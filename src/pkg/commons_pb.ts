@@ -49,20 +49,14 @@ export enum EnvironmentType {
   PRD = 1,
 
   /**
-   * @generated from enum value: TST = 2;
+   * @generated from enum value: DEV = 2;
    */
-  TST = 2,
-
-  /**
-   * @generated from enum value: DEV = 3;
-   */
-  DEV = 3,
+  DEV = 2,
 }
 // Retrieve enum metadata with: proto3.getEnumType(EnvironmentType)
 proto3.util.setEnumType(EnvironmentType, "scalekit.v1.commons.EnvironmentType", [
   { no: 0, name: "ENVIRONMENT_TYPE_UNSPECIFIED" },
   { no: 1, name: "PRD" },
-  { no: 2, name: "TST" },
-  { no: 3, name: "DEV" },
+  { no: 2, name: "DEV" },
 ]);
 

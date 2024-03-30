@@ -1,4 +1,3 @@
-
 export enum GrantType {
   AuthorizationCode = 'authorization_code',
   RefreshToken = 'refresh_token',
@@ -25,7 +24,6 @@ export type RefreshTokenAuthenticationOptions = {
   code: string;
   redirectUri: string;
 }
-
 
 export type AuthenticationOptions = {
   refreshToken: string;

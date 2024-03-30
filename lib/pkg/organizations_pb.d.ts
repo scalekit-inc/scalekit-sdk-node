@@ -322,3 +322,58 @@ export declare class DeleteOrganizationRequest extends Message<DeleteOrganizatio
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteOrganizationRequest;
     static equals(a: DeleteOrganizationRequest | PlainMessage<DeleteOrganizationRequest> | undefined, b: DeleteOrganizationRequest | PlainMessage<DeleteOrganizationRequest> | undefined): boolean;
 }
+/**
+ * @generated from message scalekit.v1.organizations.CustomerPortalLinkRequest
+ */
+export declare class CustomerPortalLinkRequest extends Message<CustomerPortalLinkRequest> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    constructor(data?: PartialMessage<CustomerPortalLinkRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.CustomerPortalLinkRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CustomerPortalLinkRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CustomerPortalLinkRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CustomerPortalLinkRequest;
+    static equals(a: CustomerPortalLinkRequest | PlainMessage<CustomerPortalLinkRequest> | undefined, b: CustomerPortalLinkRequest | PlainMessage<CustomerPortalLinkRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.Link
+ */
+export declare class Link extends Message<Link> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: string location = 2;
+     */
+    location: string;
+    constructor(data?: PartialMessage<Link>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.Link";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Link;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Link;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Link;
+    static equals(a: Link | PlainMessage<Link> | undefined, b: Link | PlainMessage<Link> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.CustomerPortalLinksResponse
+ */
+export declare class CustomerPortalLinksResponse extends Message<CustomerPortalLinksResponse> {
+    /**
+     * @generated from field: repeated scalekit.v1.organizations.Link links = 1;
+     */
+    links: Link[];
+    constructor(data?: PartialMessage<CustomerPortalLinksResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.CustomerPortalLinksResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CustomerPortalLinksResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CustomerPortalLinksResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CustomerPortalLinksResponse;
+    static equals(a: CustomerPortalLinksResponse | PlainMessage<CustomerPortalLinksResponse> | undefined, b: CustomerPortalLinksResponse | PlainMessage<CustomerPortalLinksResponse> | undefined): boolean;
+}

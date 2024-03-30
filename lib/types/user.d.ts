@@ -2,8 +2,8 @@ export type User = {
     id: string;
     username: string | undefined;
     name: string;
-    firstName: string;
-    lastName: string | undefined;
+    givenName: string;
+    familyName: string | undefined;
     email: string;
     emailVerified: boolean;
     phoneNumber: string | undefined;

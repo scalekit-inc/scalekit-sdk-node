@@ -588,3 +588,120 @@ export class DeleteOrganizationRequest extends Message<DeleteOrganizationRequest
   }
 }
 
+/**
+ * @generated from message scalekit.v1.organizations.CustomerPortalLinkRequest
+ */
+export class CustomerPortalLinkRequest extends Message<CustomerPortalLinkRequest> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  constructor(data?: PartialMessage<CustomerPortalLinkRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.CustomerPortalLinkRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CustomerPortalLinkRequest {
+    return new CustomerPortalLinkRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CustomerPortalLinkRequest {
+    return new CustomerPortalLinkRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CustomerPortalLinkRequest {
+    return new CustomerPortalLinkRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CustomerPortalLinkRequest | PlainMessage<CustomerPortalLinkRequest> | undefined, b: CustomerPortalLinkRequest | PlainMessage<CustomerPortalLinkRequest> | undefined): boolean {
+    return proto3.util.equals(CustomerPortalLinkRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.organizations.Link
+ */
+export class Link extends Message<Link> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string location = 2;
+   */
+  location = "";
+
+  constructor(data?: PartialMessage<Link>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.Link";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "location", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Link {
+    return new Link().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Link {
+    return new Link().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Link {
+    return new Link().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Link | PlainMessage<Link> | undefined, b: Link | PlainMessage<Link> | undefined): boolean {
+    return proto3.util.equals(Link, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.organizations.CustomerPortalLinksResponse
+ */
+export class CustomerPortalLinksResponse extends Message<CustomerPortalLinksResponse> {
+  /**
+   * @generated from field: repeated scalekit.v1.organizations.Link links = 1;
+   */
+  links: Link[] = [];
+
+  constructor(data?: PartialMessage<CustomerPortalLinksResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.CustomerPortalLinksResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "links", kind: "message", T: Link, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CustomerPortalLinksResponse {
+    return new CustomerPortalLinksResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CustomerPortalLinksResponse {
+    return new CustomerPortalLinksResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CustomerPortalLinksResponse {
+    return new CustomerPortalLinksResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: CustomerPortalLinksResponse | PlainMessage<CustomerPortalLinksResponse> | undefined, b: CustomerPortalLinksResponse | PlainMessage<CustomerPortalLinksResponse> | undefined): boolean {
+    return proto3.util.equals(CustomerPortalLinksResponse, a, b);
+  }
+}
+

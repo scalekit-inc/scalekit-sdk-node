@@ -31,11 +31,7 @@ export declare enum EnvironmentType {
      */
     PRD = 1,
     /**
-     * @generated from enum value: TST = 2;
+     * @generated from enum value: DEV = 2;
      */
-    TST = 2,
-    /**
-     * @generated from enum value: DEV = 3;
-     */
-    DEV = 3
+    DEV = 2
 }

@@ -1,4 +1,4 @@
-import { CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, GetOrganizationRequest, GetOrganizationResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, CustomerPortalLinkRequest, CustomerPortalLinksResponse, DeleteOrganizationRequest, GetOrganizationRequest, GetOrganizationResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.organizations.OrganizationService
@@ -49,6 +49,33 @@ export declare const OrganizationService: {
             readonly name: "DeleteOrganization";
             readonly I: typeof DeleteOrganizationRequest;
             readonly O: typeof Empty;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.GenerateCustomerPortalLink
+         */
+        readonly generateCustomerPortalLink: {
+            readonly name: "GenerateCustomerPortalLink";
+            readonly I: typeof CustomerPortalLinkRequest;
+            readonly O: typeof CustomerPortalLinksResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.DeleteCustomerPortalLink
+         */
+        readonly deleteCustomerPortalLink: {
+            readonly name: "DeleteCustomerPortalLink";
+            readonly I: typeof CustomerPortalLinkRequest;
+            readonly O: typeof Empty;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.GetCustomerPortalLink
+         */
+        readonly getCustomerPortalLink: {
+            readonly name: "GetCustomerPortalLink";
+            readonly I: typeof CustomerPortalLinkRequest;
+            readonly O: typeof CustomerPortalLinksResponse;
             readonly kind: MethodKind.Unary;
         };
     };

@@ -300,9 +300,24 @@ export enum ConnectionProvider {
   AUTH0 = 4,
 
   /**
-   * @generated from enum value: CUSTOM = 5;
+   * @generated from enum value: ONELOGIN = 5;
    */
-  CUSTOM = 5,
+  ONELOGIN = 5,
+
+  /**
+   * @generated from enum value: PING_IDENTITY = 6;
+   */
+  PING_IDENTITY = 6,
+
+  /**
+   * @generated from enum value: JUMPCLOUD = 7;
+   */
+  JUMPCLOUD = 7,
+
+  /**
+   * @generated from enum value: CUSTOM = 8;
+   */
+  CUSTOM = 8,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ConnectionProvider)
 proto3.util.setEnumType(ConnectionProvider, "scalekit.v1.connections.ConnectionProvider", [
@@ -311,7 +326,10 @@ proto3.util.setEnumType(ConnectionProvider, "scalekit.v1.connections.ConnectionP
   { no: 2, name: "GOOGLE" },
   { no: 3, name: "MICROSOFT_AD" },
   { no: 4, name: "AUTH0" },
-  { no: 5, name: "CUSTOM" },
+  { no: 5, name: "ONELOGIN" },
+  { no: 6, name: "PING_IDENTITY" },
+  { no: 7, name: "JUMPCLOUD" },
+  { no: 8, name: "CUSTOM" },
 ]);
 
 /**
@@ -973,9 +991,9 @@ export class ListConnectionsRequest extends Message<ListConnectionsRequest> {
  */
 export class ListConnectionsResponse extends Message<ListConnectionsResponse> {
   /**
-   * @generated from field: repeated scalekit.v1.connections.Connection connections = 1;
+   * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 1;
    */
-  connections: Connection[] = [];
+  connections: ListConnection[] = [];
 
   constructor(data?: PartialMessage<ListConnectionsResponse>) {
     super();
@@ -985,7 +1003,7 @@ export class ListConnectionsResponse extends Message<ListConnectionsResponse> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "scalekit.v1.connections.ListConnectionsResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "connections", kind: "message", T: Connection, repeated: true },
+    { no: 1, name: "connections", kind: "message", T: ListConnection, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListConnectionsResponse {
@@ -1002,6 +1020,79 @@ export class ListConnectionsResponse extends Message<ListConnectionsResponse> {
 
   static equals(a: ListConnectionsResponse | PlainMessage<ListConnectionsResponse> | undefined, b: ListConnectionsResponse | PlainMessage<ListConnectionsResponse> | undefined): boolean {
     return proto3.util.equals(ListConnectionsResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.ListConnection
+ */
+export class ListConnection extends Message<ListConnection> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: scalekit.v1.connections.ConnectionProvider provider = 2;
+   */
+  provider = ConnectionProvider.CONNECTION_PROVIDER_UNSPECIFIED;
+
+  /**
+   * @generated from field: scalekit.v1.connections.ConnectionType type = 3;
+   */
+  type = ConnectionType.INVALID;
+
+  /**
+   * @generated from field: scalekit.v1.connections.ConnectionStatus status = 4;
+   */
+  status = ConnectionStatus.CONNECTION_STATUS_UNSPECIFIED;
+
+  /**
+   * @generated from field: bool enabled = 5;
+   */
+  enabled = false;
+
+  /**
+   * @generated from field: string organization_id = 6;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: string ui_button_title = 7;
+   */
+  uiButtonTitle = "";
+
+  constructor(data?: PartialMessage<ListConnection>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.ListConnection";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "provider", kind: "enum", T: proto3.getEnumType(ConnectionProvider) },
+    { no: 3, name: "type", kind: "enum", T: proto3.getEnumType(ConnectionType) },
+    { no: 4, name: "status", kind: "enum", T: proto3.getEnumType(ConnectionStatus) },
+    { no: 5, name: "enabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 7, name: "ui_button_title", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListConnection {
+    return new ListConnection().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListConnection {
+    return new ListConnection().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListConnection {
+    return new ListConnection().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListConnection | PlainMessage<ListConnection> | undefined, b: ListConnection | PlainMessage<ListConnection> | undefined): boolean {
+    return proto3.util.equals(ListConnection, a, b);
   }
 }
 
@@ -1170,9 +1261,9 @@ export class OIDCConnectionConfig extends Message<OIDCConnectionConfig> {
   issuer?: string;
 
   /**
-   * @generated from field: google.protobuf.StringValue well_known_uri = 2;
+   * @generated from field: google.protobuf.StringValue discovery_endpoint = 2;
    */
-  wellKnownUri?: string;
+  discoveryEndpoint?: string;
 
   /**
    * @generated from field: google.protobuf.StringValue authorize_uri = 3;
@@ -1233,7 +1324,7 @@ export class OIDCConnectionConfig extends Message<OIDCConnectionConfig> {
   static readonly typeName = "scalekit.v1.connections.OIDCConnectionConfig";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "issuer", kind: "message", T: StringValue },
-    { no: 2, name: "well_known_uri", kind: "message", T: StringValue },
+    { no: 2, name: "discovery_endpoint", kind: "message", T: StringValue },
     { no: 3, name: "authorize_uri", kind: "message", T: StringValue },
     { no: 4, name: "token_uri", kind: "message", T: StringValue },
     { no: 5, name: "user_info_uri", kind: "message", T: StringValue },

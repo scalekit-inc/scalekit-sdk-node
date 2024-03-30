@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, GetOrganizationRequest, GetOrganizationResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, CustomerPortalLinkRequest, CustomerPortalLinksResponse, DeleteOrganizationRequest, GetOrganizationRequest, GetOrganizationResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -55,6 +55,33 @@ export const OrganizationService = {
       name: "DeleteOrganization",
       I: DeleteOrganizationRequest,
       O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.GenerateCustomerPortalLink
+     */
+    generateCustomerPortalLink: {
+      name: "GenerateCustomerPortalLink",
+      I: CustomerPortalLinkRequest,
+      O: CustomerPortalLinksResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.DeleteCustomerPortalLink
+     */
+    deleteCustomerPortalLink: {
+      name: "DeleteCustomerPortalLink",
+      I: CustomerPortalLinkRequest,
+      O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.GetCustomerPortalLink
+     */
+    getCustomerPortalLink: {
+      name: "GetCustomerPortalLink",
+      I: CustomerPortalLinkRequest,
+      O: CustomerPortalLinksResponse,
       kind: MethodKind.Unary,
     },
   }

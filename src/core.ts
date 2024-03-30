@@ -1,8 +1,8 @@
 import { Code, ConnectError } from '@connectrpc/connect';
 import axios, { AxiosError, HttpStatusCode } from "axios";
+import { JWK } from 'jose';
 import QueryString from "qs";
 import { GrantType } from './types/scalekit';
-import { JWK } from 'jose';
 
 const tokenEndpoint = "oauth/token";
 const jwksEndpoint = "keys";
@@ -52,11 +52,19 @@ export default class CoreClient {
     } catch (error) {
       if (retryLeft > 0) {
         let isUnauthenticatedError = false;
-        if (error instanceof AxiosError && error.status == HttpStatusCode.Unauthorized) {
-          isUnauthenticatedError = true;
+        if (error instanceof AxiosError) {
+          if (error.status == HttpStatusCode.Unauthorized) {
+            isUnauthenticatedError = true;
+          } else {
+            throw new Error(error.message);
+          }
         }
-        if (error instanceof ConnectError && error.code == Code.Unauthenticated) {
-          isUnauthenticatedError = true;
+        if (error instanceof ConnectError) {
+          if (error.code == Code.Unauthenticated) {
+            isUnauthenticatedError = true;
+          } else {
+            throw error;
+          }
         }
         if (isUnauthenticatedError) {
           await this.authenticateClient();

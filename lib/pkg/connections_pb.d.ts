@@ -199,9 +199,21 @@ export declare enum ConnectionProvider {
      */
     AUTH0 = 4,
     /**
-     * @generated from enum value: CUSTOM = 5;
+     * @generated from enum value: ONELOGIN = 5;
      */
-    CUSTOM = 5
+    ONELOGIN = 5,
+    /**
+     * @generated from enum value: PING_IDENTITY = 6;
+     */
+    PING_IDENTITY = 6,
+    /**
+     * @generated from enum value: JUMPCLOUD = 7;
+     */
+    JUMPCLOUD = 7,
+    /**
+     * @generated from enum value: CUSTOM = 8;
+     */
+    CUSTOM = 8
 }
 /**
  * @generated from message scalekit.v1.connections.CreateConnectionRequest
@@ -608,9 +620,9 @@ export declare class ListConnectionsRequest extends Message<ListConnectionsReque
  */
 export declare class ListConnectionsResponse extends Message<ListConnectionsResponse> {
     /**
-     * @generated from field: repeated scalekit.v1.connections.Connection connections = 1;
+     * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 1;
      */
-    connections: Connection[];
+    connections: ListConnection[];
     constructor(data?: PartialMessage<ListConnectionsResponse>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.ListConnectionsResponse";
@@ -619,6 +631,47 @@ export declare class ListConnectionsResponse extends Message<ListConnectionsResp
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListConnectionsResponse;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListConnectionsResponse;
     static equals(a: ListConnectionsResponse | PlainMessage<ListConnectionsResponse> | undefined, b: ListConnectionsResponse | PlainMessage<ListConnectionsResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.ListConnection
+ */
+export declare class ListConnection extends Message<ListConnection> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionProvider provider = 2;
+     */
+    provider: ConnectionProvider;
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionType type = 3;
+     */
+    type: ConnectionType;
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionStatus status = 4;
+     */
+    status: ConnectionStatus;
+    /**
+     * @generated from field: bool enabled = 5;
+     */
+    enabled: boolean;
+    /**
+     * @generated from field: string organization_id = 6;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string ui_button_title = 7;
+     */
+    uiButtonTitle: string;
+    constructor(data?: PartialMessage<ListConnection>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.ListConnection";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListConnection;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListConnection;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListConnection;
+    static equals(a: ListConnection | PlainMessage<ListConnection> | undefined, b: ListConnection | PlainMessage<ListConnection> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.connections.EnableConnectionRequest
@@ -722,9 +775,9 @@ export declare class OIDCConnectionConfig extends Message<OIDCConnectionConfig> 
      */
     issuer?: string;
     /**
-     * @generated from field: google.protobuf.StringValue well_known_uri = 2;
+     * @generated from field: google.protobuf.StringValue discovery_endpoint = 2;
      */
-    wellKnownUri?: string;
+    discoveryEndpoint?: string;
     /**
      * @generated from field: google.protobuf.StringValue authorize_uri = 3;
      */
