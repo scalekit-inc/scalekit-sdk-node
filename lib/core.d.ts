@@ -1,8 +1,8 @@
 import { JWK } from 'jose';
 export default class CoreClient {
-    private readonly envUrl;
-    private readonly clientId;
-    private readonly clientSecret;
+    readonly envUrl: string;
+    readonly clientId: string;
+    readonly clientSecret: string;
     keys: JWK[];
     accessToken: string | null;
     constructor(envUrl: string, clientId: string, clientSecret: string);
@@ -12,5 +12,5 @@ export default class CoreClient {
         id_token: string;
     }, any>>;
     getJwks(): Promise<void>;
-    retryWithAuthentication<T>(fn: () => Promise<T>, retryLeft?: number): Promise<T>;
+    connectExec<TRequest, TResponse>(fn: (request: TRequest) => Promise<TResponse>, data: TRequest, retryLeft?: number): Promise<TResponse>;
 }

@@ -11,9 +11,9 @@ export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
   constructor(
-    private readonly envUrl: string,
-    private readonly clientId: string,
-    private readonly clientSecret: string
+    readonly envUrl: string,
+    readonly clientId: string,
+    readonly clientSecret: string
   ) { }
 
   private async authenticateClient() {
@@ -45,9 +45,13 @@ export default class CoreClient {
     }
   }
 
-  async retryWithAuthentication<T>(fn: () => Promise<T>, retryLeft: number = 1): Promise<T> {
+  async connectExec<TRequest, TResponse>(
+    fn: (request: TRequest) => Promise<TResponse>,
+    data: TRequest,
+    retryLeft: number = 1,
+  ): Promise<TResponse> {
     try {
-      const res = await fn();
+      const res = await fn(data);
       return res;
     } catch (error) {
       if (retryLeft > 0) {
@@ -68,7 +72,7 @@ export default class CoreClient {
         }
         if (isUnauthenticatedError) {
           await this.authenticateClient();
-          return this.retryWithAuthentication(fn, retryLeft - 1);
+          return this.connectExec(fn, data, retryLeft - 1);
         }
       }
       throw error;

@@ -14,47 +14,52 @@ export default class ConnectionClient {
 
   async getConnection(options: { id: string, organizationId: string }) {
     const { id, organizationId } = options;
-    const fn = async () => this.client.getConnection({
-      id,
-      identities: {
-        case: 'organizationId',
-        value: organizationId
-      }
-    })
 
-    return this.coreClient.retryWithAuthentication(fn)
+    return this.coreClient.connectExec(
+      this.client.getConnection,
+      {
+        id,
+        identities: {
+          case: 'organizationId',
+          value: organizationId
+        }
+      },
+    )
   }
 
   async getConnectionByExternalOrganizationId(options: { id: string, externalId: string }) {
     const { id, externalId } = options;
-    const fn = async () => this.client.getConnection({
-      id,
-      identities: {
-        case: 'externalId',
-        value: externalId
-      }
-    })
-
-    return this.coreClient.retryWithAuthentication(fn)
+    return this.coreClient.connectExec(
+      this.client.getConnection,
+      {
+        id,
+        identities: {
+          case: 'externalId',
+          value: externalId
+        }
+      },
+    )
   }
 
   async getConnectionByDomain(domain: string) {
-    const fn = async () => this.client.getConnectionByDomain({
-      domain
-    })
-
-    return this.coreClient.retryWithAuthentication(fn)
+    return this.coreClient.connectExec(
+      this.client.getConnectionByDomain,
+      {
+        domain
+      },
+    )
   }
 
   async listConnections(organizationId: string) {
-    const fn = async () => this.client.listConnections({
-      identities: {
-        case: 'organizationId',
-        value: organizationId
-      }
-    })
-
-    return this.coreClient.retryWithAuthentication(fn)
+    return this.coreClient.connectExec(
+      this.client.listConnections,
+      {
+        identities: {
+          case: 'organizationId',
+          value: organizationId
+        }
+      },
+    )
   }
 }
 

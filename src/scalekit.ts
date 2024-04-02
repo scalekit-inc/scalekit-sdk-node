@@ -27,17 +27,16 @@ export default class Scalekit {
   readonly connection: ConnectionClient;
   readonly domain: DomainClient;
   constructor(
-    private readonly envUrl: string,
-    private readonly clientId: string,
-    private readonly clientSecret: string
+    envUrl: string,
+    clientId: string,
+    clientSecret: string
   ) {
     this.coreClient = new CoreClient(
-      this.envUrl,
-      this.clientId,
-      this.clientSecret
+      envUrl,
+      clientId,
+      clientSecret
     );
     this.grpcConnect = new GrpcConnect(
-      this.envUrl,
       this.coreClient
     );
 
@@ -74,7 +73,7 @@ export default class Scalekit {
     }
     const qs = QueryString.stringify({
       response_type: 'code',
-      client_id: this.clientId,
+      client_id: this.coreClient.clientId,
       redirect_uri: redirectUri,
       scope: options.scopes?.join(" "),
       ...(options.state && { state: options.state }),
@@ -86,7 +85,7 @@ export default class Scalekit {
       ...(options.organizationId && { organization_id: options.organizationId }),
     })
 
-    return `${this.envUrl}/${authorizeEndpoint}?${qs}`
+    return `${this.coreClient.envUrl}/${authorizeEndpoint}?${qs}`
   }
 
   async authenticateWithCode(options: CodeAuthenticationOptions) {
@@ -94,8 +93,8 @@ export default class Scalekit {
       code: options.code,
       redirect_uri: options.redirectUri,
       grant_type: GrantType.AuthorizationCode,
-      client_id: this.clientId,
-      client_secret: this.clientSecret,
+      client_id: this.coreClient.clientId,
+      client_secret: this.coreClient.clientSecret,
       ...(options.codeVerifier && { code_verifier: options.codeVerifier })
     }))
     const { id_token, access_token } = res.data;

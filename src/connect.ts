@@ -6,11 +6,10 @@ import CoreClient from './core';
 export default class GrpcConnect {
   private transport: Transport;
   constructor(
-    private readonly envUrl: string,
     private readonly coreClient: CoreClient
   ) {
     this.transport = createGrpcTransport({
-      baseUrl: this.envUrl,
+      baseUrl: this.coreClient.envUrl,
       httpVersion: "2",
       interceptors: [
         (next) => {

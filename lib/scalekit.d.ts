@@ -1,8 +1,8 @@
 import ConnectionClient from './connection';
+import DomainClient from './domain';
 import OrganizationClient from './organization';
 import { AuthorizationUrlOptions, CodeAuthenticationOptions } from './types/scalekit';
 import { User } from './types/user';
-import DomainClient from './domain';
 /**
  * To initiate scalekit
  * @param {string} envUrl
@@ -13,9 +13,6 @@ import DomainClient from './domain';
  * client secret
 */
 export default class Scalekit {
-    private readonly envUrl;
-    private readonly clientId;
-    private readonly clientSecret;
     private readonly coreClient;
     private readonly grpcConnect;
     readonly organization: OrganizationClient;

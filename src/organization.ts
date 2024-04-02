@@ -1,9 +1,9 @@
+import { PartialMessage } from '@bufbuild/protobuf';
 import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
-import { OrganizationService } from './pkg/organizations_connect';
-import { PartialMessage } from '@bufbuild/protobuf';
-import { UpdateOrganization } from './pkg/organizations_pb';
 import CoreClient from './core';
+import { OrganizationService } from './pkg/organizations_connect';
+import { UpdateOrganization } from './pkg/organizations_pb';
 
 export default class OrganizationClient {
   private client: PromiseClient<typeof OrganizationService>;
@@ -18,39 +18,44 @@ export default class OrganizationClient {
     pageSize?: number,
     pageToken?: string
   }) {
-    const fn = async () => this.client.listOrganization(options ? options : {});
-    return this.coreClient.retryWithAuthentication(fn)
+    return this.coreClient.connectExec(
+      this.client.listOrganization,
+      options ? options : {},
+    )
   }
 
   async getOrganization(id: string) {
-    const fn = async () => this.client.getOrganization({
-      identities: { case: 'id', value: id }
-    });
-    return this.coreClient.retryWithAuthentication(fn)
+    return this.coreClient.connectExec(
+      this.client.getOrganization,
+      { identities: { case: 'id', value: id } },
+    )
   }
 
   async getOrganizationByExternalId(externalId: string) {
-    const fn = async () => this.client.getOrganization({
-      identities: { case: 'externalId', value: externalId }
-    });
-    return this.coreClient.retryWithAuthentication(fn)
+    return this.coreClient.connectExec(
+      this.client.getOrganization,
+      { identities: { case: 'externalId', value: externalId } },
+    )
   }
 
   async updateOrganization(id: string, organization: PartialMessage<UpdateOrganization>) {
-    const fn = async () => this.client.updateOrganization({
-      identities: { case: "id", value: id },
-      organization
-    })
-    return this.coreClient.retryWithAuthentication(fn)
+    return this.coreClient.connectExec(
+      this.client.updateOrganization,
+      {
+        identities: { case: "id", value: id },
+        organization
+      },
+    )
   }
 
   async updateOrganizationByExternalId(externalId: string, organization: PartialMessage<UpdateOrganization>) {
-    const fn = async () => this.client.updateOrganization({
-      identities: { case: "externalId", value: externalId, },
-      organization
-    })
-
-    return this.coreClient.retryWithAuthentication(fn)
+    return this.coreClient.connectExec(
+      this.client.updateOrganization,
+      {
+        identities: { case: "externalId", value: externalId, },
+        organization
+      },
+    )
   }
 }
 

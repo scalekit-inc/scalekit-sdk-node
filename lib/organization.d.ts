@@ -1,7 +1,7 @@
-import GrpcConnect from './connect';
 import { PartialMessage } from '@bufbuild/protobuf';
-import { UpdateOrganization } from './pkg/organizations_pb';
+import GrpcConnect from './connect';
 import CoreClient from './core';
+import { UpdateOrganization } from './pkg/organizations_pb';
 export default class OrganizationClient {
     private readonly grpcConncet;
     private readonly coreClient;
