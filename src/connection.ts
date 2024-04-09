@@ -1,7 +1,8 @@
 import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { ConnectionService } from './pkg/connections_connect';
+import { ConnectionService } from './pkg/grpc/scalekit/v1/connections/connections_connect';
+import { GetConnectionResponse, ListConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 
 export default class ConnectionClient {
   private client: PromiseClient<typeof ConnectionService>;
@@ -12,9 +13,13 @@ export default class ConnectionClient {
     this.client = this.grpcConncet.createClient(ConnectionService);
   }
 
-  async getConnection(options: { id: string, organizationId: string }) {
-    const { id, organizationId } = options;
-
+  /**
+   * Get a connection by id and organization id
+   * @param id The connection id
+   * @param organizationId The organization id
+   * @returns {Promise<GetConnectionResponse>} The connection
+   */
+  async getConnection(id: string, organizationId: string): Promise<GetConnectionResponse> {
     return this.coreClient.connectExec(
       this.client.getConnection,
       {
@@ -27,8 +32,13 @@ export default class ConnectionClient {
     )
   }
 
-  async getConnectionByExternalOrganizationId(options: { id: string, externalId: string }) {
-    const { id, externalId } = options;
+  /**
+   * Get a connection by id and external organization id
+   * @param id The connection id
+   * @param externalId The external organization id
+   * @returns {Promise<GetConnectionResponse>} The connection
+   */
+  async getConnectionByExternalOrganizationId(id: string, externalId: string): Promise<GetConnectionResponse> {
     return this.coreClient.connectExec(
       this.client.getConnection,
       {
@@ -41,6 +51,11 @@ export default class ConnectionClient {
     )
   }
 
+  /**
+   * Get a connection by domain
+   * @param domain The domain
+   * @returns {Promise<GetConnectionResponse>} The connection
+   */
   async getConnectionByDomain(domain: string) {
     return this.coreClient.connectExec(
       this.client.getConnectionByDomain,
@@ -50,13 +65,35 @@ export default class ConnectionClient {
     )
   }
 
-  async listConnections(organizationId: string) {
+  /**
+   * List connections by organization id
+   * @param organizationId The organization id
+   * @returns {Promise<ListConnectionsResponse>} The list of connections
+   */
+  async listConnections(organizationId: string): Promise<ListConnectionsResponse> {
     return this.coreClient.connectExec(
       this.client.listConnections,
       {
         identities: {
           case: 'organizationId',
           value: organizationId
+        }
+      },
+    )
+  }
+
+  /**
+   * List connections by external organization id
+   * @param externalId The external organization id
+   * @returns {Promise<ListConnectionsResponse>} The list of connections
+   */
+  async listConnectionsByExternalOrganizationId(externalId: string): Promise<ListConnectionsResponse> {
+    return this.coreClient.connectExec(
+      this.client.listConnections,
+      {
+        identities: {
+          case: 'externalId',
+          value: externalId
         }
       },
     )

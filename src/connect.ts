@@ -1,6 +1,7 @@
 import { ServiceType } from '@bufbuild/protobuf';
 import { PromiseClient, Transport, createPromiseClient } from '@connectrpc/connect';
 import { createGrpcTransport } from '@connectrpc/connect-node';
+import { version } from "../package.json";
 import CoreClient from './core';
 
 export default class GrpcConnect {
@@ -14,6 +15,7 @@ export default class GrpcConnect {
       interceptors: [
         (next) => {
           return (req) => {
+            req.header.set("User-Agent", `scalekit-node/${version}`)
             if (this.coreClient.accessToken) {
               req.header.set("Authorization", `Bearer ${this.coreClient.accessToken}`)
             }

@@ -13,12 +13,12 @@ const authorizeEndpoint = "oauth/authorize";
 
 /**
  * To initiate scalekit
- * @param {string} envUrl 
- * Scalekit environment url
- * @param {string} clientId 
- * client id
- * @param {string} clientSecret 
- * client secret
+ * @param {string} envUrl The environment url
+ * @param {string} clientId The client id
+ * @param {string} clientSecret The client secret
+ * @returns {Scalekit} Returns the scalekit instance 
+ * @example
+ * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
 */
 export default class Scalekit {
   private readonly coreClient: CoreClient;
@@ -57,7 +57,18 @@ export default class Scalekit {
   /**
    * Returns the authorization url to initiate the authentication request.
    * @param {string} redirectUri Redirect uri
-   * @param {AuthorizationUrlOptions} options Additional options
+   * @param {AuthorizationUrlOptions} options Authorization url options
+   * @param {string[]} options.scopes Scopes to request from the user 
+   * @param {string} options.state State parameter
+   * @param {string} options.nonce Nonce parameter 
+   * @param {string} options.loginHint Login hint parameter
+   * @param {string} options.domainHint Domain hint parameter
+   * @param {string} options.connectionId Connection id parameter
+   * @param {string} options.organizationId Organization id parameter
+   * 
+   * @example
+   * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
+   * const authorizationUrl = scalekit.getAuthorizationUrl(redirectUri, { scopes: ['openid', 'profile'] });
    * @returns {string} authorization url
    */
   getAuthorizationUrl(
@@ -88,7 +99,15 @@ export default class Scalekit {
     return `${this.coreClient.envUrl}/${authorizeEndpoint}?${qs}`
   }
 
-  async authenticateWithCode(options: CodeAuthenticationOptions) {
+  /**
+   * Authenticate with the code
+   * @param {CodeAuthenticationOptions} options Code authentication options
+   * @param {string} options.code Code
+   * @param {string} options.redirectUri Redirect uri
+   * @param {string} options.codeVerifier Code verifier
+   * @returns {Promise<{ user: Partial<User>, idToken: string, accessToken: string }>} Returns user, id token and access token
+   */
+  async authenticateWithCode(options: CodeAuthenticationOptions): Promise<{ user: Partial<User>; idToken: string; accessToken: string; }> {
     const res = await this.coreClient.authenticate(QueryString.stringify({
       code: options.code,
       redirect_uri: options.redirectUri,
@@ -114,10 +133,10 @@ export default class Scalekit {
   }
 
   /**
-   * Generates a URL to validate the given token.
-   *
+   * Validates the access token. 
+   * 
    * @param {string} token The token to be validated.
-   * @return {boolean} success
+   * @return {Promise<boolean>} Returns true if the token is valid, false otherwise.
    */
   async validateAccessToken(token: string): Promise<boolean> {
     await this.coreClient.getJwks();

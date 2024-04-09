@@ -1,7 +1,8 @@
 import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { DomainService } from './pkg/domain_connect';
+import { DomainService } from './pkg/grpc/scalekit/v1/domains/domains_connect';
+import { CreateDomainResponse, GetDomainResponse, ListDomainResponse } from './pkg/grpc/scalekit/v1/domains/domains_pb';
 
 export default class DomainClient {
   private client: PromiseClient<typeof DomainService>;
@@ -12,7 +13,36 @@ export default class DomainClient {
     this.client = this.grpcConncet.createClient(DomainService);
   }
 
-  async getDomain(options: { id: string, organizationId: string }) {
+  /**
+   * Create a domain for an organization with the given name. Optionally, you can provide an external id. 
+   * @param {string} organizationId  The organization id
+   * @param {string} name The domain name
+   * @param {string} externalId The external id
+   * @returns {Promise<CreateDomainResponse>} The created domain
+  */
+  async createDomain(organizationId: string, name: string): Promise<CreateDomainResponse> {
+    return this.coreClient.connectExec(
+      this.client.createDomain,
+      {
+        identities: {
+          case: 'organizationId',
+          value: organizationId
+        },
+        domain: {
+          domain: name
+        }
+      }
+    )
+  }
+
+  /**
+   * Get a domain by id  
+   * @param {object} options The options to get a domain
+   * @param {string} options.id The domain id
+   * @param {string} options.organizationId The organization id
+   * @returns {Promise<GetDomainResponse>} The domain
+  */
+  async getDomain(options: { id: string, organizationId: string }): Promise<GetDomainResponse> {
     const { id, organizationId } = options;
     return this.coreClient.connectExec(
       this.client.getDomain,
@@ -26,7 +56,14 @@ export default class DomainClient {
     )
   }
 
-  async getDomainByExternalOrganizationId(options: { id: string, externalId: string }) {
+  /**
+   * Get a domain by external organization id
+   * @param {object} options The options to get a domain
+   * @param {string} options.id The domain id
+   * @param {string} options.externalId The external organization id
+   * @returns {Promise<GetDomainResponse>} The domain
+  */
+  async getDomainByExternalOrganizationId(options: { id: string, externalId: string }): Promise<GetDomainResponse> {
     const { id, externalId } = options;
     return this.coreClient.connectExec(
       this.client.getDomain,
@@ -40,7 +77,12 @@ export default class DomainClient {
     )
   }
 
-  async listDomains(organizationId: string) {
+  /**
+   * List domains for an organization 
+   * @param organizationId The organization id
+   * @returns {Promise<ListDomainResponse>} The list of domains for the organization
+   */
+  async listDomains(organizationId: string): Promise<ListDomainResponse> {
     return this.coreClient.connectExec(
       this.client.listDomains,
       {
@@ -52,7 +94,12 @@ export default class DomainClient {
     );
   }
 
-  async listDomainsByExternalOrganizationId(externalId: string) {
+  /**
+   * List domains for an external organization
+   * @param externalId The external organization id
+   * @returns {Promise<ListDomainResponse>} The list of domains for the external organization
+   */
+  async listDomainsByExternalOrganizationId(externalId: string): Promise<ListDomainResponse> {
     return this.coreClient.connectExec(
       this.client.listDomains,
       {
