@@ -26,26 +26,9 @@ export default class DomainClient {
         organizationId: string;
     }): Promise<GetDomainResponse>;
     /**
-     * Get a domain by external organization id
-     * @param {object} options The options to get a domain
-     * @param {string} options.id The domain id
-     * @param {string} options.externalId The external organization id
-     * @returns {Promise<GetDomainResponse>} The domain
-    */
-    getDomainByExternalOrganizationId(options: {
-        id: string;
-        externalId: string;
-    }): Promise<GetDomainResponse>;
-    /**
      * List domains for an organization
      * @param organizationId The organization id
      * @returns {Promise<ListDomainResponse>} The list of domains for the organization
      */
     listDomains(organizationId: string): Promise<ListDomainResponse>;
-    /**
-     * List domains for an external organization
-     * @param externalId The external organization id
-     * @returns {Promise<ListDomainResponse>} The list of domains for the external organization
-     */
-    listDomainsByExternalOrganizationId(externalId: string): Promise<ListDomainResponse>;
 }

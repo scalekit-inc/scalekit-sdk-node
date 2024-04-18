@@ -15,7 +15,9 @@ export default class GrpcConnect {
       interceptors: [
         (next) => {
           return (req) => {
-            req.header.set("User-Agent", `scalekit-node/${version}`)
+            req.header.set("User-Agent", this.coreClient.getUserAgent())
+            req.header.set("x-sdk-version", this.coreClient.sdkVersion)
+            req.header.set("x-api-version", this.coreClient.apiVersion)
             if (this.coreClient.accessToken) {
               req.header.set("Authorization", `Bearer ${this.coreClient.accessToken}`)
             }

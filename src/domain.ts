@@ -57,27 +57,6 @@ export default class DomainClient {
   }
 
   /**
-   * Get a domain by external organization id
-   * @param {object} options The options to get a domain
-   * @param {string} options.id The domain id
-   * @param {string} options.externalId The external organization id
-   * @returns {Promise<GetDomainResponse>} The domain
-  */
-  async getDomainByExternalOrganizationId(options: { id: string, externalId: string }): Promise<GetDomainResponse> {
-    const { id, externalId } = options;
-    return this.coreClient.connectExec(
-      this.client.getDomain,
-      {
-        id,
-        identities: {
-          case: 'externalId',
-          value: externalId
-        }
-      }
-    )
-  }
-
-  /**
    * List domains for an organization 
    * @param organizationId The organization id
    * @returns {Promise<ListDomainResponse>} The list of domains for the organization
@@ -91,23 +70,6 @@ export default class DomainClient {
           value: organizationId
         }
       },
-    );
-  }
-
-  /**
-   * List domains for an external organization
-   * @param externalId The external organization id
-   * @returns {Promise<ListDomainResponse>} The list of domains for the external organization
-   */
-  async listDomainsByExternalOrganizationId(externalId: string): Promise<ListDomainResponse> {
-    return this.coreClient.connectExec(
-      this.client.listDomains,
-      {
-        identities: {
-          case: 'externalId',
-          value: externalId
-        }
-      }
     );
   }
 }

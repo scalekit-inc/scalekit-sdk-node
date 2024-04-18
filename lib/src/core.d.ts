@@ -6,9 +6,14 @@ export default class CoreClient {
     readonly clientSecret: string;
     keys: JWK[];
     accessToken: string | null;
+    uname: string | null;
     axios: Axios;
+    sdkVersion: string;
+    apiVersion: string;
     constructor(envUrl: string, clientId: string, clientSecret: string);
     private authenticateClient;
+    private getUname;
+    getUserAgent(): string;
     /**
      * Authenticate with the code
      * @param {string} data Data to authenticate
