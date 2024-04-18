@@ -22,17 +22,17 @@
     "@connectrpc/connect": "^1.4.0",
     "@connectrpc/connect-node": "^1.4.0",
     "axios": "^1.6.8",
-    "jose": "^5.2.3",
-    "qs": "^6.12.0"
+    "jose": "^5.2.4",
+    "qs": "^6.12.1"
   },
   "devDependencies": {
-    "@bufbuild/buf": "^1.30.0",
+    "@bufbuild/buf": "^1.30.1",
     "@bufbuild/protobuf": "^1.8.0",
     "@bufbuild/protoc-gen-es": "^1.8.0",
     "@connectrpc/protoc-gen-connect-es": "^1.4.0",
-    "@types/node": "^20.11.30",
-    "@types/qs": "^6.9.13",
-    "typescript": "^5.4.2"
+    "@types/node": "^20.12.7",
+    "@types/qs": "^6.9.15",
+    "typescript": "^5.4.5"
   },
   "bugs": {
     "url": "https://github.com/scalekit-inc/scalekit-node/issues"
