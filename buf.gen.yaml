@@ -1,5 +1,4 @@
 version: v1
-
 plugins:
   - plugin: es
     opt: target=ts
@@ -7,3 +6,8 @@ plugins:
   - plugin: connect-es
     opt: target=ts
     out: src/pkg/grpc
+types:
+  include:
+    - scalekit.v1.connections
+    - scalekit.v1.domains
+    - scalekit.v1.organizations

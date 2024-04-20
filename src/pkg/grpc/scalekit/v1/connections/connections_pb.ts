@@ -491,6 +491,11 @@ export class Connection extends Message<Connection> {
   configurationType = ConfigurationType.CONFIGURATION_TYPE_UNSPECIFIED;
 
   /**
+   * @generated from field: string test_connection_uri = 12;
+   */
+  testConnectionUri = "";
+
+  /**
    * @generated from oneof scalekit.v1.connections.Connection.settings
    */
   settings: {
@@ -531,6 +536,7 @@ export class Connection extends Message<Connection> {
     { no: 9, name: "login_initiation_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 10, name: "logout_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 11, name: "configuration_type", kind: "enum", T: proto3.getEnumType(ConfigurationType) },
+    { no: 12, name: "test_connection_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 13, name: "oidc_config", kind: "message", T: OIDCConnectionConfig, oneof: "settings" },
     { no: 14, name: "saml_config", kind: "message", T: SAMLConnectionConfigResponse, oneof: "settings" },
     { no: 15, name: "attribute_mapping", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },

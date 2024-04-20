@@ -1,12 +1,12 @@
 {
   "version": "1.0.0",
-  "name": "@scalekit/node",
+  "name": "@scalekit-sdk/node",
   "description": "Scalekit Node SDK",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/scalekit-inc/scalekit-node.git"
+    "url": "git+https://github.com/scalekit-inc/scalekit-sdk-node.git"
   },
   "scripts": {
     "generate": "npx buf generate $npm_config_src",
@@ -35,9 +35,9 @@
     "typescript": "^5.4.5"
   },
   "bugs": {
-    "url": "https://github.com/scalekit-inc/scalekit-node/issues"
+    "url": "https://github.com/scalekit-inc/scalekit-sdk-node/issues"
   },
-  "homepage": "https://github.com/scalekit-inc/scalekit-node#readme",
+  "homepage": "https://github.com/scalekit-inc/scalekit-sdk-node#readme",
   "directories": {
     "example": "examples",
     "lib": "lib"

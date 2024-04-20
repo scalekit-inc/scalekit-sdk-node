@@ -34,29 +34,3 @@ proto3.util.setEnumType(RegionCode, "scalekit.v1.commons.RegionCode", [
   { no: 2, name: "EU" },
 ]);
 
-/**
- * @generated from enum scalekit.v1.commons.EnvironmentType
- */
-export enum EnvironmentType {
-  /**
-   * @generated from enum value: ENVIRONMENT_TYPE_UNSPECIFIED = 0;
-   */
-  ENVIRONMENT_TYPE_UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: PRD = 1;
-   */
-  PRD = 1,
-
-  /**
-   * @generated from enum value: DEV = 2;
-   */
-  DEV = 2,
-}
-// Retrieve enum metadata with: proto3.getEnumType(EnvironmentType)
-proto3.util.setEnumType(EnvironmentType, "scalekit.v1.commons.EnvironmentType", [
-  { no: 0, name: "ENVIRONMENT_TYPE_UNSPECIFIED" },
-  { no: 1, name: "PRD" },
-  { no: 2, name: "DEV" },
-]);
-

@@ -1,21 +1,20 @@
 import { Code, ConnectError } from '@connectrpc/connect';
 import axios, { Axios, AxiosError, AxiosResponse, HttpStatusCode } from "axios";
 import { JWK } from 'jose';
+import os from "os";
 import QueryString from "qs";
-import { version } from "../package.json";
 import { GrantType } from './types/scalekit';
-import { exec } from 'child_process';
 
 const tokenEndpoint = "oauth/token";
 const jwksEndpoint = "keys";
-
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
   public uname: string | null = null;
   public axios: Axios;
-  public sdkVersion = `node/${version}`;
+  public sdkVersion = `Scalekit-Node/1.0.0`;
   public apiVersion = "20240430";
+  public userAgent = `${this.sdkVersion} Node/${process.version} (${process.platform}; ${os.arch()})`;
   constructor(
     readonly envUrl: string,
     readonly clientId: string,
@@ -23,7 +22,7 @@ export default class CoreClient {
   ) {
     this.axios = axios.create({ baseURL: envUrl });
     this.axios.interceptors.request.use((config) => {
-      config.headers["User-Agent"] = this.getUserAgent();
+      config.headers["User-Agent"] = this.userAgent;
       config.headers["x-sdk-version"] = this.sdkVersion;
       config.headers["x-api-version"] = this.apiVersion;
       if (this.accessToken) {
@@ -33,7 +32,6 @@ export default class CoreClient {
       return config;
     });
     this.authenticateClient();
-    this.getUname();
   }
 
   private async authenticateClient() {
@@ -44,33 +42,6 @@ export default class CoreClient {
     }))
 
     this.accessToken = res.data.access_token;
-  }
-
-  private async getUname(): Promise<void> {
-    if (!this.uname) {
-      this.uname = await new Promise<string | null>((resolve) => {
-        try {
-          exec('uname -a', (err, uname: string | null) => {
-            if (err) {
-              return resolve(null);
-            }
-            resolve(uname!);
-          });
-        } catch (e) {
-          resolve(null);
-        }
-      });
-    }
-  }
-
-  getUserAgent(): string {
-    return JSON.stringify({
-      language: "node",
-      sdkVersion: this.sdkVersion,
-      uname: encodeURIComponent(this.uname || ""),
-      platform: encodeURIComponent(process.platform),
-      runtimeVersion: encodeURIComponent(process.version),
-    })
   }
   /**
    * Authenticate with the code
