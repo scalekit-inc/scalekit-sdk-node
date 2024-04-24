@@ -4,6 +4,7 @@ import { JWK } from 'jose';
 import os from "os";
 import QueryString from "qs";
 import { GrantType } from './types/scalekit';
+import { ErrorInfo } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
 
 const tokenEndpoint = "oauth/token";
 const jwksEndpoint = "keys";
@@ -102,7 +103,18 @@ export default class CoreClient {
           if (error.code == Code.Unauthenticated) {
             isUnauthenticatedError = true;
           } else {
-            throw error;
+            if (error.code == Code.InvalidArgument) {
+              const message = error.findDetails(ErrorInfo).map((detail) => {
+                if (detail.validationErrorInfo) {
+                  return detail.validationErrorInfo.fieldViolations.map((fv) => {
+                    return `${fv.field}: ${fv.description}`
+                  }).join("\n")
+                }
+                return error.message;
+              }).join("\n")
+              throw new Error(message);
+            }
+            throw new Error(error.message);
           }
         }
         if (isUnauthenticatedError) {

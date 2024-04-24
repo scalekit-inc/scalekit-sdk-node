@@ -13,6 +13,8 @@ export const OrganizationService = {
   typeName: "scalekit.v1.organizations.OrganizationService",
   methods: {
     /**
+     * Create Organization
+     *
      * @generated from rpc scalekit.v1.organizations.OrganizationService.CreateOrganization
      */
     createOrganization: {
@@ -22,6 +24,8 @@ export const OrganizationService = {
       kind: MethodKind.Unary,
     },
     /**
+     * Update Organization description here
+     *
      * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateOrganization
      */
     updateOrganization: {
@@ -31,6 +35,8 @@ export const OrganizationService = {
       kind: MethodKind.Unary,
     },
     /**
+     * Get Organization Description here 
+     *
      * @generated from rpc scalekit.v1.organizations.OrganizationService.GetOrganization
      */
     getOrganization: {
@@ -49,6 +55,8 @@ export const OrganizationService = {
       kind: MethodKind.Unary,
     },
     /**
+     * Delete an Organization
+     *
      * @generated from rpc scalekit.v1.organizations.OrganizationService.DeleteOrganization
      */
     deleteOrganization: {
@@ -58,6 +66,8 @@ export const OrganizationService = {
       kind: MethodKind.Unary,
     },
     /**
+     * Generate Portal Link for Org
+     *
      * @generated from rpc scalekit.v1.organizations.OrganizationService.GenerateCustomerPortalLink
      */
     generateCustomerPortalLink: {

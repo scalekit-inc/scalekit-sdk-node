@@ -12,6 +12,8 @@ import { RegionCode } from "../commons/commons_pb.js";
  */
 export class CreateOrganizationRequest extends Message<CreateOrganizationRequest> {
   /**
+   * Organization details
+   *
    * @generated from field: scalekit.v1.organizations.CreateOrganization organization = 1;
    */
   organization?: CreateOrganization;
@@ -86,21 +88,29 @@ export class CreateOrganizationResponse extends Message<CreateOrganizationRespon
  */
 export class CreateOrganization extends Message<CreateOrganization> {
   /**
+   * Name of the org to be used in display
+   *
    * @generated from field: string display_name = 4;
    */
   displayName = "";
 
   /**
+   * Optional regioncode  
+   *
    * @generated from field: scalekit.v1.commons.RegionCode region_code = 5;
    */
   regionCode = RegionCode.REGION_CODE_UNSPECIFIED;
 
   /**
+   * External Id is useful to store a unique identifier for a given Org that. The unique Identifier can be the id of your tenant / org in your SaaSApp
+   *
    * @generated from field: optional string external_id = 6;
    */
   externalId?: string;
 
   /**
+   * Key value pairs extension attributes. 
+   *
    * @generated from field: map<string, string> metadata = 7;
    */
   metadata: { [key: string]: string } = {};
@@ -141,36 +151,50 @@ export class CreateOrganization extends Message<CreateOrganization> {
  */
 export class Organization extends Message<Organization> {
   /**
+   * Id 
+   *
    * @generated from field: string id = 1;
    */
   id = "";
 
   /**
+   * Created Time 
+   *
    * @generated from field: google.protobuf.Timestamp create_time = 2;
    */
   createTime?: Timestamp;
 
   /**
+   * Updated time
+   *
    * @generated from field: google.protobuf.Timestamp update_time = 3;
    */
   updateTime?: Timestamp;
 
   /**
+   * Name of the org to be used in display
+   *
    * @generated from field: string display_name = 4;
    */
   displayName = "";
 
   /**
+   * Optional regioncode  
+   *
    * @generated from field: scalekit.v1.commons.RegionCode region_code = 5;
    */
   regionCode = RegionCode.REGION_CODE_UNSPECIFIED;
 
   /**
+   * External Id is useful to store a unique identifier for a given Org that. The unique Identifier can be the id of your tenant / org in your SaaSApp
+   *
    * @generated from field: optional string external_id = 6;
    */
   externalId?: string;
 
   /**
+   * Key value pairs extension attributes. 
+   *
    * @generated from field: map<string, string> metadata = 7;
    */
   metadata: { [key: string]: string } = {};

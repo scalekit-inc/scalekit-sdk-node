@@ -8,6 +8,7 @@ plugins:
     out: src/pkg/grpc
 types:
   include:
+    - scalekit.v1.errdetails
     - scalekit.v1.connections
     - scalekit.v1.domains
     - scalekit.v1.organizations

@@ -11,14 +11,39 @@ import { Message, proto3 } from "@bufbuild/protobuf";
  */
 export class ErrorInfo extends Message<ErrorInfo> {
   /**
-   * @generated from field: string code_id = 3;
-   */
-  codeId = "";
-
-  /**
-   * @generated from field: string error_code = 4;
+   * @generated from field: string error_code = 1;
    */
   errorCode = "";
+
+  /**
+   * @generated from field: optional scalekit.v1.errdetails.DebugInfo debug_info = 2;
+   */
+  debugInfo?: DebugInfo;
+
+  /**
+   * @generated from field: optional scalekit.v1.errdetails.HelpInfo help_info = 3;
+   */
+  helpInfo?: HelpInfo;
+
+  /**
+   * @generated from field: optional scalekit.v1.errdetails.LocalizedMessageInfo localized_message_info = 4;
+   */
+  localizedMessageInfo?: LocalizedMessageInfo;
+
+  /**
+   * @generated from field: optional scalekit.v1.errdetails.ResourceInfo resource_info = 5;
+   */
+  resourceInfo?: ResourceInfo;
+
+  /**
+   * @generated from field: optional scalekit.v1.errdetails.RequestInfo request_info = 6;
+   */
+  requestInfo?: RequestInfo;
+
+  /**
+   * @generated from field: optional scalekit.v1.errdetails.ValidationErrorInfo validation_error_info = 8;
+   */
+  validationErrorInfo?: ValidationErrorInfo;
 
   constructor(data?: PartialMessage<ErrorInfo>) {
     super();
@@ -28,8 +53,13 @@ export class ErrorInfo extends Message<ErrorInfo> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "scalekit.v1.errdetails.ErrorInfo";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 3, name: "code_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "error_code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "error_code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "debug_info", kind: "message", T: DebugInfo, opt: true },
+    { no: 3, name: "help_info", kind: "message", T: HelpInfo, opt: true },
+    { no: 4, name: "localized_message_info", kind: "message", T: LocalizedMessageInfo, opt: true },
+    { no: 5, name: "resource_info", kind: "message", T: ResourceInfo, opt: true },
+    { no: 6, name: "request_info", kind: "message", T: RequestInfo, opt: true },
+    { no: 8, name: "validation_error_info", kind: "message", T: ValidationErrorInfo, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ErrorInfo {
@@ -102,50 +132,50 @@ export class DebugInfo extends Message<DebugInfo> {
  * Describes violations in a client request. This error type focuses on the
  * syntactic aspects of the request.
  *
- * @generated from message scalekit.v1.errdetails.BadRequest
+ * @generated from message scalekit.v1.errdetails.ValidationErrorInfo
  */
-export class BadRequest extends Message<BadRequest> {
+export class ValidationErrorInfo extends Message<ValidationErrorInfo> {
   /**
    * Describes all violations in a client request.
    *
-   * @generated from field: repeated scalekit.v1.errdetails.BadRequest.FieldViolation field_violations = 1;
+   * @generated from field: repeated scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation field_violations = 1;
    */
-  fieldViolations: BadRequest_FieldViolation[] = [];
+  fieldViolations: ValidationErrorInfo_FieldViolation[] = [];
 
-  constructor(data?: PartialMessage<BadRequest>) {
+  constructor(data?: PartialMessage<ValidationErrorInfo>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.errdetails.BadRequest";
+  static readonly typeName = "scalekit.v1.errdetails.ValidationErrorInfo";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "field_violations", kind: "message", T: BadRequest_FieldViolation, repeated: true },
+    { no: 1, name: "field_violations", kind: "message", T: ValidationErrorInfo_FieldViolation, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadRequest {
-    return new BadRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidationErrorInfo {
+    return new ValidationErrorInfo().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BadRequest {
-    return new BadRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ValidationErrorInfo {
+    return new ValidationErrorInfo().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BadRequest {
-    return new BadRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ValidationErrorInfo {
+    return new ValidationErrorInfo().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BadRequest | PlainMessage<BadRequest> | undefined, b: BadRequest | PlainMessage<BadRequest> | undefined): boolean {
-    return proto3.util.equals(BadRequest, a, b);
+  static equals(a: ValidationErrorInfo | PlainMessage<ValidationErrorInfo> | undefined, b: ValidationErrorInfo | PlainMessage<ValidationErrorInfo> | undefined): boolean {
+    return proto3.util.equals(ValidationErrorInfo, a, b);
   }
 }
 
 /**
  * A message type used to describe a single bad request field.
  *
- * @generated from message scalekit.v1.errdetails.BadRequest.FieldViolation
+ * @generated from message scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation
  */
-export class BadRequest_FieldViolation extends Message<BadRequest_FieldViolation> {
+export class ValidationErrorInfo_FieldViolation extends Message<ValidationErrorInfo_FieldViolation> {
   /**
    * @generated from field: string field = 1;
    */
@@ -163,33 +193,33 @@ export class BadRequest_FieldViolation extends Message<BadRequest_FieldViolation
    */
   constraint = "";
 
-  constructor(data?: PartialMessage<BadRequest_FieldViolation>) {
+  constructor(data?: PartialMessage<ValidationErrorInfo_FieldViolation>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.errdetails.BadRequest.FieldViolation";
+  static readonly typeName = "scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "field", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "constraint", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadRequest_FieldViolation {
-    return new BadRequest_FieldViolation().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidationErrorInfo_FieldViolation {
+    return new ValidationErrorInfo_FieldViolation().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BadRequest_FieldViolation {
-    return new BadRequest_FieldViolation().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ValidationErrorInfo_FieldViolation {
+    return new ValidationErrorInfo_FieldViolation().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BadRequest_FieldViolation {
-    return new BadRequest_FieldViolation().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ValidationErrorInfo_FieldViolation {
+    return new ValidationErrorInfo_FieldViolation().fromJsonString(jsonString, options);
   }
 
-  static equals(a: BadRequest_FieldViolation | PlainMessage<BadRequest_FieldViolation> | undefined, b: BadRequest_FieldViolation | PlainMessage<BadRequest_FieldViolation> | undefined): boolean {
-    return proto3.util.equals(BadRequest_FieldViolation, a, b);
+  static equals(a: ValidationErrorInfo_FieldViolation | PlainMessage<ValidationErrorInfo_FieldViolation> | undefined, b: ValidationErrorInfo_FieldViolation | PlainMessage<ValidationErrorInfo_FieldViolation> | undefined): boolean {
+    return proto3.util.equals(ValidationErrorInfo_FieldViolation, a, b);
   }
 }
 
@@ -307,46 +337,46 @@ export class ResourceInfo extends Message<ResourceInfo> {
 }
 
 /**
- * @generated from message scalekit.v1.errdetails.Help
+ * @generated from message scalekit.v1.errdetails.HelpInfo
  */
-export class Help extends Message<Help> {
+export class HelpInfo extends Message<HelpInfo> {
   /**
-   * @generated from field: repeated scalekit.v1.errdetails.Help.Link links = 1;
+   * @generated from field: repeated scalekit.v1.errdetails.HelpInfo.Link links = 1;
    */
-  links: Help_Link[] = [];
+  links: HelpInfo_Link[] = [];
 
-  constructor(data?: PartialMessage<Help>) {
+  constructor(data?: PartialMessage<HelpInfo>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.errdetails.Help";
+  static readonly typeName = "scalekit.v1.errdetails.HelpInfo";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "links", kind: "message", T: Help_Link, repeated: true },
+    { no: 1, name: "links", kind: "message", T: HelpInfo_Link, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Help {
-    return new Help().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HelpInfo {
+    return new HelpInfo().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Help {
-    return new Help().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): HelpInfo {
+    return new HelpInfo().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Help {
-    return new Help().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): HelpInfo {
+    return new HelpInfo().fromJsonString(jsonString, options);
   }
 
-  static equals(a: Help | PlainMessage<Help> | undefined, b: Help | PlainMessage<Help> | undefined): boolean {
-    return proto3.util.equals(Help, a, b);
+  static equals(a: HelpInfo | PlainMessage<HelpInfo> | undefined, b: HelpInfo | PlainMessage<HelpInfo> | undefined): boolean {
+    return proto3.util.equals(HelpInfo, a, b);
   }
 }
 
 /**
- * @generated from message scalekit.v1.errdetails.Help.Link
+ * @generated from message scalekit.v1.errdetails.HelpInfo.Link
  */
-export class Help_Link extends Message<Help_Link> {
+export class HelpInfo_Link extends Message<HelpInfo_Link> {
   /**
    * @generated from field: string description = 1;
    */
@@ -357,39 +387,39 @@ export class Help_Link extends Message<Help_Link> {
    */
   url = "";
 
-  constructor(data?: PartialMessage<Help_Link>) {
+  constructor(data?: PartialMessage<HelpInfo_Link>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.errdetails.Help.Link";
+  static readonly typeName = "scalekit.v1.errdetails.HelpInfo.Link";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Help_Link {
-    return new Help_Link().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HelpInfo_Link {
+    return new HelpInfo_Link().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Help_Link {
-    return new Help_Link().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): HelpInfo_Link {
+    return new HelpInfo_Link().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Help_Link {
-    return new Help_Link().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): HelpInfo_Link {
+    return new HelpInfo_Link().fromJsonString(jsonString, options);
   }
 
-  static equals(a: Help_Link | PlainMessage<Help_Link> | undefined, b: Help_Link | PlainMessage<Help_Link> | undefined): boolean {
-    return proto3.util.equals(Help_Link, a, b);
+  static equals(a: HelpInfo_Link | PlainMessage<HelpInfo_Link> | undefined, b: HelpInfo_Link | PlainMessage<HelpInfo_Link> | undefined): boolean {
+    return proto3.util.equals(HelpInfo_Link, a, b);
   }
 }
 
 /**
- * @generated from message scalekit.v1.errdetails.LocalizedMessage
+ * @generated from message scalekit.v1.errdetails.LocalizedMessageInfo
  */
-export class LocalizedMessage extends Message<LocalizedMessage> {
+export class LocalizedMessageInfo extends Message<LocalizedMessageInfo> {
   /**
    * @generated from field: string locale = 1;
    */
@@ -400,87 +430,32 @@ export class LocalizedMessage extends Message<LocalizedMessage> {
    */
   message = "";
 
-  constructor(data?: PartialMessage<LocalizedMessage>) {
+  constructor(data?: PartialMessage<LocalizedMessageInfo>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.errdetails.LocalizedMessage";
+  static readonly typeName = "scalekit.v1.errdetails.LocalizedMessageInfo";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "locale", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LocalizedMessage {
-    return new LocalizedMessage().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LocalizedMessageInfo {
+    return new LocalizedMessageInfo().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): LocalizedMessage {
-    return new LocalizedMessage().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): LocalizedMessageInfo {
+    return new LocalizedMessageInfo().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): LocalizedMessage {
-    return new LocalizedMessage().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): LocalizedMessageInfo {
+    return new LocalizedMessageInfo().fromJsonString(jsonString, options);
   }
 
-  static equals(a: LocalizedMessage | PlainMessage<LocalizedMessage> | undefined, b: LocalizedMessage | PlainMessage<LocalizedMessage> | undefined): boolean {
-    return proto3.util.equals(LocalizedMessage, a, b);
-  }
-}
-
-/**
- * @generated from message scalekit.v1.errdetails.SsoErrorInfo
- */
-export class SsoErrorInfo extends Message<SsoErrorInfo> {
-  /**
-   * @generated from field: string code = 1;
-   */
-  code = "";
-
-  /**
-   * @generated from field: string description = 2;
-   */
-  description = "";
-
-  /**
-   * @generated from field: map<string, string> redirect_params = 3;
-   */
-  redirectParams: { [key: string]: string } = {};
-
-  /**
-   * @generated from field: string redirect_url = 4;
-   */
-  redirectUrl = "";
-
-  constructor(data?: PartialMessage<SsoErrorInfo>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.errdetails.SsoErrorInfo";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "redirect_params", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
-    { no: 4, name: "redirect_url", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SsoErrorInfo {
-    return new SsoErrorInfo().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SsoErrorInfo {
-    return new SsoErrorInfo().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SsoErrorInfo {
-    return new SsoErrorInfo().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: SsoErrorInfo | PlainMessage<SsoErrorInfo> | undefined, b: SsoErrorInfo | PlainMessage<SsoErrorInfo> | undefined): boolean {
-    return proto3.util.equals(SsoErrorInfo, a, b);
+  static equals(a: LocalizedMessageInfo | PlainMessage<LocalizedMessageInfo> | undefined, b: LocalizedMessageInfo | PlainMessage<LocalizedMessageInfo> | undefined): boolean {
+    return proto3.util.equals(LocalizedMessageInfo, a, b);
   }
 }
 

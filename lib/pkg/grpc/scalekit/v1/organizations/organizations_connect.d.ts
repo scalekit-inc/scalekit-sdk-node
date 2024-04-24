@@ -7,6 +7,8 @@ export declare const OrganizationService: {
     readonly typeName: "scalekit.v1.organizations.OrganizationService";
     readonly methods: {
         /**
+         * Create Organization
+         *
          * @generated from rpc scalekit.v1.organizations.OrganizationService.CreateOrganization
          */
         readonly createOrganization: {
@@ -16,6 +18,8 @@ export declare const OrganizationService: {
             readonly kind: MethodKind.Unary;
         };
         /**
+         * Update Organization description here
+         *
          * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateOrganization
          */
         readonly updateOrganization: {
@@ -25,6 +29,8 @@ export declare const OrganizationService: {
             readonly kind: MethodKind.Unary;
         };
         /**
+         * Get Organization Description here
+         *
          * @generated from rpc scalekit.v1.organizations.OrganizationService.GetOrganization
          */
         readonly getOrganization: {
@@ -43,6 +49,8 @@ export declare const OrganizationService: {
             readonly kind: MethodKind.Unary;
         };
         /**
+         * Delete an Organization
+         *
          * @generated from rpc scalekit.v1.organizations.OrganizationService.DeleteOrganization
          */
         readonly deleteOrganization: {
@@ -52,6 +60,8 @@ export declare const OrganizationService: {
             readonly kind: MethodKind.Unary;
         };
         /**
+         * Generate Portal Link for Org
+         *
          * @generated from rpc scalekit.v1.organizations.OrganizationService.GenerateCustomerPortalLink
          */
         readonly generateCustomerPortalLink: {

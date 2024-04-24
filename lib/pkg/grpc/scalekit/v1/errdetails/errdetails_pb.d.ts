@@ -5,13 +5,33 @@ import { Message, proto3 } from "@bufbuild/protobuf";
  */
 export declare class ErrorInfo extends Message<ErrorInfo> {
     /**
-     * @generated from field: string code_id = 3;
-     */
-    codeId: string;
-    /**
-     * @generated from field: string error_code = 4;
+     * @generated from field: string error_code = 1;
      */
     errorCode: string;
+    /**
+     * @generated from field: optional scalekit.v1.errdetails.DebugInfo debug_info = 2;
+     */
+    debugInfo?: DebugInfo;
+    /**
+     * @generated from field: optional scalekit.v1.errdetails.HelpInfo help_info = 3;
+     */
+    helpInfo?: HelpInfo;
+    /**
+     * @generated from field: optional scalekit.v1.errdetails.LocalizedMessageInfo localized_message_info = 4;
+     */
+    localizedMessageInfo?: LocalizedMessageInfo;
+    /**
+     * @generated from field: optional scalekit.v1.errdetails.ResourceInfo resource_info = 5;
+     */
+    resourceInfo?: ResourceInfo;
+    /**
+     * @generated from field: optional scalekit.v1.errdetails.RequestInfo request_info = 6;
+     */
+    requestInfo?: RequestInfo;
+    /**
+     * @generated from field: optional scalekit.v1.errdetails.ValidationErrorInfo validation_error_info = 8;
+     */
+    validationErrorInfo?: ValidationErrorInfo;
     constructor(data?: PartialMessage<ErrorInfo>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.errdetails.ErrorInfo";
@@ -52,30 +72,30 @@ export declare class DebugInfo extends Message<DebugInfo> {
  * Describes violations in a client request. This error type focuses on the
  * syntactic aspects of the request.
  *
- * @generated from message scalekit.v1.errdetails.BadRequest
+ * @generated from message scalekit.v1.errdetails.ValidationErrorInfo
  */
-export declare class BadRequest extends Message<BadRequest> {
+export declare class ValidationErrorInfo extends Message<ValidationErrorInfo> {
     /**
      * Describes all violations in a client request.
      *
-     * @generated from field: repeated scalekit.v1.errdetails.BadRequest.FieldViolation field_violations = 1;
+     * @generated from field: repeated scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation field_violations = 1;
      */
-    fieldViolations: BadRequest_FieldViolation[];
-    constructor(data?: PartialMessage<BadRequest>);
+    fieldViolations: ValidationErrorInfo_FieldViolation[];
+    constructor(data?: PartialMessage<ValidationErrorInfo>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.BadRequest";
+    static readonly typeName = "scalekit.v1.errdetails.ValidationErrorInfo";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BadRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BadRequest;
-    static equals(a: BadRequest | PlainMessage<BadRequest> | undefined, b: BadRequest | PlainMessage<BadRequest> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidationErrorInfo;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ValidationErrorInfo;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ValidationErrorInfo;
+    static equals(a: ValidationErrorInfo | PlainMessage<ValidationErrorInfo> | undefined, b: ValidationErrorInfo | PlainMessage<ValidationErrorInfo> | undefined): boolean;
 }
 /**
  * A message type used to describe a single bad request field.
  *
- * @generated from message scalekit.v1.errdetails.BadRequest.FieldViolation
+ * @generated from message scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation
  */
-export declare class BadRequest_FieldViolation extends Message<BadRequest_FieldViolation> {
+export declare class ValidationErrorInfo_FieldViolation extends Message<ValidationErrorInfo_FieldViolation> {
     /**
      * @generated from field: string field = 1;
      */
@@ -90,14 +110,14 @@ export declare class BadRequest_FieldViolation extends Message<BadRequest_FieldV
      * @generated from field: string constraint = 3;
      */
     constraint: string;
-    constructor(data?: PartialMessage<BadRequest_FieldViolation>);
+    constructor(data?: PartialMessage<ValidationErrorInfo_FieldViolation>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.BadRequest.FieldViolation";
+    static readonly typeName = "scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): BadRequest_FieldViolation;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): BadRequest_FieldViolation;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): BadRequest_FieldViolation;
-    static equals(a: BadRequest_FieldViolation | PlainMessage<BadRequest_FieldViolation> | undefined, b: BadRequest_FieldViolation | PlainMessage<BadRequest_FieldViolation> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidationErrorInfo_FieldViolation;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ValidationErrorInfo_FieldViolation;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ValidationErrorInfo_FieldViolation;
+    static equals(a: ValidationErrorInfo_FieldViolation | PlainMessage<ValidationErrorInfo_FieldViolation> | undefined, b: ValidationErrorInfo_FieldViolation | PlainMessage<ValidationErrorInfo_FieldViolation> | undefined): boolean;
 }
 /**
  * Contains metadata about the request that clients can attach when filing a bug
@@ -165,26 +185,26 @@ export declare class ResourceInfo extends Message<ResourceInfo> {
     static equals(a: ResourceInfo | PlainMessage<ResourceInfo> | undefined, b: ResourceInfo | PlainMessage<ResourceInfo> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.errdetails.Help
+ * @generated from message scalekit.v1.errdetails.HelpInfo
  */
-export declare class Help extends Message<Help> {
+export declare class HelpInfo extends Message<HelpInfo> {
     /**
-     * @generated from field: repeated scalekit.v1.errdetails.Help.Link links = 1;
+     * @generated from field: repeated scalekit.v1.errdetails.HelpInfo.Link links = 1;
      */
-    links: Help_Link[];
-    constructor(data?: PartialMessage<Help>);
+    links: HelpInfo_Link[];
+    constructor(data?: PartialMessage<HelpInfo>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.Help";
+    static readonly typeName = "scalekit.v1.errdetails.HelpInfo";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Help;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Help;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Help;
-    static equals(a: Help | PlainMessage<Help> | undefined, b: Help | PlainMessage<Help> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HelpInfo;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): HelpInfo;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): HelpInfo;
+    static equals(a: HelpInfo | PlainMessage<HelpInfo> | undefined, b: HelpInfo | PlainMessage<HelpInfo> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.errdetails.Help.Link
+ * @generated from message scalekit.v1.errdetails.HelpInfo.Link
  */
-export declare class Help_Link extends Message<Help_Link> {
+export declare class HelpInfo_Link extends Message<HelpInfo_Link> {
     /**
      * @generated from field: string description = 1;
      */
@@ -193,19 +213,19 @@ export declare class Help_Link extends Message<Help_Link> {
      * @generated from field: string url = 2;
      */
     url: string;
-    constructor(data?: PartialMessage<Help_Link>);
+    constructor(data?: PartialMessage<HelpInfo_Link>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.Help.Link";
+    static readonly typeName = "scalekit.v1.errdetails.HelpInfo.Link";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Help_Link;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Help_Link;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Help_Link;
-    static equals(a: Help_Link | PlainMessage<Help_Link> | undefined, b: Help_Link | PlainMessage<Help_Link> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HelpInfo_Link;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): HelpInfo_Link;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): HelpInfo_Link;
+    static equals(a: HelpInfo_Link | PlainMessage<HelpInfo_Link> | undefined, b: HelpInfo_Link | PlainMessage<HelpInfo_Link> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.errdetails.LocalizedMessage
+ * @generated from message scalekit.v1.errdetails.LocalizedMessageInfo
  */
-export declare class LocalizedMessage extends Message<LocalizedMessage> {
+export declare class LocalizedMessageInfo extends Message<LocalizedMessageInfo> {
     /**
      * @generated from field: string locale = 1;
      */
@@ -214,43 +234,12 @@ export declare class LocalizedMessage extends Message<LocalizedMessage> {
      * @generated from field: string message = 2;
      */
     message: string;
-    constructor(data?: PartialMessage<LocalizedMessage>);
+    constructor(data?: PartialMessage<LocalizedMessageInfo>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.LocalizedMessage";
+    static readonly typeName = "scalekit.v1.errdetails.LocalizedMessageInfo";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LocalizedMessage;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): LocalizedMessage;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): LocalizedMessage;
-    static equals(a: LocalizedMessage | PlainMessage<LocalizedMessage> | undefined, b: LocalizedMessage | PlainMessage<LocalizedMessage> | undefined): boolean;
-}
-/**
- * @generated from message scalekit.v1.errdetails.SsoErrorInfo
- */
-export declare class SsoErrorInfo extends Message<SsoErrorInfo> {
-    /**
-     * @generated from field: string code = 1;
-     */
-    code: string;
-    /**
-     * @generated from field: string description = 2;
-     */
-    description: string;
-    /**
-     * @generated from field: map<string, string> redirect_params = 3;
-     */
-    redirectParams: {
-        [key: string]: string;
-    };
-    /**
-     * @generated from field: string redirect_url = 4;
-     */
-    redirectUrl: string;
-    constructor(data?: PartialMessage<SsoErrorInfo>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.SsoErrorInfo";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SsoErrorInfo;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SsoErrorInfo;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SsoErrorInfo;
-    static equals(a: SsoErrorInfo | PlainMessage<SsoErrorInfo> | undefined, b: SsoErrorInfo | PlainMessage<SsoErrorInfo> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LocalizedMessageInfo;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): LocalizedMessageInfo;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): LocalizedMessageInfo;
+    static equals(a: LocalizedMessageInfo | PlainMessage<LocalizedMessageInfo> | undefined, b: LocalizedMessageInfo | PlainMessage<LocalizedMessageInfo> | undefined): boolean;
 }
