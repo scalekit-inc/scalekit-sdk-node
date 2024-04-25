@@ -2,7 +2,7 @@ import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
 import { ConnectionService } from './pkg/grpc/scalekit/v1/connections/connections_connect';
-import { GetConnectionByDomainResponse, GetConnectionResponse, ListConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
+import { GetConnectionResponse, ListConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 
 export default class ConnectionClient {
   private client: PromiseClient<typeof ConnectionService>;
@@ -33,15 +33,18 @@ export default class ConnectionClient {
   }
 
   /**
-   * Get a connection by domain
+   * List connections by domain
    * @param domain The domain
-   * @returns {Promise<GetConnectionByDomainResponse>} The connection
+   * @returns {Promise<ListConnectionsResponse>} The connection
    */
-  async getConnectionByDomain(domain: string): Promise<GetConnectionByDomainResponse> {
+  async listConnectionsByDomain(domain: string): Promise<ListConnectionsResponse> {
     return this.coreClient.connectExec(
-      this.client.getConnectionByDomain,
+      this.client.listConnections,
       {
-        domain
+        identities: {
+          case: 'domain',
+          value: domain
+        }
       },
     )
   }

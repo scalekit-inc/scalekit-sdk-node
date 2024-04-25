@@ -1,6 +1,6 @@
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { GetConnectionByDomainResponse, GetConnectionResponse, ListConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
+import { GetConnectionResponse, ListConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 export default class ConnectionClient {
     private readonly grpcConncet;
     private readonly coreClient;
@@ -14,11 +14,11 @@ export default class ConnectionClient {
      */
     getConnection(id: string, organizationId: string): Promise<GetConnectionResponse>;
     /**
-     * Get a connection by domain
+     * List connections by domain
      * @param domain The domain
-     * @returns {Promise<GetConnectionByDomainResponse>} The connection
+     * @returns {Promise<ListConnectionsResponse>} The connection
      */
-    getConnectionByDomain(domain: string): Promise<GetConnectionByDomainResponse>;
+    listConnectionsByDomain(domain: string): Promise<ListConnectionsResponse>;
     /**
      * List connections by organization id
      * @param organizationId The organization id

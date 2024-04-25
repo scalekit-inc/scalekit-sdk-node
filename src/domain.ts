@@ -17,7 +17,6 @@ export default class DomainClient {
    * Create a domain for an organization with the given name. Optionally, you can provide an external id. 
    * @param {string} organizationId  The organization id
    * @param {string} name The domain name
-   * @param {string} externalId The external id
    * @returns {Promise<CreateDomainResponse>} The created domain
   */
   async createDomain(organizationId: string, name: string): Promise<CreateDomainResponse> {

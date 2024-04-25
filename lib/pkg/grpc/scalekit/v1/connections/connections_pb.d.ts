@@ -603,11 +603,17 @@ export declare class ListConnectionsRequest extends Message<ListConnectionsReque
         value: string;
         case: "externalId";
     } | {
+        /**
+         * @generated from field: string domain = 3;
+         */
+        value: string;
+        case: "domain";
+    } | {
         case: undefined;
         value?: undefined;
     };
     /**
-     * @generated from field: optional string include = 3;
+     * @generated from field: optional string include = 4;
      */
     include?: string;
     constructor(data?: PartialMessage<ListConnectionsRequest>);
@@ -1021,52 +1027,6 @@ export declare class IDPCertificate extends Message<IDPCertificate> {
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IDPCertificate;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IDPCertificate;
     static equals(a: IDPCertificate | PlainMessage<IDPCertificate> | undefined, b: IDPCertificate | PlainMessage<IDPCertificate> | undefined): boolean;
-}
-/**
- * @generated from message scalekit.v1.connections.GetConnectionByDomainRequest
- */
-export declare class GetConnectionByDomainRequest extends Message<GetConnectionByDomainRequest> {
-    /**
-     * @generated from field: string domain = 1;
-     */
-    domain: string;
-    constructor(data?: PartialMessage<GetConnectionByDomainRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetConnectionByDomainRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionByDomainRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionByDomainRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionByDomainRequest;
-    static equals(a: GetConnectionByDomainRequest | PlainMessage<GetConnectionByDomainRequest> | undefined, b: GetConnectionByDomainRequest | PlainMessage<GetConnectionByDomainRequest> | undefined): boolean;
-}
-/**
- * @generated from message scalekit.v1.connections.GetConnectionByDomainResponse
- */
-export declare class GetConnectionByDomainResponse extends Message<GetConnectionByDomainResponse> {
-    /**
-     * @generated from field: string connection_id = 1;
-     */
-    connectionId: string;
-    /**
-     * @generated from field: scalekit.v1.connections.ConnectionStatus status = 2;
-     */
-    status: ConnectionStatus;
-    /**
-     * @generated from field: scalekit.v1.connections.ConnectionType type = 3;
-     */
-    type: ConnectionType;
-    /**
-     * @generated from field: string ui_button_title = 4;
-     */
-    uiButtonTitle: string;
-    constructor(data?: PartialMessage<GetConnectionByDomainResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetConnectionByDomainResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionByDomainResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionByDomainResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionByDomainResponse;
-    static equals(a: GetConnectionByDomainResponse | PlainMessage<GetConnectionByDomainResponse> | undefined, b: GetConnectionByDomainResponse | PlainMessage<GetConnectionByDomainResponse> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.connections.GetOIDCMetadataRequest

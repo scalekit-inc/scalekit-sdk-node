@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateConnectionRequest, CreateConnectionResponse, DeleteConnectionRequest, DisableConnectionRequest, EnableConnectionRequest, GetConnectionByDomainRequest, GetConnectionByDomainResponse, GetConnectionRequest, GetConnectionResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionResponse, UpdateConnectionRequest, UpdateConnectionResponse } from "./connections_pb.js";
+import { CreateConnectionRequest, CreateConnectionResponse, DeleteConnectionRequest, DisableConnectionRequest, EnableConnectionRequest, GetConnectionRequest, GetConnectionResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionResponse, UpdateConnectionRequest, UpdateConnectionResponse } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -55,15 +55,6 @@ export const ConnectionService = {
       name: "DeleteConnection",
       I: DeleteConnectionRequest,
       O: Empty,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc scalekit.v1.connections.ConnectionService.GetConnectionByDomain
-     */
-    getConnectionByDomain: {
-      name: "GetConnectionByDomain",
-      I: GetConnectionByDomainRequest,
-      O: GetConnectionByDomainResponse,
       kind: MethodKind.Unary,
     },
     /**

@@ -955,10 +955,16 @@ export class ListConnectionsRequest extends Message<ListConnectionsRequest> {
      */
     value: string;
     case: "externalId";
+  } | {
+    /**
+     * @generated from field: string domain = 3;
+     */
+    value: string;
+    case: "domain";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   /**
-   * @generated from field: optional string include = 3;
+   * @generated from field: optional string include = 4;
    */
   include?: string;
 
@@ -972,7 +978,8 @@ export class ListConnectionsRequest extends Message<ListConnectionsRequest> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "identities" },
     { no: 2, name: "external_id", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "identities" },
-    { no: 3, name: "include", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 3, name: "domain", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "identities" },
+    { no: 4, name: "include", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListConnectionsRequest {
@@ -1678,98 +1685,6 @@ export class IDPCertificate extends Message<IDPCertificate> {
 
   static equals(a: IDPCertificate | PlainMessage<IDPCertificate> | undefined, b: IDPCertificate | PlainMessage<IDPCertificate> | undefined): boolean {
     return proto3.util.equals(IDPCertificate, a, b);
-  }
-}
-
-/**
- * @generated from message scalekit.v1.connections.GetConnectionByDomainRequest
- */
-export class GetConnectionByDomainRequest extends Message<GetConnectionByDomainRequest> {
-  /**
-   * @generated from field: string domain = 1;
-   */
-  domain = "";
-
-  constructor(data?: PartialMessage<GetConnectionByDomainRequest>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.connections.GetConnectionByDomainRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "domain", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionByDomainRequest {
-    return new GetConnectionByDomainRequest().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionByDomainRequest {
-    return new GetConnectionByDomainRequest().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionByDomainRequest {
-    return new GetConnectionByDomainRequest().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: GetConnectionByDomainRequest | PlainMessage<GetConnectionByDomainRequest> | undefined, b: GetConnectionByDomainRequest | PlainMessage<GetConnectionByDomainRequest> | undefined): boolean {
-    return proto3.util.equals(GetConnectionByDomainRequest, a, b);
-  }
-}
-
-/**
- * @generated from message scalekit.v1.connections.GetConnectionByDomainResponse
- */
-export class GetConnectionByDomainResponse extends Message<GetConnectionByDomainResponse> {
-  /**
-   * @generated from field: string connection_id = 1;
-   */
-  connectionId = "";
-
-  /**
-   * @generated from field: scalekit.v1.connections.ConnectionStatus status = 2;
-   */
-  status = ConnectionStatus.CONNECTION_STATUS_UNSPECIFIED;
-
-  /**
-   * @generated from field: scalekit.v1.connections.ConnectionType type = 3;
-   */
-  type = ConnectionType.INVALID;
-
-  /**
-   * @generated from field: string ui_button_title = 4;
-   */
-  uiButtonTitle = "";
-
-  constructor(data?: PartialMessage<GetConnectionByDomainResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.connections.GetConnectionByDomainResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "status", kind: "enum", T: proto3.getEnumType(ConnectionStatus) },
-    { no: 3, name: "type", kind: "enum", T: proto3.getEnumType(ConnectionType) },
-    { no: 4, name: "ui_button_title", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionByDomainResponse {
-    return new GetConnectionByDomainResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionByDomainResponse {
-    return new GetConnectionByDomainResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionByDomainResponse {
-    return new GetConnectionByDomainResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: GetConnectionByDomainResponse | PlainMessage<GetConnectionByDomainResponse> | undefined, b: GetConnectionByDomainResponse | PlainMessage<GetConnectionByDomainResponse> | undefined): boolean {
-    return proto3.util.equals(GetConnectionByDomainResponse, a, b);
   }
 }
 

@@ -1,4 +1,4 @@
-import { CreateConnectionRequest, CreateConnectionResponse, DeleteConnectionRequest, DisableConnectionRequest, EnableConnectionRequest, GetConnectionByDomainRequest, GetConnectionByDomainResponse, GetConnectionRequest, GetConnectionResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionResponse, UpdateConnectionRequest, UpdateConnectionResponse } from "./connections_pb.js";
+import { CreateConnectionRequest, CreateConnectionResponse, DeleteConnectionRequest, DisableConnectionRequest, EnableConnectionRequest, GetConnectionRequest, GetConnectionResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionResponse, UpdateConnectionRequest, UpdateConnectionResponse } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.connections.ConnectionService
@@ -49,15 +49,6 @@ export declare const ConnectionService: {
             readonly name: "DeleteConnection";
             readonly I: typeof DeleteConnectionRequest;
             readonly O: typeof Empty;
-            readonly kind: MethodKind.Unary;
-        };
-        /**
-         * @generated from rpc scalekit.v1.connections.ConnectionService.GetConnectionByDomain
-         */
-        readonly getConnectionByDomain: {
-            readonly name: "GetConnectionByDomain";
-            readonly I: typeof GetConnectionByDomainRequest;
-            readonly O: typeof GetConnectionByDomainResponse;
             readonly kind: MethodKind.Unary;
         };
         /**
