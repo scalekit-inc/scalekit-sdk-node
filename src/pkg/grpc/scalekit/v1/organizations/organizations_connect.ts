@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateOrganizationRequest, CreateOrganizationResponse, CustomerPortalLinkRequest, CustomerPortalLinksResponse, DeleteOrganizationRequest, GetOrganizationRequest, GetOrganizationResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, CustomerPortalLinkRequest, CustomerPortalLinksResponse, DeleteOrganizationRequest, GenerateCustomerPortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -73,7 +73,7 @@ export const OrganizationService = {
     generateCustomerPortalLink: {
       name: "GenerateCustomerPortalLink",
       I: CustomerPortalLinkRequest,
-      O: CustomerPortalLinksResponse,
+      O: GenerateCustomerPortalLinkResponse,
       kind: MethodKind.Unary,
     },
     /**

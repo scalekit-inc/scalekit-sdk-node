@@ -11,7 +11,6 @@ const jwksEndpoint = "keys";
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
-  public uname: string | null = null;
   public axios: Axios;
   public sdkVersion = `Scalekit-Node/1.0.0`;
   public apiVersion = "20240430";

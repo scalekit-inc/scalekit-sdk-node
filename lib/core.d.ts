@@ -6,7 +6,6 @@ export default class CoreClient {
     readonly clientSecret: string;
     keys: JWK[];
     accessToken: string | null;
-    uname: string | null;
     axios: Axios;
     sdkVersion: string;
     apiVersion: string;

@@ -58,7 +58,7 @@ export default class OrganizationClient {
     /**
      * Generate customer portal link for an organization
      * @param organizationId  The organization id
-     * @returns {Promise<string[]>} The customer portal links
+     * @returns {Promise<string>} The customer portal link
      */
-    generateCustomerPortalLink(organizationId: string): Promise<string[]>;
+    generateCustomerPortalLink(organizationId: string): Promise<string>;
 }

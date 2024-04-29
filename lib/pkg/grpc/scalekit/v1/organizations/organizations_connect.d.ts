@@ -1,4 +1,4 @@
-import { CreateOrganizationRequest, CreateOrganizationResponse, CustomerPortalLinkRequest, CustomerPortalLinksResponse, DeleteOrganizationRequest, GetOrganizationRequest, GetOrganizationResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, CustomerPortalLinkRequest, CustomerPortalLinksResponse, DeleteOrganizationRequest, GenerateCustomerPortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.organizations.OrganizationService
@@ -67,7 +67,7 @@ export declare const OrganizationService: {
         readonly generateCustomerPortalLink: {
             readonly name: "GenerateCustomerPortalLink";
             readonly I: typeof CustomerPortalLinkRequest;
-            readonly O: typeof CustomerPortalLinksResponse;
+            readonly O: typeof GenerateCustomerPortalLinkResponse;
             readonly kind: MethodKind.Unary;
         };
         /**

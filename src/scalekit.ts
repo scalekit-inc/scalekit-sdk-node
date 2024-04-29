@@ -88,7 +88,7 @@ export default class Scalekit {
       redirect_uri: redirectUri,
       scope: options.scopes?.join(" "),
       ...(options.state && { state: options.state }),
-      ...(options.nonce && { state: options.nonce }),
+      ...(options.nonce && { nonce: options.nonce }),
       ...(options.loginHint && { login_hint: options.loginHint }),
       ...(options.domainHint && { domain_hint: options.domainHint }),
       ...(options.domainHint && { domain: options.domainHint }),

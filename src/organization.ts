@@ -110,17 +110,20 @@ export default class OrganizationClient {
   /**
    * Generate customer portal link for an organization
    * @param organizationId  The organization id
-   * @returns {Promise<string[]>} The customer portal links
+   * @returns {Promise<string>} The customer portal link
    */
-  async generateCustomerPortalLink(organizationId: string): Promise<string[]> {
+  async generateCustomerPortalLink(organizationId: string): Promise<string> {
     const response = await this.coreClient.connectExec(
       this.client.generateCustomerPortalLink,
       {
         id: organizationId
       },
     )
+    if (!response.link) {
+      throw new Error('Error generating customer portal link');
+    }
 
-    return response.links.map(link=>link.location);
+    return response.link?.location
   }
 }
 

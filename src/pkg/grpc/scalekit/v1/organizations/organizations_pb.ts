@@ -699,6 +699,43 @@ export class Link extends Message<Link> {
 }
 
 /**
+ * @generated from message scalekit.v1.organizations.GenerateCustomerPortalLinkResponse
+ */
+export class GenerateCustomerPortalLinkResponse extends Message<GenerateCustomerPortalLinkResponse> {
+  /**
+   * @generated from field: scalekit.v1.organizations.Link link = 1;
+   */
+  link?: Link;
+
+  constructor(data?: PartialMessage<GenerateCustomerPortalLinkResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.GenerateCustomerPortalLinkResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "link", kind: "message", T: Link },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenerateCustomerPortalLinkResponse {
+    return new GenerateCustomerPortalLinkResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GenerateCustomerPortalLinkResponse {
+    return new GenerateCustomerPortalLinkResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GenerateCustomerPortalLinkResponse {
+    return new GenerateCustomerPortalLinkResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GenerateCustomerPortalLinkResponse | PlainMessage<GenerateCustomerPortalLinkResponse> | undefined, b: GenerateCustomerPortalLinkResponse | PlainMessage<GenerateCustomerPortalLinkResponse> | undefined): boolean {
+    return proto3.util.equals(GenerateCustomerPortalLinkResponse, a, b);
+  }
+}
+
+/**
  * @generated from message scalekit.v1.organizations.CustomerPortalLinksResponse
  */
 export class CustomerPortalLinksResponse extends Message<CustomerPortalLinksResponse> {

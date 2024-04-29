@@ -389,6 +389,23 @@ export declare class Link extends Message<Link> {
     static equals(a: Link | PlainMessage<Link> | undefined, b: Link | PlainMessage<Link> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.organizations.GenerateCustomerPortalLinkResponse
+ */
+export declare class GenerateCustomerPortalLinkResponse extends Message<GenerateCustomerPortalLinkResponse> {
+    /**
+     * @generated from field: scalekit.v1.organizations.Link link = 1;
+     */
+    link?: Link;
+    constructor(data?: PartialMessage<GenerateCustomerPortalLinkResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.GenerateCustomerPortalLinkResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenerateCustomerPortalLinkResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GenerateCustomerPortalLinkResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GenerateCustomerPortalLinkResponse;
+    static equals(a: GenerateCustomerPortalLinkResponse | PlainMessage<GenerateCustomerPortalLinkResponse> | undefined, b: GenerateCustomerPortalLinkResponse | PlainMessage<GenerateCustomerPortalLinkResponse> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.organizations.CustomerPortalLinksResponse
  */
 export declare class CustomerPortalLinksResponse extends Message<CustomerPortalLinksResponse> {
