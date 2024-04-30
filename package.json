@@ -1,7 +1,7 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "name": "@scalekit-sdk/node",
-  "description": "Scalekit Node SDK",
+  "description": "Official Scalekit Node SDK",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "repository": {
@@ -14,9 +14,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
+    "sso",
+    "saml",
+    "oidc",
+    "sso-authentication",
     "scalekit"
   ],
-  "author": "Scalekit Team",
+  "author": "Team Scalekit",
   "license": "ISC",
   "dependencies": {
     "@connectrpc/connect": "^1.4.0",
