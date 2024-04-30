@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateConnectionRequest, CreateConnectionResponse, DeleteConnectionRequest, DisableConnectionRequest, EnableConnectionRequest, GetConnectionRequest, GetConnectionResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionResponse, UpdateConnectionRequest, UpdateConnectionResponse } from "./connections_pb.js";
+import { CreateConnectionRequest, CreateConnectionResponse, DeleteConnectionRequest, GetConnectionRequest, GetConnectionResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, UpdateConnectionRequest, UpdateConnectionResponse } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -62,7 +62,7 @@ export const ConnectionService = {
      */
     enableConnection: {
       name: "EnableConnection",
-      I: EnableConnectionRequest,
+      I: ToggleConnectionRequest,
       O: ToggleConnectionResponse,
       kind: MethodKind.Unary,
     },
@@ -71,7 +71,7 @@ export const ConnectionService = {
      */
     disableConnection: {
       name: "DisableConnection",
-      I: DisableConnectionRequest,
+      I: ToggleConnectionRequest,
       O: ToggleConnectionResponse,
       kind: MethodKind.Unary,
     },

@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateOrganizationRequest, CreateOrganizationResponse, CustomerPortalLinkRequest, CustomerPortalLinksResponse, DeleteOrganizationRequest, GenerateCustomerPortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
+import { AdminPortalLinkRequest, AdminPortalLinksResponse, CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, GenerateAdminPortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -24,8 +24,6 @@ export const OrganizationService = {
       kind: MethodKind.Unary,
     },
     /**
-     * Update Organization description here
-     *
      * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateOrganization
      */
     updateOrganization: {
@@ -35,8 +33,6 @@ export const OrganizationService = {
       kind: MethodKind.Unary,
     },
     /**
-     * Get Organization Description here 
-     *
      * @generated from rpc scalekit.v1.organizations.OrganizationService.GetOrganization
      */
     getOrganization: {
@@ -68,30 +64,30 @@ export const OrganizationService = {
     /**
      * Generate Portal Link for Org
      *
-     * @generated from rpc scalekit.v1.organizations.OrganizationService.GenerateCustomerPortalLink
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.GenerateAdminPortalLink
      */
-    generateCustomerPortalLink: {
-      name: "GenerateCustomerPortalLink",
-      I: CustomerPortalLinkRequest,
-      O: GenerateCustomerPortalLinkResponse,
+    generateAdminPortalLink: {
+      name: "GenerateAdminPortalLink",
+      I: AdminPortalLinkRequest,
+      O: GenerateAdminPortalLinkResponse,
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc scalekit.v1.organizations.OrganizationService.DeleteCustomerPortalLink
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.DeleteAdminPortalLink
      */
-    deleteCustomerPortalLink: {
-      name: "DeleteCustomerPortalLink",
-      I: CustomerPortalLinkRequest,
+    deleteAdminPortalLink: {
+      name: "DeleteAdminPortalLink",
+      I: AdminPortalLinkRequest,
       O: Empty,
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc scalekit.v1.organizations.OrganizationService.GetCustomerPortalLink
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.GetAdminPortalLink
      */
-    getCustomerPortalLink: {
-      name: "GetCustomerPortalLink",
-      I: CustomerPortalLinkRequest,
-      O: CustomerPortalLinksResponse,
+    getAdminPortalLink: {
+      name: "GetAdminPortalLink",
+      I: AdminPortalLinkRequest,
+      O: AdminPortalLinksResponse,
       kind: MethodKind.Unary,
     },
   }
