@@ -22,11 +22,11 @@ This Node SDK is a wrapper around Scalekit's REST API to help you integrate Scal
 ## Installation
 
 ```sh
-npm install @scalekit-sdk/node-sdk
+npm install @scalekit-sdk/node
 #or
-yarn add @scalekit-sdk/node-sdk
+yarn add @scalekit-sdk/node
 #or
-pnpm add @scalekit-sdk/node-sdk
+pnpm add @scalekit-sdk/node
 ```
 
 ## Usage
