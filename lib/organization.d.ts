@@ -1,7 +1,7 @@
 import { PartialMessage } from '@bufbuild/protobuf';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateOrganizationResponse, GetOrganizationResponse, ListOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
+import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
 export default class OrganizationClient {
     private readonly grpcConncet;
     private readonly coreClient;
@@ -56,9 +56,9 @@ export default class OrganizationClient {
      */
     updateOrganizationByExternalId(externalId: string, organization: PartialMessage<UpdateOrganization>): Promise<UpdateOrganizationResponse>;
     /**
-     * Generate customer portal link for an organization
+     * Generate admin portal link for an organization
      * @param organizationId  The organization id
-     * @returns {Promise<string>} The customer portal link
+     * @returns {Promise<Link>} The admin portal link object with expiration time and location
      */
-    generateCustomerPortalLink(organizationId: string): Promise<string>;
+    generatePortalLink(organizationId: string): Promise<Link>;
 }

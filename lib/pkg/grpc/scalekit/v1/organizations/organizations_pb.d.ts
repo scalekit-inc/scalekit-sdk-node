@@ -347,21 +347,55 @@ export declare class DeleteOrganizationRequest extends Message<DeleteOrganizatio
     static equals(a: DeleteOrganizationRequest | PlainMessage<DeleteOrganizationRequest> | undefined, b: DeleteOrganizationRequest | PlainMessage<DeleteOrganizationRequest> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.organizations.CustomerPortalLinkRequest
+ * @generated from message scalekit.v1.organizations.GeneratePortalLinkRequest
  */
-export declare class CustomerPortalLinkRequest extends Message<CustomerPortalLinkRequest> {
+export declare class GeneratePortalLinkRequest extends Message<GeneratePortalLinkRequest> {
     /**
      * @generated from field: string id = 1;
      */
     id: string;
-    constructor(data?: PartialMessage<CustomerPortalLinkRequest>);
+    constructor(data?: PartialMessage<GeneratePortalLinkRequest>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.organizations.CustomerPortalLinkRequest";
+    static readonly typeName = "scalekit.v1.organizations.GeneratePortalLinkRequest";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CustomerPortalLinkRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CustomerPortalLinkRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CustomerPortalLinkRequest;
-    static equals(a: CustomerPortalLinkRequest | PlainMessage<CustomerPortalLinkRequest> | undefined, b: CustomerPortalLinkRequest | PlainMessage<CustomerPortalLinkRequest> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeneratePortalLinkRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GeneratePortalLinkRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GeneratePortalLinkRequest;
+    static equals(a: GeneratePortalLinkRequest | PlainMessage<GeneratePortalLinkRequest> | undefined, b: GeneratePortalLinkRequest | PlainMessage<GeneratePortalLinkRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.GetPortalLinkRequest
+ */
+export declare class GetPortalLinkRequest extends Message<GetPortalLinkRequest> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    constructor(data?: PartialMessage<GetPortalLinkRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.GetPortalLinkRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPortalLinkRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetPortalLinkRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetPortalLinkRequest;
+    static equals(a: GetPortalLinkRequest | PlainMessage<GetPortalLinkRequest> | undefined, b: GetPortalLinkRequest | PlainMessage<GetPortalLinkRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.DeletePortalLinkRequest
+ */
+export declare class DeletePortalLinkRequest extends Message<DeletePortalLinkRequest> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    constructor(data?: PartialMessage<DeletePortalLinkRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.DeletePortalLinkRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeletePortalLinkRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeletePortalLinkRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeletePortalLinkRequest;
+    static equals(a: DeletePortalLinkRequest | PlainMessage<DeletePortalLinkRequest> | undefined, b: DeletePortalLinkRequest | PlainMessage<DeletePortalLinkRequest> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.organizations.Link
@@ -389,36 +423,36 @@ export declare class Link extends Message<Link> {
     static equals(a: Link | PlainMessage<Link> | undefined, b: Link | PlainMessage<Link> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.organizations.GenerateCustomerPortalLinkResponse
+ * @generated from message scalekit.v1.organizations.GeneratePortalLinkResponse
  */
-export declare class GenerateCustomerPortalLinkResponse extends Message<GenerateCustomerPortalLinkResponse> {
+export declare class GeneratePortalLinkResponse extends Message<GeneratePortalLinkResponse> {
     /**
      * @generated from field: scalekit.v1.organizations.Link link = 1;
      */
     link?: Link;
-    constructor(data?: PartialMessage<GenerateCustomerPortalLinkResponse>);
+    constructor(data?: PartialMessage<GeneratePortalLinkResponse>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.organizations.GenerateCustomerPortalLinkResponse";
+    static readonly typeName = "scalekit.v1.organizations.GeneratePortalLinkResponse";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenerateCustomerPortalLinkResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GenerateCustomerPortalLinkResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GenerateCustomerPortalLinkResponse;
-    static equals(a: GenerateCustomerPortalLinkResponse | PlainMessage<GenerateCustomerPortalLinkResponse> | undefined, b: GenerateCustomerPortalLinkResponse | PlainMessage<GenerateCustomerPortalLinkResponse> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeneratePortalLinkResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GeneratePortalLinkResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GeneratePortalLinkResponse;
+    static equals(a: GeneratePortalLinkResponse | PlainMessage<GeneratePortalLinkResponse> | undefined, b: GeneratePortalLinkResponse | PlainMessage<GeneratePortalLinkResponse> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.organizations.CustomerPortalLinksResponse
+ * @generated from message scalekit.v1.organizations.GetPortalLinksResponse
  */
-export declare class CustomerPortalLinksResponse extends Message<CustomerPortalLinksResponse> {
+export declare class GetPortalLinksResponse extends Message<GetPortalLinksResponse> {
     /**
      * @generated from field: repeated scalekit.v1.organizations.Link links = 1;
      */
     links: Link[];
-    constructor(data?: PartialMessage<CustomerPortalLinksResponse>);
+    constructor(data?: PartialMessage<GetPortalLinksResponse>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.organizations.CustomerPortalLinksResponse";
+    static readonly typeName = "scalekit.v1.organizations.GetPortalLinksResponse";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CustomerPortalLinksResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CustomerPortalLinksResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CustomerPortalLinksResponse;
-    static equals(a: CustomerPortalLinksResponse | PlainMessage<CustomerPortalLinksResponse> | undefined, b: CustomerPortalLinksResponse | PlainMessage<CustomerPortalLinksResponse> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPortalLinksResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetPortalLinksResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetPortalLinksResponse;
+    static equals(a: GetPortalLinksResponse | PlainMessage<GetPortalLinksResponse> | undefined, b: GetPortalLinksResponse | PlainMessage<GetPortalLinksResponse> | undefined): boolean;
 }

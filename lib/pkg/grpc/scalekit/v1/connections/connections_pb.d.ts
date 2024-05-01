@@ -420,27 +420,27 @@ export declare class UpdateConnectionRequest extends Message<UpdateConnectionReq
  */
 export declare class UpdateConnection extends Message<UpdateConnection> {
     /**
-     * @generated from field: scalekit.v1.connections.ConnectionProvider provider = 1;
+     * @generated from field: scalekit.v1.connections.ConnectionProvider provider = 2;
      */
     provider: ConnectionProvider;
     /**
-     * @generated from field: scalekit.v1.connections.ConnectionType type = 2;
+     * @generated from field: scalekit.v1.connections.ConnectionType type = 3;
      */
     type: ConnectionType;
     /**
-     * @generated from field: google.protobuf.BoolValue debug_enabled = 3;
+     * @generated from field: google.protobuf.BoolValue debug_enabled = 6;
      */
     debugEnabled?: boolean;
     /**
-     * @generated from field: google.protobuf.StringValue ui_button_title = 4;
+     * @generated from field: google.protobuf.StringValue ui_button_title = 8;
      */
     uiButtonTitle?: string;
     /**
-     * @generated from field: google.protobuf.StringValue logout_uri = 5;
+     * @generated from field: google.protobuf.StringValue logout_uri = 10;
      */
     logoutUri?: string;
     /**
-     * @generated from field: scalekit.v1.connections.ConfigurationType configuration_type = 6;
+     * @generated from field: scalekit.v1.connections.ConfigurationType configuration_type = 11;
      */
     configurationType: ConfigurationType;
     /**
@@ -448,22 +448,22 @@ export declare class UpdateConnection extends Message<UpdateConnection> {
      */
     settings: {
         /**
-         * @generated from field: scalekit.v1.connections.OIDCConnectionConfig oidc_config = 7;
+         * @generated from field: scalekit.v1.connections.OIDCConnectionConfig oidc_config = 13;
          */
         value: OIDCConnectionConfig;
         case: "oidcConfig";
     } | {
         /**
-         * @generated from field: scalekit.v1.connections.SAMLConnectionConfigRequest saml_config = 8;
+         * @generated from field: scalekit.v1.connections.SAMLConnectionConfigResponse saml_config = 14;
          */
-        value: SAMLConnectionConfigRequest;
+        value: SAMLConnectionConfigResponse;
         case: "samlConfig";
     } | {
         case: undefined;
         value?: undefined;
     };
     /**
-     * @generated from field: map<string, string> attribute_mapping = 9;
+     * @generated from field: map<string, string> attribute_mapping = 15;
      */
     attributeMapping: {
         [key: string]: string;
@@ -684,11 +684,11 @@ export declare class ListConnection extends Message<ListConnection> {
     static equals(a: ListConnection | PlainMessage<ListConnection> | undefined, b: ListConnection | PlainMessage<ListConnection> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.connections.EnableConnectionRequest
+ * @generated from message scalekit.v1.connections.ToggleConnectionRequest
  */
-export declare class EnableConnectionRequest extends Message<EnableConnectionRequest> {
+export declare class ToggleConnectionRequest extends Message<ToggleConnectionRequest> {
     /**
-     * @generated from oneof scalekit.v1.connections.EnableConnectionRequest.identities
+     * @generated from oneof scalekit.v1.connections.ToggleConnectionRequest.identities
      */
     identities: {
         /**
@@ -710,50 +710,14 @@ export declare class EnableConnectionRequest extends Message<EnableConnectionReq
      * @generated from field: string id = 3;
      */
     id: string;
-    constructor(data?: PartialMessage<EnableConnectionRequest>);
+    constructor(data?: PartialMessage<ToggleConnectionRequest>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.EnableConnectionRequest";
+    static readonly typeName = "scalekit.v1.connections.ToggleConnectionRequest";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): EnableConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): EnableConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): EnableConnectionRequest;
-    static equals(a: EnableConnectionRequest | PlainMessage<EnableConnectionRequest> | undefined, b: EnableConnectionRequest | PlainMessage<EnableConnectionRequest> | undefined): boolean;
-}
-/**
- * @generated from message scalekit.v1.connections.DisableConnectionRequest
- */
-export declare class DisableConnectionRequest extends Message<DisableConnectionRequest> {
-    /**
-     * @generated from oneof scalekit.v1.connections.DisableConnectionRequest.identities
-     */
-    identities: {
-        /**
-         * @generated from field: string organization_id = 1;
-         */
-        value: string;
-        case: "organizationId";
-    } | {
-        /**
-         * @generated from field: string external_id = 2;
-         */
-        value: string;
-        case: "externalId";
-    } | {
-        case: undefined;
-        value?: undefined;
-    };
-    /**
-     * @generated from field: string id = 3;
-     */
-    id: string;
-    constructor(data?: PartialMessage<DisableConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.DisableConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DisableConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DisableConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DisableConnectionRequest;
-    static equals(a: DisableConnectionRequest | PlainMessage<DisableConnectionRequest> | undefined, b: DisableConnectionRequest | PlainMessage<DisableConnectionRequest> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ToggleConnectionRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ToggleConnectionRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ToggleConnectionRequest;
+    static equals(a: ToggleConnectionRequest | PlainMessage<ToggleConnectionRequest> | undefined, b: ToggleConnectionRequest | PlainMessage<ToggleConnectionRequest> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.connections.ToggleConnectionResponse

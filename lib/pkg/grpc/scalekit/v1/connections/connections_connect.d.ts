@@ -1,4 +1,4 @@
-import { CreateConnectionRequest, CreateConnectionResponse, DeleteConnectionRequest, DisableConnectionRequest, EnableConnectionRequest, GetConnectionRequest, GetConnectionResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionResponse, UpdateConnectionRequest, UpdateConnectionResponse } from "./connections_pb.js";
+import { CreateConnectionRequest, CreateConnectionResponse, DeleteConnectionRequest, GetConnectionRequest, GetConnectionResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, UpdateConnectionRequest, UpdateConnectionResponse } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.connections.ConnectionService
@@ -56,7 +56,7 @@ export declare const ConnectionService: {
          */
         readonly enableConnection: {
             readonly name: "EnableConnection";
-            readonly I: typeof EnableConnectionRequest;
+            readonly I: typeof ToggleConnectionRequest;
             readonly O: typeof ToggleConnectionResponse;
             readonly kind: MethodKind.Unary;
         };
@@ -65,7 +65,7 @@ export declare const ConnectionService: {
          */
         readonly disableConnection: {
             readonly name: "DisableConnection";
-            readonly I: typeof DisableConnectionRequest;
+            readonly I: typeof ToggleConnectionRequest;
             readonly O: typeof ToggleConnectionResponse;
             readonly kind: MethodKind.Unary;
         };

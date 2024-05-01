@@ -1,4 +1,4 @@
-import { CreateOrganizationRequest, CreateOrganizationResponse, CustomerPortalLinkRequest, CustomerPortalLinksResponse, DeleteOrganizationRequest, GenerateCustomerPortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.organizations.OrganizationService
@@ -18,8 +18,6 @@ export declare const OrganizationService: {
             readonly kind: MethodKind.Unary;
         };
         /**
-         * Update Organization description here
-         *
          * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateOrganization
          */
         readonly updateOrganization: {
@@ -29,8 +27,6 @@ export declare const OrganizationService: {
             readonly kind: MethodKind.Unary;
         };
         /**
-         * Get Organization Description here
-         *
          * @generated from rpc scalekit.v1.organizations.OrganizationService.GetOrganization
          */
         readonly getOrganization: {
@@ -62,30 +58,30 @@ export declare const OrganizationService: {
         /**
          * Generate Portal Link for Org
          *
-         * @generated from rpc scalekit.v1.organizations.OrganizationService.GenerateCustomerPortalLink
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.GeneratePortalLink
          */
-        readonly generateCustomerPortalLink: {
-            readonly name: "GenerateCustomerPortalLink";
-            readonly I: typeof CustomerPortalLinkRequest;
-            readonly O: typeof GenerateCustomerPortalLinkResponse;
+        readonly generatePortalLink: {
+            readonly name: "GeneratePortalLink";
+            readonly I: typeof GeneratePortalLinkRequest;
+            readonly O: typeof GeneratePortalLinkResponse;
             readonly kind: MethodKind.Unary;
         };
         /**
-         * @generated from rpc scalekit.v1.organizations.OrganizationService.DeleteCustomerPortalLink
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.DeletePortalLink
          */
-        readonly deleteCustomerPortalLink: {
-            readonly name: "DeleteCustomerPortalLink";
-            readonly I: typeof CustomerPortalLinkRequest;
+        readonly deletePortalLink: {
+            readonly name: "DeletePortalLink";
+            readonly I: typeof DeletePortalLinkRequest;
             readonly O: typeof Empty;
             readonly kind: MethodKind.Unary;
         };
         /**
-         * @generated from rpc scalekit.v1.organizations.OrganizationService.GetCustomerPortalLink
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.GetPortalLinks
          */
-        readonly getCustomerPortalLink: {
-            readonly name: "GetCustomerPortalLink";
-            readonly I: typeof CustomerPortalLinkRequest;
-            readonly O: typeof CustomerPortalLinksResponse;
+        readonly getPortalLinks: {
+            readonly name: "GetPortalLinks";
+            readonly I: typeof GetPortalLinkRequest;
+            readonly O: typeof GetPortalLinksResponse;
             readonly kind: MethodKind.Unary;
         };
     };
