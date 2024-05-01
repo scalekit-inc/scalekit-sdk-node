@@ -82,10 +82,10 @@ export const OrganizationService = {
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc scalekit.v1.organizations.OrganizationService.GetPortalLink
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.GetPortalLinks
      */
-    getPortalLink: {
-      name: "GetPortalLink",
+    getPortalLinks: {
+      name: "GetPortalLinks",
       I: GetPortalLinkRequest,
       O: GetPortalLinksResponse,
       kind: MethodKind.Unary,
