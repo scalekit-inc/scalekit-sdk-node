@@ -112,9 +112,9 @@ export default class OrganizationClient {
    * @param organizationId  The organization id
    * @returns {Promise<string>} The customer portal link
    */
-  async generateAdminPortalLink(organizationId: string): Promise<string> {
+  async generatePortalLink(organizationId: string): Promise<string> {
     const response = await this.coreClient.connectExec(
-      this.client.generateAdminPortalLink,
+      this.client.generatePortalLink,
       {
         id: organizationId
       },

@@ -613,39 +613,113 @@ export class DeleteOrganizationRequest extends Message<DeleteOrganizationRequest
 }
 
 /**
- * @generated from message scalekit.v1.organizations.AdminPortalLinkRequest
+ * @generated from message scalekit.v1.organizations.GeneratePortalLinkRequest
  */
-export class AdminPortalLinkRequest extends Message<AdminPortalLinkRequest> {
+export class GeneratePortalLinkRequest extends Message<GeneratePortalLinkRequest> {
   /**
    * @generated from field: string id = 1;
    */
   id = "";
 
-  constructor(data?: PartialMessage<AdminPortalLinkRequest>) {
+  constructor(data?: PartialMessage<GeneratePortalLinkRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.organizations.AdminPortalLinkRequest";
+  static readonly typeName = "scalekit.v1.organizations.GeneratePortalLinkRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AdminPortalLinkRequest {
-    return new AdminPortalLinkRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeneratePortalLinkRequest {
+    return new GeneratePortalLinkRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AdminPortalLinkRequest {
-    return new AdminPortalLinkRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GeneratePortalLinkRequest {
+    return new GeneratePortalLinkRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AdminPortalLinkRequest {
-    return new AdminPortalLinkRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GeneratePortalLinkRequest {
+    return new GeneratePortalLinkRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: AdminPortalLinkRequest | PlainMessage<AdminPortalLinkRequest> | undefined, b: AdminPortalLinkRequest | PlainMessage<AdminPortalLinkRequest> | undefined): boolean {
-    return proto3.util.equals(AdminPortalLinkRequest, a, b);
+  static equals(a: GeneratePortalLinkRequest | PlainMessage<GeneratePortalLinkRequest> | undefined, b: GeneratePortalLinkRequest | PlainMessage<GeneratePortalLinkRequest> | undefined): boolean {
+    return proto3.util.equals(GeneratePortalLinkRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.organizations.GetPortalLinkRequest
+ */
+export class GetPortalLinkRequest extends Message<GetPortalLinkRequest> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  constructor(data?: PartialMessage<GetPortalLinkRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.GetPortalLinkRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPortalLinkRequest {
+    return new GetPortalLinkRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetPortalLinkRequest {
+    return new GetPortalLinkRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetPortalLinkRequest {
+    return new GetPortalLinkRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetPortalLinkRequest | PlainMessage<GetPortalLinkRequest> | undefined, b: GetPortalLinkRequest | PlainMessage<GetPortalLinkRequest> | undefined): boolean {
+    return proto3.util.equals(GetPortalLinkRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.organizations.DeletePortalLinkRequest
+ */
+export class DeletePortalLinkRequest extends Message<DeletePortalLinkRequest> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  constructor(data?: PartialMessage<DeletePortalLinkRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.DeletePortalLinkRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeletePortalLinkRequest {
+    return new DeletePortalLinkRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeletePortalLinkRequest {
+    return new DeletePortalLinkRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeletePortalLinkRequest {
+    return new DeletePortalLinkRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DeletePortalLinkRequest | PlainMessage<DeletePortalLinkRequest> | undefined, b: DeletePortalLinkRequest | PlainMessage<DeletePortalLinkRequest> | undefined): boolean {
+    return proto3.util.equals(DeletePortalLinkRequest, a, b);
   }
 }
 
@@ -699,76 +773,76 @@ export class Link extends Message<Link> {
 }
 
 /**
- * @generated from message scalekit.v1.organizations.GenerateAdminPortalLinkResponse
+ * @generated from message scalekit.v1.organizations.GeneratePortalLinkResponse
  */
-export class GenerateAdminPortalLinkResponse extends Message<GenerateAdminPortalLinkResponse> {
+export class GeneratePortalLinkResponse extends Message<GeneratePortalLinkResponse> {
   /**
    * @generated from field: scalekit.v1.organizations.Link link = 1;
    */
   link?: Link;
 
-  constructor(data?: PartialMessage<GenerateAdminPortalLinkResponse>) {
+  constructor(data?: PartialMessage<GeneratePortalLinkResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.organizations.GenerateAdminPortalLinkResponse";
+  static readonly typeName = "scalekit.v1.organizations.GeneratePortalLinkResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "link", kind: "message", T: Link },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GenerateAdminPortalLinkResponse {
-    return new GenerateAdminPortalLinkResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeneratePortalLinkResponse {
+    return new GeneratePortalLinkResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GenerateAdminPortalLinkResponse {
-    return new GenerateAdminPortalLinkResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GeneratePortalLinkResponse {
+    return new GeneratePortalLinkResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GenerateAdminPortalLinkResponse {
-    return new GenerateAdminPortalLinkResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GeneratePortalLinkResponse {
+    return new GeneratePortalLinkResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: GenerateAdminPortalLinkResponse | PlainMessage<GenerateAdminPortalLinkResponse> | undefined, b: GenerateAdminPortalLinkResponse | PlainMessage<GenerateAdminPortalLinkResponse> | undefined): boolean {
-    return proto3.util.equals(GenerateAdminPortalLinkResponse, a, b);
+  static equals(a: GeneratePortalLinkResponse | PlainMessage<GeneratePortalLinkResponse> | undefined, b: GeneratePortalLinkResponse | PlainMessage<GeneratePortalLinkResponse> | undefined): boolean {
+    return proto3.util.equals(GeneratePortalLinkResponse, a, b);
   }
 }
 
 /**
- * @generated from message scalekit.v1.organizations.AdminPortalLinksResponse
+ * @generated from message scalekit.v1.organizations.GetPortalLinksResponse
  */
-export class AdminPortalLinksResponse extends Message<AdminPortalLinksResponse> {
+export class GetPortalLinksResponse extends Message<GetPortalLinksResponse> {
   /**
    * @generated from field: repeated scalekit.v1.organizations.Link links = 1;
    */
   links: Link[] = [];
 
-  constructor(data?: PartialMessage<AdminPortalLinksResponse>) {
+  constructor(data?: PartialMessage<GetPortalLinksResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.organizations.AdminPortalLinksResponse";
+  static readonly typeName = "scalekit.v1.organizations.GetPortalLinksResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "links", kind: "message", T: Link, repeated: true },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AdminPortalLinksResponse {
-    return new AdminPortalLinksResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPortalLinksResponse {
+    return new GetPortalLinksResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AdminPortalLinksResponse {
-    return new AdminPortalLinksResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetPortalLinksResponse {
+    return new GetPortalLinksResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AdminPortalLinksResponse {
-    return new AdminPortalLinksResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetPortalLinksResponse {
+    return new GetPortalLinksResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: AdminPortalLinksResponse | PlainMessage<AdminPortalLinksResponse> | undefined, b: AdminPortalLinksResponse | PlainMessage<AdminPortalLinksResponse> | undefined): boolean {
-    return proto3.util.equals(AdminPortalLinksResponse, a, b);
+  static equals(a: GetPortalLinksResponse | PlainMessage<GetPortalLinksResponse> | undefined, b: GetPortalLinksResponse | PlainMessage<GetPortalLinksResponse> | undefined): boolean {
+    return proto3.util.equals(GetPortalLinksResponse, a, b);
   }
 }
 
