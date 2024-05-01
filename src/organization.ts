@@ -3,7 +3,7 @@ import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
 import { OrganizationService } from './pkg/grpc/scalekit/v1/organizations/organizations_connect';
-import { CreateOrganizationResponse, GetOrganizationResponse, ListOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
+import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
 
 export default class OrganizationClient {
   private client: PromiseClient<typeof OrganizationService>;
@@ -108,11 +108,11 @@ export default class OrganizationClient {
   }
 
   /**
-   * Generate Admin portal link for an organization
+   * Generate admin portal link for an organization
    * @param organizationId  The organization id
-   * @returns {Promise<string>} The customer portal link
+   * @returns {Promise<Link>} The admin portal link object with expiration time and location
    */
-  async generatePortalLink(organizationId: string): Promise<string> {
+  async generatePortalLink(organizationId: string): Promise<Link> {
     const response = await this.coreClient.connectExec(
       this.client.generatePortalLink,
       {
@@ -120,10 +120,10 @@ export default class OrganizationClient {
       },
     )
     if (!response.link) {
-      throw new Error('Error generating customer portal link');
+      throw new Error('Error generating portal link');
     }
 
-    return response.link?.location
+    return response.link
   }
 }
 
