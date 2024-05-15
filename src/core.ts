@@ -89,10 +89,10 @@ export default class CoreClient {
       return res;
     } catch (error) {
       if (retryLeft > 0) {
-        let isUnauthenticatedError = false;
+        let isUnAuthenticatedError = false;
         if (error instanceof AxiosError) {
           if (error.status == HttpStatusCode.Unauthorized) {
-            isUnauthenticatedError = true;
+            isUnAuthenticatedError = true;
           } else {
             throw new Error(error.message);
           }
@@ -100,23 +100,22 @@ export default class CoreClient {
         // ConnectError is a custom error class that extends Error class and has a code property
         if (error instanceof ConnectError) {
           if (error.code == Code.Unauthenticated) {
-            isUnauthenticatedError = true;
-          } else {
-            if (error.code == Code.InvalidArgument) {
-              const message = error.findDetails(ErrorInfo).map((detail) => {
-                if (detail.validationErrorInfo) {
-                  return detail.validationErrorInfo.fieldViolations.map((fv) => {
-                    return `${fv.field}: ${fv.description}`
-                  }).join("\n")
-                }
-                return error.message;
-              }).join("\n")
-              throw new Error(message);
-            }
-            throw new Error(error.message);
+            isUnAuthenticatedError = true;
+          }
+          if (error.code == Code.InvalidArgument) {
+            const messages = [error.message]
+            error.findDetails(ErrorInfo).forEach((detail) => {
+              if (detail.validationErrorInfo) {
+                 detail.validationErrorInfo.fieldViolations.forEach((fv) => {
+                  messages.push(`${fv.field}: ${fv.description}`)
+                })
+              }
+            })
+
+            throw new Error(messages.join("\n"));
           }
         }
-        if (isUnauthenticatedError) {
+        if (isUnAuthenticatedError) {
           await this.authenticateClient();
           return this.connectExec(fn, data, retryLeft - 1);
         }
