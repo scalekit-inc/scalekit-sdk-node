@@ -23,8 +23,8 @@ export default class CoreClient {
     this.axios = axios.create({ baseURL: envUrl });
     this.axios.interceptors.request.use((config) => {
       config.headers["User-Agent"] = this.userAgent;
-      config.headers["x-sdk-version"] = this.sdkVersion;
-      config.headers["x-api-version"] = this.apiVersion;
+      config.headers["X-Sdk-Version"] = this.sdkVersion;
+      config.headers["X-Api-Version"] = this.apiVersion;
       if (this.accessToken) {
         config.headers["Authorization"] = `Bearer ${this.accessToken}`;
       }

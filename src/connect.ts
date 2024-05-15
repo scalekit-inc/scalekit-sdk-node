@@ -15,8 +15,8 @@ export default class GrpcConnect {
         (next) => {
           return (req) => {
             req.header.set("User-Agent", this.coreClient.userAgent)
-            req.header.set("x-sdk-version", this.coreClient.sdkVersion)
-            req.header.set("x-api-version", this.coreClient.apiVersion)
+            req.header.set("X-Sdk-Version", this.coreClient.sdkVersion)
+            req.header.set("X-Api-Version", this.coreClient.apiVersion)
             if (this.coreClient.accessToken) {
               req.header.set("Authorization", `Bearer ${this.coreClient.accessToken}`)
             }
