@@ -34,11 +34,18 @@ pnpm add @scalekit-sdk/node
 ```javascript
 import { Scalekit } from "@scalekit-sdk/node";
 
-const scalekit = new Scalekit(
+const sc = new Scalekit(
   process.env.SCALEKIT_ENV_URL!,
   process.env.SCALEKIT_CLIENT_ID!,
   process.env.SCALEKIT_CLIENT_SECRET!
 );
+
+// Use the sc object to interact with the Scalekit API
+const authUrl = sc.getAuthorizationUrl("https://acme-corp.com/redirect-uri", {
+  state: "state",
+  connectionId: "connection_id",
+});
+
 ```
 
 ## API Reference
