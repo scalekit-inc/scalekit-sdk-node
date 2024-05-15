@@ -65,6 +65,8 @@ export default class Scalekit {
    * @param {string} options.domainHint Domain hint parameter
    * @param {string} options.connectionId Connection id parameter
    * @param {string} options.organizationId Organization id parameter
+   * @param {string} options.codeChallenge Code challenge parameter in case of PKCE
+   * @param {string} options.codeChallengeMethod Code challenge method parameter in case of PKCE
    * 
    * @example
    * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
@@ -94,6 +96,8 @@ export default class Scalekit {
       ...(options.domainHint && { domain: options.domainHint }),
       ...(options.connectionId && { connection_id: options.connectionId }),
       ...(options.organizationId && { organization_id: options.organizationId }),
+      ...(options.codeChallenge && { code_challenge: options.codeChallenge }),
+      ...(options.codeChallengeMethod && { code_challenge_method: options.codeChallengeMethod })
     })
 
     return `${this.coreClient.envUrl}/${authorizeEndpoint}?${qs}`
@@ -104,8 +108,8 @@ export default class Scalekit {
    * @param {string} code Code
    * @param {string} redirectUri Redirect uri
    * @param {AuthenticationOptions} options Code authentication options
-   * @param {string} options.codeVerifier Code verifier
-   * @returns {Promise<{ user: Partial<User>, idToken: string, accessToken: string }>} Returns user, id token and access token
+   * @param {string} options.codeVerifier Code verifier in case of PKCE
+   * @returns {Promise<AuthenticationResponse>} Returns user, id token and access token
    */
   async authenticateWithCode(
     code: string,

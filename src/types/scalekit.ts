@@ -14,10 +14,12 @@ export type AuthorizationUrlOptions = {
   nonce?: string;
   domainHint?: string;
   loginHint?: string;
+  codeChallenge?: string;
+  codeChallengeMethod?: string;
 }
 
 export type AuthenticationOptions = {
-  codeVerifier?: string;
+  codeVerifier?: string; 
 }
 
 export type AuthenticationResponse = {
