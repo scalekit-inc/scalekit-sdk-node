@@ -6,7 +6,7 @@ import { IdTokenClaimToUserMap } from './constants/user';
 import CoreClient from './core';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
-import { AuthorizationUrlOptions, CodeAuthenticationOptions, GrantType } from './types/scalekit';
+import { AuthorizationUrlOptions, AuthenticationOptions, GrantType, AuthenticationResponse } from './types/scalekit';
 import { IdTokenClaim, User } from './types/user';
 
 const authorizeEndpoint = "oauth/authorize";
@@ -101,20 +101,24 @@ export default class Scalekit {
 
   /**
    * Authenticate with the code
-   * @param {CodeAuthenticationOptions} options Code authentication options
-   * @param {string} options.code Code
-   * @param {string} options.redirectUri Redirect uri
+   * @param {string} code Code
+   * @param {string} redirectUri Redirect uri
+   * @param {AuthenticationOptions} options Code authentication options
    * @param {string} options.codeVerifier Code verifier
    * @returns {Promise<{ user: Partial<User>, idToken: string, accessToken: string }>} Returns user, id token and access token
    */
-  async authenticateWithCode(options: CodeAuthenticationOptions): Promise<{ user: Partial<User>; idToken: string; accessToken: string; }> {
+  async authenticateWithCode(
+    code: string,
+    redirectUri: string,
+    options?: AuthenticationOptions,
+  ): Promise<AuthenticationResponse> {
     const res = await this.coreClient.authenticate(QueryString.stringify({
-      code: options.code,
-      redirect_uri: options.redirectUri,
+      code: code,
+      redirect_uri: redirectUri,
       grant_type: GrantType.AuthorizationCode,
       client_id: this.coreClient.clientId,
       client_secret: this.coreClient.clientSecret,
-      ...(options.codeVerifier && { code_verifier: options.codeVerifier })
+      ...(options?.codeVerifier && { code_verifier: options.codeVerifier })
     }))
     const { id_token, access_token } = res.data;
     const claims = jose.decodeJwt<IdTokenClaim>(id_token);

@@ -16,19 +16,20 @@ export default class OrganizationClient {
 
   /** 
   * Create an organization with the given name. Optionally, you can provide an external id.
+  * @param {string} name The organization name
   * @param {object} options The options to create an organization
-  * @param {string} options.name The organization name
   * @param {string} options.externalId The external id
   * @returns {Promise<CreateOrganizationResponse>} The created organization
   */
-  async createOrganization(options: { name: string, externalId?: string }): Promise<CreateOrganizationResponse> {
-    const { name, externalId } = options;
+  async createOrganization(name: string, options?: { externalId?: string }): Promise<CreateOrganizationResponse> {
     return this.coreClient.connectExec(
       this.client.createOrganization,
       {
         organization: {
           displayName: name,
-          externalId: externalId
+          ...(options?.externalId && {
+            externalId: options.externalId
+          })
         }
       }
     )
