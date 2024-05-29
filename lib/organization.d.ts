@@ -1,4 +1,4 @@
-import { PartialMessage } from '@bufbuild/protobuf';
+import { Empty, PartialMessage } from '@bufbuild/protobuf';
 import GrpcConnect from './connect';
 import CoreClient from './core';
 import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
@@ -9,13 +9,12 @@ export default class OrganizationClient {
     constructor(grpcConncet: GrpcConnect, coreClient: CoreClient);
     /**
     * Create an organization with the given name. Optionally, you can provide an external id.
+    * @param {string} name The organization name
     * @param {object} options The options to create an organization
-    * @param {string} options.name The organization name
     * @param {string} options.externalId The external id
     * @returns {Promise<CreateOrganizationResponse>} The created organization
     */
-    createOrganization(options: {
-        name: string;
+    createOrganization(name: string, options?: {
         externalId?: string;
     }): Promise<CreateOrganizationResponse>;
     /**
@@ -61,4 +60,17 @@ export default class OrganizationClient {
      * @returns {Promise<Link>} The admin portal link object with expiration time and location
      */
     generatePortalLink(organizationId: string): Promise<Link>;
+    /**
+     * Get admin portal link for an organization
+     * @param organizationId  The organization id
+     * @returns {Promise<Link[]>} The admin portal link object with expiration time and location
+     */
+    getPortalLinks(organizationId: string): Promise<Link[]>;
+    /**
+     * Delete admin portal link for an organization
+     * @param organizationId  The organization id
+     * @param linkId The link id
+     * @returns {Promise<Empty>} Returns nothing
+     */
+    deletePortalLink(organizationId: string, linkId: string): Promise<Empty>;
 }

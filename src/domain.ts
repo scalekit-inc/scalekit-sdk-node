@@ -35,27 +35,6 @@ export default class DomainClient {
   }
 
   /**
-   * Get a domain by id  
-   * @param {object} options The options to get a domain
-   * @param {string} options.id The domain id
-   * @param {string} options.organizationId The organization id
-   * @returns {Promise<GetDomainResponse>} The domain
-  */
-  async getDomain(options: { id: string, organizationId: string }): Promise<GetDomainResponse> {
-    const { id, organizationId } = options;
-    return this.coreClient.connectExec(
-      this.client.getDomain,
-      {
-        id,
-        identities: {
-          case: 'organizationId',
-          value: organizationId
-        }
-      }
-    )
-  }
-
-  /**
    * List domains for an organization 
    * @param organizationId The organization id
    * @returns {Promise<ListDomainResponse>} The list of domains for the organization

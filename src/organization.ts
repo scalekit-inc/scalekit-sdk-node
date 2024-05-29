@@ -1,4 +1,4 @@
-import { PartialMessage } from '@bufbuild/protobuf';
+import { Empty, PartialMessage } from '@bufbuild/protobuf';
 import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
@@ -125,6 +125,38 @@ export default class OrganizationClient {
     }
 
     return response.link
+  }
+
+  /**
+   * Get admin portal link for an organization
+   * @param organizationId  The organization id
+   * @returns {Promise<Link[]>} The admin portal link object with expiration time and location
+   */
+  async getPortalLinks(organizationId: string): Promise<Link[]> {
+    const response = await this.coreClient.connectExec(
+      this.client.getPortalLinks,
+      {
+        id: organizationId
+      },
+    )
+
+    return response.links
+  }
+
+  /**
+   * Delete admin portal link for an organization
+   * @param organizationId  The organization id
+   * @param linkId The link id
+   * @returns {Promise<Empty>} Returns nothing
+   */
+  async deletePortalLink(organizationId: string, linkId: string): Promise<Empty> {
+    return this.coreClient.connectExec(
+      this.client.deletePortalLink,
+      {
+        id: organizationId,
+        linkId
+      },
+    )
   }
 }
 

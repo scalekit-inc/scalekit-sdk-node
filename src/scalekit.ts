@@ -16,11 +16,11 @@ const authorizeEndpoint = "oauth/authorize";
  * @param {string} envUrl The environment url
  * @param {string} clientId The client id
  * @param {string} clientSecret The client secret
- * @returns {Scalekit} Returns the scalekit instance 
+ * @returns {ScalekitClient} Returns the scalekit instance 
  * @example
  * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
 */
-export default class Scalekit {
+export default class ScalekitClient {
   private readonly coreClient: CoreClient;
   private readonly grpcConnect: GrpcConnect;
   readonly organization: OrganizationClient;

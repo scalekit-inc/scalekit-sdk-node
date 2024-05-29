@@ -1,18 +1,17 @@
 import ConnectionClient from './connection';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
-import { AuthorizationUrlOptions, CodeAuthenticationOptions } from './types/scalekit';
-import { User } from './types/user';
+import { AuthorizationUrlOptions, AuthenticationOptions, AuthenticationResponse } from './types/scalekit';
 /**
  * To initiate scalekit
  * @param {string} envUrl The environment url
  * @param {string} clientId The client id
  * @param {string} clientSecret The client secret
- * @returns {Scalekit} Returns the scalekit instance
+ * @returns {ScalekitClient} Returns the scalekit instance
  * @example
  * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
 */
-export default class Scalekit {
+export default class ScalekitClient {
     private readonly coreClient;
     private readonly grpcConnect;
     readonly organization: OrganizationClient;
@@ -30,6 +29,8 @@ export default class Scalekit {
      * @param {string} options.domainHint Domain hint parameter
      * @param {string} options.connectionId Connection id parameter
      * @param {string} options.organizationId Organization id parameter
+     * @param {string} options.codeChallenge Code challenge parameter in case of PKCE
+     * @param {string} options.codeChallengeMethod Code challenge method parameter in case of PKCE
      *
      * @example
      * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
@@ -39,17 +40,13 @@ export default class Scalekit {
     getAuthorizationUrl(redirectUri: string, options?: AuthorizationUrlOptions): string;
     /**
      * Authenticate with the code
-     * @param {CodeAuthenticationOptions} options Code authentication options
-     * @param {string} options.code Code
-     * @param {string} options.redirectUri Redirect uri
-     * @param {string} options.codeVerifier Code verifier
-     * @returns {Promise<{ user: Partial<User>, idToken: string, accessToken: string }>} Returns user, id token and access token
+     * @param {string} code Code
+     * @param {string} redirectUri Redirect uri
+     * @param {AuthenticationOptions} options Code authentication options
+     * @param {string} options.codeVerifier Code verifier in case of PKCE
+     * @returns {Promise<AuthenticationResponse>} Returns user, id token and access token
      */
-    authenticateWithCode(options: CodeAuthenticationOptions): Promise<{
-        user: Partial<User>;
-        idToken: string;
-        accessToken: string;
-    }>;
+    authenticateWithCode(code: string, redirectUri: string, options?: AuthenticationOptions): Promise<AuthenticationResponse>;
     /**
      * Validates the access token.
      *

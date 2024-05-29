@@ -1,6 +1,6 @@
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateDomainResponse, GetDomainResponse, ListDomainResponse } from './pkg/grpc/scalekit/v1/domains/domains_pb';
+import { CreateDomainResponse, ListDomainResponse } from './pkg/grpc/scalekit/v1/domains/domains_pb';
 export default class DomainClient {
     private readonly grpcConncet;
     private readonly coreClient;
@@ -13,17 +13,6 @@ export default class DomainClient {
      * @returns {Promise<CreateDomainResponse>} The created domain
     */
     createDomain(organizationId: string, name: string): Promise<CreateDomainResponse>;
-    /**
-     * Get a domain by id
-     * @param {object} options The options to get a domain
-     * @param {string} options.id The domain id
-     * @param {string} options.organizationId The organization id
-     * @returns {Promise<GetDomainResponse>} The domain
-    */
-    getDomain(options: {
-        id: string;
-        organizationId: string;
-    }): Promise<GetDomainResponse>;
     /**
      * List domains for an organization
      * @param organizationId The organization id

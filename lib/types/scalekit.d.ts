@@ -1,3 +1,4 @@
+import { User } from './user';
 export declare enum GrantType {
     AuthorizationCode = "authorization_code",
     RefreshToken = "refresh_token",
@@ -11,16 +12,14 @@ export type AuthorizationUrlOptions = {
     nonce?: string;
     domainHint?: string;
     loginHint?: string;
-};
-export type CodeAuthenticationOptions = {
-    code: string;
-    redirectUri: string;
-    codeVerifier?: string;
-};
-export type RefreshTokenAuthenticationOptions = {
-    code: string;
-    redirectUri: string;
+    codeChallenge?: string;
+    codeChallengeMethod?: string;
 };
 export type AuthenticationOptions = {
-    refreshToken: string;
+    codeVerifier?: string;
+};
+export type AuthenticationResponse = {
+    user: Partial<User>;
+    idToken: string;
+    accessToken: string;
 };
