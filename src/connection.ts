@@ -15,11 +15,11 @@ export default class ConnectionClient {
 
   /**
    * Get a connection by id and organization id
-   * @param id The connection id
    * @param organizationId The organization id
+   * @param id The connection id
    * @returns {Promise<GetConnectionResponse>} The connection
    */
-  async getConnection(id: string, organizationId: string): Promise<GetConnectionResponse> {
+  async getConnection(organizationId: string, id: string): Promise<GetConnectionResponse> {
     return this.coreClient.connectExec(
       this.client.getConnection,
       {
@@ -68,11 +68,11 @@ export default class ConnectionClient {
 
   /**
    * Enable a connection by id and organization id
-   * @param id The connection id
    * @param organizationId The organization id
+   * @param id The connection id
    * @returns {Promise<ToggleConnectionResponse>} The connection enable response
    */
-  async enableConnection(id: string, organizationId: string): Promise<ToggleConnectionResponse> {
+  async enableConnection(organizationId: string, id: string): Promise<ToggleConnectionResponse> {
     return this.coreClient.connectExec(
       this.client.enableConnection,
       {
@@ -87,11 +87,11 @@ export default class ConnectionClient {
 
   /**
    * Disable a connection by id and organization id
-   * @param id The connection id
    * @param organizationId The organization id
+   * @param id The connection id
    * @returns {Promise<ToggleConnectionResponse>} The connection enable response
    */
-  async disableConnection(id: string, organizationId: string): Promise<ToggleConnectionResponse> {
+  async disableConnection(organizationId: string, id: string): Promise<ToggleConnectionResponse> {
     return this.coreClient.connectExec(
       this.client.disableConnection,
       {

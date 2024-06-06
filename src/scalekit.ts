@@ -78,7 +78,7 @@ export default class ScalekitClient {
     options?: AuthorizationUrlOptions
   ): string {
     const defaultOptions: AuthorizationUrlOptions = {
-      scopes: ['openid', 'profile']
+      scopes: ['openid', 'profile', 'email']
     }
     options = {
       ...defaultOptions,

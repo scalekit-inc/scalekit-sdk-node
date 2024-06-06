@@ -109,6 +109,20 @@ export default class OrganizationClient {
   }
 
   /**
+   * Delete an organization by id
+   * @param {string} organizationId The organization id
+   * @returns {Promise<Empty>} Returns nothing
+   */
+  async deleteOrganization(organizationId: string): Promise<Empty> {
+    return this.coreClient.connectExec(
+      this.client.deleteOrganization,
+      {
+        identities: { case: "id", value: organizationId, },
+      },
+    )
+  }
+
+  /**
    * Generate admin portal link for an organization
    * @param organizationId  The organization id
    * @returns {Promise<Link>} The admin portal link object with expiration time and location
