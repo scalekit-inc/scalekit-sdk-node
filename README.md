@@ -21,6 +21,7 @@
 2. Get your ```env_url```, ```client_id``` and ```client_secret``` from the Scalekit dashboard.
 
 ## Installation
+
 Install Scalekit SDK using your preferred package manager. 
 
 ```sh
@@ -32,7 +33,9 @@ pnpm add @scalekit-sdk/node
 ```
 
 ## Usage
+
 Initialize the Scalekit client using the appropriate credentials. Refer code sample below.
+
 ```javascript
 import { ScalekitClient } from "@scalekit-sdk/node";
 
@@ -51,7 +54,9 @@ const authUrl = sc.getAuthorizationUrl("https://acme-corp.com/redirect-uri", {
 ```
 
 ## Examples - SSO with Express.js
+
 Below is a simple code sample that showcases how to implement Single Sign-on using Scalekit SDK
+
 ```javascript
 import express from "express";
 import { ScalekitClient } from "@scalekit-sdk/node";
@@ -93,9 +98,11 @@ app.listen(3000, () => {
 ```
 
 ## Sample Apps  
+
 Fully functional sample applications written using some popular web application frameworks and Scalekit SDK. Feel free to clone the repo and run them locally.
+
 - [Express.js](https://github.com/scalekit-inc/scalekit-express-example.git)
-- [Next.js](https://github.com/scalekit-inc/scalekit-nextjs-example.git)
+- [Next.js](https://github.com/scalekit-inc/scalekit-next-example.git)
 
 ## API Reference
 
