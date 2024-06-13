@@ -1,4 +1,4 @@
-<p align="center">
+<p align="right">
   <a href="https://scalekit.com" target="_blank" rel="noopener noreferrer">
     <picture>
       <img src="https://cdn.scalekit.cloud/v1/scalekit-logo-dark.svg" height="64">
@@ -6,20 +6,21 @@
   </a>
   <br/>
 </p>
-<h1 align="center">
-  Official Scalekit Node SDK
-</h1>
 
-Scalekit helps you in shipping enterprise auth in days.
+# Official Scalekit Node SDK
+<a href="https://scalekit.com" target="_blank" rel="noopener noreferrer">Scalekit</a> is an Enterprise Authentication Platform purpose built for B2B applications. This Node SDK helps implement Enterprise Capabilities like Single Sign-on via SAML or OIDC in your Node.js applications within a few hours.
 
-This Node SDK is a wrapper around Scalekit's REST API to help you integrate Scalekit with your Node.js applications.
-
+<div>
+📚 <a target="_blank" href="https://docs.scalekit.com">Documentation</a> - 🚀 <a target="_blank" href="https://docs.scalekit.com">Getting started</a> - 💻 <a target="_blank" href="https://docs.scalekit.com/apis">API reference</a>
+</div>
+<hr />
 ## Getting Started
 
 1. [Sign up](https://scalekit.com) for a Scalekit account.
 2. Get your ```env_url```, ```client_id``` and ```client_secret``` from the Scalekit dashboard.
 
 ## Installation
+Install Scalekit SDK using your preferred package manager. 
 
 ```sh
 npm install @scalekit-sdk/node
@@ -30,7 +31,7 @@ pnpm add @scalekit-sdk/node
 ```
 
 ## Usage
-
+Initialize the Scalekit client using the appropriate credentials. Refer code sample below.
 ```javascript
 import { ScalekitClient } from "@scalekit-sdk/node";
 
@@ -49,7 +50,7 @@ const authUrl = sc.getAuthorizationUrl("https://acme-corp.com/redirect-uri", {
 ```
 
 ## Examples - SSO with Express.js
-
+Below is a simple code sample that showcases how to implement Single Sign-on using Scalekit SDK
 ```javascript
 import express from "express";
 import { ScalekitClient } from "@scalekit-sdk/node";
@@ -91,7 +92,7 @@ app.listen(3000, () => {
 ```
 
 ## Sample Apps  
-
+Fully functional sample applications written using some popular web application frameworks and Scalekit SDK. Feel free to clone the repo and run them locally.
 - [Express.js](https://github.com/scalekit-inc/scalekit-express-example.git)
 - [Next.js](https://github.com/scalekit-inc/scalekit-nextjs-example.git)
 
@@ -101,9 +102,8 @@ See the [Scalekit API docs](https://docs.scalekit.com/apis) for more information
 
 ## More Information
 
-- [SSO Quickstart Guide](https://docs.scalekit.com)
-- [SSO Basics](https://docs.scalekit.com/best-practices/single-sign-on)
-- [ID Token](https://docs.scalekit.com/best-practices/idtoken-claims)
+- Quickstart Guide to implement Single Sign-on in your application: [SSO Quickstart Guide](https://docs.scalekit.com)
+- Understand Single Sign-on basics: [SSO Basics](https://docs.scalekit.com/best-practices/single-sign-on)
 
 ## License
 
