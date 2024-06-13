@@ -32,9 +32,9 @@ pnpm add @scalekit-sdk/node
 ## Usage
 
 ```javascript
-import { Scalekit } from "@scalekit-sdk/node";
+import { ScalekitClient } from "@scalekit-sdk/node";
 
-const sc = new Scalekit(
+const sc = new ScalekitClient(
   process.env.SCALEKIT_ENV_URL!,
   process.env.SCALEKIT_CLIENT_ID!,
   process.env.SCALEKIT_CLIENT_SECRET!
@@ -48,9 +48,64 @@ const authUrl = sc.getAuthorizationUrl("https://acme-corp.com/redirect-uri", {
 
 ```
 
+## Examples - SSO with Express.js
+
+```javascript
+import express from "express";
+import { ScalekitClient } from "@scalekit-sdk/node";
+
+const app = express();
+
+const sc = new ScalekitClient(
+  process.env.SCALEKIT_ENV_URL!,
+  process.env.SCALEKIT_CLIENT_ID!,
+  process.env.SCALEKIT_CLIENT_SECRET!
+);
+
+const redirectUri = `${process.env.HOST}/auth/callback`;
+
+// Get the authorization URL and redirect the user to the IdP login page
+app.get("/auth/login", (req, res) => {
+  const authUrl = sc.getAuthorizationUrl(
+    redirectUri, 
+    {
+      state: "state",
+      connectionId: "connection_id",
+    }
+  );
+
+  res.redirect(authUrl);
+});
+
+// Handle the callback from the Scalekit 
+app.get("/auth/callback", async (req, res) => {
+  const code = req.query.code as string;
+  const authResp = await sc.authenticateWithCode(code, redirectUri);
+  res.cookie("access_token", authResp.accessToken);
+  res.json(token);
+});
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});
+```
+
+## Sample Apps  
+
+- [Express.js](https://github.com/scalekit-inc/scalekit-express-example.git)
+- [Next.js](https://github.com/scalekit-inc/scalekit-nextjs-example.git)
+
 ## API Reference
-See the [Scalekit API docs](https://docs.scalekit.com) for more information about the API and authentication.
+
+See the [Scalekit API docs](https://docs.scalekit.com/apis) for more information about the API and authentication.
+
+## More Information
+
+- [SSO Quickstart Guide](https://docs.scalekit.com)
+- [SSO Basics](https://docs.scalekit.com/best-practices/single-sign-on)
+- [ID Token](https://docs.scalekit.com/best-practices/idtoken-claims)
 
 ## License
+
 This project is licensed under the **MIT license**.
 See the [LICENSE](LICENSE) file for more information.
