@@ -102,7 +102,7 @@ app.listen(3000, () => {
 Fully functional sample applications written using some popular web application frameworks and Scalekit SDK. Feel free to clone the repo and run them locally.
 
 - [Express.js](https://github.com/scalekit-inc/scalekit-express-example.git)
-- [Next.js](https://github.com/scalekit-inc/scalekit-next-example.git)
+- [Next.js](https://github.com/scalekit-inc/scalekit-nextjs-example.git)
 
 ## API Reference
 
