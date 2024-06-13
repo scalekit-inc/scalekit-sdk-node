@@ -14,6 +14,7 @@
 📚 <a target="_blank" href="https://docs.scalekit.com">Documentation</a> - 🚀 <a target="_blank" href="https://docs.scalekit.com">Getting started</a> - 💻 <a target="_blank" href="https://docs.scalekit.com/apis">API reference</a>
 </div>
 <hr />
+
 ## Getting Started
 
 1. [Sign up](https://scalekit.com) for a Scalekit account.
