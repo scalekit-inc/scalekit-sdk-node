@@ -1,4 +1,4 @@
-<p align="right">
+<p align="left">
   <a href="https://scalekit.com" target="_blank" rel="noopener noreferrer">
     <picture>
       <img src="https://cdn.scalekit.cloud/v1/scalekit-logo-dark.svg" height="64">
@@ -7,15 +7,15 @@
   <br/>
 </p>
 
-# Official Scalekit Node SDK
-<a href="https://scalekit.com" target="_blank" rel="noopener noreferrer">Scalekit</a> is an Enterprise Authentication Platform purpose built for B2B applications. This Node SDK helps implement Enterprise Capabilities like Single Sign-on via SAML or OIDC in your Node.js applications within a few hours.
+# Official Node.js SDK
+<a href="https://scalekit.com" target="_blank" rel="noopener noreferrer">Scalekit</a> is an Enterprise Authentication Platform purpose built for B2B applications. This Node.js SDK helps implement Enterprise Capabilities like Single Sign-on via SAML or OIDC in your Node.js applications within a few hours.
 
 <div>
 📚 <a target="_blank" href="https://docs.scalekit.com">Documentation</a> - 🚀 <a target="_blank" href="https://docs.scalekit.com">Getting started</a> - 💻 <a target="_blank" href="https://docs.scalekit.com/apis">API reference</a>
 </div>
 <hr />
 
-## Getting Started
+## Pre-requisites
 
 1. [Sign up](https://scalekit.com) for a Scalekit account.
 2. Get your ```env_url```, ```client_id``` and ```client_secret``` from the Scalekit dashboard.
@@ -99,7 +99,7 @@ Fully functional sample applications written using some popular web application 
 
 ## API Reference
 
-See the [Scalekit API docs](https://docs.scalekit.com/apis) for more information about the API and authentication.
+Refer to our [API reference docs](https://docs.scalekit.com/apis) for detailed information about all our API endpoints and their usage.
 
 ## More Information
 
