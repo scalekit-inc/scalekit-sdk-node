@@ -1,4 +1,4 @@
-import { User } from './user';
+import { User } from './auth';
 
 export enum GrantType {
   AuthorizationCode = 'authorization_code',
@@ -23,7 +23,8 @@ export type AuthenticationOptions = {
 }
 
 export type AuthenticationResponse = {
-  user: Partial<User>;
+  user: User;
   idToken: string;
   accessToken: string;
+  expiresIn: number;
 }

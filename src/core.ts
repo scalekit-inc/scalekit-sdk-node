@@ -5,6 +5,7 @@ import os from "os";
 import QueryString from "qs";
 import { GrantType } from './types/scalekit';
 import { ErrorInfo } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
+import { TokenResponse } from './types/auth';
 
 const tokenEndpoint = "oauth/token";
 const jwksEndpoint = "keys";
@@ -46,10 +47,10 @@ export default class CoreClient {
   /**
    * Authenticate with the code
    * @param {string} data Data to authenticate
-   * @returns {Promise<AxiosResponse<{ access_token: string, id_token: string }>>} Returns access token and id token
+   * @returns {Promise<AxiosResponse<TokenResponse>>} Returns access token and id token
    */
-  async authenticate(data: string): Promise<AxiosResponse<{ access_token: string; id_token: string; }, any>> {
-    return this.axios.post<{ access_token: string, id_token: string }>(
+  async authenticate(data: string): Promise<AxiosResponse<TokenResponse, any>> {
+    return this.axios.post<TokenResponse>(
       tokenEndpoint,
       data,
       {

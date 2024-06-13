@@ -7,7 +7,7 @@ import CoreClient from './core';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
 import { AuthorizationUrlOptions, AuthenticationOptions, GrantType, AuthenticationResponse } from './types/scalekit';
-import { IdTokenClaim, User } from './types/user';
+import { IdTokenClaim, User } from './types/auth';
 
 const authorizeEndpoint = "oauth/authorize";
 
@@ -124,9 +124,9 @@ export default class ScalekitClient {
       client_secret: this.coreClient.clientSecret,
       ...(options?.codeVerifier && { code_verifier: options.codeVerifier })
     }))
-    const { id_token, access_token } = res.data;
+    const { id_token, access_token, expires_in } = res.data;
     const claims = jose.decodeJwt<IdTokenClaim>(id_token);
-    const user: Partial<User> = {};
+    const user = <User>{};
     for (const [k, v] of Object.entries(claims)) {
       if (IdTokenClaimToUserMap[k]) {
         user[IdTokenClaimToUserMap[k]] = v;
@@ -136,7 +136,8 @@ export default class ScalekitClient {
     return {
       user,
       idToken: id_token,
-      accessToken: access_token
+      accessToken: access_token,
+      expiresIn: expires_in
     }
   }
 
