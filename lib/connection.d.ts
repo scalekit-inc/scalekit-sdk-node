@@ -8,11 +8,11 @@ export default class ConnectionClient {
     constructor(grpcConncet: GrpcConnect, coreClient: CoreClient);
     /**
      * Get a connection by id and organization id
-     * @param id The connection id
      * @param organizationId The organization id
+     * @param id The connection id
      * @returns {Promise<GetConnectionResponse>} The connection
      */
-    getConnection(id: string, organizationId: string): Promise<GetConnectionResponse>;
+    getConnection(organizationId: string, id: string): Promise<GetConnectionResponse>;
     /**
      * List connections by domain
      * @param domain The domain
@@ -27,16 +27,16 @@ export default class ConnectionClient {
     listConnections(organizationId: string): Promise<ListConnectionsResponse>;
     /**
      * Enable a connection by id and organization id
-     * @param id The connection id
      * @param organizationId The organization id
+     * @param id The connection id
      * @returns {Promise<ToggleConnectionResponse>} The connection enable response
      */
-    enableConnection(id: string, organizationId: string): Promise<ToggleConnectionResponse>;
+    enableConnection(organizationId: string, id: string): Promise<ToggleConnectionResponse>;
     /**
      * Disable a connection by id and organization id
-     * @param id The connection id
      * @param organizationId The organization id
+     * @param id The connection id
      * @returns {Promise<ToggleConnectionResponse>} The connection enable response
      */
-    disableConnection(id: string, organizationId: string): Promise<ToggleConnectionResponse>;
+    disableConnection(organizationId: string, id: string): Promise<ToggleConnectionResponse>;
 }

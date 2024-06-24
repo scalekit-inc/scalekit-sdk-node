@@ -55,13 +55,19 @@ export default class OrganizationClient {
      */
     updateOrganizationByExternalId(externalId: string, organization: PartialMessage<UpdateOrganization>): Promise<UpdateOrganizationResponse>;
     /**
+     * Delete an organization by id
+     * @param {string} organizationId The organization id
+     * @returns {Promise<Empty>} Returns nothing
+     */
+    deleteOrganization(organizationId: string): Promise<Empty>;
+    /**
      * Generate admin portal link for an organization
      * @param organizationId  The organization id
      * @returns {Promise<Link>} The admin portal link object with expiration time and location
      */
     generatePortalLink(organizationId: string): Promise<Link>;
     /**
-     * Get admin portal link for an organization
+     * Get admin portal links for an organization
      * @param organizationId  The organization id
      * @returns {Promise<Link[]>} The admin portal link object with expiration time and location
      */

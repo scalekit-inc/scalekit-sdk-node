@@ -1,5 +1,12 @@
 import { Axios, AxiosResponse } from "axios";
 import { JWK } from 'jose';
+import { TokenResponse } from './types/auth';
+export declare const headers: {
+    "user-agent": string;
+    "x-sdk-version": string;
+    "x-api-version": string;
+    authorization: string;
+};
 export default class CoreClient {
     readonly envUrl: string;
     readonly clientId: string;
@@ -15,12 +22,9 @@ export default class CoreClient {
     /**
      * Authenticate with the code
      * @param {string} data Data to authenticate
-     * @returns {Promise<AxiosResponse<{ access_token: string, id_token: string }>>} Returns access token and id token
+     * @returns {Promise<AxiosResponse<TokenResponse>>} Returns access token and id token
      */
-    authenticate(data: string): Promise<AxiosResponse<{
-        access_token: string;
-        id_token: string;
-    }, any>>;
+    authenticate(data: string): Promise<AxiosResponse<TokenResponse, any>>;
     /**
      * Get the JWKS from the server and store it in the client instance
      * @returns {Promise<void>} Returns nothing
