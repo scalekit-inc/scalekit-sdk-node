@@ -142,7 +142,7 @@ export default class OrganizationClient {
   }
 
   /**
-   * Get admin portal link for an organization
+   * Get admin portal links for an organization
    * @param organizationId  The organization id
    * @returns {Promise<Link[]>} The admin portal link object with expiration time and location
    */

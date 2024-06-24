@@ -1,7 +1,7 @@
 import { ServiceType } from '@bufbuild/protobuf';
 import { PromiseClient, Transport, createPromiseClient } from '@connectrpc/connect';
 import { createGrpcTransport } from '@connectrpc/connect-node';
-import CoreClient from './core';
+import CoreClient, { headers } from './core';
 
 export default class GrpcConnect {
   private transport: Transport;
@@ -14,11 +14,11 @@ export default class GrpcConnect {
       interceptors: [
         (next) => {
           return (req) => {
-            req.header.set("User-Agent", this.coreClient.userAgent)
-            req.header.set("X-Sdk-Version", this.coreClient.sdkVersion)
-            req.header.set("X-Api-Version", this.coreClient.apiVersion)
+            req.header.set(headers['user-agent'], this.coreClient.userAgent)
+            req.header.set(headers['x-sdk-version'], this.coreClient.sdkVersion)
+            req.header.set(headers['x-api-version'], this.coreClient.apiVersion)
             if (this.coreClient.accessToken) {
-              req.header.set("Authorization", `Bearer ${this.coreClient.accessToken}`)
+              req.header.set(headers.authorization, `Bearer ${this.coreClient.accessToken}`)
             }
             return next(req)
           }

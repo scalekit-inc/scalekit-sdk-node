@@ -84,12 +84,12 @@ app.get("/auth/login", (req, res) => {
   res.redirect(authUrl);
 });
 
-// Handle the callback from the Scalekit 
+// Handle the callback from Scalekit 
 app.get("/auth/callback", async (req, res) => {
   const code = req.query.code as string;
   const authResp = await sc.authenticateWithCode(code, redirectUri);
   res.cookie("access_token", authResp.accessToken);
-  res.json(token);
+  res.json(authResp.accessToken);
 });
 
 app.listen(3000, () => {

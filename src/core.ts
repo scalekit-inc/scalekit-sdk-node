@@ -7,6 +7,13 @@ import { GrantType } from './types/scalekit';
 import { ErrorInfo } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
 import { TokenResponse } from './types/auth';
 
+export const headers = {
+  "user-agent": "user-agent",
+  "x-sdk-version": "x-sdk-version",
+  "x-api-version": "x-api-version",
+  "authorization": "authorization"
+}
+
 const tokenEndpoint = "oauth/token";
 const jwksEndpoint = "keys";
 export default class CoreClient {
@@ -23,11 +30,11 @@ export default class CoreClient {
   ) {
     this.axios = axios.create({ baseURL: envUrl });
     this.axios.interceptors.request.use((config) => {
-      config.headers["User-Agent"] = this.userAgent;
-      config.headers["X-Sdk-Version"] = this.sdkVersion;
-      config.headers["X-Api-Version"] = this.apiVersion;
+      config.headers[headers['user-agent']] = this.userAgent;
+      config.headers[headers['x-sdk-version']] = this.sdkVersion;
+      config.headers[headers['x-api-version']] = this.apiVersion;
       if (this.accessToken) {
-        config.headers["Authorization"] = `Bearer ${this.accessToken}`;
+        config.headers[headers.authorization] = `Bearer ${this.accessToken}`;
       }
 
       return config;
@@ -107,7 +114,7 @@ export default class CoreClient {
             const messages = [error.message]
             error.findDetails(ErrorInfo).forEach((detail) => {
               if (detail.validationErrorInfo) {
-                 detail.validationErrorInfo.fieldViolations.forEach((fv) => {
+                detail.validationErrorInfo.fieldViolations.forEach((fv) => {
                   messages.push(`${fv.field}: ${fv.description}`)
                 })
               }
