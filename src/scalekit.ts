@@ -6,8 +6,8 @@ import { IdTokenClaimToUserMap } from './constants/user';
 import CoreClient from './core';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
-import { AuthorizationUrlOptions, CodeAuthenticationOptions, GrantType } from './types/scalekit';
-import { IdTokenClaim, User } from './types/user';
+import { AuthorizationUrlOptions, AuthenticationOptions, GrantType, AuthenticationResponse } from './types/scalekit';
+import { IdTokenClaim, User } from './types/auth';
 
 const authorizeEndpoint = "oauth/authorize";
 
@@ -16,11 +16,11 @@ const authorizeEndpoint = "oauth/authorize";
  * @param {string} envUrl The environment url
  * @param {string} clientId The client id
  * @param {string} clientSecret The client secret
- * @returns {Scalekit} Returns the scalekit instance 
+ * @returns {ScalekitClient} Returns the scalekit instance 
  * @example
  * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
 */
-export default class Scalekit {
+export default class ScalekitClient {
   private readonly coreClient: CoreClient;
   private readonly grpcConnect: GrpcConnect;
   readonly organization: OrganizationClient;
@@ -65,6 +65,8 @@ export default class Scalekit {
    * @param {string} options.domainHint Domain hint parameter
    * @param {string} options.connectionId Connection id parameter
    * @param {string} options.organizationId Organization id parameter
+   * @param {string} options.codeChallenge Code challenge parameter in case of PKCE
+   * @param {string} options.codeChallengeMethod Code challenge method parameter in case of PKCE
    * 
    * @example
    * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
@@ -76,7 +78,7 @@ export default class Scalekit {
     options?: AuthorizationUrlOptions
   ): string {
     const defaultOptions: AuthorizationUrlOptions = {
-      scopes: ['openid', 'profile']
+      scopes: ['openid', 'profile', 'email']
     }
     options = {
       ...defaultOptions,
@@ -94,6 +96,8 @@ export default class Scalekit {
       ...(options.domainHint && { domain: options.domainHint }),
       ...(options.connectionId && { connection_id: options.connectionId }),
       ...(options.organizationId && { organization_id: options.organizationId }),
+      ...(options.codeChallenge && { code_challenge: options.codeChallenge }),
+      ...(options.codeChallengeMethod && { code_challenge_method: options.codeChallengeMethod })
     })
 
     return `${this.coreClient.envUrl}/${authorizeEndpoint}?${qs}`
@@ -101,24 +105,28 @@ export default class Scalekit {
 
   /**
    * Authenticate with the code
-   * @param {CodeAuthenticationOptions} options Code authentication options
-   * @param {string} options.code Code
-   * @param {string} options.redirectUri Redirect uri
-   * @param {string} options.codeVerifier Code verifier
-   * @returns {Promise<{ user: Partial<User>, idToken: string, accessToken: string }>} Returns user, id token and access token
+   * @param {string} code Code
+   * @param {string} redirectUri Redirect uri
+   * @param {AuthenticationOptions} options Code authentication options
+   * @param {string} options.codeVerifier Code verifier in case of PKCE
+   * @returns {Promise<AuthenticationResponse>} Returns user, id token and access token
    */
-  async authenticateWithCode(options: CodeAuthenticationOptions): Promise<{ user: Partial<User>; idToken: string; accessToken: string; }> {
+  async authenticateWithCode(
+    code: string,
+    redirectUri: string,
+    options?: AuthenticationOptions,
+  ): Promise<AuthenticationResponse> {
     const res = await this.coreClient.authenticate(QueryString.stringify({
-      code: options.code,
-      redirect_uri: options.redirectUri,
+      code: code,
+      redirect_uri: redirectUri,
       grant_type: GrantType.AuthorizationCode,
       client_id: this.coreClient.clientId,
       client_secret: this.coreClient.clientSecret,
-      ...(options.codeVerifier && { code_verifier: options.codeVerifier })
+      ...(options?.codeVerifier && { code_verifier: options.codeVerifier })
     }))
-    const { id_token, access_token } = res.data;
+    const { id_token, access_token, expires_in } = res.data;
     const claims = jose.decodeJwt<IdTokenClaim>(id_token);
-    const user: Partial<User> = {};
+    const user = <User>{};
     for (const [k, v] of Object.entries(claims)) {
       if (IdTokenClaimToUserMap[k]) {
         user[IdTokenClaimToUserMap[k]] = v;
@@ -128,7 +136,8 @@ export default class Scalekit {
     return {
       user,
       idToken: id_token,
-      accessToken: access_token
+      accessToken: access_token,
+      expiresIn: expires_in
     }
   }
 

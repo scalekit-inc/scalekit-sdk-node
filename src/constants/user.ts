@@ -1,4 +1,4 @@
-import type { IdTokenClaim, User } from '../types/user';
+import type { IdTokenClaim, User } from '../types/auth';
 
 export const IdTokenClaimToUserMap: { [k in keyof IdTokenClaim]: keyof User } = {
   "sub": "id",

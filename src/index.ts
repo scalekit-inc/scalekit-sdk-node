@@ -1,7 +1,7 @@
-import Scalekit from "./scalekit";
+import ScalekitClient from "./scalekit";
 
-export { Scalekit };
-export default Scalekit;
+export { ScalekitClient };
+export default ScalekitClient;
 
 export * from "./types/scalekit";
-export * from "./types/user";
+export * from "./types/auth";

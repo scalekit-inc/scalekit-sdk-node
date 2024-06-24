@@ -1,4 +1,4 @@
-import { PartialMessage } from '@bufbuild/protobuf';
+import { Empty, PartialMessage } from '@bufbuild/protobuf';
 import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
@@ -16,19 +16,20 @@ export default class OrganizationClient {
 
   /** 
   * Create an organization with the given name. Optionally, you can provide an external id.
+  * @param {string} name The organization name
   * @param {object} options The options to create an organization
-  * @param {string} options.name The organization name
   * @param {string} options.externalId The external id
   * @returns {Promise<CreateOrganizationResponse>} The created organization
   */
-  async createOrganization(options: { name: string, externalId?: string }): Promise<CreateOrganizationResponse> {
-    const { name, externalId } = options;
+  async createOrganization(name: string, options?: { externalId?: string }): Promise<CreateOrganizationResponse> {
     return this.coreClient.connectExec(
       this.client.createOrganization,
       {
         organization: {
           displayName: name,
-          externalId: externalId
+          ...(options?.externalId && {
+            externalId: options.externalId
+          })
         }
       }
     )
@@ -108,6 +109,20 @@ export default class OrganizationClient {
   }
 
   /**
+   * Delete an organization by id
+   * @param {string} organizationId The organization id
+   * @returns {Promise<Empty>} Returns nothing
+   */
+  async deleteOrganization(organizationId: string): Promise<Empty> {
+    return this.coreClient.connectExec(
+      this.client.deleteOrganization,
+      {
+        identities: { case: "id", value: organizationId, },
+      },
+    )
+  }
+
+  /**
    * Generate admin portal link for an organization
    * @param organizationId  The organization id
    * @returns {Promise<Link>} The admin portal link object with expiration time and location
@@ -124,6 +139,38 @@ export default class OrganizationClient {
     }
 
     return response.link
+  }
+
+  /**
+   * Get admin portal links for an organization
+   * @param organizationId  The organization id
+   * @returns {Promise<Link[]>} The admin portal link object with expiration time and location
+   */
+  async getPortalLinks(organizationId: string): Promise<Link[]> {
+    const response = await this.coreClient.connectExec(
+      this.client.getPortalLinks,
+      {
+        id: organizationId
+      },
+    )
+
+    return response.links
+  }
+
+  /**
+   * Delete admin portal link for an organization
+   * @param organizationId  The organization id
+   * @param linkId The link id
+   * @returns {Promise<Empty>} Returns nothing
+   */
+  async deletePortalLink(organizationId: string, linkId: string): Promise<Empty> {
+    return this.coreClient.connectExec(
+      this.client.deletePortalLink,
+      {
+        id: organizationId,
+        linkId
+      },
+    )
   }
 }
 
