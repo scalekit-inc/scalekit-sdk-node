@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -51,6 +51,15 @@ export const OrganizationService = {
       kind: MethodKind.Unary,
     },
     /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.SearchOrganization
+     */
+    searchOrganization: {
+      name: "SearchOrganization",
+      I: SearchOrganizationsRequest,
+      O: SearchOrganizationsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
      * Delete an Organization
      *
      * @generated from rpc scalekit.v1.organizations.OrganizationService.DeleteOrganization
@@ -78,6 +87,15 @@ export const OrganizationService = {
     deletePortalLink: {
       name: "DeletePortalLink",
       I: DeletePortalLinkRequest,
+      O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.DeletePortalLinkByID
+     */
+    deletePortalLinkByID: {
+      name: "DeletePortalLinkByID",
+      I: DeletePortalLinkByIdRequest,
       O: Empty,
       kind: MethodKind.Unary,
     },

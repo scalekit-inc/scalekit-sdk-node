@@ -29,6 +29,7 @@ export default class ScalekitClient {
      * @param {string} options.domainHint Domain hint parameter
      * @param {string} options.connectionId Connection id parameter
      * @param {string} options.organizationId Organization id parameter
+     * @param {string} options.provider Provider i.e. google, github, etc.
      * @param {string} options.codeChallenge Code challenge parameter in case of PKCE
      * @param {string} options.codeChallengeMethod Code challenge method parameter in case of PKCE
      *

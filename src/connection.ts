@@ -24,10 +24,7 @@ export default class ConnectionClient {
       this.client.getConnection,
       {
         id,
-        identities: {
-          case: 'organizationId',
-          value: organizationId
-        }
+        organizationId
       },
     )
   }
@@ -41,10 +38,7 @@ export default class ConnectionClient {
     return this.coreClient.connectExec(
       this.client.listConnections,
       {
-        identities: {
-          case: 'domain',
-          value: domain
-        }
+        domain
       },
     )
   }
@@ -58,10 +52,7 @@ export default class ConnectionClient {
     return this.coreClient.connectExec(
       this.client.listConnections,
       {
-        identities: {
-          case: 'organizationId',
-          value: organizationId
-        }
+        organizationId
       },
     )
   }
@@ -77,10 +68,7 @@ export default class ConnectionClient {
       this.client.enableConnection,
       {
         id,
-        identities: {
-          case: 'organizationId',
-          value: organizationId
-        }
+        organizationId
       },
     )
   }
@@ -96,10 +84,7 @@ export default class ConnectionClient {
       this.client.disableConnection,
       {
         id,
-        identities: {
-          case: 'organizationId',
-          value: organizationId
-        }
+        organizationId
       },
     )
   }

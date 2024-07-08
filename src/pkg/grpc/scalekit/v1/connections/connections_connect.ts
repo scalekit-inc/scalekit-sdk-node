@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateConnectionRequest, CreateConnectionResponse, DeleteConnectionRequest, GetConnectionRequest, GetConnectionResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, UpdateConnectionRequest, UpdateConnectionResponse } from "./connections_pb.js";
+import { CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetEnvironmentConnectionRequest, GetProvidersRequest, GetProvidersResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -13,12 +13,39 @@ export const ConnectionService = {
   typeName: "scalekit.v1.connections.ConnectionService",
   methods: {
     /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.GetProviders
+     */
+    getProviders: {
+      name: "GetProviders",
+      I: GetProvidersRequest,
+      O: GetProvidersResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection
+     */
+    createEnvironmentConnection: {
+      name: "CreateEnvironmentConnection",
+      I: CreateEnvironmentConnectionRequest,
+      O: CreateConnectionResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
      * @generated from rpc scalekit.v1.connections.ConnectionService.CreateConnection
      */
     createConnection: {
       name: "CreateConnection",
       I: CreateConnectionRequest,
       O: CreateConnectionResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.GetEnvironmentConnection
+     */
+    getEnvironmentConnection: {
+      name: "GetEnvironmentConnection",
+      I: GetEnvironmentConnectionRequest,
+      O: GetConnectionResponse,
       kind: MethodKind.Unary,
     },
     /**
@@ -40,12 +67,30 @@ export const ConnectionService = {
       kind: MethodKind.Unary,
     },
     /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.UpdateEnvironmentConnection
+     */
+    updateEnvironmentConnection: {
+      name: "UpdateEnvironmentConnection",
+      I: UpdateEnvironmentConnectionRequest,
+      O: UpdateConnectionResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
      * @generated from rpc scalekit.v1.connections.ConnectionService.UpdateConnection
      */
     updateConnection: {
       name: "UpdateConnection",
       I: UpdateConnectionRequest,
       O: UpdateConnectionResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.DeleteEnvironmentConnection
+     */
+    deleteEnvironmentConnection: {
+      name: "DeleteEnvironmentConnection",
+      I: DeleteEnvironmentConnectionRequest,
+      O: Empty,
       kind: MethodKind.Unary,
     },
     /**
@@ -58,11 +103,29 @@ export const ConnectionService = {
       kind: MethodKind.Unary,
     },
     /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.EnableEnvironmentConnection
+     */
+    enableEnvironmentConnection: {
+      name: "EnableEnvironmentConnection",
+      I: ToggleEnvironmentConnectionRequest,
+      O: ToggleConnectionResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
      * @generated from rpc scalekit.v1.connections.ConnectionService.EnableConnection
      */
     enableConnection: {
       name: "EnableConnection",
       I: ToggleConnectionRequest,
+      O: ToggleConnectionResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.DisableEnvironmentConnection
+     */
+    disableEnvironmentConnection: {
+      name: "DisableEnvironmentConnection",
+      I: ToggleEnvironmentConnectionRequest,
       O: ToggleConnectionResponse,
       kind: MethodKind.Unary,
     },
