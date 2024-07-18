@@ -16,10 +16,11 @@ export type AuthorizationUrlOptions = {
   loginHint?: string;
   codeChallenge?: string;
   codeChallengeMethod?: string;
+  provider?: string;
 }
 
 export type AuthenticationOptions = {
-  codeVerifier?: string; 
+  codeVerifier?: string;
 }
 
 export type AuthenticationResponse = {
