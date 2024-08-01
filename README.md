@@ -1,28 +1,38 @@
-<p align="left">
+<h1 align="center">
   <a href="https://scalekit.com" target="_blank" rel="noopener noreferrer">
-    <picture>
-      <img src="https://cdn.scalekit.cloud/v1/scalekit-logo-dark.svg" height="64">
+    <picture >
+      <img src="https://cdn.scalekit.cloud/v1/scalekit-logo-dark.svg" height="50" style="padding: 1rem;">
     </picture>
   </a>
   <br/>
+    <a href="https://www.npmjs.com/package/@scalekit-sdk/node">
+    <img src="https://img.shields.io/npm/v/@scalekit-sdk/node.svg?color=a173ff&style=for-the-badge">
+  </a>
+  <a href="https://www.scalekit.com/?intent=earlyaccess&utm_source=docs">
+  <img src="https://img.shields.io/badge/Get_Early_Access-4f5eff?style=for-the-badge&labelColor=a173ff&color=a173ff">
+  </a>
+  <a>
+    <img alt="NPM Downloads" src="https://img.shields.io/npm/dm/%40scalekit-sdk%2Fnode?style=for-the-badge&color=a173ff">
+  </a>
+    <a href="https://docs.scalekit.com">
+    <img src="https://img.shields.io/badge/%F0%9F%92%A1%20-docs-a173ff.svg?style=for-the-badge">
+  </a>
+</h1>
+
+<p align="center">
+  <em><a href="https://scalekit.com">Scalekit</a> is your gateway to <b>enterprise-readiness</b> for B2B and SaaS applications. Built on <a href="https://openid.net/">OpenID</a> and <a href="https://en.wikipedia.org/wiki/SAML_2.0">SAML</a> standards, it provides seamless <b>authentication</b>, <b>user management</b>, and <b>access control</b> capabilities. Scalekit helps you comply with <b>GDPR</b>, <b>SOC2</b>, and <b>HIPAA</b> standards, enabling you to focus on <b>core product development</b> while we handle the complexities of <b>enterprise security</b> and <b>compliance</b>.</em>
 </p>
 
-# Official Node.js SDK
-<a href="https://scalekit.com" target="_blank" rel="noopener noreferrer">Scalekit</a> is an Enterprise Authentication Platform purpose built for B2B applications. This Node.js SDK helps implement Enterprise Capabilities like Single Sign-on via SAML or OIDC in your Node.js applications within a few hours.
-
-<div>
-📚 <a target="_blank" href="https://docs.scalekit.com">Documentation</a> - 🚀 <a target="_blank" href="https://docs.scalekit.com">Quick-start Guide</a> - 💻 <a target="_blank" href="https://docs.scalekit.com/apis">API Reference</a>
-</div>
-<hr />
+---
 
 ## Pre-requisites
 
 1. [Sign up](https://scalekit.com) for a Scalekit account.
-2. Get your ```env_url```, ```client_id``` and ```client_secret``` from the Scalekit dashboard.
+2. Get your `env_url`, `client_id` and `client_secret` from the Scalekit dashboard.
 
 ## Installation
 
-Install Scalekit SDK using your preferred package manager. 
+Install Scalekit SDK using your preferred package manager.
 
 ```sh
 npm install @scalekit-sdk/node
@@ -74,7 +84,7 @@ const redirectUri = `${process.env.HOST}/auth/callback`;
 // Get the authorization URL and redirect the user to the IdP login page
 app.get("/auth/login", (req, res) => {
   const authUrl = sc.getAuthorizationUrl(
-    redirectUri, 
+    redirectUri,
     {
       state: "state",
       connectionId: "connection_id",
@@ -84,7 +94,7 @@ app.get("/auth/login", (req, res) => {
   res.redirect(authUrl);
 });
 
-// Handle the callback from Scalekit 
+// Handle the callback from Scalekit
 app.get("/auth/callback", async (req, res) => {
   const code = req.query.code as string;
   const authResp = await sc.authenticateWithCode(code, redirectUri);
@@ -97,7 +107,7 @@ app.listen(3000, () => {
 });
 ```
 
-## Example Apps  
+## Example Apps
 
 Fully functional sample applications written using some popular web application frameworks and Scalekit SDK. Feel free to clone the repo and run them locally.
 
