@@ -25,22 +25,26 @@
 
 ---
 
-## Pre-requisites
+### ⚙️ Installation
 
-1. [Sign up](https://scalekit.com) for a Scalekit account.
-2. Get your `env_url`, `client_id` and `client_secret` from the Scalekit dashboard.
-
-## Installation
-
-Install Scalekit SDK using your preferred package manager.
+Scalekit's Node.js SDK requires **Node.js version 18.x** or later to run. To install or upgrade Node.js, refer to the [official Node.js installation guide](https://nodejs.org/en/download). To start setting up, go to your Node project's root directory and run following command:
 
 ```sh
 npm install @scalekit-sdk/node
-#or
+```
+
+Other package managers like Yarn and pnpm are also supported.
+
+```sh
 yarn add @scalekit-sdk/node
-#or
+```
+
+```sh
 pnpm add @scalekit-sdk/node
 ```
+
+**Note ℹ️**
+SDK requires you to authenticate before you can access its authenticaiton infrastructure. Get `client_id`, `client_secret` and `env_url` from the Scalekit dashboard.
 
 ## Usage
 
