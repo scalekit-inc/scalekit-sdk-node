@@ -315,6 +315,56 @@ export declare class ListOrganizationsResponse extends Message<ListOrganizations
     static equals(a: ListOrganizationsResponse | PlainMessage<ListOrganizationsResponse> | undefined, b: ListOrganizationsResponse | PlainMessage<ListOrganizationsResponse> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.organizations.SearchOrganizationsRequest
+ */
+export declare class SearchOrganizationsRequest extends Message<SearchOrganizationsRequest> {
+    /**
+     * @generated from field: string query = 1;
+     */
+    query: string;
+    /**
+     * @generated from field: uint32 page_size = 2;
+     */
+    pageSize: number;
+    /**
+     * @generated from field: string page_token = 3;
+     */
+    pageToken: string;
+    constructor(data?: PartialMessage<SearchOrganizationsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.SearchOrganizationsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchOrganizationsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchOrganizationsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchOrganizationsRequest;
+    static equals(a: SearchOrganizationsRequest | PlainMessage<SearchOrganizationsRequest> | undefined, b: SearchOrganizationsRequest | PlainMessage<SearchOrganizationsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.SearchOrganizationsResponse
+ */
+export declare class SearchOrganizationsResponse extends Message<SearchOrganizationsResponse> {
+    /**
+     * @generated from field: string next_page_token = 1;
+     */
+    nextPageToken: string;
+    /**
+     * @generated from field: uint32 total_size = 2;
+     */
+    totalSize: number;
+    /**
+     * @generated from field: repeated scalekit.v1.organizations.Organization organizations = 3;
+     */
+    organizations: Organization[];
+    constructor(data?: PartialMessage<SearchOrganizationsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.SearchOrganizationsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchOrganizationsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchOrganizationsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchOrganizationsResponse;
+    static equals(a: SearchOrganizationsResponse | PlainMessage<SearchOrganizationsResponse> | undefined, b: SearchOrganizationsResponse | PlainMessage<SearchOrganizationsResponse> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.organizations.DeleteOrganizationRequest
  */
 export declare class DeleteOrganizationRequest extends Message<DeleteOrganizationRequest> {
@@ -396,6 +446,27 @@ export declare class DeletePortalLinkRequest extends Message<DeletePortalLinkReq
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeletePortalLinkRequest;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeletePortalLinkRequest;
     static equals(a: DeletePortalLinkRequest | PlainMessage<DeletePortalLinkRequest> | undefined, b: DeletePortalLinkRequest | PlainMessage<DeletePortalLinkRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.DeletePortalLinkByIdRequest
+ */
+export declare class DeletePortalLinkByIdRequest extends Message<DeletePortalLinkByIdRequest> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: string link_id = 2;
+     */
+    linkId: string;
+    constructor(data?: PartialMessage<DeletePortalLinkByIdRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.DeletePortalLinkByIdRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeletePortalLinkByIdRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeletePortalLinkByIdRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeletePortalLinkByIdRequest;
+    static equals(a: DeletePortalLinkByIdRequest | PlainMessage<DeletePortalLinkByIdRequest> | undefined, b: DeletePortalLinkByIdRequest | PlainMessage<DeletePortalLinkByIdRequest> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.organizations.Link

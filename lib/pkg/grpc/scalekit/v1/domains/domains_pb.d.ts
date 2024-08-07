@@ -336,6 +336,40 @@ export declare class ListDomainResponse extends Message<ListDomainResponse> {
     static equals(a: ListDomainResponse | PlainMessage<ListDomainResponse> | undefined, b: ListDomainResponse | PlainMessage<ListDomainResponse> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.domains.ListAuthorizedDomainRequest
+ */
+export declare class ListAuthorizedDomainRequest extends Message<ListAuthorizedDomainRequest> {
+    /**
+     * @generated from field: string origin = 1;
+     */
+    origin: string;
+    constructor(data?: PartialMessage<ListAuthorizedDomainRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.domains.ListAuthorizedDomainRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAuthorizedDomainRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAuthorizedDomainRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAuthorizedDomainRequest;
+    static equals(a: ListAuthorizedDomainRequest | PlainMessage<ListAuthorizedDomainRequest> | undefined, b: ListAuthorizedDomainRequest | PlainMessage<ListAuthorizedDomainRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.domains.ListAuthorizedDomainResponse
+ */
+export declare class ListAuthorizedDomainResponse extends Message<ListAuthorizedDomainResponse> {
+    /**
+     * @generated from field: repeated string domains = 1;
+     */
+    domains: string[];
+    constructor(data?: PartialMessage<ListAuthorizedDomainResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.domains.ListAuthorizedDomainResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAuthorizedDomainResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAuthorizedDomainResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAuthorizedDomainResponse;
+    static equals(a: ListAuthorizedDomainResponse | PlainMessage<ListAuthorizedDomainResponse> | undefined, b: ListAuthorizedDomainResponse | PlainMessage<ListAuthorizedDomainResponse> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.domains.Domain
  */
 export declare class Domain extends Message<Domain> {
