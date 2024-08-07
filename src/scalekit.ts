@@ -98,7 +98,8 @@ export default class ScalekitClient {
       ...(options.connectionId && { connection_id: options.connectionId }),
       ...(options.organizationId && { organization_id: options.organizationId }),
       ...(options.codeChallenge && { code_challenge: options.codeChallenge }),
-      ...(options.codeChallengeMethod && { code_challenge_method: options.codeChallengeMethod })
+      ...(options.codeChallengeMethod && { code_challenge_method: options.codeChallengeMethod }),
+      ...(options.provider && { provider: options.provider })
     })
 
     return `${this.coreClient.envUrl}/${authorizeEndpoint}?${qs}`
