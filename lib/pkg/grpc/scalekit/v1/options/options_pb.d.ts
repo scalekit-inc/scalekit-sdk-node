@@ -41,6 +41,12 @@ export declare enum AuthenticationType {
      */
     WORKSPACE_SESSION = 80,
     /**
+     * workspace_id,organization_id is in claims and UI in audience
+     *
+     * @generated from enum value: WORKSPACE_SESSION_CUSTOMER_PORTAL = 112;
+     */
+    WORKSPACE_SESSION_CUSTOMER_PORTAL = 112,
+    /**
      * user_id is in claims
      *
      * @generated from enum value: USER = 8;

@@ -1,4 +1,4 @@
-import { CreateConnectionRequest, CreateConnectionResponse, DeleteConnectionRequest, GetConnectionRequest, GetConnectionResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, UpdateConnectionRequest, UpdateConnectionResponse } from "./connections_pb.js";
+import { CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetEnvironmentConnectionRequest, GetProvidersRequest, GetProvidersResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.connections.ConnectionService
@@ -7,12 +7,39 @@ export declare const ConnectionService: {
     readonly typeName: "scalekit.v1.connections.ConnectionService";
     readonly methods: {
         /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.GetProviders
+         */
+        readonly getProviders: {
+            readonly name: "GetProviders";
+            readonly I: typeof GetProvidersRequest;
+            readonly O: typeof GetProvidersResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection
+         */
+        readonly createEnvironmentConnection: {
+            readonly name: "CreateEnvironmentConnection";
+            readonly I: typeof CreateEnvironmentConnectionRequest;
+            readonly O: typeof CreateConnectionResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
          * @generated from rpc scalekit.v1.connections.ConnectionService.CreateConnection
          */
         readonly createConnection: {
             readonly name: "CreateConnection";
             readonly I: typeof CreateConnectionRequest;
             readonly O: typeof CreateConnectionResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.GetEnvironmentConnection
+         */
+        readonly getEnvironmentConnection: {
+            readonly name: "GetEnvironmentConnection";
+            readonly I: typeof GetEnvironmentConnectionRequest;
+            readonly O: typeof GetConnectionResponse;
             readonly kind: MethodKind.Unary;
         };
         /**
@@ -34,12 +61,30 @@ export declare const ConnectionService: {
             readonly kind: MethodKind.Unary;
         };
         /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.UpdateEnvironmentConnection
+         */
+        readonly updateEnvironmentConnection: {
+            readonly name: "UpdateEnvironmentConnection";
+            readonly I: typeof UpdateEnvironmentConnectionRequest;
+            readonly O: typeof UpdateConnectionResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
          * @generated from rpc scalekit.v1.connections.ConnectionService.UpdateConnection
          */
         readonly updateConnection: {
             readonly name: "UpdateConnection";
             readonly I: typeof UpdateConnectionRequest;
             readonly O: typeof UpdateConnectionResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.DeleteEnvironmentConnection
+         */
+        readonly deleteEnvironmentConnection: {
+            readonly name: "DeleteEnvironmentConnection";
+            readonly I: typeof DeleteEnvironmentConnectionRequest;
+            readonly O: typeof Empty;
             readonly kind: MethodKind.Unary;
         };
         /**
@@ -52,11 +97,29 @@ export declare const ConnectionService: {
             readonly kind: MethodKind.Unary;
         };
         /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.EnableEnvironmentConnection
+         */
+        readonly enableEnvironmentConnection: {
+            readonly name: "EnableEnvironmentConnection";
+            readonly I: typeof ToggleEnvironmentConnectionRequest;
+            readonly O: typeof ToggleConnectionResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
          * @generated from rpc scalekit.v1.connections.ConnectionService.EnableConnection
          */
         readonly enableConnection: {
             readonly name: "EnableConnection";
             readonly I: typeof ToggleConnectionRequest;
+            readonly O: typeof ToggleConnectionResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.DisableEnvironmentConnection
+         */
+        readonly disableEnvironmentConnection: {
+            readonly name: "DisableEnvironmentConnection";
+            readonly I: typeof ToggleEnvironmentConnectionRequest;
             readonly O: typeof ToggleConnectionResponse;
             readonly kind: MethodKind.Unary;
         };
