@@ -7,7 +7,7 @@ import CoreClient from './core';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
 import { AuthorizationUrlOptions, AuthenticationOptions, GrantType, AuthenticationResponse } from './types/scalekit';
-import { IdTokenClaim, User } from './types/auth';
+import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 
 const authorizeEndpoint = "oauth/authorize";
 
@@ -144,21 +144,46 @@ export default class ScalekitClient {
   }
 
   /**
+  * Get the idp initiated login claims
+  * 
+  * @param {string} idpInitiatedLoginToken The idp_initiated_login query param from the URL
+  * @returns {object} Returns the idp initiated login claims
+  */
+  async getIdpInitiatedLoginClaims(idpInitiatedLoginToken: string): Promise<IdpInitiatedLoginClaims> {
+    return await this.validateToken<IdpInitiatedLoginClaims>(idpInitiatedLoginToken);
+  }
+
+  /**
    * Validates the access token. 
    * 
    * @param {string} token The token to be validated.
    * @return {Promise<boolean>} Returns true if the token is valid, false otherwise.
    */
   async validateAccessToken(token: string): Promise<boolean> {
+    try {
+      await this.validateToken(token);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /**
+   * Validate token
+   * 
+   * @param {string} token The token to be validated
+   * @return {Promise<T>} Returns the payload of the token
+   */
+  private async validateToken<T>(token: string): Promise<T> {
     await this.coreClient.getJwks();
-    const JWKS = jose.createLocalJWKSet({
+    const jwks = jose.createLocalJWKSet({
       keys: this.coreClient.keys
     })
     try {
-      await jose.jwtVerify(token, JWKS);
-      return true;
-    } catch (error) {
-      return false;
+      const { payload } = await jose.jwtVerify<T>(token, jwks);
+      return payload;
+    } catch (_) {
+      throw new Error("Invalid token");
     }
   }
 }
