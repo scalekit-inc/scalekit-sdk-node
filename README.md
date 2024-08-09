@@ -87,16 +87,20 @@ app.get("/auth/login", (req, res) => {
 // Handle the callback from Scalekit 
 app.get("/auth/callback", async (req, res) => {
   const { code, error, error_description, idp_initiated_login } = req.query;
+  // Handle error
   if (error) {
     return res.status(400).json({ error, error_description });
   }
+  // Handle IdP initiated login
   if (idp_initiated_login) {
+    // Get the claims from the IdP initiated login
     const { 
       connection_id, 
       organization_id, 
       login_hint, 
       relay_state 
     } = await scalekitClient.getIdpInitiatedLoginClaims(idp_initiated_login as string);
+    // Get the authorization URL and redirect the user to the IdP login page
     const url = scalekitClient.getAuthorizationUrl(
       redirectUri,
       {
