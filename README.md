@@ -39,14 +39,14 @@ Initialize the Scalekit client using the appropriate credentials. Refer code sam
 ```javascript
 import { ScalekitClient } from "@scalekit-sdk/node";
 
-const sc = new ScalekitClient(
+const scalekitClient = new ScalekitClient(
   process.env.SCALEKIT_ENV_URL!,
   process.env.SCALEKIT_CLIENT_ID!,
   process.env.SCALEKIT_CLIENT_SECRET!
 );
 
 // Use the sc object to interact with the Scalekit API
-const authUrl = sc.getAuthorizationUrl("https://acme-corp.com/redirect-uri", {
+const authUrl = scalekitClient.getAuthorizationUrl("https://acme-corp.com/redirect-uri", {
   state: "state",
   connectionId: "connection_id",
 });
@@ -73,7 +73,7 @@ const redirectUri = `${process.env.HOST}/auth/callback`;
 
 // Get the authorization URL and redirect the user to the IdP login page
 app.get("/auth/login", (req, res) => {
-  const authUrl = sc.getAuthorizationUrl(
+  const authUrl = scalekitClient.getAuthorizationUrl(
     redirectUri, 
     {
       state: "state",
@@ -96,8 +96,8 @@ app.get("/auth/callback", async (req, res) => {
       organization_id, 
       login_hint, 
       relay_state 
-    } = await scalekit.getIdpInitiatedLoginClaims(idp_initiated_login as string);
-    const url = scalekit.getAuthorizationUrl(
+    } = await scalekitClient.getIdpInitiatedLoginClaims(idp_initiated_login as string);
+    const url = scalekitClient.getAuthorizationUrl(
       redirectUri,
       {
         connectionId: connection_id,
@@ -109,7 +109,7 @@ app.get("/auth/callback", async (req, res) => {
 
    return res.redirect(url);
   }
-  const authResp = await sc.authenticateWithCode(code, redirectUri);
+  const authResp = await scalekitClient.authenticateWithCode(code, redirectUri);
   res.cookie("access_token", authResp.accessToken);
   return res.json(authResp.accessToken);
 });
