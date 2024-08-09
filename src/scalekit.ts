@@ -148,7 +148,7 @@ export default class ScalekitClient {
   * @param {string} idpInitiatedLoginToken The idp_initiated_login query param from the URL
   * @returns {object} Returns the idp initiated login claims
   */
-  async getIdpInitiatedClaims(idpInitiatedLoginToken: string): Promise<IdpInitiatedLoginClaims> {
+  async getIdpInitiatedLoginClaims(idpInitiatedLoginToken: string): Promise<IdpInitiatedLoginClaims> {
     return await this.validateToken<IdpInitiatedLoginClaims>(idpInitiatedLoginToken);
   }
 
