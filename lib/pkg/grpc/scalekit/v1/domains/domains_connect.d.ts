@@ -1,4 +1,4 @@
-import { CreateDomainRequest, CreateDomainResponse, DeleteDomainRequest, GetDomainRequest, GetDomainResponse, ListDomainRequest, ListDomainResponse, UpdateDomainRequest, UpdateDomainResponse } from "./domains_pb.js";
+import { CreateDomainRequest, CreateDomainResponse, DeleteDomainRequest, GetDomainRequest, GetDomainResponse, ListAuthorizedDomainRequest, ListAuthorizedDomainResponse, ListDomainRequest, ListDomainResponse, UpdateDomainRequest, UpdateDomainResponse } from "./domains_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.domains.DomainService
@@ -49,6 +49,15 @@ export declare const DomainService: {
             readonly name: "ListDomains";
             readonly I: typeof ListDomainRequest;
             readonly O: typeof ListDomainResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.domains.DomainService.ListAuthorizedDomains
+         */
+        readonly listAuthorizedDomains: {
+            readonly name: "ListAuthorizedDomains";
+            readonly I: typeof ListAuthorizedDomainRequest;
+            readonly O: typeof ListAuthorizedDomainResponse;
             readonly kind: MethodKind.Unary;
         };
     };
