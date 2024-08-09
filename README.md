@@ -86,10 +86,32 @@ app.get("/auth/login", (req, res) => {
 
 // Handle the callback from Scalekit 
 app.get("/auth/callback", async (req, res) => {
-  const code = req.query.code as string;
+  const { code, error, error_description, idp_initiated_login } = req.query;
+  if (error) {
+    return res.status(400).json({ error, error_description });
+  }
+  if (idp_initiated_login) {
+    const { 
+      connection_id, 
+      organization_id, 
+      login_hint, 
+      relay_state 
+    } = await scalekit.getIdpInitiatedLoginClaims(idp_initiated_login as string);
+    const url = scalekit.getAuthorizationUrl(
+      redirectUri,
+      {
+        connectionId: connection_id,
+        organizationId: organization_id,
+        loginHint: login_hint,
+        ...(relay_state && { state: relay_state }),
+      }
+    )
+
+   return res.redirect(url);
+  }
   const authResp = await sc.authenticateWithCode(code, redirectUri);
   res.cookie("access_token", authResp.accessToken);
-  res.json(authResp.accessToken);
+  return res.json(authResp.accessToken);
 });
 
 app.listen(3000, () => {
