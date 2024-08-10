@@ -17,6 +17,10 @@
     <a href="https://docs.scalekit.com">
     <img src="https://img.shields.io/badge/%F0%9F%92%A1%20-docs-a173ff.svg?style=for-the-badge">
   </a>
+  <a>
+  <img alt="GitHub License" src="https://img.shields.io/github/license/scalekit-inc/scalekit-sdk-node?style=for-the-badge&color=a173ff">
+  </a>
+
 </h1>
 
 <p align="center">
@@ -134,7 +138,7 @@ Return Type: `string`
 
 Returns the authorization URL and redirect the user to the IdP login page
 
-```http
+```sh
 https://auth.scalekit.com/authorize
   ?client_id=skc_1220XXXXX349527
   &redirect_uri=https://yourapp.com/auth/callback
@@ -189,22 +193,32 @@ Type: `string` (JSON Web Token format)
 
 The value of `idp_initiated_login` query parameter from the redirect URL.
 
-🔍 For detailed information on each option and parameter, please refer to our [API Reference](https://docs.scalekit.com/apis) 📚.
+For detailed information on each option and parameter, please refer to our [API Reference](https://docs.scalekit.com/apis) 📚.
 
-### Examples
+### 🔍 Examples
 
-Fully functional sample applications written using some popular web application frameworks and Scalekit SDK. Feel free to clone the repo and run them locally.
+Scan through the examples for [Express.js](https://github.dev/scalekit-inc/scalekit-express-example) and [Next.js](https://github.dev/scalekit-inc/scalekit-nextjs-example).
 
-- [Express.js](https://github.com/scalekit-inc/scalekit-express-example.git)
-- [Next.js](https://github.com/scalekit-inc/scalekit-nextjs-example.git)
+```sh
+# Clone Express.js example
+git clone https://github.com/scalekit-inc/scalekit-express-example.git
 
+# Clone Next.js example
+git clone https://github.com/scalekit-inc/scalekit-nextjs-example.git
+```
 
-### More Information
+### 🤝 Contributing
 
-- Quickstart Guide to implement Single Sign-on in your application: [SSO Quickstart Guide](https://docs.scalekit.com)
-- Understand Single Sign-on basics: [SSO Basics](https://docs.scalekit.com/best-practices/single-sign-on)
+Thank you for considering contributing to the Scalekit SDK!
 
-### License
+- Feel free to open an issue or submit a pull request.
+- Become a [stargazer](https://github.com/scalekit-inc/scalekit-sdk-node/stargazers) of this repository.
+- Write a blog post of what you built with Scalekit.
 
-This project is licensed under the **MIT license**.
-See the [LICENSE](LICENSE) file for more information.
+---
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+<p align="center">
+  Made with ❤️ by the Scalekit team
+</p>
