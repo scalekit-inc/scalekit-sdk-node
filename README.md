@@ -25,7 +25,7 @@
 
 ---
 
-### ⚙️ Installation
+## ⚙️ Installation
 
 Scalekit's Node.js SDK requires **Node.js version 18.x** or later to run. To install or upgrade Node.js, refer to the [official Node.js installation guide](https://nodejs.org/en/download). To start setting up, go to your Node project's root directory and run following command:
 
@@ -43,10 +43,11 @@ yarn add @scalekit-sdk/node
 pnpm add @scalekit-sdk/node
 ```
 
-**Note ℹ️**
-SDK requires you to authenticate before you can access its authenticaiton infrastructure. Get `client_id`, `client_secret` and `env_url` from the Scalekit dashboard.
+```sh
+bun add @scalekit-sdk/node
+```
 
-### Usage
+## Usage
 
 Scalekit SDK establishes an enterprise-ready authentication server that can be set up for an application by providing API credentials (Currently, Early Access) during SDK initialization.
 
@@ -62,61 +63,33 @@ const scalekit = new ScalekitClient(
 
 <details>
   <summary> 💭 Remind me the sequence of single sign-on</summary>
-
  <figure>
   <img src="./images/1.png" style="text-align: center;">
   <figcaption>Sequence where Scalekit fits in your application</figcaption>
 </figure>
-
 </details>
-
 <br/>
 
 ```javascript
-// Generate the authorization URL to redirect users to the Identity Provider (IdP) login page.
-
-const authorizationURL = scalekit.getAuthorizationUrl(
-  'https://b2b-app.com/redirect-uri',
-  options
-);
-
-
-```
-
-### Examples
-
-#### SSO with Express.js
-
-Below is a simple code sample that showcases how to implement Single Sign-on using Scalekit SDK
-
-```javascript
-import express from "express";
-import { ScalekitClient } from "@scalekit-sdk/node";
-
-const app = express();
-
-const sc = new ScalekitClient(
-  process.env.SCALEKIT_ENV_URL!,
-  process.env.SCALEKIT_CLIENT_ID!,
-  process.env.SCALEKIT_CLIENT_SECRET!
-);
+/**
+ * Import ScalekitClient as scalekit
+ * Create an Express app instance
+*/
 
 const redirectUri = `${process.env.HOST}/auth/callback`;
 
-// Get the authorization URL and redirect the user to the IdP login page
+
 app.get("/auth/login", (req, res) => {
-  const authUrl = sc.getAuthorizationUrl(
+  const authUrl = scalekit.getAuthorizationUrl(
     redirectUri,
     {
       state: "state",
       connectionId: "connection_id",
     }
   );
-
   res.redirect(authUrl);
 });
 
-// Handle the callback from Scalekit
 app.get("/auth/callback", async (req, res) => {
   const { code, error, error_description, idp_initiated_login } = req.query;
   // Handle error
@@ -131,9 +104,10 @@ app.get("/auth/callback", async (req, res) => {
       organization_id,
       login_hint,
       relay_state
-    } = await scalekitClient.getIdpInitiatedLoginClaims(idp_initiated_login as string);
-    // Get the authorization URL and redirect the user to the IdP login page
-    const url = scalekitClient.getAuthorizationUrl(
+    } = await scalekit.getIdpInitiatedLoginClaims(idp_initiated_login as string);
+
+// Get the authorization URL and redirect the user to the IdP login page
+    const url = scalekit.getAuthorizationUrl(
       redirectUri,
       {
         connectionId: connection_id,
@@ -150,21 +124,80 @@ app.get("/auth/callback", async (req, res) => {
   return res.json(authResp.accessToken);
 });
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-});
 ```
 
-### Example Apps
+## 🧩 API
+
+#### scalekit.getAuthorizationUrl(redirectUri, options)
+
+Return Type: `string`
+
+Returns the authorization URL and redirect the user to the IdP login page
+
+```http
+https://auth.scalekit.com/authorize
+  ?client_id=skc_1220XXXXX349527
+  &redirect_uri=https://yourapp.com/auth/callback
+  &provider=google
+```
+
+##### redirectUri
+
+Type: `string`
+
+The URL to redirect the user to after the user has logged in. For example, `https://b2b-app.com/auth/callback`.
+
+##### options
+
+Type: `object`
+
+Any one of the following identifiers can be used to generate the Authorization URL:
+
+- `connectionId` - The connection ID to use for the login. For example, `conn_1220XXXXX349527`.
+- `organizationId` - The organization ID to use for the login. For example, `org_1220XXXXX349527`.
+- `loginHint` - The login hint to use for the login. For example, `user@example.com`.
+
+Read more about [Authorization URL](https://docs.scalekit.com/sso/guides/key-concepts/authorization-url)
+
+#### scalekit.authenticateWithCode(code, redirectUri, options?)
+
+Return Type: `object`
+
+Returns an object containing user profile details (`idToken` in JSON Web Token format) along with access token.
+
+##### code
+
+Type: `string`
+
+The code sent to the redirect URL (`/auth/callback`) in it's redirect query parameter.
+
+##### redirectUri
+
+Type: `string`
+
+The URL to redirect the user to after the user has logged in. For example, `https://b2b-app.com/auth/callback`.
+
+#### scalekit.getIdpInitiatedLoginClaims(idpInitiatedLoginToken)
+
+Return Type: `object`
+
+Returns the identifiers needed to generate the authorization URL when users login using their Identity Provider (IdP). (a.k.a. IdP initiated login)
+
+##### idpInitiatedLoginToken
+
+Type: `string` (JSON Web Token format)
+
+The value of `idp_initiated_login` query parameter from the redirect URL.
+
+🔍 For detailed information on each option and parameter, please refer to our [API Reference](https://docs.scalekit.com/apis) 📚.
+
+### Examples
 
 Fully functional sample applications written using some popular web application frameworks and Scalekit SDK. Feel free to clone the repo and run them locally.
 
 - [Express.js](https://github.com/scalekit-inc/scalekit-express-example.git)
 - [Next.js](https://github.com/scalekit-inc/scalekit-nextjs-example.git)
 
-### API Reference
-
-Refer to our [API reference docs](https://docs.scalekit.com/apis) for detailed information about all our API endpoints and their usage.
 
 ### More Information
 
