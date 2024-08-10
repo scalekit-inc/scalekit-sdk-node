@@ -145,13 +145,13 @@ https://auth.scalekit.com/authorize
   &provider=google
 ```
 
-##### redirectUri
+**`redirectUri`**
 
 Type: `string`
 
 The URL to redirect the user to after the user has logged in. For example, `https://b2b-app.com/auth/callback`.
 
-##### options
+**`options`**
 
 Type: `object`
 
@@ -169,13 +169,13 @@ Return Type: `object`
 
 Returns an object containing user profile details (`idToken` in JSON Web Token format) along with access token.
 
-##### code
+**`code`**
 
 Type: `string`
 
 The code sent to the redirect URL (`/auth/callback`) in it's redirect query parameter.
 
-##### redirectUri
+**`redirectUri`**
 
 Type: `string`
 
@@ -187,7 +187,7 @@ Return Type: `object`
 
 Returns the identifiers needed to generate the authorization URL when users login using their Identity Provider (IdP). (a.k.a. IdP initiated login)
 
-##### idpInitiatedLoginToken
+**`idpInitiatedLoginToken`**
 
 Type: `string` (JSON Web Token format)
 
