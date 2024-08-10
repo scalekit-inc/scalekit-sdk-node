@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/Get_Early_Access-4f5eff?style=for-the-badge&labelColor=a173ff&color=a173ff">
   </a>
   <a>
-    <img alt="NPM Downloads" src="https://img.shields.io/npm/dm/%40scalekit-sdk%2Fnode?style=for-the-badge&color=a173ff">
+    <img alt="NPM Downloads" src="https://img.shields.io/npm/d18m/%40scalekit-sdk%2Fnode?style=for-the-badge&color=a173ff">
   </a>
     <a href="https://docs.scalekit.com">
     <img src="https://img.shields.io/badge/%F0%9F%92%A1%20-docs-a173ff.svg?style=for-the-badge">
@@ -48,22 +48,38 @@ SDK requires you to authenticate before you can access its authenticaiton infras
 
 ### Usage
 
-Initialize the Scalekit client using the appropriate credentials. Refer code sample below.
+Scalekit SDK establishes an enterprise-ready authentication server that can be set up for an application by providing API credentials (Currently, Early Access) during SDK initialization.
+
+```js
+import { ScalekitClient } from '@scalekit-sdk/node';
+
+const scalekit = new ScalekitClient(
+  process.env.SCALEKIT_ENV_URL,
+  process.env.SCALEKIT_CLIENT_ID,
+  process.env.SCALEKIT_CLIENT_SECRET
+);
+```
+
+<details>
+  <summary> 💭 Remind me the sequence of single sign-on</summary>
+
+ <figure>
+  <img src="./images/1.png" style="text-align: center;">
+  <figcaption>Sequence where Scalekit fits in your application</figcaption>
+</figure>
+
+</details>
+
+<br/>
 
 ```javascript
-import { ScalekitClient } from "@scalekit-sdk/node";
+// Generate the authorization URL to redirect users to the Identity Provider (IdP) login page.
 
-const scalekitClient = new ScalekitClient(
-  process.env.SCALEKIT_ENV_URL!,
-  process.env.SCALEKIT_CLIENT_ID!,
-  process.env.SCALEKIT_CLIENT_SECRET!
+const authorizationURL = scalekit.getAuthorizationUrl(
+  'https://b2b-app.com/redirect-uri',
+  options
 );
 
-// Use the sc object to interact with the Scalekit API
-const authUrl = scalekitClient.getAuthorizationUrl("https://acme-corp.com/redirect-uri", {
-  state: "state",
-  connectionId: "connection_id",
-});
 
 ```
 
@@ -110,11 +126,11 @@ app.get("/auth/callback", async (req, res) => {
   // Handle IdP initiated login
   if (idp_initiated_login) {
     // Get the claims from the IdP initiated login
-    const { 
-      connection_id, 
-      organization_id, 
-      login_hint, 
-      relay_state 
+    const {
+      connection_id,
+      organization_id,
+      login_hint,
+      relay_state
     } = await scalekitClient.getIdpInitiatedLoginClaims(idp_initiated_login as string);
     // Get the authorization URL and redirect the user to the IdP login page
     const url = scalekitClient.getAuthorizationUrl(
