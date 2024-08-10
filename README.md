@@ -195,7 +195,7 @@ The value of `idp_initiated_login` query parameter from the redirect URL.
 
 For detailed information on each option and parameter, please refer to our [API Reference](https://docs.scalekit.com/apis) 📚.
 
-### 🔍 Examples
+## 🔍 Examples
 
 Scan through the examples for [Express.js](https://github.dev/scalekit-inc/scalekit-express-example) and [Next.js](https://github.dev/scalekit-inc/scalekit-nextjs-example).
 
@@ -207,7 +207,7 @@ git clone https://github.com/scalekit-inc/scalekit-express-example.git
 git clone https://github.com/scalekit-inc/scalekit-nextjs-example.git
 ```
 
-### 🤝 Contributing
+## 🤝 Contributing
 
 Thank you for considering contributing to the Scalekit SDK!
 
