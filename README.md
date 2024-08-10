@@ -53,14 +53,14 @@ Initialize the Scalekit client using the appropriate credentials. Refer code sam
 ```javascript
 import { ScalekitClient } from "@scalekit-sdk/node";
 
-const sc = new ScalekitClient(
+const scalekitClient = new ScalekitClient(
   process.env.SCALEKIT_ENV_URL!,
   process.env.SCALEKIT_CLIENT_ID!,
   process.env.SCALEKIT_CLIENT_SECRET!
 );
 
 // Use the sc object to interact with the Scalekit API
-const authUrl = sc.getAuthorizationUrl("https://acme-corp.com/redirect-uri", {
+const authUrl = scalekitClient.getAuthorizationUrl("https://acme-corp.com/redirect-uri", {
   state: "state",
   connectionId: "connection_id",
 });
@@ -102,10 +102,36 @@ app.get("/auth/login", (req, res) => {
 
 // Handle the callback from Scalekit
 app.get("/auth/callback", async (req, res) => {
-  const code = req.query.code as string;
-  const authResp = await sc.authenticateWithCode(code, redirectUri);
+  const { code, error, error_description, idp_initiated_login } = req.query;
+  // Handle error
+  if (error) {
+    return res.status(400).json({ error, error_description });
+  }
+  // Handle IdP initiated login
+  if (idp_initiated_login) {
+    // Get the claims from the IdP initiated login
+    const { 
+      connection_id, 
+      organization_id, 
+      login_hint, 
+      relay_state 
+    } = await scalekitClient.getIdpInitiatedLoginClaims(idp_initiated_login as string);
+    // Get the authorization URL and redirect the user to the IdP login page
+    const url = scalekitClient.getAuthorizationUrl(
+      redirectUri,
+      {
+        connectionId: connection_id,
+        organizationId: organization_id,
+        loginHint: login_hint,
+        ...(relay_state && { state: relay_state }),
+      }
+    )
+
+   return res.redirect(url);
+  }
+  const authResp = await scalekitClient.authenticateWithCode(code, redirectUri);
   res.cookie("access_token", authResp.accessToken);
-  res.json(authResp.accessToken);
+  return res.json(authResp.accessToken);
 });
 
 app.listen(3000, () => {

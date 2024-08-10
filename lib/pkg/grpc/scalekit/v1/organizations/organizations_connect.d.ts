@@ -1,4 +1,4 @@
-import { CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.organizations.OrganizationService
@@ -45,6 +45,15 @@ export declare const OrganizationService: {
             readonly kind: MethodKind.Unary;
         };
         /**
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.SearchOrganization
+         */
+        readonly searchOrganization: {
+            readonly name: "SearchOrganization";
+            readonly I: typeof SearchOrganizationsRequest;
+            readonly O: typeof SearchOrganizationsResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
          * Delete an Organization
          *
          * @generated from rpc scalekit.v1.organizations.OrganizationService.DeleteOrganization
@@ -72,6 +81,15 @@ export declare const OrganizationService: {
         readonly deletePortalLink: {
             readonly name: "DeletePortalLink";
             readonly I: typeof DeletePortalLinkRequest;
+            readonly O: typeof Empty;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.DeletePortalLinkByID
+         */
+        readonly deletePortalLinkByID: {
+            readonly name: "DeletePortalLinkByID";
+            readonly I: typeof DeletePortalLinkByIdRequest;
             readonly O: typeof Empty;
             readonly kind: MethodKind.Unary;
         };

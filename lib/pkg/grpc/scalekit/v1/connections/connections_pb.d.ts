@@ -151,7 +151,11 @@ export declare enum ConnectionType {
     /**
      * @generated from enum value: PASSWORD = 3;
      */
-    PASSWORD = 3
+    PASSWORD = 3,
+    /**
+     * @generated from enum value: OAUTH = 4;
+     */
+    OAUTH = 4
 }
 /**
  * @generated from enum scalekit.v1.connections.ConnectionStatus
@@ -213,31 +217,104 @@ export declare enum ConnectionProvider {
     /**
      * @generated from enum value: CUSTOM = 8;
      */
-    CUSTOM = 8
+    CUSTOM = 8,
+    /**
+     * @generated from enum value: GITHUB = 9;
+     */
+    GITHUB = 9,
+    /**
+     * @generated from enum value: GITLAB = 10;
+     */
+    GITLAB = 10,
+    /**
+     * @generated from enum value: LINKEDIN = 11;
+     */
+    LINKEDIN = 11,
+    /**
+     * @generated from enum value: SALESFORCE = 12;
+     */
+    SALESFORCE = 12
+}
+/**
+ * @generated from message scalekit.v1.connections.GetProvidersRequest
+ */
+export declare class GetProvidersRequest extends Message<GetProvidersRequest> {
+    constructor(data?: PartialMessage<GetProvidersRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.GetProvidersRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetProvidersRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetProvidersRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetProvidersRequest;
+    static equals(a: GetProvidersRequest | PlainMessage<GetProvidersRequest> | undefined, b: GetProvidersRequest | PlainMessage<GetProvidersRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.GetProvidersResponse
+ */
+export declare class GetProvidersResponse extends Message<GetProvidersResponse> {
+    /**
+     * @generated from field: repeated scalekit.v1.connections.Provider providers = 1;
+     */
+    providers: Provider[];
+    constructor(data?: PartialMessage<GetProvidersResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.GetProvidersResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetProvidersResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetProvidersResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetProvidersResponse;
+    static equals(a: GetProvidersResponse | PlainMessage<GetProvidersResponse> | undefined, b: GetProvidersResponse | PlainMessage<GetProvidersResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.Provider
+ */
+export declare class Provider extends Message<Provider> {
+    /**
+     * @generated from field: string key_id = 1;
+     */
+    keyId: string;
+    /**
+     * @generated from field: string display_name = 2;
+     */
+    displayName: string;
+    /**
+     * @generated from field: optional string description = 3;
+     */
+    description?: string;
+    constructor(data?: PartialMessage<Provider>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.Provider";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Provider;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Provider;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Provider;
+    static equals(a: Provider | PlainMessage<Provider> | undefined, b: Provider | PlainMessage<Provider> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.CreateEnvironmentConnectionRequest
+ */
+export declare class CreateEnvironmentConnectionRequest extends Message<CreateEnvironmentConnectionRequest> {
+    /**
+     * @generated from field: scalekit.v1.connections.CreateConnection connection = 1;
+     */
+    connection?: CreateConnection;
+    constructor(data?: PartialMessage<CreateEnvironmentConnectionRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.CreateEnvironmentConnectionRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateEnvironmentConnectionRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateEnvironmentConnectionRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateEnvironmentConnectionRequest;
+    static equals(a: CreateEnvironmentConnectionRequest | PlainMessage<CreateEnvironmentConnectionRequest> | undefined, b: CreateEnvironmentConnectionRequest | PlainMessage<CreateEnvironmentConnectionRequest> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.connections.CreateConnectionRequest
  */
 export declare class CreateConnectionRequest extends Message<CreateConnectionRequest> {
     /**
-     * @generated from oneof scalekit.v1.connections.CreateConnectionRequest.identities
+     * @generated from field: string organization_id = 1;
      */
-    identities: {
-        /**
-         * @generated from field: string organization_id = 1;
-         */
-        value: string;
-        case: "organizationId";
-    } | {
-        /**
-         * @generated from field: string external_id = 2;
-         */
-        value: string;
-        case: "externalId";
-    } | {
-        case: undefined;
-        value?: undefined;
-    };
+    organizationId: string;
     /**
      * @generated from field: scalekit.v1.connections.CreateConnection connection = 3;
      */
@@ -301,23 +378,15 @@ export declare class Connection extends Message<Connection> {
      */
     debugEnabled: boolean;
     /**
-     * @generated from field: string organization_id = 7;
+     * @generated from field: optional string organization_id = 7;
      */
-    organizationId: string;
+    organizationId?: string;
     /**
      * @generated from field: string ui_button_title = 8;
      */
     uiButtonTitle: string;
     /**
-     * @generated from field: string login_initiation_uri = 9;
-     */
-    loginInitiationUri: string;
-    /**
-     * @generated from field: string logout_uri = 10;
-     */
-    logoutUri: string;
-    /**
-     * @generated from field: scalekit.v1.connections.ConfigurationType configuration_type = 11;
+     * @generated from field: scalekit.v1.connections.ConfigurationType configuration_type = 9;
      */
     configurationType: ConfigurationType;
     /**
@@ -325,30 +394,48 @@ export declare class Connection extends Message<Connection> {
      */
     testConnectionUri: string;
     /**
-     * @generated from oneof scalekit.v1.connections.Connection.settings
-     */
-    settings: {
-        /**
-         * @generated from field: scalekit.v1.connections.OIDCConnectionConfig oidc_config = 13;
-         */
-        value: OIDCConnectionConfig;
-        case: "oidcConfig";
-    } | {
-        /**
-         * @generated from field: scalekit.v1.connections.SAMLConnectionConfigResponse saml_config = 14;
-         */
-        value: SAMLConnectionConfigResponse;
-        case: "samlConfig";
-    } | {
-        case: undefined;
-        value?: undefined;
-    };
-    /**
      * @generated from field: map<string, string> attribute_mapping = 15;
      */
     attributeMapping: {
         [key: string]: string;
     };
+    /**
+     * @generated from field: google.protobuf.Timestamp create_time = 16;
+     */
+    createTime?: Timestamp;
+    /**
+     * @generated from field: google.protobuf.Timestamp update_time = 17;
+     */
+    updateTime?: Timestamp;
+    /**
+     * @generated from oneof scalekit.v1.connections.Connection.settings
+     */
+    settings: {
+        /**
+         * @generated from field: scalekit.v1.connections.OIDCConnectionConfig oidc_config = 18;
+         */
+        value: OIDCConnectionConfig;
+        case: "oidcConfig";
+    } | {
+        /**
+         * @generated from field: scalekit.v1.connections.SAMLConnectionConfigResponse saml_config = 19;
+         */
+        value: SAMLConnectionConfigResponse;
+        case: "samlConfig";
+    } | {
+        /**
+         * @generated from field: scalekit.v1.connections.OAuthConnectionConfig oauth_config = 20;
+         */
+        value: OAuthConnectionConfig;
+        case: "oauthConfig";
+    } | {
+        case: undefined;
+        value?: undefined;
+    };
+    /**
+     * @generated from field: optional string key_id = 21;
+     */
+    keyId?: string;
     constructor(data?: PartialMessage<Connection>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.Connection";
@@ -376,28 +463,34 @@ export declare class CreateConnectionResponse extends Message<CreateConnectionRe
     static equals(a: CreateConnectionResponse | PlainMessage<CreateConnectionResponse> | undefined, b: CreateConnectionResponse | PlainMessage<CreateConnectionResponse> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.connections.UpdateEnvironmentConnectionRequest
+ */
+export declare class UpdateEnvironmentConnectionRequest extends Message<UpdateEnvironmentConnectionRequest> {
+    /**
+     * @generated from field: string connection_id = 1;
+     */
+    connectionId: string;
+    /**
+     * @generated from field: scalekit.v1.connections.UpdateConnection connection = 3;
+     */
+    connection?: UpdateConnection;
+    constructor(data?: PartialMessage<UpdateEnvironmentConnectionRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.UpdateEnvironmentConnectionRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateEnvironmentConnectionRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateEnvironmentConnectionRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateEnvironmentConnectionRequest;
+    static equals(a: UpdateEnvironmentConnectionRequest | PlainMessage<UpdateEnvironmentConnectionRequest> | undefined, b: UpdateEnvironmentConnectionRequest | PlainMessage<UpdateEnvironmentConnectionRequest> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.connections.UpdateConnectionRequest
  */
 export declare class UpdateConnectionRequest extends Message<UpdateConnectionRequest> {
     /**
-     * @generated from oneof scalekit.v1.connections.UpdateConnectionRequest.identities
+     * @generated from field: string organization_id = 1;
      */
-    identities: {
-        /**
-         * @generated from field: string organization_id = 1;
-         */
-        value: string;
-        case: "organizationId";
-    } | {
-        /**
-         * @generated from field: string external_id = 2;
-         */
-        value: string;
-        case: "externalId";
-    } | {
-        case: undefined;
-        value?: undefined;
-    };
+    organizationId: string;
     /**
      * @generated from field: string id = 3;
      */
@@ -436,38 +529,44 @@ export declare class UpdateConnection extends Message<UpdateConnection> {
      */
     uiButtonTitle?: string;
     /**
-     * @generated from field: google.protobuf.StringValue logout_uri = 10;
-     */
-    logoutUri?: string;
-    /**
      * @generated from field: scalekit.v1.connections.ConfigurationType configuration_type = 11;
      */
     configurationType: ConfigurationType;
-    /**
-     * @generated from oneof scalekit.v1.connections.UpdateConnection.settings
-     */
-    settings: {
-        /**
-         * @generated from field: scalekit.v1.connections.OIDCConnectionConfig oidc_config = 13;
-         */
-        value: OIDCConnectionConfig;
-        case: "oidcConfig";
-    } | {
-        /**
-         * @generated from field: scalekit.v1.connections.SAMLConnectionConfigResponse saml_config = 14;
-         */
-        value: SAMLConnectionConfigResponse;
-        case: "samlConfig";
-    } | {
-        case: undefined;
-        value?: undefined;
-    };
     /**
      * @generated from field: map<string, string> attribute_mapping = 15;
      */
     attributeMapping: {
         [key: string]: string;
     };
+    /**
+     * @generated from oneof scalekit.v1.connections.UpdateConnection.settings
+     */
+    settings: {
+        /**
+         * @generated from field: scalekit.v1.connections.OIDCConnectionConfig oidc_config = 16;
+         */
+        value: OIDCConnectionConfig;
+        case: "oidcConfig";
+    } | {
+        /**
+         * @generated from field: scalekit.v1.connections.SAMLConnectionConfigRequest saml_config = 17;
+         */
+        value: SAMLConnectionConfigRequest;
+        case: "samlConfig";
+    } | {
+        /**
+         * @generated from field: scalekit.v1.connections.OAuthConnectionConfig oauth_config = 18;
+         */
+        value: OAuthConnectionConfig;
+        case: "oauthConfig";
+    } | {
+        case: undefined;
+        value?: undefined;
+    };
+    /**
+     * @generated from field: optional string key_id = 19;
+     */
+    keyId?: string;
     constructor(data?: PartialMessage<UpdateConnection>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.UpdateConnection";
@@ -495,28 +594,30 @@ export declare class UpdateConnectionResponse extends Message<UpdateConnectionRe
     static equals(a: UpdateConnectionResponse | PlainMessage<UpdateConnectionResponse> | undefined, b: UpdateConnectionResponse | PlainMessage<UpdateConnectionResponse> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.connections.DeleteEnvironmentConnectionRequest
+ */
+export declare class DeleteEnvironmentConnectionRequest extends Message<DeleteEnvironmentConnectionRequest> {
+    /**
+     * @generated from field: string connection_id = 3;
+     */
+    connectionId: string;
+    constructor(data?: PartialMessage<DeleteEnvironmentConnectionRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.DeleteEnvironmentConnectionRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteEnvironmentConnectionRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteEnvironmentConnectionRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteEnvironmentConnectionRequest;
+    static equals(a: DeleteEnvironmentConnectionRequest | PlainMessage<DeleteEnvironmentConnectionRequest> | undefined, b: DeleteEnvironmentConnectionRequest | PlainMessage<DeleteEnvironmentConnectionRequest> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.connections.DeleteConnectionRequest
  */
 export declare class DeleteConnectionRequest extends Message<DeleteConnectionRequest> {
     /**
-     * @generated from oneof scalekit.v1.connections.DeleteConnectionRequest.identities
+     * @generated from field: string organization_id = 1;
      */
-    identities: {
-        /**
-         * @generated from field: string organization_id = 1;
-         */
-        value: string;
-        case: "organizationId";
-    } | {
-        /**
-         * @generated from field: string external_id = 2;
-         */
-        value: string;
-        case: "externalId";
-    } | {
-        case: undefined;
-        value?: undefined;
-    };
+    organizationId: string;
     /**
      * @generated from field: string id = 3;
      */
@@ -531,28 +632,30 @@ export declare class DeleteConnectionRequest extends Message<DeleteConnectionReq
     static equals(a: DeleteConnectionRequest | PlainMessage<DeleteConnectionRequest> | undefined, b: DeleteConnectionRequest | PlainMessage<DeleteConnectionRequest> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.connections.GetEnvironmentConnectionRequest
+ */
+export declare class GetEnvironmentConnectionRequest extends Message<GetEnvironmentConnectionRequest> {
+    /**
+     * @generated from field: string connection_id = 1;
+     */
+    connectionId: string;
+    constructor(data?: PartialMessage<GetEnvironmentConnectionRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.GetEnvironmentConnectionRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetEnvironmentConnectionRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetEnvironmentConnectionRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetEnvironmentConnectionRequest;
+    static equals(a: GetEnvironmentConnectionRequest | PlainMessage<GetEnvironmentConnectionRequest> | undefined, b: GetEnvironmentConnectionRequest | PlainMessage<GetEnvironmentConnectionRequest> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.connections.GetConnectionRequest
  */
 export declare class GetConnectionRequest extends Message<GetConnectionRequest> {
     /**
-     * @generated from oneof scalekit.v1.connections.GetConnectionRequest.identities
+     * @generated from field: string organization_id = 1;
      */
-    identities: {
-        /**
-         * @generated from field: string organization_id = 1;
-         */
-        value: string;
-        case: "organizationId";
-    } | {
-        /**
-         * @generated from field: string external_id = 2;
-         */
-        value: string;
-        case: "externalId";
-    } | {
-        case: undefined;
-        value?: undefined;
-    };
+    organizationId: string;
     /**
      * @generated from field: string id = 3;
      */
@@ -588,30 +691,13 @@ export declare class GetConnectionResponse extends Message<GetConnectionResponse
  */
 export declare class ListConnectionsRequest extends Message<ListConnectionsRequest> {
     /**
-     * @generated from oneof scalekit.v1.connections.ListConnectionsRequest.identities
+     * @generated from field: optional string organization_id = 1;
      */
-    identities: {
-        /**
-         * @generated from field: string organization_id = 1;
-         */
-        value: string;
-        case: "organizationId";
-    } | {
-        /**
-         * @generated from field: string external_id = 2;
-         */
-        value: string;
-        case: "externalId";
-    } | {
-        /**
-         * @generated from field: string domain = 3;
-         */
-        value: string;
-        case: "domain";
-    } | {
-        case: undefined;
-        value?: undefined;
-    };
+    organizationId?: string;
+    /**
+     * @generated from field: optional string domain = 3;
+     */
+    domain?: string;
     /**
      * @generated from field: optional string include = 4;
      */
@@ -684,28 +770,30 @@ export declare class ListConnection extends Message<ListConnection> {
     static equals(a: ListConnection | PlainMessage<ListConnection> | undefined, b: ListConnection | PlainMessage<ListConnection> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.connections.ToggleEnvironmentConnectionRequest
+ */
+export declare class ToggleEnvironmentConnectionRequest extends Message<ToggleEnvironmentConnectionRequest> {
+    /**
+     * @generated from field: string connection_id = 2;
+     */
+    connectionId: string;
+    constructor(data?: PartialMessage<ToggleEnvironmentConnectionRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.ToggleEnvironmentConnectionRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ToggleEnvironmentConnectionRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ToggleEnvironmentConnectionRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ToggleEnvironmentConnectionRequest;
+    static equals(a: ToggleEnvironmentConnectionRequest | PlainMessage<ToggleEnvironmentConnectionRequest> | undefined, b: ToggleEnvironmentConnectionRequest | PlainMessage<ToggleEnvironmentConnectionRequest> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.connections.ToggleConnectionRequest
  */
 export declare class ToggleConnectionRequest extends Message<ToggleConnectionRequest> {
     /**
-     * @generated from oneof scalekit.v1.connections.ToggleConnectionRequest.identities
+     * @generated from field: string organization_id = 1;
      */
-    identities: {
-        /**
-         * @generated from field: string organization_id = 1;
-         */
-        value: string;
-        case: "organizationId";
-    } | {
-        /**
-         * @generated from field: string external_id = 2;
-         */
-        value: string;
-        case: "externalId";
-    } | {
-        case: undefined;
-        value?: undefined;
-    };
+    organizationId: string;
     /**
      * @generated from field: string id = 3;
      */
@@ -802,6 +890,51 @@ export declare class OIDCConnectionConfig extends Message<OIDCConnectionConfig> 
     static equals(a: OIDCConnectionConfig | PlainMessage<OIDCConnectionConfig> | undefined, b: OIDCConnectionConfig | PlainMessage<OIDCConnectionConfig> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.connections.OAuthConnectionConfig
+ */
+export declare class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
+    /**
+     * @generated from field: google.protobuf.StringValue authorize_uri = 3;
+     */
+    authorizeUri?: string;
+    /**
+     * @generated from field: google.protobuf.StringValue token_uri = 4;
+     */
+    tokenUri?: string;
+    /**
+     * @generated from field: google.protobuf.StringValue user_info_uri = 5;
+     */
+    userInfoUri?: string;
+    /**
+     * @generated from field: google.protobuf.StringValue client_id = 8;
+     */
+    clientId?: string;
+    /**
+     * @generated from field: google.protobuf.StringValue client_secret = 9;
+     */
+    clientSecret?: string;
+    /**
+     * @generated from field: repeated string scopes = 10;
+     */
+    scopes: string[];
+    /**
+     * @generated from field: string redirect_uri = 12;
+     */
+    redirectUri: string;
+    /**
+     * @generated from field: google.protobuf.BoolValue pkce_enabled = 13;
+     */
+    pkceEnabled?: boolean;
+    constructor(data?: PartialMessage<OAuthConnectionConfig>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.OAuthConnectionConfig";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OAuthConnectionConfig;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OAuthConnectionConfig;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OAuthConnectionConfig;
+    static equals(a: OAuthConnectionConfig | PlainMessage<OAuthConnectionConfig> | undefined, b: OAuthConnectionConfig | PlainMessage<OAuthConnectionConfig> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.connections.SAMLConnectionConfigRequest
  */
 export declare class SAMLConnectionConfigRequest extends Message<SAMLConnectionConfigRequest> {
@@ -834,35 +967,31 @@ export declare class SAMLConnectionConfigRequest extends Message<SAMLConnectionC
      */
     idpNameIdFormat: NameIdFormat;
     /**
-     * @generated from field: scalekit.v1.connections.RequestBinding sso_request_binding = 8;
+     * @generated from field: scalekit.v1.connections.RequestBinding idp_sso_request_binding = 8;
      */
-    ssoRequestBinding: RequestBinding;
+    idpSsoRequestBinding: RequestBinding;
     /**
-     * @generated from field: scalekit.v1.connections.RequestBinding slo_request_binding = 9;
+     * @generated from field: scalekit.v1.connections.RequestBinding idp_slo_request_binding = 9;
      */
-    sloRequestBinding: RequestBinding;
+    idpSloRequestBinding: RequestBinding;
     /**
      * @generated from field: scalekit.v1.connections.SAMLSigningOptions saml_signing_option = 10;
      */
     samlSigningOption: SAMLSigningOptions;
     /**
-     * @generated from field: google.protobuf.BoolValue allow_idp_initiated_login = 11;
-     */
-    allowIdpInitiatedLogin?: boolean;
-    /**
-     * @generated from field: google.protobuf.BoolValue force_authn = 12;
+     * @generated from field: google.protobuf.BoolValue force_authn = 14;
      */
     forceAuthn?: boolean;
     /**
-     * @generated from field: google.protobuf.StringValue default_redirect_uri = 13;
+     * @generated from field: google.protobuf.StringValue default_redirect_uri = 15;
      */
     defaultRedirectUri?: string;
     /**
-     * @generated from field: google.protobuf.BoolValue assertion_encrypted = 14;
+     * @generated from field: google.protobuf.BoolValue assertion_encrypted = 16;
      */
     assertionEncrypted?: boolean;
     /**
-     * @generated from field: google.protobuf.BoolValue want_request_signed = 15;
+     * @generated from field: google.protobuf.BoolValue want_request_signed = 17;
      */
     wantRequestSigned?: boolean;
     constructor(data?: PartialMessage<SAMLConnectionConfigRequest>);
