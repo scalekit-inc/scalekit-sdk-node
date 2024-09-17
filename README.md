@@ -24,7 +24,7 @@
 </h1>
 
 <p align="center">
-  <em><a href="https://scalekit.com">Scalekit</a> is your gateway to <b>enterprise-readiness</b> for B2B and SaaS applications. Built on <a href="https://openid.net/">OpenID</a> and <a href="https://en.wikipedia.org/wiki/SAML_2.0">SAML</a> standards, it provides seamless <b>authentication</b>, <b>user management</b>, and <b>access control</b> capabilities. Scalekit helps you comply with <b>GDPR</b>, <b>SOC2</b>, and <b>HIPAA</b> standards, enabling you to focus on <b>core product development</b> while we handle the complexities of <b>enterprise security</b> and <b>compliance</b>.</em>
+  <em><a href="https://scalekit.com">Scalekit</a> is your gateway to <b>enterprise-readiness</b> for B2B and SaaS applications. Built on <a href="https://openid.net/">OpenID</a> and <a href="https://en.wikipedia.org/wiki/SAML_2.0">SAML</a> standards, it provides seamless <b>authentication</b>, <b>user management</b>, and <b>access control</b> capabilities. Scalekit enables you to focus on <b>core product development</b> while we handle the complexities of <b>enterprise authentication</b>.</em>
 </p>
 
 ---
