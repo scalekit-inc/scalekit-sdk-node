@@ -6,19 +6,19 @@
   </a>
   <br/>
     <a href="https://www.npmjs.com/package/@scalekit-sdk/node">
-    <img src="https://img.shields.io/npm/v/@scalekit-sdk/node.svg?color=a173ff&style=for-the-badge">
+    <img src="https://img.shields.io/npm/v/@scalekit-sdk/node.svg?color=3742B3&style=for-the-badge&labelColor=0C0D16">
   </a>
   <a href="https://www.scalekit.com/?intent=earlyaccess&utm_source=docs">
-  <img src="https://img.shields.io/badge/Get_Early_Access-4f5eff?style=for-the-badge&labelColor=a173ff&color=a173ff">
+  <img src="https://img.shields.io/badge/Get_Early_Access-4f5eff?style=for-the-badge&labelColor=E7E7E8&color=3742B3&labelColor=0C0D16">
   </a>
   <a>
-    <img alt="NPM Downloads" src="https://img.shields.io/npm/d18m/%40scalekit-sdk%2Fnode?style=for-the-badge&color=a173ff">
+    <img alt="NPM Downloads" src="https://img.shields.io/npm/d18m/%40scalekit-sdk%2Fnode?style=for-the-badge&color=3742B3&labelColor=0C0D16">
   </a>
     <a href="https://docs.scalekit.com">
-    <img src="https://img.shields.io/badge/%F0%9F%92%A1%20-docs-a173ff.svg?style=for-the-badge">
+    <img src="https://img.shields.io/badge/%F0%9F%92%A1%20-docs-a173ff.svg?style=for-the-badge&labelColor=0C0D16&color=3742B3">
   </a>
   <a>
-  <img alt="GitHub License" src="https://img.shields.io/github/license/scalekit-inc/scalekit-sdk-node?style=for-the-badge&color=a173ff">
+  <img alt="GitHub License" src="https://img.shields.io/github/license/scalekit-inc/scalekit-sdk-node?style=for-the-badge&color=3742B3&labelColor=0C0D16">
   </a>
 
 </h1>
