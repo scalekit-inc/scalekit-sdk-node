@@ -2,6 +2,7 @@ import ConnectionClient from './connection';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
 import { AuthorizationUrlOptions, AuthenticationOptions, AuthenticationResponse } from './types/scalekit';
+import { IdpInitiatedLoginClaims } from './types/auth';
 /**
  * To initiate scalekit
  * @param {string} envUrl The environment url
@@ -49,10 +50,24 @@ export default class ScalekitClient {
      */
     authenticateWithCode(code: string, redirectUri: string, options?: AuthenticationOptions): Promise<AuthenticationResponse>;
     /**
+    * Get the idp initiated login claims
+    *
+    * @param {string} idpInitiatedLoginToken The idp_initiated_login query param from the URL
+    * @returns {object} Returns the idp initiated login claims
+    */
+    getIdpInitiatedLoginClaims(idpInitiatedLoginToken: string): Promise<IdpInitiatedLoginClaims>;
+    /**
      * Validates the access token.
      *
      * @param {string} token The token to be validated.
      * @return {Promise<boolean>} Returns true if the token is valid, false otherwise.
      */
     validateAccessToken(token: string): Promise<boolean>;
+    /**
+     * Validate token
+     *
+     * @param {string} token The token to be validated
+     * @return {Promise<T>} Returns the payload of the token
+     */
+    private validateToken;
 }

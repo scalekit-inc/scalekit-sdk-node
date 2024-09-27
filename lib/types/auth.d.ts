@@ -59,3 +59,9 @@ export type TokenResponse = {
     id_token: string;
     expires_in: number;
 };
+export type IdpInitiatedLoginClaims = {
+    connection_id: string;
+    organization_id: string;
+    login_hint: string;
+    relay_state?: string;
+};
