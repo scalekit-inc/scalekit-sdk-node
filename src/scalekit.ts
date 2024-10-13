@@ -1,15 +1,19 @@
+import crypto from 'crypto';
 import * as jose from 'jose';
 import QueryString from 'qs';
 import GrpcConnect from './connect';
 import ConnectionClient from './connection';
 import { IdTokenClaimToUserMap } from './constants/user';
 import CoreClient from './core';
+import DirectoryClient from './directory';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
-import { AuthorizationUrlOptions, AuthenticationOptions, GrantType, AuthenticationResponse } from './types/scalekit';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
+import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType } from './types/scalekit';
 
 const authorizeEndpoint = "oauth/authorize";
+const WEBHOOK_TOLERANCE_IN_SECONDS = 5 * 60; // 5 minutes
+const WEBHOOK_SIGNATURE_VERSION = "v1";
 
 /**
  * To initiate scalekit
@@ -26,6 +30,7 @@ export default class ScalekitClient {
   readonly organization: OrganizationClient;
   readonly connection: ConnectionClient;
   readonly domain: DomainClient;
+  readonly directory: DirectoryClient;
   constructor(
     envUrl: string,
     clientId: string,
@@ -51,7 +56,11 @@ export default class ScalekitClient {
     this.domain = new DomainClient(
       this.grpcConnect,
       this.coreClient
-    )
+    );
+    this.directory = new DirectoryClient(
+      this.grpcConnect,
+      this.coreClient
+    );
   }
 
   /**
@@ -150,7 +159,7 @@ export default class ScalekitClient {
   * @returns {object} Returns the idp initiated login claims
   */
   async getIdpInitiatedLoginClaims(idpInitiatedLoginToken: string): Promise<IdpInitiatedLoginClaims> {
-    return await this.validateToken<IdpInitiatedLoginClaims>(idpInitiatedLoginToken);
+    return this.validateToken<IdpInitiatedLoginClaims>(idpInitiatedLoginToken);
   }
 
   /**
@@ -166,6 +175,39 @@ export default class ScalekitClient {
     } catch (_) {
       return false;
     }
+  }
+
+  /**
+   * Verifies the payload of the webhook
+   * 
+   * @param {string} secret The secret
+   * @param {Record<string, string>} headers The headers
+   * @param {string} payload The payload
+   * @return {boolean} Returns true if the payload is valid.
+   */
+  verifyWebhookPayload(secret: string, headers: Record<string, string>, payload: string): boolean {
+    const webhookId = headers['webhook-id'];
+    const webhookTimestamp = headers['webhook-timestamp'];
+    const webhookSignature = headers['webhook-signature'];
+    if (!webhookId || !webhookTimestamp || !webhookSignature) {
+      throw new Error("Missing required headers");
+    }
+    const timestamp = this.verifyTimestamp(webhookTimestamp);
+    const data = `${webhookId}.${Math.floor(timestamp.getTime() / 1000)}.${payload}`;
+    const secretBytes = Buffer.from(secret.split("_")[1], 'base64');
+    const computedSignature = this.computeSignature(secretBytes, data);
+    const receivedSignatures = webhookSignature.split(" ");
+    for (const versionedSignature of receivedSignatures) {
+      const [version, signature] = versionedSignature.split(",");
+      if (version !== WEBHOOK_SIGNATURE_VERSION) {
+        continue;
+      }
+      if (crypto.timingSafeEqual(Buffer.from(signature, 'base64'), Buffer.from(computedSignature, 'base64'))) {
+        return true;
+      }
+    }
+
+    throw new Error("Invalid Signature");
   }
 
   /**
@@ -185,6 +227,39 @@ export default class ScalekitClient {
     } catch (_) {
       throw new Error("Invalid token");
     }
+  }
+
+  /**
+   * Verify the timestamp
+   * 
+   * @param {string} timestampStr The timestamp string
+   * @return {Date} Returns the timestamp
+   */
+  private verifyTimestamp(timestampStr: string): Date {
+    const now = Math.floor(Date.now() / 1000);
+    const timestamp = parseInt(timestampStr, 10);
+    if (isNaN(timestamp)) {
+      throw new Error("Invalid timestamp");
+    }
+    if (now - timestamp > WEBHOOK_TOLERANCE_IN_SECONDS) {
+      throw new Error("Message timestamp too old");
+    }
+    if (timestamp > now + WEBHOOK_TOLERANCE_IN_SECONDS) {
+      throw new Error("Message timestamp too new");
+    }
+
+    return new Date(timestamp * 1000);
+  }
+
+  /**
+   * Compute the signature
+   * 
+   * @param {Buffer} secretBytes The secret bytes
+   * @param {string} data The data to be signed
+   * @return {string} Returns the signature
+   */
+  private computeSignature(secretBytes: Buffer, data: string): string {
+    return crypto.createHmac('sha256', secretBytes).update(data).digest('base64');
   }
 }
 
