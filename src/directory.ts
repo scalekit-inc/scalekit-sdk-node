@@ -4,9 +4,11 @@ import GrpcConnect from './connect';
 import CoreClient from './core';
 import { DirectoryService } from './pkg/grpc/scalekit/v1/directories/directories_connect';
 import {
+  GetDirectoryResponse,
   ListDirectoriesResponse,
   ListDirectoryGroupsResponse,
-  ListDirectoryUsersResponse
+  ListDirectoryUsersResponse,
+  ToggleDirectoryResponse
 } from './pkg/grpc/scalekit/v1/directories/directories_pb';
 
 export default class DirectoryClient {
@@ -27,6 +29,19 @@ export default class DirectoryClient {
     return this.coreClient.connectExec(
       this.client.listDirectory,
       { organizationId }
+    )
+  }
+
+  /**
+   * Get a directory for an organization
+   * @param {string} organizationId The organization id
+   * @param {string} directoryId The directory id
+   * @returns {Promise<GetDirectoryResponse>} Returns the directory
+   */
+  async getDirectory(organizationId: string, directoryId: string): Promise<GetDirectoryResponse> {
+    return this.coreClient.connectExec(
+      this.client.getDirectory,
+      { organizationId, id: directoryId }
     )
   }
 
@@ -103,7 +118,7 @@ export default class DirectoryClient {
         })
       }
     }
-    
+
     return this.coreClient.connectExec(
       this.client.listDirectoryGroups,
       {
@@ -111,6 +126,32 @@ export default class DirectoryClient {
         directoryId,
         requestOptions,
       }
+    )
+  }
+
+  /**
+   * Enable a directory for an organization
+   * @param {string} organizationId The organization id
+   * @param {string} directoryId The directory id
+   * @returns {Promise<ToggleDirectoryResponse>} Returns the directory enable response
+   */
+  async enableDirectory(organizationId: string, directoryId: string): Promise<ToggleDirectoryResponse> {
+    return this.coreClient.connectExec(
+      this.client.enableDirectory,
+      { organizationId, id: directoryId }
+    )
+  }
+
+  /**
+   * Disable a directory for an organization
+   * @param {string} organizationId The organization id
+   * @param {string} directoryId The directory id
+   * @returns {Promise<ToggleDirectoryResponse>} Returns the directory disable response
+   */
+  async disableDirectory(organizationId: string, directoryId: string): Promise<ToggleDirectoryResponse> {
+    return this.coreClient.connectExec(
+      this.client.disableDirectory,
+      { organizationId, id: directoryId }
     )
   }
 }
