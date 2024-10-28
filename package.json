@@ -34,7 +34,7 @@
     "@bufbuild/protobuf": "^1.10.0",
     "@bufbuild/protoc-gen-es": "^1.10.0",
     "@connectrpc/protoc-gen-connect-es": "^1.4.0",
-    "@types/node": "^20.14.10",
+    "@types/node": "^22.8.1",
     "@types/qs": "^6.9.15",
     "typescript": "^5.5.3"
   },
