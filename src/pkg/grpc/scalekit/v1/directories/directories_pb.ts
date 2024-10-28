@@ -833,71 +833,52 @@ export class Directory extends Message<Directory> {
   organizationId = "";
 
   /**
-   * @generated from field: string source = 6;
-   */
-  source = "";
-
-  /**
-   * @generated from field: bool enabled = 7;
+   * @generated from field: bool enabled = 5;
    */
   enabled = false;
 
   /**
-   * @generated from field: scalekit.v1.directories.DirectoryProvider directory_provider = 8;
+   * @generated from field: scalekit.v1.directories.DirectoryProvider directory_provider = 6;
    */
   directoryProvider = DirectoryProvider.DIRECTORY_PROVIDER_UNSPECIFIED;
 
   /**
-   * @generated from field: scalekit.v1.directories.DirectoryStatus status = 9;
-   */
-  status = DirectoryStatus.DIRECTORY_STATUS_UNSPECIFIED;
-
-  /**
-   * @generated from field: repeated scalekit.v1.directories.DirectoryMapping mappings = 10;
-   */
-  mappings: DirectoryMapping[] = [];
-
-  /**
-   * @generated from field: google.protobuf.Timestamp last_synced_at = 11;
+   * @generated from field: google.protobuf.Timestamp last_synced_at = 7;
    */
   lastSyncedAt?: Timestamp;
 
   /**
-   * @generated from field: string directory_endpoint = 12;
+   * @generated from field: string directory_endpoint = 8;
    */
   directoryEndpoint = "";
 
   /**
-   * keeping this for backward compatibility
-   *
-   * @generated from field: int32 total_users = 13;
+   * @generated from field: int32 total_users = 9;
    */
   totalUsers = 0;
 
   /**
-   * keeping this for backward compatibility
-   *
-   * @generated from field: int32 total_groups = 14;
+   * @generated from field: int32 total_groups = 10;
    */
   totalGroups = 0;
 
   /**
-   * @generated from field: repeated scalekit.v1.directories.Secret secrets = 15;
+   * @generated from field: repeated scalekit.v1.directories.Secret secrets = 11;
    */
   secrets: Secret[] = [];
 
   /**
-   * @generated from field: scalekit.v1.directories.Stats stats = 16;
+   * @generated from field: scalekit.v1.directories.Stats stats = 12;
    */
   stats?: Stats;
 
   /**
-   * @generated from field: scalekit.v1.directories.RoleAssignments role_assignments = 17;
+   * @generated from field: scalekit.v1.directories.RoleAssignments role_assignments = 13;
    */
   roleAssignments?: RoleAssignments;
 
   /**
-   * @generated from field: scalekit.v1.directories.AttributeMappings attribute_mappings = 18;
+   * @generated from field: scalekit.v1.directories.AttributeMappings attribute_mappings = 14;
    */
   attributeMappings?: AttributeMappings;
 
@@ -913,19 +894,16 @@ export class Directory extends Message<Directory> {
     { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "directory_type", kind: "enum", T: proto3.getEnumType(DirectoryType) },
     { no: 4, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 6, name: "source", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 7, name: "enabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 8, name: "directory_provider", kind: "enum", T: proto3.getEnumType(DirectoryProvider) },
-    { no: 9, name: "status", kind: "enum", T: proto3.getEnumType(DirectoryStatus) },
-    { no: 10, name: "mappings", kind: "message", T: DirectoryMapping, repeated: true },
-    { no: 11, name: "last_synced_at", kind: "message", T: Timestamp },
-    { no: 12, name: "directory_endpoint", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 13, name: "total_users", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 14, name: "total_groups", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
-    { no: 15, name: "secrets", kind: "message", T: Secret, repeated: true },
-    { no: 16, name: "stats", kind: "message", T: Stats },
-    { no: 17, name: "role_assignments", kind: "message", T: RoleAssignments },
-    { no: 18, name: "attribute_mappings", kind: "message", T: AttributeMappings },
+    { no: 5, name: "enabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "directory_provider", kind: "enum", T: proto3.getEnumType(DirectoryProvider) },
+    { no: 7, name: "last_synced_at", kind: "message", T: Timestamp },
+    { no: 8, name: "directory_endpoint", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: "total_users", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 10, name: "total_groups", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+    { no: 11, name: "secrets", kind: "message", T: Secret, repeated: true },
+    { no: 12, name: "stats", kind: "message", T: Stats },
+    { no: 13, name: "role_assignments", kind: "message", T: RoleAssignments },
+    { no: 14, name: "attribute_mappings", kind: "message", T: AttributeMappings },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Directory {

@@ -27,7 +27,7 @@ export default class DirectoryClient {
    */
   async listDirectories(organizationId: string): Promise<ListDirectoriesResponse> {
     return this.coreClient.connectExec(
-      this.client.listDirectory,
+      this.client.listDirectories,
       { organizationId }
     )
   }

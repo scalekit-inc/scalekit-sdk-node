@@ -58,10 +58,10 @@ export const DirectoryService = {
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc scalekit.v1.directories.DirectoryService.ListDirectory
+     * @generated from rpc scalekit.v1.directories.DirectoryService.ListDirectories
      */
-    listDirectory: {
-      name: "ListDirectory",
+    listDirectories: {
+      name: "ListDirectories",
       I: ListDirectoriesRequest,
       O: ListDirectoriesResponse,
       kind: MethodKind.Unary,
