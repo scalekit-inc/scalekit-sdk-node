@@ -5,6 +5,7 @@ import CoreClient from './core';
 import { DirectoryService } from './pkg/grpc/scalekit/v1/directories/directories_connect';
 import {
   GetDirectoryResponse,
+  Directory,
   ListDirectoriesResponse,
   ListDirectoryGroupsResponse,
   ListDirectoryUsersResponse,
@@ -43,6 +44,20 @@ export default class DirectoryClient {
       this.client.getDirectory,
       { organizationId, id: directoryId }
     )
+  }
+
+  /**
+   * Get a directory for an organization
+   * @param {string} organizationId The organization id
+   * @returns {Promise<Directory>} Returns the directory
+   */
+  async getDirectoryByOrganizationId(organizationId: string): Promise<Directory> {
+    const directories = await this.listDirectories(organizationId);
+    if (!directories || directories.directories.length === 0) {
+      return Promise.reject('directory does not exist for organization');
+    }
+
+    return directories.directories[0];
   }
 
   /**
