@@ -98,7 +98,7 @@ export default class DirectoryClient {
       {
         organizationId,
         directoryId,
-        requestOptions,
+        ...requestOptions,
       }
     )
   }
@@ -139,7 +139,7 @@ export default class DirectoryClient {
       {
         organizationId,
         directoryId,
-        requestOptions,
+        ...requestOptions,
       }
     )
   }
