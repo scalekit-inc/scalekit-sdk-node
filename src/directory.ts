@@ -51,7 +51,7 @@ export default class DirectoryClient {
    * @param {string} organizationId The organization id
    * @returns {Promise<Directory>} Returns the directory
    */
-  async getDirectoryByOrganizationId(organizationId: string): Promise<Directory> {
+  async getPrimaryDirectoryByOrganizationId(organizationId: string): Promise<Directory> {
     const directories = await this.listDirectories(organizationId);
     if (!directories || directories.directories.length === 0) {
       return Promise.reject('directory does not exist for organization');
