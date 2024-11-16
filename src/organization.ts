@@ -4,7 +4,7 @@ import GrpcConnect from './connect';
 import CoreClient from './core';
 import { OrganizationService } from './pkg/grpc/scalekit/v1/organizations/organizations_connect';
 import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
-
+import { OrganizationSettings } from './types/organization';
 export default class OrganizationClient {
   private client: PromiseClient<typeof OrganizationService>;
   constructor(
@@ -170,6 +170,29 @@ export default class OrganizationClient {
         id: organizationId,
         linkId
       },
+    )
+  }
+
+  /**
+   * Update organization settings for an organization
+   * @param organizationId  The organization id
+   * @param settings The organization settings
+   * @returns {Promise<GetOrganizationResponse>} The updated organization
+   */
+  async updateOrganizationSettings(organizationId: string, settings: OrganizationSettings): Promise<GetOrganizationResponse> {
+    const request = {
+      id: organizationId,
+      settings: {
+        features: settings.features.map(feature => ({
+          name: feature.name,
+          enabled: feature.enabled
+        }))
+      }
+    }
+    
+    return this.coreClient.connectExec(
+      this.client.updateOrganizationSettings,
+      request,
     )
   }
 }

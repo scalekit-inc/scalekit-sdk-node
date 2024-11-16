@@ -1,8 +1,9 @@
 import ConnectionClient from './connection';
+import DirectoryClient from './directory';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
-import { AuthorizationUrlOptions, AuthenticationOptions, AuthenticationResponse } from './types/scalekit';
 import { IdpInitiatedLoginClaims } from './types/auth';
+import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions } from './types/scalekit';
 /**
  * To initiate scalekit
  * @param {string} envUrl The environment url
@@ -18,6 +19,7 @@ export default class ScalekitClient {
     readonly organization: OrganizationClient;
     readonly connection: ConnectionClient;
     readonly domain: DomainClient;
+    readonly directory: DirectoryClient;
     constructor(envUrl: string, clientId: string, clientSecret: string);
     /**
      * Returns the authorization url to initiate the authentication request.
@@ -64,10 +66,34 @@ export default class ScalekitClient {
      */
     validateAccessToken(token: string): Promise<boolean>;
     /**
+     * Verifies the payload of the webhook
+     *
+     * @param {string} secret The secret
+     * @param {Record<string, string>} headers The headers
+     * @param {string} payload The payload
+     * @return {boolean} Returns true if the payload is valid.
+     */
+    verifyWebhookPayload(secret: string, headers: Record<string, string>, payload: string): boolean;
+    /**
      * Validate token
      *
      * @param {string} token The token to be validated
      * @return {Promise<T>} Returns the payload of the token
      */
     private validateToken;
+    /**
+     * Verify the timestamp
+     *
+     * @param {string} timestampStr The timestamp string
+     * @return {Date} Returns the timestamp
+     */
+    private verifyTimestamp;
+    /**
+     * Compute the signature
+     *
+     * @param {Buffer} secretBytes The secret bytes
+     * @param {string} data The data to be signed
+     * @return {string} Returns the signature
+     */
+    private computeSignature;
 }

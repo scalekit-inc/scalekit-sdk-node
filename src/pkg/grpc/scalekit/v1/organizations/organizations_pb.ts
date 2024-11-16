@@ -199,6 +199,13 @@ export class Organization extends Message<Organization> {
    */
   metadata: { [key: string]: string } = {};
 
+  /**
+   * Organization Settings
+   *
+   * @generated from field: scalekit.v1.organizations.OrganizationSettings settings = 8;
+   */
+  settings?: OrganizationSettings;
+
   constructor(data?: PartialMessage<Organization>) {
     super();
     proto3.util.initPartial(data, this);
@@ -214,6 +221,7 @@ export class Organization extends Message<Organization> {
     { no: 5, name: "region_code", kind: "enum", T: proto3.getEnumType(RegionCode) },
     { no: 6, name: "external_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 7, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
+    { no: 8, name: "settings", kind: "message", T: OrganizationSettings },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Organization {
@@ -532,6 +540,11 @@ export class ListOrganizationsResponse extends Message<ListOrganizationsResponse
    */
   organizations: Organization[] = [];
 
+  /**
+   * @generated from field: string prev_page_token = 4;
+   */
+  prevPageToken = "";
+
   constructor(data?: PartialMessage<ListOrganizationsResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -543,6 +556,7 @@ export class ListOrganizationsResponse extends Message<ListOrganizationsResponse
     { no: 1, name: "next_page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "total_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 3, name: "organizations", kind: "message", T: Organization, repeated: true },
+    { no: 4, name: "prev_page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListOrganizationsResponse {
@@ -630,6 +644,11 @@ export class SearchOrganizationsResponse extends Message<SearchOrganizationsResp
    */
   organizations: Organization[] = [];
 
+  /**
+   * @generated from field: string prev_page_token = 4;
+   */
+  prevPageToken = "";
+
   constructor(data?: PartialMessage<SearchOrganizationsResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -641,6 +660,7 @@ export class SearchOrganizationsResponse extends Message<SearchOrganizationsResp
     { no: 1, name: "next_page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "total_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 3, name: "organizations", kind: "message", T: Organization, repeated: true },
+    { no: 4, name: "prev_page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchOrganizationsResponse {
@@ -719,6 +739,16 @@ export class GeneratePortalLinkRequest extends Message<GeneratePortalLinkRequest
    */
   id = "";
 
+  /**
+   * @generated from field: optional bool sso = 2;
+   */
+  sso?: boolean;
+
+  /**
+   * @generated from field: optional bool directory_sync = 3;
+   */
+  directorySync?: boolean;
+
   constructor(data?: PartialMessage<GeneratePortalLinkRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -728,6 +758,8 @@ export class GeneratePortalLinkRequest extends Message<GeneratePortalLinkRequest
   static readonly typeName = "scalekit.v1.organizations.GeneratePortalLinkRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "sso", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 3, name: "directory_sync", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GeneratePortalLinkRequest {
@@ -984,6 +1016,129 @@ export class GetPortalLinksResponse extends Message<GetPortalLinksResponse> {
 
   static equals(a: GetPortalLinksResponse | PlainMessage<GetPortalLinksResponse> | undefined, b: GetPortalLinksResponse | PlainMessage<GetPortalLinksResponse> | undefined): boolean {
     return proto3.util.equals(GetPortalLinksResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.organizations.UpdateOrganizationSettingsRequest
+ */
+export class UpdateOrganizationSettingsRequest extends Message<UpdateOrganizationSettingsRequest> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: scalekit.v1.organizations.OrganizationSettings settings = 2;
+   */
+  settings?: OrganizationSettings;
+
+  constructor(data?: PartialMessage<UpdateOrganizationSettingsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.UpdateOrganizationSettingsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "settings", kind: "message", T: OrganizationSettings },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateOrganizationSettingsRequest {
+    return new UpdateOrganizationSettingsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateOrganizationSettingsRequest {
+    return new UpdateOrganizationSettingsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateOrganizationSettingsRequest {
+    return new UpdateOrganizationSettingsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UpdateOrganizationSettingsRequest | PlainMessage<UpdateOrganizationSettingsRequest> | undefined, b: UpdateOrganizationSettingsRequest | PlainMessage<UpdateOrganizationSettingsRequest> | undefined): boolean {
+    return proto3.util.equals(UpdateOrganizationSettingsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.organizations.OrganizationSettings
+ */
+export class OrganizationSettings extends Message<OrganizationSettings> {
+  /**
+   * @generated from field: repeated scalekit.v1.organizations.OrganizationSettingsFeature features = 1;
+   */
+  features: OrganizationSettingsFeature[] = [];
+
+  constructor(data?: PartialMessage<OrganizationSettings>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.OrganizationSettings";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "features", kind: "message", T: OrganizationSettingsFeature, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationSettings {
+    return new OrganizationSettings().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrganizationSettings {
+    return new OrganizationSettings().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrganizationSettings {
+    return new OrganizationSettings().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: OrganizationSettings | PlainMessage<OrganizationSettings> | undefined, b: OrganizationSettings | PlainMessage<OrganizationSettings> | undefined): boolean {
+    return proto3.util.equals(OrganizationSettings, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.organizations.OrganizationSettingsFeature
+ */
+export class OrganizationSettingsFeature extends Message<OrganizationSettingsFeature> {
+  /**
+   * @generated from field: string name = 1;
+   */
+  name = "";
+
+  /**
+   * @generated from field: bool enabled = 2;
+   */
+  enabled = false;
+
+  constructor(data?: PartialMessage<OrganizationSettingsFeature>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.OrganizationSettingsFeature";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "enabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationSettingsFeature {
+    return new OrganizationSettingsFeature().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrganizationSettingsFeature {
+    return new OrganizationSettingsFeature().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrganizationSettingsFeature {
+    return new OrganizationSettingsFeature().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: OrganizationSettingsFeature | PlainMessage<OrganizationSettingsFeature> | undefined, b: OrganizationSettingsFeature | PlainMessage<OrganizationSettingsFeature> | undefined): boolean {
+    return proto3.util.equals(OrganizationSettingsFeature, a, b);
   }
 }
 

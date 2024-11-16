@@ -124,6 +124,12 @@ export declare class Organization extends Message<Organization> {
     metadata: {
         [key: string]: string;
     };
+    /**
+     * Organization Settings
+     *
+     * @generated from field: scalekit.v1.organizations.OrganizationSettings settings = 8;
+     */
+    settings?: OrganizationSettings;
     constructor(data?: PartialMessage<Organization>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.organizations.Organization";
@@ -305,6 +311,10 @@ export declare class ListOrganizationsResponse extends Message<ListOrganizations
      * @generated from field: repeated scalekit.v1.organizations.Organization organizations = 3;
      */
     organizations: Organization[];
+    /**
+     * @generated from field: string prev_page_token = 4;
+     */
+    prevPageToken: string;
     constructor(data?: PartialMessage<ListOrganizationsResponse>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.organizations.ListOrganizationsResponse";
@@ -355,6 +365,10 @@ export declare class SearchOrganizationsResponse extends Message<SearchOrganizat
      * @generated from field: repeated scalekit.v1.organizations.Organization organizations = 3;
      */
     organizations: Organization[];
+    /**
+     * @generated from field: string prev_page_token = 4;
+     */
+    prevPageToken: string;
     constructor(data?: PartialMessage<SearchOrganizationsResponse>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.organizations.SearchOrganizationsResponse";
@@ -404,6 +418,14 @@ export declare class GeneratePortalLinkRequest extends Message<GeneratePortalLin
      * @generated from field: string id = 1;
      */
     id: string;
+    /**
+     * @generated from field: optional bool sso = 2;
+     */
+    sso?: boolean;
+    /**
+     * @generated from field: optional bool directory_sync = 3;
+     */
+    directorySync?: boolean;
     constructor(data?: PartialMessage<GeneratePortalLinkRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.organizations.GeneratePortalLinkRequest";
@@ -526,4 +548,63 @@ export declare class GetPortalLinksResponse extends Message<GetPortalLinksRespon
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetPortalLinksResponse;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetPortalLinksResponse;
     static equals(a: GetPortalLinksResponse | PlainMessage<GetPortalLinksResponse> | undefined, b: GetPortalLinksResponse | PlainMessage<GetPortalLinksResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.UpdateOrganizationSettingsRequest
+ */
+export declare class UpdateOrganizationSettingsRequest extends Message<UpdateOrganizationSettingsRequest> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: scalekit.v1.organizations.OrganizationSettings settings = 2;
+     */
+    settings?: OrganizationSettings;
+    constructor(data?: PartialMessage<UpdateOrganizationSettingsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.UpdateOrganizationSettingsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateOrganizationSettingsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateOrganizationSettingsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateOrganizationSettingsRequest;
+    static equals(a: UpdateOrganizationSettingsRequest | PlainMessage<UpdateOrganizationSettingsRequest> | undefined, b: UpdateOrganizationSettingsRequest | PlainMessage<UpdateOrganizationSettingsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.OrganizationSettings
+ */
+export declare class OrganizationSettings extends Message<OrganizationSettings> {
+    /**
+     * @generated from field: repeated scalekit.v1.organizations.OrganizationSettingsFeature features = 1;
+     */
+    features: OrganizationSettingsFeature[];
+    constructor(data?: PartialMessage<OrganizationSettings>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.OrganizationSettings";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationSettings;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrganizationSettings;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrganizationSettings;
+    static equals(a: OrganizationSettings | PlainMessage<OrganizationSettings> | undefined, b: OrganizationSettings | PlainMessage<OrganizationSettings> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.OrganizationSettingsFeature
+ */
+export declare class OrganizationSettingsFeature extends Message<OrganizationSettingsFeature> {
+    /**
+     * @generated from field: string name = 1;
+     */
+    name: string;
+    /**
+     * @generated from field: bool enabled = 2;
+     */
+    enabled: boolean;
+    constructor(data?: PartialMessage<OrganizationSettingsFeature>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.OrganizationSettingsFeature";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationSettingsFeature;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrganizationSettingsFeature;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrganizationSettingsFeature;
+    static equals(a: OrganizationSettingsFeature | PlainMessage<OrganizationSettingsFeature> | undefined, b: OrganizationSettingsFeature | PlainMessage<OrganizationSettingsFeature> | undefined): boolean;
 }

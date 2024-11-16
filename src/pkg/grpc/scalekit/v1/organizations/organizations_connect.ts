@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSettingsRequest } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -106,6 +106,15 @@ export const OrganizationService = {
       name: "GetPortalLinks",
       I: GetPortalLinkRequest,
       O: GetPortalLinksResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateOrganizationSettings
+     */
+    updateOrganizationSettings: {
+      name: "UpdateOrganizationSettings",
+      I: UpdateOrganizationSettingsRequest,
+      O: GetOrganizationResponse,
       kind: MethodKind.Unary,
     },
   }
