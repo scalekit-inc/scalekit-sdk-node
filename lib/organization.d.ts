@@ -2,6 +2,7 @@ import { Empty, PartialMessage } from '@bufbuild/protobuf';
 import GrpcConnect from './connect';
 import CoreClient from './core';
 import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
+import { OrganizationSettings } from './types/organization';
 export default class OrganizationClient {
     private readonly grpcConncet;
     private readonly coreClient;
@@ -79,4 +80,11 @@ export default class OrganizationClient {
      * @returns {Promise<Empty>} Returns nothing
      */
     deletePortalLink(organizationId: string, linkId: string): Promise<Empty>;
+    /**
+     * Update organization settings for an organization
+     * @param organizationId  The organization id
+     * @param settings The organization settings
+     * @returns {Promise<GetOrganizationResponse>} The updated organization
+     */
+    updateOrganizationSettings(organizationId: string, settings: OrganizationSettings): Promise<GetOrganizationResponse>;
 }
