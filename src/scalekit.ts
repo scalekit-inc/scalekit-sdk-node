@@ -185,12 +185,21 @@ export default class ScalekitClient {
    * @param {string} payload The payload
    * @return {boolean} Returns true if the payload is valid.
    */
-  verifyWebhookPayload(secret: string, headers: Record<string, string>, payload: string): boolean {
+  verifyWebhookPayload(secret: string, headers: Record<string, string>, payload: string | Buffer): boolean {
     const webhookId = headers['webhook-id'];
     const webhookTimestamp = headers['webhook-timestamp'];
     const webhookSignature = headers['webhook-signature'];
     if (!webhookId || !webhookTimestamp || !webhookSignature) {
       throw new Error("Missing required headers");
+    }
+    if (typeof payload === "string") {
+      // Do nothing, already a string
+    } else if (payload.constructor.name === "Buffer") {
+      payload = payload.toString();
+    } else {
+      throw new Error(
+        "Expected payload to be of type string or Buffer."
+      );
     }
     const timestamp = this.verifyTimestamp(webhookTimestamp);
     const data = `${webhookId}.${Math.floor(timestamp.getTime() / 1000)}.${payload}`;
