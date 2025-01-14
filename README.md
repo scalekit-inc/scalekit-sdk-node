@@ -8,6 +8,7 @@
 </p>
 
 # Official Node.js SDK
+
 <a href="https://scalekit.com" target="_blank" rel="noopener noreferrer">Scalekit</a> is an Enterprise Authentication Platform purpose built for B2B applications. This Node.js SDK helps implement Enterprise Capabilities like Single Sign-on via SAML or OIDC in your Node.js applications within a few hours.
 
 <div>
@@ -18,11 +19,15 @@
 ## Pre-requisites
 
 1. [Sign up](https://scalekit.com) for a Scalekit account.
-2. Get your ```env_url```, ```client_id``` and ```client_secret``` from the Scalekit dashboard.
+2. Get your `env_url`, `client_id` and `client_secret` from the Scalekit dashboard.
+
+<div style="border: 1px solid #ccc; padding: 10px; border-radius: 5px; background-color: #f9f9f9;">
+  <strong>Note:</strong> Our NodeJS SDK currently supports NodeJS versions >=18 as it is the min LTS version that is maintained by the NodeJS ecosystem.
+</div>
 
 ## Installation
 
-Install Scalekit SDK using your preferred package manager. 
+Install Scalekit SDK using your preferred package manager.
 
 ```sh
 npm install @scalekit-sdk/node
@@ -74,7 +79,7 @@ const redirectUri = `${process.env.HOST}/auth/callback`;
 // Get the authorization URL and redirect the user to the IdP login page
 app.get("/auth/login", (req, res) => {
   const authUrl = scalekitClient.getAuthorizationUrl(
-    redirectUri, 
+    redirectUri,
     {
       state: "state",
       connectionId: "connection_id",
@@ -84,7 +89,7 @@ app.get("/auth/login", (req, res) => {
   res.redirect(authUrl);
 });
 
-// Handle the callback from Scalekit 
+// Handle the callback from Scalekit
 app.get("/auth/callback", async (req, res) => {
   const { code, error, error_description, idp_initiated_login } = req.query;
   // Handle error
@@ -94,11 +99,11 @@ app.get("/auth/callback", async (req, res) => {
   // Handle IdP initiated login
   if (idp_initiated_login) {
     // Get the claims from the IdP initiated login
-    const { 
-      connection_id, 
-      organization_id, 
-      login_hint, 
-      relay_state 
+    const {
+      connection_id,
+      organization_id,
+      login_hint,
+      relay_state
     } = await scalekitClient.getIdpInitiatedLoginClaims(idp_initiated_login as string);
     // Get the authorization URL and redirect the user to the IdP login page
     const url = scalekitClient.getAuthorizationUrl(
@@ -123,7 +128,7 @@ app.listen(3000, () => {
 });
 ```
 
-## Example Apps  
+## Example Apps
 
 Fully functional sample applications written using some popular web application frameworks and Scalekit SDK. Feel free to clone the repo and run them locally.
 
