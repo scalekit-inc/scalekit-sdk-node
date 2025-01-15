@@ -44,5 +44,8 @@
   "homepage": "https://github.com/scalekit-inc/scalekit-sdk-node#readme",
   "directories": {
     "lib": "lib"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }
