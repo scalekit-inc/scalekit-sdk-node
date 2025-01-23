@@ -68,19 +68,6 @@ export default class OrganizationClient {
      */
     generatePortalLink(organizationId: string): Promise<Link>;
     /**
-     * Get admin portal links for an organization
-     * @param organizationId  The organization id
-     * @returns {Promise<Link[]>} The admin portal link object with expiration time and location
-     */
-    getPortalLinks(organizationId: string): Promise<Link[]>;
-    /**
-     * Delete admin portal link for an organization
-     * @param organizationId  The organization id
-     * @param linkId The link id
-     * @returns {Promise<Empty>} Returns nothing
-     */
-    deletePortalLink(organizationId: string, linkId: string): Promise<Empty>;
-    /**
      * Update organization settings for an organization
      * @param organizationId  The organization id
      * @param settings The organization settings
