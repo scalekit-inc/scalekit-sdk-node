@@ -1,5 +1,5 @@
 {
-  "version": "1.0.8",
+  "version": "1.0.9",
   "name": "@scalekit-sdk/node",
   "description": "Official Scalekit Node SDK",
   "main": "lib/index.js",
