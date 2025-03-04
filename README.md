@@ -37,6 +37,17 @@ yarn add @scalekit-sdk/node
 pnpm add @scalekit-sdk/node
 ```
 
+#### Minimum Requirements
+
+The Scalekit Node.js SDK has been tested with and requires the following:
+
+| Component | Version  |
+| --------- | -------- |
+| Node.js   | 16.0.0+  |
+
+> **Note:** While Node.js 16.0.0 is the minimum requirement, we recommend using Node.js versions >=18 LTS for improved performance and long-term support.
+
+
 ## Usage
 
 Initialize the Scalekit client using the appropriate credentials. Refer code sample below.
