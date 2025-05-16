@@ -24,12 +24,18 @@ export enum DirectoryType {
    * @generated from enum value: LDAP = 2;
    */
   LDAP = 2,
+
+  /**
+   * @generated from enum value: POLL = 3;
+   */
+  POLL = 3,
 }
 // Retrieve enum metadata with: proto3.getEnumType(DirectoryType)
 proto3.util.setEnumType(DirectoryType, "scalekit.v1.directories.DirectoryType", [
   { no: 0, name: "DIRECTORY_TYPE_UNSPECIFIED" },
   { no: 1, name: "SCIM" },
   { no: 2, name: "LDAP" },
+  { no: 3, name: "POLL" },
 ]);
 
 /**
@@ -65,6 +71,16 @@ export enum DirectoryProvider {
    * @generated from enum value: ONELOGIN = 5;
    */
   ONELOGIN = 5,
+
+  /**
+   * @generated from enum value: JUMPCLOUD = 6;
+   */
+  JUMPCLOUD = 6,
+
+  /**
+   * @generated from enum value: PING_IDENTITY = 7;
+   */
+  PING_IDENTITY = 7,
 }
 // Retrieve enum metadata with: proto3.getEnumType(DirectoryProvider)
 proto3.util.setEnumType(DirectoryProvider, "scalekit.v1.directories.DirectoryProvider", [
@@ -74,6 +90,8 @@ proto3.util.setEnumType(DirectoryProvider, "scalekit.v1.directories.DirectoryPro
   { no: 3, name: "MICROSOFT_AD" },
   { no: 4, name: "AUTH0" },
   { no: 5, name: "ONELOGIN" },
+  { no: 6, name: "JUMPCLOUD" },
+  { no: 7, name: "PING_IDENTITY" },
 ]);
 
 /**
@@ -414,6 +432,11 @@ export class UpdateDirectory extends Message<UpdateDirectory> {
    */
   mappings: DirectoryMapping[] = [];
 
+  /**
+   * @generated from field: repeated scalekit.v1.directories.ExternalGroup groups = 15;
+   */
+  groups: ExternalGroup[] = [];
+
   constructor(data?: PartialMessage<UpdateDirectory>) {
     super();
     proto3.util.initPartial(data, this);
@@ -428,6 +451,7 @@ export class UpdateDirectory extends Message<UpdateDirectory> {
     { no: 8, name: "directory_provider", kind: "enum", T: proto3.getEnumType(DirectoryProvider) },
     { no: 9, name: "status", kind: "enum", T: proto3.getEnumType(DirectoryStatus) },
     { no: 10, name: "mappings", kind: "message", T: DirectoryMapping, repeated: true },
+    { no: 15, name: "groups", kind: "message", T: ExternalGroup, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateDirectory {
@@ -481,6 +505,55 @@ export class UpdateDirectoryResponse extends Message<UpdateDirectoryResponse> {
 
   static equals(a: UpdateDirectoryResponse | PlainMessage<UpdateDirectoryResponse> | undefined, b: UpdateDirectoryResponse | PlainMessage<UpdateDirectoryResponse> | undefined): boolean {
     return proto3.util.equals(UpdateDirectoryResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.directories.AssignGroupsForDirectoryRequest
+ */
+export class AssignGroupsForDirectoryRequest extends Message<AssignGroupsForDirectoryRequest> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string organization_id = 2;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: repeated string external_ids = 3;
+   */
+  externalIds: string[] = [];
+
+  constructor(data?: PartialMessage<AssignGroupsForDirectoryRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.directories.AssignGroupsForDirectoryRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "external_ids", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignGroupsForDirectoryRequest {
+    return new AssignGroupsForDirectoryRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignGroupsForDirectoryRequest {
+    return new AssignGroupsForDirectoryRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignGroupsForDirectoryRequest {
+    return new AssignGroupsForDirectoryRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AssignGroupsForDirectoryRequest | PlainMessage<AssignGroupsForDirectoryRequest> | undefined, b: AssignGroupsForDirectoryRequest | PlainMessage<AssignGroupsForDirectoryRequest> | undefined): boolean {
+    return proto3.util.equals(AssignGroupsForDirectoryRequest, a, b);
   }
 }
 
@@ -720,6 +793,11 @@ export class ListDirectoryGroupsRequest extends Message<ListDirectoryGroupsReque
    */
   includeDetail?: boolean;
 
+  /**
+   * @generated from field: optional bool include_external_groups = 7;
+   */
+  includeExternalGroups?: boolean;
+
   constructor(data?: PartialMessage<ListDirectoryGroupsRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -734,6 +812,7 @@ export class ListDirectoryGroupsRequest extends Message<ListDirectoryGroupsReque
     { no: 4, name: "page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "updated_after", kind: "message", T: Timestamp, opt: true },
     { no: 6, name: "include_detail", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
+    { no: 7, name: "include_external_groups", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListDirectoryGroupsRequest {
@@ -805,6 +884,49 @@ export class ListDirectoryGroupsResponse extends Message<ListDirectoryGroupsResp
 
   static equals(a: ListDirectoryGroupsResponse | PlainMessage<ListDirectoryGroupsResponse> | undefined, b: ListDirectoryGroupsResponse | PlainMessage<ListDirectoryGroupsResponse> | undefined): boolean {
     return proto3.util.equals(ListDirectoryGroupsResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.directories.ListDirectoryGroupsSummaryRequest
+ */
+export class ListDirectoryGroupsSummaryRequest extends Message<ListDirectoryGroupsSummaryRequest> {
+  /**
+   * @generated from field: string organization_id = 1;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: string directory_id = 2;
+   */
+  directoryId = "";
+
+  constructor(data?: PartialMessage<ListDirectoryGroupsSummaryRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.directories.ListDirectoryGroupsSummaryRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "directory_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListDirectoryGroupsSummaryRequest {
+    return new ListDirectoryGroupsSummaryRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListDirectoryGroupsSummaryRequest {
+    return new ListDirectoryGroupsSummaryRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListDirectoryGroupsSummaryRequest {
+    return new ListDirectoryGroupsSummaryRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListDirectoryGroupsSummaryRequest | PlainMessage<ListDirectoryGroupsSummaryRequest> | undefined, b: ListDirectoryGroupsSummaryRequest | PlainMessage<ListDirectoryGroupsSummaryRequest> | undefined): boolean {
+    return proto3.util.equals(ListDirectoryGroupsSummaryRequest, a, b);
   }
 }
 
@@ -882,6 +1004,21 @@ export class Directory extends Message<Directory> {
    */
   attributeMappings?: AttributeMappings;
 
+  /**
+   * @generated from field: string status = 15;
+   */
+  status = "";
+
+  /**
+   * @generated from field: string email = 16;
+   */
+  email = "";
+
+  /**
+   * @generated from field: string groups_tracked = 17;
+   */
+  groupsTracked = "";
+
   constructor(data?: PartialMessage<Directory>) {
     super();
     proto3.util.initPartial(data, this);
@@ -904,6 +1041,9 @@ export class Directory extends Message<Directory> {
     { no: 12, name: "stats", kind: "message", T: Stats },
     { no: 13, name: "role_assignments", kind: "message", T: RoleAssignments },
     { no: 14, name: "attribute_mappings", kind: "message", T: AttributeMappings },
+    { no: 15, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 16, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 17, name: "groups_tracked", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Directory {
@@ -1140,6 +1280,55 @@ export class DirectoryUser extends Message<DirectoryUser> {
 
   static equals(a: DirectoryUser | PlainMessage<DirectoryUser> | undefined, b: DirectoryUser | PlainMessage<DirectoryUser> | undefined): boolean {
     return proto3.util.equals(DirectoryUser, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.directories.ExternalGroup
+ */
+export class ExternalGroup extends Message<ExternalGroup> {
+  /**
+   * @generated from field: string external_id = 1;
+   */
+  externalId = "";
+
+  /**
+   * @generated from field: string display_name = 2;
+   */
+  displayName = "";
+
+  /**
+   * @generated from field: string email = 3;
+   */
+  email = "";
+
+  constructor(data?: PartialMessage<ExternalGroup>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.directories.ExternalGroup";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "external_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExternalGroup {
+    return new ExternalGroup().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ExternalGroup {
+    return new ExternalGroup().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ExternalGroup {
+    return new ExternalGroup().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ExternalGroup | PlainMessage<ExternalGroup> | undefined, b: ExternalGroup | PlainMessage<ExternalGroup> | undefined): boolean {
+    return proto3.util.equals(ExternalGroup, a, b);
   }
 }
 
@@ -1637,7 +1826,12 @@ export class RoleAssignment extends Message<RoleAssignment> {
   groupId = "";
 
   /**
-   * @generated from field: string role_id = 2;
+   * @generated from field: string role_name = 2;
+   */
+  roleName = "";
+
+  /**
+   * @generated from field: string role_id = 3;
    */
   roleId = "";
 
@@ -1650,7 +1844,8 @@ export class RoleAssignment extends Message<RoleAssignment> {
   static readonly typeName = "scalekit.v1.directories.RoleAssignment";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "group_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "role_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "role_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "role_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RoleAssignment {
@@ -1833,6 +2028,92 @@ export class UpdateAttributesResponse extends Message<UpdateAttributesResponse> 
 
   static equals(a: UpdateAttributesResponse | PlainMessage<UpdateAttributesResponse> | undefined, b: UpdateAttributesResponse | PlainMessage<UpdateAttributesResponse> | undefined): boolean {
     return proto3.util.equals(UpdateAttributesResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.directories.DeleteDirectoryRequest
+ */
+export class DeleteDirectoryRequest extends Message<DeleteDirectoryRequest> {
+  /**
+   * @generated from field: string organization_id = 1;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: string id = 3;
+   */
+  id = "";
+
+  constructor(data?: PartialMessage<DeleteDirectoryRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.directories.DeleteDirectoryRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteDirectoryRequest {
+    return new DeleteDirectoryRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteDirectoryRequest {
+    return new DeleteDirectoryRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteDirectoryRequest {
+    return new DeleteDirectoryRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DeleteDirectoryRequest | PlainMessage<DeleteDirectoryRequest> | undefined, b: DeleteDirectoryRequest | PlainMessage<DeleteDirectoryRequest> | undefined): boolean {
+    return proto3.util.equals(DeleteDirectoryRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.directories.TriggerDirectorySyncRequest
+ */
+export class TriggerDirectorySyncRequest extends Message<TriggerDirectorySyncRequest> {
+  /**
+   * @generated from field: string directory_id = 1;
+   */
+  directoryId = "";
+
+  /**
+   * @generated from field: string organization_id = 2;
+   */
+  organizationId = "";
+
+  constructor(data?: PartialMessage<TriggerDirectorySyncRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.directories.TriggerDirectorySyncRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "directory_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TriggerDirectorySyncRequest {
+    return new TriggerDirectorySyncRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): TriggerDirectorySyncRequest {
+    return new TriggerDirectorySyncRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): TriggerDirectorySyncRequest {
+    return new TriggerDirectorySyncRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: TriggerDirectorySyncRequest | PlainMessage<TriggerDirectorySyncRequest> | undefined, b: TriggerDirectorySyncRequest | PlainMessage<TriggerDirectorySyncRequest> | undefined): boolean {
+    return proto3.util.equals(TriggerDirectorySyncRequest, a, b);
   }
 }
 

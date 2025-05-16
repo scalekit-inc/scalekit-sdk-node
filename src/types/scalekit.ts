@@ -28,4 +28,5 @@ export type AuthenticationResponse = {
   idToken: string;
   accessToken: string;
   expiresIn: number;
+  refreshToken: string;
 }

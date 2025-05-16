@@ -53,11 +53,16 @@ export enum AuthenticationType {
   WORKSPACE_SESSION = 80,
 
   /**
-   * workspace_id,organization_id is in claims and UI in audience
-   *
    * @generated from enum value: WORKSPACE_SESSION_CUSTOMER_PORTAL = 112;
    */
   WORKSPACE_SESSION_CUSTOMER_PORTAL = 112,
+
+  /**
+   * workspace_id,organization_id is in claims and UI in audience
+   *
+   * @generated from enum value: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT = 116;
+   */
+  WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT = 116,
 
   /**
    * user_id is in claims
@@ -103,6 +108,7 @@ proto3.util.setEnumType(AuthenticationType, "scalekit.v1.options.AuthenticationT
   { no: 16, name: "SESSION" },
   { no: 80, name: "WORKSPACE_SESSION" },
   { no: 112, name: "WORKSPACE_SESSION_CUSTOMER_PORTAL" },
+  { no: 116, name: "WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT" },
   { no: 8, name: "USER" },
   { no: 4, name: "CLIENT" },
   { no: 20, name: "SESSION_CLIENT" },

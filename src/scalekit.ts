@@ -8,6 +8,7 @@ import CoreClient from './core';
 import DirectoryClient from './directory';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
+import UserClient from './user';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType } from './types/scalekit';
 
@@ -31,6 +32,7 @@ export default class ScalekitClient {
   readonly connection: ConnectionClient;
   readonly domain: DomainClient;
   readonly directory: DirectoryClient;
+  readonly user: UserClient;
   constructor(
     envUrl: string,
     clientId: string,
@@ -58,6 +60,10 @@ export default class ScalekitClient {
       this.coreClient
     );
     this.directory = new DirectoryClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.user = new UserClient(
       this.grpcConnect,
       this.coreClient
     );
@@ -135,7 +141,7 @@ export default class ScalekitClient {
       client_secret: this.coreClient.clientSecret,
       ...(options?.codeVerifier && { code_verifier: options.codeVerifier })
     }))
-    const { id_token, access_token, expires_in } = res.data;
+    const { id_token, access_token, expires_in , refresh_token } = res.data;
     const claims = jose.decodeJwt<IdTokenClaim>(id_token);
     const user = <User>{};
     for (const [k, v] of Object.entries(claims)) {
@@ -148,7 +154,8 @@ export default class ScalekitClient {
       user,
       idToken: id_token,
       accessToken: access_token,
-      expiresIn: expires_in
+      expiresIn: expires_in,
+      refreshToken: refresh_token
     }
   }
 
@@ -261,6 +268,36 @@ export default class ScalekitClient {
   private computeSignature(secretBytes: Buffer, data: string): string {
     return crypto.createHmac('sha256', secretBytes).update(data).digest('base64');
   }
-}
 
+  /**
+   * Refresh access token using a refresh token
+   * @param {string} refreshToken The refresh token to use
+   * @returns {Promise<AuthenticationResponse>} Returns new access token, refresh token and other details
+   */
+  async refreshToken(refreshToken: string): Promise<AuthenticationResponse> {
+    const res = await this.coreClient.authenticate(QueryString.stringify({
+      grant_type: GrantType.RefreshToken,
+      client_id: this.coreClient.clientId,
+      client_secret: this.coreClient.clientSecret,
+      refresh_token: refreshToken
+    }));
+
+    const { id_token, access_token, expires_in, refresh_token } = res.data;
+    const claims = jose.decodeJwt<IdTokenClaim>(id_token);
+    const user = <User>{};
+    for (const [k, v] of Object.entries(claims)) {
+      if (IdTokenClaimToUserMap[k]) {
+        user[IdTokenClaimToUserMap[k]] = v;
+      }
+    }
+
+    return {
+      user,
+      idToken: id_token,
+      accessToken: access_token,
+      expiresIn: expires_in,
+      refreshToken: refresh_token
+    };
+  }
+}
 
