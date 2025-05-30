@@ -1,4 +1,4 @@
-import { CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetEnvironmentConnectionRequest, GetProvidersRequest, GetProvidersResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
+import { CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetConnectionTestResultRequest, GetConnectionTestResultResponse, GetEnvironmentConnectionRequest, GetProvidersRequest, GetProvidersResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.connections.ConnectionService
@@ -130,6 +130,15 @@ export declare const ConnectionService: {
             readonly name: "DisableConnection";
             readonly I: typeof ToggleConnectionRequest;
             readonly O: typeof ToggleConnectionResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.GetConnectionTestResult
+         */
+        readonly getConnectionTestResult: {
+            readonly name: "GetConnectionTestResult";
+            readonly I: typeof GetConnectionTestResultRequest;
+            readonly O: typeof GetConnectionTestResultResponse;
             readonly kind: MethodKind.Unary;
         };
     };

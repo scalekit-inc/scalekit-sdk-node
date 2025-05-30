@@ -1,5 +1,5 @@
-import { AssignRolesRequest, AssignRolesResponse, CreateDirectoryRequest, CreateDirectoryResponse, CreateDirectorySecretRequest, CreateDirectorySecretResponse, GetDirectoryRequest, GetDirectoryResponse, ListDirectoriesRequest, ListDirectoriesResponse, ListDirectoryGroupsRequest, ListDirectoryGroupsResponse, ListDirectoryUsersRequest, ListDirectoryUsersResponse, RegenerateDirectorySecretRequest, RegenerateDirectorySecretResponse, ToggleDirectoryRequest, ToggleDirectoryResponse, UpdateAttributesRequest, UpdateAttributesResponse, UpdateDirectoryRequest, UpdateDirectoryResponse } from "./directories_pb.js";
-import { MethodKind } from "@bufbuild/protobuf";
+import { AssignRolesRequest, AssignRolesResponse, CreateDirectoryRequest, CreateDirectoryResponse, CreateDirectorySecretRequest, CreateDirectorySecretResponse, DeleteDirectoryRequest, GetDirectoryRequest, GetDirectoryResponse, ListDirectoriesRequest, ListDirectoriesResponse, ListDirectoryGroupsRequest, ListDirectoryGroupsResponse, ListDirectoryUsersRequest, ListDirectoryUsersResponse, RegenerateDirectorySecretRequest, RegenerateDirectorySecretResponse, ToggleDirectoryRequest, ToggleDirectoryResponse, UpdateAttributesRequest, UpdateAttributesResponse, UpdateDirectoryRequest, UpdateDirectoryResponse } from "./directories_pb.js";
+import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.directories.DirectoryService
  */
@@ -13,6 +13,15 @@ export declare const DirectoryService: {
             readonly name: "CreateDirectory";
             readonly I: typeof CreateDirectoryRequest;
             readonly O: typeof CreateDirectoryResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.directories.DirectoryService.DeleteDirectory
+         */
+        readonly deleteDirectory: {
+            readonly name: "DeleteDirectory";
+            readonly I: typeof DeleteDirectoryRequest;
+            readonly O: typeof Empty;
             readonly kind: MethodKind.Unary;
         };
         /**

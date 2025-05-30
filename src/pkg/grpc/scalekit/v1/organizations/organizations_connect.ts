@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSettingsRequest } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, CreateOrganizationSessionSettingsRequest, CreateOrganizationSessionSettingsResponse, DeleteOrganizationRequest, DeleteOrganizationSessionSettingsRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetOrganizationSessionSettingsRequest, GetOrganizationSessionSettingsResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSessionSettingsRequest, UpdateOrganizationSessionSettingsResponse, UpdateOrganizationSettingsRequest } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -115,6 +115,42 @@ export const OrganizationService = {
       name: "UpdateOrganizationSettings",
       I: UpdateOrganizationSettingsRequest,
       O: GetOrganizationResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.CreateOrganizationSessionSettings
+     */
+    createOrganizationSessionSettings: {
+      name: "CreateOrganizationSessionSettings",
+      I: CreateOrganizationSessionSettingsRequest,
+      O: CreateOrganizationSessionSettingsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.GetOrganizationSessionSettings
+     */
+    getOrganizationSessionSettings: {
+      name: "GetOrganizationSessionSettings",
+      I: GetOrganizationSessionSettingsRequest,
+      O: GetOrganizationSessionSettingsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateOrganizationSessionSettings
+     */
+    updateOrganizationSessionSettings: {
+      name: "UpdateOrganizationSessionSettings",
+      I: UpdateOrganizationSessionSettingsRequest,
+      O: UpdateOrganizationSessionSettingsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.DeleteOrganizationSessionSettings
+     */
+    deleteOrganizationSessionSettings: {
+      name: "DeleteOrganizationSessionSettings",
+      I: DeleteOrganizationSessionSettingsRequest,
+      O: Empty,
       kind: MethodKind.Unary,
     },
   }

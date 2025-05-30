@@ -4,7 +4,33 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { BoolValue, Message, proto3, protoInt64, StringValue, Timestamp } from "@bufbuild/protobuf";
+import { BoolValue, Message, proto3, protoInt64, StringValue, Timestamp, UInt32Value } from "@bufbuild/protobuf";
+
+/**
+ * @generated from enum scalekit.v1.connections.CodeChallengeType
+ */
+export enum CodeChallengeType {
+  /**
+   * @generated from enum value: CODE_CHALLENGE_TYPE_UNSPECIFIED = 0;
+   */
+  CODE_CHALLENGE_TYPE_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: NUMERIC = 1;
+   */
+  NUMERIC = 1,
+
+  /**
+   * @generated from enum value: ALPHANUMERIC = 2;
+   */
+  ALPHANUMERIC = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(CodeChallengeType)
+proto3.util.setEnumType(CodeChallengeType, "scalekit.v1.connections.CodeChallengeType", [
+  { no: 0, name: "CODE_CHALLENGE_TYPE_UNSPECIFIED" },
+  { no: 1, name: "NUMERIC" },
+  { no: 2, name: "ALPHANUMERIC" },
+]);
 
 /**
  * @generated from enum scalekit.v1.connections.ConfigurationType
@@ -71,6 +97,64 @@ proto3.util.setEnumType(NameIdFormat, "scalekit.v1.connections.NameIdFormat", [
 ]);
 
 /**
+ * @generated from enum scalekit.v1.connections.PasswordlessType
+ */
+export enum PasswordlessType {
+  /**
+   * @generated from enum value: PasswordlessType_UNSPECIFIED = 0;
+   */
+  PasswordlessType_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: LINK = 1;
+   */
+  LINK = 1,
+
+  /**
+   * @generated from enum value: OTP = 2;
+   */
+  OTP = 2,
+
+  /**
+   * @generated from enum value: LINK_OTP = 3;
+   */
+  LINK_OTP = 3,
+}
+// Retrieve enum metadata with: proto3.getEnumType(PasswordlessType)
+proto3.util.setEnumType(PasswordlessType, "scalekit.v1.connections.PasswordlessType", [
+  { no: 0, name: "PasswordlessType_UNSPECIFIED" },
+  { no: 1, name: "LINK" },
+  { no: 2, name: "OTP" },
+  { no: 3, name: "LINK_OTP" },
+]);
+
+/**
+ * @generated from enum scalekit.v1.connections.TestResultStatus
+ */
+export enum TestResultStatus {
+  /**
+   * @generated from enum value: PENDING = 0;
+   */
+  PENDING = 0,
+
+  /**
+   * @generated from enum value: SUCCESS = 1;
+   */
+  SUCCESS = 1,
+
+  /**
+   * @generated from enum value: FAILURE = 2;
+   */
+  FAILURE = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(TestResultStatus)
+proto3.util.setEnumType(TestResultStatus, "scalekit.v1.connections.TestResultStatus", [
+  { no: 0, name: "PENDING" },
+  { no: 1, name: "SUCCESS" },
+  { no: 2, name: "FAILURE" },
+]);
+
+/**
  * enums all
  *
  * @generated from enum scalekit.v1.connections.SAMLSigningOptions
@@ -100,6 +184,11 @@ export enum SAMLSigningOptions {
    * @generated from enum value: SAML_RESPONSE_ASSERTION_SIGNING = 4;
    */
   SAML_RESPONSE_ASSERTION_SIGNING = 4,
+
+  /**
+   * @generated from enum value: SAML_RESPONSE_OR_ASSERTION_SIGNING = 5;
+   */
+  SAML_RESPONSE_OR_ASSERTION_SIGNING = 5,
 }
 // Retrieve enum metadata with: proto3.getEnumType(SAMLSigningOptions)
 proto3.util.setEnumType(SAMLSigningOptions, "scalekit.v1.connections.SAMLSigningOptions", [
@@ -108,6 +197,7 @@ proto3.util.setEnumType(SAMLSigningOptions, "scalekit.v1.connections.SAMLSigning
   { no: 2, name: "SAML_ONLY_RESPONSE_SIGNING" },
   { no: 3, name: "SAML_ONLY_ASSERTION_SIGNING" },
   { no: 4, name: "SAML_RESPONSE_ASSERTION_SIGNING" },
+  { no: 5, name: "SAML_RESPONSE_OR_ASSERTION_SIGNING" },
 ]);
 
 /**
@@ -234,6 +324,11 @@ export enum ConnectionType {
    * @generated from enum value: OAUTH = 4;
    */
   OAUTH = 4,
+
+  /**
+   * @generated from enum value: PASSWORDLESS = 5;
+   */
+  PASSWORDLESS = 5,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ConnectionType)
 proto3.util.setEnumType(ConnectionType, "scalekit.v1.connections.ConnectionType", [
@@ -242,6 +337,7 @@ proto3.util.setEnumType(ConnectionType, "scalekit.v1.connections.ConnectionType"
   { no: 2, name: "SAML" },
   { no: 3, name: "PASSWORD" },
   { no: 4, name: "OAUTH" },
+  { no: 5, name: "PASSWORDLESS" },
 ]);
 
 /**
@@ -344,6 +440,26 @@ export enum ConnectionProvider {
    * @generated from enum value: SALESFORCE = 12;
    */
   SALESFORCE = 12,
+
+  /**
+   * @generated from enum value: MICROSOFT = 13;
+   */
+  MICROSOFT = 13,
+
+  /**
+   * @generated from enum value: IDP_SIMULATOR = 14;
+   */
+  IDP_SIMULATOR = 14,
+
+  /**
+   * @generated from enum value: SCALEKIT = 15;
+   */
+  SCALEKIT = 15,
+
+  /**
+   * @generated from enum value: ADFS = 16;
+   */
+  ADFS = 16,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ConnectionProvider)
 proto3.util.setEnumType(ConnectionProvider, "scalekit.v1.connections.ConnectionProvider", [
@@ -360,6 +476,10 @@ proto3.util.setEnumType(ConnectionProvider, "scalekit.v1.connections.ConnectionP
   { no: 10, name: "GITLAB" },
   { no: 11, name: "LINKEDIN" },
   { no: 12, name: "SALESFORCE" },
+  { no: 13, name: "MICROSOFT" },
+  { no: 14, name: "IDP_SIMULATOR" },
+  { no: 15, name: "SCALEKIT" },
+  { no: 16, name: "ADFS" },
 ]);
 
 /**
@@ -692,6 +812,12 @@ export class Connection extends Message<Connection> {
      */
     value: OAuthConnectionConfig;
     case: "oauthConfig";
+  } | {
+    /**
+     * @generated from field: scalekit.v1.connections.PasswordLessConfig passwordless_config = 22;
+     */
+    value: PasswordLessConfig;
+    case: "passwordlessConfig";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   /**
@@ -723,6 +849,7 @@ export class Connection extends Message<Connection> {
     { no: 18, name: "oidc_config", kind: "message", T: OIDCConnectionConfig, oneof: "settings" },
     { no: 19, name: "saml_config", kind: "message", T: SAMLConnectionConfigResponse, oneof: "settings" },
     { no: 20, name: "oauth_config", kind: "message", T: OAuthConnectionConfig, oneof: "settings" },
+    { no: 22, name: "passwordless_config", kind: "message", T: PasswordLessConfig, oneof: "settings" },
     { no: 21, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
@@ -927,6 +1054,12 @@ export class UpdateConnection extends Message<UpdateConnection> {
      */
     value: OAuthConnectionConfig;
     case: "oauthConfig";
+  } | {
+    /**
+     * @generated from field: scalekit.v1.connections.PasswordLessConfig passwordless_config = 20;
+     */
+    value: PasswordLessConfig;
+    case: "passwordlessConfig";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   /**
@@ -951,6 +1084,7 @@ export class UpdateConnection extends Message<UpdateConnection> {
     { no: 16, name: "oidc_config", kind: "message", T: OIDCConnectionConfig, oneof: "settings" },
     { no: 17, name: "saml_config", kind: "message", T: SAMLConnectionConfigRequest, oneof: "settings" },
     { no: 18, name: "oauth_config", kind: "message", T: OAuthConnectionConfig, oneof: "settings" },
+    { no: 20, name: "passwordless_config", kind: "message", T: PasswordLessConfig, oneof: "settings" },
     { no: 19, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
@@ -1551,6 +1685,21 @@ export class OIDCConnectionConfig extends Message<OIDCConnectionConfig> {
    */
   pkceEnabled?: boolean;
 
+  /**
+   * @generated from field: google.protobuf.BoolValue idp_logout_required = 14;
+   */
+  idpLogoutRequired?: boolean;
+
+  /**
+   * @generated from field: google.protobuf.StringValue post_logout_redirect_uri = 15;
+   */
+  postLogoutRedirectUri?: string;
+
+  /**
+   * @generated from field: google.protobuf.StringValue backchannel_logout_redirect_uri = 16;
+   */
+  backchannelLogoutRedirectUri?: string;
+
   constructor(data?: PartialMessage<OIDCConnectionConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1571,6 +1720,9 @@ export class OIDCConnectionConfig extends Message<OIDCConnectionConfig> {
     { no: 11, name: "token_auth_type", kind: "enum", T: proto3.getEnumType(TokenAuthType) },
     { no: 12, name: "redirect_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 13, name: "pkce_enabled", kind: "message", T: BoolValue },
+    { no: 14, name: "idp_logout_required", kind: "message", T: BoolValue },
+    { no: 15, name: "post_logout_redirect_uri", kind: "message", T: StringValue },
+    { no: 16, name: "backchannel_logout_redirect_uri", kind: "message", T: StringValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OIDCConnectionConfig {
@@ -1634,6 +1786,16 @@ export class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
    */
   pkceEnabled?: boolean;
 
+  /**
+   * @generated from field: google.protobuf.StringValue prompt = 14;
+   */
+  prompt?: string;
+
+  /**
+   * @generated from field: google.protobuf.BoolValue use_platform_creds = 15;
+   */
+  usePlatformCreds?: boolean;
+
   constructor(data?: PartialMessage<OAuthConnectionConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1650,6 +1812,8 @@ export class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
     { no: 10, name: "scopes", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 12, name: "redirect_uri", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 13, name: "pkce_enabled", kind: "message", T: BoolValue },
+    { no: 14, name: "prompt", kind: "message", T: StringValue },
+    { no: 15, name: "use_platform_creds", kind: "message", T: BoolValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OAuthConnectionConfig {
@@ -1666,6 +1830,73 @@ export class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
 
   static equals(a: OAuthConnectionConfig | PlainMessage<OAuthConnectionConfig> | undefined, b: OAuthConnectionConfig | PlainMessage<OAuthConnectionConfig> | undefined): boolean {
     return proto3.util.equals(OAuthConnectionConfig, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.PasswordLessConfig
+ */
+export class PasswordLessConfig extends Message<PasswordLessConfig> {
+  /**
+   * @generated from field: scalekit.v1.connections.PasswordlessType type = 1;
+   */
+  type = PasswordlessType.PasswordlessType_UNSPECIFIED;
+
+  /**
+   * @generated from field: optional google.protobuf.UInt32Value frequency = 2;
+   */
+  frequency?: number;
+
+  /**
+   * @generated from field: optional google.protobuf.UInt32Value validity = 3;
+   */
+  validity?: number;
+
+  /**
+   * @generated from field: optional google.protobuf.BoolValue enforce_same_browser_origin = 4;
+   */
+  enforceSameBrowserOrigin?: boolean;
+
+  /**
+   * @generated from field: optional google.protobuf.UInt32Value code_challenge_length = 5;
+   */
+  codeChallengeLength?: number;
+
+  /**
+   * @generated from field: optional scalekit.v1.connections.CodeChallengeType code_challenge_type = 6;
+   */
+  codeChallengeType?: CodeChallengeType;
+
+  constructor(data?: PartialMessage<PasswordLessConfig>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.PasswordLessConfig";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "type", kind: "enum", T: proto3.getEnumType(PasswordlessType) },
+    { no: 2, name: "frequency", kind: "message", T: UInt32Value, opt: true },
+    { no: 3, name: "validity", kind: "message", T: UInt32Value, opt: true },
+    { no: 4, name: "enforce_same_browser_origin", kind: "message", T: BoolValue, opt: true },
+    { no: 5, name: "code_challenge_length", kind: "message", T: UInt32Value, opt: true },
+    { no: 6, name: "code_challenge_type", kind: "enum", T: proto3.getEnumType(CodeChallengeType), opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PasswordLessConfig {
+    return new PasswordLessConfig().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PasswordLessConfig {
+    return new PasswordLessConfig().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PasswordLessConfig {
+    return new PasswordLessConfig().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: PasswordLessConfig | PlainMessage<PasswordLessConfig> | undefined, b: PasswordLessConfig | PlainMessage<PasswordLessConfig> | undefined): boolean {
+    return proto3.util.equals(PasswordLessConfig, a, b);
   }
 }
 
@@ -1743,6 +1974,16 @@ export class SAMLConnectionConfigRequest extends Message<SAMLConnectionConfigReq
    */
   wantRequestSigned?: boolean;
 
+  /**
+   * @generated from field: google.protobuf.StringValue certificate_id = 18;
+   */
+  certificateId?: string;
+
+  /**
+   * @generated from field: google.protobuf.BoolValue idp_slo_required = 19;
+   */
+  idpSloRequired?: boolean;
+
   constructor(data?: PartialMessage<SAMLConnectionConfigRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1765,6 +2006,8 @@ export class SAMLConnectionConfigRequest extends Message<SAMLConnectionConfigReq
     { no: 15, name: "default_redirect_uri", kind: "message", T: StringValue },
     { no: 16, name: "assertion_encrypted", kind: "message", T: BoolValue },
     { no: 17, name: "want_request_signed", kind: "message", T: BoolValue },
+    { no: 18, name: "certificate_id", kind: "message", T: StringValue },
+    { no: 19, name: "idp_slo_required", kind: "message", T: BoolValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SAMLConnectionConfigRequest {
@@ -1878,6 +2121,21 @@ export class SAMLConnectionConfigResponse extends Message<SAMLConnectionConfigRe
    */
   wantRequestSigned?: boolean;
 
+  /**
+   * @generated from field: google.protobuf.StringValue certificate_id = 19;
+   */
+  certificateId?: string;
+
+  /**
+   * @generated from field: google.protobuf.BoolValue idp_slo_required = 20;
+   */
+  idpSloRequired?: boolean;
+
+  /**
+   * @generated from field: google.protobuf.StringValue sp_slo_url = 21;
+   */
+  spSloUrl?: string;
+
   constructor(data?: PartialMessage<SAMLConnectionConfigResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1904,6 +2162,9 @@ export class SAMLConnectionConfigResponse extends Message<SAMLConnectionConfigRe
     { no: 16, name: "default_redirect_uri", kind: "message", T: StringValue },
     { no: 17, name: "assertion_encrypted", kind: "message", T: BoolValue },
     { no: 18, name: "want_request_signed", kind: "message", T: BoolValue },
+    { no: 19, name: "certificate_id", kind: "message", T: StringValue },
+    { no: 20, name: "idp_slo_required", kind: "message", T: BoolValue },
+    { no: 21, name: "sp_slo_url", kind: "message", T: StringValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SAMLConnectionConfigResponse {
@@ -2398,6 +2659,110 @@ export class GetSAMLCertificateDetailsResponse extends Message<GetSAMLCertificat
 
   static equals(a: GetSAMLCertificateDetailsResponse | PlainMessage<GetSAMLCertificateDetailsResponse> | undefined, b: GetSAMLCertificateDetailsResponse | PlainMessage<GetSAMLCertificateDetailsResponse> | undefined): boolean {
     return proto3.util.equals(GetSAMLCertificateDetailsResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.GetConnectionTestResultRequest
+ */
+export class GetConnectionTestResultRequest extends Message<GetConnectionTestResultRequest> {
+  /**
+   * @generated from field: string connection_id = 1;
+   */
+  connectionId = "";
+
+  /**
+   * @generated from field: string test_request_id = 2;
+   */
+  testRequestId = "";
+
+  constructor(data?: PartialMessage<GetConnectionTestResultRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.GetConnectionTestResultRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "test_request_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionTestResultRequest {
+    return new GetConnectionTestResultRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionTestResultRequest {
+    return new GetConnectionTestResultRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionTestResultRequest {
+    return new GetConnectionTestResultRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetConnectionTestResultRequest | PlainMessage<GetConnectionTestResultRequest> | undefined, b: GetConnectionTestResultRequest | PlainMessage<GetConnectionTestResultRequest> | undefined): boolean {
+    return proto3.util.equals(GetConnectionTestResultRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.GetConnectionTestResultResponse
+ */
+export class GetConnectionTestResultResponse extends Message<GetConnectionTestResultResponse> {
+  /**
+   * @generated from field: scalekit.v1.connections.TestResultStatus status = 1;
+   */
+  status = TestResultStatus.PENDING;
+
+  /**
+   * @generated from field: optional string user_info = 2;
+   */
+  userInfo?: string;
+
+  /**
+   * @generated from field: optional string error = 3;
+   */
+  error?: string;
+
+  /**
+   * @generated from field: optional string error_description = 4;
+   */
+  errorDescription?: string;
+
+  /**
+   * @generated from field: optional string error_details = 5;
+   */
+  errorDetails?: string;
+
+  constructor(data?: PartialMessage<GetConnectionTestResultResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.GetConnectionTestResultResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "status", kind: "enum", T: proto3.getEnumType(TestResultStatus) },
+    { no: 2, name: "user_info", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 3, name: "error", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 4, name: "error_description", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 5, name: "error_details", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionTestResultResponse {
+    return new GetConnectionTestResultResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionTestResultResponse {
+    return new GetConnectionTestResultResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionTestResultResponse {
+    return new GetConnectionTestResultResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetConnectionTestResultResponse | PlainMessage<GetConnectionTestResultResponse> | undefined, b: GetConnectionTestResultResponse | PlainMessage<GetConnectionTestResultResponse> | undefined): boolean {
+    return proto3.util.equals(GetConnectionTestResultResponse, a, b);
   }
 }
 

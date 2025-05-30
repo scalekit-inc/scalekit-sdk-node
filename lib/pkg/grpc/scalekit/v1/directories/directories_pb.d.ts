@@ -44,7 +44,15 @@ export declare enum DirectoryProvider {
     /**
      * @generated from enum value: ONELOGIN = 5;
      */
-    ONELOGIN = 5
+    ONELOGIN = 5,
+    /**
+     * @generated from enum value: JUMPCLOUD = 6;
+     */
+    JUMPCLOUD = 6,
+    /**
+     * @generated from enum value: PING_IDENTITY = 7;
+     */
+    PING_IDENTITY = 7
 }
 /**
  * @generated from enum scalekit.v1.directories.DirectoryStatus
@@ -957,4 +965,25 @@ export declare class UpdateAttributesResponse extends Message<UpdateAttributesRe
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateAttributesResponse;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateAttributesResponse;
     static equals(a: UpdateAttributesResponse | PlainMessage<UpdateAttributesResponse> | undefined, b: UpdateAttributesResponse | PlainMessage<UpdateAttributesResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.directories.DeleteDirectoryRequest
+ */
+export declare class DeleteDirectoryRequest extends Message<DeleteDirectoryRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string id = 3;
+     */
+    id: string;
+    constructor(data?: PartialMessage<DeleteDirectoryRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.directories.DeleteDirectoryRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteDirectoryRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteDirectoryRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteDirectoryRequest;
+    static equals(a: DeleteDirectoryRequest | PlainMessage<DeleteDirectoryRequest> | undefined, b: DeleteDirectoryRequest | PlainMessage<DeleteDirectoryRequest> | undefined): boolean;
 }

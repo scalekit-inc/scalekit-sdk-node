@@ -3,7 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { proto3 } from "@bufbuild/protobuf";
+import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
+import { Message, proto3 } from "@bufbuild/protobuf";
 
 /**
  * @generated from enum scalekit.v1.commons.RegionCode
@@ -33,4 +34,306 @@ proto3.util.setEnumType(RegionCode, "scalekit.v1.commons.RegionCode", [
   { no: 1, name: "US" },
   { no: 2, name: "EU" },
 ]);
+
+/**
+ * @generated from enum scalekit.v1.commons.UserStatus
+ */
+export enum UserStatus {
+  /**
+   * @generated from enum value: USER_STATUS_UNSPECIFIED = 0;
+   */
+  USER_STATUS_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ACTIVE = 1;
+   */
+  ACTIVE = 1,
+
+  /**
+   * @generated from enum value: INACTIVE = 2;
+   */
+  INACTIVE = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(UserStatus)
+proto3.util.setEnumType(UserStatus, "scalekit.v1.commons.UserStatus", [
+  { no: 0, name: "USER_STATUS_UNSPECIFIED" },
+  { no: 1, name: "ACTIVE" },
+  { no: 2, name: "INACTIVE" },
+]);
+
+/**
+ * @generated from enum scalekit.v1.commons.MembershipRole
+ */
+export enum MembershipRole {
+  /**
+   * @generated from enum value: MEMBERSHIP_ROLE_UNSPECIFIED = 0;
+   */
+  MEMBERSHIP_ROLE_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: ADMIN = 1;
+   */
+  ADMIN = 1,
+
+  /**
+   * @generated from enum value: USER = 2;
+   */
+  USER = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(MembershipRole)
+proto3.util.setEnumType(MembershipRole, "scalekit.v1.commons.MembershipRole", [
+  { no: 0, name: "MEMBERSHIP_ROLE_UNSPECIFIED" },
+  { no: 1, name: "ADMIN" },
+  { no: 2, name: "USER" },
+]);
+
+/**
+ * @generated from enum scalekit.v1.commons.IdentityProviderType
+ */
+export enum IdentityProviderType {
+  /**
+   * @generated from enum value: IDENTITY_PROVIDER_UNSPECIFIED = 0;
+   */
+  IDENTITY_PROVIDER_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: OKTA = 1;
+   */
+  OKTA = 1,
+
+  /**
+   * @generated from enum value: GOOGLE = 2;
+   */
+  GOOGLE = 2,
+
+  /**
+   * @generated from enum value: MICROSOFT_AD = 3;
+   */
+  MICROSOFT_AD = 3,
+
+  /**
+   * @generated from enum value: AUTH0 = 4;
+   */
+  AUTH0 = 4,
+
+  /**
+   * @generated from enum value: ONELOGIN = 5;
+   */
+  ONELOGIN = 5,
+
+  /**
+   * @generated from enum value: PING_IDENTITY = 6;
+   */
+  PING_IDENTITY = 6,
+
+  /**
+   * @generated from enum value: JUMPCLOUD = 7;
+   */
+  JUMPCLOUD = 7,
+
+  /**
+   * @generated from enum value: CUSTOM = 8;
+   */
+  CUSTOM = 8,
+
+  /**
+   * @generated from enum value: GITHUB = 9;
+   */
+  GITHUB = 9,
+
+  /**
+   * @generated from enum value: GITLAB = 10;
+   */
+  GITLAB = 10,
+
+  /**
+   * @generated from enum value: LINKEDIN = 11;
+   */
+  LINKEDIN = 11,
+
+  /**
+   * @generated from enum value: SALESFORCE = 12;
+   */
+  SALESFORCE = 12,
+
+  /**
+   * @generated from enum value: MICROSOFT = 13;
+   */
+  MICROSOFT = 13,
+
+  /**
+   * @generated from enum value: IDP_SIMULATOR = 14;
+   */
+  IDP_SIMULATOR = 14,
+
+  /**
+   * @generated from enum value: SCALEKIT = 15;
+   */
+  SCALEKIT = 15,
+
+  /**
+   * @generated from enum value: ADFS = 16;
+   */
+  ADFS = 16,
+}
+// Retrieve enum metadata with: proto3.getEnumType(IdentityProviderType)
+proto3.util.setEnumType(IdentityProviderType, "scalekit.v1.commons.IdentityProviderType", [
+  { no: 0, name: "IDENTITY_PROVIDER_UNSPECIFIED" },
+  { no: 1, name: "OKTA" },
+  { no: 2, name: "GOOGLE" },
+  { no: 3, name: "MICROSOFT_AD" },
+  { no: 4, name: "AUTH0" },
+  { no: 5, name: "ONELOGIN" },
+  { no: 6, name: "PING_IDENTITY" },
+  { no: 7, name: "JUMPCLOUD" },
+  { no: 8, name: "CUSTOM" },
+  { no: 9, name: "GITHUB" },
+  { no: 10, name: "GITLAB" },
+  { no: 11, name: "LINKEDIN" },
+  { no: 12, name: "SALESFORCE" },
+  { no: 13, name: "MICROSOFT" },
+  { no: 14, name: "IDP_SIMULATOR" },
+  { no: 15, name: "SCALEKIT" },
+  { no: 16, name: "ADFS" },
+]);
+
+/**
+ * @generated from message scalekit.v1.commons.OrganizationMembership
+ */
+export class OrganizationMembership extends Message<OrganizationMembership> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: scalekit.v1.commons.UserStatus membership_status = 2;
+   */
+  membershipStatus = UserStatus.USER_STATUS_UNSPECIFIED;
+
+  /**
+   * @generated from field: scalekit.v1.commons.MembershipRole role = 3;
+   */
+  role = MembershipRole.MEMBERSHIP_ROLE_UNSPECIFIED;
+
+  /**
+   * @generated from field: optional string name = 4;
+   */
+  name?: string;
+
+  /**
+   * @generated from field: scalekit.v1.commons.IdentityProviderType primary_identity_provider = 5;
+   */
+  primaryIdentityProvider = IdentityProviderType.IDENTITY_PROVIDER_UNSPECIFIED;
+
+  constructor(data?: PartialMessage<OrganizationMembership>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.commons.OrganizationMembership";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "membership_status", kind: "enum", T: proto3.getEnumType(UserStatus) },
+    { no: 3, name: "role", kind: "enum", T: proto3.getEnumType(MembershipRole) },
+    { no: 4, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 5, name: "primary_identity_provider", kind: "enum", T: proto3.getEnumType(IdentityProviderType) },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationMembership {
+    return new OrganizationMembership().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrganizationMembership {
+    return new OrganizationMembership().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrganizationMembership {
+    return new OrganizationMembership().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: OrganizationMembership | PlainMessage<OrganizationMembership> | undefined, b: OrganizationMembership | PlainMessage<OrganizationMembership> | undefined): boolean {
+    return proto3.util.equals(OrganizationMembership, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.commons.UserProfile
+ */
+export class UserProfile extends Message<UserProfile> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string first_name = 2;
+   */
+  firstName = "";
+
+  /**
+   * @generated from field: string last_name = 3;
+   */
+  lastName = "";
+
+  /**
+   * @generated from field: string name = 4;
+   */
+  name = "";
+
+  /**
+   * @generated from field: string locale = 5;
+   */
+  locale = "";
+
+  /**
+   * @generated from field: bool email_verified = 6;
+   */
+  emailVerified = false;
+
+  /**
+   * @generated from field: map<string, string> metadata = 7;
+   */
+  metadata: { [key: string]: string } = {};
+
+  /**
+   * @generated from field: map<string, string> custom_attributes = 8;
+   */
+  customAttributes: { [key: string]: string } = {};
+
+  constructor(data?: PartialMessage<UserProfile>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.commons.UserProfile";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "first_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "last_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "locale", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 6, name: "email_verified", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 7, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
+    { no: 8, name: "custom_attributes", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserProfile {
+    return new UserProfile().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UserProfile {
+    return new UserProfile().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UserProfile {
+    return new UserProfile().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UserProfile | PlainMessage<UserProfile> | undefined, b: UserProfile | PlainMessage<UserProfile> | undefined): boolean {
+    return proto3.util.equals(UserProfile, a, b);
+  }
+}
 

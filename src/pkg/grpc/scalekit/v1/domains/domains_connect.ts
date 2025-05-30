@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateDomainRequest, CreateDomainResponse, DeleteDomainRequest, GetDomainRequest, GetDomainResponse, ListAuthorizedDomainRequest, ListAuthorizedDomainResponse, ListDomainRequest, ListDomainResponse, UpdateDomainRequest, UpdateDomainResponse } from "./domains_pb.js";
-import { Empty, MethodKind } from "@bufbuild/protobuf";
+import { CreateDomainRequest, CreateDomainResponse, DeleteDomainRequest, GetDomainRequest, GetDomainResponse, ListAuthorizedDomainRequest, ListAuthorizedDomainResponse, ListDomainRequest, ListDomainResponse, UpdateDomainRequest, UpdateDomainResponse, VerifyDomainRequest } from "./domains_pb.js";
+import { BoolValue, Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
  * @generated from service scalekit.v1.domains.DomainService
@@ -28,6 +28,15 @@ export const DomainService = {
       name: "UpdateDomain",
       I: UpdateDomainRequest,
       O: UpdateDomainResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.domains.DomainService.VerifyDomain
+     */
+    verifyDomain: {
+      name: "VerifyDomain",
+      I: VerifyDomainRequest,
+      O: BoolValue,
       kind: MethodKind.Unary,
     },
     /**

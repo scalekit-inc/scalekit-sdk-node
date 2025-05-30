@@ -2,6 +2,23 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { FieldMask, Message, proto3, Timestamp } from "@bufbuild/protobuf";
 import { RegionCode } from "../commons/commons_pb.js";
 /**
+ * @generated from enum scalekit.v1.organizations.Feature
+ */
+export declare enum Feature {
+    /**
+     * @generated from enum value: UNSPECIFIED = 0;
+     */
+    UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: dir_sync = 1;
+     */
+    dir_sync = 1,
+    /**
+     * @generated from enum value: sso = 2;
+     */
+    sso = 2
+}
+/**
  * @generated from message scalekit.v1.organizations.CreateOrganizationRequest
  */
 export declare class CreateOrganizationRequest extends Message<CreateOrganizationRequest> {
@@ -419,13 +436,23 @@ export declare class GeneratePortalLinkRequest extends Message<GeneratePortalLin
      */
     id: string;
     /**
-     * @generated from field: optional bool sso = 2;
+     * Deprecated: Use features
+     *
+     * @generated from field: optional bool sso = 2 [deprecated = true];
+     * @deprecated
      */
     sso?: boolean;
     /**
-     * @generated from field: optional bool directory_sync = 3;
+     * Deprecated: Use features
+     *
+     * @generated from field: optional bool directory_sync = 3 [deprecated = true];
+     * @deprecated
      */
     directorySync?: boolean;
+    /**
+     * @generated from field: repeated scalekit.v1.organizations.Feature features = 4;
+     */
+    features: Feature[];
     constructor(data?: PartialMessage<GeneratePortalLinkRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.organizations.GeneratePortalLinkRequest";
@@ -569,6 +596,198 @@ export declare class UpdateOrganizationSettingsRequest extends Message<UpdateOrg
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateOrganizationSettingsRequest;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateOrganizationSettingsRequest;
     static equals(a: UpdateOrganizationSettingsRequest | PlainMessage<UpdateOrganizationSettingsRequest> | undefined, b: UpdateOrganizationSettingsRequest | PlainMessage<UpdateOrganizationSettingsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.UpdateOrganizationSessionSettingsRequest
+ */
+export declare class UpdateOrganizationSessionSettingsRequest extends Message<UpdateOrganizationSessionSettingsRequest> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: string environment_id = 2;
+     */
+    environmentId: string;
+    /**
+     * @generated from field: scalekit.v1.organizations.OrganizationSessionSettings session_settings = 3;
+     */
+    sessionSettings?: OrganizationSessionSettings;
+    constructor(data?: PartialMessage<UpdateOrganizationSessionSettingsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.UpdateOrganizationSessionSettingsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateOrganizationSessionSettingsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateOrganizationSessionSettingsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateOrganizationSessionSettingsRequest;
+    static equals(a: UpdateOrganizationSessionSettingsRequest | PlainMessage<UpdateOrganizationSessionSettingsRequest> | undefined, b: UpdateOrganizationSessionSettingsRequest | PlainMessage<UpdateOrganizationSessionSettingsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.UpdateOrganizationSessionSettingsResponse
+ */
+export declare class UpdateOrganizationSessionSettingsResponse extends Message<UpdateOrganizationSessionSettingsResponse> {
+    /**
+     * @generated from field: string environment_id = 1;
+     */
+    environmentId: string;
+    /**
+     * @generated from field: string organization_id = 2;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: scalekit.v1.organizations.OrganizationSessionSettings session_settings = 3;
+     */
+    sessionSettings?: OrganizationSessionSettings;
+    constructor(data?: PartialMessage<UpdateOrganizationSessionSettingsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.UpdateOrganizationSessionSettingsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateOrganizationSessionSettingsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateOrganizationSessionSettingsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateOrganizationSessionSettingsResponse;
+    static equals(a: UpdateOrganizationSessionSettingsResponse | PlainMessage<UpdateOrganizationSessionSettingsResponse> | undefined, b: UpdateOrganizationSessionSettingsResponse | PlainMessage<UpdateOrganizationSessionSettingsResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.OrganizationSessionSettings
+ */
+export declare class OrganizationSessionSettings extends Message<OrganizationSessionSettings> {
+    /**
+     * @generated from field: google.protobuf.Int32Value absolute_session_timeout = 1;
+     */
+    absoluteSessionTimeout?: number;
+    /**
+     * @generated from field: google.protobuf.BoolValue session_management_enabled = 2;
+     */
+    sessionManagementEnabled?: boolean;
+    /**
+     * @generated from field: google.protobuf.Int32Value idle_session_timeout = 3;
+     */
+    idleSessionTimeout?: number;
+    /**
+     * @generated from field: google.protobuf.BoolValue idle_session_enabled = 4;
+     */
+    idleSessionEnabled?: boolean;
+    constructor(data?: PartialMessage<OrganizationSessionSettings>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.OrganizationSessionSettings";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationSessionSettings;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrganizationSessionSettings;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrganizationSessionSettings;
+    static equals(a: OrganizationSessionSettings | PlainMessage<OrganizationSessionSettings> | undefined, b: OrganizationSessionSettings | PlainMessage<OrganizationSessionSettings> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.GetOrganizationSessionSettingsRequest
+ */
+export declare class GetOrganizationSessionSettingsRequest extends Message<GetOrganizationSessionSettingsRequest> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: string environment_id = 2;
+     */
+    environmentId: string;
+    constructor(data?: PartialMessage<GetOrganizationSessionSettingsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.GetOrganizationSessionSettingsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOrganizationSessionSettingsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOrganizationSessionSettingsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOrganizationSessionSettingsRequest;
+    static equals(a: GetOrganizationSessionSettingsRequest | PlainMessage<GetOrganizationSessionSettingsRequest> | undefined, b: GetOrganizationSessionSettingsRequest | PlainMessage<GetOrganizationSessionSettingsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.CreateOrganizationSessionSettingsRequest
+ */
+export declare class CreateOrganizationSessionSettingsRequest extends Message<CreateOrganizationSessionSettingsRequest> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: string environment_id = 2;
+     */
+    environmentId: string;
+    constructor(data?: PartialMessage<CreateOrganizationSessionSettingsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.CreateOrganizationSessionSettingsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateOrganizationSessionSettingsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateOrganizationSessionSettingsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateOrganizationSessionSettingsRequest;
+    static equals(a: CreateOrganizationSessionSettingsRequest | PlainMessage<CreateOrganizationSessionSettingsRequest> | undefined, b: CreateOrganizationSessionSettingsRequest | PlainMessage<CreateOrganizationSessionSettingsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.CreateOrganizationSessionSettingsResponse
+ */
+export declare class CreateOrganizationSessionSettingsResponse extends Message<CreateOrganizationSessionSettingsResponse> {
+    /**
+     * @generated from field: string environment_id = 1;
+     */
+    environmentId: string;
+    /**
+     * @generated from field: string organization_id = 2;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: scalekit.v1.organizations.OrganizationSessionSettings session_settings = 3;
+     */
+    sessionSettings?: OrganizationSessionSettings;
+    constructor(data?: PartialMessage<CreateOrganizationSessionSettingsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.CreateOrganizationSessionSettingsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateOrganizationSessionSettingsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateOrganizationSessionSettingsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateOrganizationSessionSettingsResponse;
+    static equals(a: CreateOrganizationSessionSettingsResponse | PlainMessage<CreateOrganizationSessionSettingsResponse> | undefined, b: CreateOrganizationSessionSettingsResponse | PlainMessage<CreateOrganizationSessionSettingsResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.GetOrganizationSessionSettingsResponse
+ */
+export declare class GetOrganizationSessionSettingsResponse extends Message<GetOrganizationSessionSettingsResponse> {
+    /**
+     * @generated from field: string environment_id = 1;
+     */
+    environmentId: string;
+    /**
+     * @generated from field: string organization_id = 2;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: scalekit.v1.organizations.OrganizationSessionSettings session_settings = 3;
+     */
+    sessionSettings?: OrganizationSessionSettings;
+    constructor(data?: PartialMessage<GetOrganizationSessionSettingsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.GetOrganizationSessionSettingsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOrganizationSessionSettingsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOrganizationSessionSettingsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOrganizationSessionSettingsResponse;
+    static equals(a: GetOrganizationSessionSettingsResponse | PlainMessage<GetOrganizationSessionSettingsResponse> | undefined, b: GetOrganizationSessionSettingsResponse | PlainMessage<GetOrganizationSessionSettingsResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.DeleteOrganizationSessionSettingsRequest
+ */
+export declare class DeleteOrganizationSessionSettingsRequest extends Message<DeleteOrganizationSessionSettingsRequest> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: string environment_id = 2;
+     */
+    environmentId: string;
+    constructor(data?: PartialMessage<DeleteOrganizationSessionSettingsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.DeleteOrganizationSessionSettingsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteOrganizationSessionSettingsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteOrganizationSessionSettingsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteOrganizationSessionSettingsRequest;
+    static equals(a: DeleteOrganizationSessionSettingsRequest | PlainMessage<DeleteOrganizationSessionSettingsRequest> | undefined, b: DeleteOrganizationSessionSettingsRequest | PlainMessage<DeleteOrganizationSessionSettingsRequest> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.organizations.OrganizationSettings
