@@ -13,7 +13,7 @@ import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions } from './types/scalekit';
 
 const authorizeEndpoint = "oauth/authorize";
-const logoutEndpoint = "oauth/logout";
+const logoutEndpoint = "end_session";
 const WEBHOOK_TOLERANCE_IN_SECONDS = 5 * 60; // 5 minutes
 const WEBHOOK_SIGNATURE_VERSION = "v1";
 
