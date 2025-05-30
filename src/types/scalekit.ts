@@ -17,6 +17,7 @@ export type AuthorizationUrlOptions = {
   codeChallenge?: string;
   codeChallengeMethod?: string;
   provider?: string;
+  prompt?: string;
 }
 
 export type AuthenticationOptions = {
@@ -29,4 +30,10 @@ export type AuthenticationResponse = {
   accessToken: string;
   expiresIn: number;
   refreshToken: string;
+}
+
+export interface LogoutUrlOptions {
+  idTokenHint?: string;
+  postLogoutRedirectUri?: string;
+  state?: string;
 }
