@@ -71,16 +71,6 @@ export default class PasswordlessClient {
       expiresIn: options?.expiresIn ? Number(options.expiresIn) : undefined
     });
 
-    // Log the request object and its types
-    console.log('Request object:', request);
-    console.log('Request types:', {
-      email: typeof request.email,
-      template: request.template ? typeof request.template : 'undefined',
-      state: request.state ? typeof request.state : 'undefined',
-      expiresIn: request.expiresIn ? typeof request.expiresIn : 'undefined'
-    });
-    console.log('Template value:', request.template);
-
     return this.coreClient.connectExec(
       this.client.sendPasswordlessEmail,
       request
