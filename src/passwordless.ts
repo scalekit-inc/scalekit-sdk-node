@@ -45,8 +45,17 @@ export default class PasswordlessClient {
     }
 
     // Validate template if provided
-    if (options?.template && !Object.values(TemplateType).includes(options.template)) {
-      throw new Error('Invalid template type');
+    let templateValue: TemplateType | undefined;
+    if (options?.template) {
+      if (typeof options.template === 'string') {
+        // Convert string to enum value
+        templateValue = TemplateType[options.template as keyof typeof TemplateType];
+        if (templateValue === undefined) {
+          throw new Error('Invalid template type');
+        }
+      } else {
+        templateValue = options.template;
+      }
     }
 
     // Validate state if provided
@@ -57,7 +66,7 @@ export default class PasswordlessClient {
     // Create the request object with explicit type
     const request: SendPasswordlessRequest = new SendPasswordlessRequest({
       email,
-      template: options?.template,
+      template: templateValue,
       state: options?.state,
       expiresIn: options?.expiresIn ? Number(options.expiresIn) : undefined
     });
@@ -70,6 +79,7 @@ export default class PasswordlessClient {
       state: request.state ? typeof request.state : 'undefined',
       expiresIn: request.expiresIn ? typeof request.expiresIn : 'undefined'
     });
+    console.log('Template value:', request.template);
 
     return this.coreClient.connectExec(
       this.client.sendPasswordlessEmail,
