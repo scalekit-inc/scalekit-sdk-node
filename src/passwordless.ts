@@ -5,7 +5,8 @@ import { PasswordlessService } from './pkg/grpc/scalekit/v1/passwordless/passwor
 import { 
   SendPasswordlessResponse, 
   VerifyPasswordLessResponse,
-  TemplateType
+  TemplateType,
+  SendPasswordlessRequest
 } from './pkg/grpc/scalekit/v1/passwordless/passwordless_pb';
 
 export default class PasswordlessClient {
@@ -53,23 +54,26 @@ export default class PasswordlessClient {
       throw new Error('State must be a string');
     }
 
-    // Validate and convert expiresIn if provided
-    let expiresIn: number | undefined;
-    if (options?.expiresIn !== undefined) {
-      expiresIn = Number(options.expiresIn);
-      if (isNaN(expiresIn) || expiresIn < 0 || !Number.isInteger(expiresIn)) {
-        throw new Error('expiresIn must be a positive integer');
-      }
-    }
+    // Create the request object with explicit type
+    const request: SendPasswordlessRequest = new SendPasswordlessRequest({
+      email,
+      template: options?.template,
+      state: options?.state,
+      expiresIn: options?.expiresIn ? Number(options.expiresIn) : undefined
+    });
+
+    // Log the request object and its types
+    console.log('Request object:', request);
+    console.log('Request types:', {
+      email: typeof request.email,
+      template: request.template ? typeof request.template : 'undefined',
+      state: request.state ? typeof request.state : 'undefined',
+      expiresIn: request.expiresIn ? typeof request.expiresIn : 'undefined'
+    });
 
     return this.coreClient.connectExec(
       this.client.sendPasswordlessEmail,
-      {
-        email,
-        ...(options?.template && { template: options.template }),
-        ...(options?.state && { state: options.state }),
-        ...(expiresIn !== undefined && { expiresIn })
-      }
+      request
     );
   }
 
