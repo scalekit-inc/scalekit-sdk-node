@@ -38,13 +38,37 @@ export default class PasswordlessClient {
       expiresIn?: number;
     }
   ): Promise<SendPasswordlessResponse> {
+    // Validate email
+    if (!email || typeof email !== 'string') {
+      throw new Error('Email must be a valid string');
+    }
+
+    // Validate template if provided
+    if (options?.template && !Object.values(TemplateType).includes(options.template)) {
+      throw new Error('Invalid template type');
+    }
+
+    // Validate state if provided
+    if (options?.state && typeof options.state !== 'string') {
+      throw new Error('State must be a string');
+    }
+
+    // Validate and convert expiresIn if provided
+    let expiresIn: number | undefined;
+    if (options?.expiresIn !== undefined) {
+      expiresIn = Number(options.expiresIn);
+      if (isNaN(expiresIn) || expiresIn < 0 || !Number.isInteger(expiresIn)) {
+        throw new Error('expiresIn must be a positive integer');
+      }
+    }
+
     return this.coreClient.connectExec(
       this.client.sendPasswordlessEmail,
       {
         email,
         ...(options?.template && { template: options.template }),
         ...(options?.state && { state: options.state }),
-        ...(options?.expiresIn && { expiresIn: options.expiresIn })
+        ...(expiresIn !== undefined && { expiresIn })
       }
     );
   }
