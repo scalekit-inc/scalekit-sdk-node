@@ -42,16 +42,13 @@ export default class PasswordlessClient {
       expiresIn?: number;
     }
   ): Promise<SendPasswordlessResponse> {
-    // Validate email
     if (!email || typeof email !== 'string') {
       throw new Error('Email must be a valid string');
     }
 
-    // Validate template if provided
     let templateValue: TemplateType | undefined;
     if (options?.template) {
       if (typeof options.template === 'string') {
-        // Convert string to enum value
         templateValue = TemplateType[options.template as keyof typeof TemplateType];
         if (templateValue === undefined) {
           throw new Error('Invalid template type');
@@ -61,17 +58,14 @@ export default class PasswordlessClient {
       }
     }
 
-    // Validate state if provided
     if (options?.state && typeof options.state !== 'string') {
       throw new Error('State must be a string');
     }
 
-    // Validate magiclinkRedirectUri if provided
     if (options?.magiclinkRedirectUri && typeof options.magiclinkRedirectUri !== 'string') {
       throw new Error('Magic link redirect URI must be a string');
     }
 
-    // Create the request object with explicit type
     const request: SendPasswordlessRequest = new SendPasswordlessRequest({
       email,
       template: templateValue,
@@ -106,12 +100,6 @@ export default class PasswordlessClient {
       throw new Error('Either code or linkToken must be provided');
     }
 
-    console.log('Verifying passwordless email with:', {
-      authRequestId,
-      credentialType: credential.code ? 'code' : 'linkToken',
-      credentialValue: credential.code || credential.linkToken
-    });
-
     const request = new VerifyPasswordLessRequest({
       authRequestId,
       authCredential: credential.code 
@@ -119,28 +107,10 @@ export default class PasswordlessClient {
         : { case: "linkToken", value: credential.linkToken! }
     });
 
-    console.log('Constructed request:', {
-      authRequestId: request.authRequestId,
-      authCredential: request.authCredential
-    });
-
-    try {
-      const response = await this.coreClient.connectExec(
-        this.client.verifyPasswordlessEmail,
-        request
-      );
-      console.log('Verification response:', response);
-      return response;
-    } catch (error) {
-      console.error('Verification error details:', {
-        error,
-        request: {
-          authRequestId: request.authRequestId,
-          authCredential: request.authCredential
-        }
-      });
-      throw error;
-    }
+    return this.coreClient.connectExec(
+      this.client.verifyPasswordlessEmail,
+      request
+    );
   }
 
   /**
