@@ -540,6 +540,62 @@ export class ListDomainRequest extends Message<ListDomainRequest> {
 }
 
 /**
+ * @generated from message scalekit.v1.domains.VerifyDomainRequest
+ */
+export class VerifyDomainRequest extends Message<VerifyDomainRequest> {
+  /**
+   * @generated from oneof scalekit.v1.domains.VerifyDomainRequest.identities
+   */
+  identities: {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    value: string;
+    case: "organizationId";
+  } | {
+    /**
+     * @generated from field: string external_id = 2;
+     */
+    value: string;
+    case: "externalId";
+  } | { case: undefined; value?: undefined } = { case: undefined };
+
+  /**
+   * @generated from field: string id = 4;
+   */
+  id = "";
+
+  constructor(data?: PartialMessage<VerifyDomainRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.domains.VerifyDomainRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "identities" },
+    { no: 2, name: "external_id", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "identities" },
+    { no: 4, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VerifyDomainRequest {
+    return new VerifyDomainRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VerifyDomainRequest {
+    return new VerifyDomainRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VerifyDomainRequest {
+    return new VerifyDomainRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: VerifyDomainRequest | PlainMessage<VerifyDomainRequest> | undefined, b: VerifyDomainRequest | PlainMessage<VerifyDomainRequest> | undefined): boolean {
+    return proto3.util.equals(VerifyDomainRequest, a, b);
+  }
+}
+
+/**
  * @generated from message scalekit.v1.domains.ListDomainResponse
  */
 export class ListDomainResponse extends Message<ListDomainResponse> {

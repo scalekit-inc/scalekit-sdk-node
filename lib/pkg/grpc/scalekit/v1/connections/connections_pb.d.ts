@@ -1,6 +1,23 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
 /**
+ * @generated from enum scalekit.v1.connections.CodeChallengeType
+ */
+export declare enum CodeChallengeType {
+    /**
+     * @generated from enum value: CODE_CHALLENGE_TYPE_UNSPECIFIED = 0;
+     */
+    CODE_CHALLENGE_TYPE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: NUMERIC = 1;
+     */
+    NUMERIC = 1,
+    /**
+     * @generated from enum value: ALPHANUMERIC = 2;
+     */
+    ALPHANUMERIC = 2
+}
+/**
  * @generated from enum scalekit.v1.connections.ConfigurationType
  */
 export declare enum ConfigurationType {
@@ -43,6 +60,44 @@ export declare enum NameIdFormat {
     PERSISTENT = 4
 }
 /**
+ * @generated from enum scalekit.v1.connections.PasswordlessType
+ */
+export declare enum PasswordlessType {
+    /**
+     * @generated from enum value: PasswordlessType_UNSPECIFIED = 0;
+     */
+    PasswordlessType_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: LINK = 1;
+     */
+    LINK = 1,
+    /**
+     * @generated from enum value: OTP = 2;
+     */
+    OTP = 2,
+    /**
+     * @generated from enum value: LINK_OTP = 3;
+     */
+    LINK_OTP = 3
+}
+/**
+ * @generated from enum scalekit.v1.connections.TestResultStatus
+ */
+export declare enum TestResultStatus {
+    /**
+     * @generated from enum value: PENDING = 0;
+     */
+    PENDING = 0,
+    /**
+     * @generated from enum value: SUCCESS = 1;
+     */
+    SUCCESS = 1,
+    /**
+     * @generated from enum value: FAILURE = 2;
+     */
+    FAILURE = 2
+}
+/**
  * enums all
  *
  * @generated from enum scalekit.v1.connections.SAMLSigningOptions
@@ -67,7 +122,11 @@ export declare enum SAMLSigningOptions {
     /**
      * @generated from enum value: SAML_RESPONSE_ASSERTION_SIGNING = 4;
      */
-    SAML_RESPONSE_ASSERTION_SIGNING = 4
+    SAML_RESPONSE_ASSERTION_SIGNING = 4,
+    /**
+     * @generated from enum value: SAML_RESPONSE_OR_ASSERTION_SIGNING = 5;
+     */
+    SAML_RESPONSE_OR_ASSERTION_SIGNING = 5
 }
 /**
  * @generated from enum scalekit.v1.connections.RequestBinding
@@ -155,7 +214,11 @@ export declare enum ConnectionType {
     /**
      * @generated from enum value: OAUTH = 4;
      */
-    OAUTH = 4
+    OAUTH = 4,
+    /**
+     * @generated from enum value: PASSWORDLESS = 5;
+     */
+    PASSWORDLESS = 5
 }
 /**
  * @generated from enum scalekit.v1.connections.ConnectionStatus
@@ -233,7 +296,23 @@ export declare enum ConnectionProvider {
     /**
      * @generated from enum value: SALESFORCE = 12;
      */
-    SALESFORCE = 12
+    SALESFORCE = 12,
+    /**
+     * @generated from enum value: MICROSOFT = 13;
+     */
+    MICROSOFT = 13,
+    /**
+     * @generated from enum value: IDP_SIMULATOR = 14;
+     */
+    IDP_SIMULATOR = 14,
+    /**
+     * @generated from enum value: SCALEKIT = 15;
+     */
+    SCALEKIT = 15,
+    /**
+     * @generated from enum value: ADFS = 16;
+     */
+    ADFS = 16
 }
 /**
  * @generated from message scalekit.v1.connections.GetProvidersRequest
@@ -429,6 +508,12 @@ export declare class Connection extends Message<Connection> {
         value: OAuthConnectionConfig;
         case: "oauthConfig";
     } | {
+        /**
+         * @generated from field: scalekit.v1.connections.PasswordLessConfig passwordless_config = 22;
+         */
+        value: PasswordLessConfig;
+        case: "passwordlessConfig";
+    } | {
         case: undefined;
         value?: undefined;
     };
@@ -559,6 +644,12 @@ export declare class UpdateConnection extends Message<UpdateConnection> {
          */
         value: OAuthConnectionConfig;
         case: "oauthConfig";
+    } | {
+        /**
+         * @generated from field: scalekit.v1.connections.PasswordLessConfig passwordless_config = 20;
+         */
+        value: PasswordLessConfig;
+        case: "passwordlessConfig";
     } | {
         case: undefined;
         value?: undefined;
@@ -880,6 +971,18 @@ export declare class OIDCConnectionConfig extends Message<OIDCConnectionConfig> 
      * @generated from field: google.protobuf.BoolValue pkce_enabled = 13;
      */
     pkceEnabled?: boolean;
+    /**
+     * @generated from field: google.protobuf.BoolValue idp_logout_required = 14;
+     */
+    idpLogoutRequired?: boolean;
+    /**
+     * @generated from field: google.protobuf.StringValue post_logout_redirect_uri = 15;
+     */
+    postLogoutRedirectUri?: string;
+    /**
+     * @generated from field: google.protobuf.StringValue backchannel_logout_redirect_uri = 16;
+     */
+    backchannelLogoutRedirectUri?: string;
     constructor(data?: PartialMessage<OIDCConnectionConfig>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.OIDCConnectionConfig";
@@ -925,6 +1028,14 @@ export declare class OAuthConnectionConfig extends Message<OAuthConnectionConfig
      * @generated from field: google.protobuf.BoolValue pkce_enabled = 13;
      */
     pkceEnabled?: boolean;
+    /**
+     * @generated from field: google.protobuf.StringValue prompt = 14;
+     */
+    prompt?: string;
+    /**
+     * @generated from field: google.protobuf.BoolValue use_platform_creds = 15;
+     */
+    usePlatformCreds?: boolean;
     constructor(data?: PartialMessage<OAuthConnectionConfig>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.OAuthConnectionConfig";
@@ -933,6 +1044,43 @@ export declare class OAuthConnectionConfig extends Message<OAuthConnectionConfig
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OAuthConnectionConfig;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OAuthConnectionConfig;
     static equals(a: OAuthConnectionConfig | PlainMessage<OAuthConnectionConfig> | undefined, b: OAuthConnectionConfig | PlainMessage<OAuthConnectionConfig> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.PasswordLessConfig
+ */
+export declare class PasswordLessConfig extends Message<PasswordLessConfig> {
+    /**
+     * @generated from field: scalekit.v1.connections.PasswordlessType type = 1;
+     */
+    type: PasswordlessType;
+    /**
+     * @generated from field: optional google.protobuf.UInt32Value frequency = 2;
+     */
+    frequency?: number;
+    /**
+     * @generated from field: optional google.protobuf.UInt32Value validity = 3;
+     */
+    validity?: number;
+    /**
+     * @generated from field: optional google.protobuf.BoolValue enforce_same_browser_origin = 4;
+     */
+    enforceSameBrowserOrigin?: boolean;
+    /**
+     * @generated from field: optional google.protobuf.UInt32Value code_challenge_length = 5;
+     */
+    codeChallengeLength?: number;
+    /**
+     * @generated from field: optional scalekit.v1.connections.CodeChallengeType code_challenge_type = 6;
+     */
+    codeChallengeType?: CodeChallengeType;
+    constructor(data?: PartialMessage<PasswordLessConfig>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.PasswordLessConfig";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PasswordLessConfig;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PasswordLessConfig;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PasswordLessConfig;
+    static equals(a: PasswordLessConfig | PlainMessage<PasswordLessConfig> | undefined, b: PasswordLessConfig | PlainMessage<PasswordLessConfig> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.connections.SAMLConnectionConfigRequest
@@ -994,6 +1142,14 @@ export declare class SAMLConnectionConfigRequest extends Message<SAMLConnectionC
      * @generated from field: google.protobuf.BoolValue want_request_signed = 17;
      */
     wantRequestSigned?: boolean;
+    /**
+     * @generated from field: google.protobuf.StringValue certificate_id = 18;
+     */
+    certificateId?: string;
+    /**
+     * @generated from field: google.protobuf.BoolValue idp_slo_required = 19;
+     */
+    idpSloRequired?: boolean;
     constructor(data?: PartialMessage<SAMLConnectionConfigRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.SAMLConnectionConfigRequest";
@@ -1079,6 +1235,18 @@ export declare class SAMLConnectionConfigResponse extends Message<SAMLConnection
      * @generated from field: google.protobuf.BoolValue want_request_signed = 18;
      */
     wantRequestSigned?: boolean;
+    /**
+     * @generated from field: google.protobuf.StringValue certificate_id = 19;
+     */
+    certificateId?: string;
+    /**
+     * @generated from field: google.protobuf.BoolValue idp_slo_required = 20;
+     */
+    idpSloRequired?: boolean;
+    /**
+     * @generated from field: google.protobuf.StringValue sp_slo_url = 21;
+     */
+    spSloUrl?: string;
     constructor(data?: PartialMessage<SAMLConnectionConfigResponse>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.SAMLConnectionConfigResponse";
@@ -1329,6 +1497,60 @@ export declare class GetSAMLCertificateDetailsResponse extends Message<GetSAMLCe
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetSAMLCertificateDetailsResponse;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetSAMLCertificateDetailsResponse;
     static equals(a: GetSAMLCertificateDetailsResponse | PlainMessage<GetSAMLCertificateDetailsResponse> | undefined, b: GetSAMLCertificateDetailsResponse | PlainMessage<GetSAMLCertificateDetailsResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.GetConnectionTestResultRequest
+ */
+export declare class GetConnectionTestResultRequest extends Message<GetConnectionTestResultRequest> {
+    /**
+     * @generated from field: string connection_id = 1;
+     */
+    connectionId: string;
+    /**
+     * @generated from field: string test_request_id = 2;
+     */
+    testRequestId: string;
+    constructor(data?: PartialMessage<GetConnectionTestResultRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.GetConnectionTestResultRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionTestResultRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionTestResultRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionTestResultRequest;
+    static equals(a: GetConnectionTestResultRequest | PlainMessage<GetConnectionTestResultRequest> | undefined, b: GetConnectionTestResultRequest | PlainMessage<GetConnectionTestResultRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.GetConnectionTestResultResponse
+ */
+export declare class GetConnectionTestResultResponse extends Message<GetConnectionTestResultResponse> {
+    /**
+     * @generated from field: scalekit.v1.connections.TestResultStatus status = 1;
+     */
+    status: TestResultStatus;
+    /**
+     * @generated from field: optional string user_info = 2;
+     */
+    userInfo?: string;
+    /**
+     * @generated from field: optional string error = 3;
+     */
+    error?: string;
+    /**
+     * @generated from field: optional string error_description = 4;
+     */
+    errorDescription?: string;
+    /**
+     * @generated from field: optional string error_details = 5;
+     */
+    errorDetails?: string;
+    constructor(data?: PartialMessage<GetConnectionTestResultResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.GetConnectionTestResultResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionTestResultResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionTestResultResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionTestResultResponse;
+    static equals(a: GetConnectionTestResultResponse | PlainMessage<GetConnectionTestResultResponse> | undefined, b: GetConnectionTestResultResponse | PlainMessage<GetConnectionTestResultResponse> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.connections.PasswordConnectionConfig

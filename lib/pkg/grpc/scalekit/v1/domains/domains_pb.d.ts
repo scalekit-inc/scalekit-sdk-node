@@ -311,6 +311,42 @@ export declare class ListDomainRequest extends Message<ListDomainRequest> {
     static equals(a: ListDomainRequest | PlainMessage<ListDomainRequest> | undefined, b: ListDomainRequest | PlainMessage<ListDomainRequest> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.domains.VerifyDomainRequest
+ */
+export declare class VerifyDomainRequest extends Message<VerifyDomainRequest> {
+    /**
+     * @generated from oneof scalekit.v1.domains.VerifyDomainRequest.identities
+     */
+    identities: {
+        /**
+         * @generated from field: string organization_id = 1;
+         */
+        value: string;
+        case: "organizationId";
+    } | {
+        /**
+         * @generated from field: string external_id = 2;
+         */
+        value: string;
+        case: "externalId";
+    } | {
+        case: undefined;
+        value?: undefined;
+    };
+    /**
+     * @generated from field: string id = 4;
+     */
+    id: string;
+    constructor(data?: PartialMessage<VerifyDomainRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.domains.VerifyDomainRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VerifyDomainRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VerifyDomainRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VerifyDomainRequest;
+    static equals(a: VerifyDomainRequest | PlainMessage<VerifyDomainRequest> | undefined, b: VerifyDomainRequest | PlainMessage<VerifyDomainRequest> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.domains.ListDomainResponse
  */
 export declare class ListDomainResponse extends Message<ListDomainResponse> {

@@ -3,8 +3,8 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { AssignRolesRequest, AssignRolesResponse, CreateDirectoryRequest, CreateDirectoryResponse, CreateDirectorySecretRequest, CreateDirectorySecretResponse, GetDirectoryRequest, GetDirectoryResponse, ListDirectoriesRequest, ListDirectoriesResponse, ListDirectoryGroupsRequest, ListDirectoryGroupsResponse, ListDirectoryUsersRequest, ListDirectoryUsersResponse, RegenerateDirectorySecretRequest, RegenerateDirectorySecretResponse, ToggleDirectoryRequest, ToggleDirectoryResponse, UpdateAttributesRequest, UpdateAttributesResponse, UpdateDirectoryRequest, UpdateDirectoryResponse } from "./directories_pb.js";
-import { MethodKind } from "@bufbuild/protobuf";
+import { AssignGroupsForDirectoryRequest, AssignRolesRequest, AssignRolesResponse, CreateDirectoryRequest, CreateDirectoryResponse, CreateDirectorySecretRequest, CreateDirectorySecretResponse, DeleteDirectoryRequest, GetDirectoryRequest, GetDirectoryResponse, ListDirectoriesRequest, ListDirectoriesResponse, ListDirectoryGroupsRequest, ListDirectoryGroupsResponse, ListDirectoryGroupsSummaryRequest, ListDirectoryUsersRequest, ListDirectoryUsersResponse, RegenerateDirectorySecretRequest, RegenerateDirectorySecretResponse, ToggleDirectoryRequest, ToggleDirectoryResponse, TriggerDirectorySyncRequest, UpdateAttributesRequest, UpdateAttributesResponse, UpdateDirectoryRequest, UpdateDirectoryResponse } from "./directories_pb.js";
+import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
  * @generated from service scalekit.v1.directories.DirectoryService
@@ -22,12 +22,30 @@ export const DirectoryService = {
       kind: MethodKind.Unary,
     },
     /**
+     * @generated from rpc scalekit.v1.directories.DirectoryService.DeleteDirectory
+     */
+    deleteDirectory: {
+      name: "DeleteDirectory",
+      I: DeleteDirectoryRequest,
+      O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
      * @generated from rpc scalekit.v1.directories.DirectoryService.UpdateDirectory
      */
     updateDirectory: {
       name: "UpdateDirectory",
       I: UpdateDirectoryRequest,
       O: UpdateDirectoryResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.directories.DirectoryService.AssignGroupsForDirectory
+     */
+    assignGroupsForDirectory: {
+      name: "AssignGroupsForDirectory",
+      I: AssignGroupsForDirectoryRequest,
+      O: Empty,
       kind: MethodKind.Unary,
     },
     /**
@@ -103,6 +121,15 @@ export const DirectoryService = {
       kind: MethodKind.Unary,
     },
     /**
+     * @generated from rpc scalekit.v1.directories.DirectoryService.ListDirectoryGroupsSummary
+     */
+    listDirectoryGroupsSummary: {
+      name: "ListDirectoryGroupsSummary",
+      I: ListDirectoryGroupsSummaryRequest,
+      O: ListDirectoryGroupsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
      * @generated from rpc scalekit.v1.directories.DirectoryService.CreateDirectorySecret
      */
     createDirectorySecret: {
@@ -118,6 +145,15 @@ export const DirectoryService = {
       name: "RegenerateDirectorySecret",
       I: RegenerateDirectorySecretRequest,
       O: RegenerateDirectorySecretResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.directories.DirectoryService.TriggerDirectorySync
+     */
+    triggerDirectorySync: {
+      name: "TriggerDirectorySync",
+      I: TriggerDirectorySyncRequest,
+      O: Empty,
       kind: MethodKind.Unary,
     },
   }

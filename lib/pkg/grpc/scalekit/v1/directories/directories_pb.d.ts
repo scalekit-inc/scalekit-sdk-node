@@ -15,7 +15,11 @@ export declare enum DirectoryType {
     /**
      * @generated from enum value: LDAP = 2;
      */
-    LDAP = 2
+    LDAP = 2,
+    /**
+     * @generated from enum value: POLL = 3;
+     */
+    POLL = 3
 }
 /**
  * @generated from enum scalekit.v1.directories.DirectoryProvider
@@ -44,7 +48,15 @@ export declare enum DirectoryProvider {
     /**
      * @generated from enum value: ONELOGIN = 5;
      */
-    ONELOGIN = 5
+    ONELOGIN = 5,
+    /**
+     * @generated from enum value: JUMPCLOUD = 6;
+     */
+    JUMPCLOUD = 6,
+    /**
+     * @generated from enum value: PING_IDENTITY = 7;
+     */
+    PING_IDENTITY = 7
 }
 /**
  * @generated from enum scalekit.v1.directories.DirectoryStatus
@@ -230,6 +242,10 @@ export declare class UpdateDirectory extends Message<UpdateDirectory> {
      * @generated from field: repeated scalekit.v1.directories.DirectoryMapping mappings = 10;
      */
     mappings: DirectoryMapping[];
+    /**
+     * @generated from field: repeated scalekit.v1.directories.ExternalGroup groups = 15;
+     */
+    groups: ExternalGroup[];
     constructor(data?: PartialMessage<UpdateDirectory>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.directories.UpdateDirectory";
@@ -255,6 +271,31 @@ export declare class UpdateDirectoryResponse extends Message<UpdateDirectoryResp
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateDirectoryResponse;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateDirectoryResponse;
     static equals(a: UpdateDirectoryResponse | PlainMessage<UpdateDirectoryResponse> | undefined, b: UpdateDirectoryResponse | PlainMessage<UpdateDirectoryResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.directories.AssignGroupsForDirectoryRequest
+ */
+export declare class AssignGroupsForDirectoryRequest extends Message<AssignGroupsForDirectoryRequest> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: string organization_id = 2;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: repeated string external_ids = 3;
+     */
+    externalIds: string[];
+    constructor(data?: PartialMessage<AssignGroupsForDirectoryRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.directories.AssignGroupsForDirectoryRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignGroupsForDirectoryRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignGroupsForDirectoryRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignGroupsForDirectoryRequest;
+    static equals(a: AssignGroupsForDirectoryRequest | PlainMessage<AssignGroupsForDirectoryRequest> | undefined, b: AssignGroupsForDirectoryRequest | PlainMessage<AssignGroupsForDirectoryRequest> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.directories.ListDirectoriesRequest
@@ -388,6 +429,10 @@ export declare class ListDirectoryGroupsRequest extends Message<ListDirectoryGro
      * @generated from field: optional bool include_detail = 6;
      */
     includeDetail?: boolean;
+    /**
+     * @generated from field: optional bool include_external_groups = 7;
+     */
+    includeExternalGroups?: boolean;
     constructor(data?: PartialMessage<ListDirectoryGroupsRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.directories.ListDirectoryGroupsRequest";
@@ -425,6 +470,27 @@ export declare class ListDirectoryGroupsResponse extends Message<ListDirectoryGr
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListDirectoryGroupsResponse;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListDirectoryGroupsResponse;
     static equals(a: ListDirectoryGroupsResponse | PlainMessage<ListDirectoryGroupsResponse> | undefined, b: ListDirectoryGroupsResponse | PlainMessage<ListDirectoryGroupsResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.directories.ListDirectoryGroupsSummaryRequest
+ */
+export declare class ListDirectoryGroupsSummaryRequest extends Message<ListDirectoryGroupsSummaryRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string directory_id = 2;
+     */
+    directoryId: string;
+    constructor(data?: PartialMessage<ListDirectoryGroupsSummaryRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.directories.ListDirectoryGroupsSummaryRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListDirectoryGroupsSummaryRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListDirectoryGroupsSummaryRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListDirectoryGroupsSummaryRequest;
+    static equals(a: ListDirectoryGroupsSummaryRequest | PlainMessage<ListDirectoryGroupsSummaryRequest> | undefined, b: ListDirectoryGroupsSummaryRequest | PlainMessage<ListDirectoryGroupsSummaryRequest> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.directories.Directory
@@ -486,6 +552,18 @@ export declare class Directory extends Message<Directory> {
      * @generated from field: scalekit.v1.directories.AttributeMappings attribute_mappings = 14;
      */
     attributeMappings?: AttributeMappings;
+    /**
+     * @generated from field: string status = 15;
+     */
+    status: string;
+    /**
+     * @generated from field: string email = 16;
+     */
+    email: string;
+    /**
+     * @generated from field: string groups_tracked = 17;
+     */
+    groupsTracked: string;
     constructor(data?: PartialMessage<Directory>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.directories.Directory";
@@ -610,6 +688,31 @@ export declare class DirectoryUser extends Message<DirectoryUser> {
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DirectoryUser;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DirectoryUser;
     static equals(a: DirectoryUser | PlainMessage<DirectoryUser> | undefined, b: DirectoryUser | PlainMessage<DirectoryUser> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.directories.ExternalGroup
+ */
+export declare class ExternalGroup extends Message<ExternalGroup> {
+    /**
+     * @generated from field: string external_id = 1;
+     */
+    externalId: string;
+    /**
+     * @generated from field: string display_name = 2;
+     */
+    displayName: string;
+    /**
+     * @generated from field: string email = 3;
+     */
+    email: string;
+    constructor(data?: PartialMessage<ExternalGroup>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.directories.ExternalGroup";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExternalGroup;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ExternalGroup;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ExternalGroup;
+    static equals(a: ExternalGroup | PlainMessage<ExternalGroup> | undefined, b: ExternalGroup | PlainMessage<ExternalGroup> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.directories.DirectoryGroup
@@ -866,7 +969,11 @@ export declare class RoleAssignment extends Message<RoleAssignment> {
      */
     groupId: string;
     /**
-     * @generated from field: string role_id = 2;
+     * @generated from field: string role_name = 2;
+     */
+    roleName: string;
+    /**
+     * @generated from field: string role_id = 3;
      */
     roleId: string;
     constructor(data?: PartialMessage<RoleAssignment>);
@@ -957,4 +1064,46 @@ export declare class UpdateAttributesResponse extends Message<UpdateAttributesRe
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateAttributesResponse;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateAttributesResponse;
     static equals(a: UpdateAttributesResponse | PlainMessage<UpdateAttributesResponse> | undefined, b: UpdateAttributesResponse | PlainMessage<UpdateAttributesResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.directories.DeleteDirectoryRequest
+ */
+export declare class DeleteDirectoryRequest extends Message<DeleteDirectoryRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string id = 3;
+     */
+    id: string;
+    constructor(data?: PartialMessage<DeleteDirectoryRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.directories.DeleteDirectoryRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteDirectoryRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteDirectoryRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteDirectoryRequest;
+    static equals(a: DeleteDirectoryRequest | PlainMessage<DeleteDirectoryRequest> | undefined, b: DeleteDirectoryRequest | PlainMessage<DeleteDirectoryRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.directories.TriggerDirectorySyncRequest
+ */
+export declare class TriggerDirectorySyncRequest extends Message<TriggerDirectorySyncRequest> {
+    /**
+     * @generated from field: string directory_id = 1;
+     */
+    directoryId: string;
+    /**
+     * @generated from field: string organization_id = 2;
+     */
+    organizationId: string;
+    constructor(data?: PartialMessage<TriggerDirectorySyncRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.directories.TriggerDirectorySyncRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): TriggerDirectorySyncRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): TriggerDirectorySyncRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): TriggerDirectorySyncRequest;
+    static equals(a: TriggerDirectorySyncRequest | PlainMessage<TriggerDirectorySyncRequest> | undefined, b: TriggerDirectorySyncRequest | PlainMessage<TriggerDirectorySyncRequest> | undefined): boolean;
 }
