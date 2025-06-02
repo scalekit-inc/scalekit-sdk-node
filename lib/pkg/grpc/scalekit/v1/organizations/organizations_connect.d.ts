@@ -1,4 +1,4 @@
-import { CreateOrganizationRequest, CreateOrganizationResponse, DeleteOrganizationRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSettingsRequest } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, CreateOrganizationSessionSettingsRequest, CreateOrganizationSessionSettingsResponse, DeleteOrganizationRequest, DeleteOrganizationSessionSettingsRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetOrganizationSessionSettingsRequest, GetOrganizationSessionSettingsResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSessionSettingsRequest, UpdateOrganizationSessionSettingsResponse, UpdateOrganizationSettingsRequest } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.organizations.OrganizationService
@@ -109,6 +109,42 @@ export declare const OrganizationService: {
             readonly name: "UpdateOrganizationSettings";
             readonly I: typeof UpdateOrganizationSettingsRequest;
             readonly O: typeof GetOrganizationResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.CreateOrganizationSessionSettings
+         */
+        readonly createOrganizationSessionSettings: {
+            readonly name: "CreateOrganizationSessionSettings";
+            readonly I: typeof CreateOrganizationSessionSettingsRequest;
+            readonly O: typeof CreateOrganizationSessionSettingsResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.GetOrganizationSessionSettings
+         */
+        readonly getOrganizationSessionSettings: {
+            readonly name: "GetOrganizationSessionSettings";
+            readonly I: typeof GetOrganizationSessionSettingsRequest;
+            readonly O: typeof GetOrganizationSessionSettingsResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateOrganizationSessionSettings
+         */
+        readonly updateOrganizationSessionSettings: {
+            readonly name: "UpdateOrganizationSessionSettings";
+            readonly I: typeof UpdateOrganizationSessionSettingsRequest;
+            readonly O: typeof UpdateOrganizationSessionSettingsResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.DeleteOrganizationSessionSettings
+         */
+        readonly deleteOrganizationSessionSettings: {
+            readonly name: "DeleteOrganizationSessionSettings";
+            readonly I: typeof DeleteOrganizationSessionSettingsRequest;
+            readonly O: typeof Empty;
             readonly kind: MethodKind.Unary;
         };
     };
