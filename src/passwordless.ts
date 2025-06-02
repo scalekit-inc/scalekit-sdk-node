@@ -1,13 +1,14 @@
 import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { PasswordlessService } from './pkg/grpc/scalekit/v1/passwordless/passwordless_connect';
+import { PasswordlessService } from './pkg/grpc/scalekit/v1/auth/passwordless_connect';
 import { 
   SendPasswordlessResponse, 
   VerifyPasswordLessResponse,
   TemplateType,
-  SendPasswordlessRequest
-} from './pkg/grpc/scalekit/v1/passwordless/passwordless_pb';
+  SendPasswordlessRequest,
+  VerifyPasswordLessRequest
+} from './pkg/grpc/scalekit/v1/auth/passwordless_pb';
 
 export default class PasswordlessClient {
   private client: PromiseClient<typeof PasswordlessService>;
@@ -24,6 +25,7 @@ export default class PasswordlessClient {
    * @param {object} options The options for sending the passwordless email
    * @param {TemplateType} options.template The template type (SIGNIN/SIGNUP)
    * @param {string} options.state Optional state parameter to maintain state between request and callback
+   * @param {string} options.magiclinkRedirectUri Optional redirect URI for magic link authentication
    * @param {number} options.expiresIn Optional expiration time in seconds (default: 3600)
    * @returns {Promise<SendPasswordlessResponse>} The response containing:
    * - authRequestId: Unique identifier for the passwordless authentication request
@@ -36,6 +38,7 @@ export default class PasswordlessClient {
     options?: {
       template?: TemplateType;
       state?: string;
+      magiclinkRedirectUri?: string;
       expiresIn?: number;
     }
   ): Promise<SendPasswordlessResponse> {
@@ -63,12 +66,18 @@ export default class PasswordlessClient {
       throw new Error('State must be a string');
     }
 
+    // Validate magiclinkRedirectUri if provided
+    if (options?.magiclinkRedirectUri && typeof options.magiclinkRedirectUri !== 'string') {
+      throw new Error('Magic link redirect URI must be a string');
+    }
+
     // Create the request object with explicit type
     const request: SendPasswordlessRequest = new SendPasswordlessRequest({
       email,
       template: templateValue,
       state: options?.state,
-      expiresIn: options?.expiresIn ? Number(options.expiresIn) : undefined
+      magiclinkRedirectUri: options?.magiclinkRedirectUri,
+      expiresIn: options?.expiresIn
     });
 
     return this.coreClient.connectExec(
@@ -78,9 +87,11 @@ export default class PasswordlessClient {
   }
 
   /**
-   * Verify a passwordless authentication code
-   * @param {string} code The one-time code received via email
+   * Verify a passwordless authentication code or link token
    * @param {string} authRequestId The auth request ID from the send response
+   * @param {object} credential The credential to verify
+   * @param {string} credential.code The one-time code received via email
+   * @param {string} credential.linkToken The link token received via email
    * @returns {Promise<VerifyPasswordLessResponse>} The response containing:
    * - email: The email address that was verified
    * - state: Optional state parameter that was passed in the send request
@@ -88,16 +99,48 @@ export default class PasswordlessClient {
    * - passwordlessType: Type of passwordless authentication used
    */
   async verifyPasswordlessEmail(
-    code: string,
-    authRequestId: string
+    authRequestId: string,
+    credential: { code?: string; linkToken?: string }
   ): Promise<VerifyPasswordLessResponse> {
-    return this.coreClient.connectExec(
-      this.client.verifyPasswordlessEmail,
-      {
-        code,
-        authRequestId
-      }
-    );
+    if (!credential.code && !credential.linkToken) {
+      throw new Error('Either code or linkToken must be provided');
+    }
+
+    console.log('Verifying passwordless email with:', {
+      authRequestId,
+      credentialType: credential.code ? 'code' : 'linkToken',
+      credentialValue: credential.code || credential.linkToken
+    });
+
+    const request = new VerifyPasswordLessRequest({
+      authRequestId,
+      authCredential: credential.code 
+        ? { case: "code", value: credential.code }
+        : { case: "linkToken", value: credential.linkToken! }
+    });
+
+    console.log('Constructed request:', {
+      authRequestId: request.authRequestId,
+      authCredential: request.authCredential
+    });
+
+    try {
+      const response = await this.coreClient.connectExec(
+        this.client.verifyPasswordlessEmail,
+        request
+      );
+      console.log('Verification response:', response);
+      return response;
+    } catch (error) {
+      console.error('Verification error details:', {
+        error,
+        request: {
+          authRequestId: request.authRequestId,
+          authCredential: request.authCredential
+        }
+      });
+      throw error;
+    }
   }
 
   /**
