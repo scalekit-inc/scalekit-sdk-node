@@ -79,9 +79,9 @@ export class SendPasswordlessRequest extends Message<SendPasswordlessRequest> {
   template?: TemplateType;
 
   /**
-   * @generated from field: optional string magiclink_redirect_uri = 3;
+   * @generated from field: optional string magiclink_auth_uri = 3;
    */
-  magiclinkRedirectUri?: string;
+  magiclinkAuthUri?: string;
 
   /**
    * @generated from field: optional string state = 4;
@@ -103,7 +103,7 @@ export class SendPasswordlessRequest extends Message<SendPasswordlessRequest> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "template", kind: "enum", T: proto3.getEnumType(TemplateType), opt: true },
-    { no: 3, name: "magiclink_redirect_uri", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 3, name: "magiclink_auth_uri", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 4, name: "state", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 5, name: "expires_in", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
   ]);
@@ -202,9 +202,9 @@ export class VerifyPasswordLessRequest extends Message<VerifyPasswordLessRequest
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   /**
-   * @generated from field: string auth_request_id = 3;
+   * @generated from field: optional string auth_request_id = 3;
    */
-  authRequestId = "";
+  authRequestId?: string;
 
   constructor(data?: PartialMessage<VerifyPasswordLessRequest>) {
     super();
@@ -216,7 +216,7 @@ export class VerifyPasswordLessRequest extends Message<VerifyPasswordLessRequest
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "code", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "auth_credential" },
     { no: 2, name: "link_token", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "auth_credential" },
-    { no: 3, name: "auth_request_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "auth_request_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VerifyPasswordLessRequest {

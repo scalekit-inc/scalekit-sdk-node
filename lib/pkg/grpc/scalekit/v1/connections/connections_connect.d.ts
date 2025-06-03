@@ -1,4 +1,4 @@
-import { CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetConnectionTestResultRequest, GetConnectionTestResultResponse, GetEnvironmentConnectionRequest, GetProvidersRequest, GetProvidersResponse, ListConnectionsRequest, ListConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
+import { CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetConnectionTestResultRequest, GetConnectionTestResultResponse, GetEnvironmentConnectionRequest, GetProvidersRequest, GetProvidersResponse, ListConnectionsRequest, ListConnectionsResponse, ListOrganizationConnectionsRequest, ListOrganizationConnectionsResponse, SearchOrganizationConnectionsRequest, SearchOrganizationConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.connections.ConnectionService
@@ -58,6 +58,24 @@ export declare const ConnectionService: {
             readonly name: "ListConnections";
             readonly I: typeof ListConnectionsRequest;
             readonly O: typeof ListConnectionsResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.ListOrganizationConnections
+         */
+        readonly listOrganizationConnections: {
+            readonly name: "ListOrganizationConnections";
+            readonly I: typeof ListOrganizationConnectionsRequest;
+            readonly O: typeof ListOrganizationConnectionsResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.SearchOrganizationConnections
+         */
+        readonly searchOrganizationConnections: {
+            readonly name: "SearchOrganizationConnections";
+            readonly I: typeof SearchOrganizationConnectionsRequest;
+            readonly O: typeof SearchOrganizationConnectionsResponse;
             readonly kind: MethodKind.Unary;
         };
         /**

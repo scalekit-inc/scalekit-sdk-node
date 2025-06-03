@@ -51,9 +51,9 @@ export declare class SendPasswordlessRequest extends Message<SendPasswordlessReq
      */
     template?: TemplateType;
     /**
-     * @generated from field: optional string magiclink_redirect_uri = 3;
+     * @generated from field: optional string magiclink_auth_uri = 3;
      */
-    magiclinkRedirectUri?: string;
+    magiclinkAuthUri?: string;
     /**
      * @generated from field: optional string state = 4;
      */
@@ -124,9 +124,9 @@ export declare class VerifyPasswordLessRequest extends Message<VerifyPasswordLes
         value?: undefined;
     };
     /**
-     * @generated from field: string auth_request_id = 3;
+     * @generated from field: optional string auth_request_id = 3;
      */
-    authRequestId: string;
+    authRequestId?: string;
     constructor(data?: PartialMessage<VerifyPasswordLessRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.auth.passwordless.VerifyPasswordLessRequest";

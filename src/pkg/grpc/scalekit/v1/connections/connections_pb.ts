@@ -1464,6 +1464,16 @@ export class ListConnection extends Message<ListConnection> {
    */
   uiButtonTitle = "";
 
+  /**
+   * @generated from field: repeated string domains = 8;
+   */
+  domains: string[] = [];
+
+  /**
+   * @generated from field: string organization_name = 9;
+   */
+  organizationName = "";
+
   constructor(data?: PartialMessage<ListConnection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1479,6 +1489,8 @@ export class ListConnection extends Message<ListConnection> {
     { no: 5, name: "enabled", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 6, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 7, name: "ui_button_title", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "domains", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 9, name: "organization_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListConnection {
@@ -1495,6 +1507,226 @@ export class ListConnection extends Message<ListConnection> {
 
   static equals(a: ListConnection | PlainMessage<ListConnection> | undefined, b: ListConnection | PlainMessage<ListConnection> | undefined): boolean {
     return proto3.util.equals(ListConnection, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.ListOrganizationConnectionsRequest
+ */
+export class ListOrganizationConnectionsRequest extends Message<ListOrganizationConnectionsRequest> {
+  /**
+   * @generated from field: uint32 page_size = 1;
+   */
+  pageSize = 0;
+
+  /**
+   * @generated from field: string page_token = 2;
+   */
+  pageToken = "";
+
+  constructor(data?: PartialMessage<ListOrganizationConnectionsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.ListOrganizationConnectionsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "page_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListOrganizationConnectionsRequest {
+    return new ListOrganizationConnectionsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsRequest {
+    return new ListOrganizationConnectionsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsRequest {
+    return new ListOrganizationConnectionsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListOrganizationConnectionsRequest | PlainMessage<ListOrganizationConnectionsRequest> | undefined, b: ListOrganizationConnectionsRequest | PlainMessage<ListOrganizationConnectionsRequest> | undefined): boolean {
+    return proto3.util.equals(ListOrganizationConnectionsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.ListOrganizationConnectionsResponse
+ */
+export class ListOrganizationConnectionsResponse extends Message<ListOrganizationConnectionsResponse> {
+  /**
+   * @generated from field: string next_page_token = 1;
+   */
+  nextPageToken = "";
+
+  /**
+   * @generated from field: uint32 total_size = 2;
+   */
+  totalSize = 0;
+
+  /**
+   * @generated from field: string prev_page_token = 3;
+   */
+  prevPageToken = "";
+
+  /**
+   * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 4;
+   */
+  connections: ListConnection[] = [];
+
+  constructor(data?: PartialMessage<ListOrganizationConnectionsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.ListOrganizationConnectionsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "next_page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "total_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "prev_page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "connections", kind: "message", T: ListConnection, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListOrganizationConnectionsResponse {
+    return new ListOrganizationConnectionsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsResponse {
+    return new ListOrganizationConnectionsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsResponse {
+    return new ListOrganizationConnectionsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListOrganizationConnectionsResponse | PlainMessage<ListOrganizationConnectionsResponse> | undefined, b: ListOrganizationConnectionsResponse | PlainMessage<ListOrganizationConnectionsResponse> | undefined): boolean {
+    return proto3.util.equals(ListOrganizationConnectionsResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.SearchOrganizationConnectionsRequest
+ */
+export class SearchOrganizationConnectionsRequest extends Message<SearchOrganizationConnectionsRequest> {
+  /**
+   * @generated from field: optional string query = 1;
+   */
+  query?: string;
+
+  /**
+   * @generated from field: optional scalekit.v1.connections.ConnectionProvider provider = 2;
+   */
+  provider?: ConnectionProvider;
+
+  /**
+   * @generated from field: optional scalekit.v1.connections.ConnectionStatus status = 3;
+   */
+  status?: ConnectionStatus;
+
+  /**
+   * @generated from field: optional scalekit.v1.connections.ConnectionType connection_type = 4;
+   */
+  connectionType?: ConnectionType;
+
+  /**
+   * @generated from field: uint32 page_size = 5;
+   */
+  pageSize = 0;
+
+  /**
+   * @generated from field: string page_token = 6;
+   */
+  pageToken = "";
+
+  constructor(data?: PartialMessage<SearchOrganizationConnectionsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.SearchOrganizationConnectionsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "query", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 2, name: "provider", kind: "enum", T: proto3.getEnumType(ConnectionProvider), opt: true },
+    { no: 3, name: "status", kind: "enum", T: proto3.getEnumType(ConnectionStatus), opt: true },
+    { no: 4, name: "connection_type", kind: "enum", T: proto3.getEnumType(ConnectionType), opt: true },
+    { no: 5, name: "page_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 6, name: "page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchOrganizationConnectionsRequest {
+    return new SearchOrganizationConnectionsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsRequest {
+    return new SearchOrganizationConnectionsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsRequest {
+    return new SearchOrganizationConnectionsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SearchOrganizationConnectionsRequest | PlainMessage<SearchOrganizationConnectionsRequest> | undefined, b: SearchOrganizationConnectionsRequest | PlainMessage<SearchOrganizationConnectionsRequest> | undefined): boolean {
+    return proto3.util.equals(SearchOrganizationConnectionsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.SearchOrganizationConnectionsResponse
+ */
+export class SearchOrganizationConnectionsResponse extends Message<SearchOrganizationConnectionsResponse> {
+  /**
+   * @generated from field: string next_page_token = 1;
+   */
+  nextPageToken = "";
+
+  /**
+   * @generated from field: uint32 total_size = 2;
+   */
+  totalSize = 0;
+
+  /**
+   * @generated from field: string prev_page_token = 3;
+   */
+  prevPageToken = "";
+
+  /**
+   * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 4;
+   */
+  connections: ListConnection[] = [];
+
+  constructor(data?: PartialMessage<SearchOrganizationConnectionsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.SearchOrganizationConnectionsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "next_page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "total_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 3, name: "prev_page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "connections", kind: "message", T: ListConnection, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchOrganizationConnectionsResponse {
+    return new SearchOrganizationConnectionsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsResponse {
+    return new SearchOrganizationConnectionsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsResponse {
+    return new SearchOrganizationConnectionsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: SearchOrganizationConnectionsResponse | PlainMessage<SearchOrganizationConnectionsResponse> | undefined, b: SearchOrganizationConnectionsResponse | PlainMessage<SearchOrganizationConnectionsResponse> | undefined): boolean {
+    return proto3.util.equals(SearchOrganizationConnectionsResponse, a, b);
   }
 }
 

@@ -25,7 +25,7 @@ export default class PasswordlessClient {
    * @param {object} options The options for sending the passwordless email
    * @param {TemplateType} options.template The template type (SIGNIN/SIGNUP)
    * @param {string} options.state Optional state parameter to maintain state between request and callback
-   * @param {string} options.magiclinkRedirectUri Optional redirect URI for magic link authentication
+   * @param {string} options.magiclinkAuthUri Optional auth URI for magic link authentication
    * @param {number} options.expiresIn Optional expiration time in seconds (default: 3600)
    * @returns {Promise<SendPasswordlessResponse>} The response containing:
    * - authRequestId: Unique identifier for the passwordless authentication request
@@ -38,7 +38,7 @@ export default class PasswordlessClient {
     options?: {
       template?: TemplateType;
       state?: string;
-      magiclinkRedirectUri?: string;
+      magiclinkAuthUri?: string;
       expiresIn?: number;
     }
   ): Promise<SendPasswordlessResponse> {
@@ -62,15 +62,15 @@ export default class PasswordlessClient {
       throw new Error('State must be a string');
     }
 
-    if (options?.magiclinkRedirectUri && typeof options.magiclinkRedirectUri !== 'string') {
-      throw new Error('Magic link redirect URI must be a string');
+    if (options?.magiclinkAuthUri && typeof options.magiclinkAuthUri !== 'string') {
+      throw new Error('Magic link auth URI must be a string');
     }
 
     const request: SendPasswordlessRequest = new SendPasswordlessRequest({
       email,
       template: templateValue,
       state: options?.state,
-      magiclinkRedirectUri: options?.magiclinkRedirectUri,
+      magiclinkAuthUri: options?.magiclinkAuthUri,
       expiresIn: options?.expiresIn
     });
 
@@ -82,10 +82,10 @@ export default class PasswordlessClient {
 
   /**
    * Verify a passwordless authentication code or link token
-   * @param {string} authRequestId The auth request ID from the send response
    * @param {object} credential The credential to verify
    * @param {string} credential.code The one-time code received via email
    * @param {string} credential.linkToken The link token received via email
+   * @param {string} [authRequestId] Optional auth request ID from the send response
    * @returns {Promise<VerifyPasswordLessResponse>} The response containing:
    * - email: The email address that was verified
    * - state: Optional state parameter that was passed in the send request
@@ -93,8 +93,8 @@ export default class PasswordlessClient {
    * - passwordlessType: Type of passwordless authentication used
    */
   async verifyPasswordlessEmail(
-    authRequestId: string,
-    credential: { code?: string; linkToken?: string }
+    credential: { code?: string; linkToken?: string },
+    authRequestId?: string
   ): Promise<VerifyPasswordLessResponse> {
     if (!credential.code && !credential.linkToken) {
       throw new Error('Either code or linkToken must be provided');

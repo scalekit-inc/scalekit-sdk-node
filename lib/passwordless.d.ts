@@ -12,7 +12,7 @@ export default class PasswordlessClient {
      * @param {object} options The options for sending the passwordless email
      * @param {TemplateType} options.template The template type (SIGNIN/SIGNUP)
      * @param {string} options.state Optional state parameter to maintain state between request and callback
-     * @param {string} options.magiclinkRedirectUri Optional redirect URI for magic link authentication
+     * @param {string} options.magiclinkAuthUri Optional auth URI for magic link authentication
      * @param {number} options.expiresIn Optional expiration time in seconds (default: 3600)
      * @returns {Promise<SendPasswordlessResponse>} The response containing:
      * - authRequestId: Unique identifier for the passwordless authentication request
@@ -23,25 +23,25 @@ export default class PasswordlessClient {
     sendPasswordlessEmail(email: string, options?: {
         template?: TemplateType;
         state?: string;
-        magiclinkRedirectUri?: string;
+        magiclinkAuthUri?: string;
         expiresIn?: number;
     }): Promise<SendPasswordlessResponse>;
     /**
      * Verify a passwordless authentication code or link token
-     * @param {string} authRequestId The auth request ID from the send response
      * @param {object} credential The credential to verify
      * @param {string} credential.code The one-time code received via email
      * @param {string} credential.linkToken The link token received via email
+     * @param {string} [authRequestId] Optional auth request ID from the send response
      * @returns {Promise<VerifyPasswordLessResponse>} The response containing:
      * - email: The email address that was verified
      * - state: Optional state parameter that was passed in the send request
      * - template: The template type used for the authentication
      * - passwordlessType: Type of passwordless authentication used
      */
-    verifyPasswordlessEmail(authRequestId: string, credential: {
+    verifyPasswordlessEmail(credential: {
         code?: string;
         linkToken?: string;
-    }): Promise<VerifyPasswordLessResponse>;
+    }, authRequestId?: string): Promise<VerifyPasswordLessResponse>;
     /**
      * Resend a passwordless authentication email
      * @param {string} authRequestId The auth request ID from the original send response
