@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { AddUserRequest, AddUserResponse, CreateUserRequest, CreateUserResponse, DeleteUserRequest, GetUserRequest, GetUserResponse, ListUserRequest, ListUserResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
+import { CreateMembershipRequest, CreateMembershipResponse, CreateUserAndMembershipRequest, CreateUserAndMembershipResponse, DeleteMembershipRequest, DeleteUserRequest, GetUserRequest, GetUserResponse, ListOrganizationUsersRequest, ListOrganizationUsersResponse, ListUsersRequest, ListUsersResponse, SearchOrganizationUsersRequest, SearchOrganizationUsersResponse, SearchUsersRequest, SearchUsersResponse, UpdateMembershipRequest, UpdateMembershipResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -13,24 +13,8 @@ export const UserService = {
   typeName: "scalekit.v1.users.UserService",
   methods: {
     /**
-     * @generated from rpc scalekit.v1.users.UserService.CreateUser
-     */
-    createUser: {
-      name: "CreateUser",
-      I: CreateUserRequest,
-      O: CreateUserResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc scalekit.v1.users.UserService.UpdateUser
-     */
-    updateUser: {
-      name: "UpdateUser",
-      I: UpdateUserRequest,
-      O: UpdateUserResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
+     * Users
+     *
      * @generated from rpc scalekit.v1.users.UserService.GetUser
      */
     getUser: {
@@ -44,8 +28,35 @@ export const UserService = {
      */
     listUsers: {
       name: "ListUsers",
-      I: ListUserRequest,
-      O: ListUserResponse,
+      I: ListUsersRequest,
+      O: ListUsersResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.users.UserService.SearchUsers
+     */
+    searchUsers: {
+      name: "SearchUsers",
+      I: SearchUsersRequest,
+      O: SearchUsersResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.users.UserService.SearchOrganizationUsers
+     */
+    searchOrganizationUsers: {
+      name: "SearchOrganizationUsers",
+      I: SearchOrganizationUsersRequest,
+      O: SearchOrganizationUsersResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.users.UserService.UpdateUser
+     */
+    updateUser: {
+      name: "UpdateUser",
+      I: UpdateUserRequest,
+      O: UpdateUserResponse,
       kind: MethodKind.Unary,
     },
     /**
@@ -58,12 +69,54 @@ export const UserService = {
       kind: MethodKind.Unary,
     },
     /**
-     * @generated from rpc scalekit.v1.users.UserService.AddUserToOrganization
+     * Memberships
+     *
+     * @generated from rpc scalekit.v1.users.UserService.CreateMembership
      */
-    addUserToOrganization: {
-      name: "AddUserToOrganization",
-      I: AddUserRequest,
-      O: AddUserResponse,
+    createMembership: {
+      name: "CreateMembership",
+      I: CreateMembershipRequest,
+      O: CreateMembershipResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * TODO Check cascade behaviour currently its ignored
+     *
+     * @generated from rpc scalekit.v1.users.UserService.DeleteMembership
+     */
+    deleteMembership: {
+      name: "DeleteMembership",
+      I: DeleteMembershipRequest,
+      O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.users.UserService.UpdateMembership
+     */
+    updateMembership: {
+      name: "UpdateMembership",
+      I: UpdateMembershipRequest,
+      O: UpdateMembershipResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.users.UserService.CreateUserAndMembership
+     */
+    createUserAndMembership: {
+      name: "CreateUserAndMembership",
+      I: CreateUserAndMembershipRequest,
+      O: CreateUserAndMembershipResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * only memberships of the organization
+     *
+     * @generated from rpc scalekit.v1.users.UserService.ListOrganizationUsers
+     */
+    listOrganizationUsers: {
+      name: "ListOrganizationUsers",
+      I: ListOrganizationUsersRequest,
+      O: ListOrganizationUsersResponse,
       kind: MethodKind.Unary,
     },
   }

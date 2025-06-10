@@ -4,21 +4,30 @@ import GrpcConnect from './connect';
 import CoreClient from './core';
 import { UserService } from './pkg/grpc/scalekit/v1/users/users_connect';
 import { 
-  CreateUserRequest as ProtoCreateUserRequest, 
-  CreateUserResponse,
+  CreateUserAndMembershipRequest,
+  CreateUserAndMembershipResponse,
   DeleteUserRequest,
   GetUserRequest,
   GetUserResponse,
-  ListUserRequest,
-  ListUserResponse,
-  UpdateUserRequest as ProtoUpdateUserRequest,
+  ListUsersRequest,
+  ListUsersResponse,
+  UpdateUserRequest,
   UpdateUserResponse,
-  AddUserRequest,
-  AddUserResponse,
   User,
-  UpdateUser 
+  UpdateUser,
+  CreateUser,
+  CreateUserProfile,
+  CreateMembershipRequest,
+  CreateMembershipResponse,
+  DeleteMembershipRequest,
+  UpdateMembershipRequest,
+  UpdateMembershipResponse,
+  ListOrganizationUsersRequest,
+  ListOrganizationUsersResponse,
+  CreateMembership,
+  UpdateMembership
 } from './pkg/grpc/scalekit/v1/users/users_pb';
-import { CreateUserRequest, UpdateUserRequest } from './types/user';
+import { CreateUserRequest, UpdateUserRequest as UpdateUserRequestType } from './types/user';
 
 export default class UserClient {
   private client: PromiseClient<typeof UserService>;
@@ -31,12 +40,12 @@ export default class UserClient {
   }
 
   /**
-   * Create a new user in an organization
+   * Create a new user and add them to an organization
    * @param {string} organizationId The organization id
    * @param {CreateUserRequest} options The user creation options
-   * @returns {Promise<CreateUserResponse>} The created user
+   * @returns {Promise<CreateUserAndMembershipResponse>} The created user
    */
-  async createUser(organizationId: string, options: CreateUserRequest): Promise<CreateUserResponse> {
+  async createUserAndMembership(organizationId: string, options: CreateUserRequest): Promise<CreateUserAndMembershipResponse> {
     if (!organizationId) {
       throw new Error('organizationId is required');
     }
@@ -44,21 +53,27 @@ export default class UserClient {
       throw new Error('email is required');
     }
 
-    const user = new User({
+    const user = new CreateUser({
       email: options.email,
-      userProfile: {
-        firstName: options.userProfile?.firstName,
-        lastName: options.userProfile?.lastName
-      },
+      userProfile: options.userProfile ? new CreateUserProfile({
+        firstName: options.userProfile.firstName,
+        lastName: options.userProfile.lastName
+      }) : undefined,
       metadata: options.metadata
     });
 
+    const request: PartialMessage<CreateUserAndMembershipRequest> = {
+      organizationId,
+      user
+    };
+
+    if (options.sendActivationEmail !== undefined) {
+      request.sendActivationEmail = options.sendActivationEmail;
+    }
+
     const response = await this.coreClient.connectExec(
-      this.client.createUser,
-      {
-        organizationId,
-        user
-      }
+      this.client.createUserAndMembership,
+      request
     );
     
     if (!response.user) {
@@ -78,7 +93,6 @@ export default class UserClient {
     return this.coreClient.connectExec(
       this.client.getUser,
       {
-        organizationId,
         identities: {
           case: 'id',
           value: userId
@@ -93,17 +107,17 @@ export default class UserClient {
    * @param {object} options The pagination options
    * @param {number} options.pageSize The page size
    * @param {string} options.pageToken The page token
-   * @returns {Promise<ListUserResponse>} The list of users
+   * @returns {Promise<ListUsersResponse>} The list of users
    */
   async listUsers(organizationId: string, options?: {
     pageSize?: number,
     pageToken?: string
-  }): Promise<ListUserResponse> {
+  }): Promise<ListUsersResponse> {
     return this.coreClient.connectExec(
       this.client.listUsers,
       {
-        organizationId,
-        ...options
+        pageSize: options?.pageSize,
+        pageToken: options?.pageToken
       }
     );
   }
@@ -112,22 +126,21 @@ export default class UserClient {
    * Update a user
    * @param {string} organizationId The organization id
    * @param {string} userId The user id
-   * @param {UpdateUserRequest} options The update options
+   * @param {UpdateUserRequestType} options The update options
    * @returns {Promise<UpdateUserResponse>} The updated user
    */
-  async updateUser(organizationId: string, userId: string, options: UpdateUserRequest): Promise<UpdateUserResponse> {
+  async updateUser(organizationId: string, userId: string, options: UpdateUserRequestType): Promise<UpdateUserResponse> {
     const updateUser = new UpdateUser({
-      userProfile: {
-        firstName: options.userProfile?.firstName,
-        lastName: options.userProfile?.lastName
-      },
+      userProfile: options.userProfile ? {
+        firstName: options.userProfile.firstName,
+        lastName: options.userProfile.lastName
+      } : undefined,
       metadata: options.metadata
     });
 
     return this.coreClient.connectExec(
       this.client.updateUser,
       {
-        organizationId,
         identities: {
           case: 'id',
           value: userId
@@ -147,6 +160,70 @@ export default class UserClient {
     return this.coreClient.connectExec(
       this.client.deleteUser,
       {
+        identities: {
+          case: 'id',
+          value: userId
+        }
+      }
+    );
+  }
+
+  /**
+   * Create a membership for a user in an organization
+   * @param {string} organizationId The organization id
+   * @param {string} userId The user id
+   * @param {object} options The membership options
+   * @param {string[]} options.roles The roles to assign
+   * @param {Record<string, string>} options.metadata Optional metadata
+   * @param {boolean} options.sendActivationEmail Whether to send activation email
+   * @returns {Promise<CreateMembershipResponse>} The response with updated user
+   */
+  async createMembership(
+    organizationId: string,
+    userId: string,
+    options: {
+      roles?: string[],
+      metadata?: Record<string, string>,
+      sendActivationEmail?: boolean
+    } = {}
+  ): Promise<CreateMembershipResponse> {
+    const membership = new CreateMembership({
+      roles: options.roles?.map(role => ({ name: role })) || [],
+      metadata: options.metadata || {}
+    });
+
+    const request: PartialMessage<CreateMembershipRequest> = {
+      organizationId,
+      identities: {
+        case: 'id',
+        value: userId
+      },
+      membership
+    };
+
+    if (options.sendActivationEmail !== undefined) {
+      request.sendActivationEmail = options.sendActivationEmail;
+    }
+
+    return this.coreClient.connectExec(
+      this.client.createMembership,
+      request
+    );
+  }
+
+  /**
+   * Delete a user's membership from an organization
+   * @param {string} organizationId The organization id
+   * @param {string} userId The user id
+   * @returns {Promise<Empty>} Empty response
+   */
+  async deleteMembership(
+    organizationId: string,
+    userId: string
+  ): Promise<Empty> {
+    return this.coreClient.connectExec(
+      this.client.deleteMembership,
+      {
         organizationId,
         identities: {
           case: 'id',
@@ -157,20 +234,61 @@ export default class UserClient {
   }
 
   /**
-   * Add a user to an organization
+   * Update a user's membership in an organization
    * @param {string} organizationId The organization id
    * @param {string} userId The user id
-   * @returns {Promise<AddUserResponse>} The response
+   * @param {object} options The update options
+   * @param {string[]} options.roles The roles to assign
+   * @param {Record<string, string>} options.metadata Optional metadata
+   * @returns {Promise<UpdateMembershipResponse>} The response with updated user
    */
-  async addUserToOrganization(organizationId: string, userId: string): Promise<AddUserResponse> {
+  async updateMembership(
+    organizationId: string,
+    userId: string,
+    options: {
+      roles?: string[],
+      metadata?: Record<string, string>
+    } = {}
+  ): Promise<UpdateMembershipResponse> {
+    const membership = new UpdateMembership({
+      roles: options.roles?.map(role => ({ name: role })) || [],
+      metadata: options.metadata || {}
+    });
+
     return this.coreClient.connectExec(
-      this.client.addUserToOrganization,
+      this.client.updateMembership,
       {
         organizationId,
         identities: {
           case: 'id',
           value: userId
-        }
+        },
+        membership
+      }
+    );
+  }
+
+  /**
+   * List users in an organization with pagination
+   * @param {string} organizationId The organization id
+   * @param {object} options The pagination options
+   * @param {number} options.pageSize The page size
+   * @param {string} options.pageToken The page token
+   * @returns {Promise<ListOrganizationUsersResponse>} The list of users in the organization
+   */
+  async listOrganizationUsers(
+    organizationId: string,
+    options?: {
+      pageSize?: number,
+      pageToken?: string
+    }
+  ): Promise<ListOrganizationUsersResponse> {
+    return this.coreClient.connectExec(
+      this.client.listOrganizationUsers,
+      {
+        organizationId,
+        pageSize: options?.pageSize,
+        pageToken: options?.pageToken
       }
     );
   }

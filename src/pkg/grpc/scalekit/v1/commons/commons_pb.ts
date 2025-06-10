@@ -4,7 +4,7 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
 
 /**
  * @generated from enum scalekit.v1.commons.RegionCode
@@ -53,38 +53,24 @@ export enum UserStatus {
    * @generated from enum value: INACTIVE = 2;
    */
   INACTIVE = 2,
+
+  /**
+   * @generated from enum value: INVITED = 3;
+   */
+  INVITED = 3,
+
+  /**
+   * @generated from enum value: PENDING = 4;
+   */
+  PENDING = 4,
 }
 // Retrieve enum metadata with: proto3.getEnumType(UserStatus)
 proto3.util.setEnumType(UserStatus, "scalekit.v1.commons.UserStatus", [
   { no: 0, name: "USER_STATUS_UNSPECIFIED" },
   { no: 1, name: "ACTIVE" },
   { no: 2, name: "INACTIVE" },
-]);
-
-/**
- * @generated from enum scalekit.v1.commons.MembershipRole
- */
-export enum MembershipRole {
-  /**
-   * @generated from enum value: MEMBERSHIP_ROLE_UNSPECIFIED = 0;
-   */
-  MEMBERSHIP_ROLE_UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: ADMIN = 1;
-   */
-  ADMIN = 1,
-
-  /**
-   * @generated from enum value: USER = 2;
-   */
-  USER = 2,
-}
-// Retrieve enum metadata with: proto3.getEnumType(MembershipRole)
-proto3.util.setEnumType(MembershipRole, "scalekit.v1.commons.MembershipRole", [
-  { no: 0, name: "MEMBERSHIP_ROLE_UNSPECIFIED" },
-  { no: 1, name: "ADMIN" },
-  { no: 2, name: "USER" },
+  { no: 3, name: "INVITED" },
+  { no: 4, name: "PENDING" },
 ]);
 
 /**
@@ -202,29 +188,39 @@ proto3.util.setEnumType(IdentityProviderType, "scalekit.v1.commons.IdentityProvi
  */
 export class OrganizationMembership extends Message<OrganizationMembership> {
   /**
-   * @generated from field: string id = 1;
+   * @generated from field: string organization_id = 1;
    */
-  id = "";
+  organizationId = "";
 
   /**
-   * @generated from field: scalekit.v1.commons.UserStatus membership_status = 2;
+   * @generated from field: google.protobuf.Timestamp join_time = 2;
+   */
+  joinTime?: Timestamp;
+
+  /**
+   * @generated from field: scalekit.v1.commons.UserStatus membership_status = 3;
    */
   membershipStatus = UserStatus.USER_STATUS_UNSPECIFIED;
 
   /**
-   * @generated from field: scalekit.v1.commons.MembershipRole role = 3;
+   * @generated from field: repeated scalekit.v1.commons.Role roles = 4;
    */
-  role = MembershipRole.MEMBERSHIP_ROLE_UNSPECIFIED;
+  roles: Role[] = [];
 
   /**
-   * @generated from field: optional string name = 4;
+   * @generated from field: optional string name = 5;
    */
   name?: string;
 
   /**
-   * @generated from field: scalekit.v1.commons.IdentityProviderType primary_identity_provider = 5;
+   * @generated from field: scalekit.v1.commons.IdentityProviderType primary_identity_provider = 6;
    */
   primaryIdentityProvider = IdentityProviderType.IDENTITY_PROVIDER_UNSPECIFIED;
+
+  /**
+   * @generated from field: map<string, string> metadata = 7;
+   */
+  metadata: { [key: string]: string } = {};
 
   constructor(data?: PartialMessage<OrganizationMembership>) {
     super();
@@ -234,11 +230,13 @@ export class OrganizationMembership extends Message<OrganizationMembership> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "scalekit.v1.commons.OrganizationMembership";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "membership_status", kind: "enum", T: proto3.getEnumType(UserStatus) },
-    { no: 3, name: "role", kind: "enum", T: proto3.getEnumType(MembershipRole) },
-    { no: 4, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 5, name: "primary_identity_provider", kind: "enum", T: proto3.getEnumType(IdentityProviderType) },
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "join_time", kind: "message", T: Timestamp },
+    { no: 3, name: "membership_status", kind: "enum", T: proto3.getEnumType(UserStatus) },
+    { no: 4, name: "roles", kind: "message", T: Role, repeated: true },
+    { no: 5, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 6, name: "primary_identity_provider", kind: "enum", T: proto3.getEnumType(IdentityProviderType) },
+    { no: 7, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationMembership {
@@ -255,6 +253,49 @@ export class OrganizationMembership extends Message<OrganizationMembership> {
 
   static equals(a: OrganizationMembership | PlainMessage<OrganizationMembership> | undefined, b: OrganizationMembership | PlainMessage<OrganizationMembership> | undefined): boolean {
     return proto3.util.equals(OrganizationMembership, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.commons.Role
+ */
+export class Role extends Message<Role> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
+  constructor(data?: PartialMessage<Role>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.commons.Role";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Role {
+    return new Role().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Role {
+    return new Role().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Role {
+    return new Role().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Role | PlainMessage<Role> | undefined, b: Role | PlainMessage<Role> | undefined): boolean {
+    return proto3.util.equals(Role, a, b);
   }
 }
 
@@ -293,12 +334,17 @@ export class UserProfile extends Message<UserProfile> {
   emailVerified = false;
 
   /**
-   * @generated from field: map<string, string> metadata = 7;
+   * @generated from field: string phone_number = 7;
+   */
+  phoneNumber = "";
+
+  /**
+   * @generated from field: map<string, string> metadata = 8;
    */
   metadata: { [key: string]: string } = {};
 
   /**
-   * @generated from field: map<string, string> custom_attributes = 8;
+   * @generated from field: map<string, string> custom_attributes = 9;
    */
   customAttributes: { [key: string]: string } = {};
 
@@ -316,8 +362,9 @@ export class UserProfile extends Message<UserProfile> {
     { no: 4, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "locale", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "email_verified", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
-    { no: 7, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
-    { no: 8, name: "custom_attributes", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
+    { no: 7, name: "phone_number", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
+    { no: 9, name: "custom_attributes", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserProfile {
