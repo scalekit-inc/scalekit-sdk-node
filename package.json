@@ -29,6 +29,9 @@
     "jose": "^5.6.3",
     "qs": "^6.13.0"
   },
+  "peerDependencies": {
+    "@bufbuild/protobuf": "^1.10.0"
+  },
   "devDependencies": {
     "@bufbuild/buf": "^1.36.0",
     "@bufbuild/protobuf": "^1.10.0",
