@@ -27,6 +27,7 @@ export default class PasswordlessClient {
    * @param {string} options.state Optional state parameter to maintain state between request and callback
    * @param {string} options.magiclinkAuthUri Optional auth URI for magic link authentication
    * @param {number} options.expiresIn Optional expiration time in seconds (default: 3600)
+   * @param {object} options.templateVariables Optional template variables
    * @returns {Promise<SendPasswordlessResponse>} The response containing:
    * - authRequestId: Unique identifier for the passwordless authentication request
    * - expiresAt: Expiration time in seconds since epoch
@@ -40,6 +41,7 @@ export default class PasswordlessClient {
       state?: string;
       magiclinkAuthUri?: string;
       expiresIn?: number;
+      templateVariables?: Record<string, string>;
     }
   ): Promise<SendPasswordlessResponse> {
     if (!email || typeof email !== 'string') {
@@ -71,7 +73,8 @@ export default class PasswordlessClient {
       template: templateValue,
       state: options?.state,
       magiclinkAuthUri: options?.magiclinkAuthUri,
-      expiresIn: options?.expiresIn
+      expiresIn: options?.expiresIn,
+      templateVariables: options?.templateVariables || {}
     });
 
     return this.coreClient.connectExec(

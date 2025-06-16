@@ -93,6 +93,11 @@ export class SendPasswordlessRequest extends Message<SendPasswordlessRequest> {
    */
   expiresIn?: number;
 
+  /**
+   * @generated from field: map<string, string> template_variables = 6;
+   */
+  templateVariables: { [key: string]: string } = {};
+
   constructor(data?: PartialMessage<SendPasswordlessRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -106,6 +111,7 @@ export class SendPasswordlessRequest extends Message<SendPasswordlessRequest> {
     { no: 3, name: "magiclink_auth_uri", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 4, name: "state", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 5, name: "expires_in", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+    { no: 6, name: "template_variables", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendPasswordlessRequest {
