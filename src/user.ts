@@ -85,11 +85,10 @@ export default class UserClient {
 
   /**
    * Get a user by id
-   * @param {string} organizationId The organization id
    * @param {string} userId The user id
    * @returns {Promise<GetUserResponse>} The user
    */
-  async getUser(organizationId: string, userId: string): Promise<GetUserResponse> {
+  async getUser(userId: string): Promise<GetUserResponse> {
     return this.coreClient.connectExec(
       this.client.getUser,
       {
@@ -103,13 +102,12 @@ export default class UserClient {
 
   /**
    * List users with pagination
-   * @param {string} organizationId The organization id
    * @param {object} options The pagination options
    * @param {number} options.pageSize The page size
    * @param {string} options.pageToken The page token
    * @returns {Promise<ListUsersResponse>} The list of users
    */
-  async listUsers(organizationId: string, options?: {
+  async listUsers(options?: {
     pageSize?: number,
     pageToken?: string
   }): Promise<ListUsersResponse> {
@@ -124,12 +122,11 @@ export default class UserClient {
 
   /**
    * Update a user
-   * @param {string} organizationId The organization id
    * @param {string} userId The user id
    * @param {UpdateUserRequestType} options The update options
    * @returns {Promise<UpdateUserResponse>} The updated user
    */
-  async updateUser(organizationId: string, userId: string, options: UpdateUserRequestType): Promise<UpdateUserResponse> {
+  async updateUser(userId: string, options: UpdateUserRequestType): Promise<UpdateUserResponse> {
     const updateUser = new UpdateUser({
       userProfile: options.userProfile ? {
         firstName: options.userProfile.firstName,
@@ -152,11 +149,10 @@ export default class UserClient {
 
   /**
    * Delete a user
-   * @param {string} organizationId The organization id
    * @param {string} userId The user id
    * @returns {Promise<Empty>} Empty response
    */
-  async deleteUser(organizationId: string, userId: string): Promise<Empty> {
+  async deleteUser(userId: string): Promise<Empty> {
     return this.coreClient.connectExec(
       this.client.deleteUser,
       {
