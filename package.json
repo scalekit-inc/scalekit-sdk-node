@@ -38,6 +38,9 @@
     "@types/qs": "^6.9.15",
     "typescript": "^5.5.3"
   },
+  "overrides": {
+    "undici": "^5.29.0"
+  },
   "bugs": {
     "url": "https://github.com/scalekit-inc/scalekit-sdk-node/issues"
   },
