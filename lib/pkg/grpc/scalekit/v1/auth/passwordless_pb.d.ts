@@ -62,6 +62,12 @@ export declare class SendPasswordlessRequest extends Message<SendPasswordlessReq
      * @generated from field: optional uint32 expires_in = 5;
      */
     expiresIn?: number;
+    /**
+     * @generated from field: map<string, string> template_variables = 6;
+     */
+    templateVariables: {
+        [key: string]: string;
+    };
     constructor(data?: PartialMessage<SendPasswordlessRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.auth.passwordless.SendPasswordlessRequest";
