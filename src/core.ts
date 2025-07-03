@@ -20,7 +20,7 @@ export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
   public axios: Axios;
-  public sdkVersion = `Scalekit-Node/1.0.12`;
+  public sdkVersion = `Scalekit-Node/1.0.14`;
   public apiVersion = "20240430";
   public userAgent = `${this.sdkVersion} Node/${process.version} (${process.platform}; ${os.arch()})`;
   constructor(
