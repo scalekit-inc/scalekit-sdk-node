@@ -23,6 +23,12 @@ export type AuthenticationOptions = {
   codeVerifier?: string;
 }
 
+export type TokenValidationOptions = {
+  issuer?: string;
+  audience?: string | string[];
+  requiredScopes?: string[];
+}
+
 export type AuthenticationResponse = {
   user: User;
   idToken: string;
