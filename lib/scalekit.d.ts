@@ -126,5 +126,5 @@ export default class ScalekitClient {
      * @returns {Promise<RefreshTokenResponse>} Returns new access token, refresh token and other details
      * @throws {Error} When authentication fails or response data is invalid
      */
-    refreshToken(refreshToken: string): Promise<RefreshTokenResponse>;
+    refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse>;
 }
