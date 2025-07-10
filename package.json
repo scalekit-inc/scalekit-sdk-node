@@ -1,5 +1,5 @@
 {
-  "version": "1.0.10",
+  "version": "1.0.14",
   "name": "@scalekit-sdk/node",
   "description": "Official Scalekit Node SDK",
   "main": "lib/index.js",
@@ -23,15 +23,16 @@
   "author": "Team Scalekit",
   "license": "ISC",
   "dependencies": {
+    "@bufbuild/protobuf": "^1.10.0",
     "@connectrpc/connect": "^1.4.0",
     "@connectrpc/connect-node": "^1.4.0",
-    "axios": "^1.7.3",
+    "axios": "^1.10.0",
     "jose": "^5.6.3",
     "qs": "^6.13.0"
   },
+ 
   "devDependencies": {
     "@bufbuild/buf": "^1.36.0",
-    "@bufbuild/protobuf": "^1.10.0",
     "@bufbuild/protoc-gen-es": "^1.10.0",
     "@connectrpc/protoc-gen-connect-es": "^1.4.0",
     "@types/node": "^20.14.10",
@@ -39,6 +40,9 @@
     "dotenv": "^16.4.7",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
+  },
+  "overrides": {
+    "undici": "^5.29.0"
   },
   "bugs": {
     "url": "https://github.com/scalekit-inc/scalekit-sdk-node/issues"

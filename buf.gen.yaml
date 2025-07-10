@@ -14,3 +14,4 @@ types:
     - scalekit.v1.organizations
     - scalekit.v1.directories
     - scalekit.v1.users
+    - scalekit.v1.auth.passwordless
