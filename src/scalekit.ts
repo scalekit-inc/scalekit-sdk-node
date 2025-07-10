@@ -8,6 +8,8 @@ import CoreClient from './core';
 import DirectoryClient from './directory';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
+import PasswordlessClient from './passwordless';
+import UserClient from './user';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse } from './types/scalekit';
 
@@ -32,6 +34,8 @@ export default class ScalekitClient {
   readonly connection: ConnectionClient;
   readonly domain: DomainClient;
   readonly directory: DirectoryClient;
+  readonly passwordless: PasswordlessClient;
+  readonly user: UserClient;
   constructor(
     envUrl: string,
     clientId: string,
@@ -59,6 +63,14 @@ export default class ScalekitClient {
       this.coreClient
     );
     this.directory = new DirectoryClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.passwordless = new PasswordlessClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.user = new UserClient(
       this.grpcConnect,
       this.coreClient
     );
