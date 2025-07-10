@@ -1,5 +1,5 @@
 {
-  "version": "1.0.14",
+  "version": "2.0.0",
   "name": "@scalekit-sdk/node",
   "description": "Official Scalekit Node SDK",
   "main": "lib/index.js",
@@ -30,7 +30,6 @@
     "jose": "^5.6.3",
     "qs": "^6.13.0"
   },
- 
   "devDependencies": {
     "@bufbuild/buf": "^1.36.0",
     "@bufbuild/protoc-gen-es": "^1.10.0",
