@@ -2,8 +2,8 @@ import ConnectionClient from './connection';
 import DirectoryClient from './directory';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
-import UserClient from './user';
 import PasswordlessClient from './passwordless';
+import UserClient from './user';
 import { IdpInitiatedLoginClaims } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse } from './types/scalekit';
 /**
@@ -22,8 +22,8 @@ export default class ScalekitClient {
     readonly connection: ConnectionClient;
     readonly domain: DomainClient;
     readonly directory: DirectoryClient;
-    readonly user: UserClient;
     readonly passwordless: PasswordlessClient;
+    readonly user: UserClient;
     constructor(envUrl: string, clientId: string, clientSecret: string);
     /**
      * Returns the authorization url to initiate the authentication request.
