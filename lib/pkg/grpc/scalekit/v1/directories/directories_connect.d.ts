@@ -1,4 +1,4 @@
-import { AssignRolesRequest, AssignRolesResponse, CreateDirectoryRequest, CreateDirectoryResponse, CreateDirectorySecretRequest, CreateDirectorySecretResponse, DeleteDirectoryRequest, GetDirectoryRequest, GetDirectoryResponse, ListDirectoriesRequest, ListDirectoriesResponse, ListDirectoryGroupsRequest, ListDirectoryGroupsResponse, ListDirectoryUsersRequest, ListDirectoryUsersResponse, RegenerateDirectorySecretRequest, RegenerateDirectorySecretResponse, ToggleDirectoryRequest, ToggleDirectoryResponse, UpdateAttributesRequest, UpdateAttributesResponse, UpdateDirectoryRequest, UpdateDirectoryResponse } from "./directories_pb.js";
+import { AssignGroupsForDirectoryRequest, AssignRolesRequest, AssignRolesResponse, CreateDirectoryRequest, CreateDirectoryResponse, CreateDirectorySecretRequest, CreateDirectorySecretResponse, DeleteDirectoryRequest, GetDirectoryRequest, GetDirectoryResponse, ListDirectoriesRequest, ListDirectoriesResponse, ListDirectoryGroupsRequest, ListDirectoryGroupsResponse, ListDirectoryGroupsSummaryRequest, ListDirectoryUsersRequest, ListDirectoryUsersResponse, RegenerateDirectorySecretRequest, RegenerateDirectorySecretResponse, ToggleDirectoryRequest, ToggleDirectoryResponse, TriggerDirectorySyncRequest, UpdateAttributesRequest, UpdateAttributesResponse, UpdateDirectoryRequest, UpdateDirectoryResponse } from "./directories_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.directories.DirectoryService
@@ -31,6 +31,15 @@ export declare const DirectoryService: {
             readonly name: "UpdateDirectory";
             readonly I: typeof UpdateDirectoryRequest;
             readonly O: typeof UpdateDirectoryResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.directories.DirectoryService.AssignGroupsForDirectory
+         */
+        readonly assignGroupsForDirectory: {
+            readonly name: "AssignGroupsForDirectory";
+            readonly I: typeof AssignGroupsForDirectoryRequest;
+            readonly O: typeof Empty;
             readonly kind: MethodKind.Unary;
         };
         /**
@@ -106,6 +115,15 @@ export declare const DirectoryService: {
             readonly kind: MethodKind.Unary;
         };
         /**
+         * @generated from rpc scalekit.v1.directories.DirectoryService.ListDirectoryGroupsSummary
+         */
+        readonly listDirectoryGroupsSummary: {
+            readonly name: "ListDirectoryGroupsSummary";
+            readonly I: typeof ListDirectoryGroupsSummaryRequest;
+            readonly O: typeof ListDirectoryGroupsResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
          * @generated from rpc scalekit.v1.directories.DirectoryService.CreateDirectorySecret
          */
         readonly createDirectorySecret: {
@@ -121,6 +139,15 @@ export declare const DirectoryService: {
             readonly name: "RegenerateDirectorySecret";
             readonly I: typeof RegenerateDirectorySecretRequest;
             readonly O: typeof RegenerateDirectorySecretResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.directories.DirectoryService.TriggerDirectorySync
+         */
+        readonly triggerDirectorySync: {
+            readonly name: "TriggerDirectorySync";
+            readonly I: typeof TriggerDirectorySyncRequest;
+            readonly O: typeof Empty;
             readonly kind: MethodKind.Unary;
         };
     };

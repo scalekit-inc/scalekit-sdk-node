@@ -1,5 +1,22 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Duration, Message, proto3, Timestamp } from "@bufbuild/protobuf";
+import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
+/**
+ * @generated from enum scalekit.v1.connections.CodeChallengeType
+ */
+export declare enum CodeChallengeType {
+    /**
+     * @generated from enum value: CODE_CHALLENGE_TYPE_UNSPECIFIED = 0;
+     */
+    CODE_CHALLENGE_TYPE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: NUMERIC = 1;
+     */
+    NUMERIC = 1,
+    /**
+     * @generated from enum value: ALPHANUMERIC = 2;
+     */
+    ALPHANUMERIC = 2
+}
 /**
  * @generated from enum scalekit.v1.connections.ConfigurationType
  */
@@ -291,7 +308,11 @@ export declare enum ConnectionProvider {
     /**
      * @generated from enum value: SCALEKIT = 15;
      */
-    SCALEKIT = 15
+    SCALEKIT = 15,
+    /**
+     * @generated from enum value: ADFS = 16;
+     */
+    ADFS = 16
 }
 /**
  * @generated from message scalekit.v1.connections.GetProvidersRequest
@@ -830,6 +851,14 @@ export declare class ListConnection extends Message<ListConnection> {
      * @generated from field: string ui_button_title = 7;
      */
     uiButtonTitle: string;
+    /**
+     * @generated from field: repeated string domains = 8;
+     */
+    domains: string[];
+    /**
+     * @generated from field: string organization_name = 9;
+     */
+    organizationName: string;
     constructor(data?: PartialMessage<ListConnection>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.ListConnection";
@@ -838,6 +867,122 @@ export declare class ListConnection extends Message<ListConnection> {
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListConnection;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListConnection;
     static equals(a: ListConnection | PlainMessage<ListConnection> | undefined, b: ListConnection | PlainMessage<ListConnection> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.ListOrganizationConnectionsRequest
+ */
+export declare class ListOrganizationConnectionsRequest extends Message<ListOrganizationConnectionsRequest> {
+    /**
+     * @generated from field: uint32 page_size = 1;
+     */
+    pageSize: number;
+    /**
+     * @generated from field: string page_token = 2;
+     */
+    pageToken: string;
+    constructor(data?: PartialMessage<ListOrganizationConnectionsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.ListOrganizationConnectionsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListOrganizationConnectionsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsRequest;
+    static equals(a: ListOrganizationConnectionsRequest | PlainMessage<ListOrganizationConnectionsRequest> | undefined, b: ListOrganizationConnectionsRequest | PlainMessage<ListOrganizationConnectionsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.ListOrganizationConnectionsResponse
+ */
+export declare class ListOrganizationConnectionsResponse extends Message<ListOrganizationConnectionsResponse> {
+    /**
+     * @generated from field: string next_page_token = 1;
+     */
+    nextPageToken: string;
+    /**
+     * @generated from field: uint32 total_size = 2;
+     */
+    totalSize: number;
+    /**
+     * @generated from field: string prev_page_token = 3;
+     */
+    prevPageToken: string;
+    /**
+     * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 4;
+     */
+    connections: ListConnection[];
+    constructor(data?: PartialMessage<ListOrganizationConnectionsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.ListOrganizationConnectionsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListOrganizationConnectionsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsResponse;
+    static equals(a: ListOrganizationConnectionsResponse | PlainMessage<ListOrganizationConnectionsResponse> | undefined, b: ListOrganizationConnectionsResponse | PlainMessage<ListOrganizationConnectionsResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.SearchOrganizationConnectionsRequest
+ */
+export declare class SearchOrganizationConnectionsRequest extends Message<SearchOrganizationConnectionsRequest> {
+    /**
+     * @generated from field: optional string query = 1;
+     */
+    query?: string;
+    /**
+     * @generated from field: optional scalekit.v1.connections.ConnectionProvider provider = 2;
+     */
+    provider?: ConnectionProvider;
+    /**
+     * @generated from field: optional scalekit.v1.connections.ConnectionStatus status = 3;
+     */
+    status?: ConnectionStatus;
+    /**
+     * @generated from field: optional scalekit.v1.connections.ConnectionType connection_type = 4;
+     */
+    connectionType?: ConnectionType;
+    /**
+     * @generated from field: uint32 page_size = 5;
+     */
+    pageSize: number;
+    /**
+     * @generated from field: string page_token = 6;
+     */
+    pageToken: string;
+    constructor(data?: PartialMessage<SearchOrganizationConnectionsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.SearchOrganizationConnectionsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchOrganizationConnectionsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsRequest;
+    static equals(a: SearchOrganizationConnectionsRequest | PlainMessage<SearchOrganizationConnectionsRequest> | undefined, b: SearchOrganizationConnectionsRequest | PlainMessage<SearchOrganizationConnectionsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.SearchOrganizationConnectionsResponse
+ */
+export declare class SearchOrganizationConnectionsResponse extends Message<SearchOrganizationConnectionsResponse> {
+    /**
+     * @generated from field: string next_page_token = 1;
+     */
+    nextPageToken: string;
+    /**
+     * @generated from field: uint32 total_size = 2;
+     */
+    totalSize: number;
+    /**
+     * @generated from field: string prev_page_token = 3;
+     */
+    prevPageToken: string;
+    /**
+     * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 4;
+     */
+    connections: ListConnection[];
+    constructor(data?: PartialMessage<SearchOrganizationConnectionsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.SearchOrganizationConnectionsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchOrganizationConnectionsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsResponse;
+    static equals(a: SearchOrganizationConnectionsResponse | PlainMessage<SearchOrganizationConnectionsResponse> | undefined, b: SearchOrganizationConnectionsResponse | PlainMessage<SearchOrganizationConnectionsResponse> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.connections.ToggleEnvironmentConnectionRequest
@@ -1033,13 +1178,25 @@ export declare class PasswordLessConfig extends Message<PasswordLessConfig> {
      */
     type: PasswordlessType;
     /**
-     * @generated from field: int32 frequency = 2;
+     * @generated from field: optional google.protobuf.UInt32Value frequency = 2;
      */
-    frequency: number;
+    frequency?: number;
     /**
-     * @generated from field: google.protobuf.Duration validity = 3;
+     * @generated from field: optional google.protobuf.UInt32Value validity = 3;
      */
-    validity?: Duration;
+    validity?: number;
+    /**
+     * @generated from field: optional google.protobuf.BoolValue enforce_same_browser_origin = 4;
+     */
+    enforceSameBrowserOrigin?: boolean;
+    /**
+     * @generated from field: optional google.protobuf.UInt32Value code_challenge_length = 5;
+     */
+    codeChallengeLength?: number;
+    /**
+     * @generated from field: optional scalekit.v1.connections.CodeChallengeType code_challenge_type = 6;
+     */
+    codeChallengeType?: CodeChallengeType;
     constructor(data?: PartialMessage<PasswordLessConfig>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.PasswordLessConfig";

@@ -1,4 +1,4 @@
-import { AddUserRequest, AddUserResponse, CreateUserRequest, CreateUserResponse, DeleteUserRequest, GetUserRequest, GetUserResponse, ListUserRequest, ListUserResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
+import { CreateMembershipRequest, CreateMembershipResponse, CreateUserAndMembershipRequest, CreateUserAndMembershipResponse, DeleteMembershipRequest, DeleteUserRequest, GetUserRequest, GetUserResponse, ListOrganizationUsersRequest, ListOrganizationUsersResponse, ListUsersRequest, ListUsersResponse, SearchOrganizationUsersRequest, SearchOrganizationUsersResponse, SearchUsersRequest, SearchUsersResponse, UpdateMembershipRequest, UpdateMembershipResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.users.UserService
@@ -7,24 +7,8 @@ export declare const UserService: {
     readonly typeName: "scalekit.v1.users.UserService";
     readonly methods: {
         /**
-         * @generated from rpc scalekit.v1.users.UserService.CreateUser
-         */
-        readonly createUser: {
-            readonly name: "CreateUser";
-            readonly I: typeof CreateUserRequest;
-            readonly O: typeof CreateUserResponse;
-            readonly kind: MethodKind.Unary;
-        };
-        /**
-         * @generated from rpc scalekit.v1.users.UserService.UpdateUser
-         */
-        readonly updateUser: {
-            readonly name: "UpdateUser";
-            readonly I: typeof UpdateUserRequest;
-            readonly O: typeof UpdateUserResponse;
-            readonly kind: MethodKind.Unary;
-        };
-        /**
+         * Users
+         *
          * @generated from rpc scalekit.v1.users.UserService.GetUser
          */
         readonly getUser: {
@@ -38,8 +22,35 @@ export declare const UserService: {
          */
         readonly listUsers: {
             readonly name: "ListUsers";
-            readonly I: typeof ListUserRequest;
-            readonly O: typeof ListUserResponse;
+            readonly I: typeof ListUsersRequest;
+            readonly O: typeof ListUsersResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.users.UserService.SearchUsers
+         */
+        readonly searchUsers: {
+            readonly name: "SearchUsers";
+            readonly I: typeof SearchUsersRequest;
+            readonly O: typeof SearchUsersResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.users.UserService.SearchOrganizationUsers
+         */
+        readonly searchOrganizationUsers: {
+            readonly name: "SearchOrganizationUsers";
+            readonly I: typeof SearchOrganizationUsersRequest;
+            readonly O: typeof SearchOrganizationUsersResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.users.UserService.UpdateUser
+         */
+        readonly updateUser: {
+            readonly name: "UpdateUser";
+            readonly I: typeof UpdateUserRequest;
+            readonly O: typeof UpdateUserResponse;
             readonly kind: MethodKind.Unary;
         };
         /**
@@ -52,12 +63,54 @@ export declare const UserService: {
             readonly kind: MethodKind.Unary;
         };
         /**
-         * @generated from rpc scalekit.v1.users.UserService.AddUserToOrganization
+         * Memberships
+         *
+         * @generated from rpc scalekit.v1.users.UserService.CreateMembership
          */
-        readonly addUserToOrganization: {
-            readonly name: "AddUserToOrganization";
-            readonly I: typeof AddUserRequest;
-            readonly O: typeof AddUserResponse;
+        readonly createMembership: {
+            readonly name: "CreateMembership";
+            readonly I: typeof CreateMembershipRequest;
+            readonly O: typeof CreateMembershipResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * TODO Check cascade behaviour currently its ignored
+         *
+         * @generated from rpc scalekit.v1.users.UserService.DeleteMembership
+         */
+        readonly deleteMembership: {
+            readonly name: "DeleteMembership";
+            readonly I: typeof DeleteMembershipRequest;
+            readonly O: typeof Empty;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.users.UserService.UpdateMembership
+         */
+        readonly updateMembership: {
+            readonly name: "UpdateMembership";
+            readonly I: typeof UpdateMembershipRequest;
+            readonly O: typeof UpdateMembershipResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.users.UserService.CreateUserAndMembership
+         */
+        readonly createUserAndMembership: {
+            readonly name: "CreateUserAndMembership";
+            readonly I: typeof CreateUserAndMembershipRequest;
+            readonly O: typeof CreateUserAndMembershipResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * only memberships of the organization
+         *
+         * @generated from rpc scalekit.v1.users.UserService.ListOrganizationUsers
+         */
+        readonly listOrganizationUsers: {
+            readonly name: "ListOrganizationUsers";
+            readonly I: typeof ListOrganizationUsersRequest;
+            readonly O: typeof ListOrganizationUsersResponse;
             readonly kind: MethodKind.Unary;
         };
     };

@@ -2,18 +2,26 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { FieldMask, Message, proto3, Timestamp } from "@bufbuild/protobuf";
 import { RegionCode } from "../commons/commons_pb.js";
 /**
+ * Feature represents the available features that can be enabled for an organization's portal link
+ *
  * @generated from enum scalekit.v1.organizations.Feature
  */
 export declare enum Feature {
     /**
+     * UNSPECIFIED represents an unset or invalid feature value
+     *
      * @generated from enum value: UNSPECIFIED = 0;
      */
     UNSPECIFIED = 0,
     /**
+     * dir_sync enables directory synchronization configuration in the portal
+     *
      * @generated from enum value: dir_sync = 1;
      */
     dir_sync = 1,
     /**
+     * sso enables Single Sign-On (SSO) configuration in the portal
+     *
      * @generated from enum value: sso = 2;
      */
     sso = 2
@@ -59,26 +67,18 @@ export declare class CreateOrganizationResponse extends Message<CreateOrganizati
  */
 export declare class CreateOrganization extends Message<CreateOrganization> {
     /**
-     * Name of the org to be used in display
-     *
      * @generated from field: string display_name = 4;
      */
     displayName: string;
     /**
-     * Optional regioncode
-     *
      * @generated from field: scalekit.v1.commons.RegionCode region_code = 5;
      */
     regionCode: RegionCode;
     /**
-     * External Id is useful to store a unique identifier for a given Org that. The unique Identifier can be the id of your tenant / org in your SaaSApp
-     *
      * @generated from field: optional string external_id = 6;
      */
     externalId?: string;
     /**
-     * Key value pairs extension attributes.
-     *
      * @generated from field: map<string, string> metadata = 7;
      */
     metadata: {
@@ -303,6 +303,10 @@ export declare class ListOrganizationsRequest extends Message<ListOrganizationsR
      * @generated from field: string page_token = 2;
      */
     pageToken: string;
+    /**
+     * @generated from field: optional string external_id = 3;
+     */
+    externalId?: string;
     constructor(data?: PartialMessage<ListOrganizationsRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.organizations.ListOrganizationsRequest";

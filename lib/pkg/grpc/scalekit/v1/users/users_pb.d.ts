@@ -1,6 +1,6 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
-import { OrganizationMembership, UserProfile } from "../commons/commons_pb.js";
+import { OrganizationMembership, Role, UserProfile } from "../commons/commons_pb.js";
 /**
  * @generated from message scalekit.v1.users.User
  */
@@ -30,29 +30,21 @@ export declare class User extends Message<User> {
      */
     externalId?: string;
     /**
-     * @generated from field: string identity = 8;
+     * @generated from field: repeated scalekit.v1.commons.OrganizationMembership memberships = 7;
      */
-    identity: string;
+    memberships: OrganizationMembership[];
     /**
-     * @generated from field: string phone_number = 9;
-     */
-    phoneNumber: string;
-    /**
-     * @generated from field: repeated scalekit.v1.commons.OrganizationMembership organizations = 10;
-     */
-    organizations: OrganizationMembership[];
-    /**
-     * @generated from field: scalekit.v1.commons.UserProfile user_profile = 11;
+     * @generated from field: scalekit.v1.commons.UserProfile user_profile = 8;
      */
     userProfile?: UserProfile;
     /**
-     * @generated from field: map<string, string> metadata = 12;
+     * @generated from field: map<string, string> metadata = 9;
      */
     metadata: {
         [key: string]: string;
     };
     /**
-     * @generated from field: google.protobuf.Timestamp last_login = 13;
+     * @generated from field: google.protobuf.Timestamp last_login = 10;
      */
     lastLogin?: Timestamp;
     constructor(data?: PartialMessage<User>);
@@ -65,61 +57,65 @@ export declare class User extends Message<User> {
     static equals(a: User | PlainMessage<User> | undefined, b: User | PlainMessage<User> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.users.CreateUserRequest
+ * @generated from message scalekit.v1.users.CreateUserAndMembershipRequest
  */
-export declare class CreateUserRequest extends Message<CreateUserRequest> {
+export declare class CreateUserAndMembershipRequest extends Message<CreateUserAndMembershipRequest> {
     /**
      * @generated from field: string organization_id = 1;
      */
     organizationId: string;
     /**
-     * @generated from field: scalekit.v1.users.User user = 2;
+     * @generated from field: scalekit.v1.users.CreateUser user = 2;
      */
-    user?: User;
-    constructor(data?: PartialMessage<CreateUserRequest>);
+    user?: CreateUser;
+    /**
+     * @generated from field: bool send_activation_email = 3;
+     */
+    sendActivationEmail: boolean;
+    constructor(data?: PartialMessage<CreateUserAndMembershipRequest>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.users.CreateUserRequest";
+    static readonly typeName = "scalekit.v1.users.CreateUserAndMembershipRequest";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateUserRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateUserRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateUserRequest;
-    static equals(a: CreateUserRequest | PlainMessage<CreateUserRequest> | undefined, b: CreateUserRequest | PlainMessage<CreateUserRequest> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateUserAndMembershipRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateUserAndMembershipRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateUserAndMembershipRequest;
+    static equals(a: CreateUserAndMembershipRequest | PlainMessage<CreateUserAndMembershipRequest> | undefined, b: CreateUserAndMembershipRequest | PlainMessage<CreateUserAndMembershipRequest> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.users.CreateUserResponse
+ * @generated from message scalekit.v1.users.CreateUserAndMembershipResponse
  */
-export declare class CreateUserResponse extends Message<CreateUserResponse> {
+export declare class CreateUserAndMembershipResponse extends Message<CreateUserAndMembershipResponse> {
     /**
      * @generated from field: scalekit.v1.users.User user = 1;
      */
     user?: User;
-    constructor(data?: PartialMessage<CreateUserResponse>);
+    constructor(data?: PartialMessage<CreateUserAndMembershipResponse>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.users.CreateUserResponse";
+    static readonly typeName = "scalekit.v1.users.CreateUserAndMembershipResponse";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateUserResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateUserResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateUserResponse;
-    static equals(a: CreateUserResponse | PlainMessage<CreateUserResponse> | undefined, b: CreateUserResponse | PlainMessage<CreateUserResponse> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateUserAndMembershipResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateUserAndMembershipResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateUserAndMembershipResponse;
+    static equals(a: CreateUserAndMembershipResponse | PlainMessage<CreateUserAndMembershipResponse> | undefined, b: CreateUserAndMembershipResponse | PlainMessage<CreateUserAndMembershipResponse> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.users.UpdateUser
  */
 export declare class UpdateUser extends Message<UpdateUser> {
     /**
-     * @generated from field: optional string external_id = 7;
+     * @generated from field: optional string external_id = 6;
      */
     externalId?: string;
     /**
-     * @generated from field: map<string, string> metadata = 8;
+     * @generated from field: scalekit.v1.users.UpdateUserProfile user_profile = 8;
+     */
+    userProfile?: UpdateUserProfile;
+    /**
+     * @generated from field: map<string, string> metadata = 9;
      */
     metadata: {
         [key: string]: string;
     };
-    /**
-     * @generated from field: scalekit.v1.commons.UserProfile user_profile = 9;
-     */
-    userProfile?: UserProfile;
     constructor(data?: PartialMessage<UpdateUser>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.users.UpdateUser";
@@ -134,36 +130,26 @@ export declare class UpdateUser extends Message<UpdateUser> {
  */
 export declare class UpdateUserRequest extends Message<UpdateUserRequest> {
     /**
-     * @generated from field: string organization_id = 1;
-     */
-    organizationId: string;
-    /**
      * @generated from oneof scalekit.v1.users.UpdateUserRequest.identities
      */
     identities: {
         /**
-         * @generated from field: string id = 2;
+         * @generated from field: string id = 1;
          */
         value: string;
         case: "id";
     } | {
         /**
-         * @generated from field: string external_id = 3;
+         * @generated from field: string external_id = 2;
          */
         value: string;
         case: "externalId";
-    } | {
-        /**
-         * @generated from field: string identity = 4;
-         */
-        value: string;
-        case: "identity";
     } | {
         case: undefined;
         value?: undefined;
     };
     /**
-     * @generated from field: scalekit.v1.users.UpdateUser user = 5;
+     * @generated from field: scalekit.v1.users.UpdateUser user = 3;
      */
     user?: UpdateUser;
     constructor(data?: PartialMessage<UpdateUserRequest>);
@@ -197,32 +183,20 @@ export declare class UpdateUserResponse extends Message<UpdateUserResponse> {
  */
 export declare class GetUserRequest extends Message<GetUserRequest> {
     /**
-     * validate the presence
-     *
-     * @generated from field: string organization_id = 1;
-     */
-    organizationId: string;
-    /**
      * @generated from oneof scalekit.v1.users.GetUserRequest.identities
      */
     identities: {
         /**
-         * @generated from field: string id = 2;
+         * @generated from field: string id = 1;
          */
         value: string;
         case: "id";
     } | {
         /**
-         * @generated from field: string external_id = 3;
+         * @generated from field: string external_id = 2;
          */
         value: string;
         case: "externalId";
-    } | {
-        /**
-         * @generated from field: string identity = 4;
-         */
-        value: string;
-        case: "identity";
     } | {
         case: undefined;
         value?: undefined;
@@ -254,9 +228,9 @@ export declare class GetUserResponse extends Message<GetUserResponse> {
     static equals(a: GetUserResponse | PlainMessage<GetUserResponse> | undefined, b: GetUserResponse | PlainMessage<GetUserResponse> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.users.ListUserRequest
+ * @generated from message scalekit.v1.users.ListOrganizationUsersRequest
  */
-export declare class ListUserRequest extends Message<ListUserRequest> {
+export declare class ListOrganizationUsersRequest extends Message<ListOrganizationUsersRequest> {
     /**
      * @generated from field: string organization_id = 1;
      */
@@ -269,19 +243,19 @@ export declare class ListUserRequest extends Message<ListUserRequest> {
      * @generated from field: string page_token = 3;
      */
     pageToken: string;
-    constructor(data?: PartialMessage<ListUserRequest>);
+    constructor(data?: PartialMessage<ListOrganizationUsersRequest>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.users.ListUserRequest";
+    static readonly typeName = "scalekit.v1.users.ListOrganizationUsersRequest";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUserRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUserRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUserRequest;
-    static equals(a: ListUserRequest | PlainMessage<ListUserRequest> | undefined, b: ListUserRequest | PlainMessage<ListUserRequest> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListOrganizationUsersRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListOrganizationUsersRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListOrganizationUsersRequest;
+    static equals(a: ListOrganizationUsersRequest | PlainMessage<ListOrganizationUsersRequest> | undefined, b: ListOrganizationUsersRequest | PlainMessage<ListOrganizationUsersRequest> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.users.ListUserResponse
+ * @generated from message scalekit.v1.users.ListOrganizationUsersResponse
  */
-export declare class ListUserResponse extends Message<ListUserResponse> {
+export declare class ListOrganizationUsersResponse extends Message<ListOrganizationUsersResponse> {
     /**
      * @generated from field: string next_page_token = 1;
      */
@@ -298,25 +272,25 @@ export declare class ListUserResponse extends Message<ListUserResponse> {
      * @generated from field: string prev_page_token = 4;
      */
     prevPageToken: string;
-    constructor(data?: PartialMessage<ListUserResponse>);
+    constructor(data?: PartialMessage<ListOrganizationUsersResponse>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.users.ListUserResponse";
+    static readonly typeName = "scalekit.v1.users.ListOrganizationUsersResponse";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUserResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUserResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUserResponse;
-    static equals(a: ListUserResponse | PlainMessage<ListUserResponse> | undefined, b: ListUserResponse | PlainMessage<ListUserResponse> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListOrganizationUsersResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListOrganizationUsersResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListOrganizationUsersResponse;
+    static equals(a: ListOrganizationUsersResponse | PlainMessage<ListOrganizationUsersResponse> | undefined, b: ListOrganizationUsersResponse | PlainMessage<ListOrganizationUsersResponse> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.users.DeleteUserRequest
+ * @generated from message scalekit.v1.users.DeleteMembershipRequest
  */
-export declare class DeleteUserRequest extends Message<DeleteUserRequest> {
+export declare class DeleteMembershipRequest extends Message<DeleteMembershipRequest> {
     /**
      * @generated from field: string organization_id = 1;
      */
     organizationId: string;
     /**
-     * @generated from oneof scalekit.v1.users.DeleteUserRequest.identities
+     * @generated from oneof scalekit.v1.users.DeleteMembershipRequest.identities
      */
     identities: {
         /**
@@ -331,11 +305,206 @@ export declare class DeleteUserRequest extends Message<DeleteUserRequest> {
         value: string;
         case: "externalId";
     } | {
+        case: undefined;
+        value?: undefined;
+    };
+    /**
+     * @generated from field: optional bool cascade = 5;
+     */
+    cascade?: boolean;
+    constructor(data?: PartialMessage<DeleteMembershipRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.DeleteMembershipRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteMembershipRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteMembershipRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteMembershipRequest;
+    static equals(a: DeleteMembershipRequest | PlainMessage<DeleteMembershipRequest> | undefined, b: DeleteMembershipRequest | PlainMessage<DeleteMembershipRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.CreateMembershipRequest
+ */
+export declare class CreateMembershipRequest extends Message<CreateMembershipRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: scalekit.v1.users.CreateMembership membership = 2;
+     */
+    membership?: CreateMembership;
+    /**
+     * @generated from oneof scalekit.v1.users.CreateMembershipRequest.identities
+     */
+    identities: {
         /**
-         * @generated from field: string identity = 4;
+         * @generated from field: string id = 3;
          */
         value: string;
-        case: "identity";
+        case: "id";
+    } | {
+        /**
+         * @generated from field: string external_id = 4;
+         */
+        value: string;
+        case: "externalId";
+    } | {
+        case: undefined;
+        value?: undefined;
+    };
+    /**
+     * @generated from field: bool send_activation_email = 5;
+     */
+    sendActivationEmail: boolean;
+    constructor(data?: PartialMessage<CreateMembershipRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.CreateMembershipRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateMembershipRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateMembershipRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateMembershipRequest;
+    static equals(a: CreateMembershipRequest | PlainMessage<CreateMembershipRequest> | undefined, b: CreateMembershipRequest | PlainMessage<CreateMembershipRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.CreateMembershipResponse
+ */
+export declare class CreateMembershipResponse extends Message<CreateMembershipResponse> {
+    /**
+     * @generated from field: scalekit.v1.users.User user = 1;
+     */
+    user?: User;
+    constructor(data?: PartialMessage<CreateMembershipResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.CreateMembershipResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateMembershipResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateMembershipResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateMembershipResponse;
+    static equals(a: CreateMembershipResponse | PlainMessage<CreateMembershipResponse> | undefined, b: CreateMembershipResponse | PlainMessage<CreateMembershipResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.ListUsersRequest
+ */
+export declare class ListUsersRequest extends Message<ListUsersRequest> {
+    /**
+     * @generated from field: uint32 page_size = 1;
+     */
+    pageSize: number;
+    /**
+     * @generated from field: string page_token = 2;
+     */
+    pageToken: string;
+    constructor(data?: PartialMessage<ListUsersRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.ListUsersRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUsersRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUsersRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUsersRequest;
+    static equals(a: ListUsersRequest | PlainMessage<ListUsersRequest> | undefined, b: ListUsersRequest | PlainMessage<ListUsersRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.ListUsersResponse
+ */
+export declare class ListUsersResponse extends Message<ListUsersResponse> {
+    /**
+     * @generated from field: repeated scalekit.v1.users.User users = 1;
+     */
+    users: User[];
+    /**
+     * @generated from field: string next_page_token = 2;
+     */
+    nextPageToken: string;
+    /**
+     * @generated from field: uint32 total_size = 3;
+     */
+    totalSize: number;
+    /**
+     * @generated from field: string prev_page_token = 4;
+     */
+    prevPageToken: string;
+    constructor(data?: PartialMessage<ListUsersResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.ListUsersResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUsersResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUsersResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUsersResponse;
+    static equals(a: ListUsersResponse | PlainMessage<ListUsersResponse> | undefined, b: ListUsersResponse | PlainMessage<ListUsersResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.SearchUsersRequest
+ */
+export declare class SearchUsersRequest extends Message<SearchUsersRequest> {
+    /**
+     * @generated from field: string query = 1;
+     */
+    query: string;
+    /**
+     * @generated from field: uint32 page_size = 2;
+     */
+    pageSize: number;
+    /**
+     * @generated from field: string page_token = 3;
+     */
+    pageToken: string;
+    constructor(data?: PartialMessage<SearchUsersRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.SearchUsersRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchUsersRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchUsersRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchUsersRequest;
+    static equals(a: SearchUsersRequest | PlainMessage<SearchUsersRequest> | undefined, b: SearchUsersRequest | PlainMessage<SearchUsersRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.SearchUsersResponse
+ */
+export declare class SearchUsersResponse extends Message<SearchUsersResponse> {
+    /**
+     * @generated from field: string next_page_token = 1;
+     */
+    nextPageToken: string;
+    /**
+     * @generated from field: uint32 total_size = 2;
+     */
+    totalSize: number;
+    /**
+     * @generated from field: repeated scalekit.v1.users.User users = 3;
+     */
+    users: User[];
+    /**
+     * @generated from field: string prev_page_token = 4;
+     */
+    prevPageToken: string;
+    constructor(data?: PartialMessage<SearchUsersResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.SearchUsersResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchUsersResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchUsersResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchUsersResponse;
+    static equals(a: SearchUsersResponse | PlainMessage<SearchUsersResponse> | undefined, b: SearchUsersResponse | PlainMessage<SearchUsersResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.DeleteUserRequest
+ */
+export declare class DeleteUserRequest extends Message<DeleteUserRequest> {
+    /**
+     * @generated from oneof scalekit.v1.users.DeleteUserRequest.identities
+     */
+    identities: {
+        /**
+         * @generated from field: string id = 1;
+         */
+        value: string;
+        case: "id";
+    } | {
+        /**
+         * @generated from field: string external_id = 2;
+         */
+        value: string;
+        case: "externalId";
     } | {
         case: undefined;
         value?: undefined;
@@ -350,15 +519,15 @@ export declare class DeleteUserRequest extends Message<DeleteUserRequest> {
     static equals(a: DeleteUserRequest | PlainMessage<DeleteUserRequest> | undefined, b: DeleteUserRequest | PlainMessage<DeleteUserRequest> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.users.AddUserRequest
+ * @generated from message scalekit.v1.users.UpdateMembershipRequest
  */
-export declare class AddUserRequest extends Message<AddUserRequest> {
+export declare class UpdateMembershipRequest extends Message<UpdateMembershipRequest> {
     /**
      * @generated from field: string organization_id = 1;
      */
     organizationId: string;
     /**
-     * @generated from oneof scalekit.v1.users.AddUserRequest.identities
+     * @generated from oneof scalekit.v1.users.UpdateMembershipRequest.identities
      */
     identities: {
         /**
@@ -373,38 +542,265 @@ export declare class AddUserRequest extends Message<AddUserRequest> {
         value: string;
         case: "externalId";
     } | {
-        /**
-         * @generated from field: string identity = 4;
-         */
-        value: string;
-        case: "identity";
-    } | {
         case: undefined;
         value?: undefined;
     };
-    constructor(data?: PartialMessage<AddUserRequest>);
+    /**
+     * @generated from field: scalekit.v1.users.UpdateMembership membership = 5;
+     */
+    membership?: UpdateMembership;
+    constructor(data?: PartialMessage<UpdateMembershipRequest>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.users.AddUserRequest";
+    static readonly typeName = "scalekit.v1.users.UpdateMembershipRequest";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddUserRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AddUserRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AddUserRequest;
-    static equals(a: AddUserRequest | PlainMessage<AddUserRequest> | undefined, b: AddUserRequest | PlainMessage<AddUserRequest> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateMembershipRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateMembershipRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateMembershipRequest;
+    static equals(a: UpdateMembershipRequest | PlainMessage<UpdateMembershipRequest> | undefined, b: UpdateMembershipRequest | PlainMessage<UpdateMembershipRequest> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.users.AddUserResponse
+ * @generated from message scalekit.v1.users.UpdateMembership
  */
-export declare class AddUserResponse extends Message<AddUserResponse> {
+export declare class UpdateMembership extends Message<UpdateMembership> {
+    /**
+     * @generated from field: repeated scalekit.v1.commons.Role roles = 4;
+     */
+    roles: Role[];
+    /**
+     * @generated from field: map<string, string> metadata = 7;
+     */
+    metadata: {
+        [key: string]: string;
+    };
+    constructor(data?: PartialMessage<UpdateMembership>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.UpdateMembership";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateMembership;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateMembership;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateMembership;
+    static equals(a: UpdateMembership | PlainMessage<UpdateMembership> | undefined, b: UpdateMembership | PlainMessage<UpdateMembership> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.CreateMembership
+ */
+export declare class CreateMembership extends Message<CreateMembership> {
+    /**
+     * @generated from field: repeated scalekit.v1.commons.Role roles = 4;
+     */
+    roles: Role[];
+    /**
+     * @generated from field: map<string, string> metadata = 7;
+     */
+    metadata: {
+        [key: string]: string;
+    };
+    constructor(data?: PartialMessage<CreateMembership>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.CreateMembership";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateMembership;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateMembership;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateMembership;
+    static equals(a: CreateMembership | PlainMessage<CreateMembership> | undefined, b: CreateMembership | PlainMessage<CreateMembership> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.UpdateMembershipResponse
+ */
+export declare class UpdateMembershipResponse extends Message<UpdateMembershipResponse> {
     /**
      * @generated from field: scalekit.v1.users.User user = 1;
      */
     user?: User;
-    constructor(data?: PartialMessage<AddUserResponse>);
+    constructor(data?: PartialMessage<UpdateMembershipResponse>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.users.AddUserResponse";
+    static readonly typeName = "scalekit.v1.users.UpdateMembershipResponse";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddUserResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AddUserResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AddUserResponse;
-    static equals(a: AddUserResponse | PlainMessage<AddUserResponse> | undefined, b: AddUserResponse | PlainMessage<AddUserResponse> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateMembershipResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateMembershipResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateMembershipResponse;
+    static equals(a: UpdateMembershipResponse | PlainMessage<UpdateMembershipResponse> | undefined, b: UpdateMembershipResponse | PlainMessage<UpdateMembershipResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.SearchOrganizationUsersRequest
+ */
+export declare class SearchOrganizationUsersRequest extends Message<SearchOrganizationUsersRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string query = 2;
+     */
+    query: string;
+    /**
+     * @generated from field: uint32 page_size = 3;
+     */
+    pageSize: number;
+    /**
+     * @generated from field: string page_token = 4;
+     */
+    pageToken: string;
+    constructor(data?: PartialMessage<SearchOrganizationUsersRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.SearchOrganizationUsersRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchOrganizationUsersRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchOrganizationUsersRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchOrganizationUsersRequest;
+    static equals(a: SearchOrganizationUsersRequest | PlainMessage<SearchOrganizationUsersRequest> | undefined, b: SearchOrganizationUsersRequest | PlainMessage<SearchOrganizationUsersRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.SearchOrganizationUsersResponse
+ */
+export declare class SearchOrganizationUsersResponse extends Message<SearchOrganizationUsersResponse> {
+    /**
+     * @generated from field: string next_page_token = 1;
+     */
+    nextPageToken: string;
+    /**
+     * @generated from field: uint32 total_size = 2;
+     */
+    totalSize: number;
+    /**
+     * @generated from field: repeated scalekit.v1.users.User users = 3;
+     */
+    users: User[];
+    /**
+     * @generated from field: string prev_page_token = 4;
+     */
+    prevPageToken: string;
+    constructor(data?: PartialMessage<SearchOrganizationUsersResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.SearchOrganizationUsersResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchOrganizationUsersResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchOrganizationUsersResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchOrganizationUsersResponse;
+    static equals(a: SearchOrganizationUsersResponse | PlainMessage<SearchOrganizationUsersResponse> | undefined, b: SearchOrganizationUsersResponse | PlainMessage<SearchOrganizationUsersResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.CreateUser
+ */
+export declare class CreateUser extends Message<CreateUser> {
+    /**
+     * @generated from field: string email = 5;
+     */
+    email: string;
+    /**
+     * @generated from field: optional string external_id = 6;
+     */
+    externalId?: string;
+    /**
+     * @generated from field: scalekit.v1.users.CreateMembership membership = 7;
+     */
+    membership?: CreateMembership;
+    /**
+     * @generated from field: scalekit.v1.users.CreateUserProfile user_profile = 8;
+     */
+    userProfile?: CreateUserProfile;
+    /**
+     * @generated from field: map<string, string> metadata = 9;
+     */
+    metadata: {
+        [key: string]: string;
+    };
+    constructor(data?: PartialMessage<CreateUser>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.CreateUser";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateUser;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateUser;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateUser;
+    static equals(a: CreateUser | PlainMessage<CreateUser> | undefined, b: CreateUser | PlainMessage<CreateUser> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.CreateUserProfile
+ */
+export declare class CreateUserProfile extends Message<CreateUserProfile> {
+    /**
+     * @generated from field: string first_name = 2;
+     */
+    firstName: string;
+    /**
+     * @generated from field: string last_name = 3;
+     */
+    lastName: string;
+    /**
+     * @generated from field: string name = 4;
+     */
+    name: string;
+    /**
+     * @generated from field: string locale = 5;
+     */
+    locale: string;
+    /**
+     * @generated from field: string phone_number = 7;
+     */
+    phoneNumber: string;
+    /**
+     * @generated from field: map<string, string> metadata = 8;
+     */
+    metadata: {
+        [key: string]: string;
+    };
+    /**
+     * @generated from field: map<string, string> custom_attributes = 9;
+     */
+    customAttributes: {
+        [key: string]: string;
+    };
+    constructor(data?: PartialMessage<CreateUserProfile>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.CreateUserProfile";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateUserProfile;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateUserProfile;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateUserProfile;
+    static equals(a: CreateUserProfile | PlainMessage<CreateUserProfile> | undefined, b: CreateUserProfile | PlainMessage<CreateUserProfile> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.UpdateUserProfile
+ */
+export declare class UpdateUserProfile extends Message<UpdateUserProfile> {
+    /**
+     * @generated from field: optional string first_name = 2;
+     */
+    firstName?: string;
+    /**
+     * @generated from field: optional string last_name = 3;
+     */
+    lastName?: string;
+    /**
+     * @generated from field: optional string name = 4;
+     */
+    name?: string;
+    /**
+     * @generated from field: optional string locale = 5;
+     */
+    locale?: string;
+    /**
+     * @generated from field: optional string phone_number = 7;
+     */
+    phoneNumber?: string;
+    /**
+     * @generated from field: map<string, string> metadata = 8;
+     */
+    metadata: {
+        [key: string]: string;
+    };
+    /**
+     * @generated from field: map<string, string> custom_attributes = 9;
+     */
+    customAttributes: {
+        [key: string]: string;
+    };
+    constructor(data?: PartialMessage<UpdateUserProfile>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.UpdateUserProfile";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateUserProfile;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateUserProfile;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateUserProfile;
+    static equals(a: UpdateUserProfile | PlainMessage<UpdateUserProfile> | undefined, b: UpdateUserProfile | PlainMessage<UpdateUserProfile> | undefined): boolean;
 }

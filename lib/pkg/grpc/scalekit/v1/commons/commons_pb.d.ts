@@ -1,5 +1,5 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
 /**
  * @generated from enum scalekit.v1.commons.RegionCode
  */
@@ -35,24 +35,15 @@ export declare enum UserStatus {
     /**
      * @generated from enum value: INACTIVE = 2;
      */
-    INACTIVE = 2
-}
-/**
- * @generated from enum scalekit.v1.commons.MembershipRole
- */
-export declare enum MembershipRole {
+    INACTIVE = 2,
     /**
-     * @generated from enum value: MEMBERSHIP_ROLE_UNSPECIFIED = 0;
+     * @generated from enum value: INVITED = 3;
      */
-    MEMBERSHIP_ROLE_UNSPECIFIED = 0,
+    INVITED = 3,
     /**
-     * @generated from enum value: ADMIN = 1;
+     * @generated from enum value: PENDING = 4;
      */
-    ADMIN = 1,
-    /**
-     * @generated from enum value: USER = 2;
-     */
-    USER = 2
+    PENDING = 4
 }
 /**
  * @generated from enum scalekit.v1.commons.IdentityProviderType
@@ -121,32 +112,46 @@ export declare enum IdentityProviderType {
     /**
      * @generated from enum value: SCALEKIT = 15;
      */
-    SCALEKIT = 15
+    SCALEKIT = 15,
+    /**
+     * @generated from enum value: ADFS = 16;
+     */
+    ADFS = 16
 }
 /**
  * @generated from message scalekit.v1.commons.OrganizationMembership
  */
 export declare class OrganizationMembership extends Message<OrganizationMembership> {
     /**
-     * @generated from field: string id = 1;
+     * @generated from field: string organization_id = 1;
      */
-    id: string;
+    organizationId: string;
     /**
-     * @generated from field: scalekit.v1.commons.UserStatus membership_status = 2;
+     * @generated from field: google.protobuf.Timestamp join_time = 2;
+     */
+    joinTime?: Timestamp;
+    /**
+     * @generated from field: scalekit.v1.commons.UserStatus membership_status = 3;
      */
     membershipStatus: UserStatus;
     /**
-     * @generated from field: scalekit.v1.commons.MembershipRole role = 3;
+     * @generated from field: repeated scalekit.v1.commons.Role roles = 4;
      */
-    role: MembershipRole;
+    roles: Role[];
     /**
-     * @generated from field: optional string name = 4;
+     * @generated from field: optional string name = 5;
      */
     name?: string;
     /**
-     * @generated from field: scalekit.v1.commons.IdentityProviderType primary_identity_provider = 5;
+     * @generated from field: scalekit.v1.commons.IdentityProviderType primary_identity_provider = 6;
      */
     primaryIdentityProvider: IdentityProviderType;
+    /**
+     * @generated from field: map<string, string> metadata = 7;
+     */
+    metadata: {
+        [key: string]: string;
+    };
     constructor(data?: PartialMessage<OrganizationMembership>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.commons.OrganizationMembership";
@@ -155,6 +160,27 @@ export declare class OrganizationMembership extends Message<OrganizationMembersh
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrganizationMembership;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrganizationMembership;
     static equals(a: OrganizationMembership | PlainMessage<OrganizationMembership> | undefined, b: OrganizationMembership | PlainMessage<OrganizationMembership> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.commons.Role
+ */
+export declare class Role extends Message<Role> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: string name = 2;
+     */
+    name: string;
+    constructor(data?: PartialMessage<Role>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.commons.Role";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Role;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Role;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Role;
+    static equals(a: Role | PlainMessage<Role> | undefined, b: Role | PlainMessage<Role> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.commons.UserProfile
@@ -185,13 +211,17 @@ export declare class UserProfile extends Message<UserProfile> {
      */
     emailVerified: boolean;
     /**
-     * @generated from field: map<string, string> metadata = 7;
+     * @generated from field: string phone_number = 7;
+     */
+    phoneNumber: string;
+    /**
+     * @generated from field: map<string, string> metadata = 8;
      */
     metadata: {
         [key: string]: string;
     };
     /**
-     * @generated from field: map<string, string> custom_attributes = 8;
+     * @generated from field: map<string, string> custom_attributes = 9;
      */
     customAttributes: {
         [key: string]: string;

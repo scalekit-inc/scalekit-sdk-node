@@ -1,59 +1,95 @@
 import { Empty } from '@bufbuild/protobuf';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateUserResponse, GetUserResponse, ListUserResponse, UpdateUserResponse, AddUserResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
-import { CreateUserRequest, UpdateUserRequest } from './types/user';
+import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
+import { CreateUserRequest, UpdateUserRequest as UpdateUserRequestType } from './types/user';
 export default class UserClient {
     private readonly grpcConnect;
     private readonly coreClient;
     private client;
     constructor(grpcConnect: GrpcConnect, coreClient: CoreClient);
     /**
-     * Create a new user in an organization
+     * Create a new user and add them to an organization
      * @param {string} organizationId The organization id
      * @param {CreateUserRequest} options The user creation options
-     * @returns {Promise<CreateUserResponse>} The created user
+     * @returns {Promise<CreateUserAndMembershipResponse>} The created user
      */
-    createUser(organizationId: string, options: CreateUserRequest): Promise<CreateUserResponse>;
+    createUserAndMembership(organizationId: string, options: CreateUserRequest): Promise<CreateUserAndMembershipResponse>;
     /**
      * Get a user by id
-     * @param {string} organizationId The organization id
      * @param {string} userId The user id
      * @returns {Promise<GetUserResponse>} The user
      */
-    getUser(organizationId: string, userId: string): Promise<GetUserResponse>;
+    getUser(userId: string): Promise<GetUserResponse>;
     /**
      * List users with pagination
-     * @param {string} organizationId The organization id
      * @param {object} options The pagination options
      * @param {number} options.pageSize The page size
      * @param {string} options.pageToken The page token
-     * @returns {Promise<ListUserResponse>} The list of users
+     * @returns {Promise<ListUsersResponse>} The list of users
      */
-    listUsers(organizationId: string, options?: {
+    listUsers(options?: {
         pageSize?: number;
         pageToken?: string;
-    }): Promise<ListUserResponse>;
+    }): Promise<ListUsersResponse>;
     /**
      * Update a user
-     * @param {string} organizationId The organization id
      * @param {string} userId The user id
-     * @param {UpdateUserRequest} options The update options
+     * @param {UpdateUserRequestType} options The update options
      * @returns {Promise<UpdateUserResponse>} The updated user
      */
-    updateUser(organizationId: string, userId: string, options: UpdateUserRequest): Promise<UpdateUserResponse>;
+    updateUser(userId: string, options: UpdateUserRequestType): Promise<UpdateUserResponse>;
     /**
      * Delete a user
+     * @param {string} userId The user id
+     * @returns {Promise<Empty>} Empty response
+     */
+    deleteUser(userId: string): Promise<Empty>;
+    /**
+     * Create a membership for a user in an organization
+     * @param {string} organizationId The organization id
+     * @param {string} userId The user id
+     * @param {object} options The membership options
+     * @param {string[]} options.roles The roles to assign
+     * @param {Record<string, string>} options.metadata Optional metadata
+     * @param {boolean} options.sendActivationEmail Whether to send activation email
+     * @returns {Promise<CreateMembershipResponse>} The response with updated user
+     */
+    createMembership(organizationId: string, userId: string, options?: {
+        roles?: string[];
+        metadata?: Record<string, string>;
+        sendActivationEmail?: boolean;
+    }): Promise<CreateMembershipResponse>;
+    /**
+     * Delete a user's membership from an organization
      * @param {string} organizationId The organization id
      * @param {string} userId The user id
      * @returns {Promise<Empty>} Empty response
      */
-    deleteUser(organizationId: string, userId: string): Promise<Empty>;
+    deleteMembership(organizationId: string, userId: string): Promise<Empty>;
     /**
-     * Add a user to an organization
+     * Update a user's membership in an organization
      * @param {string} organizationId The organization id
      * @param {string} userId The user id
-     * @returns {Promise<AddUserResponse>} The response
+     * @param {object} options The update options
+     * @param {string[]} options.roles The roles to assign
+     * @param {Record<string, string>} options.metadata Optional metadata
+     * @returns {Promise<UpdateMembershipResponse>} The response with updated user
      */
-    addUserToOrganization(organizationId: string, userId: string): Promise<AddUserResponse>;
+    updateMembership(organizationId: string, userId: string, options?: {
+        roles?: string[];
+        metadata?: Record<string, string>;
+    }): Promise<UpdateMembershipResponse>;
+    /**
+     * List users in an organization with pagination
+     * @param {string} organizationId The organization id
+     * @param {object} options The pagination options
+     * @param {number} options.pageSize The page size
+     * @param {string} options.pageToken The page token
+     * @returns {Promise<ListOrganizationUsersResponse>} The list of users in the organization
+     */
+    listOrganizationUsers(organizationId: string, options?: {
+        pageSize?: number;
+        pageToken?: string;
+    }): Promise<ListOrganizationUsersResponse>;
 }
