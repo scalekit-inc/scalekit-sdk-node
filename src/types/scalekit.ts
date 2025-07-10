@@ -32,6 +32,11 @@ export type AuthenticationResponse = {
   refreshToken: string;
 }
 
+export type RefreshTokenResponse = {
+  accessToken: string;
+  refreshToken: string;
+}
+
 export interface LogoutUrlOptions {
   idTokenHint?: string;
   postLogoutRedirectUri?: string;

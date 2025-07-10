@@ -10,7 +10,7 @@ import DomainClient from './domain';
 import OrganizationClient from './organization';
 import UserClient from './user';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
-import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions } from './types/scalekit';
+import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse } from './types/scalekit';
 
 const authorizeEndpoint = "oauth/authorize";
 const logoutEndpoint = "end_session";
@@ -303,30 +303,42 @@ export default class ScalekitClient {
   /**
    * Refresh access token using a refresh token
    * @param {string} refreshToken The refresh token to use
-   * @returns {Promise<AuthenticationResponse>} Returns new access token, refresh token and other details
+   * @returns {Promise<RefreshTokenResponse>} Returns new access token, refresh token and other details
+   * @throws {Error} When authentication fails or response data is invalid
    */
-  async refreshToken(refreshToken: string): Promise<AuthenticationResponse> {
-    const res = await this.coreClient.authenticate(QueryString.stringify({
-      grant_type: GrantType.RefreshToken,
-      client_id: this.coreClient.clientId,
-      client_secret: this.coreClient.clientSecret,
-      refresh_token: refreshToken
-    }));
+  async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
+    if (!refreshToken) {
+      throw new Error("Refresh token is required");
+    }
 
-    const { id_token, access_token, expires_in, refresh_token } = res.data;
-    const claims = jose.decodeJwt<IdTokenClaim>(id_token);
-    const user = <User>{};
-    for (const [k, v] of Object.entries(claims)) {
-      if (IdTokenClaimToUserMap[k]) {
-        user[IdTokenClaimToUserMap[k]] = v;
-      }
+    let res;
+    try {
+      res = await this.coreClient.authenticate(QueryString.stringify({
+        grant_type: GrantType.RefreshToken,
+        client_id: this.coreClient.clientId,
+        client_secret: this.coreClient.clientSecret,
+        refresh_token: refreshToken
+      }));
+    } catch (error) {
+      throw new Error(`Failed to refresh token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    if (!res || !res.data) {
+      throw new Error("Invalid response from authentication server");
+    }
+
+    const { access_token, refresh_token } = res.data;
+
+    // Validate that all required properties exist
+    if (!access_token) {
+      throw new Error("Missing access_token in authentication response");
+    }
+    if (!refresh_token) {
+      throw new Error("Missing refresh_token in authentication response");
     }
 
     return {
-      user,
-      idToken: id_token,
       accessToken: access_token,
-      expiresIn: expires_in,
       refreshToken: refresh_token
     };
   }
