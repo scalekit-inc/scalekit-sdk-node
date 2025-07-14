@@ -241,7 +241,10 @@ export default class ScalekitClient {
       });
       
       if (options?.requiredScopes && options.requiredScopes.length > 0) {
-        this.verifyScopes(payload, options.requiredScopes);
+        const hasRequiredScopes = this.verifyScopes(token, options.requiredScopes);
+        if (!hasRequiredScopes) {
+          throw new Error("Token missing required scopes");
+        }
       }
 
       return payload;
@@ -253,16 +256,24 @@ export default class ScalekitClient {
   /**
    * Verify that the token contains the required scopes
    * 
-   * @param {any} payload The token payload
+   * @param {string} token The token to verify
    * @param {string[]} requiredScopes The scopes that must be present in the token
-   * @throws {Error} If any required scope is missing
+   * @return {boolean} Returns true if all required scopes are present, false otherwise
    */
-  verifyScopes(payload: any, requiredScopes: string[]): void {
-    const scopes = Array.isArray(payload.scopes) ? payload.scopes.filter(scope => typeof scope === 'string' && scope.trim() !== '') : [];
-    for (const requiredScope of requiredScopes) {
-      if (!scopes.includes(requiredScope)) {
-        throw new Error(`Missing required scope: ${requiredScope}`);
+  verifyScopes(token: string, requiredScopes: string[]): boolean {
+    try {
+      const payload = jose.decodeJwt(token);
+      const scopes = Array.isArray(payload.scopes) ? payload.scopes.filter(scope => typeof scope === 'string' && scope.trim() !== '') : [];
+      
+      for (const requiredScope of requiredScopes) {
+        if (!scopes.includes(requiredScope)) {
+          return false;
+        }
       }
+      
+      return true;
+    } catch (_) {
+      return false;
     }
   }
 
