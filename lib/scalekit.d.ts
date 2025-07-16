@@ -3,8 +3,9 @@ import DirectoryClient from './directory';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
 import PasswordlessClient from './passwordless';
+import UserClient from './user';
 import { IdpInitiatedLoginClaims } from './types/auth';
-import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions } from './types/scalekit';
+import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse } from './types/scalekit';
 /**
  * To initiate scalekit
  * @param {string} envUrl The environment url
@@ -22,6 +23,7 @@ export default class ScalekitClient {
     readonly domain: DomainClient;
     readonly directory: DirectoryClient;
     readonly passwordless: PasswordlessClient;
+    readonly user: UserClient;
     constructor(envUrl: string, clientId: string, clientSecret: string);
     /**
      * Returns the authorization url to initiate the authentication request.
@@ -37,10 +39,14 @@ export default class ScalekitClient {
      * @param {string} options.provider Provider i.e. google, github, etc.
      * @param {string} options.codeChallenge Code challenge parameter in case of PKCE
      * @param {string} options.codeChallengeMethod Code challenge method parameter in case of PKCE
+     * @param {string} options.prompt Prompt parameter to control the authorization server's authentication behavior
      *
      * @example
      * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
-     * const authorizationUrl = scalekit.getAuthorizationUrl(redirectUri, { scopes: ['openid', 'profile'] });
+     * const authorizationUrl = scalekit.getAuthorizationUrl(redirectUri, {
+     *   scopes: ['openid', 'profile'],
+     *   prompt: 'create'
+     * });
      * @returns {string} authorization url
      */
     getAuthorizationUrl(redirectUri: string, options?: AuthorizationUrlOptions): string;
@@ -67,6 +73,22 @@ export default class ScalekitClient {
      * @return {Promise<boolean>} Returns true if the token is valid, false otherwise.
      */
     validateAccessToken(token: string): Promise<boolean>;
+    /**
+     * Returns the logout URL that can be used to log out the user.
+     * @param {LogoutUrlOptions} options Logout URL options
+     * @param {string} options.idTokenHint The ID Token previously issued to the client
+     * @param {string} options.postLogoutRedirectUri URL to redirect after logout
+     * @param {string} options.state Opaque value to maintain state between request and callback
+     * @returns {string} The logout URL
+     *
+     * @example
+     * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
+     * const logoutUrl = scalekit.getLogoutUrl({
+     *   postLogoutRedirectUri: 'https://example.com',
+     *   state: 'some-state'
+     * });
+     */
+    getLogoutUrl(options?: LogoutUrlOptions): string;
     /**
      * Verifies the payload of the webhook
      *
@@ -98,4 +120,11 @@ export default class ScalekitClient {
      * @return {string} Returns the signature
      */
     private computeSignature;
+    /**
+     * Refresh access token using a refresh token
+     * @param {string} refreshToken The refresh token to use
+     * @returns {Promise<RefreshTokenResponse>} Returns new access token, refresh token and other details
+     * @throws {Error} When authentication fails or response data is invalid
+     */
+    refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse>;
 }

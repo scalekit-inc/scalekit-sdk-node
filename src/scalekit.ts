@@ -9,10 +9,12 @@ import DirectoryClient from './directory';
 import DomainClient from './domain';
 import OrganizationClient from './organization';
 import PasswordlessClient from './passwordless';
+import UserClient from './user';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
-import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, TokenValidationOptions } from './types/scalekit';
-  
+import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse ,TokenValidationOptions } from './types/scalekit';
+
 const authorizeEndpoint = "oauth/authorize";
+const logoutEndpoint = "oidc/logout";
 const WEBHOOK_TOLERANCE_IN_SECONDS = 5 * 60; // 5 minutes
 const WEBHOOK_SIGNATURE_VERSION = "v1";
 
@@ -33,6 +35,7 @@ export default class ScalekitClient {
   readonly domain: DomainClient;
   readonly directory: DirectoryClient;
   readonly passwordless: PasswordlessClient;
+  readonly user: UserClient;
   constructor(
     envUrl: string,
     clientId: string,
@@ -67,6 +70,10 @@ export default class ScalekitClient {
       this.grpcConnect,
       this.coreClient
     );
+    this.user = new UserClient(
+      this.grpcConnect,
+      this.coreClient
+    );
   }
 
   /**
@@ -83,10 +90,14 @@ export default class ScalekitClient {
    * @param {string} options.provider Provider i.e. google, github, etc.
    * @param {string} options.codeChallenge Code challenge parameter in case of PKCE
    * @param {string} options.codeChallengeMethod Code challenge method parameter in case of PKCE
+   * @param {string} options.prompt Prompt parameter to control the authorization server's authentication behavior
    * 
    * @example
    * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
-   * const authorizationUrl = scalekit.getAuthorizationUrl(redirectUri, { scopes: ['openid', 'profile'] });
+   * const authorizationUrl = scalekit.getAuthorizationUrl(redirectUri, { 
+   *   scopes: ['openid', 'profile'],
+   *   prompt: 'create'
+   * });
    * @returns {string} authorization url
    */
   getAuthorizationUrl(
@@ -114,7 +125,8 @@ export default class ScalekitClient {
       ...(options.organizationId && { organization_id: options.organizationId }),
       ...(options.codeChallenge && { code_challenge: options.codeChallenge }),
       ...(options.codeChallengeMethod && { code_challenge_method: options.codeChallengeMethod }),
-      ...(options.provider && { provider: options.provider })
+      ...(options.provider && { provider: options.provider }),
+      ...(options.prompt && { prompt: options.prompt })
     })
 
     return `${this.coreClient.envUrl}/${authorizeEndpoint}?${qs}`
@@ -141,7 +153,7 @@ export default class ScalekitClient {
       client_secret: this.coreClient.clientSecret,
       ...(options?.codeVerifier && { code_verifier: options.codeVerifier })
     }))
-    const { id_token, access_token, expires_in } = res.data;
+    const { id_token, access_token, expires_in , refresh_token } = res.data;
     const claims = jose.decodeJwt<IdTokenClaim>(id_token);
     const user = <User>{};
     for (const [k, v] of Object.entries(claims)) {
@@ -154,7 +166,8 @@ export default class ScalekitClient {
       user,
       idToken: id_token,
       accessToken: access_token,
-      expiresIn: expires_in
+      expiresIn: expires_in,
+      refreshToken: refresh_token
     }
   }
 
@@ -186,6 +199,31 @@ export default class ScalekitClient {
   }
 
 
+
+  /**
+   * Returns the logout URL that can be used to log out the user.
+   * @param {LogoutUrlOptions} options Logout URL options
+   * @param {string} options.idTokenHint The ID Token previously issued to the client
+   * @param {string} options.postLogoutRedirectUri URL to redirect after logout
+   * @param {string} options.state Opaque value to maintain state between request and callback
+   * @returns {string} The logout URL
+   * 
+   * @example
+   * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
+   * const logoutUrl = scalekit.getLogoutUrl({
+   *   postLogoutRedirectUri: 'https://example.com',
+   *   state: 'some-state'
+   * });
+   */
+  getLogoutUrl(options?: LogoutUrlOptions): string {
+    const qs = QueryString.stringify({
+      ...(options?.idTokenHint && { id_token_hint: options.idTokenHint }),
+      ...(options?.postLogoutRedirectUri && { post_logout_redirect_uri: options.postLogoutRedirectUri }),
+      ...(options?.state && { state: options.state })
+    });
+
+    return `${this.coreClient.envUrl}/${logoutEndpoint}${qs ? `?${qs}` : ''}`;
+  }
 
   /**
    * Verifies the payload of the webhook
@@ -317,6 +355,48 @@ export default class ScalekitClient {
   private computeSignature(secretBytes: Buffer, data: string): string {
     return crypto.createHmac('sha256', secretBytes).update(data).digest('base64');
   }
-}
 
+  /**
+   * Refresh access token using a refresh token
+   * @param {string} refreshToken The refresh token to use
+   * @returns {Promise<RefreshTokenResponse>} Returns new access token, refresh token and other details
+   * @throws {Error} When authentication fails or response data is invalid
+   */
+  async refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse> {
+    if (!refreshToken) {
+      throw new Error("Refresh token is required");
+    }
+
+    let res;
+    try {
+      res = await this.coreClient.authenticate(QueryString.stringify({
+        grant_type: GrantType.RefreshToken,
+        client_id: this.coreClient.clientId,
+        client_secret: this.coreClient.clientSecret,
+        refresh_token: refreshToken
+      }));
+    } catch (error) {
+      throw new Error(`Failed to refresh token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    if (!res || !res.data) {
+      throw new Error("Invalid response from authentication server");
+    }
+
+    const { access_token, refresh_token } = res.data;
+
+    // Validate that all required properties exist
+    if (!access_token) {
+      throw new Error("Missing access_token in authentication response");
+    }
+    if (!refresh_token) {
+      throw new Error("Missing refresh_token in authentication response");
+    }
+
+    return {
+      accessToken: access_token,
+      refreshToken: refresh_token
+    };
+  }
+}
 
