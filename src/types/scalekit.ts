@@ -25,7 +25,7 @@ export type AuthenticationOptions = {
 
 export type TokenValidationOptions = {
   issuer?: string;
-  audience?: string | string[];
+  audience?: string[];
   requiredScopes?: string[];
 }
 
