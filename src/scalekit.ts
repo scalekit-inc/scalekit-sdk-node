@@ -11,7 +11,7 @@ import OrganizationClient from './organization';
 import PasswordlessClient from './passwordless';
 import UserClient from './user';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
-import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse } from './types/scalekit';
+import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse ,TokenValidationOptions } from './types/scalekit';
 
 const authorizeEndpoint = "oauth/authorize";
 const logoutEndpoint = "oidc/logout";
@@ -175,26 +175,30 @@ export default class ScalekitClient {
   * Get the idp initiated login claims
   * 
   * @param {string} idpInitiatedLoginToken The idp_initiated_login query param from the URL
+  * @param {TokenValidationOptions} options Optional validation options for issuer and audience
   * @returns {object} Returns the idp initiated login claims
   */
-  async getIdpInitiatedLoginClaims(idpInitiatedLoginToken: string): Promise<IdpInitiatedLoginClaims> {
-    return this.validateToken<IdpInitiatedLoginClaims>(idpInitiatedLoginToken);
+  async getIdpInitiatedLoginClaims(idpInitiatedLoginToken: string, options?: TokenValidationOptions): Promise<IdpInitiatedLoginClaims> {
+    return this.validateToken<IdpInitiatedLoginClaims>(idpInitiatedLoginToken, options);
   }
 
   /**
-   * Validates the access token.  
+   * Validates the access token and returns a boolean result.
    * 
    * @param {string} token The token to be validated.
+   * @param {TokenValidationOptions} options Optional validation options for issuer, audience, and scopes
    * @return {Promise<boolean>} Returns true if the token is valid, false otherwise.
    */
-  async validateAccessToken(token: string): Promise<boolean> {
+  async validateAccessToken(token: string, options?: TokenValidationOptions): Promise<boolean> {
     try {
-      await this.validateToken(token);
+      await this.validateToken(token, options);
       return true;
     } catch (_) {
       return false;
     }
   }
+
+
 
   /**
    * Returns the logout URL that can be used to log out the user.
@@ -255,22 +259,67 @@ export default class ScalekitClient {
   }
 
   /**
-   * Validate token
+   * Validates a token and returns its payload if valid.
+   * Supports issuer, audience, and scope validation.
    * 
    * @param {string} token The token to be validated
-   * @return {Promise<T>} Returns the payload of the token
+   * @param {TokenValidationOptions} options Optional validation options for issuer, audience, and scopes
+   * @return {Promise<T>} Returns the token payload if valid
+   * @throws {Error} If token is invalid or missing required scopes
    */
-  private async validateToken<T>(token: string): Promise<T> {
+  async validateToken<T>(token: string, options?: TokenValidationOptions): Promise<T> {
     await this.coreClient.getJwks();
     const jwks = jose.createLocalJWKSet({
       keys: this.coreClient.keys
     })
     try {
-      const { payload } = await jose.jwtVerify<T>(token, jwks);
+      const { payload } = await jose.jwtVerify<T>(token, jwks, {
+        ...(options?.issuer && { issuer: options.issuer }),
+        ...(options?.audience && { audience: options.audience })
+      });
+      
+      if (options?.requiredScopes && options.requiredScopes.length > 0) {
+        this.verifyScopes(token, options.requiredScopes);
+      }
+
       return payload;
     } catch (_) {
       throw new Error("Invalid token");
     }
+  }
+
+  /**
+   * Verify that the token contains the required scopes
+   * 
+   * @param {string} token The token to verify
+   * @param {string[]} requiredScopes The scopes that must be present in the token
+   * @return {boolean} Returns true if all required scopes are present
+   * @throws {Error} If required scopes are missing, with details about which scopes are missing
+   */
+  verifyScopes(token: string, requiredScopes: string[]): boolean {
+    const payload = jose.decodeJwt(token);
+    const scopes = this.extractScopesFromPayload(payload);
+    
+    const missingScopes = requiredScopes.filter(scope => !scopes.includes(scope));
+    
+    if (missingScopes.length > 0) {
+      throw new Error(`Token missing required scopes: ${missingScopes.join(', ')}`);
+    }
+    
+    return true;
+  }
+
+  /**
+   * Extract scopes from token payload
+   * 
+   * @param {any} payload The token payload
+   * @return {string[]} Array of scopes found in the token
+   */
+  private extractScopesFromPayload(payload: Record<string, any>): string[] {
+    const scopes = payload.scopes;
+    return Array.isArray(scopes)
+      ? scopes.filter((scope) => !!scope.trim?.())
+      : [];
   }
 
   /**
