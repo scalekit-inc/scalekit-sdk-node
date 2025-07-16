@@ -58,6 +58,7 @@ export type TokenResponse = {
     access_token: string;
     id_token: string;
     expires_in: number;
+    refresh_token: string;
 };
 export type IdpInitiatedLoginClaims = {
     connection_id: string;
