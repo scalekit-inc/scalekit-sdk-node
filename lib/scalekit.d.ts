@@ -5,7 +5,7 @@ import OrganizationClient from './organization';
 import PasswordlessClient from './passwordless';
 import UserClient from './user';
 import { IdpInitiatedLoginClaims } from './types/auth';
-import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse } from './types/scalekit';
+import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse, TokenValidationOptions } from './types/scalekit';
 /**
  * To initiate scalekit
  * @param {string} envUrl The environment url
@@ -63,16 +63,18 @@ export default class ScalekitClient {
     * Get the idp initiated login claims
     *
     * @param {string} idpInitiatedLoginToken The idp_initiated_login query param from the URL
+    * @param {TokenValidationOptions} options Optional validation options for issuer and audience
     * @returns {object} Returns the idp initiated login claims
     */
-    getIdpInitiatedLoginClaims(idpInitiatedLoginToken: string): Promise<IdpInitiatedLoginClaims>;
+    getIdpInitiatedLoginClaims(idpInitiatedLoginToken: string, options?: TokenValidationOptions): Promise<IdpInitiatedLoginClaims>;
     /**
-     * Validates the access token.
+     * Validates the access token and returns a boolean result.
      *
      * @param {string} token The token to be validated.
+     * @param {TokenValidationOptions} options Optional validation options for issuer, audience, and scopes
      * @return {Promise<boolean>} Returns true if the token is valid, false otherwise.
      */
-    validateAccessToken(token: string): Promise<boolean>;
+    validateAccessToken(token: string, options?: TokenValidationOptions): Promise<boolean>;
     /**
      * Returns the logout URL that can be used to log out the user.
      * @param {LogoutUrlOptions} options Logout URL options
@@ -99,12 +101,31 @@ export default class ScalekitClient {
      */
     verifyWebhookPayload(secret: string, headers: Record<string, string>, payload: string): boolean;
     /**
-     * Validate token
+     * Validates a token and returns its payload if valid.
+     * Supports issuer, audience, and scope validation.
      *
      * @param {string} token The token to be validated
-     * @return {Promise<T>} Returns the payload of the token
+     * @param {TokenValidationOptions} options Optional validation options for issuer, audience, and scopes
+     * @return {Promise<T>} Returns the token payload if valid
+     * @throws {Error} If token is invalid or missing required scopes
      */
-    private validateToken;
+    validateToken<T>(token: string, options?: TokenValidationOptions): Promise<T>;
+    /**
+     * Verify that the token contains the required scopes
+     *
+     * @param {string} token The token to verify
+     * @param {string[]} requiredScopes The scopes that must be present in the token
+     * @return {boolean} Returns true if all required scopes are present
+     * @throws {Error} If required scopes are missing, with details about which scopes are missing
+     */
+    verifyScopes(token: string, requiredScopes: string[]): boolean;
+    /**
+     * Extract scopes from token payload
+     *
+     * @param {any} payload The token payload
+     * @return {string[]} Array of scopes found in the token
+     */
+    private extractScopesFromPayload;
     /**
      * Verify the timestamp
      *
