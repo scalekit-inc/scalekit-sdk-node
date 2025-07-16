@@ -315,12 +315,11 @@ export default class ScalekitClient {
    * @param {any} payload The token payload
    * @return {string[]} Array of scopes found in the token
    */
-  private extractScopesFromPayload(payload: any): string[] {
+  private extractScopesFromPayload(payload: Record<string, any>): string[] {
     const scopes = payload.scopes;
-    if (Array.isArray(scopes)) {
-      return scopes.filter(scope => typeof scope === 'string' && scope.trim() !== '');
-    }
-    return [];
+    return Array.isArray(scopes)
+      ? scopes.filter((scope) => !!scope.trim?.())
+      : [];
   }
 
   /**
