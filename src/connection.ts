@@ -2,7 +2,8 @@ import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
 import { ConnectionService } from './pkg/grpc/scalekit/v1/connections/connections_connect';
-import { GetConnectionResponse, ToggleConnectionResponse, ListConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
+import {  CreateConnection, CreateConnectionResponse, GetConnectionResponse, ToggleConnectionResponse, ListConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
+
 
 export default class ConnectionClient {
   private client: PromiseClient<typeof ConnectionService>;
@@ -12,6 +13,22 @@ export default class ConnectionClient {
   ) {
     this.client = this.grpcConncet.createClient(ConnectionService);
   }
+
+  /**
+ * Create a new connection
+ * @param organizationId The organization id
+ * @param connection The data for the new connection
+ * @returns {Promise<CreateConnectionResponse>} The created connection
+ */
+async createConnection(organizationId: string, connection: CreateConnection): Promise<CreateConnectionResponse> {
+  return this.coreClient.connectExec(
+    this.client.createConnection,
+    {
+      organizationId,
+      connection
+    },
+  );
+}
 
   /**
    * Get a connection by id and organization id
