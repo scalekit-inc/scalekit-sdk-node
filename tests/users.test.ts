@@ -1,69 +1,36 @@
 import ScalekitClient from '../src/scalekit';
 import { CreateUserRequest, UpdateUserRequest } from '../src/types/user';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { TestDataGenerator, TestOrganizationManager, TestUserManager } from './utils/test-data';
 
 describe('Users', () => {
   let client: ScalekitClient;
   let testOrg: string;
   let userId: string | null = null;
-  let externalId: string | null = null;
 
   beforeEach(async () => {
     // Use global client
     client = global.client;
     
     // Create test organization for each test
-    const orgName = `Test Org ${Date.now()}`;
-    const orgResponse = await client.organization.createOrganization(orgName, {
-      externalId: `ext_org_${Date.now()}`
-    });
-    testOrg = orgResponse.organization?.id || '';
-    
-    if (!testOrg) {
-      throw new Error('Failed to create test organization');
-    }
+    testOrg = await TestOrganizationManager.createTestOrganization(client);
   });
 
   afterEach(async () => {
     // Clean up test resources
     if (userId) {
-      try {
-        // Remove membership if it exists
-        await client.user.deleteMembership(testOrg, userId);
-      } catch (error) {
-        // Membership may not exist
-      }
-      
-      try {
-        await client.user.deleteUser(userId);
-      } catch (error) {
-        // User may already be deleted
-      }
+      await TestUserManager.cleanupTestUser(client, testOrg, userId);
       userId = null;
     }
     
     // Clean up test organization
-    if (testOrg) {
-      try {
-        await client.organization.deleteOrganization(testOrg);
-      } catch (error) {
-        // Organization may already be deleted
-      }
-    }
+    await TestOrganizationManager.cleanupTestOrganization(client, testOrg);
   });
 
   describe('listOrganizationUsers', () => {
     it('should list users by organization', async () => {
       // Create a user to ensure the organization has at least one user
-      const uniqueEmail = `test.user.${Date.now()}@example.com`;
-      
-      const userData: CreateUserRequest = {
-        email: uniqueEmail,
-        userProfile: {
-          firstName: 'Test',
-          lastName: 'User'
-        }
-      };
+      const userData = TestDataGenerator.generateUserData();
 
       const createResponse = await client.user.createUserAndMembership(testOrg, userData);
       const createdUserId = createResponse.user?.id;
@@ -73,10 +40,7 @@ describe('Users', () => {
       userId = createdUserId || null;
 
       // List users in the organization
-      const usersList = await client.user.listOrganizationUsers(testOrg, {
-        pageSize: 10,
-        pageToken: ''
-      });
+      const usersList = await client.user.listOrganizationUsers(testOrg, TestDataGenerator.generatePaginationParams());
 
       expect(usersList).toBeDefined();
       expect(usersList.users).toBeDefined();
@@ -91,10 +55,7 @@ describe('Users', () => {
     });
 
     it('should handle pagination', async () => {
-      const firstPage = await client.user.listOrganizationUsers(testOrg, {
-        pageSize: 5,
-        pageToken: ''
-      });
+      const firstPage = await client.user.listOrganizationUsers(testOrg, TestDataGenerator.generatePaginationParams(5));
 
       expect(firstPage).toBeDefined();
       expect(firstPage.users.length).toBeLessThanOrEqual(5);
@@ -114,15 +75,7 @@ describe('Users', () => {
   describe('getUser', () => {
     it('should get user by ID', async () => {
       // Create a user for testing
-      const uniqueEmail = `test.user.${Date.now()}@example.com`;
-      
-      const userData: CreateUserRequest = {
-        email: uniqueEmail,
-        userProfile: {
-          firstName: 'Test',
-          lastName: 'User'
-        }
-      };
+      const userData = TestDataGenerator.generateUserData();
 
       const createResponse = await client.user.createUserAndMembership(testOrg, userData);
       const createdUserId = createResponse.user?.id;
@@ -137,31 +90,20 @@ describe('Users', () => {
       expect(user).toBeDefined();
       expect(user.user).toBeDefined();
       expect(user.user?.id).toBe(createdUserId);
-      expect(user.user?.email).toBe(uniqueEmail);
+      expect(user.user?.email).toBe(userData.email);
     });
   });
 
   describe('createUserAndMembership', () => {
     it('should create user and membership', async () => {
-      const uniqueEmail = `test.user.${Date.now()}@example.com`;
-      
-      const userData: CreateUserRequest = {
-        email: uniqueEmail,
-        userProfile: {
-          firstName: 'Test',
-          lastName: 'User'
-        },
-        metadata: {
-          source: 'test'
-        }
-      };
+      const userData = TestDataGenerator.generateUserData();
 
       const response = await client.user.createUserAndMembership(testOrg, userData);
       
       expect(response).toBeDefined();
       expect(response.user).toBeDefined();
       expect(response.user?.id).toBeDefined();
-      expect(response.user?.email).toBe(uniqueEmail);
+      expect(response.user?.email).toBe(userData.email);
       expect(response.user?.metadata?.source).toBe('test');
       
       // Track user ID for cleanup
@@ -169,13 +111,7 @@ describe('Users', () => {
     });
 
     it('should throw error when email is missing', async () => {
-      const userData: CreateUserRequest = {
-        email: '', // Empty email
-        userProfile: {
-          firstName: 'Test',
-          lastName: 'User'
-        }
-      };
+      const userData = TestDataGenerator.generateUserData({ email: '' }); // Empty email
 
       await expect(
         client.user.createUserAndMembership(testOrg, userData)
@@ -183,13 +119,7 @@ describe('Users', () => {
     });
 
     it('should throw error when organizationId is missing', async () => {
-      const userData: CreateUserRequest = {
-        email: 'test@example.com',
-        userProfile: {
-          firstName: 'Test',
-          lastName: 'User'
-        }
-      };
+      const userData = TestDataGenerator.generateUserData({ email: 'test@example.com' });
 
       await expect(
         client.user.createUserAndMembership('', userData)
@@ -200,15 +130,7 @@ describe('Users', () => {
   describe('updateUser', () => {
     it('should update user', async () => {
       // Create a user for testing
-      const uniqueEmail = `test.user.${Date.now()}@example.com`;
-      
-      const userData: CreateUserRequest = {
-        email: uniqueEmail,
-        userProfile: {
-          firstName: 'Test',
-          lastName: 'User'
-        }
-      };
+      const userData = TestDataGenerator.generateUserData();
 
       const createResponse = await client.user.createUserAndMembership(testOrg, userData);
       const createdUserId = createResponse.user?.id;
@@ -218,12 +140,7 @@ describe('Users', () => {
       userId = createdUserId || null;
 
       // Modify the user
-      const updateData: UpdateUserRequest = {
-        userProfile: {
-          firstName: 'Updated',
-          lastName: 'Name'
-        }
-      };
+      const updateData = TestDataGenerator.generateUserUpdateData();
 
       const updatedUser = await client.user.updateUser(createdUserId!, updateData);
       

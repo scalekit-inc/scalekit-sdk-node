@@ -1,5 +1,6 @@
 import ScalekitClient from '../src/scalekit';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { TestOrganizationManager } from './utils/test-data';
 
 describe('Connections', () => {
   let client: ScalekitClient;
@@ -10,26 +11,12 @@ describe('Connections', () => {
     client = global.client;
     
     // Create test organization for each test
-    const orgName = `Test Org ${Date.now()}`;
-    const orgResponse = await client.organization.createOrganization(orgName, {
-      externalId: `ext_org_${Date.now()}`
-    });
-    testOrg = orgResponse.organization?.id || '';
-    
-    if (!testOrg) {
-      throw new Error('Failed to create test organization');
-    }
+    testOrg = await TestOrganizationManager.createTestOrganization(client);
   });
 
   afterEach(async () => {
     // Clean up test organization
-    if (testOrg) {
-      try {
-        await client.organization.deleteOrganization(testOrg);
-      } catch (error) {
-        // Organization may already be deleted
-      }
-    }
+    await TestOrganizationManager.cleanupTestOrganization(client, testOrg);
   });
 
   describe('listConnections', () => {

@@ -1,6 +1,7 @@
 import ScalekitClient from '../src/scalekit';
 import { TemplateType } from '../src/pkg/grpc/scalekit/v1/auth/passwordless_pb';
 import { describe, it, expect, beforeEach } from '@jest/globals';
+import { TestDataGenerator } from './utils/test-data';
 
 describe('Passwordless', () => {
   let client: ScalekitClient;
@@ -12,14 +13,9 @@ describe('Passwordless', () => {
 
   describe('sendPasswordlessEmail', () => {
     it('should send passwordless email with basic parameters', async () => {
-      const email = `test.user.${Date.now()}@example.com`;
+      const email = TestDataGenerator.generateUniqueEmail();
       
-      const response = await client.passwordless.sendPasswordlessEmail(email, {
-        template: TemplateType.SIGNIN,
-        state: 'test-state',
-        expiresIn: 3600,
-        magiclinkAuthUri: 'https://example.com/auth/callback'
-      });
+      const response = await client.passwordless.sendPasswordlessEmail(email, TestDataGenerator.generatePasswordlessEmailData());
 
       expect(response).toBeDefined();
       expect(response.authRequestId).toBeDefined();
@@ -29,16 +25,9 @@ describe('Passwordless', () => {
     });
 
     it('should send passwordless email with template variables', async () => {
-      const email = `test.user.${Date.now()}@example.com`;
+      const email = TestDataGenerator.generateUniqueEmail();
       
-      const response = await client.passwordless.sendPasswordlessEmail(email, {
-        template: TemplateType.SIGNUP,
-        templateVariables: {
-          companyName: 'Test Company',
-          appName: 'Test App'
-        },
-        magiclinkAuthUri: 'https://example.com/auth/callback'
-      });
+      const response = await client.passwordless.sendPasswordlessEmail(email, TestDataGenerator.generatePasswordlessEmailWithTemplateData());
 
       expect(response).toBeDefined();
       expect(response.authRequestId).toBeDefined();
@@ -53,7 +42,7 @@ describe('Passwordless', () => {
     });
 
     it('should throw error for invalid template type', async () => {
-      const email = `test.user.${Date.now()}@example.com`;
+      const email = TestDataGenerator.generateUniqueEmail();
       
       await expect(
         client.passwordless.sendPasswordlessEmail(email, {
@@ -72,7 +61,7 @@ describe('Passwordless', () => {
 
     it('should verify with code', async () => {
       // Mock code for testing - expected to fail
-      const credential = { code: 'mock-code' };
+      const credential = TestDataGenerator.generateCredentialData('code');
       
       try {
         const response = await client.passwordless.verifyPasswordlessEmail(credential);
@@ -85,7 +74,7 @@ describe('Passwordless', () => {
 
     it('should verify with linkToken', async () => {
       // Mock linkToken for testing - expected to fail
-      const credential = { linkToken: 'mock-link-token' };
+      const credential = TestDataGenerator.generateCredentialData('linkToken');
       
       try {
         const response = await client.passwordless.verifyPasswordlessEmail(credential);
@@ -100,12 +89,9 @@ describe('Passwordless', () => {
   describe('resendPasswordlessEmail', () => {
     it('should resend passwordless email', async () => {
       // Send initial passwordless email
-      const email = `test.user.${Date.now()}@example.com`;
+      const email = TestDataGenerator.generateUniqueEmail();
       
-      const sendResponse = await client.passwordless.sendPasswordlessEmail(email, {
-        template: TemplateType.SIGNIN,
-        magiclinkAuthUri: 'https://example.com/auth/callback'
-      });
+      const sendResponse = await client.passwordless.sendPasswordlessEmail(email, TestDataGenerator.generatePasswordlessEmailData());
 
       // Resend the email
       const resendResponse = await client.passwordless.resendPasswordlessEmail(

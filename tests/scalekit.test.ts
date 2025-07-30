@@ -1,6 +1,7 @@
 import ScalekitClient from '../src/scalekit';
 import { AuthenticationOptions } from '../src/types/scalekit';
 import { describe, it, expect, beforeEach } from '@jest/globals';
+import { TestDataGenerator } from './utils/test-data';
 
 describe('ScalekitClient', () => {
   let client: ScalekitClient;
@@ -34,12 +35,7 @@ describe('ScalekitClient', () => {
 
     it('should include optional parameters when provided', () => {
       const redirectUri = 'https://example.com/callback';
-      const options = {
-        scopes: ['openid', 'profile'],
-        state: 'test-state',
-        nonce: 'test-nonce',
-        prompt: 'login'
-      };
+      const options = TestDataGenerator.generateAuthorizationUrlOptions();
       
       const url = client.getAuthorizationUrl(redirectUri, options);
       
@@ -51,10 +47,7 @@ describe('ScalekitClient', () => {
 
     it('should handle PKCE parameters', () => {
       const redirectUri = 'https://example.com/callback';
-      const options = {
-        codeChallenge: 'test-challenge',
-        codeChallengeMethod: 'S256'
-      };
+      const options = TestDataGenerator.generatePKCEParams();
       
       const url = client.getAuthorizationUrl(redirectUri, options);
       
@@ -65,51 +58,31 @@ describe('ScalekitClient', () => {
 
   describe('verifyWebhookPayload', () => {
     it('should verify valid webhook payload', () => {
-      const secret = 'whsec_test-secret';
-      const payload = '{"test": "data"}';
-      const timestamp = Math.floor(Date.now() / 1000).toString();
-      const webhookId = 'msg_test_webhook_id';
+      const webhookData = TestDataGenerator.generateWebhookData();
       
-      // Generate valid signature for testing
-      const crypto = require('crypto');
-      const data = `${webhookId}.${timestamp}.${payload}`;
-      const hmac = crypto.createHmac('sha256', Buffer.from('test-secret', 'base64'));
-      hmac.update(data);
-      const computedSignature = hmac.digest('base64');
-      const signature = `v1,${computedSignature}`;
-      
-      const headers = {
-        'webhook-id': webhookId,
-        'webhook-timestamp': timestamp,
-        'webhook-signature': signature
-      };
-      
-      const result = client.verifyWebhookPayload(secret, headers, payload);
+      const result = client.verifyWebhookPayload(webhookData.secret, webhookData.headers, webhookData.payload);
       expect(result).toBe(true);
     });
 
     it('should throw error for invalid signature', () => {
-      const secret = 'whsec_test-secret';
-      const payload = '{"test": "data"}';
-      const timestamp = Math.floor(Date.now() / 1000).toString();
-      const webhookId = 'msg_test_webhook_id';
+      const webhookData = TestDataGenerator.generateWebhookData();
       
       // Generate invalid signature using wrong payload data
       const crypto = require('crypto');
-      const wrongData = `${webhookId}.${timestamp}.wrong-payload`;
+      const wrongData = `${webhookData.webhookId}.${webhookData.timestamp}.wrong-payload`;
       const hmac = crypto.createHmac('sha256', Buffer.from('test-secret', 'base64'));
       hmac.update(wrongData);
       const wrongSignature = hmac.digest('base64');
       const signature = `v1,${wrongSignature}`;
       
       const headers = {
-        'webhook-id': webhookId,
-        'webhook-timestamp': timestamp,
+        'webhook-id': webhookData.webhookId,
+        'webhook-timestamp': webhookData.timestamp,
         'webhook-signature': signature
       };
       
       expect(() => {
-        client.verifyWebhookPayload(secret, headers, payload);
+        client.verifyWebhookPayload(webhookData.secret, headers, webhookData.payload);
       }).toThrow('Invalid Signature');
     });
   });

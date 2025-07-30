@@ -1,5 +1,6 @@
 import ScalekitClient from '../src/scalekit';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { TestDataGenerator, TestOrganizationManager } from './utils/test-data';
 
 describe('Organizations', () => {
   let client: ScalekitClient;
@@ -10,34 +11,17 @@ describe('Organizations', () => {
     client = global.client;
     
     // Create test organization for each test
-    const orgName = `Test Org ${Date.now()}`;
-    const orgResponse = await client.organization.createOrganization(orgName, {
-      externalId: `ext_org_${Date.now()}`
-    });
-    testOrg = orgResponse.organization?.id || '';
-    
-    if (!testOrg) {
-      throw new Error('Failed to create test organization');
-    }
+    testOrg = await TestOrganizationManager.createTestOrganization(client);
   });
 
   afterEach(async () => {
     // Clean up test organization
-    if (testOrg) {
-      try {
-        await client.organization.deleteOrganization(testOrg);
-      } catch (error) {
-        // Organization may already be deleted
-      }
-    }
+    await TestOrganizationManager.cleanupTestOrganization(client, testOrg);
   });
 
   describe('listOrganization', () => {
     it('should list organizations', async () => {
-      const organizations = await client.organization.listOrganization({
-        pageSize: 10,
-        pageToken: ''
-      });
+      const organizations = await client.organization.listOrganization(TestDataGenerator.generatePaginationParams());
 
       expect(organizations).toBeDefined();
       expect(organizations.organizations).toBeDefined();
@@ -51,10 +35,7 @@ describe('Organizations', () => {
     });
 
     it('should handle pagination', async () => {
-      const firstPage = await client.organization.listOrganization({
-        pageSize: 5,
-        pageToken: ''
-      });
+      const firstPage = await client.organization.listOrganization(TestDataGenerator.generatePaginationParams(5));
 
       expect(firstPage).toBeDefined();
       expect(firstPage.organizations.length).toBeLessThanOrEqual(5);
