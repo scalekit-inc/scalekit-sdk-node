@@ -6,6 +6,8 @@ import QueryString from "qs";
 import { GrantType } from './types/scalekit';
 import { ErrorInfo } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
 import { TokenResponse } from './types/auth';
+import { transformError } from './errors';
+import { ScalekitServerException, ScalekitClientException } from './errors/base-exception';
 
 export const headers = {
   "user-agent": "user-agent",
@@ -81,7 +83,7 @@ export default class CoreClient {
   }
 
   /**
-   * 
+   * Execute a function with error handling and retry logic
    * @param fn Function to execute
    * @param data Data to pass to the function
    * @param retryLeft Number of retries left
@@ -96,39 +98,19 @@ export default class CoreClient {
       const res = await fn(data);
       return res;
     } catch (error) {
+      // Transform the error to our specific exception types
+      const transformedError = transformError(error);
+      
       if (retryLeft > 0) {
-        let isUnAuthenticatedError = false;
-        if (error instanceof AxiosError) {
-          if (error.status == HttpStatusCode.Unauthorized) {
-            isUnAuthenticatedError = true;
-          } else {
-            throw new Error(error.message);
-          }
-        }
-        // ConnectError is a custom error class that extends Error class and has a code property
-        if (error instanceof ConnectError) {
-          if (error.code == Code.Unauthenticated) {
-            isUnAuthenticatedError = true;
-          }
-          if (error.code == Code.InvalidArgument) {
-            const messages = [error.message]
-            error.findDetails(ErrorInfo).forEach((detail) => {
-              if (detail.validationErrorInfo) {
-                detail.validationErrorInfo.fieldViolations.forEach((fv) => {
-                  messages.push(`${fv.field}: ${fv.description}`)
-                })
-              }
-            })
-
-            throw new Error(messages.join("\n"));
-          }
-        }
-        if (isUnAuthenticatedError) {
+        // Check if it's an authentication error that we can retry
+        if (transformedError instanceof ScalekitServerException && transformedError.httpStatus === 401) {
           await this.authenticateClient();
           return this.connectExec(fn, data, retryLeft - 1);
         }
       }
-      throw error;
+      
+      // Throw the transformed error
+      throw transformedError;
     }
   }
 }
