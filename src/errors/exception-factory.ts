@@ -1,62 +1,73 @@
 import { ConnectError, Code } from '@connectrpc/connect';
+import { AxiosResponse } from 'axios';
 import { ScalekitServerException } from './base-exception';
 import {
-  ScalekitInvalidArgumentException,
-  ScalekitFailedPreconditionException,
-  ScalekitOutOfRangeException,
-  ScalekitUnauthenticatedException,
-  ScalekitPermissionDeniedException,
+  ScalekitBadRequestException,
+  ScalekitUnauthorizedException,
+  ScalekitForbiddenException,
   ScalekitNotFoundException,
   ScalekitConflictException,
-  ScalekitResourceExhaustedException,
+  ScalekitTooManyRequestsException,
   ScalekitCancelledException,
-  ScalekitDataLossException,
-  ScalekitUnknownException,
   ScalekitInternalServerException,
-  ScalekitUnimplementedException,
+  ScalekitNotImplementedException,
   ScalekitServiceUnavailableException,
-  ScalekitDeadlineExceededException,
+  ScalekitGatewayTimeoutException,
+  ScalekitUnknownException,
 } from './specific-exceptions';
 
+// HTTP to gRPC status mapping
+const HTTP_TO_GRPC: Record<number, number> = {
+  200: Code.Unknown, // No direct mapping for 200
+  400: Code.InvalidArgument,
+  401: Code.Unauthenticated,
+  403: Code.PermissionDenied,
+  404: Code.NotFound,
+  409: Code.AlreadyExists,
+  429: Code.ResourceExhausted,
+  500: Code.Internal,
+  501: Code.Unimplemented,
+  503: Code.Unavailable,
+  504: Code.DeadlineExceeded,
+};
+
 /**
- * Factory function to create specific Scalekit exceptions from gRPC errors
+ * Factory function to create specific Scalekit exceptions from gRPC or HTTP errors
  */
-export function scalekitException(grpcError: ConnectError): ScalekitServerException {
-  const grpcStatus = grpcError.code;
+export function scalekitException(error: ConnectError | AxiosResponse): ScalekitServerException {
+  const grpcStatus = error instanceof ConnectError 
+    ? error.code 
+    : HTTP_TO_GRPC[error.status] || Code.Unknown;
 
   switch (grpcStatus) {
     case Code.InvalidArgument:
-      return new ScalekitInvalidArgumentException(grpcError);
     case Code.FailedPrecondition:
-      return new ScalekitFailedPreconditionException(grpcError);
     case Code.OutOfRange:
-      return new ScalekitOutOfRangeException(grpcError);
+      return new ScalekitBadRequestException(error);
     case Code.Unauthenticated:
-      return new ScalekitUnauthenticatedException(grpcError);
+      return new ScalekitUnauthorizedException(error);
     case Code.PermissionDenied:
-      return new ScalekitPermissionDeniedException(grpcError);
+      return new ScalekitForbiddenException(error);
     case Code.NotFound:
-      return new ScalekitNotFoundException(grpcError);
+      return new ScalekitNotFoundException(error);
     case Code.AlreadyExists:
     case Code.Aborted:
-      return new ScalekitConflictException(grpcError);
+      return new ScalekitConflictException(error);
     case Code.ResourceExhausted:
-      return new ScalekitResourceExhaustedException(grpcError);
+      return new ScalekitTooManyRequestsException(error);
     case Code.Canceled:
-      return new ScalekitCancelledException(grpcError);
+      return new ScalekitCancelledException(error);
     case Code.DataLoss:
-      return new ScalekitDataLossException(grpcError);
     case Code.Unknown:
-      return new ScalekitUnknownException(grpcError);
     case Code.Internal:
-      return new ScalekitInternalServerException(grpcError);
+      return new ScalekitInternalServerException(error);
     case Code.Unimplemented:
-      return new ScalekitUnimplementedException(grpcError);
+      return new ScalekitNotImplementedException(error);
     case Code.Unavailable:
-      return new ScalekitServiceUnavailableException(grpcError);
+      return new ScalekitServiceUnavailableException(error);
     case Code.DeadlineExceeded:
-      return new ScalekitDeadlineExceededException(grpcError);
+      return new ScalekitGatewayTimeoutException(error);
     default:
-      return new ScalekitUnknownException(grpcError);
+      return new ScalekitUnknownException(error);
   }
 } 

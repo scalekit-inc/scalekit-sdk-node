@@ -7,7 +7,7 @@ import { GrantType } from './types/scalekit';
 import { ErrorInfo } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
 import { TokenResponse } from './types/auth';
 import { transformError } from './errors';
-import { ScalekitServerException, ScalekitClientException } from './errors/base-exception';
+import { ScalekitException, ScalekitServerException } from './errors/base-exception';
 
 export const headers = {
   "user-agent": "user-agent",

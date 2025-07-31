@@ -1,108 +1,88 @@
 import { ConnectError } from '@connectrpc/connect';
+import { AxiosResponse } from 'axios';
 import { ScalekitServerException } from './base-exception';
 
-// Specific exception classes
-export class ScalekitInvalidArgumentException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitInvalidArgumentException';
+// Specific exception classes with new naming (matching Python SDK)
+export class ScalekitBadRequestException extends ScalekitServerException {
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
+    this.name = 'ScalekitBadRequestException';
   }
 }
 
-export class ScalekitFailedPreconditionException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitFailedPreconditionException';
+export class ScalekitUnauthorizedException extends ScalekitServerException {
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
+    this.name = 'ScalekitUnauthorizedException';
+  }
+}
+
+export class ScalekitForbiddenException extends ScalekitServerException {
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
+    this.name = 'ScalekitForbiddenException';
   }
 }
 
 export class ScalekitNotFoundException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
     this.name = 'ScalekitNotFoundException';
   }
 }
 
-export class ScalekitUnauthenticatedException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitUnauthenticatedException';
-  }
-}
-
-export class ScalekitPermissionDeniedException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitPermissionDeniedException';
-  }
-}
-
-export class ScalekitInternalServerException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitInternalServerException';
-  }
-}
-
-export class ScalekitServiceUnavailableException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitServiceUnavailableException';
-  }
-}
-
 export class ScalekitConflictException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
     this.name = 'ScalekitConflictException';
   }
 }
 
-export class ScalekitResourceExhaustedException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitResourceExhaustedException';
+export class ScalekitTooManyRequestsException extends ScalekitServerException {
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
+    this.name = 'ScalekitTooManyRequestsException';
   }
 }
 
-export class ScalekitUnknownException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitUnknownException';
+export class ScalekitInternalServerException extends ScalekitServerException {
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
+    this.name = 'ScalekitInternalServerException';
   }
 }
 
-export class ScalekitUnimplementedException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitUnimplementedException';
+export class ScalekitNotImplementedException extends ScalekitServerException {
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
+    this.name = 'ScalekitNotImplementedException';
   }
 }
 
-export class ScalekitDeadlineExceededException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitDeadlineExceededException';
+export class ScalekitServiceUnavailableException extends ScalekitServerException {
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
+    this.name = 'ScalekitServiceUnavailableException';
   }
 }
 
-export class ScalekitDataLossException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitDataLossException';
-  }
-}
-
-export class ScalekitOutOfRangeException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
-    this.name = 'ScalekitOutOfRangeException';
+export class ScalekitGatewayTimeoutException extends ScalekitServerException {
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
+    this.name = 'ScalekitGatewayTimeoutException';
   }
 }
 
 export class ScalekitCancelledException extends ScalekitServerException {
-  constructor(exception: ConnectError) {
-    super(exception);
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
     this.name = 'ScalekitCancelledException';
+  }
+}
+
+export class ScalekitUnknownException extends ScalekitServerException {
+  constructor(error: AxiosResponse | ConnectError) {
+    super(error);
+    this.name = 'ScalekitUnknownException';
   }
 } 
