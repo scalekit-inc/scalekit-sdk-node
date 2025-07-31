@@ -218,4 +218,45 @@ export class ScalekitServerException extends ScalekitException {
   get unpackedDetails(): ErrorInfo[] {
     return this._unpackedDetails;
   }
+
+  static promote(error: AxiosResponse | ConnectError): ScalekitServerException {
+    // Use dynamic import to avoid circular dependency
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const specific = require('./specific-exceptions');
+    const grpcStatus = error instanceof ConnectError
+      ? error.code
+      : HTTP_TO_GRPC[error.status] || Code.Unknown;
+
+    switch (grpcStatus) {
+      case Code.InvalidArgument:
+      case Code.FailedPrecondition:
+      case Code.OutOfRange:
+        return new specific.ScalekitBadRequestException(error);
+      case Code.Unauthenticated:
+        return new specific.ScalekitUnauthorizedException(error);
+      case Code.PermissionDenied:
+        return new specific.ScalekitForbiddenException(error);
+      case Code.NotFound:
+        return new specific.ScalekitNotFoundException(error);
+      case Code.AlreadyExists:
+      case Code.Aborted:
+        return new specific.ScalekitConflictException(error);
+      case Code.ResourceExhausted:
+        return new specific.ScalekitTooManyRequestsException(error);
+      case Code.Canceled:
+        return new specific.ScalekitCancelledException(error);
+      case Code.DataLoss:
+      case Code.Unknown:
+      case Code.Internal:
+        return new specific.ScalekitInternalServerException(error);
+      case Code.Unimplemented:
+        return new specific.ScalekitNotImplementedException(error);
+      case Code.Unavailable:
+        return new specific.ScalekitServiceUnavailableException(error);
+      case Code.DeadlineExceeded:
+        return new specific.ScalekitGatewayTimeoutException(error);
+      default:
+        return new specific.ScalekitUnknownException(error);
+    }
+  }
 } 

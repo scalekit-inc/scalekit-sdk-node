@@ -4,9 +4,7 @@ import { JWK } from 'jose';
 import os from "os";
 import QueryString from "qs";
 import { GrantType } from './types/scalekit';
-import { ErrorInfo } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
 import { TokenResponse } from './types/auth';
-import { transformError } from './errors';
 import { ScalekitException, ScalekitServerException } from './errors/base-exception';
 
 export const headers = {
@@ -98,19 +96,38 @@ export default class CoreClient {
       const res = await fn(data);
       return res;
     } catch (error) {
-      // Transform the error to our specific exception types
-      const transformedError = transformError(error);
-      
-      if (retryLeft > 0) {
-        // Check if it's an authentication error that we can retry
-        if (transformedError instanceof ScalekitServerException && transformedError.httpStatus === 401) {
-          await this.authenticateClient();
-          return this.connectExec(fn, data, retryLeft - 1);
+      // Handle gRPC Connect errors 
+      if (error instanceof ConnectError) {
+        if (retryLeft > 0) {
+          const serverException = new ScalekitServerException(error);
+          if (serverException.httpStatus === 401) {
+            await this.authenticateClient();
+            return this.connectExec(fn, data, retryLeft - 1);
+          }
+        }
+        throw ScalekitServerException.promote(error);
+      }
+      // Handle HTTP/Axios errors
+      if (error instanceof AxiosError) {
+        if (error.response) {
+          if (retryLeft > 0) {
+            const serverException = new ScalekitServerException(error.response);
+            if (serverException.httpStatus === 401) {
+              await this.authenticateClient();
+              return this.connectExec(fn, data, retryLeft - 1);
+            }
+          }
+          throw ScalekitServerException.promote(error.response);
+        } else {
+          throw new ScalekitException(error);
         }
       }
-      
-      // Throw the transformed error
-      throw transformedError;
+      // Handle existing ScalekitException instances
+      if (error instanceof ScalekitException) {
+        throw error;
+      }
+      // Handle generic errors
+      throw new ScalekitException(error);
     }
   }
 }
