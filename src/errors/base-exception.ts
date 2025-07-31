@@ -127,25 +127,70 @@ export class ScalekitServerException extends ScalekitException {
 
   // String representation
   toString(): string {
-    const border = '========================================';
+    const border = '='.repeat(40);
     
     if (this._unpackedDetails.length > 0) {
       let detailsStr = JSON.stringify(this._unpackedDetails, null, 2);
+      
+      // Format the JSON string for better readability
+      
       if (detailsStr.startsWith("[") && detailsStr.includes("\n")) {
-        detailsStr = detailsStr.replace("[", "[\n");
+        detailsStr = "[\n" + detailsStr.substring(1);
       }
+      
       return `\n${border}\n` +
              `Error Code: ${this._errorCode}\n` +
-             `GRPC: (${this._grpcStatus}: ${this._grpcStatus})\n` +
-             `HTTP: (${this._httpStatus})\n` +
+             `GRPC: (${this.getGrpcStatusName()}: ${this._grpcStatus})\n` +
+             `HTTP: (${this.getHttpStatusName()}: ${this._httpStatus})\n` +
              `Error Details:\n` +
              `${this._message}: ${detailsStr}\n${border}\n`;
     } else {
       return `\n${border}\n` +
              `Error Code: ${this._errorCode}\n` +
-             `GRPC: (${this._grpcStatus}: ${this._grpcStatus})\n` +
-             `HTTP: (${this._httpStatus})\n` +
+             `GRPC: (${this.getGrpcStatusName()}: ${this._grpcStatus})\n` +
+             `HTTP: (${this.getHttpStatusName()}: ${this._httpStatus})\n` +
              `Error Details: ${this._errDetails}\n${border}\n`;
+    }
+  }
+
+  // Helper method to get gRPC status name
+  private getGrpcStatusName(): string {
+    switch (this._grpcStatus) {
+      case Code.InvalidArgument: return 'INVALID_ARGUMENT';
+      case Code.FailedPrecondition: return 'FAILED_PRECONDITION';
+      case Code.OutOfRange: return 'OUT_OF_RANGE';
+      case Code.Unauthenticated: return 'UNAUTHENTICATED';
+      case Code.PermissionDenied: return 'PERMISSION_DENIED';
+      case Code.NotFound: return 'NOT_FOUND';
+      case Code.AlreadyExists: return 'ALREADY_EXISTS';
+      case Code.Aborted: return 'ABORTED';
+      case Code.ResourceExhausted: return 'RESOURCE_EXHAUSTED';
+      case Code.Canceled: return 'CANCELED';
+      case Code.DataLoss: return 'DATA_LOSS';
+      case Code.Unknown: return 'UNKNOWN';
+      case Code.Internal: return 'INTERNAL';
+      case Code.Unimplemented: return 'UNIMPLEMENTED';
+      case Code.Unavailable: return 'UNAVAILABLE';
+      case Code.DeadlineExceeded: return 'DEADLINE_EXCEEDED';
+      default: return 'UNKNOWN';
+    }
+  }
+
+  // Helper method to get HTTP status name
+  private getHttpStatusName(): string {
+    switch (this._httpStatus) {
+      case 200: return 'OK';
+      case 400: return 'BAD_REQUEST';
+      case 401: return 'UNAUTHORIZED';
+      case 403: return 'FORBIDDEN';
+      case 404: return 'NOT_FOUND';
+      case 409: return 'CONFLICT';
+      case 429: return 'TOO_MANY_REQUESTS';
+      case 500: return 'INTERNAL_SERVER_ERROR';
+      case 501: return 'NOT_IMPLEMENTED';
+      case 503: return 'SERVICE_UNAVAILABLE';
+      case 504: return 'GATEWAY_TIMEOUT';
+      default: return 'INTERNAL_SERVER_ERROR';
     }
   }
 
