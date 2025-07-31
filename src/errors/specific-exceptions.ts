@@ -2,7 +2,7 @@ import { ConnectError } from '@connectrpc/connect';
 import { AxiosResponse } from 'axios';
 import { ScalekitServerException } from './base-exception';
 
-// Specific exception classes with new naming (matching Python SDK)
+// Specific exception classes 
 export class ScalekitBadRequestException extends ScalekitServerException {
   constructor(error: AxiosResponse | ConnectError) {
     super(error);
