@@ -39,6 +39,32 @@ proto3.util.setEnumType(VerificationStatus, "scalekit.v1.domains.VerificationSta
 ]);
 
 /**
+ * @generated from enum scalekit.v1.domains.DomainType
+ */
+export enum DomainType {
+  /**
+   * @generated from enum value: DOMAIN_TYPE_UNSPECIFIED = 0;
+   */
+  DOMAIN_TYPE_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: HOME_REALM_DISCOVERY = 1;
+   */
+  HOME_REALM_DISCOVERY = 1,
+
+  /**
+   * @generated from enum value: JIT_PROVISIONING_DOMAIN = 2;
+   */
+  JIT_PROVISIONING_DOMAIN = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(DomainType)
+proto3.util.setEnumType(DomainType, "scalekit.v1.domains.DomainType", [
+  { no: 0, name: "DOMAIN_TYPE_UNSPECIFIED" },
+  { no: 1, name: "HOME_REALM_DISCOVERY" },
+  { no: 2, name: "JIT_PROVISIONING_DOMAIN" },
+]);
+
+/**
  * @generated from message scalekit.v1.domains.CreateDomainRequest
  */
 export class CreateDomainRequest extends Message<CreateDomainRequest> {
@@ -146,6 +172,11 @@ export class CreateDomain extends Message<CreateDomain> {
    */
   domain = "";
 
+  /**
+   * @generated from field: scalekit.v1.domains.DomainType domain_type = 2;
+   */
+  domainType = DomainType.DOMAIN_TYPE_UNSPECIFIED;
+
   constructor(data?: PartialMessage<CreateDomain>) {
     super();
     proto3.util.initPartial(data, this);
@@ -155,6 +186,7 @@ export class CreateDomain extends Message<CreateDomain> {
   static readonly typeName = "scalekit.v1.domains.CreateDomain";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "domain", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "domain_type", kind: "enum", T: proto3.getEnumType(DomainType) },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateDomain {
@@ -506,6 +538,11 @@ export class ListDomainRequest extends Message<ListDomainRequest> {
    */
   pageNumber?: number;
 
+  /**
+   * @generated from field: scalekit.v1.domains.DomainType domain_type = 7;
+   */
+  domainType = DomainType.DOMAIN_TYPE_UNSPECIFIED;
+
   constructor(data?: PartialMessage<ListDomainRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -520,6 +557,7 @@ export class ListDomainRequest extends Message<ListDomainRequest> {
     { no: 4, name: "include", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 5, name: "page_size", kind: "message", T: Int32Value },
     { no: 6, name: "page_number", kind: "message", T: Int32Value },
+    { no: 7, name: "domain_type", kind: "enum", T: proto3.getEnumType(DomainType) },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListDomainRequest {
@@ -777,6 +815,11 @@ export class Domain extends Message<Domain> {
    */
   createdBy?: string;
 
+  /**
+   * @generated from field: scalekit.v1.domains.DomainType domain_type = 12;
+   */
+  domainType = DomainType.DOMAIN_TYPE_UNSPECIFIED;
+
   constructor(data?: PartialMessage<Domain>) {
     super();
     proto3.util.initPartial(data, this);
@@ -796,6 +839,7 @@ export class Domain extends Message<Domain> {
     { no: 9, name: "create_time", kind: "message", T: Timestamp },
     { no: 10, name: "update_time", kind: "message", T: Timestamp },
     { no: 11, name: "created_by", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 12, name: "domain_type", kind: "enum", T: proto3.getEnumType(DomainType) },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Domain {

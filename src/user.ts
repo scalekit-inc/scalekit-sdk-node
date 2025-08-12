@@ -25,7 +25,9 @@ import {
   ListOrganizationUsersRequest,
   ListOrganizationUsersResponse,
   CreateMembership,
-  UpdateMembership
+  UpdateMembership,
+  ResendInviteRequest,
+  ResendInviteResponse
 } from './pkg/grpc/scalekit/v1/users/users_pb';
 import { CreateUserRequest, UpdateUserRequest as UpdateUserRequestType } from './types/user';
 
@@ -67,8 +69,8 @@ export default class UserClient {
       user
     };
 
-    if (options.sendActivationEmail !== undefined) {
-      request.sendActivationEmail = options.sendActivationEmail;
+    if (options.sendInvitationEmail !== undefined) {
+      request.sendInvitationEmail = options.sendInvitationEmail;
     }
 
     const response = await this.coreClient.connectExec(
@@ -171,7 +173,7 @@ export default class UserClient {
    * @param {object} options The membership options
    * @param {string[]} options.roles The roles to assign
    * @param {Record<string, string>} options.metadata Optional metadata
-   * @param {boolean} options.sendActivationEmail Whether to send activation email
+   * @param {boolean} options.sendInvitationEmail Whether to send invitation email
    * @returns {Promise<CreateMembershipResponse>} The response with updated user
    */
   async createMembership(
@@ -180,7 +182,7 @@ export default class UserClient {
     options: {
       roles?: string[],
       metadata?: Record<string, string>,
-      sendActivationEmail?: boolean
+      sendInvitationEmail?: boolean
     } = {}
   ): Promise<CreateMembershipResponse> {
     const membership = new CreateMembership({
@@ -197,8 +199,8 @@ export default class UserClient {
       membership
     };
 
-    if (options.sendActivationEmail !== undefined) {
-      request.sendActivationEmail = options.sendActivationEmail;
+    if (options.sendInvitationEmail !== undefined) {
+      request.sendInvitationEmail = options.sendInvitationEmail;
     }
 
     return this.coreClient.connectExec(
@@ -286,6 +288,31 @@ export default class UserClient {
         pageSize: options?.pageSize,
         pageToken: options?.pageToken
       }
+    );
+  }
+
+  /**
+   * Resend an invitation to a user
+   * @param {string} organizationId The organization id
+   * @param {string} userId The user id
+   * @returns {Promise<ResendInviteResponse>} The response with the invite
+   */
+  async resendInvite(organizationId: string, userId: string): Promise<ResendInviteResponse> {
+    if (!organizationId) {
+      throw new Error('organizationId is required');
+    }
+    if (!userId) {
+      throw new Error('userId is required');
+    }
+
+    const request = new ResendInviteRequest({
+      organizationId,
+      id: userId
+    });
+
+    return this.coreClient.connectExec(
+      this.client.resendInvite,
+      request
     );
   }
 }
