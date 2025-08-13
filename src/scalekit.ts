@@ -12,6 +12,7 @@ import PasswordlessClient from './passwordless';
 import UserClient from './user';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse ,TokenValidationOptions } from './types/scalekit';
+import { WebhookVerificationError, ScalekitValidateTokenFailureException } from './errors/base-exception';
 
 const authorizeEndpoint = "oauth/authorize";
 const logoutEndpoint = "oidc/logout";
@@ -226,7 +227,7 @@ export default class ScalekitClient {
   }
 
   /**
-   * Verifies the payload of the webhook
+   * Verify webhook payload
    * 
    * @param {string} secret The secret
    * @param {Record<string, string>} headers The headers
@@ -237,25 +238,40 @@ export default class ScalekitClient {
     const webhookId = headers['webhook-id'];
     const webhookTimestamp = headers['webhook-timestamp'];
     const webhookSignature = headers['webhook-signature'];
+    
     if (!webhookId || !webhookTimestamp || !webhookSignature) {
-      throw new Error("Missing required headers");
+      throw new WebhookVerificationError("Missing required headers");
     }
-    const timestamp = this.verifyTimestamp(webhookTimestamp);
-    const data = `${webhookId}.${Math.floor(timestamp.getTime() / 1000)}.${payload}`;
-    const secretBytes = Buffer.from(secret.split("_")[1], 'base64');
-    const computedSignature = this.computeSignature(secretBytes, data);
-    const receivedSignatures = webhookSignature.split(" ");
-    for (const versionedSignature of receivedSignatures) {
-      const [version, signature] = versionedSignature.split(",");
-      if (version !== WEBHOOK_SIGNATURE_VERSION) {
-        continue;
-      }
-      if (crypto.timingSafeEqual(Buffer.from(signature, 'base64'), Buffer.from(computedSignature, 'base64'))) {
-        return true;
-      }
+    
+    const secretParts = secret.split("_");
+    if (secretParts.length < 2) {
+      throw new WebhookVerificationError("Invalid secret");
     }
+    
+    try {
+      const timestamp = this.verifyTimestamp(webhookTimestamp);
+      const data = `${webhookId}.${Math.floor(timestamp.getTime() / 1000)}.${payload}`;
+      const secretBytes = Buffer.from(secretParts[1], 'base64');
+      const computedSignature = this.computeSignature(secretBytes, data);
+      const receivedSignatures = webhookSignature.split(" ");
+      
+      for (const versionedSignature of receivedSignatures) {
+        const [version, signature] = versionedSignature.split(",");
+        if (version !== WEBHOOK_SIGNATURE_VERSION) {
+          continue;
+        }
+        if (crypto.timingSafeEqual(Buffer.from(signature, 'base64'), Buffer.from(computedSignature, 'base64'))) {
+          return true;
+        }
+      }
 
-    throw new Error("Invalid Signature");
+      throw new WebhookVerificationError("Invalid signature");
+    } catch (error) {
+      if (error instanceof WebhookVerificationError) {
+        throw error;
+      }
+      throw new WebhookVerificationError("Invalid signature");
+    }
   }
 
   /**
@@ -265,7 +281,7 @@ export default class ScalekitClient {
    * @param {string} token The token to be validated
    * @param {TokenValidationOptions} options Optional validation options for issuer, audience, and scopes
    * @return {Promise<T>} Returns the token payload if valid
-   * @throws {Error} If token is invalid or missing required scopes
+   * @throws {ScalekitValidateTokenFailureException} If token is invalid or missing required scopes
    */
   async validateToken<T>(token: string, options?: TokenValidationOptions): Promise<T> {
     await this.coreClient.getJwks();
@@ -283,8 +299,8 @@ export default class ScalekitClient {
       }
 
       return payload;
-    } catch (_) {
-      throw new Error("Invalid token");
+    } catch (error) {
+      throw new ScalekitValidateTokenFailureException(error);
     }
   }
 
@@ -294,7 +310,7 @@ export default class ScalekitClient {
    * @param {string} token The token to verify
    * @param {string[]} requiredScopes The scopes that must be present in the token
    * @return {boolean} Returns true if all required scopes are present
-   * @throws {Error} If required scopes are missing, with details about which scopes are missing
+   * @throws {ScalekitValidateTokenFailureException} If required scopes are missing, with details about which scopes are missing
    */
   verifyScopes(token: string, requiredScopes: string[]): boolean {
     const payload = jose.decodeJwt(token);
@@ -303,7 +319,7 @@ export default class ScalekitClient {
     const missingScopes = requiredScopes.filter(scope => !scopes.includes(scope));
     
     if (missingScopes.length > 0) {
-      throw new Error(`Token missing required scopes: ${missingScopes.join(', ')}`);
+      throw new ScalekitValidateTokenFailureException(`Token missing required scopes: ${missingScopes.join(', ')}`);
     }
     
     return true;
@@ -332,13 +348,13 @@ export default class ScalekitClient {
     const now = Math.floor(Date.now() / 1000);
     const timestamp = parseInt(timestampStr, 10);
     if (isNaN(timestamp)) {
-      throw new Error("Invalid timestamp");
+      throw new WebhookVerificationError("Invalid Signature Headers");
     }
     if (now - timestamp > WEBHOOK_TOLERANCE_IN_SECONDS) {
-      throw new Error("Message timestamp too old");
+      throw new WebhookVerificationError("Message timestamp too old");
     }
     if (timestamp > now + WEBHOOK_TOLERANCE_IN_SECONDS) {
-      throw new Error("Message timestamp too new");
+      throw new WebhookVerificationError("Message timestamp too new");
     }
 
     return new Date(timestamp * 1000);
