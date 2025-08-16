@@ -7,7 +7,7 @@ export interface CreateUserRequest {
     lastName?: string;
   };
   metadata?: Record<string, string>;
-  sendActivationEmail?: boolean;
+  sendInvitationEmail?: boolean;
 }
 
 export interface UpdateUserRequest {

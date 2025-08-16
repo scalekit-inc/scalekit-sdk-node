@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateMembershipRequest, CreateMembershipResponse, CreateUserAndMembershipRequest, CreateUserAndMembershipResponse, DeleteMembershipRequest, DeleteUserRequest, GetUserRequest, GetUserResponse, ListOrganizationUsersRequest, ListOrganizationUsersResponse, ListUsersRequest, ListUsersResponse, SearchOrganizationUsersRequest, SearchOrganizationUsersResponse, SearchUsersRequest, SearchUsersResponse, UpdateMembershipRequest, UpdateMembershipResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
+import { AssignUserRolesRequest, AssignUserRolesResponse, CreateMembershipRequest, CreateMembershipResponse, CreateUserAndMembershipRequest, CreateUserAndMembershipResponse, DeleteMembershipRequest, DeleteUserRequest, GetUserRequest, GetUserResponse, ListOrganizationUsersRequest, ListOrganizationUsersResponse, ListUserPermissionsRequest, ListUserPermissionsResponse, ListUserRolesRequest, ListUserRolesResponse, ListUsersRequest, ListUsersResponse, RemoveUserRoleRequest, ResendInviteRequest, ResendInviteResponse, SearchOrganizationUsersRequest, SearchOrganizationUsersResponse, SearchUsersRequest, SearchUsersResponse, UpdateMembershipRequest, UpdateMembershipResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -117,6 +117,53 @@ export const UserService = {
       name: "ListOrganizationUsers",
       I: ListOrganizationUsersRequest,
       O: ListOrganizationUsersResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.users.UserService.ResendInvite
+     */
+    resendInvite: {
+      name: "ResendInvite",
+      I: ResendInviteRequest,
+      O: ResendInviteResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * User Role Management
+     *
+     * @generated from rpc scalekit.v1.users.UserService.ListUserRoles
+     */
+    listUserRoles: {
+      name: "ListUserRoles",
+      I: ListUserRolesRequest,
+      O: ListUserRolesResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.users.UserService.AssignUserRoles
+     */
+    assignUserRoles: {
+      name: "AssignUserRoles",
+      I: AssignUserRolesRequest,
+      O: AssignUserRolesResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.users.UserService.RemoveUserRole
+     */
+    removeUserRole: {
+      name: "RemoveUserRole",
+      I: RemoveUserRoleRequest,
+      O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.users.UserService.ListUserPermissions
+     */
+    listUserPermissions: {
+      name: "ListUserPermissions",
+      I: ListUserPermissionsRequest,
+      O: ListUserPermissionsResponse,
       kind: MethodKind.Unary,
     },
   }

@@ -45,6 +45,11 @@ export class ErrorInfo extends Message<ErrorInfo> {
    */
   validationErrorInfo?: ValidationErrorInfo;
 
+  /**
+   * @generated from field: optional scalekit.v1.errdetails.ToolErrorInfo tool_error_info = 9;
+   */
+  toolErrorInfo?: ToolErrorInfo;
+
   constructor(data?: PartialMessage<ErrorInfo>) {
     super();
     proto3.util.initPartial(data, this);
@@ -60,6 +65,7 @@ export class ErrorInfo extends Message<ErrorInfo> {
     { no: 5, name: "resource_info", kind: "message", T: ResourceInfo, opt: true },
     { no: 6, name: "request_info", kind: "message", T: RequestInfo, opt: true },
     { no: 8, name: "validation_error_info", kind: "message", T: ValidationErrorInfo, opt: true },
+    { no: 9, name: "tool_error_info", kind: "message", T: ToolErrorInfo, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ErrorInfo {
@@ -456,6 +462,49 @@ export class LocalizedMessageInfo extends Message<LocalizedMessageInfo> {
 
   static equals(a: LocalizedMessageInfo | PlainMessage<LocalizedMessageInfo> | undefined, b: LocalizedMessageInfo | PlainMessage<LocalizedMessageInfo> | undefined): boolean {
     return proto3.util.equals(LocalizedMessageInfo, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.errdetails.ToolErrorInfo
+ */
+export class ToolErrorInfo extends Message<ToolErrorInfo> {
+  /**
+   * @generated from field: string execution_id = 1;
+   */
+  executionId = "";
+
+  /**
+   * @generated from field: string tool_message = 2;
+   */
+  toolMessage = "";
+
+  constructor(data?: PartialMessage<ToolErrorInfo>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.errdetails.ToolErrorInfo";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "execution_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "tool_message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ToolErrorInfo {
+    return new ToolErrorInfo().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ToolErrorInfo {
+    return new ToolErrorInfo().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ToolErrorInfo {
+    return new ToolErrorInfo().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ToolErrorInfo | PlainMessage<ToolErrorInfo> | undefined, b: ToolErrorInfo | PlainMessage<ToolErrorInfo> | undefined): boolean {
+    return proto3.util.equals(ToolErrorInfo, a, b);
   }
 }
 

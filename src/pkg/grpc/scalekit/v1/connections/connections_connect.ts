@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetConnectionTestResultRequest, GetConnectionTestResultResponse, GetEnvironmentConnectionRequest, GetProvidersRequest, GetProvidersResponse, ListConnectionsRequest, ListConnectionsResponse, ListOrganizationConnectionsRequest, ListOrganizationConnectionsResponse, SearchOrganizationConnectionsRequest, SearchOrganizationConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
+import { AssignDomainsToConnectionRequest, AssignDomainsToConnectionResponse, CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetConnectionTestResultRequest, GetConnectionTestResultResponse, GetEnvironmentConnectionRequest, ListAppConnectionsRequest, ListAppConnectionsResponse, ListConnectionsRequest, ListConnectionsResponse, ListOrganizationConnectionsRequest, ListOrganizationConnectionsResponse, SearchOrganizationConnectionsRequest, SearchOrganizationConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -12,15 +12,6 @@ import { Empty, MethodKind } from "@bufbuild/protobuf";
 export const ConnectionService = {
   typeName: "scalekit.v1.connections.ConnectionService",
   methods: {
-    /**
-     * @generated from rpc scalekit.v1.connections.ConnectionService.GetProviders
-     */
-    getProviders: {
-      name: "GetProviders",
-      I: GetProvidersRequest,
-      O: GetProvidersResponse,
-      kind: MethodKind.Unary,
-    },
     /**
      * @generated from rpc scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection
      */
@@ -37,6 +28,15 @@ export const ConnectionService = {
       name: "CreateConnection",
       I: CreateConnectionRequest,
       O: CreateConnectionResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.AssignDomainsToConnection
+     */
+    assignDomainsToConnection: {
+      name: "AssignDomainsToConnection",
+      I: AssignDomainsToConnectionRequest,
+      O: AssignDomainsToConnectionResponse,
       kind: MethodKind.Unary,
     },
     /**
@@ -163,6 +163,15 @@ export const ConnectionService = {
       name: "GetConnectionTestResult",
       I: GetConnectionTestResultRequest,
       O: GetConnectionTestResultResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.ListAppConnections
+     */
+    listAppConnections: {
+      name: "ListAppConnections",
+      I: ListAppConnectionsRequest,
+      O: ListAppConnectionsResponse,
       kind: MethodKind.Unary,
     },
   }

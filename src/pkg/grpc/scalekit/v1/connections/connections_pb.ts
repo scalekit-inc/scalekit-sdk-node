@@ -4,7 +4,8 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { BoolValue, Message, proto3, protoInt64, StringValue, Timestamp, UInt32Value } from "@bufbuild/protobuf";
+import { BoolValue, Message, proto3, protoInt64, StringValue, Struct, Timestamp, UInt32Value } from "@bufbuild/protobuf";
+import { Domain } from "../domains/domains_pb.js";
 
 /**
  * @generated from enum scalekit.v1.connections.CodeChallengeType
@@ -329,6 +330,21 @@ export enum ConnectionType {
    * @generated from enum value: PASSWORDLESS = 5;
    */
   PASSWORDLESS = 5,
+
+  /**
+   * @generated from enum value: BASIC = 6;
+   */
+  BASIC = 6,
+
+  /**
+   * @generated from enum value: BEARER = 7;
+   */
+  BEARER = 7,
+
+  /**
+   * @generated from enum value: API_KEY = 8;
+   */
+  API_KEY = 8,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ConnectionType)
 proto3.util.setEnumType(ConnectionType, "scalekit.v1.connections.ConnectionType", [
@@ -338,6 +354,9 @@ proto3.util.setEnumType(ConnectionType, "scalekit.v1.connections.ConnectionType"
   { no: 3, name: "PASSWORD" },
   { no: 4, name: "OAUTH" },
   { no: 5, name: "PASSWORDLESS" },
+  { no: 6, name: "BASIC" },
+  { no: 7, name: "BEARER" },
+  { no: 8, name: "API_KEY" },
 ]);
 
 /**
@@ -483,6 +502,92 @@ proto3.util.setEnumType(ConnectionProvider, "scalekit.v1.connections.ConnectionP
 ]);
 
 /**
+ * @generated from message scalekit.v1.connections.AssignDomainsToConnectionRequest
+ */
+export class AssignDomainsToConnectionRequest extends Message<AssignDomainsToConnectionRequest> {
+  /**
+   * @generated from field: string organization_id = 1;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: string connection_id = 2;
+   */
+  connectionId = "";
+
+  /**
+   * @generated from field: repeated string domain_ids = 3;
+   */
+  domainIds: string[] = [];
+
+  constructor(data?: PartialMessage<AssignDomainsToConnectionRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.AssignDomainsToConnectionRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "domain_ids", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignDomainsToConnectionRequest {
+    return new AssignDomainsToConnectionRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionRequest {
+    return new AssignDomainsToConnectionRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionRequest {
+    return new AssignDomainsToConnectionRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AssignDomainsToConnectionRequest | PlainMessage<AssignDomainsToConnectionRequest> | undefined, b: AssignDomainsToConnectionRequest | PlainMessage<AssignDomainsToConnectionRequest> | undefined): boolean {
+    return proto3.util.equals(AssignDomainsToConnectionRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.AssignDomainsToConnectionResponse
+ */
+export class AssignDomainsToConnectionResponse extends Message<AssignDomainsToConnectionResponse> {
+  /**
+   * @generated from field: scalekit.v1.connections.Connection connection = 1;
+   */
+  connection?: Connection;
+
+  constructor(data?: PartialMessage<AssignDomainsToConnectionResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.AssignDomainsToConnectionResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "connection", kind: "message", T: Connection },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignDomainsToConnectionResponse {
+    return new AssignDomainsToConnectionResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionResponse {
+    return new AssignDomainsToConnectionResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionResponse {
+    return new AssignDomainsToConnectionResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AssignDomainsToConnectionResponse | PlainMessage<AssignDomainsToConnectionResponse> | undefined, b: AssignDomainsToConnectionResponse | PlainMessage<AssignDomainsToConnectionResponse> | undefined): boolean {
+    return proto3.util.equals(AssignDomainsToConnectionResponse, a, b);
+  }
+}
+
+/**
  * @generated from message scalekit.v1.connections.GetProvidersRequest
  */
 export class GetProvidersRequest extends Message<GetProvidersRequest> {
@@ -608,6 +713,11 @@ export class CreateEnvironmentConnectionRequest extends Message<CreateEnvironmen
    */
   connection?: CreateConnection;
 
+  /**
+   * @generated from field: optional scalekit.v1.connections.Flags flags = 2;
+   */
+  flags?: Flags;
+
   constructor(data?: PartialMessage<CreateEnvironmentConnectionRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -617,6 +727,7 @@ export class CreateEnvironmentConnectionRequest extends Message<CreateEnvironmen
   static readonly typeName = "scalekit.v1.connections.CreateEnvironmentConnectionRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "connection", kind: "message", T: CreateConnection },
+    { no: 2, name: "flags", kind: "message", T: Flags, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateEnvironmentConnectionRequest {
@@ -693,6 +804,16 @@ export class CreateConnection extends Message<CreateConnection> {
    */
   type = ConnectionType.INVALID;
 
+  /**
+   * @generated from field: string provider_key = 3;
+   */
+  providerKey = "";
+
+  /**
+   * @generated from field: optional string key_id = 4;
+   */
+  keyId?: string;
+
   constructor(data?: PartialMessage<CreateConnection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -703,6 +824,8 @@ export class CreateConnection extends Message<CreateConnection> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "provider", kind: "enum", T: proto3.getEnumType(ConnectionProvider) },
     { no: 2, name: "type", kind: "enum", T: proto3.getEnumType(ConnectionType) },
+    { no: 3, name: "provider_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateConnection {
@@ -818,12 +941,28 @@ export class Connection extends Message<Connection> {
      */
     value: PasswordLessConfig;
     case: "passwordlessConfig";
+  } | {
+    /**
+     * @generated from field: scalekit.v1.connections.StaticAuthConfig static_config = 26;
+     */
+    value: StaticAuthConfig;
+    case: "staticConfig";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   /**
-   * @generated from field: optional string key_id = 21;
+   * @generated from field: optional string key_id = 25;
    */
   keyId?: string;
+
+  /**
+   * @generated from field: string provider_key = 23;
+   */
+  providerKey = "";
+
+  /**
+   * @generated from field: repeated scalekit.v1.domains.Domain domains = 24;
+   */
+  domains: Domain[] = [];
 
   constructor(data?: PartialMessage<Connection>) {
     super();
@@ -850,7 +989,10 @@ export class Connection extends Message<Connection> {
     { no: 19, name: "saml_config", kind: "message", T: SAMLConnectionConfigResponse, oneof: "settings" },
     { no: 20, name: "oauth_config", kind: "message", T: OAuthConnectionConfig, oneof: "settings" },
     { no: 22, name: "passwordless_config", kind: "message", T: PasswordLessConfig, oneof: "settings" },
-    { no: 21, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 26, name: "static_config", kind: "message", T: StaticAuthConfig, oneof: "settings" },
+    { no: 25, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 23, name: "provider_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 24, name: "domains", kind: "message", T: Domain, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Connection {
@@ -1060,12 +1202,23 @@ export class UpdateConnection extends Message<UpdateConnection> {
      */
     value: PasswordLessConfig;
     case: "passwordlessConfig";
+  } | {
+    /**
+     * @generated from field: scalekit.v1.connections.StaticAuthConfig static_config = 23;
+     */
+    value: StaticAuthConfig;
+    case: "staticConfig";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   /**
-   * @generated from field: optional string key_id = 19;
+   * @generated from field: optional string key_id = 22;
    */
   keyId?: string;
+
+  /**
+   * @generated from field: string provider_key = 21;
+   */
+  providerKey = "";
 
   constructor(data?: PartialMessage<UpdateConnection>) {
     super();
@@ -1085,7 +1238,9 @@ export class UpdateConnection extends Message<UpdateConnection> {
     { no: 17, name: "saml_config", kind: "message", T: SAMLConnectionConfigRequest, oneof: "settings" },
     { no: 18, name: "oauth_config", kind: "message", T: OAuthConnectionConfig, oneof: "settings" },
     { no: 20, name: "passwordless_config", kind: "message", T: PasswordLessConfig, oneof: "settings" },
-    { no: 19, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 23, name: "static_config", kind: "message", T: StaticAuthConfig, oneof: "settings" },
+    { no: 22, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 21, name: "provider_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnection {
@@ -1474,6 +1629,21 @@ export class ListConnection extends Message<ListConnection> {
    */
   organizationName = "";
 
+  /**
+   * @generated from field: string provider_key = 10;
+   */
+  providerKey = "";
+
+  /**
+   * @generated from field: string key_id = 11;
+   */
+  keyId = "";
+
+  /**
+   * @generated from field: google.protobuf.Timestamp created_at = 12;
+   */
+  createdAt?: Timestamp;
+
   constructor(data?: PartialMessage<ListConnection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1491,6 +1661,9 @@ export class ListConnection extends Message<ListConnection> {
     { no: 7, name: "ui_button_title", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "domains", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 9, name: "organization_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: "provider_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 11, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 12, name: "created_at", kind: "message", T: Timestamp },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListConnection {
@@ -1618,9 +1791,9 @@ export class SearchOrganizationConnectionsRequest extends Message<SearchOrganiza
   query?: string;
 
   /**
-   * @generated from field: optional scalekit.v1.connections.ConnectionProvider provider = 2;
+   * @generated from field: optional string provider = 2;
    */
-  provider?: ConnectionProvider;
+  provider?: string;
 
   /**
    * @generated from field: optional scalekit.v1.connections.ConnectionStatus status = 3;
@@ -1631,6 +1804,11 @@ export class SearchOrganizationConnectionsRequest extends Message<SearchOrganiza
    * @generated from field: optional scalekit.v1.connections.ConnectionType connection_type = 4;
    */
   connectionType?: ConnectionType;
+
+  /**
+   * @generated from field: optional bool enabled = 7;
+   */
+  enabled?: boolean;
 
   /**
    * @generated from field: uint32 page_size = 5;
@@ -1651,9 +1829,10 @@ export class SearchOrganizationConnectionsRequest extends Message<SearchOrganiza
   static readonly typeName = "scalekit.v1.connections.SearchOrganizationConnectionsRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "query", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 2, name: "provider", kind: "enum", T: proto3.getEnumType(ConnectionProvider), opt: true },
+    { no: 2, name: "provider", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 3, name: "status", kind: "enum", T: proto3.getEnumType(ConnectionStatus), opt: true },
     { no: 4, name: "connection_type", kind: "enum", T: proto3.getEnumType(ConnectionType), opt: true },
+    { no: 7, name: "enabled", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
     { no: 5, name: "page_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 6, name: "page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
@@ -2028,6 +2207,11 @@ export class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
    */
   usePlatformCreds?: boolean;
 
+  /**
+   * @generated from field: google.protobuf.StringValue access_type = 16;
+   */
+  accessType?: string;
+
   constructor(data?: PartialMessage<OAuthConnectionConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2046,6 +2230,7 @@ export class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
     { no: 13, name: "pkce_enabled", kind: "message", T: BoolValue },
     { no: 14, name: "prompt", kind: "message", T: StringValue },
     { no: 15, name: "use_platform_creds", kind: "message", T: BoolValue },
+    { no: 16, name: "access_type", kind: "message", T: StringValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OAuthConnectionConfig {
@@ -2099,6 +2284,11 @@ export class PasswordLessConfig extends Message<PasswordLessConfig> {
    */
   codeChallengeType?: CodeChallengeType;
 
+  /**
+   * @generated from field: optional google.protobuf.BoolValue regenerate_passwordless_credentials_on_resend = 7;
+   */
+  regeneratePasswordlessCredentialsOnResend?: boolean;
+
   constructor(data?: PartialMessage<PasswordLessConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2113,6 +2303,7 @@ export class PasswordLessConfig extends Message<PasswordLessConfig> {
     { no: 4, name: "enforce_same_browser_origin", kind: "message", T: BoolValue, opt: true },
     { no: 5, name: "code_challenge_length", kind: "message", T: UInt32Value, opt: true },
     { no: 6, name: "code_challenge_type", kind: "enum", T: proto3.getEnumType(CodeChallengeType), opt: true },
+    { no: 7, name: "regenerate_passwordless_credentials_on_resend", kind: "message", T: BoolValue, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PasswordLessConfig {
@@ -2129,6 +2320,43 @@ export class PasswordLessConfig extends Message<PasswordLessConfig> {
 
   static equals(a: PasswordLessConfig | PlainMessage<PasswordLessConfig> | undefined, b: PasswordLessConfig | PlainMessage<PasswordLessConfig> | undefined): boolean {
     return proto3.util.equals(PasswordLessConfig, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.StaticAuthConfig
+ */
+export class StaticAuthConfig extends Message<StaticAuthConfig> {
+  /**
+   * @generated from field: google.protobuf.Struct static_config = 1;
+   */
+  staticConfig?: Struct;
+
+  constructor(data?: PartialMessage<StaticAuthConfig>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.StaticAuthConfig";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "static_config", kind: "message", T: Struct },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StaticAuthConfig {
+    return new StaticAuthConfig().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StaticAuthConfig {
+    return new StaticAuthConfig().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StaticAuthConfig {
+    return new StaticAuthConfig().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: StaticAuthConfig | PlainMessage<StaticAuthConfig> | undefined, b: StaticAuthConfig | PlainMessage<StaticAuthConfig> | undefined): boolean {
+    return proto3.util.equals(StaticAuthConfig, a, b);
   }
 }
 
@@ -3026,6 +3254,147 @@ export class PasswordConnectionConfig extends Message<PasswordConnectionConfig> 
 
   static equals(a: PasswordConnectionConfig | PlainMessage<PasswordConnectionConfig> | undefined, b: PasswordConnectionConfig | PlainMessage<PasswordConnectionConfig> | undefined): boolean {
     return proto3.util.equals(PasswordConnectionConfig, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.Flags
+ */
+export class Flags extends Message<Flags> {
+  /**
+   * @generated from field: bool is_login = 1;
+   */
+  isLogin = false;
+
+  /**
+   * @generated from field: bool is_app = 2;
+   */
+  isApp = false;
+
+  constructor(data?: PartialMessage<Flags>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.Flags";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "is_login", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 2, name: "is_app", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Flags {
+    return new Flags().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Flags {
+    return new Flags().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Flags {
+    return new Flags().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Flags | PlainMessage<Flags> | undefined, b: Flags | PlainMessage<Flags> | undefined): boolean {
+    return proto3.util.equals(Flags, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.ListAppConnectionsRequest
+ */
+export class ListAppConnectionsRequest extends Message<ListAppConnectionsRequest> {
+  /**
+   * @generated from field: uint32 page_size = 1;
+   */
+  pageSize = 0;
+
+  /**
+   * @generated from field: string page_token = 2;
+   */
+  pageToken = "";
+
+  constructor(data?: PartialMessage<ListAppConnectionsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.ListAppConnectionsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "page_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+    { no: 2, name: "page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAppConnectionsRequest {
+    return new ListAppConnectionsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAppConnectionsRequest {
+    return new ListAppConnectionsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAppConnectionsRequest {
+    return new ListAppConnectionsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListAppConnectionsRequest | PlainMessage<ListAppConnectionsRequest> | undefined, b: ListAppConnectionsRequest | PlainMessage<ListAppConnectionsRequest> | undefined): boolean {
+    return proto3.util.equals(ListAppConnectionsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.ListAppConnectionsResponse
+ */
+export class ListAppConnectionsResponse extends Message<ListAppConnectionsResponse> {
+  /**
+   * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 1;
+   */
+  connections: ListConnection[] = [];
+
+  /**
+   * @generated from field: string next_page_token = 2;
+   */
+  nextPageToken = "";
+
+  /**
+   * @generated from field: string prev_page_token = 3;
+   */
+  prevPageToken = "";
+
+  /**
+   * @generated from field: uint32 total_size = 4;
+   */
+  totalSize = 0;
+
+  constructor(data?: PartialMessage<ListAppConnectionsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.ListAppConnectionsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "connections", kind: "message", T: ListConnection, repeated: true },
+    { no: 2, name: "next_page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "prev_page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "total_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAppConnectionsResponse {
+    return new ListAppConnectionsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAppConnectionsResponse {
+    return new ListAppConnectionsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAppConnectionsResponse {
+    return new ListAppConnectionsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListAppConnectionsResponse | PlainMessage<ListAppConnectionsResponse> | undefined, b: ListAppConnectionsResponse | PlainMessage<ListAppConnectionsResponse> | undefined): boolean {
+    return proto3.util.equals(ListAppConnectionsResponse, a, b);
   }
 }
 
