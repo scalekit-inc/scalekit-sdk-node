@@ -1,7 +1,7 @@
 import { Empty } from '@bufbuild/protobuf';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
+import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
 import { CreateUserRequest, UpdateUserRequest as UpdateUserRequestType } from './types/user';
 export default class UserClient {
     private readonly grpcConnect;
@@ -52,13 +52,13 @@ export default class UserClient {
      * @param {object} options The membership options
      * @param {string[]} options.roles The roles to assign
      * @param {Record<string, string>} options.metadata Optional metadata
-     * @param {boolean} options.sendActivationEmail Whether to send activation email
+     * @param {boolean} options.sendInvitationEmail Whether to send invitation email
      * @returns {Promise<CreateMembershipResponse>} The response with updated user
      */
     createMembership(organizationId: string, userId: string, options?: {
         roles?: string[];
         metadata?: Record<string, string>;
-        sendActivationEmail?: boolean;
+        sendInvitationEmail?: boolean;
     }): Promise<CreateMembershipResponse>;
     /**
      * Delete a user's membership from an organization
@@ -92,4 +92,11 @@ export default class UserClient {
         pageSize?: number;
         pageToken?: string;
     }): Promise<ListOrganizationUsersResponse>;
+    /**
+     * Resend an invitation to a user
+     * @param {string} organizationId The organization id
+     * @param {string} userId The user id
+     * @returns {Promise<ResendInviteResponse>} The response with the invite
+     */
+    resendInvite(organizationId: string, userId: string): Promise<ResendInviteResponse>;
 }
