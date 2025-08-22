@@ -4,8 +4,8 @@ import { JWK } from 'jose';
 import os from "os";
 import QueryString from "qs";
 import { GrantType } from './types/scalekit';
-import { ErrorInfo } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
 import { TokenResponse } from './types/auth';
+import { ScalekitException, ScalekitServerException } from './errors/base-exception';
 
 export const headers = {
   "user-agent": "user-agent",
@@ -81,7 +81,7 @@ export default class CoreClient {
   }
 
   /**
-   * 
+   * Execute a function with error handling and retry logic
    * @param fn Function to execute
    * @param data Data to pass to the function
    * @param retryLeft Number of retries left
@@ -96,39 +96,38 @@ export default class CoreClient {
       const res = await fn(data);
       return res;
     } catch (error) {
-      if (retryLeft > 0) {
-        let isUnAuthenticatedError = false;
-        if (error instanceof AxiosError) {
-          if (error.status == HttpStatusCode.Unauthorized) {
-            isUnAuthenticatedError = true;
-          } else {
-            throw new Error(error.message);
+      // Handle gRPC Connect errors 
+      if (error instanceof ConnectError) {
+        if (retryLeft > 0) {
+          const serverException = new ScalekitServerException(error);
+          if (serverException.httpStatus === 401) {
+            await this.authenticateClient();
+            return this.connectExec(fn, data, retryLeft - 1);
           }
         }
-        // ConnectError is a custom error class that extends Error class and has a code property
-        if (error instanceof ConnectError) {
-          if (error.code == Code.Unauthenticated) {
-            isUnAuthenticatedError = true;
+        throw ScalekitServerException.promote(error);
+      }
+      // Handle HTTP/Axios errors
+      if (error instanceof AxiosError) {
+        if (error.response) {
+          if (retryLeft > 0) {
+            const serverException = new ScalekitServerException(error.response);
+            if (serverException.httpStatus === 401) {
+              await this.authenticateClient();
+              return this.connectExec(fn, data, retryLeft - 1);
+            }
           }
-          if (error.code == Code.InvalidArgument) {
-            const messages = [error.message]
-            error.findDetails(ErrorInfo).forEach((detail) => {
-              if (detail.validationErrorInfo) {
-                detail.validationErrorInfo.fieldViolations.forEach((fv) => {
-                  messages.push(`${fv.field}: ${fv.description}`)
-                })
-              }
-            })
-
-            throw new Error(messages.join("\n"));
-          }
-        }
-        if (isUnAuthenticatedError) {
-          await this.authenticateClient();
-          return this.connectExec(fn, data, retryLeft - 1);
+          throw ScalekitServerException.promote(error.response);
+        } else {
+          throw new ScalekitException(error);
         }
       }
-      throw error;
+      // Handle existing ScalekitException instances
+      if (error instanceof ScalekitException) {
+        throw error;
+      }
+      // Handle generic errors
+      throw new ScalekitException(error);
     }
   }
 }
