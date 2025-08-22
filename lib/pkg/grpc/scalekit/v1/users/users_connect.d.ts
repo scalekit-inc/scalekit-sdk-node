@@ -1,4 +1,4 @@
-import { CreateMembershipRequest, CreateMembershipResponse, CreateUserAndMembershipRequest, CreateUserAndMembershipResponse, DeleteMembershipRequest, DeleteUserRequest, GetUserRequest, GetUserResponse, ListOrganizationUsersRequest, ListOrganizationUsersResponse, ListUsersRequest, ListUsersResponse, SearchOrganizationUsersRequest, SearchOrganizationUsersResponse, SearchUsersRequest, SearchUsersResponse, UpdateMembershipRequest, UpdateMembershipResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
+import { AssignUserRolesRequest, AssignUserRolesResponse, CreateMembershipRequest, CreateMembershipResponse, CreateUserAndMembershipRequest, CreateUserAndMembershipResponse, DeleteMembershipRequest, DeleteUserRequest, GetUserRequest, GetUserResponse, ListOrganizationUsersRequest, ListOrganizationUsersResponse, ListUserPermissionsRequest, ListUserPermissionsResponse, ListUserRolesRequest, ListUserRolesResponse, ListUsersRequest, ListUsersResponse, RemoveUserRoleRequest, ResendInviteRequest, ResendInviteResponse, SearchOrganizationUsersRequest, SearchOrganizationUsersResponse, SearchUsersRequest, SearchUsersResponse, UpdateMembershipRequest, UpdateMembershipResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.users.UserService
@@ -111,6 +111,53 @@ export declare const UserService: {
             readonly name: "ListOrganizationUsers";
             readonly I: typeof ListOrganizationUsersRequest;
             readonly O: typeof ListOrganizationUsersResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.users.UserService.ResendInvite
+         */
+        readonly resendInvite: {
+            readonly name: "ResendInvite";
+            readonly I: typeof ResendInviteRequest;
+            readonly O: typeof ResendInviteResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * User Role Management
+         *
+         * @generated from rpc scalekit.v1.users.UserService.ListUserRoles
+         */
+        readonly listUserRoles: {
+            readonly name: "ListUserRoles";
+            readonly I: typeof ListUserRolesRequest;
+            readonly O: typeof ListUserRolesResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.users.UserService.AssignUserRoles
+         */
+        readonly assignUserRoles: {
+            readonly name: "AssignUserRoles";
+            readonly I: typeof AssignUserRolesRequest;
+            readonly O: typeof AssignUserRolesResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.users.UserService.RemoveUserRole
+         */
+        readonly removeUserRole: {
+            readonly name: "RemoveUserRole";
+            readonly I: typeof RemoveUserRoleRequest;
+            readonly O: typeof Empty;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.users.UserService.ListUserPermissions
+         */
+        readonly listUserPermissions: {
+            readonly name: "ListUserPermissions";
+            readonly I: typeof ListUserPermissionsRequest;
+            readonly O: typeof ListUserPermissionsResponse;
             readonly kind: MethodKind.Unary;
         };
     };

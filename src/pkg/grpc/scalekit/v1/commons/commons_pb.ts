@@ -36,13 +36,13 @@ proto3.util.setEnumType(RegionCode, "scalekit.v1.commons.RegionCode", [
 ]);
 
 /**
- * @generated from enum scalekit.v1.commons.UserStatus
+ * @generated from enum scalekit.v1.commons.MembershipStatus
  */
-export enum UserStatus {
+export enum MembershipStatus {
   /**
-   * @generated from enum value: USER_STATUS_UNSPECIFIED = 0;
+   * @generated from enum value: Membership_Status_UNSPECIFIED = 0;
    */
-  USER_STATUS_UNSPECIFIED = 0,
+  Membership_Status_UNSPECIFIED = 0,
 
   /**
    * @generated from enum value: ACTIVE = 1;
@@ -55,132 +55,22 @@ export enum UserStatus {
   INACTIVE = 2,
 
   /**
-   * @generated from enum value: INVITED = 3;
+   * @generated from enum value: PENDING_INVITE = 3;
    */
-  INVITED = 3,
+  PENDING_INVITE = 3,
 
   /**
-   * @generated from enum value: PENDING = 4;
+   * @generated from enum value: INVITE_EXPIRED = 4;
    */
-  PENDING = 4,
+  INVITE_EXPIRED = 4,
 }
-// Retrieve enum metadata with: proto3.getEnumType(UserStatus)
-proto3.util.setEnumType(UserStatus, "scalekit.v1.commons.UserStatus", [
-  { no: 0, name: "USER_STATUS_UNSPECIFIED" },
+// Retrieve enum metadata with: proto3.getEnumType(MembershipStatus)
+proto3.util.setEnumType(MembershipStatus, "scalekit.v1.commons.MembershipStatus", [
+  { no: 0, name: "Membership_Status_UNSPECIFIED" },
   { no: 1, name: "ACTIVE" },
   { no: 2, name: "INACTIVE" },
-  { no: 3, name: "INVITED" },
-  { no: 4, name: "PENDING" },
-]);
-
-/**
- * @generated from enum scalekit.v1.commons.IdentityProviderType
- */
-export enum IdentityProviderType {
-  /**
-   * @generated from enum value: IDENTITY_PROVIDER_UNSPECIFIED = 0;
-   */
-  IDENTITY_PROVIDER_UNSPECIFIED = 0,
-
-  /**
-   * @generated from enum value: OKTA = 1;
-   */
-  OKTA = 1,
-
-  /**
-   * @generated from enum value: GOOGLE = 2;
-   */
-  GOOGLE = 2,
-
-  /**
-   * @generated from enum value: MICROSOFT_AD = 3;
-   */
-  MICROSOFT_AD = 3,
-
-  /**
-   * @generated from enum value: AUTH0 = 4;
-   */
-  AUTH0 = 4,
-
-  /**
-   * @generated from enum value: ONELOGIN = 5;
-   */
-  ONELOGIN = 5,
-
-  /**
-   * @generated from enum value: PING_IDENTITY = 6;
-   */
-  PING_IDENTITY = 6,
-
-  /**
-   * @generated from enum value: JUMPCLOUD = 7;
-   */
-  JUMPCLOUD = 7,
-
-  /**
-   * @generated from enum value: CUSTOM = 8;
-   */
-  CUSTOM = 8,
-
-  /**
-   * @generated from enum value: GITHUB = 9;
-   */
-  GITHUB = 9,
-
-  /**
-   * @generated from enum value: GITLAB = 10;
-   */
-  GITLAB = 10,
-
-  /**
-   * @generated from enum value: LINKEDIN = 11;
-   */
-  LINKEDIN = 11,
-
-  /**
-   * @generated from enum value: SALESFORCE = 12;
-   */
-  SALESFORCE = 12,
-
-  /**
-   * @generated from enum value: MICROSOFT = 13;
-   */
-  MICROSOFT = 13,
-
-  /**
-   * @generated from enum value: IDP_SIMULATOR = 14;
-   */
-  IDP_SIMULATOR = 14,
-
-  /**
-   * @generated from enum value: SCALEKIT = 15;
-   */
-  SCALEKIT = 15,
-
-  /**
-   * @generated from enum value: ADFS = 16;
-   */
-  ADFS = 16,
-}
-// Retrieve enum metadata with: proto3.getEnumType(IdentityProviderType)
-proto3.util.setEnumType(IdentityProviderType, "scalekit.v1.commons.IdentityProviderType", [
-  { no: 0, name: "IDENTITY_PROVIDER_UNSPECIFIED" },
-  { no: 1, name: "OKTA" },
-  { no: 2, name: "GOOGLE" },
-  { no: 3, name: "MICROSOFT_AD" },
-  { no: 4, name: "AUTH0" },
-  { no: 5, name: "ONELOGIN" },
-  { no: 6, name: "PING_IDENTITY" },
-  { no: 7, name: "JUMPCLOUD" },
-  { no: 8, name: "CUSTOM" },
-  { no: 9, name: "GITHUB" },
-  { no: 10, name: "GITLAB" },
-  { no: 11, name: "LINKEDIN" },
-  { no: 12, name: "SALESFORCE" },
-  { no: 13, name: "MICROSOFT" },
-  { no: 14, name: "IDP_SIMULATOR" },
-  { no: 15, name: "SCALEKIT" },
-  { no: 16, name: "ADFS" },
+  { no: 3, name: "PENDING_INVITE" },
+  { no: 4, name: "INVITE_EXPIRED" },
 ]);
 
 /**
@@ -198,9 +88,9 @@ export class OrganizationMembership extends Message<OrganizationMembership> {
   joinTime?: Timestamp;
 
   /**
-   * @generated from field: scalekit.v1.commons.UserStatus membership_status = 3;
+   * @generated from field: scalekit.v1.commons.MembershipStatus membership_status = 3;
    */
-  membershipStatus = UserStatus.USER_STATUS_UNSPECIFIED;
+  membershipStatus = MembershipStatus.Membership_Status_UNSPECIFIED;
 
   /**
    * @generated from field: repeated scalekit.v1.commons.Role roles = 4;
@@ -213,14 +103,34 @@ export class OrganizationMembership extends Message<OrganizationMembership> {
   name?: string;
 
   /**
-   * @generated from field: scalekit.v1.commons.IdentityProviderType primary_identity_provider = 6;
-   */
-  primaryIdentityProvider = IdentityProviderType.IDENTITY_PROVIDER_UNSPECIFIED;
-
-  /**
    * @generated from field: map<string, string> metadata = 7;
    */
   metadata: { [key: string]: string } = {};
+
+  /**
+   * @generated from field: optional string display_name = 9;
+   */
+  displayName?: string;
+
+  /**
+   * @generated from field: optional string invited_by = 10;
+   */
+  invitedBy?: string;
+
+  /**
+   * @generated from field: optional google.protobuf.Timestamp created_at = 11;
+   */
+  createdAt?: Timestamp;
+
+  /**
+   * @generated from field: optional google.protobuf.Timestamp accepted_at = 12;
+   */
+  acceptedAt?: Timestamp;
+
+  /**
+   * @generated from field: optional google.protobuf.Timestamp expires_at = 13;
+   */
+  expiresAt?: Timestamp;
 
   constructor(data?: PartialMessage<OrganizationMembership>) {
     super();
@@ -232,11 +142,15 @@ export class OrganizationMembership extends Message<OrganizationMembership> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "join_time", kind: "message", T: Timestamp },
-    { no: 3, name: "membership_status", kind: "enum", T: proto3.getEnumType(UserStatus) },
+    { no: 3, name: "membership_status", kind: "enum", T: proto3.getEnumType(MembershipStatus) },
     { no: 4, name: "roles", kind: "message", T: Role, repeated: true },
     { no: 5, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 6, name: "primary_identity_provider", kind: "enum", T: proto3.getEnumType(IdentityProviderType) },
     { no: 7, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
+    { no: 9, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 10, name: "invited_by", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 11, name: "created_at", kind: "message", T: Timestamp, opt: true },
+    { no: 12, name: "accepted_at", kind: "message", T: Timestamp, opt: true },
+    { no: 13, name: "expires_at", kind: "message", T: Timestamp, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationMembership {
@@ -270,6 +184,11 @@ export class Role extends Message<Role> {
    */
   name = "";
 
+  /**
+   * @generated from field: string display_name = 3;
+   */
+  displayName = "";
+
   constructor(data?: PartialMessage<Role>) {
     super();
     proto3.util.initPartial(data, this);
@@ -280,6 +199,7 @@ export class Role extends Message<Role> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Role {

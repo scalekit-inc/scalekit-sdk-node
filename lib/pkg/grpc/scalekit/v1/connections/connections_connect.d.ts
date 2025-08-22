@@ -1,4 +1,4 @@
-import { CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetConnectionTestResultRequest, GetConnectionTestResultResponse, GetEnvironmentConnectionRequest, GetProvidersRequest, GetProvidersResponse, ListConnectionsRequest, ListConnectionsResponse, ListOrganizationConnectionsRequest, ListOrganizationConnectionsResponse, SearchOrganizationConnectionsRequest, SearchOrganizationConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
+import { AssignDomainsToConnectionRequest, AssignDomainsToConnectionResponse, CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetConnectionTestResultRequest, GetConnectionTestResultResponse, GetEnvironmentConnectionRequest, ListAppConnectionsRequest, ListAppConnectionsResponse, ListConnectionsRequest, ListConnectionsResponse, ListOrganizationConnectionsRequest, ListOrganizationConnectionsResponse, SearchOrganizationConnectionsRequest, SearchOrganizationConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.connections.ConnectionService
@@ -6,15 +6,6 @@ import { Empty, MethodKind } from "@bufbuild/protobuf";
 export declare const ConnectionService: {
     readonly typeName: "scalekit.v1.connections.ConnectionService";
     readonly methods: {
-        /**
-         * @generated from rpc scalekit.v1.connections.ConnectionService.GetProviders
-         */
-        readonly getProviders: {
-            readonly name: "GetProviders";
-            readonly I: typeof GetProvidersRequest;
-            readonly O: typeof GetProvidersResponse;
-            readonly kind: MethodKind.Unary;
-        };
         /**
          * @generated from rpc scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection
          */
@@ -31,6 +22,15 @@ export declare const ConnectionService: {
             readonly name: "CreateConnection";
             readonly I: typeof CreateConnectionRequest;
             readonly O: typeof CreateConnectionResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.AssignDomainsToConnection
+         */
+        readonly assignDomainsToConnection: {
+            readonly name: "AssignDomainsToConnection";
+            readonly I: typeof AssignDomainsToConnectionRequest;
+            readonly O: typeof AssignDomainsToConnectionResponse;
             readonly kind: MethodKind.Unary;
         };
         /**
@@ -157,6 +157,15 @@ export declare const ConnectionService: {
             readonly name: "GetConnectionTestResult";
             readonly I: typeof GetConnectionTestResultRequest;
             readonly O: typeof GetConnectionTestResultResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.connections.ConnectionService.ListAppConnections
+         */
+        readonly listAppConnections: {
+            readonly name: "ListAppConnections";
+            readonly I: typeof ListAppConnectionsRequest;
+            readonly O: typeof ListAppConnectionsResponse;
             readonly kind: MethodKind.Unary;
         };
     };

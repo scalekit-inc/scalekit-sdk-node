@@ -113,9 +113,9 @@ export class CreateUserAndMembershipRequest extends Message<CreateUserAndMembers
   user?: CreateUser;
 
   /**
-   * @generated from field: bool send_activation_email = 3;
+   * @generated from field: optional bool send_invitation_email = 3;
    */
-  sendActivationEmail = false;
+  sendInvitationEmail?: boolean;
 
   constructor(data?: PartialMessage<CreateUserAndMembershipRequest>) {
     super();
@@ -127,7 +127,7 @@ export class CreateUserAndMembershipRequest extends Message<CreateUserAndMembers
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "user", kind: "message", T: CreateUser },
-    { no: 3, name: "send_activation_email", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 3, name: "send_invitation_email", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateUserAndMembershipRequest {
@@ -611,9 +611,9 @@ export class CreateMembershipRequest extends Message<CreateMembershipRequest> {
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   /**
-   * @generated from field: bool send_activation_email = 5;
+   * @generated from field: optional bool send_invitation_email = 5;
    */
-  sendActivationEmail = false;
+  sendInvitationEmail?: boolean;
 
   constructor(data?: PartialMessage<CreateMembershipRequest>) {
     super();
@@ -627,7 +627,7 @@ export class CreateMembershipRequest extends Message<CreateMembershipRequest> {
     { no: 2, name: "membership", kind: "message", T: CreateMembership },
     { no: 3, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "identities" },
     { no: 4, name: "external_id", kind: "scalar", T: 9 /* ScalarType.STRING */, oneof: "identities" },
-    { no: 5, name: "send_activation_email", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 5, name: "send_invitation_email", kind: "scalar", T: 8 /* ScalarType.BOOL */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateMembershipRequest {
@@ -1435,6 +1435,558 @@ export class UpdateUserProfile extends Message<UpdateUserProfile> {
 
   static equals(a: UpdateUserProfile | PlainMessage<UpdateUserProfile> | undefined, b: UpdateUserProfile | PlainMessage<UpdateUserProfile> | undefined): boolean {
     return proto3.util.equals(UpdateUserProfile, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.Invite
+ */
+export class Invite extends Message<Invite> {
+  /**
+   * @generated from field: string organization_id = 1;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: string user_id = 2;
+   */
+  userId = "";
+
+  /**
+   * @generated from field: string invited_by = 3;
+   */
+  invitedBy = "";
+
+  /**
+   * @generated from field: string status = 4;
+   */
+  status = "";
+
+  /**
+   * @generated from field: google.protobuf.Timestamp created_at = 5;
+   */
+  createdAt?: Timestamp;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp expires_at = 6;
+   */
+  expiresAt?: Timestamp;
+
+  /**
+   * @generated from field: google.protobuf.Timestamp resent_at = 7;
+   */
+  resentAt?: Timestamp;
+
+  /**
+   * @generated from field: int32 resent_count = 8;
+   */
+  resentCount = 0;
+
+  constructor(data?: PartialMessage<Invite>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.Invite";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "invited_by", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "created_at", kind: "message", T: Timestamp },
+    { no: 6, name: "expires_at", kind: "message", T: Timestamp },
+    { no: 7, name: "resent_at", kind: "message", T: Timestamp },
+    { no: 8, name: "resent_count", kind: "scalar", T: 5 /* ScalarType.INT32 */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Invite {
+    return new Invite().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Invite {
+    return new Invite().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Invite {
+    return new Invite().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Invite | PlainMessage<Invite> | undefined, b: Invite | PlainMessage<Invite> | undefined): boolean {
+    return proto3.util.equals(Invite, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.ResendInviteRequest
+ */
+export class ResendInviteRequest extends Message<ResendInviteRequest> {
+  /**
+   * @generated from field: string organization_id = 1;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: string id = 2;
+   */
+  id = "";
+
+  constructor(data?: PartialMessage<ResendInviteRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.ResendInviteRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResendInviteRequest {
+    return new ResendInviteRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ResendInviteRequest {
+    return new ResendInviteRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ResendInviteRequest {
+    return new ResendInviteRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ResendInviteRequest | PlainMessage<ResendInviteRequest> | undefined, b: ResendInviteRequest | PlainMessage<ResendInviteRequest> | undefined): boolean {
+    return proto3.util.equals(ResendInviteRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.ResendInviteResponse
+ */
+export class ResendInviteResponse extends Message<ResendInviteResponse> {
+  /**
+   * @generated from field: scalekit.v1.users.Invite invite = 1;
+   */
+  invite?: Invite;
+
+  constructor(data?: PartialMessage<ResendInviteResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.ResendInviteResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "invite", kind: "message", T: Invite },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResendInviteResponse {
+    return new ResendInviteResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ResendInviteResponse {
+    return new ResendInviteResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ResendInviteResponse {
+    return new ResendInviteResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ResendInviteResponse | PlainMessage<ResendInviteResponse> | undefined, b: ResendInviteResponse | PlainMessage<ResendInviteResponse> | undefined): boolean {
+    return proto3.util.equals(ResendInviteResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.ListUserRolesRequest
+ */
+export class ListUserRolesRequest extends Message<ListUserRolesRequest> {
+  /**
+   * @generated from field: string organization_id = 1;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: string user_id = 2;
+   */
+  userId = "";
+
+  constructor(data?: PartialMessage<ListUserRolesRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.ListUserRolesRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUserRolesRequest {
+    return new ListUserRolesRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUserRolesRequest {
+    return new ListUserRolesRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUserRolesRequest {
+    return new ListUserRolesRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListUserRolesRequest | PlainMessage<ListUserRolesRequest> | undefined, b: ListUserRolesRequest | PlainMessage<ListUserRolesRequest> | undefined): boolean {
+    return proto3.util.equals(ListUserRolesRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.ListUserRolesResponse
+ */
+export class ListUserRolesResponse extends Message<ListUserRolesResponse> {
+  /**
+   * @generated from field: repeated scalekit.v1.commons.Role roles = 1;
+   */
+  roles: Role[] = [];
+
+  constructor(data?: PartialMessage<ListUserRolesResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.ListUserRolesResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "roles", kind: "message", T: Role, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUserRolesResponse {
+    return new ListUserRolesResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUserRolesResponse {
+    return new ListUserRolesResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUserRolesResponse {
+    return new ListUserRolesResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListUserRolesResponse | PlainMessage<ListUserRolesResponse> | undefined, b: ListUserRolesResponse | PlainMessage<ListUserRolesResponse> | undefined): boolean {
+    return proto3.util.equals(ListUserRolesResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.AssignUserRolesRequest
+ */
+export class AssignUserRolesRequest extends Message<AssignUserRolesRequest> {
+  /**
+   * @generated from field: string organization_id = 1;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: string user_id = 2;
+   */
+  userId = "";
+
+  /**
+   * @generated from field: repeated scalekit.v1.users.AssignRoleRequest roles = 3;
+   */
+  roles: AssignRoleRequest[] = [];
+
+  constructor(data?: PartialMessage<AssignUserRolesRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.AssignUserRolesRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "roles", kind: "message", T: AssignRoleRequest, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignUserRolesRequest {
+    return new AssignUserRolesRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignUserRolesRequest {
+    return new AssignUserRolesRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignUserRolesRequest {
+    return new AssignUserRolesRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AssignUserRolesRequest | PlainMessage<AssignUserRolesRequest> | undefined, b: AssignUserRolesRequest | PlainMessage<AssignUserRolesRequest> | undefined): boolean {
+    return proto3.util.equals(AssignUserRolesRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.AssignRoleRequest
+ */
+export class AssignRoleRequest extends Message<AssignRoleRequest> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  constructor(data?: PartialMessage<AssignRoleRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.AssignRoleRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignRoleRequest {
+    return new AssignRoleRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignRoleRequest {
+    return new AssignRoleRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignRoleRequest {
+    return new AssignRoleRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AssignRoleRequest | PlainMessage<AssignRoleRequest> | undefined, b: AssignRoleRequest | PlainMessage<AssignRoleRequest> | undefined): boolean {
+    return proto3.util.equals(AssignRoleRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.AssignUserRolesResponse
+ */
+export class AssignUserRolesResponse extends Message<AssignUserRolesResponse> {
+  /**
+   * @generated from field: repeated scalekit.v1.commons.Role roles = 1;
+   */
+  roles: Role[] = [];
+
+  constructor(data?: PartialMessage<AssignUserRolesResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.AssignUserRolesResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "roles", kind: "message", T: Role, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignUserRolesResponse {
+    return new AssignUserRolesResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignUserRolesResponse {
+    return new AssignUserRolesResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignUserRolesResponse {
+    return new AssignUserRolesResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AssignUserRolesResponse | PlainMessage<AssignUserRolesResponse> | undefined, b: AssignUserRolesResponse | PlainMessage<AssignUserRolesResponse> | undefined): boolean {
+    return proto3.util.equals(AssignUserRolesResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.RemoveUserRoleRequest
+ */
+export class RemoveUserRoleRequest extends Message<RemoveUserRoleRequest> {
+  /**
+   * @generated from field: string organization_id = 1;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: string user_id = 2;
+   */
+  userId = "";
+
+  /**
+   * @generated from field: string role_id = 3;
+   */
+  roleId = "";
+
+  constructor(data?: PartialMessage<RemoveUserRoleRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.RemoveUserRoleRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "role_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RemoveUserRoleRequest {
+    return new RemoveUserRoleRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RemoveUserRoleRequest {
+    return new RemoveUserRoleRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RemoveUserRoleRequest {
+    return new RemoveUserRoleRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: RemoveUserRoleRequest | PlainMessage<RemoveUserRoleRequest> | undefined, b: RemoveUserRoleRequest | PlainMessage<RemoveUserRoleRequest> | undefined): boolean {
+    return proto3.util.equals(RemoveUserRoleRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.ListUserPermissionsRequest
+ */
+export class ListUserPermissionsRequest extends Message<ListUserPermissionsRequest> {
+  /**
+   * @generated from field: string organization_id = 1;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: string user_id = 2;
+   */
+  userId = "";
+
+  constructor(data?: PartialMessage<ListUserPermissionsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.ListUserPermissionsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUserPermissionsRequest {
+    return new ListUserPermissionsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUserPermissionsRequest {
+    return new ListUserPermissionsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUserPermissionsRequest {
+    return new ListUserPermissionsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListUserPermissionsRequest | PlainMessage<ListUserPermissionsRequest> | undefined, b: ListUserPermissionsRequest | PlainMessage<ListUserPermissionsRequest> | undefined): boolean {
+    return proto3.util.equals(ListUserPermissionsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.Permission
+ */
+export class Permission extends Message<Permission> {
+  /**
+   * @generated from field: string id = 1;
+   */
+  id = "";
+
+  /**
+   * @generated from field: string name = 2;
+   */
+  name = "";
+
+  /**
+   * @generated from field: string display_name = 3;
+   */
+  displayName = "";
+
+  /**
+   * @generated from field: string description = 4;
+   */
+  description = "";
+
+  /**
+   * @generated from field: repeated string tags = 5;
+   */
+  tags: string[] = [];
+
+  constructor(data?: PartialMessage<Permission>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.Permission";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "tags", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Permission {
+    return new Permission().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Permission {
+    return new Permission().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Permission {
+    return new Permission().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: Permission | PlainMessage<Permission> | undefined, b: Permission | PlainMessage<Permission> | undefined): boolean {
+    return proto3.util.equals(Permission, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.users.ListUserPermissionsResponse
+ */
+export class ListUserPermissionsResponse extends Message<ListUserPermissionsResponse> {
+  /**
+   * @generated from field: repeated scalekit.v1.users.Permission permissions = 1;
+   */
+  permissions: Permission[] = [];
+
+  constructor(data?: PartialMessage<ListUserPermissionsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.ListUserPermissionsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "permissions", kind: "message", T: Permission, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUserPermissionsResponse {
+    return new ListUserPermissionsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUserPermissionsResponse {
+    return new ListUserPermissionsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUserPermissionsResponse {
+    return new ListUserPermissionsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ListUserPermissionsResponse | PlainMessage<ListUserPermissionsResponse> | undefined, b: ListUserPermissionsResponse | PlainMessage<ListUserPermissionsResponse> | undefined): boolean {
+    return proto3.util.equals(ListUserPermissionsResponse, a, b);
   }
 }
 

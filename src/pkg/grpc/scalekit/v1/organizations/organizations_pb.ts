@@ -4,7 +4,7 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { BoolValue, FieldMask, Int32Value, Message, proto3, Timestamp } from "@bufbuild/protobuf";
+import { BoolValue, FieldMask, Int32Value, Message, NullValue, proto3, Timestamp } from "@bufbuild/protobuf";
 import { RegionCode } from "../commons/commons_pb.js";
 
 /**
@@ -14,21 +14,27 @@ import { RegionCode } from "../commons/commons_pb.js";
  */
 export enum Feature {
   /**
-   * UNSPECIFIED represents an unset or invalid feature value
+   * An unspecified or invalid feature value
    *
-   * @generated from enum value: UNSPECIFIED = 0;
+   * @generated from enum value: FEATURE_UNSPECIFIED = 0;
+   */
+  FEATURE_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: UNSPECIFIED = 0 [deprecated = true];
+   * @deprecated
    */
   UNSPECIFIED = 0,
 
   /**
-   * dir_sync enables directory synchronization configuration in the portal
+   * Enables directory synchronization configuration in the portal
    *
    * @generated from enum value: dir_sync = 1;
    */
   dir_sync = 1,
 
   /**
-   * sso enables Single Sign-On (SSO) configuration in the portal
+   * Enables Single Sign-On (SSO) configuration in the portal
    *
    * @generated from enum value: sso = 2;
    */
@@ -36,6 +42,7 @@ export enum Feature {
 }
 // Retrieve enum metadata with: proto3.getEnumType(Feature)
 proto3.util.setEnumType(Feature, "scalekit.v1.organizations.Feature", [
+  { no: 0, name: "FEATURE_UNSPECIFIED" },
   { no: 0, name: "UNSPECIFIED" },
   { no: 1, name: "dir_sync" },
   { no: 2, name: "sso" },
@@ -1205,6 +1212,58 @@ export class UpdateOrganizationSessionSettingsResponse extends Message<UpdateOrg
 }
 
 /**
+ * @generated from message scalekit.v1.organizations.OrganizationUserManagementSettings
+ */
+export class OrganizationUserManagementSettings extends Message<OrganizationUserManagementSettings> {
+  /**
+   * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 1;
+   */
+  jitProvisioningWithSsoEnabled?: boolean;
+
+  /**
+   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 2;
+   */
+  syncUserProfileOnSignin?: boolean;
+
+  /**
+   * Deprecated placeholder to ensure google.protobuf.NullValue is referenced in the schema, preventing unused-definition warnings.
+   *
+   * @generated from field: google.protobuf.NullValue deprecated_placeholder = 99 [deprecated = true];
+   * @deprecated
+   */
+  deprecatedPlaceholder = NullValue.NULL_VALUE;
+
+  constructor(data?: PartialMessage<OrganizationUserManagementSettings>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.OrganizationUserManagementSettings";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "jit_provisioning_with_sso_enabled", kind: "message", T: BoolValue },
+    { no: 2, name: "sync_user_profile_on_signin", kind: "message", T: BoolValue },
+    { no: 99, name: "deprecated_placeholder", kind: "enum", T: proto3.getEnumType(NullValue) },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationUserManagementSettings {
+    return new OrganizationUserManagementSettings().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrganizationUserManagementSettings {
+    return new OrganizationUserManagementSettings().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrganizationUserManagementSettings {
+    return new OrganizationUserManagementSettings().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: OrganizationUserManagementSettings | PlainMessage<OrganizationUserManagementSettings> | undefined, b: OrganizationUserManagementSettings | PlainMessage<OrganizationUserManagementSettings> | undefined): boolean {
+    return proto3.util.equals(OrganizationUserManagementSettings, a, b);
+  }
+}
+
+/**
  * @generated from message scalekit.v1.organizations.OrganizationSessionSettings
  */
 export class OrganizationSessionSettings extends Message<OrganizationSessionSettings> {
@@ -1563,6 +1622,160 @@ export class OrganizationSettingsFeature extends Message<OrganizationSettingsFea
 
   static equals(a: OrganizationSettingsFeature | PlainMessage<OrganizationSettingsFeature> | undefined, b: OrganizationSettingsFeature | PlainMessage<OrganizationSettingsFeature> | undefined): boolean {
     return proto3.util.equals(OrganizationSettingsFeature, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.organizations.UpdateUserManagementSettingsRequest
+ */
+export class UpdateUserManagementSettingsRequest extends Message<UpdateUserManagementSettingsRequest> {
+  /**
+   * @generated from field: string organization_id = 1;
+   */
+  organizationId = "";
+
+  /**
+   * @generated from field: scalekit.v1.organizations.OrganizationUserManagementSettings settings = 2;
+   */
+  settings?: OrganizationUserManagementSettings;
+
+  constructor(data?: PartialMessage<UpdateUserManagementSettingsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.UpdateUserManagementSettingsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "settings", kind: "message", T: OrganizationUserManagementSettings },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateUserManagementSettingsRequest {
+    return new UpdateUserManagementSettingsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsRequest {
+    return new UpdateUserManagementSettingsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsRequest {
+    return new UpdateUserManagementSettingsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UpdateUserManagementSettingsRequest | PlainMessage<UpdateUserManagementSettingsRequest> | undefined, b: UpdateUserManagementSettingsRequest | PlainMessage<UpdateUserManagementSettingsRequest> | undefined): boolean {
+    return proto3.util.equals(UpdateUserManagementSettingsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.organizations.UpdateUserManagementSettingsResponse
+ */
+export class UpdateUserManagementSettingsResponse extends Message<UpdateUserManagementSettingsResponse> {
+  /**
+   * @generated from field: scalekit.v1.organizations.OrganizationUserManagementSettings settings = 1;
+   */
+  settings?: OrganizationUserManagementSettings;
+
+  constructor(data?: PartialMessage<UpdateUserManagementSettingsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.UpdateUserManagementSettingsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "settings", kind: "message", T: OrganizationUserManagementSettings },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateUserManagementSettingsResponse {
+    return new UpdateUserManagementSettingsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsResponse {
+    return new UpdateUserManagementSettingsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsResponse {
+    return new UpdateUserManagementSettingsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UpdateUserManagementSettingsResponse | PlainMessage<UpdateUserManagementSettingsResponse> | undefined, b: UpdateUserManagementSettingsResponse | PlainMessage<UpdateUserManagementSettingsResponse> | undefined): boolean {
+    return proto3.util.equals(UpdateUserManagementSettingsResponse, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.organizations.GetOrganizationUserManagementSettingsRequest
+ */
+export class GetOrganizationUserManagementSettingsRequest extends Message<GetOrganizationUserManagementSettingsRequest> {
+  /**
+   * @generated from field: string organization_id = 1;
+   */
+  organizationId = "";
+
+  constructor(data?: PartialMessage<GetOrganizationUserManagementSettingsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.GetOrganizationUserManagementSettingsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOrganizationUserManagementSettingsRequest {
+    return new GetOrganizationUserManagementSettingsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOrganizationUserManagementSettingsRequest {
+    return new GetOrganizationUserManagementSettingsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOrganizationUserManagementSettingsRequest {
+    return new GetOrganizationUserManagementSettingsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetOrganizationUserManagementSettingsRequest | PlainMessage<GetOrganizationUserManagementSettingsRequest> | undefined, b: GetOrganizationUserManagementSettingsRequest | PlainMessage<GetOrganizationUserManagementSettingsRequest> | undefined): boolean {
+    return proto3.util.equals(GetOrganizationUserManagementSettingsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse
+ */
+export class GetOrganizationUserManagementSettingsResponse extends Message<GetOrganizationUserManagementSettingsResponse> {
+  /**
+   * @generated from field: scalekit.v1.organizations.OrganizationUserManagementSettings settings = 1;
+   */
+  settings?: OrganizationUserManagementSettings;
+
+  constructor(data?: PartialMessage<GetOrganizationUserManagementSettingsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "settings", kind: "message", T: OrganizationUserManagementSettings },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOrganizationUserManagementSettingsResponse {
+    return new GetOrganizationUserManagementSettingsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOrganizationUserManagementSettingsResponse {
+    return new GetOrganizationUserManagementSettingsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOrganizationUserManagementSettingsResponse {
+    return new GetOrganizationUserManagementSettingsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetOrganizationUserManagementSettingsResponse | PlainMessage<GetOrganizationUserManagementSettingsResponse> | undefined, b: GetOrganizationUserManagementSettingsResponse | PlainMessage<GetOrganizationUserManagementSettingsResponse> | undefined): boolean {
+    return proto3.util.equals(GetOrganizationUserManagementSettingsResponse, a, b);
   }
 }
 

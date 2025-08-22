@@ -92,7 +92,7 @@ export default class ScalekitClient {
      */
     getLogoutUrl(options?: LogoutUrlOptions): string;
     /**
-     * Verifies the payload of the webhook
+     * Verify webhook payload
      *
      * @param {string} secret The secret
      * @param {Record<string, string>} headers The headers
@@ -107,7 +107,7 @@ export default class ScalekitClient {
      * @param {string} token The token to be validated
      * @param {TokenValidationOptions} options Optional validation options for issuer, audience, and scopes
      * @return {Promise<T>} Returns the token payload if valid
-     * @throws {Error} If token is invalid or missing required scopes
+     * @throws {ScalekitValidateTokenFailureException} If token is invalid or missing required scopes
      */
     validateToken<T>(token: string, options?: TokenValidationOptions): Promise<T>;
     /**
@@ -116,7 +116,7 @@ export default class ScalekitClient {
      * @param {string} token The token to verify
      * @param {string[]} requiredScopes The scopes that must be present in the token
      * @return {boolean} Returns true if all required scopes are present
-     * @throws {Error} If required scopes are missing, with details about which scopes are missing
+     * @throws {ScalekitValidateTokenFailureException} If required scopes are missing, with details about which scopes are missing
      */
     verifyScopes(token: string, requiredScopes: string[]): boolean;
     /**

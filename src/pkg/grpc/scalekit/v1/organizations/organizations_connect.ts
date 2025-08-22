@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateOrganizationRequest, CreateOrganizationResponse, CreateOrganizationSessionSettingsRequest, CreateOrganizationSessionSettingsResponse, DeleteOrganizationRequest, DeleteOrganizationSessionSettingsRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetOrganizationSessionSettingsRequest, GetOrganizationSessionSettingsResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSessionSettingsRequest, UpdateOrganizationSessionSettingsResponse, UpdateOrganizationSettingsRequest } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, CreateOrganizationSessionSettingsRequest, CreateOrganizationSessionSettingsResponse, DeleteOrganizationRequest, DeleteOrganizationSessionSettingsRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetOrganizationSessionSettingsRequest, GetOrganizationSessionSettingsResponse, GetOrganizationUserManagementSettingsRequest, GetOrganizationUserManagementSettingsResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSessionSettingsRequest, UpdateOrganizationSessionSettingsResponse, UpdateOrganizationSettingsRequest, UpdateUserManagementSettingsRequest, UpdateUserManagementSettingsResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -151,6 +151,26 @@ export const OrganizationService = {
       name: "DeleteOrganizationSessionSettings",
       I: DeleteOrganizationSessionSettingsRequest,
       O: Empty,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * Update user management setting for an organization
+     *
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateUserManagementSettings
+     */
+    updateUserManagementSettings: {
+      name: "UpdateUserManagementSettings",
+      I: UpdateUserManagementSettingsRequest,
+      O: UpdateUserManagementSettingsResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.GetOrganizationUserManagementSetting
+     */
+    getOrganizationUserManagementSetting: {
+      name: "GetOrganizationUserManagementSetting",
+      I: GetOrganizationUserManagementSettingsRequest,
+      O: GetOrganizationUserManagementSettingsResponse,
       kind: MethodKind.Unary,
     },
   }

@@ -1,5 +1,6 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
+import { Message, proto3, Struct, Timestamp } from "@bufbuild/protobuf";
+import { Domain } from "../domains/domains_pb.js";
 /**
  * @generated from enum scalekit.v1.connections.CodeChallengeType
  */
@@ -218,7 +219,19 @@ export declare enum ConnectionType {
     /**
      * @generated from enum value: PASSWORDLESS = 5;
      */
-    PASSWORDLESS = 5
+    PASSWORDLESS = 5,
+    /**
+     * @generated from enum value: BASIC = 6;
+     */
+    BASIC = 6,
+    /**
+     * @generated from enum value: BEARER = 7;
+     */
+    BEARER = 7,
+    /**
+     * @generated from enum value: API_KEY = 8;
+     */
+    API_KEY = 8
 }
 /**
  * @generated from enum scalekit.v1.connections.ConnectionStatus
@@ -315,6 +328,48 @@ export declare enum ConnectionProvider {
     ADFS = 16
 }
 /**
+ * @generated from message scalekit.v1.connections.AssignDomainsToConnectionRequest
+ */
+export declare class AssignDomainsToConnectionRequest extends Message<AssignDomainsToConnectionRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string connection_id = 2;
+     */
+    connectionId: string;
+    /**
+     * @generated from field: repeated string domain_ids = 3;
+     */
+    domainIds: string[];
+    constructor(data?: PartialMessage<AssignDomainsToConnectionRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.AssignDomainsToConnectionRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignDomainsToConnectionRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionRequest;
+    static equals(a: AssignDomainsToConnectionRequest | PlainMessage<AssignDomainsToConnectionRequest> | undefined, b: AssignDomainsToConnectionRequest | PlainMessage<AssignDomainsToConnectionRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.AssignDomainsToConnectionResponse
+ */
+export declare class AssignDomainsToConnectionResponse extends Message<AssignDomainsToConnectionResponse> {
+    /**
+     * @generated from field: scalekit.v1.connections.Connection connection = 1;
+     */
+    connection?: Connection;
+    constructor(data?: PartialMessage<AssignDomainsToConnectionResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.AssignDomainsToConnectionResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignDomainsToConnectionResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionResponse;
+    static equals(a: AssignDomainsToConnectionResponse | PlainMessage<AssignDomainsToConnectionResponse> | undefined, b: AssignDomainsToConnectionResponse | PlainMessage<AssignDomainsToConnectionResponse> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.connections.GetProvidersRequest
  */
 export declare class GetProvidersRequest extends Message<GetProvidersRequest> {
@@ -377,6 +432,10 @@ export declare class CreateEnvironmentConnectionRequest extends Message<CreateEn
      * @generated from field: scalekit.v1.connections.CreateConnection connection = 1;
      */
     connection?: CreateConnection;
+    /**
+     * @generated from field: optional scalekit.v1.connections.Flags flags = 2;
+     */
+    flags?: Flags;
     constructor(data?: PartialMessage<CreateEnvironmentConnectionRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.CreateEnvironmentConnectionRequest";
@@ -419,6 +478,14 @@ export declare class CreateConnection extends Message<CreateConnection> {
      * @generated from field: scalekit.v1.connections.ConnectionType type = 2;
      */
     type: ConnectionType;
+    /**
+     * @generated from field: string provider_key = 3;
+     */
+    providerKey: string;
+    /**
+     * @generated from field: optional string key_id = 4;
+     */
+    keyId?: string;
     constructor(data?: PartialMessage<CreateConnection>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.CreateConnection";
@@ -514,13 +581,27 @@ export declare class Connection extends Message<Connection> {
         value: PasswordLessConfig;
         case: "passwordlessConfig";
     } | {
+        /**
+         * @generated from field: scalekit.v1.connections.StaticAuthConfig static_config = 26;
+         */
+        value: StaticAuthConfig;
+        case: "staticConfig";
+    } | {
         case: undefined;
         value?: undefined;
     };
     /**
-     * @generated from field: optional string key_id = 21;
+     * @generated from field: optional string key_id = 25;
      */
     keyId?: string;
+    /**
+     * @generated from field: string provider_key = 23;
+     */
+    providerKey: string;
+    /**
+     * @generated from field: repeated scalekit.v1.domains.Domain domains = 24;
+     */
+    domains: Domain[];
     constructor(data?: PartialMessage<Connection>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.Connection";
@@ -651,13 +732,23 @@ export declare class UpdateConnection extends Message<UpdateConnection> {
         value: PasswordLessConfig;
         case: "passwordlessConfig";
     } | {
+        /**
+         * @generated from field: scalekit.v1.connections.StaticAuthConfig static_config = 23;
+         */
+        value: StaticAuthConfig;
+        case: "staticConfig";
+    } | {
         case: undefined;
         value?: undefined;
     };
     /**
-     * @generated from field: optional string key_id = 19;
+     * @generated from field: optional string key_id = 22;
      */
     keyId?: string;
+    /**
+     * @generated from field: string provider_key = 21;
+     */
+    providerKey: string;
     constructor(data?: PartialMessage<UpdateConnection>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.UpdateConnection";
@@ -859,6 +950,18 @@ export declare class ListConnection extends Message<ListConnection> {
      * @generated from field: string organization_name = 9;
      */
     organizationName: string;
+    /**
+     * @generated from field: string provider_key = 10;
+     */
+    providerKey: string;
+    /**
+     * @generated from field: string key_id = 11;
+     */
+    keyId: string;
+    /**
+     * @generated from field: google.protobuf.Timestamp created_at = 12;
+     */
+    createdAt?: Timestamp;
     constructor(data?: PartialMessage<ListConnection>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.ListConnection";
@@ -927,9 +1030,9 @@ export declare class SearchOrganizationConnectionsRequest extends Message<Search
      */
     query?: string;
     /**
-     * @generated from field: optional scalekit.v1.connections.ConnectionProvider provider = 2;
+     * @generated from field: optional string provider = 2;
      */
-    provider?: ConnectionProvider;
+    provider?: string;
     /**
      * @generated from field: optional scalekit.v1.connections.ConnectionStatus status = 3;
      */
@@ -938,6 +1041,10 @@ export declare class SearchOrganizationConnectionsRequest extends Message<Search
      * @generated from field: optional scalekit.v1.connections.ConnectionType connection_type = 4;
      */
     connectionType?: ConnectionType;
+    /**
+     * @generated from field: optional bool enabled = 7;
+     */
+    enabled?: boolean;
     /**
      * @generated from field: uint32 page_size = 5;
      */
@@ -1160,6 +1267,10 @@ export declare class OAuthConnectionConfig extends Message<OAuthConnectionConfig
      * @generated from field: google.protobuf.BoolValue use_platform_creds = 15;
      */
     usePlatformCreds?: boolean;
+    /**
+     * @generated from field: google.protobuf.StringValue access_type = 16;
+     */
+    accessType?: string;
     constructor(data?: PartialMessage<OAuthConnectionConfig>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.OAuthConnectionConfig";
@@ -1197,6 +1308,10 @@ export declare class PasswordLessConfig extends Message<PasswordLessConfig> {
      * @generated from field: optional scalekit.v1.connections.CodeChallengeType code_challenge_type = 6;
      */
     codeChallengeType?: CodeChallengeType;
+    /**
+     * @generated from field: optional google.protobuf.BoolValue regenerate_passwordless_credentials_on_resend = 7;
+     */
+    regeneratePasswordlessCredentialsOnResend?: boolean;
     constructor(data?: PartialMessage<PasswordLessConfig>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.PasswordLessConfig";
@@ -1205,6 +1320,23 @@ export declare class PasswordLessConfig extends Message<PasswordLessConfig> {
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PasswordLessConfig;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PasswordLessConfig;
     static equals(a: PasswordLessConfig | PlainMessage<PasswordLessConfig> | undefined, b: PasswordLessConfig | PlainMessage<PasswordLessConfig> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.StaticAuthConfig
+ */
+export declare class StaticAuthConfig extends Message<StaticAuthConfig> {
+    /**
+     * @generated from field: google.protobuf.Struct static_config = 1;
+     */
+    staticConfig?: Struct;
+    constructor(data?: PartialMessage<StaticAuthConfig>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.StaticAuthConfig";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StaticAuthConfig;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StaticAuthConfig;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StaticAuthConfig;
+    static equals(a: StaticAuthConfig | PlainMessage<StaticAuthConfig> | undefined, b: StaticAuthConfig | PlainMessage<StaticAuthConfig> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.connections.SAMLConnectionConfigRequest
@@ -1688,4 +1820,75 @@ export declare class PasswordConnectionConfig extends Message<PasswordConnection
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PasswordConnectionConfig;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PasswordConnectionConfig;
     static equals(a: PasswordConnectionConfig | PlainMessage<PasswordConnectionConfig> | undefined, b: PasswordConnectionConfig | PlainMessage<PasswordConnectionConfig> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.Flags
+ */
+export declare class Flags extends Message<Flags> {
+    /**
+     * @generated from field: bool is_login = 1;
+     */
+    isLogin: boolean;
+    /**
+     * @generated from field: bool is_app = 2;
+     */
+    isApp: boolean;
+    constructor(data?: PartialMessage<Flags>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.Flags";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Flags;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Flags;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Flags;
+    static equals(a: Flags | PlainMessage<Flags> | undefined, b: Flags | PlainMessage<Flags> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.ListAppConnectionsRequest
+ */
+export declare class ListAppConnectionsRequest extends Message<ListAppConnectionsRequest> {
+    /**
+     * @generated from field: uint32 page_size = 1;
+     */
+    pageSize: number;
+    /**
+     * @generated from field: string page_token = 2;
+     */
+    pageToken: string;
+    constructor(data?: PartialMessage<ListAppConnectionsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.ListAppConnectionsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAppConnectionsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAppConnectionsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAppConnectionsRequest;
+    static equals(a: ListAppConnectionsRequest | PlainMessage<ListAppConnectionsRequest> | undefined, b: ListAppConnectionsRequest | PlainMessage<ListAppConnectionsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.ListAppConnectionsResponse
+ */
+export declare class ListAppConnectionsResponse extends Message<ListAppConnectionsResponse> {
+    /**
+     * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 1;
+     */
+    connections: ListConnection[];
+    /**
+     * @generated from field: string next_page_token = 2;
+     */
+    nextPageToken: string;
+    /**
+     * @generated from field: string prev_page_token = 3;
+     */
+    prevPageToken: string;
+    /**
+     * @generated from field: uint32 total_size = 4;
+     */
+    totalSize: number;
+    constructor(data?: PartialMessage<ListAppConnectionsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.ListAppConnectionsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAppConnectionsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAppConnectionsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAppConnectionsResponse;
+    static equals(a: ListAppConnectionsResponse | PlainMessage<ListAppConnectionsResponse> | undefined, b: ListAppConnectionsResponse | PlainMessage<ListAppConnectionsResponse> | undefined): boolean;
 }

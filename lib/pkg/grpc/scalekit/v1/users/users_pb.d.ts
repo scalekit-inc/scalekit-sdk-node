@@ -69,9 +69,9 @@ export declare class CreateUserAndMembershipRequest extends Message<CreateUserAn
      */
     user?: CreateUser;
     /**
-     * @generated from field: bool send_activation_email = 3;
+     * @generated from field: optional bool send_invitation_email = 3;
      */
-    sendActivationEmail: boolean;
+    sendInvitationEmail?: boolean;
     constructor(data?: PartialMessage<CreateUserAndMembershipRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.users.CreateUserAndMembershipRequest";
@@ -353,9 +353,9 @@ export declare class CreateMembershipRequest extends Message<CreateMembershipReq
         value?: undefined;
     };
     /**
-     * @generated from field: bool send_activation_email = 5;
+     * @generated from field: optional bool send_invitation_email = 5;
      */
-    sendActivationEmail: boolean;
+    sendInvitationEmail?: boolean;
     constructor(data?: PartialMessage<CreateMembershipRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.users.CreateMembershipRequest";
@@ -803,4 +803,280 @@ export declare class UpdateUserProfile extends Message<UpdateUserProfile> {
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateUserProfile;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateUserProfile;
     static equals(a: UpdateUserProfile | PlainMessage<UpdateUserProfile> | undefined, b: UpdateUserProfile | PlainMessage<UpdateUserProfile> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.Invite
+ */
+export declare class Invite extends Message<Invite> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string user_id = 2;
+     */
+    userId: string;
+    /**
+     * @generated from field: string invited_by = 3;
+     */
+    invitedBy: string;
+    /**
+     * @generated from field: string status = 4;
+     */
+    status: string;
+    /**
+     * @generated from field: google.protobuf.Timestamp created_at = 5;
+     */
+    createdAt?: Timestamp;
+    /**
+     * @generated from field: google.protobuf.Timestamp expires_at = 6;
+     */
+    expiresAt?: Timestamp;
+    /**
+     * @generated from field: google.protobuf.Timestamp resent_at = 7;
+     */
+    resentAt?: Timestamp;
+    /**
+     * @generated from field: int32 resent_count = 8;
+     */
+    resentCount: number;
+    constructor(data?: PartialMessage<Invite>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.Invite";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Invite;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Invite;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Invite;
+    static equals(a: Invite | PlainMessage<Invite> | undefined, b: Invite | PlainMessage<Invite> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.ResendInviteRequest
+ */
+export declare class ResendInviteRequest extends Message<ResendInviteRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string id = 2;
+     */
+    id: string;
+    constructor(data?: PartialMessage<ResendInviteRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.ResendInviteRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResendInviteRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ResendInviteRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ResendInviteRequest;
+    static equals(a: ResendInviteRequest | PlainMessage<ResendInviteRequest> | undefined, b: ResendInviteRequest | PlainMessage<ResendInviteRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.ResendInviteResponse
+ */
+export declare class ResendInviteResponse extends Message<ResendInviteResponse> {
+    /**
+     * @generated from field: scalekit.v1.users.Invite invite = 1;
+     */
+    invite?: Invite;
+    constructor(data?: PartialMessage<ResendInviteResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.ResendInviteResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResendInviteResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ResendInviteResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ResendInviteResponse;
+    static equals(a: ResendInviteResponse | PlainMessage<ResendInviteResponse> | undefined, b: ResendInviteResponse | PlainMessage<ResendInviteResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.ListUserRolesRequest
+ */
+export declare class ListUserRolesRequest extends Message<ListUserRolesRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string user_id = 2;
+     */
+    userId: string;
+    constructor(data?: PartialMessage<ListUserRolesRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.ListUserRolesRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUserRolesRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUserRolesRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUserRolesRequest;
+    static equals(a: ListUserRolesRequest | PlainMessage<ListUserRolesRequest> | undefined, b: ListUserRolesRequest | PlainMessage<ListUserRolesRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.ListUserRolesResponse
+ */
+export declare class ListUserRolesResponse extends Message<ListUserRolesResponse> {
+    /**
+     * @generated from field: repeated scalekit.v1.commons.Role roles = 1;
+     */
+    roles: Role[];
+    constructor(data?: PartialMessage<ListUserRolesResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.ListUserRolesResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUserRolesResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUserRolesResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUserRolesResponse;
+    static equals(a: ListUserRolesResponse | PlainMessage<ListUserRolesResponse> | undefined, b: ListUserRolesResponse | PlainMessage<ListUserRolesResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.AssignUserRolesRequest
+ */
+export declare class AssignUserRolesRequest extends Message<AssignUserRolesRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string user_id = 2;
+     */
+    userId: string;
+    /**
+     * @generated from field: repeated scalekit.v1.users.AssignRoleRequest roles = 3;
+     */
+    roles: AssignRoleRequest[];
+    constructor(data?: PartialMessage<AssignUserRolesRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.AssignUserRolesRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignUserRolesRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignUserRolesRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignUserRolesRequest;
+    static equals(a: AssignUserRolesRequest | PlainMessage<AssignUserRolesRequest> | undefined, b: AssignUserRolesRequest | PlainMessage<AssignUserRolesRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.AssignRoleRequest
+ */
+export declare class AssignRoleRequest extends Message<AssignRoleRequest> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    constructor(data?: PartialMessage<AssignRoleRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.AssignRoleRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignRoleRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignRoleRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignRoleRequest;
+    static equals(a: AssignRoleRequest | PlainMessage<AssignRoleRequest> | undefined, b: AssignRoleRequest | PlainMessage<AssignRoleRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.AssignUserRolesResponse
+ */
+export declare class AssignUserRolesResponse extends Message<AssignUserRolesResponse> {
+    /**
+     * @generated from field: repeated scalekit.v1.commons.Role roles = 1;
+     */
+    roles: Role[];
+    constructor(data?: PartialMessage<AssignUserRolesResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.AssignUserRolesResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignUserRolesResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignUserRolesResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignUserRolesResponse;
+    static equals(a: AssignUserRolesResponse | PlainMessage<AssignUserRolesResponse> | undefined, b: AssignUserRolesResponse | PlainMessage<AssignUserRolesResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.RemoveUserRoleRequest
+ */
+export declare class RemoveUserRoleRequest extends Message<RemoveUserRoleRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string user_id = 2;
+     */
+    userId: string;
+    /**
+     * @generated from field: string role_id = 3;
+     */
+    roleId: string;
+    constructor(data?: PartialMessage<RemoveUserRoleRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.RemoveUserRoleRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RemoveUserRoleRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RemoveUserRoleRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RemoveUserRoleRequest;
+    static equals(a: RemoveUserRoleRequest | PlainMessage<RemoveUserRoleRequest> | undefined, b: RemoveUserRoleRequest | PlainMessage<RemoveUserRoleRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.ListUserPermissionsRequest
+ */
+export declare class ListUserPermissionsRequest extends Message<ListUserPermissionsRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: string user_id = 2;
+     */
+    userId: string;
+    constructor(data?: PartialMessage<ListUserPermissionsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.ListUserPermissionsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUserPermissionsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUserPermissionsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUserPermissionsRequest;
+    static equals(a: ListUserPermissionsRequest | PlainMessage<ListUserPermissionsRequest> | undefined, b: ListUserPermissionsRequest | PlainMessage<ListUserPermissionsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.Permission
+ */
+export declare class Permission extends Message<Permission> {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: string name = 2;
+     */
+    name: string;
+    /**
+     * @generated from field: string display_name = 3;
+     */
+    displayName: string;
+    /**
+     * @generated from field: string description = 4;
+     */
+    description: string;
+    /**
+     * @generated from field: repeated string tags = 5;
+     */
+    tags: string[];
+    constructor(data?: PartialMessage<Permission>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.Permission";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Permission;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Permission;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Permission;
+    static equals(a: Permission | PlainMessage<Permission> | undefined, b: Permission | PlainMessage<Permission> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.users.ListUserPermissionsResponse
+ */
+export declare class ListUserPermissionsResponse extends Message<ListUserPermissionsResponse> {
+    /**
+     * @generated from field: repeated scalekit.v1.users.Permission permissions = 1;
+     */
+    permissions: Permission[];
+    constructor(data?: PartialMessage<ListUserPermissionsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.ListUserPermissionsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListUserPermissionsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListUserPermissionsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListUserPermissionsResponse;
+    static equals(a: ListUserPermissionsResponse | PlainMessage<ListUserPermissionsResponse> | undefined, b: ListUserPermissionsResponse | PlainMessage<ListUserPermissionsResponse> | undefined): boolean;
 }

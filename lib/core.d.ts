@@ -31,7 +31,7 @@ export default class CoreClient {
      */
     getJwks(): Promise<void>;
     /**
-     *
+     * Execute a function with error handling and retry logic
      * @param fn Function to execute
      * @param data Data to pass to the function
      * @param retryLeft Number of retries left

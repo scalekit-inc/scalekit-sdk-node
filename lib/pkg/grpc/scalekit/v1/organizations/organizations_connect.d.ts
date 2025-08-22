@@ -1,4 +1,4 @@
-import { CreateOrganizationRequest, CreateOrganizationResponse, CreateOrganizationSessionSettingsRequest, CreateOrganizationSessionSettingsResponse, DeleteOrganizationRequest, DeleteOrganizationSessionSettingsRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetOrganizationSessionSettingsRequest, GetOrganizationSessionSettingsResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSessionSettingsRequest, UpdateOrganizationSessionSettingsResponse, UpdateOrganizationSettingsRequest } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, CreateOrganizationSessionSettingsRequest, CreateOrganizationSessionSettingsResponse, DeleteOrganizationRequest, DeleteOrganizationSessionSettingsRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetOrganizationSessionSettingsRequest, GetOrganizationSessionSettingsResponse, GetOrganizationUserManagementSettingsRequest, GetOrganizationUserManagementSettingsResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSessionSettingsRequest, UpdateOrganizationSessionSettingsResponse, UpdateOrganizationSettingsRequest, UpdateUserManagementSettingsRequest, UpdateUserManagementSettingsResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.organizations.OrganizationService
@@ -145,6 +145,26 @@ export declare const OrganizationService: {
             readonly name: "DeleteOrganizationSessionSettings";
             readonly I: typeof DeleteOrganizationSessionSettingsRequest;
             readonly O: typeof Empty;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * Update user management setting for an organization
+         *
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateUserManagementSettings
+         */
+        readonly updateUserManagementSettings: {
+            readonly name: "UpdateUserManagementSettings";
+            readonly I: typeof UpdateUserManagementSettingsRequest;
+            readonly O: typeof UpdateUserManagementSettingsResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.GetOrganizationUserManagementSetting
+         */
+        readonly getOrganizationUserManagementSetting: {
+            readonly name: "GetOrganizationUserManagementSetting";
+            readonly I: typeof GetOrganizationUserManagementSettingsRequest;
+            readonly O: typeof GetOrganizationUserManagementSettingsResponse;
             readonly kind: MethodKind.Unary;
         };
     };

@@ -32,6 +32,10 @@ export declare class ErrorInfo extends Message<ErrorInfo> {
      * @generated from field: optional scalekit.v1.errdetails.ValidationErrorInfo validation_error_info = 8;
      */
     validationErrorInfo?: ValidationErrorInfo;
+    /**
+     * @generated from field: optional scalekit.v1.errdetails.ToolErrorInfo tool_error_info = 9;
+     */
+    toolErrorInfo?: ToolErrorInfo;
     constructor(data?: PartialMessage<ErrorInfo>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.errdetails.ErrorInfo";
@@ -242,4 +246,25 @@ export declare class LocalizedMessageInfo extends Message<LocalizedMessageInfo> 
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): LocalizedMessageInfo;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): LocalizedMessageInfo;
     static equals(a: LocalizedMessageInfo | PlainMessage<LocalizedMessageInfo> | undefined, b: LocalizedMessageInfo | PlainMessage<LocalizedMessageInfo> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.errdetails.ToolErrorInfo
+ */
+export declare class ToolErrorInfo extends Message<ToolErrorInfo> {
+    /**
+     * @generated from field: string execution_id = 1;
+     */
+    executionId: string;
+    /**
+     * @generated from field: string tool_message = 2;
+     */
+    toolMessage: string;
+    constructor(data?: PartialMessage<ToolErrorInfo>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.errdetails.ToolErrorInfo";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ToolErrorInfo;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ToolErrorInfo;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ToolErrorInfo;
+    static equals(a: ToolErrorInfo | PlainMessage<ToolErrorInfo> | undefined, b: ToolErrorInfo | PlainMessage<ToolErrorInfo> | undefined): boolean;
 }

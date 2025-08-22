@@ -1,5 +1,5 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { FieldMask, Message, proto3, Timestamp } from "@bufbuild/protobuf";
+import { FieldMask, Message, NullValue, proto3, Timestamp } from "@bufbuild/protobuf";
 import { RegionCode } from "../commons/commons_pb.js";
 /**
  * Feature represents the available features that can be enabled for an organization's portal link
@@ -8,19 +8,24 @@ import { RegionCode } from "../commons/commons_pb.js";
  */
 export declare enum Feature {
     /**
-     * UNSPECIFIED represents an unset or invalid feature value
+     * An unspecified or invalid feature value
      *
-     * @generated from enum value: UNSPECIFIED = 0;
+     * @generated from enum value: FEATURE_UNSPECIFIED = 0;
+     */
+    FEATURE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: UNSPECIFIED = 0 [deprecated = true];
+     * @deprecated
      */
     UNSPECIFIED = 0,
     /**
-     * dir_sync enables directory synchronization configuration in the portal
+     * Enables directory synchronization configuration in the portal
      *
      * @generated from enum value: dir_sync = 1;
      */
     dir_sync = 1,
     /**
-     * sso enables Single Sign-On (SSO) configuration in the portal
+     * Enables Single Sign-On (SSO) configuration in the portal
      *
      * @generated from enum value: sso = 2;
      */
@@ -652,6 +657,34 @@ export declare class UpdateOrganizationSessionSettingsResponse extends Message<U
     static equals(a: UpdateOrganizationSessionSettingsResponse | PlainMessage<UpdateOrganizationSessionSettingsResponse> | undefined, b: UpdateOrganizationSessionSettingsResponse | PlainMessage<UpdateOrganizationSessionSettingsResponse> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.organizations.OrganizationUserManagementSettings
+ */
+export declare class OrganizationUserManagementSettings extends Message<OrganizationUserManagementSettings> {
+    /**
+     * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 1;
+     */
+    jitProvisioningWithSsoEnabled?: boolean;
+    /**
+     * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 2;
+     */
+    syncUserProfileOnSignin?: boolean;
+    /**
+     * Deprecated placeholder to ensure google.protobuf.NullValue is referenced in the schema, preventing unused-definition warnings.
+     *
+     * @generated from field: google.protobuf.NullValue deprecated_placeholder = 99 [deprecated = true];
+     * @deprecated
+     */
+    deprecatedPlaceholder: NullValue;
+    constructor(data?: PartialMessage<OrganizationUserManagementSettings>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.OrganizationUserManagementSettings";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationUserManagementSettings;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrganizationUserManagementSettings;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrganizationUserManagementSettings;
+    static equals(a: OrganizationUserManagementSettings | PlainMessage<OrganizationUserManagementSettings> | undefined, b: OrganizationUserManagementSettings | PlainMessage<OrganizationUserManagementSettings> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.organizations.OrganizationSessionSettings
  */
 export declare class OrganizationSessionSettings extends Message<OrganizationSessionSettings> {
@@ -830,4 +863,76 @@ export declare class OrganizationSettingsFeature extends Message<OrganizationSet
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrganizationSettingsFeature;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrganizationSettingsFeature;
     static equals(a: OrganizationSettingsFeature | PlainMessage<OrganizationSettingsFeature> | undefined, b: OrganizationSettingsFeature | PlainMessage<OrganizationSettingsFeature> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.UpdateUserManagementSettingsRequest
+ */
+export declare class UpdateUserManagementSettingsRequest extends Message<UpdateUserManagementSettingsRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: scalekit.v1.organizations.OrganizationUserManagementSettings settings = 2;
+     */
+    settings?: OrganizationUserManagementSettings;
+    constructor(data?: PartialMessage<UpdateUserManagementSettingsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.UpdateUserManagementSettingsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateUserManagementSettingsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsRequest;
+    static equals(a: UpdateUserManagementSettingsRequest | PlainMessage<UpdateUserManagementSettingsRequest> | undefined, b: UpdateUserManagementSettingsRequest | PlainMessage<UpdateUserManagementSettingsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.UpdateUserManagementSettingsResponse
+ */
+export declare class UpdateUserManagementSettingsResponse extends Message<UpdateUserManagementSettingsResponse> {
+    /**
+     * @generated from field: scalekit.v1.organizations.OrganizationUserManagementSettings settings = 1;
+     */
+    settings?: OrganizationUserManagementSettings;
+    constructor(data?: PartialMessage<UpdateUserManagementSettingsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.UpdateUserManagementSettingsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateUserManagementSettingsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsResponse;
+    static equals(a: UpdateUserManagementSettingsResponse | PlainMessage<UpdateUserManagementSettingsResponse> | undefined, b: UpdateUserManagementSettingsResponse | PlainMessage<UpdateUserManagementSettingsResponse> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.GetOrganizationUserManagementSettingsRequest
+ */
+export declare class GetOrganizationUserManagementSettingsRequest extends Message<GetOrganizationUserManagementSettingsRequest> {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    constructor(data?: PartialMessage<GetOrganizationUserManagementSettingsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.GetOrganizationUserManagementSettingsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOrganizationUserManagementSettingsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOrganizationUserManagementSettingsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOrganizationUserManagementSettingsRequest;
+    static equals(a: GetOrganizationUserManagementSettingsRequest | PlainMessage<GetOrganizationUserManagementSettingsRequest> | undefined, b: GetOrganizationUserManagementSettingsRequest | PlainMessage<GetOrganizationUserManagementSettingsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse
+ */
+export declare class GetOrganizationUserManagementSettingsResponse extends Message<GetOrganizationUserManagementSettingsResponse> {
+    /**
+     * @generated from field: scalekit.v1.organizations.OrganizationUserManagementSettings settings = 1;
+     */
+    settings?: OrganizationUserManagementSettings;
+    constructor(data?: PartialMessage<GetOrganizationUserManagementSettingsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOrganizationUserManagementSettingsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOrganizationUserManagementSettingsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOrganizationUserManagementSettingsResponse;
+    static equals(a: GetOrganizationUserManagementSettingsResponse | PlainMessage<GetOrganizationUserManagementSettingsResponse> | undefined, b: GetOrganizationUserManagementSettingsResponse | PlainMessage<GetOrganizationUserManagementSettingsResponse> | undefined): boolean;
 }

@@ -7,6 +7,7 @@ describe('Users', () => {
   let client: ScalekitClient;
   let testOrg: string;
   let userId: string | null = null;
+  let sharedUserData: CreateUserRequest;
 
   beforeEach(async () => {
     // Use global client
@@ -14,6 +15,12 @@ describe('Users', () => {
     
     // Create test organization for each test
     testOrg = await TestOrganizationManager.createTestOrganization(client);
+    
+    // Create a shared user for testing
+    sharedUserData = TestDataGenerator.generateUserData();
+    const createResponse = await client.user.createUserAndMembership(testOrg, sharedUserData);
+    userId = createResponse.user?.id || null;
+    expect(userId).toBeDefined();
   });
 
   afterEach(async () => {
@@ -29,16 +36,6 @@ describe('Users', () => {
 
   describe('listOrganizationUsers', () => {
     it('should list users by organization', async () => {
-      // Create a user to ensure the organization has at least one user
-      const userData = TestDataGenerator.generateUserData();
-
-      const createResponse = await client.user.createUserAndMembership(testOrg, userData);
-      const createdUserId = createResponse.user?.id;
-      expect(createdUserId).toBeDefined();
-      
-      // Track user ID for cleanup
-      userId = createdUserId || null;
-
       // List users in the organization
       const usersList = await client.user.listOrganizationUsers(testOrg, TestDataGenerator.generatePaginationParams());
 
@@ -74,40 +71,38 @@ describe('Users', () => {
 
   describe('getUser', () => {
     it('should get user by ID', async () => {
-      // Create a user for testing
-      const userData = TestDataGenerator.generateUserData();
-
-      const createResponse = await client.user.createUserAndMembership(testOrg, userData);
-      const createdUserId = createResponse.user?.id;
-      expect(createdUserId).toBeDefined();
-      
-      // Track user ID for cleanup
-      userId = createdUserId || null;
-
       // Retrieve the user by ID
-      const user = await client.user.getUser(createdUserId!);
+      const user = await client.user.getUser(userId!);
       
       expect(user).toBeDefined();
       expect(user.user).toBeDefined();
-      expect(user.user?.id).toBe(createdUserId);
-      expect(user.user?.email).toBe(userData.email);
+      expect(user.user?.id).toBe(userId);
+      expect(user.user?.email).toBe(sharedUserData.email);
     });
   });
 
   describe('createUserAndMembership', () => {
     it('should create user and membership', async () => {
+      // Create a new user for this specific test
       const userData = TestDataGenerator.generateUserData();
+      let newUserId: string | null = null;
 
-      const response = await client.user.createUserAndMembership(testOrg, userData);
-      
-      expect(response).toBeDefined();
-      expect(response.user).toBeDefined();
-      expect(response.user?.id).toBeDefined();
-      expect(response.user?.email).toBe(userData.email);
-      expect(response.user?.metadata?.source).toBe('test');
-      
-      // Track user ID for cleanup
-      userId = response.user?.id || null;
+      try {
+        const response = await client.user.createUserAndMembership(testOrg, userData);
+        
+        expect(response).toBeDefined();
+        expect(response.user).toBeDefined();
+        expect(response.user?.id).toBeDefined();
+        expect(response.user?.email).toBe(userData.email);
+        expect(response.user?.metadata?.source).toBe('test');
+        
+        newUserId = response.user?.id || null;
+      } finally {
+        // Clean up the new user created in this test
+        if (newUserId) {
+          await TestUserManager.cleanupTestUser(client, testOrg, newUserId);
+        }
+      }
     });
 
     it('should throw error when email is missing', async () => {
@@ -129,26 +124,45 @@ describe('Users', () => {
 
   describe('updateUser', () => {
     it('should update user', async () => {
-      // Create a user for testing
-      const userData = TestDataGenerator.generateUserData();
-
-      const createResponse = await client.user.createUserAndMembership(testOrg, userData);
-      const createdUserId = createResponse.user?.id;
-      expect(createdUserId).toBeDefined();
-      
-      // Track user ID for cleanup
-      userId = createdUserId || null;
-
-      // Modify the user
+      // Modify the shared user
       const updateData = TestDataGenerator.generateUserUpdateData();
 
-      const updatedUser = await client.user.updateUser(createdUserId!, updateData);
+      const updatedUser = await client.user.updateUser(userId!, updateData);
       
       expect(updatedUser).toBeDefined();
       expect(updatedUser.user).toBeDefined();
-      expect(updatedUser.user?.id).toBe(createdUserId);
+      expect(updatedUser.user?.id).toBe(userId);
       expect(updatedUser.user?.userProfile?.firstName).toBe('Updated');
       expect(updatedUser.user?.userProfile?.lastName).toBe('Name');
+    });
+  });
+
+  describe('resendInvite', () => {
+    it('should resend invite to user', async () => {
+      // Resend invite to the shared user
+      const resendResponse = await client.user.resendInvite(testOrg, userId!);
+      
+      // Verify the response structure
+      expect(resendResponse).toBeDefined();
+      expect(resendResponse.invite).toBeDefined();
+      expect(resendResponse.invite?.userId).toBe(userId);
+      expect(resendResponse.invite?.organizationId).toBe(testOrg);
+      expect(resendResponse.invite?.status).toBe('PENDING_INVITE');
+      expect(resendResponse.invite?.createdAt).toBeDefined();
+      expect(resendResponse.invite?.expiresAt).toBeDefined();
+      expect(resendResponse.invite?.resentCount).toBe(1);
+    });
+
+    it('should throw error when organizationId is missing', async () => {
+      await expect(
+        client.user.resendInvite('', userId!)
+      ).rejects.toThrow('organizationId is required');
+    });
+
+    it('should throw error when userId is missing', async () => {
+      await expect(
+        client.user.resendInvite(testOrg, '')
+      ).rejects.toThrow('userId is required');
     });
   });
 }); 

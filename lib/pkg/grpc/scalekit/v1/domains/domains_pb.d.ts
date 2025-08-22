@@ -22,6 +22,23 @@ export declare enum VerificationStatus {
     FAILED = 3
 }
 /**
+ * @generated from enum scalekit.v1.domains.DomainType
+ */
+export declare enum DomainType {
+    /**
+     * @generated from enum value: DOMAIN_TYPE_UNSPECIFIED = 0;
+     */
+    DOMAIN_TYPE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: HOME_REALM_DISCOVERY = 1;
+     */
+    HOME_REALM_DISCOVERY = 1,
+    /**
+     * @generated from enum value: JIT_PROVISIONING_DOMAIN = 2;
+     */
+    JIT_PROVISIONING_DOMAIN = 2
+}
+/**
  * @generated from message scalekit.v1.domains.CreateDomainRequest
  */
 export declare class CreateDomainRequest extends Message<CreateDomainRequest> {
@@ -86,6 +103,10 @@ export declare class CreateDomain extends Message<CreateDomain> {
      * @generated from field: string domain = 1;
      */
     domain: string;
+    /**
+     * @generated from field: scalekit.v1.domains.DomainType domain_type = 2;
+     */
+    domainType: DomainType;
     constructor(data?: PartialMessage<CreateDomain>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.domains.CreateDomain";
@@ -301,6 +322,10 @@ export declare class ListDomainRequest extends Message<ListDomainRequest> {
      * @generated from field: google.protobuf.Int32Value page_number = 6;
      */
     pageNumber?: number;
+    /**
+     * @generated from field: scalekit.v1.domains.DomainType domain_type = 7;
+     */
+    domainType: DomainType;
     constructor(data?: PartialMessage<ListDomainRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.domains.ListDomainRequest";
@@ -453,6 +478,10 @@ export declare class Domain extends Message<Domain> {
      * @generated from field: optional string created_by = 11;
      */
     createdBy?: string;
+    /**
+     * @generated from field: scalekit.v1.domains.DomainType domain_type = 12;
+     */
+    domainType: DomainType;
     constructor(data?: PartialMessage<Domain>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.domains.Domain";
