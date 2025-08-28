@@ -475,9 +475,14 @@ export class ToolErrorInfo extends Message<ToolErrorInfo> {
   executionId = "";
 
   /**
-   * @generated from field: string tool_message = 2;
+   * @generated from field: string tool_error_message = 2;
    */
-  toolMessage = "";
+  toolErrorMessage = "";
+
+  /**
+   * @generated from field: string tool_error_code = 3;
+   */
+  toolErrorCode = "";
 
   constructor(data?: PartialMessage<ToolErrorInfo>) {
     super();
@@ -488,7 +493,8 @@ export class ToolErrorInfo extends Message<ToolErrorInfo> {
   static readonly typeName = "scalekit.v1.errdetails.ToolErrorInfo";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "execution_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "tool_message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "tool_error_message", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "tool_error_code", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ToolErrorInfo {

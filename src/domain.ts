@@ -2,7 +2,7 @@ import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
 import { DomainService } from './pkg/grpc/scalekit/v1/domains/domains_connect';
-import { CreateDomainResponse, GetDomainResponse, ListDomainResponse } from './pkg/grpc/scalekit/v1/domains/domains_pb';
+import { CreateDomainResponse, GetDomainResponse, ListDomainResponse, DomainType } from './pkg/grpc/scalekit/v1/domains/domains_pb';
 
 export default class DomainClient {
   private client: PromiseClient<typeof DomainService>;
@@ -17,9 +17,11 @@ export default class DomainClient {
    * Create a domain for an organization with the given name. Optionally, you can provide an external id. 
    * @param {string} organizationId  The organization id
    * @param {string} name The domain name
+   * @param {object} options The options to create a domain
+   * @param {DomainType} options.domainType The type of domain (ALLOWED_EMAIL_DOMAIN or ORGANIZATION_DOMAIN)
    * @returns {Promise<CreateDomainResponse>} The created domain
   */
-  async createDomain(organizationId: string, name: string): Promise<CreateDomainResponse> {
+  async createDomain(organizationId: string, name: string, options?: { domainType?: DomainType }): Promise<CreateDomainResponse> {
     return this.coreClient.connectExec(
       this.client.createDomain,
       {
@@ -28,7 +30,8 @@ export default class DomainClient {
           value: organizationId
         },
         domain: {
-          domain: name
+          domain: name,
+          ...(options?.domainType && { domainType: options.domainType })
         }
       }
     )

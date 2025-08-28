@@ -1055,6 +1055,11 @@ export class CreateMembership extends Message<CreateMembership> {
    */
   metadata: { [key: string]: string } = {};
 
+  /**
+   * @generated from field: optional string inviter_email = 8;
+   */
+  inviterEmail?: string;
+
   constructor(data?: PartialMessage<CreateMembership>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1065,6 +1070,7 @@ export class CreateMembership extends Message<CreateMembership> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 4, name: "roles", kind: "message", T: Role, repeated: true },
     { no: 7, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
+    { no: 8, name: "inviter_email", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateMembership {
@@ -1453,9 +1459,9 @@ export class Invite extends Message<Invite> {
   userId = "";
 
   /**
-   * @generated from field: string invited_by = 3;
+   * @generated from field: optional string invited_by = 3;
    */
-  invitedBy = "";
+  invitedBy?: string;
 
   /**
    * @generated from field: string status = 4;
@@ -1492,7 +1498,7 @@ export class Invite extends Message<Invite> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "invited_by", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "invited_by", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 4, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "created_at", kind: "message", T: Timestamp },
     { no: 6, name: "expires_at", kind: "message", T: Timestamp },
@@ -1731,9 +1737,15 @@ export class AssignUserRolesRequest extends Message<AssignUserRolesRequest> {
  */
 export class AssignRoleRequest extends Message<AssignRoleRequest> {
   /**
-   * @generated from field: string id = 1;
+   * @generated from field: string id = 1 [deprecated = true];
+   * @deprecated
    */
   id = "";
+
+  /**
+   * @generated from field: string role_name = 2;
+   */
+  roleName = "";
 
   constructor(data?: PartialMessage<AssignRoleRequest>) {
     super();
@@ -1744,6 +1756,7 @@ export class AssignRoleRequest extends Message<AssignRoleRequest> {
   static readonly typeName = "scalekit.v1.users.AssignRoleRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "role_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignRoleRequest {
@@ -1815,9 +1828,9 @@ export class RemoveUserRoleRequest extends Message<RemoveUserRoleRequest> {
   userId = "";
 
   /**
-   * @generated from field: string role_id = 3;
+   * @generated from field: string role_name = 3;
    */
-  roleId = "";
+  roleName = "";
 
   constructor(data?: PartialMessage<RemoveUserRoleRequest>) {
     super();
@@ -1829,7 +1842,7 @@ export class RemoveUserRoleRequest extends Message<RemoveUserRoleRequest> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "role_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "role_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RemoveUserRoleRequest {
