@@ -595,6 +595,10 @@ export declare class CreateMembership extends Message<CreateMembership> {
     metadata: {
         [key: string]: string;
     };
+    /**
+     * @generated from field: optional string inviter_email = 8;
+     */
+    inviterEmail?: string;
     constructor(data?: PartialMessage<CreateMembership>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.users.CreateMembership";
@@ -817,9 +821,9 @@ export declare class Invite extends Message<Invite> {
      */
     userId: string;
     /**
-     * @generated from field: string invited_by = 3;
+     * @generated from field: optional string invited_by = 3;
      */
-    invitedBy: string;
+    invitedBy?: string;
     /**
      * @generated from field: string status = 4;
      */
@@ -955,9 +959,14 @@ export declare class AssignUserRolesRequest extends Message<AssignUserRolesReque
  */
 export declare class AssignRoleRequest extends Message<AssignRoleRequest> {
     /**
-     * @generated from field: string id = 1;
+     * @generated from field: string id = 1 [deprecated = true];
+     * @deprecated
      */
     id: string;
+    /**
+     * @generated from field: string role_name = 2;
+     */
+    roleName: string;
     constructor(data?: PartialMessage<AssignRoleRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.users.AssignRoleRequest";
@@ -997,9 +1006,9 @@ export declare class RemoveUserRoleRequest extends Message<RemoveUserRoleRequest
      */
     userId: string;
     /**
-     * @generated from field: string role_id = 3;
+     * @generated from field: string role_name = 3;
      */
-    roleId: string;
+    roleName: string;
     constructor(data?: PartialMessage<RemoveUserRoleRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.users.RemoveUserRoleRequest";

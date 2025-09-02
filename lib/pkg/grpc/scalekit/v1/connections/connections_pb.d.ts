@@ -1854,6 +1854,10 @@ export declare class ListAppConnectionsRequest extends Message<ListAppConnection
      * @generated from field: string page_token = 2;
      */
     pageToken: string;
+    /**
+     * @generated from field: optional string provider = 3;
+     */
+    provider?: string;
     constructor(data?: PartialMessage<ListAppConnectionsRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.ListAppConnectionsRequest";

@@ -256,9 +256,13 @@ export declare class ToolErrorInfo extends Message<ToolErrorInfo> {
      */
     executionId: string;
     /**
-     * @generated from field: string tool_message = 2;
+     * @generated from field: string tool_error_message = 2;
      */
-    toolMessage: string;
+    toolErrorMessage: string;
+    /**
+     * @generated from field: string tool_error_code = 3;
+     */
+    toolErrorCode: string;
     constructor(data?: PartialMessage<ToolErrorInfo>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.errdetails.ToolErrorInfo";
