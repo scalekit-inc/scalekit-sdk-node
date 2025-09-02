@@ -29,6 +29,11 @@ export enum VerificationStatus {
    * @generated from enum value: FAILED = 3;
    */
   FAILED = 3,
+
+  /**
+   * @generated from enum value: AUTO_VERIFIED = 4;
+   */
+  AUTO_VERIFIED = 4,
 }
 // Retrieve enum metadata with: proto3.getEnumType(VerificationStatus)
 proto3.util.setEnumType(VerificationStatus, "scalekit.v1.domains.VerificationStatus", [
@@ -36,6 +41,7 @@ proto3.util.setEnumType(VerificationStatus, "scalekit.v1.domains.VerificationSta
   { no: 1, name: "PENDING" },
   { no: 2, name: "VERIFIED" },
   { no: 3, name: "FAILED" },
+  { no: 4, name: "AUTO_VERIFIED" },
 ]);
 
 /**
@@ -48,20 +54,20 @@ export enum DomainType {
   DOMAIN_TYPE_UNSPECIFIED = 0,
 
   /**
-   * @generated from enum value: HOME_REALM_DISCOVERY = 1;
+   * @generated from enum value: ALLOWED_EMAIL_DOMAIN = 1;
    */
-  HOME_REALM_DISCOVERY = 1,
+  ALLOWED_EMAIL_DOMAIN = 1,
 
   /**
-   * @generated from enum value: JIT_PROVISIONING_DOMAIN = 2;
+   * @generated from enum value: ORGANIZATION_DOMAIN = 2;
    */
-  JIT_PROVISIONING_DOMAIN = 2,
+  ORGANIZATION_DOMAIN = 2,
 }
 // Retrieve enum metadata with: proto3.getEnumType(DomainType)
 proto3.util.setEnumType(DomainType, "scalekit.v1.domains.DomainType", [
   { no: 0, name: "DOMAIN_TYPE_UNSPECIFIED" },
-  { no: 1, name: "HOME_REALM_DISCOVERY" },
-  { no: 2, name: "JIT_PROVISIONING_DOMAIN" },
+  { no: 1, name: "ALLOWED_EMAIL_DOMAIN" },
+  { no: 2, name: "ORGANIZATION_DOMAIN" },
 ]);
 
 /**

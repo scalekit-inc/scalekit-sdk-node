@@ -3314,6 +3314,11 @@ export class ListAppConnectionsRequest extends Message<ListAppConnectionsRequest
    */
   pageToken = "";
 
+  /**
+   * @generated from field: optional string provider = 3;
+   */
+  provider?: string;
+
   constructor(data?: PartialMessage<ListAppConnectionsRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -3324,6 +3329,7 @@ export class ListAppConnectionsRequest extends Message<ListAppConnectionsRequest
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "page_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "provider", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAppConnectionsRequest {

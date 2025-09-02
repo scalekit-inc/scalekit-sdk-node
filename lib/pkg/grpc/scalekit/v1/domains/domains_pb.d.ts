@@ -19,7 +19,11 @@ export declare enum VerificationStatus {
     /**
      * @generated from enum value: FAILED = 3;
      */
-    FAILED = 3
+    FAILED = 3,
+    /**
+     * @generated from enum value: AUTO_VERIFIED = 4;
+     */
+    AUTO_VERIFIED = 4
 }
 /**
  * @generated from enum scalekit.v1.domains.DomainType
@@ -30,13 +34,13 @@ export declare enum DomainType {
      */
     DOMAIN_TYPE_UNSPECIFIED = 0,
     /**
-     * @generated from enum value: HOME_REALM_DISCOVERY = 1;
+     * @generated from enum value: ALLOWED_EMAIL_DOMAIN = 1;
      */
-    HOME_REALM_DISCOVERY = 1,
+    ALLOWED_EMAIL_DOMAIN = 1,
     /**
-     * @generated from enum value: JIT_PROVISIONING_DOMAIN = 2;
+     * @generated from enum value: ORGANIZATION_DOMAIN = 2;
      */
-    JIT_PROVISIONING_DOMAIN = 2
+    ORGANIZATION_DOMAIN = 2
 }
 /**
  * @generated from message scalekit.v1.domains.CreateDomainRequest
