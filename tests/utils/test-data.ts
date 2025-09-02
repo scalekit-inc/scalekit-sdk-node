@@ -1,5 +1,6 @@
 import { CreateUserRequest, UpdateUserRequest } from '../../src/types/user';
 import { TemplateType } from '../../src/pkg/grpc/scalekit/v1/auth/passwordless_pb';
+import { DomainType } from '../../src/pkg/grpc/scalekit/v1/domains/domains_pb';
 
 /**
  * Test data generation utilities to reduce redundancy across test files
@@ -165,6 +166,28 @@ export class TestDataGenerator {
       return { linkToken: 'mock-link-token' };
     }
   }
+
+  /**
+   * Generate test domain data
+   */
+  static generateDomainData(domainType?: 'allowed' | 'organization') {
+    const uniqueId = this.generateUniqueId();
+    const baseDomain = `test-domain-${uniqueId}.com`;
+    
+    return {
+      domain: baseDomain,
+      domainType: domainType === 'allowed' ? 'ALLOWED_EMAIL_DOMAIN' : 
+                  domainType === 'organization' ? 'ORGANIZATION_DOMAIN' : undefined
+    };
+  }
+
+  /**
+   * Generate unique domain name for testing
+   */
+  static generateUniqueDomainName(prefix: string = 'test'): string {
+    const uniqueId = this.generateUniqueId();
+    return `${prefix}-${uniqueId}.com`;
+  }
 }
 
 /**
@@ -242,6 +265,49 @@ export class TestUserManager {
         await client.user.deleteUser(userId);
       } catch (error) {
         // User may already be deleted
+      }
+    }
+  }
+}
+
+/**
+ * Test domain management utilities
+ */
+export class TestDomainManager {
+  /**
+   * Create a test domain and return domain data
+   */
+  static async createTestDomain(client: any, testOrg: string, domainType?: 'allowed' | 'organization') {
+    const domainName = TestDataGenerator.generateUniqueDomainName();
+    const options = domainType ? { 
+      domainType: domainType === 'allowed' ? DomainType.ALLOWED_EMAIL_DOMAIN : DomainType.ORGANIZATION_DOMAIN
+    } : undefined;
+    
+    const response = await client.domain.createDomain(testOrg, domainName, options);
+    const createdDomainId = response.domain?.id;
+    
+    if (!createdDomainId) {
+      throw new Error('Failed to create test domain');
+    }
+    
+    return {
+      domainId: createdDomainId,
+      domainName,
+      domainType: response.domain?.domainType,
+      response
+    };
+  }
+
+  /**
+   * Clean up a test domain (if domain deletion is supported)
+   */
+  static async cleanupTestDomain(client: any, testOrg: string, domainId: string): Promise<void> {
+    if (domainId) {
+      try {
+        // Note: Domain deletion may not be implemented yet
+        // await client.domain.deleteDomain(testOrg, domainId);
+      } catch (error) {
+        // Domain may already be deleted or deletion not supported
       }
     }
   }
