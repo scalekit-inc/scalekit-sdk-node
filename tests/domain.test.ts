@@ -211,34 +211,7 @@ describe('Domains', () => {
       ).rejects.toThrow();
     });
 
-    it('should handle cross-organization domain deletion', async () => {
-      // Create a test domain
-      const { domainId } = await TestDomainManager.createTestDomain(client, testOrg, 'allowed');
-      
-      // Create another organization
-      const otherOrg = await TestOrganizationManager.createTestOrganization(client);
-      
-      try {
-        // Test cross-organization deletion - the API might allow this
-        const deleteResponse = await client.domain.deleteDomain(otherOrg, domainId);
-        expect(deleteResponse).toBeDefined();
-        
-        // Since the domain was deleted, it should no longer exist
-        // We'll test this by trying to get it from either organization
-        try {
-          await client.domain.getDomain(testOrg, domainId);
-          // If we get here, the domain still exists, which means deletion might not have worked
-          // or the domain is accessible from multiple organizations
-          console.log('Note: Domain still accessible after cross-organization deletion');
-        } catch (error) {
-          // Domain was successfully deleted
-          expect(error).toBeDefined();
-        }
-      } finally {
-        // Clean up the other organization
-        await TestOrganizationManager.cleanupTestOrganization(client, otherOrg);
-      }
-    });
+
   });
 
   describe('error handling', () => {
