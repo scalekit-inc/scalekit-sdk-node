@@ -10,6 +10,8 @@ import DomainClient from './domain';
 import OrganizationClient from './organization';
 import PasswordlessClient from './passwordless';
 import UserClient from './user';
+import RoleClient from './role';
+import PermissionClient from './permission';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse ,TokenValidationOptions } from './types/scalekit';
 import { WebhookVerificationError, ScalekitValidateTokenFailureException } from './errors/base-exception';
@@ -37,6 +39,8 @@ export default class ScalekitClient {
   readonly directory: DirectoryClient;
   readonly passwordless: PasswordlessClient;
   readonly user: UserClient;
+  readonly role: RoleClient;
+  readonly permission: PermissionClient;
   constructor(
     envUrl: string,
     clientId: string,
@@ -72,6 +76,14 @@ export default class ScalekitClient {
       this.coreClient
     );
     this.user = new UserClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.role = new RoleClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.permission = new PermissionClient(
       this.grpcConnect,
       this.coreClient
     );
