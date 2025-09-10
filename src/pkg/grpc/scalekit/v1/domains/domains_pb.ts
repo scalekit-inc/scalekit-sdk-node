@@ -787,11 +787,6 @@ export class Domain extends Message<Domain> {
   organizationId = "";
 
   /**
-   * @generated from field: string connection_id = 5;
-   */
-  connectionId = "";
-
-  /**
    * @generated from field: string txt_record_key = 6;
    */
   txtRecordKey = "";
@@ -817,11 +812,6 @@ export class Domain extends Message<Domain> {
   updateTime?: Timestamp;
 
   /**
-   * @generated from field: optional string created_by = 11;
-   */
-  createdBy?: string;
-
-  /**
    * @generated from field: scalekit.v1.domains.DomainType domain_type = 12;
    */
   domainType = DomainType.DOMAIN_TYPE_UNSPECIFIED;
@@ -838,13 +828,11 @@ export class Domain extends Message<Domain> {
     { no: 2, name: "domain", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "environment_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "txt_record_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 7, name: "txt_record_secret", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "verification_status", kind: "enum", T: proto3.getEnumType(VerificationStatus) },
     { no: 9, name: "create_time", kind: "message", T: Timestamp },
     { no: 10, name: "update_time", kind: "message", T: Timestamp },
-    { no: 11, name: "created_by", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 12, name: "domain_type", kind: "enum", T: proto3.getEnumType(DomainType) },
   ]);
 
