@@ -1,0 +1,563 @@
+syntax = "proto3";
+
+package scalekit.v1.domains;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/domains";
+
+service DomainService {
+  rpc CreateDomain(CreateDomainRequest) returns (CreateDomainResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+
+    option (google.api.http) = {
+      post: "/api/v1/organizations/{organization_id}/domains"
+      body: "domain"
+      // additional_bindings: [
+      //   {
+      //     post: "/api/v1/organizations/-/domains"
+      //     body: "domain"
+      //   }
+      // ]
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Domains"
+      summary: "Create Domain"
+      description:
+        "Creates a new domain and associates it with the specified organization. The domain can be configured as either an ALLOWED_EMAIL_DOMAIN for automatic organization suggestions during user sign-in/sign-up, or as an ORGANIZATION_DOMAIN for SSO connection identification.\n\n"
+        "The domain must be a valid, business email domain that you control. Public disposable domains (gmail.com, outlook.com, etc.) are automatically blocked for security.\n\n"
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully created the domain."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.domains.CreateDomainResponse"}
+          }
+        }
+      }
+
+      responses: {
+        key: "400"
+        value: {
+          description: "Invalid request — common causes invalid domain format, public or disposable domain, or domain already exists."
+          schema: {
+            json_schema: {ref: "#/definitions/errdetailsErrorInfo"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateDomain(UpdateDomainRequest) returns (UpdateDomainResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{organization_id}/domains/{id}"
+      body: "domain"
+      // additional_bindings: [
+      //   {
+      //     patch: "/api/v1/organizations/-/domains"
+      //     body: "domain"
+      //   }
+      // ]
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Domains"
+      summary: "Update Domain"
+      description:
+        "Updates an existing domain's configuration within an organization. Currently supports updating domain metadata and configuration settings.\n\n"
+        "Use this endpoint to modify domain properties after initial creation. Note that the domain name itself cannot be changed once created.\n\n"
+        "The domain must belong to the specified organization and you must provide either the organization ID or external ID along with the domain ID."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully updated the domain."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.domains.UpdateDomainResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc VerifyDomain(VerifyDomainRequest) returns (google.protobuf.BoolValue) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{organization_id}/domains/{id}:verify"
+      // additional_bindings: [
+      //   {patch: "/api/v1/organizations/-/domains/{id}:verify"}]
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Domains"
+      summary: "Verify Domain"
+      description:
+        "Initiates domain ownership verification by checking the DNS TXT record that should be added to the domain's DNS configuration.\n\n"
+        "Use this endpoint to manually trigger verification for domains that are in PENDING status. The system will check for the required TXT record and update the verification status accordingly.\n\n"
+        "For automatically verified domains, this endpoint will return true immediately. For domains requiring manual verification, ensure the TXT record has been properly configured in your DNS settings before calling this endpoint."
+      responses: {
+        key: "200"
+        value: {
+          description: "Domain verification result. Returns true if verification succeeds, false otherwise."
+          schema: {
+            json_schema: {ref: ".google.protobuf.BoolValue"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetDomain(GetDomainRequest) returns (GetDomainResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      get: "/api/v1/organizations/{organization_id}/domains/{id}"
+      // additional_bindings: [
+      //   {get: "/api/v1/organizations/-/domains/{id}"}]
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Domains"
+      summary: "Get Domain"
+      description: "Retrieves complete details for a specific allowed email domain or organization domain, including timestamps, and configuration information.\n\n"
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved the domain details."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.domains.GetDomainResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteDomain(DeleteDomainRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      delete: "/api/v1/organizations/{organization_id}/domains/{id}"
+      // additional_bindings: [
+      //   {delete: "/api/v1/organizations/-/domains/{id}"}]
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Domains"
+      summary: "Delete Domain"
+      description:
+        "Permanently removes an allowed email domain or organization domain from the organization configuration.\n\n"
+        "Use this endpoint when you need to remove a domain that is no longer trusted or when consolidating multiple domains. Note that this action cannot be undone.\n\n"
+      responses: {
+        key: "200"
+        value: {description: "Domain successfully deleted."}
+      }
+    };
+  }
+
+  rpc ListDomains(ListDomainRequest) returns (ListDomainResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      get: "/api/v1/organizations/{organization_id}/domains"
+      // additional_bindings: [
+      //   {get: "/api/v1/organizations/-/domains"}]
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Domains"
+      summary: "List Domains"
+      description:
+        "Retrieves a paginated list of all allowed email domains and organization domains configured for the specified organization."
+        "Use this endpoint to view and manage domain configurations.\n\n"
+        "ALLOWED_EMAIL_DOMAIN enables users to join an organization with automatic suggestions in the organization switcher.\n"
+        "\nORGANIZATION_DOMAIN is used to identify the SSO connection for the organization.\n\n"
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved the list of domains."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.domains.ListDomainResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListAuthorizedDomains(ListAuthorizedDomainRequest) returns (ListAuthorizedDomainResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/domains/{origin}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Domains"
+      summary: "List Authorized Domains"
+      description:
+        "Retrieves a list of domains that are authorized for use with the specified origin URL.\n\n"
+        "Use this endpoint to validate whether a particular domain is allowed for authentication or other domain-restricted operations.\n\n"
+        "This is commonly used by frontend applications to verify domain allowlists and CORS configurations."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved the list of authorized domains."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.domains.ListAuthorizedDomainResponse"}
+          }
+        }
+      }
+    };
+  }
+}
+
+message CreateDomainRequest {
+  oneof identities {
+    string organization_id = 1 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Scalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization."
+        example: "\"org_81667076086825451\""
+      }
+    ];
+    string external_id = 2 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (google.api.field_visibility).restriction = "PREVIEW",
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization."
+        example: "\"tenant_12345\""
+      }
+    ];
+  }
+  optional string connection_id = 3 [
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Optional identity provider connection ID to associate with this domain for enterprise SSO configurations."
+      example: "\"conn_123456789\""
+    }
+  ];
+  CreateDomain domain = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Domain configuration including the domain name and type."}];
+}
+
+message CreateDomainResponse {
+  Domain domain = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The newly created domain object with all configuration details and system-generated identifiers."}];
+}
+
+message CreateDomain {
+  string domain = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 4
+      max_len: 255
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The domain name to be configured. Must be a valid business domain you control. Public disposable domains (gmail.com, outlook.com, etc.) are automatically blocked for security."
+      example: "\"customerdomain.com\""
+    }
+  ];
+  DomainType domain_type = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The type of domain configuration. ALLOWED_EMAIL_DOMAIN enables automatic organization suggestions for users with matching email domains during sign-in/sign-up. ORGANIZATION_DOMAIN is for primary organization domains."
+    example: "\"ALLOWED_EMAIL_DOMAIN\""
+  }];
+}
+
+message UpdateDomainRequest {
+  oneof identities {
+    string organization_id = 1 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Scalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization."
+        example: "\"org_81667076086825451\""
+      }
+    ];
+    string external_id = 2 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (google.api.field_visibility).restriction = "PREVIEW",
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization."
+        example: "\"tenant_12345\""
+      }
+    ];
+  }
+  optional string connection_id = 3 [
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Optional updated identity provider connection ID to associate with this domain."
+      example: "\"conn_123456789\""
+    }
+  ];
+  string id = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Scalekit-generated unique identifier of the domain to be updated."
+    example: "\"dom_88351643129225005\""
+  }];
+  UpdateDomain domain = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Domain update configuration. Currently empty as domain name cannot be changed once created."}];
+}
+
+message UpdateDomain {}
+
+message UpdateDomainResponse {
+  Domain domain = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The updated domain object reflecting all changes made to the domain configuration."}];
+}
+
+message GetDomainRequest {
+  oneof identities {
+    string organization_id = 1 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Scalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization."
+        example: "\"org_81667076086825451\""
+      }
+    ];
+    string external_id = 2 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (google.api.field_visibility).restriction = "PREVIEW",
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization."
+        example: "\"tenant_12345\""
+      }
+    ];
+  }
+  string id = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Scalekit-generated unique identifier of the domain to retrieve."
+    example: "\"dom_88351643129225005\""
+  }];
+}
+
+message GetDomainResponse {
+  Domain domain = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The requested domain object with complete details including timestamps, and configuration."}];
+}
+
+message DeleteDomainRequest {
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Scalekit-generated unique identifier of the domain to be permanently deleted."
+    example: "\"dom_88351643129225005\""
+  }];
+  oneof identities {
+    string organization_id = 2 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Scalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization."
+        example: "\"org_81667076086825451\""
+      }
+    ];
+    string external_id = 3 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (google.api.field_visibility).restriction = "PREVIEW",
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization."
+        example: "\"tenant_12345\""
+      }
+    ];
+  }
+  optional string connection_id = 4 [
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Optional connection ID for additional validation during domain deletion."
+      example: "\"conn_123456789\""
+    }
+  ];
+}
+
+message ListDomainRequest {
+  oneof identities {
+    string organization_id = 1 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Scalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization."
+        example: "\"org_81667076086825451\""
+      }
+    ];
+    string external_id = 2 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (google.api.field_visibility).restriction = "PREVIEW",
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization."
+        example: "\"tenant_12345\""
+      }
+    ];
+  }
+  optional string connection_id = 3 [
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Optional filter to list domains associated with a specific identity provider connection."
+      example: "\"conn_123456789\""
+    }
+  ];
+  optional string include = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Optional comma-separated list of additional fields to include in the response (e.g., 'verification_details')."
+    example: "\"verification_details\""
+  }];
+  google.protobuf.Int32Value page_size = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Maximum number of domains to return per page. Default is 30, maximum is 100."
+    example: "30"
+  }];
+  google.protobuf.Int32Value page_number = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Page number to retrieve (0-based). Use 0 for the first page."
+    example: "0"
+  }];
+  DomainType domain_type = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description:
+      "ALLOWED_EMAIL_DOMAIN enables users to join an organization with automatic suggestions in the organization switcher.\n"
+      "\nORGANIZATION_DOMAIN is used to identify the SSO connection for the organization.\n\n"
+    example: "\"ALLOWED_EMAIL_DOMAIN\""
+  }];
+}
+
+message VerifyDomainRequest {
+  oneof identities {
+    string organization_id = 1 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Scalekit-generated unique identifier for the organization. Use either this or external_id to identify the organization."
+        example: "\"org_81667076086825451\""
+      }
+    ];
+    string external_id = 2 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (google.api.field_visibility).restriction = "PREVIEW",
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Your application's unique identifier for the organization. Alternative to organization_id for identifying the organization."
+        example: "\"tenant_12345\""
+      }
+    ];
+  }
+  string id = 4 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "dom"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Scalekit-generated unique identifier of the domain to verify. Must start with 'dom_' prefix."
+      example: "\"dom_88351643129225005\""
+    }
+  ];
+}
+
+message ListDomainResponse {
+  int32 page_size = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Number of domains returned in this page."
+    example: "1"
+  }];
+  int32 page_number = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Current page number in the pagination sequence."
+    example: "1"
+  }];
+  repeated Domain domains = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Array of domain objects containing all domain details including verification status and configuration."}];
+}
+
+message ListAuthorizedDomainRequest {
+  string origin = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The origin URL to check for authorized domains (e.g., https://app.example.com)."
+    example: "\"https://myapp.com\""
+  }];
+}
+
+message ListAuthorizedDomainResponse {
+  repeated string domains = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Array of domain names that are authorized for use with the specified origin."
+    example: "[\"example.com\", \"app.example.com\"]"
+  }];
+}
+
+message Domain {
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Scalekit-generated unique identifier for this domain record."
+    example: "\"dom_88351643129225005\""
+  }];
+  string domain = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The business domain name that was configured for allowed email domain functionality (e.g., company.com, subdomain.company.com)."
+    example: "\"customerdomain.com\""
+  }];
+  string environment_id = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The environment ID where this domain is configured."
+    example: "\"env_58345499215790610\""
+  }];
+  reserved 5;
+  string organization_id = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The organization to which the domain belongs."
+    example: "\"org_81667076086825451\""
+  }];
+  string txt_record_key = 6 [
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The DNS TXT record key that should be added to verify domain ownership."
+      example: "\"scalekit-verification=abc123def456\""
+    }
+  ];
+  string txt_record_secret = 7 [
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The DNS TXT record value that should be added to verify domain ownership."
+      example: "\"scalekit-verification-value\""
+    }
+  ];
+  VerificationStatus verification_status = 8 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Current verification status of the domain. AUTO_VERIFIED means the domain was automatically verified without DNS changes, VERIFIED means manually verified via DNS TXT record, PENDING requires manual DNS configuration."
+      example: "\"AUTO_VERIFIED\""
+    },
+    (google.api.field_visibility).restriction = "PREVIEW"
+  ];
+  google.protobuf.Timestamp create_time = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the domain was first created."
+    example: "\"2025-09-01T12:14:43.100Z\""
+  }];
+  google.protobuf.Timestamp update_time = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the domain was last updated."
+    example: "\"2025-09-01T12:14:43.110455169Z\""
+  }];
+  DomainType domain_type = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The type of domain configuration. ALLOWED_EMAIL_DOMAIN enables automatic organization suggestions for users with matching email domains during sign-in/sign-up. ORGANIZATION_DOMAIN is for primary organization domains."
+    example: "\"ALLOWED_EMAIL_DOMAIN\""
+  }];
+  reserved 11;
+}
+
+enum VerificationStatus {
+  VERIFICATION_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;
+  VERIFIED = 2;
+  FAILED = 3;
+  AUTO_VERIFIED = 4;
+}
+
+enum DomainType {
+  DOMAIN_TYPE_UNSPECIFIED = 0;
+  ALLOWED_EMAIL_DOMAIN = 1;
+  ORGANIZATION_DOMAIN = 2;
+}

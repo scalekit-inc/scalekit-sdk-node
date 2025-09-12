@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package scalekit.v1.migrations;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/empty.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/migrations";
+
+service MigrationService {
+  rpc MigrateFSAData(MigrateFSARequest) returns (MigrationFSAResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {post: "/migrations/fsa-data"};
+  }
+}
+
+message MigrationServiceResponse {
+  int32 success_environments = 1;
+  int32 failed_environments = 2;
+}
+
+message MigrationSAMLRequest {
+  repeated int64 environment_ids = 1;
+  int32 batch_size = 2 [(buf.validate.field).required = true];
+}
+
+message MigrateFSARequest {
+  repeated int64 environment_ids = 1;
+  FSADataType data_type = 2 [(buf.validate.field).required = true];
+  int32 batch_size = 3 [(buf.validate.field).required = true];
+}
+
+message MigrationFSAResponse {
+  int32 success_environments = 1;
+  int32 failed_environments = 2;
+}
+
+message MigrationSAMLResponse {
+  int32 success_environments = 1;
+  int32 failed_environments = 2;
+}
+
+enum FSADataType {
+  FSA_DATA_TYPE_UNSPECIFIED = 0;
+  FSA_DATA_TYPE_CONNECTION = 1;
+  FSA_DATA_TYPE_SESSION = 2;
+  FSA_DATA_TYPE_USER_MANAGEMENT = 3;
+}

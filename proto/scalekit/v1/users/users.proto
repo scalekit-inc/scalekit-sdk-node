@@ -1,0 +1,1883 @@
+syntax = "proto3";
+
+package scalekit.v1.users;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/errdetails/errdetails.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/users";
+
+service UserService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    name: "Users"
+    description: "Comprehensive user management operations including user lifecycle, organization memberships, and invitation workflows. This service provides endpoints for creating, retrieving, updating, and deleting user accounts across your Scalekit environment. It supports both individual user operations and bulk operations for user administration, including user search, pagination, and metadata management. The service also handles user invitations and organization membership management."
+  };
+  // Users
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      get: "/api/v1/users/{id}"
+      // additional_bindings: [
+      //   {get: "/api/v1/users:external_id/{external_id}"}
+      // ]
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Get user"
+      description: "Retrieves all details for a user by system-generated user ID or external ID. The response includes organization memberships and user metadata."
+      responses: {
+        key: "200"
+        value: {
+          description: "User details retrieved successfully. Returns full user object with system-generated fields and timestamps."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.GetUserResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/users"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "List all users in environment"
+      description: "Retrieves a paginated list of all users across your entire environment. Use this endpoint to view all users regardless of their organization memberships. This is useful for administrative purposes, user audits, or when you need to see all users in your Scalekit environment. Supports pagination for large user bases."
+      responses: {
+        key: "200"
+        value: {
+          description: "List of users."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.ListUsersResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const response = await sc.user.listUsers(\n  { pageSize: 100 });"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "# pass empty org to fetch all users in environment\nresp,_ = sc.users.list_users(organization_id=\"\", page_size=100)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "all, err := sc.User().ListOrganizationUsers(ctx, \"\", &scalekit.ListUsersOptions{PageSize: 100})"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "ListUsersRequest lur = ListUsersRequest.\n  newBuilder().setPageSize(100).build();\nListUsersResponse allUsers = users.listUsers(lur);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc SearchUsers(SearchUsersRequest) returns (SearchUsersResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/users:search"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Search users"
+      description: "Searches for users in the environment by email, user ID, or external ID. Returns all users that match the query. Supports pagination."
+      responses: {
+        key: "200"
+        value: {
+          description: "Returns a list of matching users and a page token for pagination if there are additional results."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.SearchUsersResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc SearchOrganizationUsers(SearchOrganizationUsersRequest) returns (SearchOrganizationUsersResponse) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/organizations/{organization_id}/users:search"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Search organization users"
+      description: "Searches for users within a specific organization by email, user ID, or external ID. Returns all users in the organization that match the query. Supports pagination."
+      responses: {
+        key: "200"
+        value: {
+          description: "Returns a list of matching users within the organization and a page token for pagination if there are additional results."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.SearchOrganizationUsersResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      patch: "/api/v1/users/{id}"
+      body: "user"
+      // additional_bindings: [
+      //   {
+      //     patch: "/api/v1/users:external_id/{external_id}"
+      //     body: "user"
+      //   }
+      // ]
+      // Note: This is hidden from the docs as new rpc method needs to be created
+      // TODO: use summary to be "Update User"
+      // additional_bindings: [
+      //   {
+      //     patch: "/api/v1/organizations/-/users"
+      //     body: "user"
+      //   }
+      // ]
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Update user information"
+      description: "Modifies user account information including profile details, metadata, and external ID. Use this endpoint to update a user's personal information, contact details, or custom metadata. You can update the user's profile, phone number, and metadata fields. Note that fields like user ID, email address, environment ID, and creation time cannot be modified."
+      responses: {
+        key: "200"
+        value: {
+          description: "User updated successfully. Returns the modified user object with updated timestamps."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.UpdateUserResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "await sc.user.updateUser(\"usr_123\", {\n	userProfile: {\n		firstName: \"John\",\n		lastName: \"Smith\",\n	},\n	metadata: {\n		department: \"sales\",\n	},\n});"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "import os\nfrom scalekit import ScalekitClient\nfrom scalekit.v1.users.users_pb2 import UpdateUser\nfrom scalekit.v1.commons.\n  commons_pb2 import UserProfile\nsc = ScalekitClient(\n    env_url=os.getenv(\"SCALEKIT_ENV_URL\"),\n    client_id=os.getenv(\"SCALEKIT_CLIENT_ID\"),\n    client_secret=os.getenv(\"SCALEKIT_CLIENT_SECRET\"),\n)\nupdate_user = UpdateUser(\n    user_profile=UserProfile(\n        first_name=\"John\",\n        last_name=\"Smith\"\n    ),\n    metadata={\"department\": \"sales\"}\n)\nsc.users.update_user(organization_id=\"org_123\", \n  user=update_user)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "upd := &usersv1.UpdateUser{\n    UserProfile: &usersv1.UpdateUserProfile{\n        FirstName: \"John\",\n        LastName:  \"Smith\",\n    },\n    Metadata: map[string]string{\n        \"department\": \"sales\",\n    },\n}\nsc.User().UpdateUser(ctx, \"usr_123\", upd)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "UpdateUser upd = UpdateUser.newBuilder()\n        .setUserProfile(\n          UpdateUserProfile.newBuilder()\n                .setFirstName(\"John\")\n                .setLastName(\"Smith\")\n                .build())\n        .putMetadata(\"department\", \"sales\")\n        .build();\nUpdateUserRequest updReq = UpdateUserRequest.\n  newBuilder().setUser(upd).build();\nusers.updateUser(\"usr_123\", updReq);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      delete: "/api/v1/users/{id}"
+      // additional_bindings: [
+      //   {delete: "/api/v1/users:external_id/{external_id}"}
+      // ]
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Delete user permanently"
+      description: "Permanently removes a user from your environment and deletes all associated data. Use this endpoint when you need to completely remove a user account. This action deletes the user's profile, memberships, and all related data across all organizations. This operation cannot be undone, so use with caution."
+      responses: {
+        key: "200"
+        value: {description: "User successfully deleted. No content returned"}
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "await sc.user.deleteUser(\"usr_123\");"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "sc.users.delete_user(organization_id=\"org_123\", \n  user_id=\"usr_123\")"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "if err := sc.User().DeleteUser(ctx, \n  \"usr_123\"); err != nil {\n    panic(err)\n}"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "users.deleteUser(\"usr_123\");"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  // Memberships
+  rpc CreateMembership(CreateMembershipRequest) returns (CreateMembershipResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/memberships/organizations/{organization_id}/users/{id}"
+      body: "membership"
+      // Note: This is hidden from the docs as new rpc method needs to be created
+      // TODO: use summary to be "Add existing User"
+      // additional_bindings: [
+      //   {post: "/api/v1/organizations/-/users/{id}"}
+      // ]
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Add existing user to organization"
+      description: "Adds an existing user to an organization and assigns them specific roles and permissions. Use this endpoint when you want to grant an existing user access to a particular organization. You can specify roles, metadata, and other membership details during the invitation process."
+      responses: {
+        key: "201"
+        value: {
+          description: "User successfully added to the organization. Returns details of the updated membership details"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.CreateMembershipResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "import { ScalekitClient } from \"@scalekit-sdk/node\";\nconst sc = new ScalekitClient(\n	process.env.SCALEKIT_ENV_URL,\n	process.env.SCALEKIT_CLIENT_ID,\n	process.env.SCALEKIT_CLIENT_SECRET\n);\nawait sc.user.createMembership(\"org_123\", \"usr_123\", {\n	roles: [\"admin\"],\n	metadata: {\n		department: \"engineering\",\n		location: \"nyc-office\",\n	},\n});"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "import os\nfrom scalekit import ScalekitClient\nsc = ScalekitClient(\n    env_url=os.getenv(\"SCALEKIT_ENV_URL\"),\n    client_id=os.getenv(\"SCALEKIT_CLIENT_ID\"),\n    client_secret=os.getenv(\"SCALEKIT_CLIENT_SECRET\"),\n)\n# The Python SDK currently exposes a helper that \n  #simply links an existing\n# user to an organization.\nresp, _ = sc.users.add_user_to_organization(\n    organization_id=\"org_123\",\n    user_id=\"usr_123\",\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "func main() {\n    sc := scalekit.NewScalekitClient(\n        os.Getenv(\"SCALEKIT_ENV_URL\"),\n        os.Getenv(\"SCALEKIT_CLIENT_ID\"),\n        os.Getenv(\"SCALEKIT_CLIENT_SECRET\"),\n    )\n    membership := &usersv1.CreateMembership{\n        Roles: []*usersv1.Role{{Name: \"admin\"}},\n        Metadata: map[string]string{\n            \"department\": \"engineering\",\n            \"location\":   \"nyc-office\",\n        },\n    }\n    resp, \n      err := sc.User().CreateMembership(\n        context.Background(), \"org_123\", \n          \"usr_123\", membership, false)\n    if err != nil {\n        panic(err)\n    }\n}"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "import com.scalekit.ScalekitClient;\nimport com.scalekit.api.UserClient;\nimport com.scalekit.grpc.scalekit.v1.users.*;\nScalekitClient sk = new ScalekitClient(\n    System.getenv(\"SCALEKIT_ENV_URL\"),\n    System.getenv(\"SCALEKIT_CLIENT_ID\"),\n    System.getenv(\"SCALEKIT_CLIENT_SECRET\")\n);\nUserClient users = sk.users();\nCreateMembershipRequest membershipReq = CreateMemb\n  ershipRequest.newBuilder()\n        .setMembership(\n          CreateMembership.newBuilder()\n                .addRoles(Role.newBuilder(\n                  ).setName(\"admin\").build())\n                .putMetadata(\"department\", \"engineering\")\n                .putMetadata(\"location\", \"nyc-office\")\n                .build())\n        .build();\nCreateMembershipResponse res = users.\n  createMembership(\"org_123\", \"usr_123\", \n    membershipReq);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  // TODO Check cascade behaviour currently its ignored
+  rpc DeleteMembership(DeleteMembershipRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      delete: "/api/v1/memberships/organizations/{organization_id}/users/{id}"
+
+      // Note: This wildcard binding is hidden from documentation.
+      // Create a separate RPC if this functionality needs explicit exposure.
+      // additional_bindings: [
+      //   {delete: "/api/v1/organizations/-/users/-"}
+      // ]
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Delete organization membership for user"
+      description: "Removes a user from an organization by user ID or external ID. If the user has no memberships left and cascade is true, the user is also deleted. This action is irreversible and may also remove related group memberships."
+      responses: {
+        key: "200"
+        value: {description: "User successfully marked for deletion. No content returned"}
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "response = scalekit_client.users.delete_membership(\n  organization_id=org_id,user_id=user_id\n)"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateMembership(UpdateMembershipRequest) returns (UpdateMembershipResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/memberships/organizations/{organization_id}/users/{id}"
+      body: "membership"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Update organization membership for user"
+      description: "Updates a user's membership details within an organization by user ID or external ID. You can update roles and membership metadata."
+      responses: {
+        key: "200"
+        value: {
+          description: "Membership updated successfully. Returns the updated user object."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.UpdateMembershipResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc CreateUserAndMembership(CreateUserAndMembershipRequest) returns (CreateUserAndMembershipResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/organizations/{organization_id}/users"
+      body: "user"
+      // Note: This is hidden from the docs as new rpc method needs to be created
+      // TODO: use summary to be "Create User"
+      // additional_bindings: [
+      //   {
+      //     post: "/api/v1/organizations/-/users"
+      //     body: "user"
+      //   }
+      // ]
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Create new user in organization"
+      description: "Creates a new user account and immediately adds them to the specified organization. Use this endpoint when you want to create a user and grant them access to an organization in a single operation. You can provide user profile information, assign roles, and configure membership metadata. The user receives an activation email unless this feature is disabled in the organization settings."
+      responses: {
+        key: "201"
+        value: {
+          description: "User created successfully. Returns the created user object, including system-generated identifiers and timestamps"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.CreateUserAndMembershipResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const {\n   user } = await sc.user.\n    createUserAndMembership(\"org_123\", {\n	email: \"user@example.com\",\n	externalId: \"ext_12345a67b89c\",\n	metadata: { department: \"engineering\", \n	  location: \"nyc-office\" },\n	userProfile: {\n		firstName: \"John\",\n		lastName: \"Doe\",\n	},\n});"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "import os\nfrom scalekit import ScalekitClient\nfrom scalekit.v1.users.users_pb2 import User\nfrom scalekit.v1.commons.\n  commons_pb2 import UserProfile\nsc = ScalekitClient(\n    env_url=os.getenv(\"SCALEKIT_ENV_URL\"),\n    client_id=os.getenv(\"SCALEKIT_CLIENT_ID\"),\n    client_secret=os.getenv(\"SCALEKIT_CLIENT_SECRET\"),\n)\nuser_msg = User(\n    email=\"user@example.com\",\n    external_id=\"ext_12345a67b89c\",\n    metadata={\"department\": \"engineering\", \"location\": \"nyc-office\"},\n    user_profile=UserProfile(\n        first_name=\"John\",\n        last_name=\"Doe\"\n    )\n)\ncreate_resp, \n  _ = sc.users.create_user(\"org_123\", user_msg)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "newUser := &usersv1.CreateUser{\n    Email:      \"user@example.com\",\n    ExternalId: \"ext_12345a67b89c\",\n    Metadata: map[string]string{\n        \"department\": \"engineering\",\n        \"location\":   \"nyc-office\",\n    },\n    UserProfile: &usersv1.CreateUserProfile{\n        FirstName: \"John\",\n        LastName:  \"Doe\",\n    },\n}\ncuResp, \n  err := sc.User().CreateUserAndMembership(ctx, \"org_123\", newUser, false)\nif err != nil { /* handle error */ }"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "CreateUser createUser = CreateUser.newBuilder()\n        .setEmail(\"user@example.com\")\n        .setExternalId(\"ext_12345a67b89c\")\n        .putMetadata(\"department\", \"engineering\")\n        .putMetadata(\"location\", \"nyc-office\")\n        .setUserProfile(\n          CreateUserProfile.newBuilder()\n                .setFirstName(\"John\")\n                .setLastName(\"Doe\")\n                .build())\n        .build();\nCreateUserAndMembershipRequest cuReq = CreateUserA\n  ndMembershipRequest.newBuilder()\n        .setUser(createUser)\n        .build();\nCreateUserAndMembershipResponse cuResp = users.\n  createUserAndMembership(\"org_123\", cuReq);\nSystem.out.println(cuResp.getUser().getId());"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  // only memberships of the organization
+  rpc ListOrganizationUsers(ListOrganizationUsersRequest) returns (ListOrganizationUsersResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      get: "/api/v1/organizations/{organization_id}/users"
+      // Note: This is hidden from the docs as new rpc method needs to be created
+      // additional_bindings: [
+      //   {get: "/api/v1/organizations/-/users"}
+      // ]
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "List organization users"
+      description: "Retrieves a paginated list of all users who are members of the specified organization. Use this endpoint to view all users with access to a particular organization, including their roles, metadata, and membership details. Supports pagination for large user lists."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved the list of users in the organization"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.ListOrganizationUsersResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const response = await sc.user.\n  listOrganizationUsers(\"org_123\", {\n	pageSize: 50,\n});\nconsole.log(response.users);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "resp, _ = sc.users.list_users(organization_id=\"org_123\", page_size=50)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "list, \n  err := sc.User().ListOrganizationUsers(ctx, \"org_123\", &scalekit.ListUsersOptions{PageSize: 50})\nif err != nil { /* handle error */ }\nfmt.Println(list.Users)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "ListOrganizationUsersRequest listReq = ListOrganiz\n  ationUsersRequest.newBuilder()\n        .setPageSize(50)\n        .build();\nListOrganizationUsersResponse list = users.\n  listOrganizationUsers(\"org_123\", listReq);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc ResendInvite(ResendInviteRequest) returns (ResendInviteResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {
+      patch: "/api/v1/invites/organizations/{organization_id}/users/{id}/resend"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Resend user invitation email"
+      description:
+        "Resends an invitation email to a user who has a pending or expired invitation in the specified organization. If the invitation has expired, a new invitation will be automatically created and sent. If the invitation is still valid, a reminder email will be sent instead. "
+        "Use this endpoint when a user hasn't responded to their initial invitation and you need to send them a reminder or when the original invitation has expired. "
+        "The invitation email includes a secure magic link that allows the user to complete their account setup and join the organization. "
+        "Each resend operation increments the resent counter."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully resent the invitation email. Returns the updated invitation object with organization ID, user ID, membership status, timestamps, and resent count. If expired, a new invitation is created; otherwise, the existing one is resent."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.ResendInviteResponse"}
+          }
+        }
+      }
+
+      responses: {
+        key: "400"
+        value: {
+          description: "Invalid request — common causes include user ID or organization ID is invalid, full-stack authentication is disabled, user profile is missing, invite already accepted, or missing expiry time in user management settings."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.errdetails.ErrorInfo"}
+          }
+        }
+      }
+      responses: {
+        key: "404"
+        value: {
+          description: "Resource not found — the specified user, organization, membership, or invitation could not be found in the specified environment. Verify that all IDs are correct and that the resources exist before attempting to resend an invitation."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.errdetails.ErrorInfo"}
+          }
+        }
+      }
+      responses: {
+        key: "500"
+        value: {
+          description: "Internal server error — an unexpected error occurred while processing the invitation resend request. This may be due to database connectivity issues, problems generating the secure magic link, email delivery service failures, or transaction errors during invitation processing. Contact support if the problem persists."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.errdetails.ErrorInfo"}
+          }
+        }
+      }
+    };
+  }
+
+  // User Role Management
+  rpc ListUserRoles(ListUserRolesRequest) returns (ListUserRolesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/organizations/{organization_id}/users/{user_id}/roles"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "List user roles"
+      description: "Retrieves all roles assigned to a user within a specific organization. This includes both direct role assignments and inherited roles from role hierarchy."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved the list of roles assigned to the user"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.ListUserRolesResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc AssignUserRoles(AssignUserRolesRequest) returns (AssignUserRolesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/organizations/{organization_id}/users/{user_id}/roles"
+      body: "roles"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Assign roles to user"
+      description: "Assigns one or more roles to a user within a specific organization. This operation adds to existing role assignments rather than replacing them."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully assigned roles to the user"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.AssignUserRolesResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc RemoveUserRole(RemoveUserRoleRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/organizations/{organization_id}/users/{user_id}/roles/{role_name}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "Remove role from user"
+      description: "Removes a specific role assignment from a user within an organization. This only removes direct role assignments, not inherited roles from role hierarchy."
+      responses: {
+        key: "200"
+        value: {description: "Role successfully removed from user"}
+      }
+    };
+  }
+
+  rpc ListUserPermissions(ListUserPermissionsRequest) returns (ListUserPermissionsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/organizations/{organization_id}/users/{user_id}/permissions"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Users"
+      summary: "List user permissions"
+      description: "Retrieves all permissions a user has access to within a specific organization. This includes permissions from direct role assignments and inherited permissions from role hierarchy."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved the list of permissions for the user"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.users.ListUserPermissionsResponse"}
+          }
+        }
+      }
+    };
+  }
+}
+
+message User {
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique system-generated identifier for the user. Immutable once created."
+    example: "\"usr_1234abcd5678efgh\""
+  }];
+
+  string environment_id = 2 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Identifier of the environment where the user was created. System-assigned and read-only."
+      example: "\"env_9876zyxw5432vuts\""
+    }
+  ];
+
+  google.protobuf.Timestamp create_time = 3 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the user account was initially created. Automatically set by the server."}
+  ];
+
+  google.protobuf.Timestamp update_time = 4 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp of the last modification to the user account. Automatically updated by the server."}
+  ];
+
+  string email = 5 [
+    (buf.validate.field).string.email = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Primary email address for the user. Must be unique across the environment and valid per RFC 5322."
+      example: "\"user@example.com\""
+    }
+  ];
+
+  optional string external_id = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Your application's unique identifier for this organization, used to link Scalekit with your system."
+    example: "\"ext_12345a67b89c\""
+  }];
+
+  repeated scalekit.v1.commons.OrganizationMembership memberships = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of organization memberships. Automatically populated based on group assignments."}];
+
+  scalekit.v1.commons.UserProfile user_profile = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "User's personal information including name, address, and other profile attributes."}];
+
+  map<string, string> metadata = 9 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"department\": \"engineering\", \"location\": \"nyc-office\"}"
+    }
+  ];
+
+  google.protobuf.Timestamp last_login = 10 [
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp of the user's most recent successful authentication. Updated automatically."}
+  ];
+}
+
+message CreateUserAndMembershipRequest {
+  string organization_id = 1;
+  CreateUser user = 2 [(buf.validate.field).required = true];
+  optional bool send_invitation_email = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "If true, sends an activation email to the user. Defaults to true."
+    example: "true"
+  }];
+}
+
+message CreateUserAndMembershipResponse {
+  User user = 1;
+}
+
+message UpdateUser {
+  reserved 1 to 5, 7, 10;
+
+  optional string external_id = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Your application's unique identifier for this organization, used to link Scalekit with your system."
+    example: "\"ext_12345a67b89c\""
+  }];
+
+  UpdateUserProfile user_profile = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "User's personal information including name, address, and other profile attributes."}];
+
+  map<string, string> metadata = 9 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"department\": \"engineering\", \"location\": \"nyc-office\"}"
+    }
+  ];
+}
+
+message UpdateUserRequest {
+  oneof identities {
+    string id = 1 [
+      (buf.validate.field).string = {
+        min_len: 19
+        max_len: 25
+        prefix: "usr_"
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "System-generated user ID. Must start with 'usr_' and be 19-25 characters long."
+        example: "\"usr_1234abcd5678efgh\""
+      }
+    ];
+
+    string external_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Your application's unique identifier for this organization, used to link Scalekit with your system."
+      example: "\"ext_7890xyz\""
+    }];
+  }
+
+  UpdateUser user = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User fields to update. Only specified fields will be modified. Required fields must be provided if being changed."
+      example: "{\"firstName\": \"John\", \"lastName\": \"Doe\"}"
+    }
+  ];
+}
+
+message UpdateUserResponse {
+  User user = 1;
+}
+
+message GetUserRequest {
+  oneof identities {
+    string id = 1 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+        prefix: "usr_"
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "System-generated user ID"
+        example: "\"usr_1234abcd5678efgh\""
+      }
+    ];
+
+    string external_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Your application's unique identifier for this organization, used to link Scalekit with your system."
+      example: "\"ext_7890xyz\""
+    }];
+  }
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message ListOrganizationUsersRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization for which to list users. Must start with 'org_' and be 1-32 characters long."
+      example: "\"org_1234abcd5678efgh\""
+    }
+  ];
+
+  uint32 page_size = 2 [
+    (buf.validate.field).uint32 = {
+      gte: 0
+      lte: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Maximum number of users to return in a single response. Valid range: 1-100. Server may return fewer users than specified."
+      example: "50"
+    }
+  ];
+
+  string page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Pagination token from a previous ListUserResponse. Used to retrieve the next page of results. Leave empty for the first request."
+    example: "\"eyJwYWdlIjogMiwgImxhc3RfaWQiOiAidXNyXzEyMzQ1In0=\""
+  }];
+}
+
+message ListOrganizationUsersResponse {
+  string next_page_token = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Opaque token for retrieving the next page of results. Empty if there are no more pages."
+    example: "\"eyJwYWdlIjogMiwgImxhc3RfaWQiOiAidXNyXzEyMzQ1In0=\""
+  }];
+
+  uint32 total_size = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total number of users matching the request criteria, regardless of pagination."
+    example: "1042"
+  }];
+
+  repeated User users = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of user objects for the current page. May contain fewer entries than requested page_size."}];
+
+  string prev_page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Opaque token for retrieving the previous page of results. Empty for the first page."
+    example: "\"eyJwYWdlIjogMCwgImZpcnN0X2lkIjogInVzcl85ODc2NSJ9\""
+  }];
+}
+
+message DeleteMembershipRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique organization identifier. Must start with 'org_' and be 1-32 characters long"
+      example: "\"org_1234abcd5678efgh\""
+    }
+  ];
+
+  oneof identities {
+    string id = 2 [
+      (buf.validate.field).string = {
+        min_len: 19
+        max_len: 25
+        prefix: "usr_"
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "System-generated user ID. Must start with 'usr_' (19-25 characters)"
+        example: "\"usr_1234abcd5678efgh\""
+      }
+    ];
+
+    string external_id = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "External system identifier from connected directories. Must match existing records"
+      example: "\"ext_7890xyz\""
+    }];
+  }
+
+  optional bool cascade = 5 [
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "If true, if user has no memberships left the user is also deleted. defaults to true"
+      example: "false"
+    }
+  ];
+}
+
+message CreateMembershipRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the target organization. Must start with 'org_' and be 1-32 characters long."
+      example: "\"org_1234abcd5678efgh\""
+    }
+  ];
+
+  CreateMembership membership = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Membership details to create. Required fields must be provided."}
+  ];
+
+  oneof identities {
+    string id = 3 [
+      (buf.validate.field).string = {
+        min_len: 19
+        max_len: 25
+        prefix: "usr_"
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "System-generated user ID. Must start with 'usr_' (19-25 characters)"
+        example: "\"usr_1234abcd5678efgh\""
+      }
+    ];
+
+    string external_id = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "External system identifier from connected directories. Must be unique across the system"
+      example: "\"ext_7890xyz\""
+    }];
+  }
+  optional bool send_invitation_email = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "If true, sends an activation email to the user. Defaults to true."
+    example: "true"
+  }];
+}
+
+message CreateMembershipResponse {
+  User user = 1;
+}
+
+message ListUsersRequest {
+  uint32 page_size = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "30"
+    description: "Maximum number of organizations to return per page. Must be between 10 and 100"
+  }];
+  string page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "\"<page_token>\""
+    description: "Pagination token from the previous response. Use to retrieve the next page of organizations"
+  }];
+}
+
+message ListUsersResponse {
+  repeated User users = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of users."}];
+  string next_page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for retrieving the next page of results. Empty if there are no more pages."
+    example: "\"eyJwYWdlIjogMiwgImxhc3RfaWQiOiAidXNyXzEyMzQ1In0=\""
+  }];
+  uint32 total_size = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total number of users matching the request criteria, regardless of pagination."
+    example: "1042"
+  }];
+  string prev_page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for retrieving the previous page of results. Empty if this is the first page."
+    example: "\"eyJwYWdlIjogMCwgImZpcnN0X2lkIjogInVzcl85ODc2NSJ9\""
+  }];
+}
+
+message SearchUsersRequest {
+  string query = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 3
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "john@example.com"
+      description: "Search term to match against user email, IDs, or external IDs. Must be at least 3 characters. Case insensitive."
+    }
+  ];
+
+  uint32 page_size = 2 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "30"
+      description: "Maximum number of users to return per page. Value must be between 1 and 30."
+    }
+  ];
+  string page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "eyJwYWdlIjoyLCJsaW1pdCI6MzB9"
+    description: "Token from a previous response for pagination. Provide this to retrieve the next page of results."
+  }];
+}
+
+message SearchUsersResponse {
+  string next_page_token = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for retrieving the next page of results. Empty if there are no more pages."
+    example: "\"eyJwYWdlIjogMiwgImxhc3RfaWQiOiAidXNyXzEyMzQ1In0=\""
+  }];
+  uint32 total_size = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total number of users matching the request criteria, regardless of pagination."
+    example: "1042"
+  }];
+  repeated User users = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of matching users."}];
+  string prev_page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for retrieving the previous page of results. Empty if this is the first page."
+    example: "\"eyJwYWdlIjogMCwgImZpcnN0X2lkIjogInVzcl85ODc2NSJ9\""
+  }];
+}
+
+message DeleteUserRequest {
+  oneof identities {
+    string id = 1 [
+      (buf.validate.field).string = {
+        min_len: 19
+        max_len: 25
+        prefix: "usr_"
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "System-generated user ID. Must start with 'usr_' (19-25 characters)"
+        example: "\"usr_1234abcd5678efgh\""
+      }
+    ];
+
+    string external_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "External system identifier from connected directories. Must match existing records"
+      example: "\"ext_7890xyz\""
+    }];
+  }
+}
+
+message UpdateMembershipRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization containing the membership. Must start with 'org_' and be 1-32 characters long."
+      example: "\"org_1234abcd5678efgh\""
+    }
+  ];
+
+  oneof identities {
+    string id = 2 [
+      (buf.validate.field).string = {
+        min_len: 19
+        max_len: 25
+        prefix: "usr_"
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "System-generated user ID. Must start with 'usr_' and be 19-25 characters long."
+        example: "\"usr_1234abcd5678efgh\""
+      }
+    ];
+
+    string external_id = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Your application's unique identifier for this user."
+      example: "\"ext_7890xyz\""
+    }];
+  }
+
+  UpdateMembership membership = 5 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Membership fields to update. Only specified fields will be modified."
+      example: "{\"role\": \"admin\"}"
+    }
+  ];
+}
+
+message UpdateMembership {
+  reserved 1, 2, 3, 5, 6;
+  repeated scalekit.v1.commons.Role roles = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Role to assign to the user within the organization"
+    example: "[{\"name\": \"admin\"}]"
+  }];
+  map<string, string> metadata = 7 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"department\": \"engineering\", \"location\": \"nyc-office\"}"
+    }
+  ];
+}
+
+message CreateMembership {
+  reserved 1, 2, 3, 5, 6;
+  repeated scalekit.v1.commons.Role roles = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Role to assign to the user within the organization"
+    example: "[{\"name\": \"admin\"}]"
+  }];
+  map<string, string> metadata = 7 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"department\": \"engineering\", \"location\": \"nyc-office\"}"
+    }
+  ];
+  optional string inviter_email = 8 [
+    (buf.validate.field).string = {
+      min_len: 5
+      max_len: 254
+      email: true
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "\"john.doe@example.com\""
+      description: "Email address of the user who invited this member. Must be a valid email address."
+    }
+  ];
+}
+
+message UpdateMembershipResponse {
+  User user = 1;
+}
+
+message SearchOrganizationUsersRequest {
+  string organization_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization to search within. Must start with 'org_' and be 1-32 characters long."
+      example: "\"org_1234abcd5678efgh\""
+    }
+  ];
+
+  string query = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 3
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "john@example.com"
+      description: "Search term to match against user email, IDs, or external IDs. Must be at least 3 characters. Case insensitive."
+    }
+  ];
+
+  uint32 page_size = 3 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "30"
+      description: "Maximum number of users to return per page. Value must be between 1 and 30."
+    }
+  ];
+  string page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "eyJwYWdlIjoyLCJsaW1pdCI6MzB9"
+    description: "Token from a previous response for pagination. Provide this to retrieve the next page of results."
+  }];
+}
+
+message SearchOrganizationUsersResponse {
+  string next_page_token = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for retrieving the next page of results. Empty if there are no more pages."
+    example: "\"eyJwYWdlIjogMiwgImxhc3RfaWQiOiAidXNyXzEyMzQ1In0=\""
+  }];
+  uint32 total_size = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total number of users matching the request criteria, regardless of pagination."
+    example: "1042"
+  }];
+  repeated User users = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of matching users."}];
+  string prev_page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for retrieving the previous page of results. Empty if this is the first page."
+    example: "\"eyJwYWdlIjogMCwgImZpcnN0X2lkIjogInVzcl85ODc2NSJ9\""
+  }];
+}
+
+message CreateUser {
+  reserved 1, 2, 3, 4, 10;
+
+  string email = 5 [
+    (buf.validate.field).string.email = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Primary email address for the user. Must be unique across the environment and valid per RFC 5322."
+      example: "\"user@example.com\""
+    }
+  ];
+
+  optional string external_id = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Your application's unique identifier for this organization, used to link Scalekit with your system."
+    example: "\"ext_12345a67b89c\""
+  }];
+
+  CreateMembership membership = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of organization memberships. Automatically populated based on group assignments."}];
+
+  CreateUserProfile user_profile = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "User's personal information including name, address, and other profile attributes."}];
+
+  map<string, string> metadata = 9 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"department\": \"engineering\", \"location\": \"nyc-office\"}"
+    }
+  ];
+}
+
+message CreateUserProfile {
+  reserved 1, 6;
+
+  string first_name = 2 [
+    (buf.validate.field).string = {max_len: 200},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User's given name. Maximum 200 characters."
+      example: "\"John\""
+    }
+  ];
+
+  string last_name = 3 [
+    (buf.validate.field).string = {max_len: 200},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User's family name. Maximum 200 characters."
+      example: "\"Doe\""
+    }
+  ];
+
+  string name = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Full name in display format. Typically combines first_name and last_name."
+    example: "\"John Michael Doe\""
+  }];
+
+  string locale = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User's localization preference in BCP-47 format. Defaults to organization settings."
+    example: "\"en-US\""
+  }];
+
+  string phone_number = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Phone number in E.164 international format. Required for SMS-based authentication."
+    example: "\"+14155552671\""
+  }];
+
+  map<string, string> metadata = 8 [
+    (buf.validate.field).map = {
+      max_pairs: 30
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "System-managed key-value pairs for internal tracking. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"account_status\": \"active\", \"signup_source\": \"mobile_app\"}"
+    }
+  ];
+
+  map<string, string> custom_attributes = 9 [
+    (buf.validate.field).map = {
+      max_pairs: 100
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom attributes for extended user profile data. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"department\": \"engineering\", \"security_clearance\": \"level2\"}"
+    }
+  ];
+}
+
+message UpdateUserProfile {
+  reserved 1, 6;
+
+  optional string first_name = 2 [
+    (buf.validate.field).string = {max_len: 200},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User's given name. Maximum 200 characters."
+      example: "\"John\""
+    }
+  ];
+
+  optional string last_name = 3 [
+    (buf.validate.field).string = {max_len: 200},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User's family name. Maximum 200 characters."
+      example: "\"Doe\""
+    }
+  ];
+
+  optional string name = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Full name in display format. Typically combines first_name and last_name."
+    example: "\"John Michael Doe\""
+  }];
+
+  optional string locale = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User's localization preference in BCP-47 format. Defaults to organization settings."
+    example: "\"en-US\""
+  }];
+
+  optional string phone_number = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Phone number in E.164 international format. Required for SMS-based authentication."
+    example: "\"+14155552671\""
+  }];
+
+  map<string, string> metadata = 8 [
+    (buf.validate.field).map = {
+      max_pairs: 30
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "System-managed key-value pairs for internal tracking. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"account_status\": \"active\", \"signup_source\": \"mobile_app\"}"
+    }
+  ];
+
+  map<string, string> custom_attributes = 9 [
+    (buf.validate.field).map = {
+      max_pairs: 100
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom attributes for extended user profile data. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"department\": \"engineering\", \"security_clearance\": \"level2\"}"
+    }
+  ];
+}
+
+message Invite {
+  string organization_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The organization to which the invite belongs."
+    example: "\"org_987654321\""
+  }];
+
+  string user_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User ID to whom the invite is sent. May be empty if the user has not signed up yet."
+    example: "\"usr_123456\""
+  }];
+
+  optional string invited_by = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Identifier of the user or system that initiated the invite."
+    example: "\"admin_998877\""
+  }];
+
+  string status = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Current status of the invite (e.g., pending, accepted, expired, revoked)."
+    example: "\"pending_invite\""
+  }];
+
+  google.protobuf.Timestamp created_at = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the invite was originally created."
+    example: "\"2025-07-10T08:00:00Z\""
+  }];
+
+  google.protobuf.Timestamp expires_at = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The time at which the invite expires."
+    example: "\"2025-12-31T23:59:59Z\""
+  }];
+
+  google.protobuf.Timestamp resent_at = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Timestamp when the invite was last resent, if applicable."
+    example: "\"2025-07-15T09:30:00Z\""
+  }];
+
+  int32 resent_count = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Number of times the invite has been resent."
+    example: "2"
+  }];
+}
+
+message ResendInviteRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization containing the pending invitation. Must start with 'org_' and be 1-32 characters long."
+      example: "\"org_1234abcd5678efgh\""
+    }
+  ];
+  string id = 2 [
+    (buf.validate.field).string = {
+      min_len: 19
+      max_len: 25
+      prefix: "usr_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "System-generated user ID of the user who has a pending invitation. Must start with 'usr_' and be 19-25 characters long."
+      example: "\"usr_1234abcd5678efgh\""
+    }
+  ];
+}
+
+message ResendInviteResponse {
+  Invite invite = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Updated invitation object containing the resent invitation details, including new expiration time and incremented resend counter."
+    example: "{\"organization_id\": \"org_123\", \"user_id\": \"usr_456\", \"status\": \"pending_invite\", \"expires_at\": \"2025-12-31T23:59:59Z\", \"resent_count\": 2}"
+  }];
+}
+
+// User Role Management Messages
+
+message ListUserRolesRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {prefix: "org_"},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the organization"
+      example: "\"org_1234abcd5678efgh\""
+    }
+  ];
+
+  string user_id = 2 [
+    (buf.validate.field).string = {prefix: "usr_"},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the user"
+      example: "\"usr_1234abcd5678efgh\""
+    }
+  ];
+}
+
+message ListUserRolesResponse {
+  repeated scalekit.v1.commons.Role roles = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of roles assigned to the user"}];
+}
+
+message AssignUserRolesRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {prefix: "org_"},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the organization"
+      example: "\"org_1234abcd5678efgh\""
+    }
+  ];
+
+  string user_id = 2 [
+    (buf.validate.field).string = {prefix: "usr_"},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the user"
+      example: "\"usr_1234abcd5678efgh\""
+    }
+  ];
+
+  repeated AssignRoleRequest roles = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of roles to assign to the user"}
+  ];
+}
+
+message AssignRoleRequest {
+  string id = 1 [
+    deprecated = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the role"
+      example: "\"role_1234abcd5678efgh\""
+    }
+  ];
+
+  string role_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name for the role"
+      example: "\"viewer\""
+    }
+  ];
+}
+
+message AssignUserRolesResponse {
+  repeated scalekit.v1.commons.Role roles = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of all roles currently assigned to the user"}];
+}
+
+message RemoveUserRoleRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {prefix: "org_"},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the organization"
+      example: "\"org_1234abcd5678efgh\""
+    }
+  ];
+
+  string user_id = 2 [
+    (buf.validate.field).string = {prefix: "usr_"},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the user"
+      example: "\"usr_1234abcd5678efgh\""
+    }
+  ];
+
+  string role_name = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for the role to remove"
+    example: "\"role_1234abcd5678efgh\""
+  }];
+}
+
+message ListUserPermissionsRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {prefix: "org_"},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the organization"
+      example: "\"org_1234abcd5678efgh\""
+    }
+  ];
+
+  string user_id = 2 [
+    (buf.validate.field).string = {prefix: "usr_"},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the user"
+      example: "\"usr_1234abcd5678efgh\""
+    }
+  ];
+}
+
+message Permission {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the permission"
+      example: "\"perm_1234abcd5678efgh\""
+    }
+  ];
+
+  string name = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique name identifier for the permission"
+    example: "\"users.create\""
+  }];
+
+  string display_name = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Human-readable name for the permission"
+    example: "\"Create Users\""
+  }];
+
+  string description = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Description of what the permission allows"
+    example: "\"Allows creating new user accounts\""
+  }];
+
+  repeated string tags = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Tags for categorizing permissions"
+    example: "[\"user-management\", \"admin\"]"
+  }];
+}
+
+message ListUserPermissionsResponse {
+  repeated Permission permissions = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of permissions the user has access to"}];
+}

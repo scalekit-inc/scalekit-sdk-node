@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package scalekit.v1.auditlogs;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/auditlogs";
+
+service AuditLogsService {
+  rpc ListAuthRequests(ListAuthLogRequest) returns (ListAuthLogResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/logs/authentication/requests"};
+  }
+}
+
+message ListAuthLogRequest {
+  uint32 page_size = 1;
+  string page_token = 2;
+  string email = 3;
+  string status = 4;
+  google.protobuf.Timestamp start_time = 5;
+  google.protobuf.Timestamp end_time = 6;
+}
+
+message ListAuthLogResponse {
+  string next_page_token = 1;
+  string prev_page_token = 2;
+  uint32 total_size = 3;
+  repeated AuthLogRequest authRequests = 4;
+}
+
+message AuthLogRequest {
+  string organization_id = 1;
+  string environment_id = 2;
+  string connection_id = 3;
+  string auth_request_id = 4;
+  string email = 5;
+  string connection_type = 6;
+  string connection_provider = 7;
+  string status = 8;
+  google.protobuf.Timestamp timestamp = 9;
+  repeated ConnectionDetails connection_details = 10;
+  string workflow = 11;
+}
+
+message ConnectionDetails {
+  string connection_id = 1;
+  string organization_id = 2;
+  string connection_type = 3;
+  string connection_provider = 4;
+}

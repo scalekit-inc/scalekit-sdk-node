@@ -1,0 +1,344 @@
+syntax = "proto3";
+
+package scalekit.v1.auth;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/connections/connections.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/auth";
+
+service AuthService {
+  rpc ListAuthMethods(ListAuthMethodsRequest) returns (ListAuthMethodsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {get: "/api/v1/authmethods"};
+  }
+
+  rpc DiscoveryAuthMethod(DiscoveryAuthMethodRequest) returns (DiscoveryAuthMethodResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {
+      post: "/api/v1/auth:discovery"
+      body: "discovery_request"
+    };
+  }
+
+  rpc VerifyPasswordLessOtp(VerifyPasswordLessRequest) returns (VerifyPasswordLessResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {
+      post: "/api/v1/auth/passwordless:verify"
+      body: "otp_req"
+    };
+  }
+
+  rpc ResendPasswordless(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {post: "/api/v1/auth/passwordless:resend"};
+  }
+
+  rpc ListUserOrganizations(google.protobuf.Empty) returns (ListUserOrganizationsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {get: "/api/v1/auth:organizations"};
+  }
+
+  rpc SignupOrganization(SignupOrganizationRequest) returns (SignupOrganizationResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {
+      post: "/api/v1/auth:signup"
+      body: "*"
+    };
+  }
+
+  rpc GetAuthState(google.protobuf.Empty) returns (GetAuthStateResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {get: "/api/v1/auth/state"};
+  }
+
+  rpc Logout(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {post: "/api/v1/auth/logout"};
+  }
+
+  rpc GetActiveSession(google.protobuf.Empty) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {get: "/api/v1/session:active"};
+  }
+
+  rpc GetAuthCustomizations(GetAuthCustomizationsRequest) returns (GetAuthCustomizationsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {get: "/api/v1/auth:customizations"};
+  }
+
+  rpc GetAuthFeatures(google.protobuf.Empty) returns (GetAuthFeaturesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+    option (google.api.http) = {get: "/api/v1/auth:features"};
+  }
+
+  rpc UpdateLoginUserDetails(UpdateLoginUserDetailsRequest) returns (google.protobuf.Empty) {
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/connections/{connection_id}/auth-requests/{login_request_id}/user"
+      body: "user"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Update User Details for login request"
+      description: "Update User Details for login request"
+      responses: {
+        key: "200"
+        value: {description: "Deleted Successfully"}
+      }
+    };
+  }
+}
+
+message ListAuthMethodsRequest {
+  string intent = 1;
+}
+
+message ListAuthMethodsResponse {
+  repeated AuthMethod auth_methods = 1;
+}
+
+message AuthMethod {
+  string connection_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the connection to be toggled"
+      example: "\"conn_121312434123312\""
+    }
+  ];
+  connections.ConnectionType connection_type = 2;
+  string provider = 3;
+  string auth_initiation_uri = 4 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 255
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "URI to initiate the connection"
+      example: "\"https://sso.acmecorp.com/sso/v1/oidc/conn_123/init\""
+    }
+  ];
+  optional connections.PasswordlessType passwordless_type = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Passwordless type"
+    example: "\"OTP\""
+  }];
+
+  optional uint32 code_challenge_length = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Length of the OTP code"
+    example: "6"
+  }];
+}
+
+message DiscoveryAuthMethodRequest {
+  DiscoveryRequest discovery_request = 2;
+}
+
+message DiscoveryRequest {
+  string email = 1 [
+    (buf.validate.field).string = {
+      min_len: 3
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "user identifier like email or phone number"
+      example: "\"john@acmecorp.com\""
+    }
+  ];
+  Intent intent = 2 [(buf.validate.field).enum.defined_only = true];
+}
+
+enum Intent {
+  INTENT_UNSPECIFIED = 0;
+  sign_in = 1;
+  sign_up = 2;
+}
+
+message DiscoveryAuthMethodResponse {
+  AuthMethod auth_method = 1;
+}
+
+message GetAuthCustomizationsRequest {}
+
+message GetAuthCustomizationsResponse {
+  google.protobuf.Struct customization_settings = 2;
+}
+
+message GetAuthFeaturesResponse {
+  google.protobuf.Struct features = 1;
+}
+
+message VerifyPasswordLessRequest {
+  OTPRequest otp_req = 2;
+}
+
+message VerifyPasswordLessResponse {}
+
+message OTPRequest {
+  string code_challenge = 1 [
+    (buf.validate.field).string = {
+      min_len: 5
+      max_len: 6
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "OTP sent to the user's email"
+      example: "\"123456\""
+    }
+  ];
+}
+
+message ListUserOrganizationsResponse {
+  repeated Organization organizations = 1;
+  UserDetails user = 2;
+  Intent intent = 3 [(buf.validate.field).enum.defined_only = true];
+}
+
+message Organization {
+  string id = 1;
+  string name = 2;
+  string membership_status = 3;
+  optional string invitation_invited_by = 4;
+  optional google.protobuf.Timestamp invitation_accepted_at = 5;
+  optional google.protobuf.Timestamp invitation_created_at = 6;
+  optional google.protobuf.Timestamp invitation_expires_at = 7;
+}
+
+message UserDetails {
+  string email = 1;
+  string first_name = 2;
+  string last_name = 3;
+}
+
+message SignupOrganizationRequest {
+  // making all optional for now
+  string organization_name = 1;
+  string first_name = 2;
+  string last_name = 3;
+  string full_name = 4;
+  string phone_number = 5;
+}
+
+message SignupOrganizationResponse {
+  string organization_id = 1;
+  string organization_name = 2;
+}
+
+message UpdateLoginUserDetailsRequest {
+  string connection_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection ID. Unique ID for the connection"
+      example: "\"conn_121312434123312\""
+    }
+  ];
+  string login_request_id = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Login Request ID that was shared as part of authorization initiate"
+      example: "\"lri_73415099636808061\""
+    }
+  ];
+  User user = 3;
+}
+
+message User {
+  string sub = 1 [
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Subject identifier for the user (typically a unique user ID from the identity provider)"
+      example: "\"1234567890\""
+    }
+  ];
+  string email = 2 [
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User's primary email address"
+      example: "\"user@example.com\""
+    }
+  ];
+  string given_name = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User's first name"
+    example: "\"John\""
+  }];
+  string family_name = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User's last name"
+    example: "\"Doe\""
+  }];
+  bool email_verified = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates whether the user's email address has been verified by the identity provider."
+    example: "true"
+  }];
+  string phone_number = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User's primary phone number in E.164 format."
+    example: "\"+1234567890\""
+  }];
+  bool phone_number_verified = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates whether the user's phone number has been verified by the identity provider."
+    example: "false"
+  }];
+  string name = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Full display name of the user"
+    example: "\"John Doe\""
+  }];
+  string preferred_username = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User's preferred username or handle"
+    example: "\"johndoe\""
+  }];
+  string picture = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "URL to the user's profile picture"
+    example: "\"https://example.com/avatar.jpg\""
+  }];
+  string gender = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User's gender as reported by the identity provider."
+    example: "\"male\""
+  }];
+  string locale = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User's locale or language preference (IETF BCP 47 language tag)"
+    example: "\"en-US\""
+  }];
+  repeated string groups = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of group names or IDs the user belongs to."
+    example: "[\"admins\", \"developers\"]"
+  }];
+  google.protobuf.Struct custom_attributes = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Custom attributes for the user, represented as a key-value map. Used for additional identity provider claims."
+    example: "{\"department\": \"Engineering\", \"employee_id\": \"E12345\"}"
+  }];
+}
+
+message GetAuthStateResponse {
+  AuthState auth_state = 1;
+}
+
+enum AuthState {
+  AUTH_STATE_UNSPECIFIED = 0;
+  AUTHENTICATION_IN_PROGRESS = 1;
+  ORGANIZATION_SWITCHER = 2;
+  ORGANIZATION_SELECTED = 3;
+  ORGANIZATION_SIGNUP = 4;
+  ORGANIZATION_SWITCHER_SIGNUP = 5;
+  OTP_VERIFICATION_PENDING = 6;
+  MAGIC_LINK_SENT = 7;
+  LINK_SENT_OTP_VERIFICATION_PENDING = 8;
+  OTP_VERIFIED = 9;
+  LINK_VERIFIED = 10;
+  SSO_AUTHENTICATED = 11;
+  ORG_USER_CREATED = 12;
+  AUTHENTICATION_COMPLETED = 13;
+  AUTHENTICATION_FAILED = 14;
+}

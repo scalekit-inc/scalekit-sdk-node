@@ -1,0 +1,158 @@
+syntax = "proto3";
+
+package scalekit.v1.mcp;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/mcp";
+
+service McpService {
+  rpc CreateMcp(CreateMcpRequest) returns (CreateMcpResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/mcp"
+      body: "mcp"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp"
+      summary: "Creates or returns the existing MCP with the given configuration."
+      description: "Creates a new MCP for the configuration. If same configuration exists, it will return the existing MCP."
+    };
+  }
+
+  rpc GetMcp(GetMcpRequest) returns (GetMcpResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {get: "/api/v1/mcp/{mcp_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp"
+      summary: "Get an existing MCP by ID."
+      description: "Returns the existing MCP with the given ID."
+    };
+  }
+
+  rpc ListMcp(ListMcpRequest) returns (ListMcpResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {get: "/api/v1/mcp"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp"
+      summary: "List MCPs with optional filters."
+      description: "Returns a list of existing MCPs, optionally filtered by connected_account_identifier and link_token."
+    };
+  }
+
+  rpc DeleteMcp(DeleteMcpRequest) returns (DeleteMcpResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/mcp/{mcp_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "mcp"
+      summary: "Delete an MCP by ID."
+      description: "Deletes the MCP with the given ID."
+    };
+  }
+}
+
+message CreateMcpRequest {
+  Mcp mcp = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "MCP tool configuration to create or update"}
+  ];
+}
+
+message CreateMcpResponse {
+  Mcp mcp = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The MCP server details"}];
+}
+
+message Mcp {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique ID of the tool"
+      example: "\"res_123\""
+    }
+  ];
+  repeated ToolMapping tool_mappings = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).repeated = {min_items: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Provider name (e.g. GOOGLE)"
+      example: "\"GOOGLE\""
+    }
+  ];
+  string connected_account_identifier = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {min_len: 1},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Identifier for the connected account"
+      example: "\"account_123\""
+    }
+  ];
+  string url = 4 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique ID of the tool"
+      example: "\"https://example.com/mcp/v1/abc\""
+    }
+  ];
+}
+
+message ToolMapping {
+  repeated string tool_names = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of tool names"
+    example: "[\"GMAIL_FETCH_MAILS\", \"LIST_DRAFTS\"]"
+  }];
+  string connection_name = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection name for the tool"
+      example: "\"MY-GMAIL\""
+    }
+  ];
+  string status = 3 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Authentication status of the tool"
+      example: "\"ACTIVE\""
+    }
+  ];
+}
+
+message GetMcpRequest {
+  string mcp_id = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "ID of the MCP to retrieve"}
+  ];
+}
+
+message GetMcpResponse {
+  Mcp mcp = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The MCP details"}];
+}
+
+message ListMcpRequest {
+  message Filter {
+    string connected_account_identifier = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter by connected account identifier"}];
+    string link_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter by link token"}];
+  }
+  Filter filter = 1;
+}
+
+message ListMcpResponse {
+  repeated Mcp mcps = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of MCPs"}];
+}
+
+message DeleteMcpRequest {
+  string mcp_id = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "ID of the MCP to delete"}
+  ];
+}
+
+message DeleteMcpResponse {}

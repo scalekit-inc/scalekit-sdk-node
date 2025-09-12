@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package scalekit.v1.auditlogs;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/timestamp.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/sessions";
+
+service SessionService {
+  rpc GetSession(SessionDetailsRequest) returns (SessionDetails) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/sessions/{session_id}"};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+  }
+
+  rpc RevokeSession(RevokeSessionRequest) returns (RevokeSessionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {post: "/api/v1/sessions/{session_id}/revoke"};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+  }
+
+  rpc GetUserSessions(UserSessionDetailsRequest) returns (UserSessionDetails) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/users/{user_id}/sessions"};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+  }
+}
+
+message SessionDetailsRequest {
+  string session_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.pattern = "^ses_[0-9]+$"
+  ];
+}
+
+message UserSessionDetailsRequest {
+  string user_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.pattern = "^usr_[0-9]+$"
+  ];
+}
+
+message RevokeSessionRequest {
+  string session_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.pattern = "^ses_[0-9]+$"
+  ];
+}
+
+message RevokeSessionResponse {
+  SessionDetails revoked_session = 1;
+}
+
+message UserSessionDetails {
+  repeated SessionDetails sessions = 1;
+}
+
+message SessionDetails {
+  string session_id = 1;
+  string user_id = 2;
+  repeated string authenticated_organizations = 3;
+  string organization_id = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Timestamp idle_expires_at = 7;
+  google.protobuf.Timestamp absolute_expires_at = 8;
+  google.protobuf.Timestamp expired_at = 9;
+  google.protobuf.Timestamp logout_at = 10;
+  string status = 11;
+  string initial_user_agent = 12;
+  string initial_os = 13;
+  string initial_os_version = 14;
+  string initial_browser = 15;
+  string initial_browser_version = 16;
+  string initial_device_type = 17;
+  string initial_ip = 19;
+  Location initial_location = 20;
+  string latest_user_agent = 21;
+  string latest_os = 22;
+  string latest_os_version = 23;
+  string latest_browser = 24;
+  string latest_browser_version = 25;
+  string latest_device_type = 26;
+  string latest_ip = 28;
+  Location latest_location = 29;
+}
+
+message Location {
+  string region = 1;
+  string region_subdivision = 2;
+  string city = 3;
+  string latitude = 4;
+  string longitude = 5;
+}

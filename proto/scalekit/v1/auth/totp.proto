@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+package scalekit.v1.auth.totp;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/auth/totp";
+
+service TOTPService {
+  // Enable TOTP for a user
+  rpc RegisterTOTP(TOTPRegistrationRequest) returns (TOTPRegistrationResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/totp/registration"
+      body: "totp_registration"
+    };
+  }
+
+  rpc EnableTOTP(EnableRegistrationTOTPRequest) returns (EnableRegistrationTOTPResponse) {
+    // Enable TOTP for a registration
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/totp/{registration_id}/enable"
+      body: "*"
+    };
+  }
+
+  // Verify TOTP code for a user
+  rpc VerifyUserCode(VerifyUserCodeRequest) returns (VerifyCodeResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/user/{user_id}/totp:verify"
+      body: "*"
+    };
+  }
+
+  // Verify TOTP code for a registration
+  rpc VerifyRegistrationCode(VerifyRegistrationCodeRequest) returns (VerifyCodeResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/totp/{registration_id}/verify"
+      body: "*"
+    };
+    // buf:lint:ignore RPC_NO_DELETE
+  }
+
+  rpc DisableTOTP(DisableRegistrationTOTPRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/totp/{registration_id}/disable"
+      body: "*"
+    };
+  }
+}
+
+message TOTPRegistrationRequest {
+  TOTPRegistration totp_registration = 1 [(buf.validate.field).required = false];
+}
+
+message TOTPRegistrationResponse {
+  TOTPRegistration totp_registration = 1 [(buf.validate.field).required = false];
+}
+
+message TOTPRegistration {
+  // Id
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique scalekit-generated identifier that uniquely references an organization"
+    example: "\"org_59615193906282635\""
+  }];
+  // Created Time
+  google.protobuf.Timestamp create_time = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "\"2025-02-15T06:23:44.560Z\""
+      description: "Timestamp when the organization was created"
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  // Updated time
+  google.protobuf.Timestamp update_time = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "\"2025-02-15T06:23:44.560Z\""
+    description: "Timestamp when the organization was last updated"
+  }];
+
+  oneof UserIdOrAccountName {
+    string user_id = 4 [
+      (buf.validate.field).required = false,
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+        prefix: "usr_"
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "The user ID associated with the TOTP registration"
+        example: "\"usr_59615193906282635\""
+      }
+    ];
+    string account_name = 5 [
+      (buf.validate.field).required = false,
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 355
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "The account name associated with the TOTP registration"
+        example: "\"me@example.com\""
+      }
+    ];
+  }
+  optional string qr_code_uri = 6 [
+    (buf.validate.field).required = false,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 1024
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The URI for the QR code used to set up TOTP"
+      example: "\"otpauth://totp/Scalekit:usr_59615193906282635?secret=ABC123&issuer=Scalekit\""
+    },
+    (google.api.field_behavior) = OUTPUT_ONLY
+  ];
+}
+
+message EnableRegistrationTOTPRequest {
+  string registration_id = 1 [(buf.validate.field).required = true];
+  // TODO: Add more validations
+  string code = 2 [(buf.validate.field).required = true];
+}
+
+message EnableRegistrationTOTPResponse {
+  string id = 1 [(buf.validate.field).required = true];
+  repeated string backup_codes = 3;
+}
+
+message DisableRegistrationTOTPRequest {
+  string registration_id = 1 [(buf.validate.field).required = true];
+  string code = 2 [(buf.validate.field).required = true];
+}
+
+message GenerateQRCodeRequest {
+  string environment_id = 1 [(buf.validate.field).required = true];
+  string identifier = 2 [(buf.validate.field).required = true];
+  bool is_user = 3;
+}
+
+message GenerateQRCodeResponse {
+  string qr_code = 1;
+}
+
+message VerifyUserCodeRequest {
+  string user_id = 1 [(buf.validate.field).required = true];
+  string code = 2 [(buf.validate.field).required = true];
+}
+
+message VerifyCodeResponse {
+  bool valid = 1;
+}
+
+message VerifyRegistrationCodeRequest {
+  string registration_id = 1 [(buf.validate.field).required = true];
+  string code = 2 [(buf.validate.field).required = true];
+}

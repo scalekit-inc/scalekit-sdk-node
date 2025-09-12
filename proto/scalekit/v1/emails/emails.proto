@@ -1,0 +1,635 @@
+syntax = "proto3";
+
+package scalekit.v1.emails;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/emails";
+
+service EmailService {
+  rpc GetTemplatePlaceholders(GetPlaceholdersRequest) returns (GetPlaceholdersResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {get: "/api/v1/email/templates/placeholders"};
+  }
+
+  rpc GetTemplateUseCases(google.protobuf.Empty) returns (GetTemplateUseCasesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: NONE};
+
+    option (google.api.http) = {get: "/api/v1/email/templates/usecases"};
+  }
+
+  // For templates
+
+  rpc CreateEmailTemplate(CreateEmailTemplateRequest) returns (CreateEmailTemplateResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/organizations/{organization_id}/email/templates"
+      body: "template"
+      additional_bindings: [
+        {
+          post: "/api/v1/organizations/-/email/templates"
+          body: "template"
+        }
+      ]
+    };
+  }
+
+  rpc UpdateEmailTemplate(PatchEmailTemplateRequest) returns (GetEmailTemplateResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{organization_id}/email/templates/{template_id}"
+      body: "template"
+      additional_bindings: [
+        {
+          patch: "/api/v1/organizations/-/email/templates/{template_id}"
+          body: "template"
+        }
+      ]
+    };
+  }
+
+  rpc GetEmailConfiguration(google.protobuf.Empty) returns (GetEmailConfigurationResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION};
+    option (google.api.http) = {get: "/api/v1/emails/configuration"};
+  }
+
+  rpc UpsertEmailConfiguration(UpsertEmailConfigurationRequest) returns (UpsertEmailConfigurationResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION};
+    option (google.api.http) = {
+      post: "/api/v1/emails/configuration"
+      body: "*"
+    };
+  }
+
+  rpc EnableEmailTemplate(EnableEmailTemplateRequest) returns (EnableEmailTemplateResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{organization_id}/email/templates/{template_id}:enable"
+      additional_bindings: [
+        {patch: "/api/v1/organizations/-/email/templates/{template_id}:enable"}]
+    };
+  }
+
+  rpc DisableEmailTemplate(DisableEmailTemplateRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{organization_id}/email/templates/{template_id}:disable"
+      additional_bindings: [
+        {patch: "/api/v1/organizations/-/email/templates/{template_id}:disable"}]
+    };
+  }
+
+  rpc GetEmailTemplate(GetEmailTemplateRequest) returns (GetEmailTemplateResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      get: "/api/v1/organizations/{organization_id}/email/templates/{template_id}"
+      additional_bindings: [
+        {get: "/api/v1/organizations/-/email/templates/{template_id}"}]
+    };
+  }
+
+  rpc ListEmailTemplates(ListEmailTemplateRequest) returns (ListEmailTemplateResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      get: "/api/v1/organizations/{organization_id}/email/templates"
+      additional_bindings: [
+        {get: "/api/v1/organizations/-/email/templates"}]
+    };
+  }
+
+  rpc DeleteEmailTemplate(DeleteEmailTemplateRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      delete: "/api/v1/organizations/{organization_id}/email/templates/{template_id}"
+      additional_bindings: [
+        {delete: "/api/v1/organizations/-/email/templates/{template_id}"}]
+    };
+  }
+
+  // Email Server Services
+  rpc CreateEmailServer(CreateEmailServerRequest) returns (CreateEmailServerResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/email/servers"
+      body: "*"
+    };
+  }
+
+  rpc UpdateEmailServerSettings(PatchEmailServerSettingsRequest) returns (GetEmailServerResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      put: "/api/v1/email/servers/{server_id}"
+      body: "settings"
+    };
+  }
+
+  rpc EnableEmailServer(EnableEmailServerRequest) returns (EnableEmailServerResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {patch: "/api/v1/email/servers/{server_id}:enable"};
+  }
+
+  rpc DisableEmailServer(DisableEmailServerRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {patch: "/api/v1/email/servers/{server_id}:disable"};
+  }
+
+  rpc GetEmailServer(GetEmailServerRequest) returns (GetEmailServerResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/email/servers/{server_id}"};
+  }
+
+  rpc ListEmailServers(google.protobuf.Empty) returns (ListEmailServerResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/email/servers"};
+  }
+
+  rpc DeleteEmailServer(DeleteEmailServerRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/email/servers/{server_id}"};
+  }
+}
+
+message GetPlaceholdersRequest {
+  TemplateUsecase use_case = 1 [(buf.validate.field).required = true];
+}
+
+message GetPlaceholdersResponse {
+  repeated string placeholders = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+enum TemplateUsecase {
+  TEMPLATE_USECASE_UNSPECIFIED = 0;
+  LOGIN = 1;
+  OTP_LOGIN = 2;
+  MEMBER_INVITE = 3;
+  USER_INVITE = 4;
+  USER_LOGIN = 5;
+  SIGNUP = 6;
+  USER_LOGIN_OTP = 7;
+  USER_LOGIN_LINK = 8;
+  USER_LOGIN_LINK_OTP = 9;
+  USER_SIGNUP_OTP = 10;
+  USER_SIGNUP_LINK = 11;
+  USER_SIGNUP_LINK_OTP = 12;
+}
+
+message GetTemplateUseCasesResponse {
+  repeated TemplateUsecaseWithPlaceholders use_cases = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+message TemplateUsecaseWithPlaceholders {
+  TemplateUsecase use_case = 1 [(buf.validate.field).required = true];
+  string title = 2 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string description = 3 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+
+  repeated Placeholder placeholders = 4 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  bool display = 5;
+
+  Template default_template = 6 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+message Placeholder {
+  string name = 1 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string title = 2 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string description = 3 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  bool display = 4;
+  string category = 5;
+}
+
+message Template {
+  google.protobuf.Timestamp updated_at = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+  string id = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  TemplateUsecase use_case = 3;
+  bool enabled = 4;
+
+  string subject = 5 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string html_content = 6 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_bytes = 1048576
+  ];
+  string plain_content = 7 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_bytes = 1048576
+  ];
+
+  repeated string placeholders = 8 [(google.api.field_behavior) = OUTPUT_ONLY];
+}
+
+message CreateEmailTemplate {
+  google.protobuf.Timestamp updated_at = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+  string id = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
+
+  TemplateUsecase use_case = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).enum.defined_only = true
+  ];
+
+  string subject = 4 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255,
+    (buf.validate.field).required = true
+  ];
+  string html_content = 5 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_bytes = 1048576,
+    (buf.validate.field).required = true
+  ];
+  string plain_content = 6 [
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_bytes = 1048576,
+    (buf.validate.field).required = true
+  ];
+}
+
+message CreateEmailTemplateRequest {
+  string organization_id = 1 [(buf.validate.field).string = {
+    min_len: 0
+    max_len: 32
+  }];
+  CreateEmailTemplate template = 2 [(buf.validate.field).required = true];
+}
+
+message CreateEmailTemplateResponse {
+  Template template = 1 [(buf.validate.field).required = true];
+}
+
+message EnableEmailTemplateRequest {
+  string organization_id = 1 [(buf.validate.field).string = {
+    min_len: 0
+    max_len: 32
+  }];
+
+  string template_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "tpl"
+    }
+  ];
+}
+
+message EnableEmailTemplateResponse {
+  google.protobuf.StringValue active_template_id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "tpl"
+  }];
+  google.protobuf.StringValue last_active_template_id = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "tpl"
+  }];
+}
+
+message DisableEmailTemplateRequest {
+  string organization_id = 1 [(buf.validate.field).string = {
+    min_len: 0
+    max_len: 32
+  }];
+
+  string template_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "tpl"
+    }
+  ];
+}
+
+message GetEmailTemplateRequest {
+  string organization_id = 1 [(buf.validate.field).string = {
+    min_len: 0
+    max_len: 32
+  }];
+  string template_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "tpl"
+    }
+  ];
+}
+
+message GetEmailTemplateResponse {
+  Template template = 1;
+}
+
+message ListEmailTemplateRequest {
+  string organization_id = 1 [(buf.validate.field).string = {
+    min_len: 0
+    max_len: 32
+  }];
+}
+
+message ListEmailTemplateResponse {
+  repeated Template templates = 1;
+}
+
+message UpdateTemplate {
+  option (buf.validate.message).cel = {
+    id: "at_least_one_field_required"
+    expression: "has(this.subject) || has(this.html_content) || has(this.plain_content)"
+    message: "At least one of 'subject', 'html_content', or 'plain_content' must be set"
+  };
+
+  optional string subject = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 255
+  }];
+
+  optional string html_content = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_bytes: 1048576
+  }];
+
+  optional string plain_content = 3 [(buf.validate.field).string = {
+    min_len: 1
+    max_bytes: 1048576
+  }];
+}
+
+enum EmailServerType {
+  UNSPECIFIED = 0;
+  INHOUSE = 1;
+  CUSTOMER = 2;
+}
+
+message GetEmailConfigurationResponse {
+  string default_from_name = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Default email from name when using scalekit email server"}];
+  string default_from_address = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Default email from address when using scalekit email server"}
+  ];
+  EmailServerType email_server_selected = 3;
+  EmailServer server = 4;
+}
+
+message UpsertEmailConfigurationRequest {
+  string default_from_name = 1;
+  UpsertEmailConfigurationServer server = 2;
+}
+
+message UpsertEmailConfigurationServer {
+  string id = 1;
+  EmailServerProvider provider = 2 [(buf.validate.field).required = true];
+  google.protobuf.BoolValue enabled = 3 [(buf.validate.field).required = true];
+  UpsertEmailConfigurationSMTPServerSettings settings = 4 [(buf.validate.field).required = true];
+}
+
+message UpsertEmailConfigurationSMTPServerSettings {
+  string host = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  int64 port = 2 [(buf.validate.field).required = true];
+  string username = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string password = 4;
+  string from_email = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string from_name = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+}
+
+message UpsertEmailConfigurationResponse {
+  string default_from_name = 1;
+  string default_from_address = 2;
+  EmailServerType email_server_selected = 3;
+  EmailServer server = 4;
+}
+message PatchEmailTemplateRequest {
+  string organization_id = 1 [(buf.validate.field).string = {
+    min_len: 0
+    max_len: 32
+  }];
+
+  string template_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "tpl"
+    }
+  ];
+
+  UpdateTemplate template = 4 [(buf.validate.field).required = true];
+  google.protobuf.FieldMask update_mask = 99;
+}
+
+message DeleteEmailTemplateRequest {
+  string organization_id = 1 [(buf.validate.field).string = {
+    min_len: 0
+    max_len: 32
+  }];
+  string template_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "tpl"
+    }
+  ];
+}
+
+// Email Servers
+
+enum EmailServerProvider {
+  EMAIL_SERVER_UNSPECIFIED = 0;
+  SENDGRID = 1;
+  POSTMARK = 2;
+  OTHER = 3;
+}
+
+message EmailServer {
+  google.protobuf.Timestamp updated_at = 1 [(google.api.field_behavior) = OUTPUT_ONLY];
+  string id = 2 [(google.api.field_behavior) = OUTPUT_ONLY];
+  EmailServerProvider provider = 3 [(buf.validate.field).required = true];
+  bool enabled = 4;
+  oneof settings {
+    SMTPServerSettings smtp_settings = 5 [(buf.validate.field).required = true];
+  }
+}
+
+message SMTPServerSettings {
+  string host = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  int64 port = 2 [(buf.validate.field).required = true];
+  string username = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string password = 4 [
+    (google.api.field_behavior) = INPUT_ONLY,
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string from_email = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string from_name = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+}
+
+message PatchSMTPServerSettings {
+  string host = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  int64 port = 2 [(buf.validate.field).required = true];
+  string username = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string password = 4 [(google.api.field_behavior) = INPUT_ONLY];
+  string from_email = 5 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+  string from_name = 6 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string.min_len = 1,
+    (buf.validate.field).string.max_len = 255
+  ];
+}
+
+message CreateEmailServerRequest {
+  EmailServerProvider provider = 1 [(buf.validate.field).required = true];
+  SMTPServerSettings settings = 2;
+}
+
+message CreateEmailServerResponse {
+  EmailServer server = 1 [(buf.validate.field).required = true];
+}
+
+message GetEmailServerRequest {
+  string server_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "esr"
+    }
+  ];
+}
+
+message GetEmailServerResponse {
+  EmailServer server = 1;
+}
+
+message EnableEmailServerRequest {
+  string server_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "esr"
+    }
+  ];
+}
+
+message EnableEmailServerResponse {
+  google.protobuf.StringValue active_server_id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "esr"
+  }];
+  google.protobuf.StringValue last_active_server_id = 2 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "esr"
+  }];
+}
+
+message DisableEmailServerRequest {
+  string server_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "esr"
+    }
+  ];
+}
+
+message ListEmailServerResponse {
+  repeated EmailServer servers = 1;
+}
+
+message PatchEmailServerSettingsRequest {
+  string server_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "esr"
+    }
+  ];
+  PatchSMTPServerSettings settings = 2 [(buf.validate.field).required = true];
+}
+
+message DeleteEmailServerRequest {
+  string server_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "esr"
+    }
+  ];
+}

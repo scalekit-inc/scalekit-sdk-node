@@ -1,0 +1,2164 @@
+syntax = "proto3";
+
+package scalekit.v1.connections;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/domains/domains.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/connections";
+
+service ConnectionService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    name: "Connections"
+    description: "Manage enterprise connections for your Scalekit environment. This service provides endpoints for retrieving, and updating connections."
+  };
+
+  rpc CreateEnvironmentConnection(CreateEnvironmentConnectionRequest) returns (CreateConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/connections"
+      body: "connection"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Create a new connection"
+      description: "Establish a new connection for the specified environment"
+      responses: {
+        key: "201"
+        value: {
+          description: "Connection created successfully"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.CreateConnectionResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc CreateConnection(CreateConnectionRequest) returns (CreateConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/organizations/{organization_id}/connections"
+      body: "connection"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Create a new connection"
+      description: "Establish a new SSO connection for the specified organization"
+      responses: {
+        key: "201"
+        value: {
+          description: "Connection created successfully"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.CreateConnectionResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const connection = await sc.connection.createConnection(organizationId, connectionConfig);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "connection = sc.connection.create_connection(\n  organization_id,\n  connection_config\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "connection, err := sc.Connection.CreateConnection(\n  ctx,\n  organizationId,\n  connectionConfig,\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "Connection connection = client.connections().createConnection(organizationId, connectionConfig);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc AssignDomainsToConnection(AssignDomainsToConnectionRequest) returns (AssignDomainsToConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      put: "/api/v1/organizations/{organization_id}/connections/{connection_id}/domains"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Assign domains to a connection"
+      description: "Assigns one or more domains to a specific connection within an organization. This allows the connection to be used for authentication on the specified domains"
+      responses: {
+        key: "200"
+        value: {
+          description: "Domains assigned successfully"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.AssignDomainsToConnectionResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetEnvironmentConnection(GetEnvironmentConnectionRequest) returns (GetConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/connections/{connection_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Retrieve connection details"
+      description: "Obtain detailed information about a specific connection using its unique identifier"
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved connection details"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.GetConnectionResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetConnection(GetConnectionRequest) returns (GetConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {get: "/api/v1/organizations/{organization_id}/connections/{id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Get connection details"
+      description: "Retrieves the complete configuration and status details for a specific connection by its ID within an organization. Returns all connection properties including provider settings, protocols, and current status."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved connection details for the specified organization"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.GetConnectionResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const connection = await sc.connection.getConnection(\n  organizationId,\n  connectionId\n);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "connection = sc.connection.get_connection(\n  organization_id,\n  connection_id,\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "connection, err := sc.Connection.GetConnection(\n  ctx,\n  organizationId,\n  connectionId,\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "Connection connection = client.connections().getConnectionById(connectionId, organizationId);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListConnections(ListConnectionsRequest) returns (ListConnectionsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {get: "/api/v1/connections"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "List connections"
+      description: "Retrieves a list of connections in the environment"
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved connections"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.ListConnectionsResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "// List connections by organization id\nconst connections = await scalekit.connection.listConnections(organizationId);\n\n// List connections by domain\nconst connections = await scalekit.connection.listConnectionsByDomain(domain);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "# List connections by organization id\nconnections = scalekit_client.connection.list_connections(\n  organization_id\n)\n\n# List connections by domain\nresponse = scalekit_client.connection.list_connections_by_domain(domain=\"example.com\")"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "// List connections by organization id\nconnections, err := scalekitClient.Connection().ListConnections(\n  ctx,\n  organizationId\n)\n\n// List connections by domain\nconnections, err := scalekitClient.Connection().ListConnectionsByDomain(ctx, \n  domain)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "// List connections by organization id\nListConnectionsResponse response = scalekitClient.connections(\n  ).listConnections(organizationId);\n\n// List connections by domain\nListConnectionsResponse response = scalekitClient.connections(\n  ).listConnectionsByDomain(\"your-domain.com\");"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListOrganizationConnections(ListOrganizationConnectionsRequest) returns (ListOrganizationConnectionsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/organizations/-/connections"};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "List organization connections"
+      description: "Retrieves a list of connections for all the organizations"
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved connections"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.ListOrganizationConnectionsResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc SearchOrganizationConnections(SearchOrganizationConnectionsRequest) returns (SearchOrganizationConnectionsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/organizations/-/connections:search"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Search organization connections"
+      description: "Search with query or filters provided and return list of connections"
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully found connections"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.SearchOrganizationConnectionsResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateEnvironmentConnection(UpdateEnvironmentConnectionRequest) returns (UpdateConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/connections/{connection_id}"
+      body: "connection"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Update a connection"
+      description: "Update a SSO Connection"
+      responses: {
+        key: "200"
+        value: {
+          description: "Updated Successfully"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.UpdateConnectionResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateConnection(UpdateConnectionRequest) returns (UpdateConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{organization_id}/connections/{id}"
+      body: "connection"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Update a connection for organization"
+      description: "Update a SSO Connection"
+      responses: {
+        key: "200"
+        value: {
+          description: "Updated Successfully"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.UpdateConnectionResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const connection = await sc.connection.updateConnection(organizationId, connectionId, connectionConfig);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "connection = sc.connection.update_connection(\n  organization_id,\n  connection_id,\n  connection_config\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "connection, err := sc.Connection.UpdateConnection(\n  ctx,\n  organizationId,\n  connectionId,\n  connectionConfig,\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "Connection connection = client.connections().updateConnection(connectionId, organizationId, connectionConfig);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteEnvironmentConnection(DeleteEnvironmentConnectionRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/connections/{connection_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Delete a connection"
+      description: "Delete a SSO Connection"
+      responses: {
+        key: "200"
+        value: {description: "Deleted Successfully"}
+      }
+    };
+  }
+
+  rpc DeleteConnection(DeleteConnectionRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/organizations/{organization_id}/connections/{id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Delete a connection for organization"
+      description: "Delete a SSO Connection"
+      responses: {
+        key: "200"
+        value: {description: "Deleted Successfully"}
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "await sc.connection.deleteConnection(organizationId, connectionId);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "sc.connection.delete_connection(\n  organization_id,\n  connection_id\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "err := sc.Connection.DeleteConnection(\n  ctx,\n  organizationId,\n  connectionId,\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "client.connections().deleteConnection(connectionId, organizationId);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc EnableEnvironmentConnection(ToggleEnvironmentConnectionRequest) returns (ToggleConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {patch: "/api/v1/connections/{connection_id}:enable"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Enable a connection"
+      description: "Enable a SSO Connection"
+      responses: {
+        key: "200"
+        value: {
+          description: "Success"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.ToggleConnectionResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc EnableConnection(ToggleConnectionRequest) returns (ToggleConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {patch: "/api/v1/organizations/{organization_id}/connections/{id}:enable"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Enable organization connection"
+      description: "Activate an existing connection for the specified organization. When enabled, users can authenticate using this connection. This endpoint changes the connection state from disabled to enabled without modifying other configuration settings"
+      responses: {
+        key: "200"
+        value: {
+          description: "Connection enabled successfully"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.ToggleConnectionResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "await sc.connection.enableConnection(organizationId, connectionId);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "sc.connection.enable_connection(\n  organization_id,\n  connection_id,\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "err := sc.Connection.EnableConnection(\n  ctx,\n  organizationId,\n  connectionId,\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "ToggleConnectionResponse response = scalekitClient.connections().enableConnection(connectionId, organizationId);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc DisableEnvironmentConnection(ToggleEnvironmentConnectionRequest) returns (ToggleConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {patch: "/api/v1/connections/{connection_id}:disable"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Disable a connection"
+      description: "Disable a SSO Connection"
+      responses: {
+        key: "200"
+        value: {
+          description: "Success"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.ToggleConnectionResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DisableConnection(ToggleConnectionRequest) returns (ToggleConnectionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {patch: "/api/v1/organizations/{organization_id}/connections/{id}:disable"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Disable organization connection"
+      description: "Deactivate an existing connection for the specified organization. When disabled, users cannot authenticate using this connection. This endpoint changes the connection state from enabled to disabled without modifying other configuration settings"
+      responses: {
+        key: "200"
+        value: {
+          description: "Connection disabled successfully"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.ToggleConnectionResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "await sc.connection.disableConnection(organizationId, connectionId);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "sc.connection.disable_connection(\n  organization_id,\n  connection_id\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "err := sc.Connection.DisableConnection(\n  ctx,\n  organizationId,\n  connectionId,\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "ToggleConnectionResponse response = scalekitClient.connections().disableConnection(connectionId, organizationId);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetConnectionTestResult(GetConnectionTestResultRequest) returns (GetConnectionTestResultResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/connections/{connection_id}/test-requests/{test_request_id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "Test connection result"
+      description: "Connection test result"
+      responses: {
+        key: "200"
+        value: {
+          description: "Success"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.GetConnectionTestResultResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListAppConnections(ListAppConnectionsRequest) returns (ListAppConnectionsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/connections/app"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Connections"
+      summary: "List App connections"
+      description: "Retrieves a list of app connections in the environment"
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved connections"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.connections.ListConnectionsResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const connections = await sc.connection.listConnections(organizationId);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "connections = sc.connection.list_connections(\n  organization_id\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "connections, err := sc.Connection.ListConnections(\n  ctx,\n  organizationId\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "ListConnectionsResponse response = scalekitClient.connections().listConnectionsByOrganization(organizationId);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+}
+
+message AssignDomainsToConnectionRequest {
+  string organization_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    }
+  ];
+
+  string connection_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "conn_"
+    }
+  ];
+  repeated string domain_ids = 3 [(buf.validate.field).repeated = {
+    min_items: 0
+    max_items: 50
+  }];
+}
+
+message AssignDomainsToConnectionResponse {
+  Connection connection = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Connection with assigned domains"
+    example: "{\n  \"id\": \"conn_1234567890\",\n  \"provider\": \"OKTA\",\n  \"type\": \"OIDC\",\n  \"status\": \"CONFIGURED\",\n  \"enabled\": true,\n  \"debug_enabled\": false,\n  \"organization_id\": \"org_1234567890\",\n  \"ui_button_title\": \"Login with SSO\",\n  \"configuration_type\": \"MANUAL\",\n  \"test_connection_uri\": \"https://auth.example.com/test-connection/conn_1234567890\"\n}"
+  }];
+}
+
+message GetProvidersRequest {}
+
+message GetProvidersResponse {
+  repeated Provider providers = 1;
+}
+
+message Provider {
+  string key_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Provider Key ID"
+    example: "\"google\""
+  }];
+  string display_name = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Provider Display Name"
+    example: "\"Google\""
+  }];
+  optional string description = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Provider Description"
+    example: "\"Sign In With Google\""
+  }];
+}
+
+message CreateEnvironmentConnectionRequest {
+  CreateConnection connection = 1 [(buf.validate.field).required = true];
+  optional Flags flags = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Optional flags to control connection creation behavior, such as enabling debug mode"
+    example: "{ \"is_social\": true }"
+  }];
+}
+
+message CreateConnectionRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization for which the connection is created."
+      example: "\"org_12362474900684814\""
+    }
+  ];
+  reserved 2;
+  CreateConnection connection = 3 [(buf.validate.field).required = true];
+}
+
+message CreateConnection {
+  ConnectionProvider provider = 1 [
+    (buf.validate.field).enum = {defined_only: true},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Identity provider service that handles authentication (such as OKTA, Google, Azure AD, or a custom provider)"
+      example: "\"OKTA\""
+    }
+  ];
+  ConnectionType type = 2 [(buf.validate.field).enum.defined_only = true];
+  string provider_key = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Key ID of the identity provider. This is used to identify the specific configuration for the provider."
+    example: "\"google\""
+  }];
+  optional string key_id = 4;
+}
+
+message Connection {
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for this connection. Used in API calls to reference this specific connection."
+    example: "\"conn_2123312131125533\""
+  }];
+  ConnectionProvider provider = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Identity provider service that handles authentication (such as OKTA, Google, Azure AD, or a custom provider)"
+    example: "\"OKTA\""
+  }];
+  ConnectionType type = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Authentication protocol used by this connection. Can be OIDC (OpenID Connect), SAML, OAUTH, or MAGIC_LINK."
+    example: "\"OIDC\""
+  }];
+  ConnectionStatus status = 4 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Current configuration status of the connection. Possible values include IN_PROGRESS, CONFIGURED, and ERROR."
+      example: "\"IN_PROGRESS\""
+    },
+    (google.api.field_behavior) = OUTPUT_ONLY
+  ];
+  bool enabled = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Controls whether users can sign in using this connection. When false, the connection exists but cannot be used for authentication."
+    example: "false"
+  }];
+  bool debug_enabled = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Enables testing mode that allows non-HTTPS endpoints. Should only be enabled in development environments, never in production."
+    example: "true"
+  }];
+  optional string organization_id = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Identifier of the organization that owns this connection. Connections are typically scoped to a single organization."
+    example: "\"org_2123312131125533\""
+  }];
+  string ui_button_title = 8 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom text shown on the login button in the user interface. Helps users identify which SSO option to select."
+      example: "\"Login with SSO\""
+    },
+    (google.api.field_visibility).restriction = "PREVIEW"
+  ];
+  ConfigurationType configuration_type = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "How the connection was configured: DISCOVERY (automatic configuration) or MANUAL (administrator configured)"
+    example: "\"MANUAL\""
+  }];
+  string test_connection_uri = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "URI that can be used to test this connection. Visit this URL to verify the connection works correctly."
+    example: "\"https://auth.example.com/test-connection/conn_2123312131125533\""
+  }];
+
+  reserved 13 to 14;
+  map<string, string> attribute_mapping = 15 [
+    (buf.validate.field).map = {
+      max_pairs: 30
+      keys: {
+        string: {
+          min_len: 1
+          max_len: 100
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Maps identity provider attributes to user profile fields. For example, {'email': 'user.mail', 'name': 'user.displayName'}."}
+  ];
+  google.protobuf.Timestamp create_time = 16 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "When this connection was first created. Format is RFC 3339 timestamp."
+      example: "\"2023-01-15T14:30:00Z\""
+    },
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (google.api.field_visibility).restriction = "PREVIEW"
+  ];
+  google.protobuf.Timestamp update_time = 17 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "When this connection was last modified. Format is RFC 3339 timestamp."
+      example: "\"2023-02-20T09:15:30Z\""
+    },
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (google.api.field_visibility).restriction = "PREVIEW"
+  ];
+  oneof settings {
+    OIDCConnectionConfig oidc_config = 18 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Configuration details for OpenID Connect (OIDC) connections. Present only when type is OIDC."}];
+    SAMLConnectionConfigResponse saml_config = 19 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Configuration details for SAML connections. Present only when type is SAML."}];
+    OAuthConnectionConfig oauth_config = 20 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Configuration details for OAuth connections. Present only when type is OAUTH."}];
+    PasswordLessConfig passwordless_config = 22 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Configuration details for Magic Link authentication. Present only when type is MAGIC_LINK."}];
+    StaticAuthConfig static_config = 26 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Static configuration for custom connections. Present only when type is BASIC, BEARER, API_KEY, or custom."}];
+  }
+
+  optional string key_id = 25 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Alternative identifier for this connection, typically used in frontend applications or URLs."}];
+  string provider_key = 23 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Key ID of the identity provider service that handles authentication"
+    example: "\"google\""
+  }];
+  repeated domains.Domain domains = 24 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Domain associated with this connection, used for domain-based authentication flows."
+    example: "[{\"name\": \"example.com\"}]"
+  }];
+}
+
+message CreateConnectionResponse {
+  Connection connection = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Connection Detail"}];
+}
+
+message UpdateEnvironmentConnectionRequest {
+  string connection_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection ID. Unique ID for the connection"
+      example: "\"conn_121312434123312\""
+      field_configuration: {path_param_name: "id"}
+    }
+  ];
+
+  UpdateConnection connection = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection properties to be updated"
+      field_configuration: {path_param_name: "id"}
+    }
+  ];
+}
+
+message UpdateConnectionRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID for the Connection."
+      example: "\"org_121312434123312\""
+    }
+  ];
+  reserved 2;
+  string id = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection ID. Unique ID for the connection"
+      example: "\"conn_121312434123312\""
+    }
+  ];
+  UpdateConnection connection = 4 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection properties to be updated"
+      field_configuration: {path_param_name: "id"}
+    }
+  ];
+}
+
+message UpdateConnection {
+  reserved 1;
+  ConnectionProvider provider = 2 [
+    (buf.validate.field).enum = {defined_only: true},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "SSO Connection Provider"
+      example: "\"CUSTOM\""
+    }
+  ];
+  ConnectionType type = 3 [
+    (buf.validate.field).enum.defined_only = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection Protocol OIDC / SAML "
+      example: "\"OIDC\""
+    }
+  ];
+  reserved 4;
+  reserved 5;
+  google.protobuf.BoolValue debug_enabled = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Debug mode for the connection. Debug would allow non HTTPS endpoint to be used with the connection"
+    example: "true"
+  }];
+  google.protobuf.StringValue ui_button_title = 8 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Display name for the Login Button"
+      example: "\"Login with SSO\""
+    },
+    (google.api.field_visibility).restriction = "PREVIEW"
+  ];
+  reserved 9 to 10;
+  ConfigurationType configuration_type = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Configuration Type. "
+    example: "\"MANUAL\""
+  }];
+  reserved 12 to 14;
+  map<string, string> attribute_mapping = 15 [
+    (buf.validate.field).map = {
+      max_pairs: 30
+      keys: {
+        string: {
+          min_len: 1
+          max_len: 100
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Attribute Mapping"}
+  ];
+  oneof settings {
+    OIDCConnectionConfig oidc_config = 16 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "OIDC Configuration if ConnectionType == OIDC"}];
+    SAMLConnectionConfigRequest saml_config = 17 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "SAML Configuration if ConnectionType == SAML"}];
+    OAuthConnectionConfig oauth_config = 18 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "OAuth Configuration if ConnectionType == OAUTH"}];
+    PasswordLessConfig passwordless_config = 20 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Magic Link Configuration if ConnectionType == MAGIC_LINK"}];
+    StaticAuthConfig static_config = 23;
+  }
+  optional string key_id = 22 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+  }];
+  string provider_key = 21 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Key ID of the identity provider service that handles authentication"
+    example: "\"google\""
+  }];
+}
+
+message UpdateConnectionResponse {
+  Connection connection = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated Connection details"}];
+}
+
+message DeleteEnvironmentConnectionRequest {
+  string connection_id = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection ID. Unique ID for the connection"
+      example: "\"conn_121312434123312\""
+    }
+  ];
+}
+
+message DeleteConnectionRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID for the Connection."
+      example: "\"org_121312434123312\""
+    }
+  ];
+  reserved 2;
+  string id = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection ID. Unique ID for the connection"
+      example: "\"conn_121312434123312\""
+    }
+  ];
+}
+
+message GetEnvironmentConnectionRequest {
+  string connection_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the Connection"
+      example: "\"conn_121312434123312\""
+    }
+  ];
+}
+
+message GetConnectionRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization identifier (required). Specifies which organization owns the connection you want to retrieve."
+      example: "\"org_121312434123312\""
+    }
+  ];
+  reserved 2;
+  string id = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection identifier (required). Specifies which specific connection to retrieve from the organization."
+      example: "\"conn_121312434123312\""
+    }
+  ];
+}
+
+message GetConnectionResponse {
+  Connection connection = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Complete connection details including provider configuration, protocol settings, status, and all metadata. Contains everything needed to understand the connection's current state."}];
+}
+
+message ListConnectionsRequest {
+  optional string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter connections by organization identifier"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  reserved 2;
+  optional string domain = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter connections by email domain associated with the organization"
+      example: "\"hero-saas.app\""
+    }
+  ];
+
+  optional string include = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter connections by status. Use 'all' to include all connections regardless of status. Default behavior shows only active (completed and enabled) connections"}];
+}
+
+message ListConnectionsResponse {
+  repeated ListConnection connections = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of connections matching the request criteria"}];
+}
+
+message ListConnection {
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier of the connection"
+    example: "\"conn_2123312131125533\""
+  }];
+  ConnectionProvider provider = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Identity provider type (e.g., OKTA, Google, Azure AD)"
+    example: "\"CUSTOM\""
+  }];
+  ConnectionType type = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Authentication protocol used by the connection"
+    example: "\"OIDC\""
+  }];
+  ConnectionStatus status = 4 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Current configuration status of the connection"
+      example: "\"IN_PROGRESS\""
+    },
+    (google.api.field_behavior) = OUTPUT_ONLY
+  ];
+  bool enabled = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Whether the connection is currently active for organization users"
+    example: "false"
+  }];
+  string organization_id = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier of the organization that owns this connection"
+    example: "\"org_2123312131125533\""
+  }];
+  string ui_button_title = 7 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Text displayed on the SSO login button for this connection"
+      example: "\"Login with SSO\""
+    },
+    (google.api.field_visibility).restriction = "PREVIEW"
+  ];
+  repeated string domains = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of domains configured with this connection"
+    example: "[\"yourapp.com\", \"yourworkspace.com\"]"
+  }];
+
+  string organization_name = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Name of the organization of the connection"
+    example: "\"Your Organization\""
+  }];
+  string provider_key = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Key ID of the identity provider service that handles authentication"
+    example: "\"google\""
+  }];
+  string key_id = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Alternative identifier for this connection, typically used in frontend applications or URLs"
+    example: "\"conn_2123312131125533\""
+  }];
+
+  google.protobuf.Timestamp created_at = 12 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "When this connection was first created"
+      example: "\"2023-01-15T14:30:00Z\""
+    },
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (google.api.field_visibility).restriction = "PREVIEW"
+  ];
+}
+
+message ListOrganizationConnectionsRequest {
+  uint32 page_size = 1 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "30"
+      description: "Maximum number of organizations to return per page. Value must be between 1 and 30."
+    }
+  ];
+
+  string page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "eyJwYWdlIjoyLCJsaW1pdCI6MzB9"
+    description: "Token from a previous response for pagination. Provide this to retrieve the next page of results."
+  }];
+}
+
+message ListOrganizationConnectionsResponse {
+  string next_page_token = 1;
+  uint32 total_size = 2;
+  string prev_page_token = 3;
+  repeated ListConnection connections = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of connections matching the filter criteria"}];
+}
+
+message SearchOrganizationConnectionsRequest {
+  optional string query = 1 [
+    (buf.validate.field).string = {max_len: 100},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Search query Connection ID or Organization ID"
+      example: "\"conn_121312434123312\""
+    }
+  ];
+
+  optional string provider = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Filter by provider"
+    example: "\"OKTA\""
+  }];
+
+  optional ConnectionStatus status = 3 [
+    (buf.validate.field).enum.defined_only = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter by connection status"
+      example: "\"COMPLETED\""
+    }
+  ];
+
+  optional ConnectionType connection_type = 4 [
+    (buf.validate.field).enum.defined_only = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter by connection status"
+      example: "\"COMPLETED\""
+    }
+  ];
+
+  optional bool enabled = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Filter by connection enabled status"
+    example: "\"true\""
+  }];
+
+  uint32 page_size = 5 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "30"
+      description: "Maximum number of organizations to return per page. Value must be between 1 and 30."
+    }
+  ];
+
+  string page_token = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "eyJwYWdlIjoyLCJsaW1pdCI6MzB9"
+    description: "Token from a previous response for pagination. Provide this to retrieve the next page of results."
+  }];
+}
+
+message SearchOrganizationConnectionsResponse {
+  string next_page_token = 1;
+  uint32 total_size = 2;
+  string prev_page_token = 3;
+  repeated ListConnection connections = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of connections matching the filter criteria"}];
+}
+
+message ToggleEnvironmentConnectionRequest {
+  string connection_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Connection ID. Unique ID for the connection"
+      example: "\"conn_121312434123312\""
+    }
+  ];
+}
+
+message ToggleConnectionRequest {
+  string organization_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization associated with the connection"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  reserved 2;
+  string id = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the connection to be toggled"
+      example: "\"conn_121312434123312\""
+    }
+  ];
+}
+
+message ToggleConnectionResponse {
+  bool enabled = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Current state of the connection after the operation. True means the connection is now enabled and can be used for authentication."
+    example: "true"
+  }];
+  optional string error_message = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Error message if the operation fails"
+    example: "\"placeholder\""
+  }];
+}
+
+message OIDCConnectionConfig {
+  google.protobuf.StringValue issuer = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Issuer URL"
+    example: "\"https://youridp.com/service/oauth\""
+  }];
+  google.protobuf.StringValue discovery_endpoint = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Discovery Endpoint"
+    example: "\"https://youridp.com/service/oauth/.well-known/openid-configuration\""
+  }];
+  google.protobuf.StringValue authorize_uri = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Authorize URI"
+    example: "\"https://youridp.com/service/oauth/authorize\""
+  }];
+  google.protobuf.StringValue token_uri = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token URI"
+    example: "\"https://youridp.com/service/oauth/token\""
+  }];
+  google.protobuf.StringValue user_info_uri = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User Info URI"
+    example: "\"https://youridp.com/service/oauth/userinfo\""
+  }];
+  google.protobuf.StringValue jwks_uri = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "JWKS URI"
+    example: "\"https://youridp.com/service/oauth/jwks\""
+  }];
+  google.protobuf.StringValue client_id = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Client ID"
+    example: "\"oauth_client_id\""
+  }];
+  google.protobuf.StringValue client_secret = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Client Secret"
+    example: "\"oauth_client_secret\""
+  }];
+  repeated OIDCScope scopes = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "OIDC Scopes"
+    example: "[\"openid\", \"profile\"]"
+  }];
+  TokenAuthType token_auth_type = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token Auth Type"
+    example: "\"URL_PARAMS\""
+  }];
+  string redirect_uri = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Redirect URI"
+    example: "\"https://yourapp.com/sso/v1/oidc/conn_1234/callback\""
+  }];
+  google.protobuf.BoolValue pkce_enabled = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "PKCE Enabled"
+    example: "true"
+  }];
+  google.protobuf.BoolValue idp_logout_required = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Enable IDP logout"
+    example: "true"
+  }];
+  google.protobuf.StringValue post_logout_redirect_uri = 15 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "post logout redirect uri"
+      example: "\"https://yourapp.com/sso/v1/oidc/conn_1234/logout/callback\""
+    },
+    (google.api.field_behavior) = OUTPUT_ONLY
+  ];
+  google.protobuf.StringValue backchannel_logout_redirect_uri = 16 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "backchannel logout redirect uri where idp sends logout_token"
+      example: "\"https://yourapp.com/sso/v1/oidc/conn_1234/backchannel-logout\""
+    },
+    (google.api.field_behavior) = OUTPUT_ONLY
+  ];
+}
+
+message OAuthConnectionConfig {
+  google.protobuf.StringValue authorize_uri = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Authorize URI"
+    example: "\"https://youridp.com/service/oauth/authorize\""
+  }];
+  google.protobuf.StringValue token_uri = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token URI"
+    example: "\"https://youridp.com/service/oauth/token\""
+  }];
+  google.protobuf.StringValue user_info_uri = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User Info URI"
+    example: "\"https://youridp.com/service/oauth/userinfo\""
+  }];
+  google.protobuf.StringValue client_id = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Client ID"
+    example: "\"oauth_client_id\""
+  }];
+  google.protobuf.StringValue client_secret = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Client Secret"
+    example: "\"oauth_client_secret\""
+  }];
+  repeated string scopes = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "OIDC Scopes"
+    example: "[\"openid\", \"profile\"]"
+  }];
+  string redirect_uri = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Redirect URI"
+    example: "\"https://yourapp.com/service/oauth/redirect\""
+  }];
+  google.protobuf.BoolValue pkce_enabled = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "PKCE Enabled"
+    example: "true"
+  }];
+  google.protobuf.StringValue prompt = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Prompt for the user"
+    example: "\"none\""
+  }];
+  google.protobuf.BoolValue use_platform_creds = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Use Scalekit credentials"
+    example: "true"
+  }];
+  google.protobuf.StringValue access_type = 16 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Access Type"
+    example: "\"offline\""
+  }];
+  google.protobuf.StringValue custom_scope_name = 17 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Custom Scope Name"
+    example: "\"user_scope\""
+  }];
+}
+
+message PasswordLessConfig {
+  PasswordlessType type = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Passwordless Type"
+    example: "\"LINK\""
+  }];
+
+  optional google.protobuf.UInt32Value frequency = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Link Frequency"
+    example: "1"
+  }];
+
+  optional google.protobuf.UInt32Value validity = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Link Validity in Seconds"
+    example: "600"
+  }];
+
+  optional google.protobuf.BoolValue enforce_same_browser_origin = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Enforce Same Browser Origin"
+    example: "true"
+  }];
+
+  optional google.protobuf.UInt32Value code_challenge_length = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Code Challenge Length"
+    example: "6"
+  }];
+
+  optional CodeChallengeType code_challenge_type = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Code Challenge Type"
+    example: "\"NUMERIC\""
+  }];
+
+  optional google.protobuf.BoolValue regenerate_passwordless_credentials_on_resend = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Regenerate the "
+    example: "true"
+  }];
+}
+
+message StaticAuthConfig {
+  google.protobuf.Struct static_config = 1;
+}
+
+message SAMLConnectionConfigRequest {
+  google.protobuf.StringValue idp_metadata_url = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP Metadata URL"
+    example: "\"https://youridp.com/service/saml/metadata\""
+  }];
+  google.protobuf.StringValue idp_entity_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP Entity ID"
+    example: "\"https://youridp.com/service/saml\""
+  }];
+  google.protobuf.StringValue idp_sso_url = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP SSO URL"
+    example: "\"https://youridp.com/service/saml/sso\""
+  }];
+  google.protobuf.StringValue idp_certificate = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "IDP Certificate"}];
+  google.protobuf.StringValue idp_slo_url = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP SLO URL"
+    example: "\"https://youridp.com/service/saml/slo\""
+  }];
+  google.protobuf.StringValue ui_button_title = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "UI Button Title"
+    example: "\"Login with SSO\""
+  }];
+  NameIdFormat idp_name_id_format = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP Name ID Format"
+    example: "\"EMAIL\""
+  }];
+  RequestBinding idp_sso_request_binding = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP SSO Request Binding"
+    example: "\"HTTP_POST\""
+  }];
+  RequestBinding idp_slo_request_binding = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP SLO Request Binding"
+    example: "\"HTTP_REDIRECT\""
+  }];
+  SAMLSigningOptions saml_signing_option = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "SAML Signing Option"
+    example: "\"SAML_ONLY_RESPONSE_SIGNING\""
+  }];
+  reserved 11;
+  google.protobuf.BoolValue force_authn = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Force Authn"
+    example: "true"
+  }];
+  google.protobuf.StringValue default_redirect_uri = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Default Redirect URI"
+    example: "\"https://yourapp.com/service/saml/redirect\""
+  }];
+  google.protobuf.BoolValue assertion_encrypted = 16 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Assertion Encrypted"
+    example: "true"
+  }];
+  google.protobuf.BoolValue want_request_signed = 17 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Want Request Signed"
+    example: "true"
+  }];
+  google.protobuf.StringValue certificate_id = 18 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Certificate ID"
+    example: "\"cer_35585423166144613\""
+  }];
+  google.protobuf.BoolValue idp_slo_required = 19 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Enable IDP logout"
+    example: "true"
+  }];
+
+  google.protobuf.StringValue sp_entity_id = 20 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Service Provider Entity ID"
+    example: "\"https://env.scalekit.com/sso/v1/saml/conn_123\""
+  }];
+  google.protobuf.StringValue sp_assertion_url = 21 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Service Provider SSO URL"
+    example: "\"https://env.scalekit.com/sso/v1/saml/conn_123/callback\""
+  }];
+  google.protobuf.StringValue sp_slo_url = 22 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Service Provider SLO URL"
+    example: "\"https://env.scalekit.com/sso/v1/saml/conn_123/slo\""
+  }];
+}
+
+message SAMLConnectionConfigResponse {
+  string sp_entity_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "SP Entity ID"
+    example: "\"https://yourapp.com/service/saml\""
+  }];
+  string sp_assertion_url = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "SP Assertion URL"
+    example: "\"https://youridp.com/service/saml/assertion\""
+  }];
+  string sp_metadata_url = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "SP Metadata URL"
+    example: "\"https://youridp.com/service/saml/metadata\""
+  }];
+  google.protobuf.StringValue idp_metadata_url = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP Metadata URL"
+    example: "\"https://youridp.com/service/saml/metadata\""
+  }];
+  google.protobuf.StringValue idp_entity_id = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP Entity ID"
+    example: "\"https://youridp.com/service/saml\""
+  }];
+  google.protobuf.StringValue idp_sso_url = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP SSO URL"
+    example: "\"https://youridp.com/service/saml/sso\""
+  }];
+  repeated IDPCertificate idp_certificates = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "IDP Certificates"}];
+  google.protobuf.StringValue idp_slo_url = 8 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP SLO URL"
+    example: "\"https://youridp.com/service/saml/slo\""
+  }];
+  google.protobuf.StringValue ui_button_title = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "UI Button Title"
+    example: "\"Login with SSO\""
+  }];
+  NameIdFormat idp_name_id_format = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP Name ID Format"
+    example: "\"EMAIL\""
+  }];
+  RequestBinding idp_sso_request_binding = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP SSO Request Binding"
+    example: "\"HTTP_POST\""
+  }];
+  RequestBinding idp_slo_request_binding = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "IDP SLO Request Binding"
+    example: "\"HTTP_POST\""
+  }];
+  SAMLSigningOptions saml_signing_option = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "SAML Signing Option"
+    example: "\"SAML_ONLY_RESPONSE_SIGNING\""
+  }];
+  google.protobuf.BoolValue allow_idp_initiated_login = 14 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Allow IDP Initiated Login"
+    example: "true"
+  }];
+  google.protobuf.BoolValue force_authn = 15 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Force Authn"
+    example: "true"
+  }];
+  google.protobuf.StringValue default_redirect_uri = 16 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Default Redirect URI"
+    example: "\"https://yourapp.com/service/saml/redirect\""
+  }];
+  google.protobuf.BoolValue assertion_encrypted = 17 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Assertion Encrypted"
+    example: "true"
+  }];
+  google.protobuf.BoolValue want_request_signed = 18 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Want Request Signed"
+    example: "true"
+  }];
+  google.protobuf.StringValue certificate_id = 19 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Certificate ID"
+    example: "\"cer_35585423166144613\""
+  }];
+  google.protobuf.BoolValue idp_slo_required = 20 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Enable IDP logout"
+    example: "true"
+  }];
+  google.protobuf.StringValue sp_slo_url = 21 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Service Provider SLO url"
+      example: "\"https://yourapp.com/sso/v1/saml/conn_1234/slo/callback\""
+    },
+    (google.api.field_behavior) = OUTPUT_ONLY
+  ];
+}
+
+message IDPCertificate {
+  string certificate = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "IDP Certificate"}];
+  google.protobuf.Timestamp create_time = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Certificate Creation Time"
+    example: "\"2021-09-01T00:00:00Z\""
+  }];
+  google.protobuf.Timestamp expiry_time = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Certificate Expiry Time"
+    example: "\"2021-09-01T00:00:00Z\""
+  }];
+  string id = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Certificate ID"
+    example: "\"cert_123123123123\""
+  }];
+  string issuer = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Certificate Issuer"
+    example: "\"https://youridp.com/service/saml\""
+  }];
+}
+
+enum CodeChallengeType {
+  CODE_CHALLENGE_TYPE_UNSPECIFIED = 0;
+  NUMERIC = 1;
+  ALPHANUMERIC = 2;
+}
+
+enum ConfigurationType {
+  CONFIGURATION_TYPE_UNSPECIFIED = 0;
+  DISCOVERY = 1;
+  MANUAL = 2;
+}
+
+enum NameIdFormat {
+  NAME_ID_FORMAT_NIL = 0;
+  UNSPECIFIED = 1;
+  EMAIL = 2;
+  TRANSIENT = 3;
+  PERSISTENT = 4;
+}
+
+enum PasswordlessType {
+  PasswordlessType_UNSPECIFIED = 0;
+  LINK = 1;
+  OTP = 2;
+  LINK_OTP = 3;
+}
+
+message GetOIDCMetadataRequest {
+  OIDCMetadataRequest metadata = 1;
+}
+
+message OIDCMetadataRequest {
+  string issuer = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 200
+  }];
+}
+
+message GetOIDCMetadataResponse {
+  string issuer = 1;
+  string authorization_endpoint = 2;
+  string token_endpoint = 3;
+  string userinfo_endpoint = 4;
+  string jwks_uri = 5;
+}
+
+message GetSAMLMetadataRequest {
+  SAMLMetadataRequest metadata = 1;
+}
+
+message SAMLMetadataRequest {
+  string metadata_url = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 200
+  }];
+}
+
+message GetSAMLMetadataResponse {
+  string idp_entity_id = 1;
+  string idp_sso_url = 2;
+  string idp_slo_url = 3;
+  repeated string idp_certificates = 4;
+  string idp_name_id_format = 5;
+  string request_binding = 6;
+  bool want_assertions_signed = 7;
+}
+
+message GetSAMLCertificateDetailsRequest {
+  SAMLCertificateRequest certificate = 1;
+}
+
+message SAMLCertificateRequest {
+  string text = 1 [(buf.validate.field).string = {min_len: 1}];
+}
+
+message GetSAMLCertificateDetailsResponse {
+  string text = 1;
+  int64 not_after = 2;
+  int64 not_before = 3;
+  string subject = 4;
+  string issuer = 5;
+}
+
+message GetConnectionTestResultRequest {
+  string connection_id = 1 [(buf.validate.field).string = {min_len: 1}];
+  string test_request_id = 2 [(buf.validate.field).string = {
+    min_len: 1
+    prefix: "test_"
+  }];
+}
+
+message GetConnectionTestResultResponse {
+  TestResultStatus status = 1;
+  optional string user_info = 2;
+  optional string error = 3;
+  optional string error_description = 4;
+  optional string error_details = 5;
+}
+
+enum TestResultStatus {
+  PENDING = 0;
+  SUCCESS = 1;
+  FAILURE = 2;
+}
+
+// enums all
+enum SAMLSigningOptions {
+  SAML_SIGNING_OPTIONS_UNSPECIFIED = 0;
+  NO_SIGNING = 1;
+  SAML_ONLY_RESPONSE_SIGNING = 2;
+  SAML_ONLY_ASSERTION_SIGNING = 3;
+  SAML_RESPONSE_ASSERTION_SIGNING = 4;
+  SAML_RESPONSE_OR_ASSERTION_SIGNING = 5;
+}
+
+enum RequestBinding {
+  REQUEST_BINDING_UNSPECIFIED = 0;
+  HTTP_POST = 1;
+  HTTP_REDIRECT = 2;
+}
+
+enum TokenAuthType {
+  TOKEN_AUTH_TYPE_UNSPECIFIED = 0;
+  URL_PARAMS = 1;
+  BASIC_AUTH = 2;
+}
+
+enum OIDCScope {
+  OIDC_SCOPE_UNSPECIFIED = 0;
+  openid = 1;
+  profile = 2;
+  email = 3;
+  address = 4;
+  phone = 5;
+}
+
+message PasswordConnectionConfig {}
+
+enum ConnectionType {
+  INVALID = 0;
+  OIDC = 1;
+  SAML = 2;
+  PASSWORD = 3;
+  OAUTH = 4;
+  PASSWORDLESS = 5;
+  BASIC = 6;
+  BEARER = 7;
+  API_KEY = 8;
+}
+
+enum ConnectionStatus {
+  CONNECTION_STATUS_UNSPECIFIED = 0;
+  DRAFT = 1;
+  IN_PROGRESS = 2;
+  COMPLETED = 3;
+}
+
+enum ConnectionProvider {
+  CONNECTION_PROVIDER_UNSPECIFIED = 0;
+  OKTA = 1;
+  GOOGLE = 2;
+  MICROSOFT_AD = 3;
+  AUTH0 = 4;
+  ONELOGIN = 5;
+  PING_IDENTITY = 6;
+  JUMPCLOUD = 7;
+  CUSTOM = 8;
+  GITHUB = 9;
+  GITLAB = 10;
+  LINKEDIN = 11;
+  SALESFORCE = 12;
+  MICROSOFT = 13;
+  IDP_SIMULATOR = 14;
+  SCALEKIT = 15;
+  ADFS = 16;
+}
+
+message Flags {
+  bool is_login = 1;
+  bool is_app = 2;
+}
+
+message ListAppConnectionsRequest {
+  uint32 page_size = 1 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "30"
+      description: "Maximum number of organizations to return per page. Value must be between 1 and 30."
+    }
+  ];
+
+  string page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "eyJwYWdlIjoyLCJsaW1pdCI6MzB9"
+    description: "Token from a previous response for pagination. Provide this to retrieve the next page of results."
+  }];
+
+  optional string provider = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 50
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter connections by provider"
+      example: "\"OKTA\""
+    }
+  ];
+}
+
+message ListAppConnectionsResponse {
+  repeated ListConnection connections = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of connections matching the request criteria"}];
+  string next_page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for the next page of results"
+    example: "\"eyJwYWdlIjoyLCJsaW1pdCI6MzB9\""
+  }];
+
+  string prev_page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for the previous page of results"
+    example: "\"eyJwYWdlIjoyLCJsaW1pdCI6MzB9\""
+  }];
+
+  uint32 total_size = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total number of connections matching the request criteria"
+    example: "100"
+  }];
+}

@@ -1,0 +1,1797 @@
+syntax = "proto3";
+
+package scalekit.v1.roles;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/roles";
+
+service RolesService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    name: "Roles"
+    description: "Role-based access control (RBAC) for defining and managing permissions in an environment. Create and update custom roles with explicit permissions, model role hierarchies through inheritance, view dependent roles, manage role-permission assignments, and list roles and permissions. Also provides a utility to count users assigned to a role."
+  };
+
+  rpc CreateRole(CreateRoleRequest) returns (CreateRoleResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {
+      post: "/api/v1/roles"
+      body: "role"
+      // additional_bindings: [
+      //   {
+      //     post: "/api/v1/environments/-/roles"
+      //     body: "role"
+      //   },
+      //   {
+      //     post: "/api/v1/environments/{env_id}/roles"
+      //     body: "role"
+      //   }
+      // ]
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Create new role in environment"
+      description: "Creates a new role within the environment with specified permissions and metadata. Use this endpoint to define custom roles that can be assigned to users or groups. You can create hierarchical roles by extending existing roles, assign specific permissions, and configure display information. Roles are the foundation of your access control system and determine what actions users can perform."
+      responses: {
+        key: "201"
+        value: {
+          description: "Role created successfully. Returns the complete role object with system-generated ID and timestamps."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.CreateRoleResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "from scalekit.v1.roles.roles_pb2 import CreateRole\n\nrole = CreateRole(\n    name=\"viewer\",\n    display_name=\"Viewer\",\n    description=\"Read-only access\",\n)\ncreate_response = scalekit_client.roles.create_role(\n    role=role,\n)"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateRole(UpdateRoleRequest) returns (UpdateRoleResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      put: "/api/v1/roles/{role_name}"
+      body: "role"
+      // additional_bindings: [
+      //   {
+      //     put: "/api/v1/environments/-/roles/{name}"
+      //     body: "role"
+      //   },
+      //   {
+      //     put: "/api/v1/environments/{env_id}/roles/{name}"
+      //     body: "role"
+      //   }
+      // ]
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Update role information"
+      description: "Modifies an existing role's properties including display name, description, permissions, and inheritance. Use this endpoint to update role metadata, change permission assignments, or modify role hierarchy. Only the fields you specify will be updated, leaving other properties unchanged. When updating permissions, the new list replaces all existing permissions for the role."
+      responses: {
+        key: "200"
+        value: {
+          description: "Role updated successfully. Returns the modified role object with updated timestamps."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.UpdateRoleResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "from scalekit.v1.roles.roles_pb2 import UpdateRole\n\nupdate_role = UpdateRole(\n    display_name=\"Viewer (Limited)\",\n    description=\"Read-only access, no billing\",\n)\nupdated_role = scalekit_client.roles.update_role(\n    role_id=\"role_123456789\",\n    role=update_role,\n)"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetRole(GetRoleRequest) returns (GetRoleResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {
+      get: "/api/v1/roles/{role_name}"
+      // additional_bindings: [
+      //   {get: "/api/v1/environments/-/roles/{name}"},
+      //   {get: "/api/v1/environments/{env_id}/roles/{name}"}]
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Get role details"
+      description: "Retrieves complete information for a specific role including metadata and inheritance details (base role and dependent role count). Use this endpoint to audit role configuration and understand the role's place in the hierarchy. To view the role's permissions, use the ListRolePermissions endpoint."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved role details. Returns the role object including metadata and inheritance details. Permissions are not included."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.GetRoleResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "role_response = scalekit_client.roles.get_role(\n    role_id=\"role_123456789\",\n)"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListRoles(ListRolesRequest) returns (ListRolesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      get: "/api/v1/roles"
+      // additional_bindings: [
+      //   {get: "/api/v1/environments/-/roles"},
+      //   {get: "/api/v1/environments/{env_id}/roles"}]
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "List all roles in environment"
+      description: "Retrieves a comprehensive list of all roles available within the specified environment including organization roles. Use this endpoint to view all role definitions, including custom roles and their configurations. You can optionally include permission details for each role to understand their capabilities. This is useful for role management, auditing organization access controls, or understanding the available access levels within the organization."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved list of roles. Returns all roles with their metadata and optionally their permissions."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.ListRolesResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "roles_response = scalekit_client.roles.list_roles()"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteRole(DeleteRoleRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      delete: "/api/v1/roles/{role_name}"
+      // additional_bindings: [
+      //   {delete: "/api/v1/environments/-/roles/{name}"},
+      //   {delete: "/api/v1/environments/{env_id}/roles/{name}"}]
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Delete role and reassign users"
+      description: "Permanently removes a role from the environment and reassigns users who had that role to a different role. Use this endpoint when you need to clean up unused roles or restructure your access control system. The role cannot be deleted if it has dependent roles (roles that extend it) unless you specify a replacement role. If users are assigned to the role being deleted, you must provide a reassign_role_name to move those users to a different role before deletion can proceed. This action cannot be undone, so ensure no critical users depend on the role before deletion."
+      responses: {
+        key: "200"
+        value: {description: "Role successfully deleted and users reassigned. No content returned."}
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "scalekit_client.roles.delete_role(\n    role_id=\"role_123456789\",\n)"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc CreateOrganizationRole(CreateOrganizationRoleRequest) returns (CreateOrganizationRoleResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/organizations/{org_id}/roles"
+      body: "role"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Create organization role"
+      description: "Creates a new role within the specified organization with basic configuration including name, display name, description, and permissions. Use this endpoint to define custom roles that can be assigned to users within the organization. You can create hierarchical roles by extending existing roles and assign specific permissions to control access levels. The role will be scoped to the organization and can be used for organization-specific access control."
+      responses: {
+        key: "201"
+        value: {
+          description: "Organization role created successfully. Returns the complete role object with system-generated ID and timestamps."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.CreateOrganizationRoleResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateOrganizationRole(UpdateOrganizationRoleRequest) returns (UpdateOrganizationRoleResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      put: "/api/v1/organizations/{org_id}/roles/{role_name}"
+      body: "role"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Update organization role"
+      description: "Modifies an existing organization role's properties including display name, description, permissions, and inheritance settings. Use this endpoint to update role metadata, change permission assignments, or modify role hierarchy within the organization. Only the fields you specify will be updated, leaving other properties unchanged. When updating permissions, the new list replaces all existing permissions for the role."
+      responses: {
+        key: "200"
+        value: {
+          description: "Organization role updated successfully. Returns the modified role object with updated timestamps."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.UpdateOrganizationRoleResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetOrganizationRole(GetOrganizationRoleRequest) returns (GetOrganizationRoleResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {get: "/api/v1/organizations/{org_id}/roles/{role_name}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Get organization role details"
+      description: "Retrieves complete information for a specific organization role including metadata, inheritance details, and optionally permissions. Use this endpoint to audit role configuration and understand the role's place in the organization's role hierarchy. You can include permission details to see what capabilities the role provides. This operation is useful for role management, user assignment decisions, or understanding organization access controls."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved organization role details. Returns the role object including metadata and inheritance details. Permissions are included only when requested via the include parameter."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.GetOrganizationRoleResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListOrganizationRoles(ListOrganizationRolesRequest) returns (ListOrganizationRolesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {get: "/api/v1/organizations/{org_id}/roles"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "List organization roles"
+      description: "Retrieves all environment roles and organization specific roles. Use this endpoint to view all role definitions, including custom roles and their configurations. You can optionally include permission details for each role to understand their capabilities. This is useful for role management, auditing organization access controls, or understanding the available access levels within the organization."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved list of organization roles. Returns all roles with their metadata and optionally their permissions."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.ListOrganizationRolesResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteOrganizationRole(DeleteOrganizationRoleRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {delete: "/api/v1/organizations/{org_id}/roles/{role_name}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Delete organization role"
+      description: "Permanently removes a role from the organization and optionally reassigns users who had that role to a different role. Use this endpoint when you need to clean up unused roles or restructure your organization's access control system. If users are assigned to the role being deleted, you can provide a reassign_role_name to move those users to a different role before deletion. This action cannot be undone, so ensure no critical users depend on the role before deletion."
+      responses: {
+        key: "200"
+        value: {description: "Organization role successfully deleted and users reassigned if specified. No content returned."}
+      }
+    };
+  }
+
+  rpc GetRoleUsersCount(GetRoleUsersCountRequest) returns (GetRoleUsersCountResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      get: "/api/v1/roles/{role_name}/users:count"
+      // additional_bindings: [
+      //   {get: "/api/v1/environments/-/roles/{name}/users:count"},
+      //   {get: "/api/v1/environments/{env_id}/roles/{name}/users:count"}]
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Retrieve user count for role"
+      description: "Retrieves the total number of users currently assigned to the specified role within the environment. Use this endpoint to monitor role usage, enforce user limits, or understand the scope of role assignments. Provide the role's unique name as a path parameter, and the response will include the current user count for that role. This operation is read-only and does not modify any data or user assignments. The count reflects all users who have the role either directly assigned or inherited through organization membership. This information is useful for capacity planning, security auditing, or understanding the impact of role changes across your user base."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved user count for the specified role. Returns the total number of users currently assigned to the role, including both direct assignments and inherited assignments."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.GetRoleUsersCountResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetOrganizationRoleUsersCount(GetOrganizationRoleUsersCountRequest) returns (GetOrganizationRoleUsersCountResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/organizations/{org_id}/roles/{role_name}/users:count"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Get organization role user count"
+      description: "Retrieves the total number of users currently assigned to the specified organization role. Use this endpoint to monitor organization role usage, enforce user limits, or understand the scope of role assignments within the organization. Provide the organization ID and role name as path parameters. The response includes the user count for the requested organization role. This operation is read-only and does not modify any data or user assignments."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved user count for the specified organization role. Returns the total number of users currently assigned to the role."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.GetOrganizationRoleUsersCountResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateDefaultRoles(UpdateDefaultRolesRequest) returns (UpdateDefaultRolesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/roles:set_defaults"
+      body: "*"
+      additional_bindings: [
+        {
+          patch: "/api/v1/roles/default"
+          body: "*"
+        }
+      ]
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Set default creator and member roles"
+      description: "Updates the default creator and member roles for the current environment. Use this endpoint to configure which roles are automatically assigned to new users when they join the environment. You can specify role names for both creator and member default roles. The system will validate that the specified roles exist and update the environment settings accordingly. Returns the updated default role objects including their complete role information and permissions."
+
+      responses: {
+        key: "200"
+        value: {
+          description: "Default roles updated successfully"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.UpdateDefaultRolesResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateDefaultOrganizationRoles(UpdateDefaultOrganizationRolesRequest) returns (UpdateDefaultOrganizationRolesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{org_id}/roles:set_defaults"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Set default organization roles"
+      description: "Updates the default member role for the specified organization. Use this endpoint to configure which role is automatically assigned to new users when they join the organization. The system will validate that the specified role exists and update the organization settings accordingly. This configuration affects all new user invitations and memberships within the organization."
+      responses: {
+        key: "200"
+        value: {
+          description: "Default organization roles updated successfully. Returns the updated default member role object with complete role information."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.UpdateDefaultOrganizationRolesResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  // Role Hierarchy Management RPCs
+  rpc ListDependentRoles(ListDependentRolesRequest) returns (ListDependentRolesResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {get: "/api/v1/roles/{role_name}/dependents"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "List dependent roles"
+      description: "Retrieves all roles that directly extend the specified base role through inheritance. Use this endpoint to understand the role hierarchy and identify which roles inherit permissions from a particular base role. Provide the base role name as a path parameter, and the response will include all dependent roles with their metadata and permission information. This operation is useful for auditing role inheritance relationships, understanding the impact of changes to base roles, or managing role hierarchies effectively. Returns a list of dependent role objects including their names, display names, descriptions, and permission details."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved dependent roles. Returns a list of all roles that extend the specified base role, including their metadata and permission information."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.ListDependentRolesResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeleteRoleBase(DeleteRoleBaseRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    // option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/roles/{role_name}/base"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Delete role inheritance relationship"
+      description: "Removes the base role inheritance relationship for a specified role, effectively eliminating all inherited permissions from the base role. Use this endpoint when you want to break the hierarchical relationship between roles and remove inherited permissions. The role will retain only its directly assigned permissions after this operation. This action cannot be undone, so ensure the role has sufficient direct permissions before removing inheritance. Returns no content on successful removal of the base relationship."
+
+      responses: {
+        key: "200"
+        value: {description: "Base role inheritance relationship successfully removed. The role now has only its directly assigned permissions."}
+      }
+    };
+  }
+
+  rpc DeleteOrganizationRoleBase(DeleteOrganizationRoleBaseRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/organizations/{org_id}/roles/{role_name}/base"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Remove organization role inheritance"
+      description: "Removes the base role inheritance relationship for a specified organization role, effectively eliminating all inherited permissions from the base role. Use this endpoint when you want to break the hierarchical relationship between roles and remove inherited permissions within the organization. The role will retain only its directly assigned permissions after this operation. This action cannot be undone, so ensure the role has sufficient direct permissions before removing inheritance."
+      responses: {
+        key: "200"
+        value: {description: "Organization role base inheritance relationship successfully removed. The role now has only its directly assigned permissions."}
+      }
+    };
+  }
+
+  // Permission Management RPCs
+  rpc CreatePermission(CreatePermissionRequest) returns (CreatePermissionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      post: "/api/v1/permissions"
+      body: "permission"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Permissions"
+      summary: "Create new permission"
+      description: "Creates a new permission that represents a specific action users can perform within the environment. Use this endpoint to define granular access controls for your RBAC system. You can provide a unique permission name following the format 'action:resource' (for example, 'read:documents', 'write:users') and an optional description explaining the permission's purpose. The permission name must be unique across the environment and follows alphanumeric naming conventions with colons and underscores. Returns the created permission object including system-generated ID and timestamps."
+      responses: {
+        key: "201"
+        value: {
+          description: "Permission created successfully. Returns the complete permission object with system-generated ID, name, description, and timestamps."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.CreatePermissionResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetPermission(GetPermissionRequest) returns (GetPermissionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/permissions/{permission_name}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Permissions"
+      summary: "Retrieve permission details"
+      description: "Retrieves complete information for a specific permission by its unique name identifier. Use this endpoint to view permission details including description, creation time, and last update time. Provide the permission name in the path parameter following the format 'action:resource' (for example, 'read:documents'). This operation is useful for auditing permission definitions, understanding permission purposes, or verifying permission existence before assignment. Returns the complete permission object with all metadata and system-generated timestamps."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved permission details. Returns the complete permission object including name, description, creation time, and update time."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.GetPermissionResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdatePermission(UpdatePermissionRequest) returns (UpdatePermissionResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {
+      put: "/api/v1/permissions/{permission_name}"
+      body: "permission"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Permissions"
+      summary: "Update permission details"
+      description: "Modifies an existing permission's attributes including description and metadata. Use this endpoint to update permission descriptions or clarify permission purposes after creation. The permission is identified by its unique name in the path parameter, and only the fields you specify in the request body will be updated. Note that the permission name itself cannot be changed as it serves as the immutable identifier. This operation is useful for maintaining clear documentation of permission purposes or updating descriptions to reflect changes in system functionality. Returns the updated permission object with modified timestamps."
+      responses: {
+        key: "200"
+        value: {
+          description: "Permission updated successfully. Returns the modified permission object with updated description and timestamps."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.UpdatePermissionResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {get: "/api/v1/permissions"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Permissions"
+      summary: "List all permissions"
+      description: "Retrieves a comprehensive, paginated list of all permissions available within the environment. Use this endpoint to view all permission definitions for auditing, role management, or understanding the complete set of available access controls. The response includes pagination tokens to navigate through large sets of permissions efficiently. Each permission object contains the permission name, description, creation time, and last update time. This operation is useful for building permission selection interfaces, auditing permission usage, or understanding the scope of available access controls in your RBAC system."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved the list of permissions. Returns a paginated list of permission objects with metadata and pagination tokens for navigation."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.ListPermissionsResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeletePermission(DeletePermissionRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {delete: "/api/v1/permissions/{permission_name}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Permissions"
+      summary: "Delete permission"
+      description: "Permanently removes a permission from the environment using its unique name identifier. Use this endpoint when you need to clean up unused permissions or remove access controls that are no longer relevant. The permission is identified by its name in the path parameter following the format 'action:resource'. This operation cannot be undone, so ensure no active roles depend on the permission before deletion. If the permission is currently assigned to any roles, you may need to remove those assignments first or update the roles to use alternative permissions. Returns no content on successful deletion."
+      responses: {
+        key: "200"
+        value: {description: "Permission successfully deleted. No content returned."}
+      }
+    };
+  }
+
+  // Role-Permission Management RPCs
+  rpc ListRolePermissions(ListRolePermissionsRequest) returns (ListRolePermissionsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {get: "/api/v1/roles/{role_name}/permissions"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "List permissions for role"
+      description: "Retrieves all permissions directly assigned to the specified role, excluding permissions inherited from base roles. Use this endpoint to view the explicit permission assignments for a role, which is useful for understanding direct role capabilities, auditing permission assignments, or managing role-permission relationships. Provide the role name as a path parameter, and the response will include only the permissions that are directly assigned to that role. This operation does not include inherited permissions from role hierarchies - use ListEffectiveRolePermissions to see the complete set of permissions including inheritance. Returns a list of permission objects with their names, descriptions, and assignment metadata."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved role permissions. Returns a list of all permissions directly assigned to the specified role, excluding inherited permissions."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.ListRolePermissionsResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc AddPermissionsToRole(AddPermissionsToRoleRequest) returns (AddPermissionsToRoleResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {
+      post: "/api/v1/roles/{role_name}/permissions"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Add permissions to role"
+      description: "Adds one or more permissions to the specified role while preserving existing permission assignments. Use this endpoint to grant additional capabilities to a role without affecting its current permission set. Provide the role name as a path parameter and a list of permission names in the request body. The system will validate that all specified permissions exist in the environment and add them to the role. Existing permission assignments remain unchanged, making this operation safe for incremental permission management. This is useful for gradually expanding role capabilities or adding new permissions as your system evolves. Returns the updated list of all permissions now assigned to the role."
+      responses: {
+        key: "200"
+        value: {
+          description: "Permissions added to role successfully. Returns the complete list of all permissions now assigned to the role, including both existing and newly added permissions."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.AddPermissionsToRoleResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc RemovePermissionFromRole(RemovePermissionFromRoleRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {delete: "/api/v1/roles/{role_name}/permissions/{permission_name}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "Remove permission from role"
+      description: "Removes a specific permission from the specified role, revoking that capability from all users assigned to the role. Use this endpoint to restrict role capabilities or remove unnecessary permissions. Provide both the role name and permission name as path parameters. This operation only affects the direct permission assignment and does not impact permissions inherited from base roles. If the permission is inherited through role hierarchy, you may need to modify the base role instead. This is useful for fine-tuning role permissions, implementing least-privilege access controls, or removing deprecated permissions. Returns no content on successful removal."
+      responses: {
+        key: "200"
+        value: {description: "Permission removed from role successfully. No content returned."}
+      }
+    };
+  }
+
+  rpc ListEffectiveRolePermissions(ListEffectiveRolePermissionsRequest) returns (ListEffectiveRolePermissionsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    // option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/roles/{role_name}/permissions:all"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Roles"
+      summary: "List effective permissions for role"
+      description: "Retrieves the complete set of effective permissions for a role, including both directly assigned permissions and permissions inherited from base roles through the role hierarchy. Use this endpoint to understand the full scope of capabilities available to users assigned to a specific role. Provide the role name as a path parameter, and the response will include all permissions that apply to the role, accounting for inheritance relationships. This operation is essential for auditing role capabilities, understanding permission inheritance, or verifying the complete access scope before role assignment. Returns a comprehensive list of permission names representing the full set of effective permissions for the specified role."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved effective permissions. Returns the complete list of all permissions that apply to the role, including both direct assignments and inherited permissions from base roles."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.roles.ListEffectiveRolePermissionsResponse"}
+          }
+        }
+      }
+    };
+  }
+}
+
+message Role {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique system-generated identifier for the role. Immutable once created."
+      example: "\"role_1234abcd5678efgh\""
+    }
+  ];
+  string name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name identifier for the role. Must be alphanumeric with underscores, 1-100 characters."
+      example: "\"content_editor\""
+    }
+  ];
+  string display_name = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Human-readable display name for the role. Used in user interfaces and reports."
+      example: "\"Content Editor\""
+    }
+  ];
+  string description = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Detailed description of the role's purpose and capabilities. Maximum 2000 characters."
+    example: "\"Can create, edit, and publish content but cannot delete or manage users\""
+  }];
+  reserved 5;
+  bool default_creator = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if this role is the default creator role for new organizations."
+    example: "true"
+  }];
+  bool default_member = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if this role is the default member role for new users."
+    example: "true"
+  }];
+  optional string extends = 8 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the base role that this role extends. Enables hierarchical role inheritance."
+      example: "\"admin_role\""
+    }
+  ];
+  repeated RolePermission permissions = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of permissions with role source information. Only included when 'include' parameter is specified in the request."
+    example: "[{\"name\": \"read:content\", \"description\": \"Read Content\", \"role_name\": \"admin_role\"}, {\"name\": \"write:content\", \"description\": \"Write Content\", \"role_name\": \"editor_role\"}]"
+  }];
+  int32 dependent_roles_count = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Number of roles that extend from this role (dependent roles count). Read-only field."
+    example: "3"
+  }];
+  bool is_org_role = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Indicates if this role is an organization role."
+    example: "true"
+  }];
+}
+
+message CreateRole {
+  string name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name identifier for the role. Must be alphanumeric with underscores, 1-64 characters. This name is used in API calls and cannot be changed after creation."
+      example: "\"content_editor\""
+    }
+  ];
+  string display_name = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Human-readable display name for the role. Used in user interfaces, reports, and user-facing communications."
+      example: "\"Content Editor\""
+    }
+  ];
+  optional string description = 4 [
+    (buf.validate.field).string = {max_len: 2000},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Detailed description of the role's purpose, capabilities, and intended use cases. Maximum 2000 characters."
+      example: "\"Can create, edit, and publish content but cannot delete content or manage user accounts\""
+    }
+  ];
+  // Default role flags removed - use UpdateDefaultRolesRequest to manage defaults
+  reserved 5, 6, 7;
+  optional string extends = 8 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the base role that this role extends. Enables hierarchical role inheritance where this role inherits all permissions from the base role."
+      example: "\"viewer\""
+    }
+  ];
+  repeated string permissions = 9 [
+    (buf.validate.field).repeated = {
+      max_items: 100
+      items: {
+        string: {
+          min_len: 1
+          max_len: 64
+          pattern: "^[a-zA-Z0-9_:]+$"
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "List of permission names to assign to this role. Permissions must exist in the current environment. Maximum 100 permissions per role."
+      example: "[\"read:content\", \"write:content\", \"publish:content\"]"
+    }
+  ];
+}
+
+message CreateOrganizationRole {
+  string name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name of the organization's role"
+      example: "\"org_viewer_role\""
+    }
+  ];
+  string display_name = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Display name of the organization's role"
+      example: "\"Organization Viewer Role\""
+    }
+  ];
+  optional string description = 4 [
+    (buf.validate.field).string = {max_len: 2000},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Description of the organization's role"
+      example: "\"Organization Viewer Role will be used only for viewing the objects\""
+    }
+  ];
+  // Default role flags removed - use UpdateDefaultOrganizationRolesRequest to manage defaults
+  reserved 5, 6, 7;
+  optional string extends = 8 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Base role name for hierarchical roles"
+      example: "\"admin_role\""
+    }
+  ];
+  repeated string permissions = 9 [
+    (buf.validate.field).repeated = {
+      max_items: 100
+      items: {
+        string: {
+          min_len: 1
+          max_len: 64
+          pattern: "^[a-zA-Z0-9_:]+$"
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "List of permission names to assign to this role. Permissions must exist in the current environment."
+      example: "[\"read:users\", \"write:documents\"]"
+    }
+  ];
+}
+
+message CreateRoleRequest {
+  reserved 1; // Backward compatibility with previous versions
+  CreateRole role = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Role configuration details including name, display name, description, permissions, and inheritance settings."
+      example: "{\"name\": \"content_editor\", \"display_name\": \"Content Editor\", \"description\": \"Can edit content\", \"permissions\": [\"read:content\", \"write:content\"]}"
+    }
+  ];
+}
+
+message CreateRoleResponse {
+  Role role = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The created role object with system-generated ID and all configuration details."
+    example: "{\"id\": \"role_1234abcd5678efgh\", \"name\": \"content_editor\", \"display_name\": \"Content Editor\", \"description\": \"Can edit content\"}"
+  }];
+}
+
+message GetRoleRequest {
+  reserved 1; // Backward compatibility - was orginally used for environment ID
+  string role_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name identifier of the role to retrieve. Must be alphanumeric with underscores, 1-64 characters."
+      example: "\"content_editor\""
+    }
+  ];
+  optional string include = 3 [
+    (buf.validate.field).string = {
+      in: [
+        "",
+        "permissions",
+        "permissions:all"
+      ]
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Include additional data in the response. Valid values: 'permissions' (direct permissions only), 'permissions:all' (includes inherited permissions from role hierarchy)"
+      example: "\"permissions\""
+    }
+  ];
+}
+
+message GetRoleResponse {
+  Role role = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The complete role object with all metadata, permissions, and inheritance details."
+    example: "{\"id\": \"role_1234abcd5678efgh\", \"name\": \"content_editor\", \"display_name\": \"Content Editor\", \"permissions\": [{\"name\": \"read:content\"}], \"dependent_roles_count\": 2}"
+  }];
+}
+
+message ListRolesRequest {
+  reserved 1; // Backward compatibility - was orginally used for environment ID
+  optional string include = 2 [
+    (buf.validate.field).string = {
+      in: [
+        "",
+        "permissions",
+        "permissions:all"
+      ]
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Include additional data in the response. Valid values: 'permissions' (direct permissions only), 'permissions:all' (includes inherited permissions from role hierarchy)"
+      example: "\"permissions\""
+    }
+  ];
+}
+
+message ListRolesResponse {
+  repeated Role roles = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of all roles in the environment with their metadata and optionally their permissions."
+    example: "[{\"id\": \"role_1234abcd5678efgh\", \"name\": \"admin\", \"display_name\": \"Administrator\"}, {\"id\": \"role_9876zyxw5432vuts\", \"name\": \"viewer\", \"display_name\": \"Viewer\"}]"
+  }];
+}
+
+message UpdateRole {
+  optional string display_name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Human-readable display name for the role. Used in user interfaces, reports, and user-facing communications."
+      example: "\"Senior Content Editor\""
+    }
+  ];
+  optional string description = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 2000
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Detailed description of the role's purpose, capabilities, and intended use cases. Maximum 2000 characters."
+      example: "\"Can create, edit, publish, and approve content. Cannot delete content or manage user accounts.\""
+    }
+  ];
+  // Default role flags removed - use UpdateDefaultRolesRequest/UpdateDefaultOrganizationRolesRequest to manage defaults
+  reserved 3, 4, 5;
+  optional string extends = 6 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the base role that this role extends. Enables hierarchical role inheritance where this role inherits all permissions from the base role."
+      example: "\"content_editor\""
+    }
+  ];
+  repeated string permissions = 7 [
+    (buf.validate.field).repeated = {
+      max_items: 100
+      items: {
+        string: {
+          min_len: 1
+          max_len: 64
+          pattern: "^[a-zA-Z0-9_:]+$"
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "List of permission names to assign to this role. When provided, this replaces all existing role-permission mappings. Permissions must exist in the current environment. Maximum 100 permissions per role."
+      example: "[\"read:content\", \"write:content\", \"publish:content\", \"approve:content\"]"
+    }
+  ];
+}
+
+message UpdateRoleRequest {
+  reserved 1; // Backward compatibility - was orginally used for environment ID
+  string role_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name identifier of the role to update. Must be alphanumeric with underscores, 1-64 characters."
+      example: "\"content_editor\""
+    }
+  ];
+  UpdateRole role = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Role fields to update. Only specified fields will be modified."
+      example: "{\"display_name\": \"Senior Editor\", \"description\": \"Can edit and approve content\"}"
+    }
+  ];
+}
+
+message UpdateRoleResponse {
+  Role role = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The updated role object with all current configuration details."
+    example: "{\"id\": \"role_1234abcd5678efgh\", \"name\": \"content_editor\", \"display_name\": \"Senior Editor\", \"description\": \"Can edit and approve content\"}"
+  }];
+}
+
+message DeleteRoleRequest {
+  reserved 1; // Backward compatibility - was orginally used for environment ID
+  string role_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name identifier of the role to delete. Must be alphanumeric with underscores, 1-64 characters."
+      example: "\"old_role\""
+    }
+  ];
+  optional string reassign_role_id = 3 [
+    deprecated = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Role name to reassign users to when deleting this role"
+      example: "\"member_role\""
+    }
+  ];
+  optional string reassign_role_name = 4 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Role name to reassign users to when deleting this role"
+      example: "\"member_role\""
+    }
+  ];
+}
+
+message CreateOrganizationRoleRequest {
+  string org_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  CreateOrganizationRole role = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Organization role details"}
+  ];
+}
+
+message CreateOrganizationRoleResponse {
+  Role role = 1;
+}
+
+message GetOrganizationRoleRequest {
+  string org_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  string role_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name of the role"
+      example: "\"admin_role\""
+    }
+  ];
+  optional string include = 3 [
+    (buf.validate.field).string = {
+      in: [
+        "",
+        "permissions",
+        "permissions:all"
+      ]
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Include additional data in the response. Valid values: 'permissions' (direct permissions only), 'permissions:all' (includes inherited permissions)"
+      example: "\"permissions\""
+    }
+  ];
+}
+
+message GetOrganizationRoleResponse {
+  Role role = 1;
+}
+
+message ListOrganizationRolesRequest {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "List organization roles"
+      description: "Retrieves a paginated list of all roles within the organization. Use the page_token from the response to access subsequent pages of results"
+      required: ["org_id"]
+    }
+    example: "{\"org_id\" : \"org_8756865685762\" }"
+  };
+  string org_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  optional string include = 2 [
+    (buf.validate.field).string = {
+      in: [
+        "",
+        "permissions",
+        "permissions:all"
+      ]
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Include additional data in the response. Valid values: 'permissions' (direct permissions only), 'permissions:all' (includes inherited permissions)"
+      example: "\"permissions\""
+    }
+  ];
+}
+
+message ListOrganizationRolesResponse {
+  repeated Role roles = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of roles objects"}];
+}
+
+message UpdateOrganizationRoleRequest {
+  string org_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  string role_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name of the role"
+      example: "\"admin_role\""
+    }
+  ];
+  UpdateRole role = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Organization role details"}
+  ];
+}
+
+message UpdateOrganizationRoleResponse {
+  Role role = 1;
+}
+
+message DeleteOrganizationRoleRequest {
+  string org_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  string role_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name of the role"
+      example: "\"admin_role\""
+    }
+  ];
+  optional string reassign_role_name = 3 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Role name to reassign users to when deleting this role"
+      example: "\"member_role\""
+    }
+  ];
+}
+
+message GetRoleUsersCountRequest {
+  reserved 1; // Backward compatibility - was orginally used for environment ID
+  string role_name = 2 [ // was role_id originally
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name of the role"
+      example: "\"admin_role\""
+    }
+  ];
+}
+
+message GetRoleUsersCountResponse {
+  int64 count = 1 [
+    (buf.validate.field).int32 = {gt: 0},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Number of users associated with the role"
+      example: "10"
+    }
+  ];
+}
+
+message GetOrganizationRoleUsersCountRequest {
+  string org_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_1234567890\""
+    }
+  ];
+  string role_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name of the organization role"
+      example: "\"admin_role\""
+    }
+  ];
+}
+
+message GetOrganizationRoleUsersCountResponse {
+  int64 count = 1 [
+    (buf.validate.field).int32 = {gt: 0},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Number of users associated with the organization role"
+      example: "5"
+    }
+  ];
+}
+
+message UpdateDefaultRolesRequest {
+  reserved 1; // Backward compatibility - was orginally used for environment ID
+  UpdateDefaultRole default_creator = 2 [
+    deprecated = true, // Deprecated field, use default_creator_role instead
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Default creator role (deprecated - use default_creator_role field instead)"
+      example: "{\"id\": \"role_1234567890\", \"name\": \"creator\", \"display_name\": \"Creator Role\", \"description\": \"Role for creating resources\"}"
+    }
+  ];
+  UpdateDefaultRole default_member = 3 [
+    deprecated = true, // Deprecated field, use default_member_role instead
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Default member role (deprecated - use default_member_role field instead)"
+      example: "{\"id\": \"role_0987654321\", \"name\": \"member\", \"display_name\": \"Member Role\", \"description\": \"Role for regular members\"}"
+    }
+  ];
+  optional string default_creator_role = 4 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    // (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the role to set as the default creator role. This role will be automatically assigned to users who create new resources in the environment. Must be a valid role name that exists in the environment."
+      example: "\"creator\""
+    }
+  ];
+  optional string default_member_role = 5 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    // (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the role to set as the default member role. This role will be automatically assigned to new users when they join the environment. Must be a valid role name that exists in the environment."
+      example: "\"member\""
+    }
+  ];
+}
+
+message UpdateDefaultOrganizationRolesRequest {
+  string org_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  string default_member_role = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name of the default member role"
+      example: "\"member\""
+    }
+  ];
+}
+
+message UpdateDefaultRolesResponse {
+  Role default_creator = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The role that is now set as the default creator role for the environment. Contains complete role information including permissions and metadata."
+    example: "{\"id\": \"role_1234567890\", \"name\": \"creator\", \"display_name\": \"Creator Role\", \"description\": \"Role for creating resources\"}"
+  }];
+  Role default_member = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The role that is now set as the default member role for the environment. Contains complete role information including permissions and metadata."
+    example: "{\"id\": \"role_0987654321\", \"name\": \"member\", \"display_name\": \"Member Role\", \"description\": \"Role for regular members\"}"
+  }];
+}
+
+message UpdateDefaultOrganizationRolesResponse {
+  Role default_member = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Updated default member role"
+    example: "{\"id\": \"role_0987654321\", \"name\": \"member\", \"display_name\": \"Member Role\", \"description\": \"Role for regular members\"}"
+  }];
+}
+
+message UpdateDefaultRole {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "role"
+  }];
+  optional string name = 2 [
+    (buf.validate.field).string = {
+      min_len: 0
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name of the role"
+      example: "\"creator\""
+    }
+  ];
+}
+
+// Permission Entity
+message Permission {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "perm"
+  }];
+  string name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_:]+$"
+    },
+    (buf.validate.field).required = true
+  ];
+  string description = 3 [(buf.validate.field).string = {max_len: 2000}];
+  google.protobuf.Timestamp create_time = 4;
+  google.protobuf.Timestamp update_time = 5;
+}
+
+// RolePermissions represents a permission with role source information
+message RolePermission {
+  string id = 1 [(buf.validate.field).string = {
+    min_len: 1
+    max_len: 32
+    prefix: "perm"
+  }];
+  string name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_:]+$"
+    },
+    (buf.validate.field).required = true
+  ];
+  string description = 3 [(buf.validate.field).string = {max_len: 2000}];
+  google.protobuf.Timestamp create_time = 4;
+  google.protobuf.Timestamp update_time = 5;
+  string role_name = 6 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the role from which this permission was sourced"
+      example: "\"admin_role\""
+    }
+  ];
+}
+
+message CreatePermission {
+  string name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_:]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name/ID of the permission"
+      example: "\"read:documents\""
+    }
+  ];
+  string description = 2 [
+    (buf.validate.field).string = {max_len: 2000},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Description of the permission"
+      example: "\"Allows user to read documents from the system\""
+    }
+  ];
+}
+
+// Permission Request/Response Messages
+message CreatePermissionRequest {
+  CreatePermission permission = 1 [(buf.validate.field).required = true];
+}
+
+message CreatePermissionResponse {
+  Permission permission = 1;
+}
+
+message GetPermissionRequest {
+  string permission_name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_:]+$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the permission"
+      example: "\"read:users\""
+    }
+  ];
+}
+
+message GetPermissionResponse {
+  Permission permission = 1;
+}
+
+message UpdatePermissionRequest {
+  string permission_name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_:]+$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the permission"
+      example: "\"read_users\""
+    }
+  ];
+  CreatePermission permission = 3 [(buf.validate.field).required = true];
+}
+
+message UpdatePermissionResponse {
+  Permission permission = 1;
+}
+
+message ListPermissionsRequest {
+  optional string page_token = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Page token to retrieve next page of results"
+    example: "\"token_abc123\""
+  }];
+  optional uint32 page_size = 2 [
+    (buf.validate.field).uint32 = {
+      gte: 1
+      lte: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Number of permissions to return per page (max 100)"
+      example: "50"
+    }
+  ];
+}
+
+message ListPermissionsResponse {
+  repeated Permission permissions = 1;
+  string prev_page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token to retrieve previous page of results"
+    example: "\"token_def456\""
+  }];
+  string next_page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token to retrieve next page of results"
+    example: "\"token_def456\""
+  }];
+  uint32 total_size = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total number of permissions available"
+    example: "150"
+  }];
+}
+
+message DeletePermissionRequest {
+  string permission_name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_:]+$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the permission"
+      example: "\"read_users\""
+    }
+  ];
+}
+
+// Role-Permission Management Messages
+
+message ListRolePermissionsRequest {
+  string role_name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_-]+$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the role"
+      example: "admin"
+    }
+  ];
+}
+
+message ListRolePermissionsResponse {
+  repeated Permission permissions = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of permissions directly assigned to the role"}];
+}
+
+message AddPermissionsToRoleRequest {
+  string role_name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_:]+$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the role"
+      example: "admin"
+    }
+  ];
+  repeated string permission_names = 2 [
+    (buf.validate.field).repeated = {
+      min_items: 1
+      max_items: 100
+      items: {
+        string: {
+          min_len: 1
+          max_len: 64
+          pattern: "^[a-zA-Z0-9_:]+$"
+        }
+      }
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of permission names to add to the role"}
+  ];
+}
+
+message AddPermissionsToRoleResponse {
+  repeated Permission permissions = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of all permissions belonging to the role after addition"}];
+}
+
+message RemovePermissionFromRoleRequest {
+  string role_name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_]+$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the role"
+      example: "admin"
+    }
+  ];
+  string permission_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_:]+$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the permission to remove"
+      example: "read_users"
+    }
+  ];
+}
+
+message ListEffectiveRolePermissionsRequest {
+  string role_name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_]+$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the role"
+      example: "admin"
+    }
+  ];
+}
+
+message ListEffectiveRolePermissionsResponse {
+  repeated Permission permissions = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of all effective permissions including those inherited from base roles"}];
+}
+
+// Role Hierarchy Management Messages
+
+message ListDependentRolesRequest {
+  string role_name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_]+$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the base role"
+      example: "admin"
+    }
+  ];
+}
+
+message ListDependentRolesResponse {
+  repeated Role roles = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of dependent roles"}];
+}
+
+message DeleteRoleBaseRequest {
+  string role_name = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 64
+      pattern: "^[a-zA-Z0-9_]+$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique name identifier of the role whose base inheritance relationship should be removed. Must be alphanumeric with underscores, 1-64 characters."
+      example: "content_editor"
+    }
+  ];
+}
+
+message DeleteOrganizationRoleBaseRequest {
+  string org_id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier to an Organization"
+      example: "\"org_121312434123312\""
+    }
+  ];
+  string role_name = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_]{1,64}$"
+    },
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the organization role to remove base from"
+      example: "admin"
+    }
+  ];
+}

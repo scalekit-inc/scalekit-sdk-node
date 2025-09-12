@@ -1,0 +1,16 @@
+info:
+  title: Scalekit APIs
+  version: "1.0.0"
+  x-scalar-sdk-installation:
+    - lang: node
+      description: "Install the Scalekit SDK for Node.js from npm:"
+      source: "npm install @scalekit-sdk/node"
+    - lang: python
+      description: "Install the Scalekit SDK for Python using pip:"
+      source: "pip install scalekit-sdk-python"
+    - lang: Go
+      description: "Install the Scalekit SDK for Go:"
+      source: "go get -u github.com/scalekit-inc/scalekit-sdk-go"
+    - lang: Java
+      description: "Adding Java SDK dependency"
+      source: "/* Gradle users - add the following to your dependencies in build file */\nimplementation \"com.scalekit:scalekit-sdk-java:2.0.1\"\n\n<!-- Maven users - add the following to your `pom.xml` -->\n<dependency>\n  <groupId>com.scalekit</groupId>\n  <artifactId>scalekit-sdk-java</artifactId>\n  <version>2.0.1</version>\n</dependency>"

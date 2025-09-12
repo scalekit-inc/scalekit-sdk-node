@@ -1,0 +1,189 @@
+syntax = "proto3";
+
+package scalekit.v1.providers;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/providers";
+
+// Service definition
+service ProviderService {
+  rpc CreateProvider(CreateProviderRequest) returns (CreateProviderResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT}; //only for scalekit client
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/providers"
+      body: "provider"
+    };
+  }
+
+  rpc UpdateProvider(UpdateProviderRequest) returns (UpdateProviderResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      put: "/api/v1/providers/{identifier}"
+      body: "provider"
+    };
+  }
+
+  rpc DeleteProvider(DeleteProviderRequest) returns (DeleteProviderResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/providers/{identifier}"};
+  }
+
+  rpc ListProviders(ListProvidersRequest) returns (ListProvidersResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/providers"};
+  }
+}
+
+// Provider represents a connected app provider
+message Provider {
+  string id = 1;
+  string identifier = 2;
+  string display_name = 3;
+  string description = 4;
+  repeated string categories = 5;
+  google.protobuf.ListValue auth_patterns = 6;
+  string icon_src = 7;
+  int32 display_priority = 8;
+}
+
+message CreateProvider {
+  reserved 1;
+  string identifier = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-zA-Z0-9_-]*$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the connected app provider"
+      example: "\"google_workspace\""
+    }
+  ];
+  string display_name = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Display name for the connected app provider"
+      example: "\"Google Workspace\""
+    }
+  ];
+  string description = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Description of the connected app provider"
+    example: "\"Connect to Google Workspace for email and calendar integration\""
+  }];
+  repeated string categories = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Categories for the connected app provider"
+    example: "[\"productivity\", \"email\"]"
+  }];
+  google.protobuf.ListValue auth_patterns = 6 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Authentication patterns for the connected app provider"}
+  ];
+  string icon_src = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Image source URL for the connected app provider"
+    example: "\"https://example.com/images/google_workspace.png\""
+  }];
+  int32 display_priority = 8;
+}
+
+// Create Provider
+message CreateProviderRequest {
+  CreateProvider provider = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the connected app provider to create"}
+  ];
+}
+
+message CreateProviderResponse {
+  Provider provider = 1;
+}
+
+message UpdateProvider {
+  reserved 1, 2;
+  string display_name = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Display name for the connected app provider"
+      example: "\"Google Workspace\""
+    }
+  ];
+  string description = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Description of the connected app provider"
+    example: "\"Connect to Google Workspace for email and calendar integration\""
+  }];
+  repeated string categories = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Categories for the connected app provider"
+    example: "[\"productivity\", \"email\"]"
+  }];
+  google.protobuf.ListValue auth_patterns = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Authentication patterns for the connected app provider"}];
+  string icon_src = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Image source URL for the connected app provider"
+    example: "\"https://example.com/images/google_workspace.png\""
+  }];
+  int32 display_priority = 8;
+}
+
+// Update Provider
+message UpdateProviderRequest {
+  string identifier = 1 [(buf.validate.field).string = {
+    min_len: 0
+    max_len: 100
+    pattern: "^[a-zA-Z0-9_-]*$"
+  }];
+  UpdateProvider provider = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Fields to update for the connected app provider"}
+  ];
+}
+
+message UpdateProviderResponse {
+  Provider provider = 1;
+}
+
+// List Providers
+message ListProvidersRequest {
+  string identifier = 1 [(buf.validate.field).string = {
+    min_len: 0
+    max_len: 100
+    pattern: "^[a-zA-Z0-9_-]*$"
+  }];
+  uint32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListProvidersResponse {
+  repeated Provider providers = 1;
+  string next_page_token = 2;
+  uint32 total_size = 3;
+  string prev_page_token = 4;
+}
+
+message DeleteProviderRequest {
+  string identifier = 1 [(buf.validate.field).string = {
+    min_len: 0
+    max_len: 100
+    pattern: "^[a-zA-Z0-9_-]*$"
+  }];
+}
+
+message DeleteProviderResponse {}

@@ -1,0 +1,215 @@
+syntax = "proto3";
+
+package scalekit.v1.commons;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/commons";
+
+enum RegionCode {
+  /*
+     If the region code is unspecified the selected region will automatically be decided based on the origin of the call.
+  */
+  REGION_CODE_UNSPECIFIED = 0;
+  US = 1;
+  EU = 2;
+}
+
+enum EnvironmentType {
+  ENVIRONMENT_TYPE_UNSPECIFIED = 0;
+  PRD = 1;
+  DEV = 2;
+}
+
+message OrganizationMembership {
+  string organization_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for the organization. Immutable and read-only."
+    example: "\"org_1234abcd5678efgh\""
+  }];
+  google.protobuf.Timestamp join_time = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the membership was created. Automatically set by the server."}];
+  MembershipStatus membership_status = 3;
+  repeated Role roles = 4;
+  optional string name = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Display name for the Organization name."
+    example: "\"AcmeCorp\""
+  }];
+  map<string, string> metadata = 7 [
+    (buf.validate.field).map = {
+      max_pairs: 20
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom key-value pairs for storing additional user context. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"department\": \"engineering\", \"location\": \"nyc-office\"}"
+    }
+  ];
+  optional string display_name = 9 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Display name for the Organization name."
+    example: "\"AcmeCorp\""
+  }];
+  optional string invited_by = 10 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "ID of the user who invited this user."}];
+
+  optional google.protobuf.Timestamp created_at = 11 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the invitation was created."}];
+
+  optional google.protobuf.Timestamp accepted_at = 12 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the user accepted the invitation."}];
+
+  optional google.protobuf.Timestamp expires_at = 13 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Timestamp when the invitation expired."}];
+}
+
+message Role {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Role ID"
+      example: "\"role_79643236410327240\""
+    }
+  ];
+  string name = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique key identifier for the role"
+    example: "\"team_dev\""
+  }];
+  string display_name = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Human-readable name for the role"
+    example: "\"Dev Team\""
+  }];
+}
+
+enum MembershipStatus {
+  Membership_Status_UNSPECIFIED = 0;
+  ACTIVE = 1;
+  INACTIVE = 2;
+  PENDING_INVITE = 3;
+  INVITE_EXPIRED = 4;
+}
+
+message UserProfile {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique system-generated identifier for the user profile. Immutable and read-only."
+      example: "\"usr_profile_1234abcd5678efgh\""
+    }
+  ];
+
+  string first_name = 2 [
+    (buf.validate.field).string = {max_len: 200},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User's given name. Maximum 200 characters."
+      example: "\"John\""
+    }
+  ];
+
+  string last_name = 3 [
+    (buf.validate.field).string = {max_len: 200},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "User's family name. Maximum 200 characters."
+      example: "\"Doe\""
+    }
+  ];
+
+  string name = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Full name in display format. Typically combines first_name and last_name."
+    example: "\"John Michael Doe\""
+  }];
+
+  string locale = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "User's localization preference in BCP-47 format. Defaults to organization settings."
+    example: "\"en-US\""
+  }];
+
+  bool email_verified = 6 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Indicates if the user's email address has been verified. Automatically updated by the system."
+      example: "true"
+    }
+  ];
+
+  string phone_number = 7 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Phone number in E.164 international format. Required for SMS-based authentication."
+    example: "\"+14155552671\""
+  }];
+
+  map<string, string> metadata = 8 [
+    (buf.validate.field).map = {
+      max_pairs: 30
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "System-managed key-value pairs for internal tracking. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"account_status\": \"active\", \"signup_source\": \"mobile_app\"}"
+    }
+  ];
+
+  map<string, string> custom_attributes = 9 [
+    (buf.validate.field).map = {
+      max_pairs: 100
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom attributes for extended user profile data. Keys (3-25 chars), values (1-256 chars)."
+      example: "{\"department\": \"engineering\", \"security_clearance\": \"level2\"}"
+    }
+  ];
+}
+
+enum IdentityProviderType {
+  IDENTITY_PROVIDER_UNSPECIFIED = 0;
+  OKTA = 1;
+  GOOGLE = 2;
+  MICROSOFT_AD = 3;
+  AUTH0 = 4;
+  ONELOGIN = 5;
+  PING_IDENTITY = 6;
+  JUMPCLOUD = 7;
+  CUSTOM = 8;
+  GITHUB = 9;
+  GITLAB = 10;
+  LINKEDIN = 11;
+  SALESFORCE = 12;
+  MICROSOFT = 13;
+  IDP_SIMULATOR = 14;
+  SCALEKIT = 15;
+  ADFS = 16;
+}

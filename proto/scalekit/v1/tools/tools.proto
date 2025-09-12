@@ -1,0 +1,395 @@
+syntax = "proto3";
+
+package scalekit.v1.tools;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/tools";
+
+service ToolService {
+  rpc CreateTool(CreateToolRequest) returns (CreateToolResponse) {
+    option (scalekit.v1.options.auth_option) = {
+      authentication_type: CLIENT // only for scalekit client
+    };
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/tools"
+      body: "tool"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Tools"
+      summary: "Create a new tool"
+      description: "Register a new tool with its schema, metadata, and other configuration."
+    };
+  }
+  rpc ListTools(ListToolsRequest) returns (ListToolsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/tools"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Tools"
+      summary: "List tools"
+      description: "Fetch tools by provider, identifier, and connector. If `summary=true`, returns only tool names."
+    };
+  }
+  rpc ListScopedTools(ListScopedToolsRequest) returns (ListScopedToolsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/tools/scoped"};
+  }
+  rpc SetToolDefault(SetToolDefaultRequest) returns (SetToolDefaultResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/tools:set_default"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Tools"
+      summary: "Marks a tool as the default version"
+      description: "Set a specific tool (by name, schema version, tool version, and provider) as the default."
+    };
+  }
+  rpc UpdateTool(UpdateToolRequest) returns (UpdateToolResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      put: "/api/v1/tools"
+      body: "tool"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Tools"
+      summary: "Update a tool"
+      description: "Update an existing tool by provider and tool name."
+    };
+  }
+  rpc DeleteTool(DeleteToolRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/tools/{id}"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Tools"
+      summary: "Delete a tool"
+      description: "Delete a tool by name, schema version, tool version, and provider."
+    };
+  }
+  rpc ExecuteTool(ExecuteToolRequest) returns (ExecuteToolResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      post: "/api/v1/execute_tool"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "AppConnectors"
+      summary: "Execute a tool using a connected account"
+      description: "Execute a tool using the specified connected account with the provided parameters."
+    };
+  }
+}
+
+message CreateToolRequest {
+  Tool tool = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Tool details including name, schema version, and definition"}
+  ];
+}
+
+message CreateToolResponse {
+  Tool tool = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Details of the created tool"}];
+}
+
+message Tool {
+  string id = 1 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique ID of the tool"
+      example: "\"tol_123\""
+    }
+  ];
+  string provider = 2 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Provider name (e.g. GOOGLE)"
+      example: "\"GOOGLE\""
+    }
+  ];
+  google.protobuf.Struct definition = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Tool definition in structured format"
+      example: "{\"input\": {\"type\": \"object\"}}"
+    }
+  ];
+  google.protobuf.Struct metadata = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Additional metadata about the tool"
+    example: "{\"category\": \"email\"}"
+  }];
+  repeated string tags = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Tags for categorization or filtering"
+    example: "[\"notification\", \"email\"]"
+  }];
+  google.protobuf.BoolValue is_default = 6 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Marks this tool as the default version for the combination"
+      example: "true"
+    }
+  ];
+  google.protobuf.Timestamp updated_at = 7 [
+    (google.api.field_behavior) = OUTPUT_ONLY,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Timestamp when the tool was last updated"
+      example: "\"2023-10-01T12:00:00Z\""
+    }
+  ];
+}
+
+message ScopedTool {
+  Tool tool = 1;
+  string identifier = 2;
+  string connected_account_id = 3 [
+    (buf.validate.field).string = {max_len: 100},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "ID of the connected account for this scoped tool"
+      example: "\"ca_123\""
+    }
+  ];
+}
+
+message ListToolsRequest {
+  Filter filter = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter parameters for listing tools"}];
+
+  uint32 page_size = 2;
+
+  string page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "eyJwYWdlIjoyLCJsaW1pdCI6MzB9"
+    description: "Token from a previous response for pagination."
+  }];
+}
+
+message Filter {
+  google.protobuf.BoolValue summary = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Return only tool names instead of full tool details"
+    example: "true"
+  }];
+  string provider = 2 [
+    (buf.validate.field).string = {max_len: 50},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter by tool provider"
+      example: "\"GOOGLE\""
+    }
+  ];
+  string identifier = 3 [
+    (buf.validate.field).string = {max_len: 100},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter by connected account identifier"
+      example: "\"app_google_workspace\""
+    }
+  ];
+  repeated string tool_name = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Filter by tool name"
+    example: "\"gmail_send_email\""
+  }];
+  optional string query = 5 [
+    (buf.validate.field).string = {
+      min_len: 3
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Filter by connected account identifier"
+      example: "\"gmail get attachment\""
+    }
+  ];
+}
+
+message ListToolsResponse {
+  string next_page_token = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for fetching the next page of tools"
+    example: "\"eyJwYWdlIjozLCJsaW1pdCI6MzB9\""
+  }];
+  uint32 total_size = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total number of tools matching the query"
+    example: "104"
+  }];
+  string prev_page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for fetching the previous page of tools"
+    example: "\"eyJwYWdlIjoxLCJsaW1pdCI6MzB9\""
+  }];
+
+  repeated string tool_names = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of tool names (if summary=true)"
+    example: "[\"gmail_send_email\"]"
+  }];
+
+  repeated Tool tools = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of tools (if summary=false or omitted)"}];
+}
+
+message ExecuteToolRequest {
+  string tool_name = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the tool to execute"
+      example: "\"send_email\""
+    }
+  ];
+  optional string identifier = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Identifier of the connected account to use for tool execution"
+    example: "\"app_google_workspace\""
+  }];
+  google.protobuf.Struct params = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Free-flowing JSON parameters for the tool execution"
+    example: "{\"to\": \"user@example.com\", \"subject\": \"Hello\", \"body\": \"Hello World\"}"
+  }];
+
+  optional string connected_account_id = 4 [
+    (buf.validate.field).string = {max_len: 100},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "ID of the connected account to use for tool execution"
+      example: "\"ca_123\""
+    }
+  ];
+
+  optional string connector = 5 [
+    (buf.validate.field).string = {max_len: 100},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the connected account to use for tool execution"
+      example: "\"Google Workspace\""
+    }
+  ];
+
+  optional string organization_id = 6 [
+    (buf.validate.field).string = {max_len: 100},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "ID of the organization to use for tool execution"
+      example: "\"org_123\""
+    }
+  ];
+
+  optional string user_id = 7 [
+    (buf.validate.field).string = {max_len: 100},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "ID of the user to use for tool execution"
+      example: "\"user_123\""
+    }
+  ];
+}
+
+message ExecuteToolResponse {
+  google.protobuf.Struct data = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Free-flowing JSON parameters for the tool execution"
+    example: "{\"to\": \"user@example.com\", \"subject\": \"Hello\", \"body\": \"Hello World\"}"
+  }];
+
+  string execution_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique identifier for the tool execution"
+    example: "\"123456789\""
+  }];
+}
+
+message SetToolDefaultRequest {
+  string name = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 100
+      pattern: "^[a-z0-9_].*$"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Fully qualified tool name"
+      example: "\"gmail_send_email\""
+    }
+  ];
+  string schema_version = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 10
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Schema version of the tool"
+      example: "\"1\""
+    }
+  ];
+  string tool_version = 3 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 10
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Tool version to mark as default"
+      example: "\"1\""
+    }
+  ];
+}
+
+message SetToolDefaultResponse {
+  Tool tool = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The tool now marked as default"}];
+}
+
+message UpdateToolRequest {
+  Tool tool = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated tool data"}
+  ];
+}
+
+message UpdateToolResponse {
+  Tool tool = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The updated tool"}];
+}
+
+message DeleteToolRequest {
+  string id = 1 [(buf.validate.field).string = {prefix: "tol_"}];
+}
+
+message ListScopedToolsRequest {
+  string identifier = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {max_len: 100},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Identifier of the connected account to filter tools"
+      example: "\"app_google_workspace\""
+    }
+  ];
+
+  ScopedToolFilter filter = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Filter parameters for listing scoped tools"}];
+
+  uint32 page_size = 3;
+
+  string page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "eyJwYWdlIjoyLCJsaW1pdCI6MzB9"
+    description: "Token from a previous response for pagination."
+  }];
+}
+
+message ListScopedToolsResponse {
+  string next_page_token = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for fetching the next page of tools"
+    example: "\"eyJwYWdlIjozLCJsaW1pdCI6MzB9\""
+  }];
+  uint32 total_size = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Total number of tools matching the query"
+    example: "104"
+  }];
+  string prev_page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Token for fetching the previous page of tools"
+    example: "\"eyJwYWdlIjoxLCJsaW1pdCI6MzB9\""
+  }];
+  repeated ScopedTool tools = 5;
+}
+
+message ScopedToolFilter {
+  repeated string providers = 1;
+  repeated string tool_names = 2;
+  repeated string connection_names = 3;
+}

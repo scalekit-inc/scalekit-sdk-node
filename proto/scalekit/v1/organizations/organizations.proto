@@ -1,0 +1,1782 @@
+syntax = "proto3";
+
+package scalekit.v1.organizations;
+
+import "buf/validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/api/visibility.proto";
+import "google/protobuf/any.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "scalekit/v1/commons/commons.proto";
+import "scalekit/v1/options/options.proto";
+
+option go_package = "github.com/scalekit-inc/scalekit/pkg/grpc/organizations";
+// {{import \"proto/scalekit/v1/getting_started.md\"}}
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info: {
+    title: "Scalekit APIs"
+    version: "1.0.0"
+    // {{import \"proto/scalekit/v1/getting_started.md\"}}
+    // This is copy of the content from proto/scalekit/v1/getting_started.md .
+    // The go MD comments processor does not work with just this description field..
+    // It can be used else where. So putting in raw content in a single line text i
+    // The following content is the output of command  `cat proto/scalekit/v1/getting_started.md | sed -e 's/\\/\\\\/g' | sed -e 's/"/\\"/g' | awk 1 ORS='\\n'`
+    description: "# Introduction\n\nThe Scalekit API is a comprehensive RESTful API that enables you to manage organizations, users, authentication settings, and identity provider integrations. All requests must use HTTPS and require proper authentication.\n\n### Base URL\n\nAll API requests use the following base URLs:\n\n```\nhttps://{environment}.scalekit.dev (Development)\nhttps://{environment}.scalekit.com (Production)\nhttps://auth.example.com (Custom domain)\n```\n\nScalekit operates two separate environments: Development and Production. Resources cannot be moved between environments.\n\n# Authentication\n\nThe Scalekit API uses OAuth 2.0 Client Credentials for authentication.\n\nGetting an access token\n\n1. Get your credentials from the [Scalekit Dashboard](https://app.scalekit.com): `SCALEKIT_ENVIRONMENT_URL`, `SCALEKIT_CLIENT_ID`, `SCALEKIT_CLIENT_SECRET`\n\n2. Request an access token:\n\n```shell\ncurl https://{SCALEKIT_ENVIRONMENT_URL}/oauth/token \\\n  -X POST \\\n  -H 'Content-Type: application/x-www-form-urlencoded' \\\n  -d 'client_id={client_id}' \\\n  -d 'client_secret={client_secret}' \\\n  -d 'grant_type=client_credentials'\n```\n\nUse the access token in API requests:\n\n```shell\ncurl https://{SCALEKIT_ENVIRONMENT_URL}/api/v1/organizations \\\n  -H 'Content-Type: application/json' \\\n  -H 'Authorization: Bearer {access_token}'\n```\n\nThe response includes an access token:\n\n```json\n{\n	\"access_token\": \"eyJhbGciOiJSUzI1NiIsImInR5cCI6IkpXVCJ9...\",\n	\"token_type\": \"Bearer\",\n	\"expires_in\": 86399,\n	\"scope\": \"openid\"\n}\n```\n"
+    contact: {
+      name: "Scalekit Inc"
+      url: "https://scalekit.com"
+      email: "support@scalekit.com"
+    }
+    license: {
+      name: "Apache 2.0"
+      url: "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  }
+  host: "$SCALEKIT_ENVIRONMENT_URL"
+  schemes: HTTPS
+  consumes: "application/json"
+  produces: "application/json"
+  external_docs: {
+    description: "Scalekit Docs"
+    url: "https://docs.scalekit.com/"
+  }
+
+  /**
+     // Disabled for now as it is not working with Scalar.
+     security_definitions: {
+       security: {
+         key: "BasicAuth"
+         value: {type: TYPE_BASIC}
+       }
+       security: {
+         key: "OAuth2"
+         value: {
+           type: TYPE_OAUTH2
+           flow: FLOW_ACCESS_CODE
+           token_url: "http://$ENV_URL/oauth/token"
+           authorization_url: "http://$ENV_URL/oauth/authorize"
+           scopes: {
+             scope: {
+               key: "offline_access"
+               value: "Grants a refresh token with absolute expiry"
+             }
+           }
+         }
+       }
+     }
+  */
+
+  /* The following does not work for Scalar .. But works fine with Redocly */
+  /* { name: "Scalekit API", description: "{{import \"proto/scalekit/v1/getting_started.md\"}}", },*/
+  tags: [
+    {name: "Organizations"},
+    {
+      name: "Permissions"
+      description: "Permission management for defining and controlling access to system resources. Create, retrieve, update, and delete granular permissions that represent specific actions users can perform. Permissions are the building blocks of role-based access control (RBAC) and can be assigned to roles to grant users the ability to perform specific operations. Use this service to define custom permissions for your application's unique access control requirements."
+    }
+  ]
+};
+
+service OrganizationService {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_tag) = {
+    name: "Organizations"
+    // Imported description from a markdown file can be added here in service or as a Tag description in the above section
+    description: "{{import \"proto/scalekit/v1/organizations/organization_details.md\"}}"
+  };
+
+  // Create Organization
+  rpc CreateOrganization(CreateOrganizationRequest) returns (CreateOrganizationResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {
+      post: "/api/v1/organizations"
+      body: "organization"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Create an organization"
+      description: "Creates a new organization in your environment. Use this endpoint to add a new tenant that can be configured with various settings and metadata"
+
+      responses: {
+        key: "201"
+        value: {
+          description: "Returns the newly created organization with its unique identifier and settings"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.CreateOrganizationResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateOrganization(UpdateOrganizationRequest) returns (UpdateOrganizationResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{id}"
+      body: "organization"
+
+      // Hiding the access directly with external_id as it requires separate rpc method defined
+      // additional_bindings: {
+      //   patch: "/api/v1/organizations:external/{external_id}"
+      //   body: "organization"
+      // }
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Update organization details"
+      description: "Updates an organization's display name, external ID, or metadata. Requires a valid organization identifier. Region code cannot be modified through this endpoint."
+      responses: {
+        key: "200"
+        value: {
+          description: "Returns the updated organization with all current details reflected in the response."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.UpdateOrganizationResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const organization = await sc.organization.updateOrganization(organization_id, {\n  displayName: 'displayName',\n  externalId: 'externalId',\n});"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "organization = sc.organization.update_organization(organization_id, {\n  display_name: \"display_name\",\n  external_id: \"external_id\"\n})"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "organization, err := sc.Organization.UpdateOrganization(\n  ctx,\n  organizationId,\n  &scalekit.UpdateOrganization{\n    DisplayName: \"displayName\",\n    ExternalId: \"externalId\",\n  },\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "UpdateOrganization updateOrganization = UpdateOrganization.newBuilder()\n  .setDisplayName(\"Updated Organization Name\")\n  .build();\n\nOrganization updatedOrganizationById = scalekitClient.organizations().updateById(organizationId, updateOrganization);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetOrganization(GetOrganizationRequest) returns (GetOrganizationResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.http) = {
+      get: "/api/v1/organizations/{id}"
+
+      // Hiding the access directly with external_id as it requires separate rpc method defined
+      // additional_bindings: {get: "/api/v1/organizations:external/{external_id}"}
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Get organization details"
+      description: "Retrieves organization details by Scalekit ID, including name, region, metadata, and settings"
+
+      responses: {
+        key: "200"
+        value: {
+          description: "Returns the complete organization object with ID, display name, settings, and metadata"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.GetOrganizationResponse"}
+          }
+        }
+      }
+
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const sc = new ScalekitClient(\n  <SCALEKIT_ENVIRONMENT_URL>,\n  <SCALEKIT_CLIENT_ID>,\n  <SCALEKIT_CLIENT_SECRET>\n);\n\nconst organization = await sc.organization.getOrganization(organization_id);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "sc = ScalekitClient(\n  <SCALEKIT_ENVIRONMENT_URL>,\n  <SCALEKIT_CLIENT_ID>,\n  <SCALEKIT_CLIENT_SECRET>\n)\n\norganization = sc.organization.get_organization(\n  organization_id\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "sc := scalekit.NewScalekitClient(\n  <SCALEKIT_ENVIRONMENT_URL>,\n  <SCALEKIT_CLIENT_ID>,\n  <SCALEKIT_CLIENT_SECRET>\n)\n\norganization, err := sc.Organization.GetOrganization(\n  ctx,\n  organizationId\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "ScalekitClient scalekitClient = new ScalekitClient(\n  \"<SCALEKIT_ENVIRONMENT_URL>\",\n  \"<SCALEKIT_CLIENT_ID>\",\n  \"<SCALEKIT_CLIENT_SECRET>\"\n);\n\nOrganization organization = scalekitClient.organizations().getById(organizationId);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc ListOrganization(ListOrganizationsRequest) returns (ListOrganizationsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {get: "/api/v1/organizations"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "List organizations"
+      description: "Retrieve a paginated list of organizations within your environment. The response includes a `page_token` that can be used to access subsequent pages of results."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved the list of organizations"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.ListOrganizationsResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid page token"}
+      }
+      external_docs: {
+        description: "Learn more about organization listing"
+        url: "https://docs.scalekit.com/"
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const organizations = await scalekit.organization.listOrganization({\n  pageSize: 10,\n});"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "options = ListOrganizationOptions()\noptions.page_size = 10\n\norganizations = sc.organization.list_organizations(\n  options=options\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "organizations, err := sc.Organization.ListOrganizations(\n  ctx,\n  &scalekit.ListOrganizationOptions{\n    PageSize: 10,\n  }\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "ListOrganizationsResponse organizations = scalekitClient.organizations().listOrganizations(10, \"\");"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc SearchOrganization(SearchOrganizationsRequest) returns (SearchOrganizationsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/organizations:search"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Search organizations"
+      description: "Searches for organizations in your environment using a query string. The query matches against organization name, ID, or external ID. Returns multiple results when more than one organization matches the criteria."
+      responses: {
+        key: "200"
+        value: {
+          description: "Returns a list of matching organizations and a page token for pagination if there are additional results."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.SearchOrganizationsResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  //Delete an Organization
+  rpc DeleteOrganization(DeleteOrganizationRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      delete: "/api/v1/organizations/{id}"
+
+      // Hiding the access directly with external_id as it requires separate rpc method defined
+      // additional_bindings: {delete: "/api/v1/organizations:external/{external_id}"}
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Delete an organization"
+      description: "Remove an existing organization from the environment using its unique identifier"
+
+      responses: {
+        key: "200"
+        value: {description: "Organization successfully deleted and no longer accessible"}
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "await sc.organization.deleteOrganization(organizationId);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "sc.organization.delete_organization(organization_id)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "err := sc.Organization.DeleteOrganization(\n  ctx,\n  organizationId\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "ScalekitClient scalekitClient = new ScalekitClient(\n  \"<SCALEKIT_ENVIRONMENT_URL>\",\n  \"<SCALEKIT_CLIENT_ID>\",\n  \"<SCALEKIT_CLIENT_SECRET>\"\n);\n\nscalekitClient.organizations().deleteById(organizationId);"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  //Generate Portal Link for Org
+  rpc GeneratePortalLink(GeneratePortalLinkRequest) returns (GeneratePortalLinkResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {put: "/api/v1/organizations/{id}/portal_links"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Generate admin portal link"
+      description: "Creates a time-limited Admin Portal URL for IT administrators to configure and manage Single Sign-On (SSO) connections within their organization. Generated links expire after 7 days (168 hours)."
+      responses: {
+        key: "200"
+        value: {
+          description: "Admin Portal link generated successfully. Returns the portal URL and expiration timestamp."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.GeneratePortalLinkResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const link = await sc.organization.generatePortalLink(organization_id);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "link = sc.organization.generate_portal_link(\n  organization_id\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "link, err := sc.Organization.GeneratePortalLink(\n  ctx,\n  organizationId\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "Link portalLink = client\n  .organizations()\n  .generatePortalLink(organizationId, Arrays.asList(Feature.sso, Feature.dir_sync));"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeletePortalLink(DeletePortalLinkRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION};
+    option (google.api.http) = {delete: "/api/v1/organizations/{id}/portal_links"};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Admin Portal"
+      summary: "Delete portal link"
+      description: "Revokes and deletes an Admin portal link."
+      responses: {
+        key: "200"
+        value: {description: "Portal link deleted successfully"}
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "await sc.organization.deletePortalLink(organizationId, linkId);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "sc.organization.delete_portal_link(\n  organization_id,\n  link_id\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "err := sc.Organization.DeletePortalLink(\n  ctx,\n  organizationId,\n  linkId\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "// Hang in there. Coming soon! (Vroom! Vroom!)"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc DeletePortalLinkByID(DeletePortalLinkByIdRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {delete: "/api/v1/organizations/{id}/portal_links/{link_id}"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Admin Portal"
+      summary: "Delete admin portal link"
+      description: "Revokes and deletes an Admin portal link."
+      responses: {
+        key: "200"
+        value: {description: "Success"}
+      }
+    };
+  }
+
+  rpc GetPortalLinks(GetPortalLinkRequest) returns (GetPortalLinksResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/organizations/{id}/portal_links"};
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Admin Portal"
+      summary: "Get portal link"
+      description: "Returns the Admin portal link if it exists. Use Generate Portal link to create and fetch a link"
+      responses: {
+        key: "200"
+        value: {
+          description: "Success"
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.GetPortalLinksResponse"}
+          }
+        }
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const links = sc.organization.getPortalLinks(organization_id);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "links = sc.organization.get_portal_links(\n  organization_id\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "links, err := sc.Organization.GetPortalLinks(\n  ctx,\n  organizationId\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "Link portalLink = client\n  .organizations()\n  .generatePortalLink(organizationId, Arrays.asList(Feature.sso, Feature.dir_sync));"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc UpdateOrganizationSettings(UpdateOrganizationSettingsRequest) returns (GetOrganizationResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{id}/settings"
+      body: "settings"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Toggle organization settings"
+      description: "Updates configuration settings for an organization. Supports modifying SSO configuration, directory synchronization settings, and session parameters. Requires organization ID and the specific settings to update."
+      responses: {
+        key: "200"
+        value: {
+          description: "Returns the complete organization object with updated settings applied. Contains all organization details including ID, display name, and the modified settings."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.GetOrganizationResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "400"
+        value: {description: "Invalid request - occurs when the settings payload contains invalid values or unsupported configuration"}
+      }
+      responses: {
+        key: "404"
+        value: {description: "Organization not found - the specified organization ID doesn't exist"}
+      }
+      extensions: {
+        key: "x-codeSamples"
+        value: {
+          list_value: {
+            values: [
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "javascript"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Node.js SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "const settings = {\n  features: [\n    {\n      name: 'sso',\n      enabled: true,\n    },\n    {\n      name: 'dir_sync',\n      enabled: true,\n    },\n  ],\n};\n\nawait sc.organization.updateOrganizationSettings('<organization_id>', settings);"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "python"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Python SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "settings = [\n        {\n            \"name\": \"sso\",\n            \"enabled\": true\n        },\n        {\n            \"name\": \"dir_sync\",\n            \"enabled\": true\n        }\n    ]\n\nsc.organization.update_organization_settings(\n  organization_id='<organization_id>', settings=settings\n)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "go"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Go SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "settings := OrganizationSettings{\n		Features: []Feature{\n			{\n				Name:    \"sso\",\n				Enabled: true,\n			},\n			{\n				Name:    \"dir_sync\",\n				Enabled: true,\n			},\n		},\n	}\n\norganization,err := sc.Organization().UpdateOrganizationSettings(ctx, organizationId, settings)"}
+                  }
+                }
+              },
+              {
+                struct_value: {
+                  fields: {
+                    key: "lang"
+                    value: {string_value: "java"}
+                  }
+                  fields: {
+                    key: "label"
+                    value: {string_value: "Java SDK"}
+                  }
+                  fields: {
+                    key: "source"
+                    value: {string_value: "OrganizationSettingsFeature featureSSO = OrganizationSettingsFeature.newBuilder()\n                .setName(\"sso\")\n                .setEnabled(true)\n                .build();\n\nOrganizationSettingsFeature featureDirectorySync = OrganizationSettingsFeature.newBuilder()\n                .setName(\"dir_sync\")\n                .setEnabled(true)\n                .build();\n\nupdatedOrganization = scalekitClient.organizations()\n                .updateOrganizationSettings(organization.getId(), List.of(featureSSO, featureDirectorySync));"}
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    };
+  }
+
+  rpc CreateOrganizationSessionSettings(CreateOrganizationSessionSettingsRequest) returns (CreateOrganizationSessionSettingsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+
+    option (google.api.http) = {post: "/api/v1/organizations/{id}/session-settings"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Create organization session settings"
+      description: "Defines session timeout policies for an organization, including absolute and idle timeout durations. This endpoint is used to configure session lifetimes and enhance security by automatically logging out users after a specified period of inactivity."
+      responses: {
+        key: "201"
+        value: {
+          description: "Session settings created successfully. Returns the newly configured session policies."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.CreateOrganizationSessionSettingsResponse"}
+          }
+        }
+      }
+    };
+  }
+
+  rpc GetOrganizationSessionSettings(GetOrganizationSessionSettingsRequest) returns (GetOrganizationSessionSettingsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Get organization session settings"
+      description: "Retrieves the currently configured session timeout policies for a specific organization, including absolute and idle timeout values."
+      responses: {
+        key: "200"
+        value: {
+          description: "Successfully retrieved organization session settings."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.GetOrganizationSessionSettingsResponse"}
+          }
+        }
+      }
+    };
+    option (google.api.http) = {get: "/api/v1/organizations/{id}/session-settings"};
+  }
+
+  rpc UpdateOrganizationSessionSettings(UpdateOrganizationSessionSettingsRequest) returns (UpdateOrganizationSessionSettingsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Update organization session settings"
+      description: "Modifies the session timeout policies for an organization. Use this to adjust the absolute and idle session timeout durations to enforce different security levels."
+      responses: {
+        key: "200"
+        value: {
+          description: "Session settings updated successfully. Returns the modified session policies."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.UpdateOrganizationSessionSettingsResponse"}
+          }
+        }
+      }
+    };
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{id}/session-settings"
+      body: "session_settings"
+    };
+  }
+
+  rpc DeleteOrganizationSessionSettings(DeleteOrganizationSessionSettingsRequest) returns (google.protobuf.Empty) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Delete organization session settings"
+      description: "Resets an organization's session timeout policies to the default settings, removing any custom absolute or idle timeout configurations."
+      responses: {
+        key: "200"
+        value: {description: "Organization session settings deleted successfully."}
+      }
+    };
+    option (google.api.http) = {delete: "/api/v1/organizations/{id}/session-settings"};
+  }
+  // Update user management setting for an organization
+  rpc UpdateUserManagementSettings(UpdateUserManagementSettingsRequest) returns (UpdateUserManagementSettingsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {
+      patch: "/api/v1/organizations/{organization_id}/settings/usermanagement"
+      body: "*"
+    };
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Update organization user setting"
+      description: "Updates user management settings for an organization"
+      responses: {
+        key: "200"
+        value: {
+          description: "Returns the updated organization setting."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.UpdateUserManagementSettingsResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "404"
+        value: {description: "Organization or setting not found."}
+      }
+    };
+  }
+
+  rpc GetOrganizationUserManagementSetting(GetOrganizationUserManagementSettingsRequest) returns (GetOrganizationUserManagementSettingsResponse) {
+    option (scalekit.v1.options.auth_option) = {authentication_type: WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT};
+    option (google.api.method_visibility).restriction = "PREVIEW";
+    option (google.api.http) = {get: "/api/v1/organizations/{organization_id}/settings/usermanagement"};
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      tags: "Organizations"
+      summary: "Get organization user management setting"
+      description: "Retrieves the user management settings for a specific organization."
+      responses: {
+        key: "200"
+        value: {
+          description: "Returns the requested organization setting."
+          schema: {
+            json_schema: {ref: ".scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse"}
+          }
+        }
+      }
+      responses: {
+        key: "404"
+        value: {description: "Organization or setting not found."}
+      }
+    };
+  }
+}
+
+message CreateOrganizationRequest {
+  // Organization details
+  CreateOrganization organization = 1 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Required parameters for creating a new organization"}
+  ];
+}
+
+message CreateOrganizationResponse {
+  Organization organization = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The newly created organization containing its ID, settings, and metadata"}];
+}
+
+message CreateOrganization {
+  string display_name = 4 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    },
+    (google.api.field_behavior) = REQUIRED,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the organization. Must be between 1 and 200 characters."
+      example: "\"Megasoft Inc\""
+    }
+  ];
+
+  scalekit.v1.commons.RegionCode region_code = 5 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Geographic region code for the organization. Currently limited to US"
+      example: "\"US\""
+    },
+    (google.api.field_visibility).restriction = "PREVIEW"
+  ];
+
+  optional string external_id = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Your application's unique identifier for this organization, used to link Scalekit with your system."
+    example: "\"my_unique_id\""
+  }];
+
+  map<string, string> metadata = 7 [(buf.validate.field).map = {
+    max_pairs: 10
+    keys: {
+      string: {
+        min_len: 3
+        max_len: 25
+      }
+    }
+    values: {
+      string: {
+        min_len: 1
+        max_len: 256
+      }
+    }
+  }];
+}
+
+message Organization {
+  // Id
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique scalekit-generated identifier that uniquely references an organization"
+    example: "\"org_59615193906282635\""
+  }];
+  // Created Time
+  google.protobuf.Timestamp create_time = 2 [
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "\"2025-02-15T06:23:44.560Z\""
+      description: "Timestamp when the organization was created"
+    },
+    (google.api.field_behavior) = REQUIRED
+  ];
+  // Updated time
+  google.protobuf.Timestamp update_time = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "\"2025-02-15T06:23:44.560Z\""
+    description: "Timestamp when the organization was last updated"
+  }];
+  // Name of the org to be used in display
+  string display_name = 4 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the organization. Must be between 1 and 200 characters"
+      example: "\"Megasoft\""
+    }
+  ];
+  // Optional regioncode
+  scalekit.v1.commons.RegionCode region_code = 5 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Geographic region code for the organization. Currently limited to US."
+    example: "\"US\""
+  }];
+  // External Id is useful to store a unique identifier for a given Org that. The unique Identifier can be the id of your tenant / org in your SaaSApp
+  optional string external_id = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Your application's unique identifier for this organization, used to link Scalekit with your system."
+    example: "\"my_unique_id\""
+  }];
+  // Key value pairs extension attributes.
+  map<string, string> metadata = 7 [(buf.validate.field).map = {
+    max_pairs: 10
+    keys: {
+      string: {
+        min_len: 3
+        max_len: 25
+      }
+    }
+    values: {
+      string: {
+        min_len: 1
+        max_len: 256
+      }
+    }
+  }];
+  // Organization Settings
+  OrganizationSettings settings = 8;
+}
+
+message UpdateOrganizationRequest {
+  oneof identities {
+    string id = 1 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Unique identifier of the organization to be updated"
+        example: "\"org_121312434123312\""
+      }
+    ];
+    string external_id = 2 [
+      (buf.validate.field).string = {min_len: 1},
+      (google.api.field_visibility).restriction = "PREVIEW",
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "External ID of the organization to be updated"
+        example: "\"tenant_123123123123123\""
+      }
+    ];
+  }
+  UpdateOrganization organization = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Organization Parameters to be updated"}
+  ];
+  google.protobuf.FieldMask update_mask = 99;
+}
+
+// For update messages ensure the indexes are same as the base model itself.
+message UpdateOrganization {
+  optional string display_name = 4 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 200
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Name of the organization to display in the UI. Must be between 1 and 200 characters"
+      example: "\"Acme Corporation\""
+    }
+  ];
+
+  reserved 5; //region is not updatable here.
+
+  optional string external_id = 6 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Your application's unique identifier for this organization, used to link Scalekit with your system"
+    example: "\"tenant_12345\""
+  }];
+
+  map<string, string> metadata = 7 [
+    (buf.validate.field).map = {
+      max_pairs: 10
+      keys: {
+        string: {
+          min_len: 3
+          max_len: 25
+        }
+      }
+      values: {
+        string: {
+          min_len: 1
+          max_len: 256
+        }
+      }
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Custom key-value pairs to store with the organization. Keys must be 3-25 characters, values must be 1-256 characters. Maximum 10 pairs allowed."
+      example: "{\"industry\": \"technology\"}"
+    }
+  ];
+}
+
+message UpdateOrganizationResponse {
+  Organization organization = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Updated organization details"}];
+}
+
+message GetOrganizationRequest {
+  oneof identities {
+    string id = 1 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Unique scalekit-generated identifier that uniquely references an organization"
+        example: "\"org_121312434123312\""
+      }
+    ];
+    string external_id = 2 [
+      (buf.validate.field).string = {min_len: 1},
+      (google.api.field_visibility).restriction = "PREVIEW",
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Unique identifier that links an Organization Object to your app's tenant, stored as an External ID"
+        example: "\"tenant_123123123123123\""
+      }
+    ];
+  }
+}
+
+message GetOrganizationResponse {
+  Organization organization = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The newly created organization"}];
+}
+
+message ListOrganizationsRequest {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "List Organizations"
+      description: "Retrieves a paginated list of all organizations within the environment. Use the `page_token` from the response to access subsequent pages of results"
+    }
+    external_docs: {
+      description: "List Organizations"
+      url: "https://docs.scalekit.com/reference/list-organizations"
+    }
+  };
+  uint32 page_size = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "30"
+    description: "Maximum number of organizations to return per page. Must be between 10 and 100"
+  }];
+  string page_token = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "\"<page_token>\""
+    description: "Pagination token from the previous response. Use to retrieve the next page of organizations"
+  }];
+  optional string external_id = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Your application's unique identifier for this organization, used to link Scalekit with your system"
+    example: "\"<your_app_assigned_id>\""
+  }];
+}
+
+message ListOrganizationsResponse {
+  string next_page_token = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "\"<next_page_token>\""
+    description: "Pagination token for the next page of results. Use this token to fetch the next page."
+  }];
+  uint32 total_size = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "30"
+    description: "Total number of organizations in the environment."
+  }];
+  repeated Organization organizations = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of organization objects"}];
+  string prev_page_token = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "\"<prev_page_token>\""
+    description: "Pagination token for the previous page of results. Use this token to fetch the previous page."
+  }];
+}
+
+message SearchOrganizationsRequest {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Search Organizations"
+      description: "Search for organizations in your environment using a text query that matches against names, IDs, or external IDs"
+    }
+    example: "query=acme&page_size=30&page_token=1"
+  };
+
+  string query = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 3
+      max_len: 100
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "acme"
+      description: "Search term to match against organization names, IDs, or external IDs. Must be at least 3 characters. Case insensitive."
+    }
+  ];
+
+  uint32 page_size = 2 [
+    (buf.validate.field).uint32 = {lte: 30},
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      example: "30"
+      description: "Maximum number of organizations to return per page. Value must be between 1 and 30."
+    }
+  ];
+  string page_token = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    example: "eyJwYWdlIjoyLCJsaW1pdCI6MzB9"
+    description: "Token from a previous response for pagination. Provide this to retrieve the next page of results."
+  }];
+}
+
+message SearchOrganizationsResponse {
+  string next_page_token = 1;
+  uint32 total_size = 2;
+  repeated Organization organizations = 3;
+  string prev_page_token = 4;
+}
+
+message DeleteOrganizationRequest {
+  oneof identities {
+    string id = 1 [
+      (buf.validate.field).string = {
+        min_len: 1
+        max_len: 32
+      },
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "Unique scalekit-generated identifier that uniquely references an organization"
+        example: "\"org_123456789\""
+      }
+    ];
+    string external_id = 2 [
+      (buf.validate.field).string = {min_len: 1},
+      (google.api.field_visibility).restriction = "PREVIEW",
+      (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+        description: "External ID of the organization to delete"
+        example: "\"tenant_123123123123123\""
+      }
+    ];
+  }
+}
+
+message GeneratePortalLinkRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID"
+      example: "\"org_1231234233424344\""
+    }
+  ];
+
+  // Deprecated: Use features
+  optional bool sso = 2 [
+    deprecated = true,
+    (google.api.field_visibility).restriction = "PREVIEW"
+  ];
+
+  // Deprecated: Use features
+  optional bool directory_sync = 3 [
+    deprecated = true,
+    (google.api.field_visibility).restriction = "PREVIEW"
+  ];
+
+  repeated Feature features = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Features to enable in the admin portal link. To enable features, append them as URL parameters:\n\n- Single Sign-On: ?features=sso\n- Directory Sync: ?features=dir_sync\n- Both features: ?features=sso&features=dir_sync\n\nExample URL: https://scalekit.com/portal/lnk_123?features=sso"}];
+}
+
+// Feature represents the available features that can be enabled for an organization's portal link
+enum Feature {
+  option allow_alias = true;
+
+  // An unspecified or invalid feature value
+  FEATURE_UNSPECIFIED = 0;
+  UNSPECIFIED = 0 [deprecated = true];
+
+  // Enables directory synchronization configuration in the portal
+  dir_sync = 1;
+
+  // Enables Single Sign-On (SSO) configuration in the portal
+  sso = 2;
+}
+
+message GetPortalLinkRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID"
+      example: "\"org_1231234233424344\""
+    }
+  ];
+}
+
+message DeletePortalLinkRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID"
+      example: "\"org_1231234233424344\""
+    }
+  ];
+}
+
+message DeletePortalLinkByIdRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Organization ID"
+      example: "\"org_1231234233424344\""
+    }
+  ];
+
+  string link_id = 2 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "lnk_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Link ID"
+      example: "\"lnk_1231234233424344\""
+    }
+  ];
+}
+
+message Link {
+  string id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Unique Identifier for the link"
+    example: "\"lnk_123123123123123\""
+  }];
+  string location = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Location of the link. This is the URL that can be used to access the Admin portal. The link is valid for 1 week."
+    example: "\"https://scalekit.com/portal/lnk_123123123123123\""
+  }];
+  google.protobuf.Timestamp expire_time = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Expiry time of the link. The link is valid for 1 week."
+    example: "\"2024-02-06T14:48:00.000Z\""
+  }];
+}
+
+message GeneratePortalLinkResponse {
+  Link link = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Contains the generated admin portal link details. The link URL can be shared with organization administrators to set up: Single Sign-On (SSO) authentication and directory synchronization"}];
+}
+
+message GetPortalLinksResponse {
+  repeated Link links = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Admin Portal Links"}];
+}
+
+message UpdateOrganizationSettingsRequest {
+  string id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier of the organization to update settings. Must begin with 'org_' prefix"
+      example: "\"org_1231234233424344\""
+    }
+  ];
+
+  OrganizationSettings settings = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Settings configuration to apply to the organization. Contains feature toggles for SSO, directory synchronization, and other organization capabilities"
+      example: "{\"features\": [{\"name\": \"sso\", \"enabled\": true}, {\"name\": \"directory_sync\", \"enabled\": false}]}"
+    }
+  ];
+}
+
+message UpdateOrganizationSessionSettingsRequest {
+  string id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the organization, beginning with an 'org_' prefix."
+      example: "\"org_59615193906282635\""
+    }
+  ];
+  string environment_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "env"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "Unique identifier for the environment where the organization resides, prefixed with 'env_'. This specifies the environment context for the session settings."
+      example: "\"env_59615193906282635\""
+    }
+  ];
+  OrganizationSessionSettings session_settings = 3 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The session settings to be applied, including absolute and idle timeout configurations."}
+  ];
+}
+
+message UpdateOrganizationSessionSettingsResponse {
+  string environment_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The environment ID where the organization's session settings were updated."
+    example: "\"env_59615193906282635\""
+  }];
+  string organization_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The unique identifier of the organization whose session settings were updated."
+    example: "\"org_59615193906282635\""
+  }];
+  OrganizationSessionSettings session_settings = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The updated session settings, reflecting the new timeout policies."}];
+}
+message OrganizationUserManagementSettings {
+  google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Enables or disables user management features for the organization. When true, users can be added, removed, and managed."
+    example: "true"
+  }];
+  google.protobuf.BoolValue sync_user_profile_on_signin = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Enables or disables synchronization of user profiles upon sign-in. When true, user profiles are automatically updated with the latest information from the identity provider."
+    example: "true"
+  }];
+  // Deprecated placeholder to ensure google.protobuf.NullValue is referenced in the schema, preventing unused-definition warnings.
+  google.protobuf.NullValue deprecated_placeholder = 99 [
+    deprecated = true,
+    (google.api.field_visibility).restriction = "PREVIEW",
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "Deprecated placeholder (no functional use)."}
+  ];
+}
+message OrganizationSessionSettings {
+  google.protobuf.Int32Value absolute_session_timeout = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The maximum duration in seconds that a session can remain active, regardless of activity. After this time, the user will be required to re-authenticate."
+    example: "86400"
+  }];
+  google.protobuf.BoolValue session_management_enabled = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Enables or disables session management features for the organization. When true, session timeout policies are enforced."
+    example: "true"
+  }];
+  google.protobuf.Int32Value idle_session_timeout = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The duration in seconds that a session can remain idle before it is automatically terminated. Activity resets the timer."
+    example: "1800"
+  }];
+  google.protobuf.BoolValue idle_session_enabled = 4 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Enables or disables idle session timeout. If true, inactive sessions will be terminated after the specified idle duration."
+    example: "true"
+  }];
+}
+
+message GetOrganizationSessionSettingsRequest {
+  string id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The unique identifier of the organization whose session settings are being requested."
+      example: "\"org_59615193906282635\""
+    }
+  ];
+  string environment_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "env"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The environment ID to scope the request. This ensures the settings are retrieved from the correct environment."
+      example: "\"env_59615193906282635\""
+    }
+  ];
+}
+
+message CreateOrganizationSessionSettingsRequest {
+  string id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The unique identifier of the organization for which to create session settings."
+      example: "\"org_59615193906282635\""
+    }
+  ];
+  string environment_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "env"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The environment ID where the organization exists. This scopes the creation of session settings to a specific environment."
+      example: "\"env_59615193906282635\""
+    }
+  ];
+}
+
+message CreateOrganizationSessionSettingsResponse {
+  string environment_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The environment ID where the session settings were created."
+    example: "\"env_59615193906282635\""
+  }];
+  string organization_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The unique identifier of the organization for which session settings were created."
+    example: "\"org_59615193906282635\""
+  }];
+  OrganizationSessionSettings session_settings = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The newly created session settings, including timeout policies."}];
+}
+
+message GetOrganizationSessionSettingsResponse {
+  string environment_id = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The environment ID from which the session settings were retrieved."
+    example: "\"env_59615193906282635\""
+  }];
+  string organization_id = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "The unique identifier of the organization whose session settings are returned."
+    example: "\"org_59615193906282635\""
+  }];
+  OrganizationSessionSettings session_settings = 3 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The retrieved session timeout policies for the organization."}];
+}
+
+message DeleteOrganizationSessionSettingsRequest {
+  string id = 1 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The unique identifier of the organization whose session settings should be deleted."
+      example: "\"org_59615193906282635\""
+    }
+  ];
+  string environment_id = 2 [
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "env"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+      description: "The environment ID to scope the deletion. This ensures that the session settings are removed from the correct environment."
+      example: "\"env_59615193906282635\""
+    }
+  ];
+}
+
+message OrganizationSettings {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Organization Settings"
+      description: "Configuration options that control organization-level features and capabilities"
+    }
+    example: "{\"features\": [{\"name\": \"sso\", \"enabled\": true}, {\"name\": \"directory_sync\", \"enabled\": false}]}"
+  };
+
+  repeated OrganizationSettingsFeature features = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "List of feature toggles that control organization capabilities such as SSO authentication and directory synchronization"
+    example: "[{\"name\": \"sso\", \"enabled\": true}, {\"name\": \"directory_sync\", \"enabled\": false}]"
+  }];
+}
+
+message OrganizationSettingsFeature {
+  option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_schema) = {
+    json_schema: {
+      title: "Organization Feature Toggle"
+      description: "Controls the activation state of a specific organization feature"
+      required: [
+        "name",
+        "enabled"
+      ]
+    }
+  };
+
+  string name = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Feature identifier. Supported values include: \"sso\" (Single Sign-On), \"directory_sync\" (Directory Synchronization)"
+    example: "\"sso\""
+  }];
+
+  bool enabled = 2 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {
+    description: "Whether the feature is enabled (true) or disabled (false) for this organization"
+    example: "true"
+  }];
+}
+
+message UpdateUserManagementSettingsRequest {
+  string organization_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "ID of the organization."}
+  ];
+  OrganizationUserManagementSettings settings = 2 [
+    (buf.validate.field).required = true,
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The new values for the setting fields to patch."}
+  ];
+}
+
+message UpdateUserManagementSettingsResponse {
+  OrganizationUserManagementSettings settings = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "The updated setting."}];
+}
+
+message GetOrganizationUserManagementSettingsRequest {
+  string organization_id = 1 [
+    (buf.validate.field).required = true,
+    (buf.validate.field).string = {
+      min_len: 1
+      max_len: 32
+      prefix: "org_"
+    },
+    (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "ID of the organization."}
+  ];
+}
+
+message GetOrganizationUserManagementSettingsResponse {
+  OrganizationUserManagementSettings settings = 1 [(grpc.gateway.protoc_gen_openapiv2.options.openapiv2_field) = {description: "List of organization settings."}];
+}
