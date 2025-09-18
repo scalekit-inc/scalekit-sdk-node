@@ -821,9 +821,9 @@ export declare class Invite extends Message<Invite> {
      */
     userId: string;
     /**
-     * @generated from field: optional string invited_by = 3;
+     * @generated from field: optional string inviter_email = 3;
      */
-    invitedBy?: string;
+    inviterEmail?: string;
     /**
      * @generated from field: string status = 4;
      */
