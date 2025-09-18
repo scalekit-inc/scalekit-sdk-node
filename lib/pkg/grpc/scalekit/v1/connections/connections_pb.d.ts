@@ -1271,6 +1271,10 @@ export declare class OAuthConnectionConfig extends Message<OAuthConnectionConfig
      * @generated from field: google.protobuf.StringValue access_type = 16;
      */
     accessType?: string;
+    /**
+     * @generated from field: google.protobuf.StringValue custom_scope_name = 17;
+     */
+    customScopeName?: string;
     constructor(data?: PartialMessage<OAuthConnectionConfig>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.OAuthConnectionConfig";
@@ -1406,6 +1410,18 @@ export declare class SAMLConnectionConfigRequest extends Message<SAMLConnectionC
      * @generated from field: google.protobuf.BoolValue idp_slo_required = 19;
      */
     idpSloRequired?: boolean;
+    /**
+     * @generated from field: google.protobuf.StringValue sp_entity_id = 20;
+     */
+    spEntityId?: string;
+    /**
+     * @generated from field: google.protobuf.StringValue sp_assertion_url = 21;
+     */
+    spAssertionUrl?: string;
+    /**
+     * @generated from field: google.protobuf.StringValue sp_slo_url = 22;
+     */
+    spSloUrl?: string;
     constructor(data?: PartialMessage<SAMLConnectionConfigRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.SAMLConnectionConfigRequest";
