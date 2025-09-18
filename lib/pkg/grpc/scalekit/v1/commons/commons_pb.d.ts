@@ -80,9 +80,9 @@ export declare class OrganizationMembership extends Message<OrganizationMembersh
      */
     displayName?: string;
     /**
-     * @generated from field: optional string invited_by = 10;
+     * @generated from field: optional string inviter_email = 10;
      */
-    invitedBy?: string;
+    inviterEmail?: string;
     /**
      * @generated from field: optional google.protobuf.Timestamp created_at = 11;
      */

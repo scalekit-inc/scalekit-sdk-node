@@ -1459,9 +1459,9 @@ export class Invite extends Message<Invite> {
   userId = "";
 
   /**
-   * @generated from field: optional string invited_by = 3;
+   * @generated from field: optional string inviter_email = 3;
    */
-  invitedBy?: string;
+  inviterEmail?: string;
 
   /**
    * @generated from field: string status = 4;
@@ -1498,7 +1498,7 @@ export class Invite extends Message<Invite> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "invited_by", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 3, name: "inviter_email", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 4, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "created_at", kind: "message", T: Timestamp },
     { no: 6, name: "expires_at", kind: "message", T: Timestamp },

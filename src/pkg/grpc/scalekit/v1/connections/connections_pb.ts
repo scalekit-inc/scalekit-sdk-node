@@ -2212,6 +2212,11 @@ export class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
    */
   accessType?: string;
 
+  /**
+   * @generated from field: google.protobuf.StringValue custom_scope_name = 17;
+   */
+  customScopeName?: string;
+
   constructor(data?: PartialMessage<OAuthConnectionConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2231,6 +2236,7 @@ export class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
     { no: 14, name: "prompt", kind: "message", T: StringValue },
     { no: 15, name: "use_platform_creds", kind: "message", T: BoolValue },
     { no: 16, name: "access_type", kind: "message", T: StringValue },
+    { no: 17, name: "custom_scope_name", kind: "message", T: StringValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OAuthConnectionConfig {
@@ -2444,6 +2450,21 @@ export class SAMLConnectionConfigRequest extends Message<SAMLConnectionConfigReq
    */
   idpSloRequired?: boolean;
 
+  /**
+   * @generated from field: google.protobuf.StringValue sp_entity_id = 20;
+   */
+  spEntityId?: string;
+
+  /**
+   * @generated from field: google.protobuf.StringValue sp_assertion_url = 21;
+   */
+  spAssertionUrl?: string;
+
+  /**
+   * @generated from field: google.protobuf.StringValue sp_slo_url = 22;
+   */
+  spSloUrl?: string;
+
   constructor(data?: PartialMessage<SAMLConnectionConfigRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2468,6 +2489,9 @@ export class SAMLConnectionConfigRequest extends Message<SAMLConnectionConfigReq
     { no: 17, name: "want_request_signed", kind: "message", T: BoolValue },
     { no: 18, name: "certificate_id", kind: "message", T: StringValue },
     { no: 19, name: "idp_slo_required", kind: "message", T: BoolValue },
+    { no: 20, name: "sp_entity_id", kind: "message", T: StringValue },
+    { no: 21, name: "sp_assertion_url", kind: "message", T: StringValue },
+    { no: 22, name: "sp_slo_url", kind: "message", T: StringValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SAMLConnectionConfigRequest {
