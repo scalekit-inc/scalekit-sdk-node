@@ -11,6 +11,8 @@ import OrganizationClient from './organization';
 import PasswordlessClient from './passwordless';
 import UserClient from './user';
 import SessionClient from './session';
+import RoleClient from './role';
+import PermissionClient from './permission';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse ,TokenValidationOptions } from './types/scalekit';
 import { WebhookVerificationError, ScalekitValidateTokenFailureException } from './errors/base-exception';
@@ -39,6 +41,8 @@ export default class ScalekitClient {
   readonly passwordless: PasswordlessClient;
   readonly user: UserClient;
   readonly session: SessionClient;
+  readonly role: RoleClient;
+  readonly permission: PermissionClient;
   constructor(
     envUrl: string,
     clientId: string,
@@ -77,11 +81,19 @@ export default class ScalekitClient {
       this.grpcConnect,
       this.coreClient
     );
-      this.session = new SessionClient(
+    this.session = new SessionClient(
       this.grpcConnect,
       this.coreClient
     );
-}
+    this.role = new RoleClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.permission = new PermissionClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+  }
 
   /**
    * Returns the authorization url to initiate the authentication request.

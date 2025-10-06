@@ -1,6 +1,8 @@
 import { CreateUserRequest, UpdateUserRequest } from '../../src/types/user';
 import { TemplateType } from '../../src/pkg/grpc/scalekit/v1/auth/passwordless_pb';
 import { DomainType } from '../../src/pkg/grpc/scalekit/v1/domains/domains_pb';
+import { CreateRole, UpdateRole, CreateOrganizationRole } from '../../src/pkg/grpc/scalekit/v1/roles/roles_pb';
+import { CreatePermission } from '../../src/pkg/grpc/scalekit/v1/roles/roles_pb';
 
 /**
  * Test data generation utilities to reduce redundancy across test files
@@ -11,7 +13,10 @@ export class TestDataGenerator {
    * Generate a unique timestamp-based identifier
    */
   static generateUniqueId(): string {
-    return Date.now().toString();
+    // Alphanumeric only (no hyphens), to satisfy backend regex constraints
+    const ts = Date.now().toString(36);
+    const rnd = Math.random().toString(36).substr(2, 9);
+    return `${ts}${rnd}`;
   }
 
   /**
@@ -188,6 +193,62 @@ export class TestDataGenerator {
     const uniqueId = this.generateUniqueId();
     return `${prefix}-${uniqueId}.com`;
   }
+
+  /**
+   * Generate test role data
+   */
+  static generateRoleData(overrides: Partial<CreateRole> = {}): CreateRole {
+    const uniqueId = this.generateUniqueId();
+    
+    return new CreateRole({
+      name: `test_role_${uniqueId}`,
+      displayName: `Test Role ${uniqueId}`,
+      description: `Test role description ${uniqueId}`,
+      permissions: [], // Initialize empty permissions array
+      ...overrides
+    });
+  }
+
+  /**
+   * Generate test role update data
+   */
+  static generateRoleUpdateData(overrides: Partial<UpdateRole> = {}): UpdateRole {
+    const uniqueId = this.generateUniqueId();
+    
+    return new UpdateRole({
+      displayName: `Updated Role ${uniqueId}`,
+      description: `Updated role description ${uniqueId}`,
+      ...overrides
+    });
+  }
+
+  /**
+   * Generate test organization role data
+   */
+  static generateOrganizationRoleData(overrides: Partial<CreateOrganizationRole> = {}): CreateOrganizationRole {
+    const uniqueId = this.generateUniqueId();
+    
+    return new CreateOrganizationRole({
+      name: `test_org_role_${uniqueId}`,
+      displayName: `Test Organization Role ${uniqueId}`,
+      description: `Test organization role description ${uniqueId}`,
+      permissions: [], // Initialize empty permissions array
+      ...overrides
+    });
+  }
+
+  /**
+   * Generate test permission data
+   */
+  static generatePermissionData(overrides: Partial<CreatePermission> = {}): CreatePermission {
+    const uniqueId = this.generateUniqueId();
+    
+    return new CreatePermission({
+      name: `test_permission_${uniqueId}`,
+      description: `Test permission description ${uniqueId}`,
+      ...overrides
+    });
+  }
 }
 
 /**
@@ -308,6 +369,112 @@ export class TestDomainManager {
         // await client.domain.deleteDomain(testOrg, domainId);
       } catch (error) {
         // Domain may already be deleted or deletion not supported
+      }
+    }
+  }
+}
+
+/**
+ * Test role management utilities
+ */
+export class TestRoleManager {
+  /**
+   * Create a test role and return role data
+   */
+  static async createTestRole(client: any, overrides: Partial<CreateRole> = {}) {
+    const roleData = TestDataGenerator.generateRoleData(overrides);
+    const response = await client.role.createRole(roleData);
+    const createdRoleName = response.role?.name;
+    
+    if (!createdRoleName) {
+      throw new Error('Failed to create test role');
+    }
+    
+    return {
+      roleName: createdRoleName,
+      roleData,
+      response
+    };
+  }
+
+  /**
+   * Clean up a test role
+   */
+  static async cleanupTestRole(client: any, roleName: string): Promise<void> {
+    if (roleName) {
+      try {
+        await client.role.deleteRole(roleName);
+      } catch (error) {
+        // Role may already be deleted
+      }
+    }
+  }
+
+  /**
+   * Create a test organization role and return role data
+   */
+  static async createTestOrganizationRole(client: any, testOrg: string, overrides: Partial<CreateOrganizationRole> = {}) {
+    const roleData = TestDataGenerator.generateOrganizationRoleData(overrides);
+    const response = await client.role.createOrganizationRole(testOrg, roleData);
+    const createdRoleName = response.role?.name;
+    
+    if (!createdRoleName) {
+      throw new Error('Failed to create test organization role');
+    }
+    
+    return {
+      roleName: createdRoleName,
+      roleData,
+      response
+    };
+  }
+
+  /**
+   * Clean up a test organization role
+   */
+  static async cleanupTestOrganizationRole(client: any, testOrg: string, roleName: string): Promise<void> {
+    if (roleName) {
+      try {
+        await client.role.deleteOrganizationRole(testOrg, roleName);
+      } catch (error) {
+        // Role may already be deleted
+      }
+    }
+  }
+}
+
+/**
+ * Test permission management utilities
+ */
+export class TestPermissionManager {
+  /**
+   * Create a test permission and return permission data
+   */
+  static async createTestPermission(client: any, overrides: Partial<CreatePermission> = {}) {
+    const permissionData = TestDataGenerator.generatePermissionData(overrides);
+    const response = await client.permission.createPermission(permissionData);
+    const createdPermissionName = response.permission?.name;
+    
+    if (!createdPermissionName) {
+      throw new Error('Failed to create test permission');
+    }
+    
+    return {
+      permissionName: createdPermissionName,
+      permissionData,
+      response
+    };
+  }
+
+  /**
+   * Clean up a test permission
+   */
+  static async cleanupTestPermission(client: any, permissionName: string): Promise<void> {
+    if (permissionName) {
+      try {
+        await client.permission.deletePermission(permissionName);
+      } catch (error) {
+        // Permission may already be deleted
       }
     }
   }
