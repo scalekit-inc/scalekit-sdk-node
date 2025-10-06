@@ -455,10 +455,6 @@ export declare class Domain extends Message<Domain> {
      */
     organizationId: string;
     /**
-     * @generated from field: string connection_id = 5;
-     */
-    connectionId: string;
-    /**
      * @generated from field: string txt_record_key = 6;
      */
     txtRecordKey: string;
@@ -478,10 +474,6 @@ export declare class Domain extends Message<Domain> {
      * @generated from field: google.protobuf.Timestamp update_time = 10;
      */
     updateTime?: Timestamp;
-    /**
-     * @generated from field: optional string created_by = 11;
-     */
-    createdBy?: string;
     /**
      * @generated from field: scalekit.v1.domains.DomainType domain_type = 12;
      */
