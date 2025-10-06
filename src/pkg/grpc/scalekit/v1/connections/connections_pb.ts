@@ -2212,6 +2212,11 @@ export class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
    */
   accessType?: string;
 
+  /**
+   * @generated from field: google.protobuf.StringValue custom_scope_name = 17;
+   */
+  customScopeName?: string;
+
   constructor(data?: PartialMessage<OAuthConnectionConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2231,6 +2236,7 @@ export class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
     { no: 14, name: "prompt", kind: "message", T: StringValue },
     { no: 15, name: "use_platform_creds", kind: "message", T: BoolValue },
     { no: 16, name: "access_type", kind: "message", T: StringValue },
+    { no: 17, name: "custom_scope_name", kind: "message", T: StringValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OAuthConnectionConfig {

@@ -26,9 +26,9 @@ export class ListAuthLogRequest extends Message<ListAuthLogRequest> {
   email = "";
 
   /**
-   * @generated from field: string status = 4;
+   * @generated from field: repeated string status = 4;
    */
-  status = "";
+  status: string[] = [];
 
   /**
    * @generated from field: google.protobuf.Timestamp start_time = 5;
@@ -51,7 +51,7 @@ export class ListAuthLogRequest extends Message<ListAuthLogRequest> {
     { no: 1, name: "page_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */ },
     { no: 2, name: "page_token", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "email", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 5, name: "start_time", kind: "message", T: Timestamp },
     { no: 6, name: "end_time", kind: "message", T: Timestamp },
   ]);

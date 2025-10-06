@@ -113,9 +113,9 @@ export class OrganizationMembership extends Message<OrganizationMembership> {
   displayName?: string;
 
   /**
-   * @generated from field: optional string invited_by = 10;
+   * @generated from field: optional string inviter_email = 10;
    */
-  invitedBy?: string;
+  inviterEmail?: string;
 
   /**
    * @generated from field: optional google.protobuf.Timestamp created_at = 11;
@@ -147,7 +147,7 @@ export class OrganizationMembership extends Message<OrganizationMembership> {
     { no: 5, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 7, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
     { no: 9, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 10, name: "invited_by", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 10, name: "inviter_email", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 11, name: "created_at", kind: "message", T: Timestamp, opt: true },
     { no: 12, name: "accepted_at", kind: "message", T: Timestamp, opt: true },
     { no: 13, name: "expires_at", kind: "message", T: Timestamp, opt: true },
