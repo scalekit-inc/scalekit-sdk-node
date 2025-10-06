@@ -10,6 +10,7 @@ import DomainClient from './domain';
 import OrganizationClient from './organization';
 import PasswordlessClient from './passwordless';
 import UserClient from './user';
+import SessionClient from './session';
 import RoleClient from './role';
 import PermissionClient from './permission';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
@@ -39,6 +40,7 @@ export default class ScalekitClient {
   readonly directory: DirectoryClient;
   readonly passwordless: PasswordlessClient;
   readonly user: UserClient;
+  readonly session: SessionClient;
   readonly role: RoleClient;
   readonly permission: PermissionClient;
   constructor(
@@ -76,6 +78,10 @@ export default class ScalekitClient {
       this.coreClient
     );
     this.user = new UserClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.session = new SessionClient(
       this.grpcConnect,
       this.coreClient
     );

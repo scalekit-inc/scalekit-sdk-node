@@ -15,4 +15,6 @@ types:
     - scalekit.v1.directories
     - scalekit.v1.users
     - scalekit.v1.auth.passwordless
+    - scalekit.v1.auditlogs
+    - scalekit.v1.sessions
     - scalekit.v1.roles
