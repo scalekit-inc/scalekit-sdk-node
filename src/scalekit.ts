@@ -257,7 +257,7 @@ export default class ScalekitClient {
     const webhookTimestamp = headers['webhook-timestamp'];
     const webhookSignature = headers['webhook-signature'];
     
-    return this.verifyPayload(secret, webhookId, webhookTimestamp, webhookSignature, payload);
+    return this.verifyPayloadSignature(secret, webhookId, webhookTimestamp, webhookSignature, payload);
   }
 
   /**
@@ -273,19 +273,20 @@ export default class ScalekitClient {
     const interceptorTimestamp = headers['interceptor-timestamp'];
     const interceptorSignature = headers['interceptor-signature'];
     
-    return this.verifyPayload(secret, interceptorId, interceptorTimestamp, interceptorSignature, payload);
+    return this.verifyPayloadSignature(secret, interceptorId, interceptorTimestamp, interceptorSignature, payload);
   }
 
   /**
+   * Common payload signature verification logic
    * 
    * @param {string} secret The secret
    * @param {string} id The webhook/interceptor id
    * @param {string} timestamp The timestamp
    * @param {string} signature The signature
    * @param {string} payload The payload
-   * @return {boolean} Returns true if the payload is valid.
+   * @return {boolean} Returns true if the payload signature is valid.
    */
-  private verifyPayload(secret: string, id: string, timestamp: string, signature: string, payload: string): boolean {
+  private verifyPayloadSignature(secret: string, id: string, timestamp: string, signature: string, payload: string): boolean {
     if (!id || !timestamp || !signature) {
       throw new WebhookVerificationError("Missing required headers");
     }
