@@ -257,7 +257,37 @@ export default class ScalekitClient {
     const webhookTimestamp = headers['webhook-timestamp'];
     const webhookSignature = headers['webhook-signature'];
     
-    if (!webhookId || !webhookTimestamp || !webhookSignature) {
+    return this.verifyPayloadSignature(secret, webhookId, webhookTimestamp, webhookSignature, payload);
+  }
+
+  /**
+   * Verify interceptor payload
+   * 
+   * @param {string} secret The secret
+   * @param {Record<string, string>} headers The headers
+   * @param {string} payload The payload
+   * @return {boolean} Returns true if the payload is valid.
+   */
+  verifyInterceptorPayload(secret: string, headers: Record<string, string>, payload: string): boolean {
+    const interceptorId = headers['interceptor-id'];
+    const interceptorTimestamp = headers['interceptor-timestamp'];
+    const interceptorSignature = headers['interceptor-signature'];
+    
+    return this.verifyPayloadSignature(secret, interceptorId, interceptorTimestamp, interceptorSignature, payload);
+  }
+
+  /**
+   * Common payload signature verification logic
+   * 
+   * @param {string} secret The secret
+   * @param {string} id The webhook/interceptor id
+   * @param {string} timestamp The timestamp
+   * @param {string} signature The signature
+   * @param {string} payload The payload
+   * @return {boolean} Returns true if the payload signature is valid.
+   */
+  private verifyPayloadSignature(secret: string, id: string, timestamp: string, signature: string, payload: string): boolean {
+    if (!id || !timestamp || !signature) {
       throw new WebhookVerificationError("Missing required headers");
     }
     
@@ -267,18 +297,18 @@ export default class ScalekitClient {
     }
     
     try {
-      const timestamp = this.verifyTimestamp(webhookTimestamp);
-      const data = `${webhookId}.${Math.floor(timestamp.getTime() / 1000)}.${payload}`;
+      const timestampDate = this.verifyTimestamp(timestamp);
+      const data = `${id}.${Math.floor(timestampDate.getTime() / 1000)}.${payload}`;
       const secretBytes = Buffer.from(secretParts[1], 'base64');
       const computedSignature = this.computeSignature(secretBytes, data);
-      const receivedSignatures = webhookSignature.split(" ");
+      const receivedSignatures = signature.split(" ");
       
       for (const versionedSignature of receivedSignatures) {
-        const [version, signature] = versionedSignature.split(",");
+        const [version, receivedSignature] = versionedSignature.split(",");
         if (version !== WEBHOOK_SIGNATURE_VERSION) {
           continue;
         }
-        if (crypto.timingSafeEqual(Buffer.from(signature, 'base64'), Buffer.from(computedSignature, 'base64'))) {
+        if (crypto.timingSafeEqual(Buffer.from(receivedSignature, 'base64'), Buffer.from(computedSignature, 'base64'))) {
           return true;
         }
       }
