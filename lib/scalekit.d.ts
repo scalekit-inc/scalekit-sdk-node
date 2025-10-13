@@ -107,6 +107,26 @@ export default class ScalekitClient {
      */
     verifyWebhookPayload(secret: string, headers: Record<string, string>, payload: string): boolean;
     /**
+     * Verify interceptor payload
+     *
+     * @param {string} secret The secret
+     * @param {Record<string, string>} headers The headers
+     * @param {string} payload The payload
+     * @return {boolean} Returns true if the payload is valid.
+     */
+    verifyInterceptorPayload(secret: string, headers: Record<string, string>, payload: string): boolean;
+    /**
+     * Common payload signature verification logic
+     *
+     * @param {string} secret The secret
+     * @param {string} id The webhook/interceptor id
+     * @param {string} timestamp The timestamp
+     * @param {string} signature The signature
+     * @param {string} payload The payload
+     * @return {boolean} Returns true if the payload signature is valid.
+     */
+    private verifyPayloadSignature;
+    /**
      * Validates a token and returns its payload if valid.
      * Supports issuer, audience, and scope validation.
      *
