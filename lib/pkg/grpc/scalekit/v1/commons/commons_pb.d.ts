@@ -138,13 +138,13 @@ export declare class UserProfile extends Message<UserProfile> {
      */
     id: string;
     /**
-     * @generated from field: string first_name = 2;
+     * @generated from field: string given_name = 2;
      */
-    firstName: string;
+    givenName: string;
     /**
-     * @generated from field: string last_name = 3;
+     * @generated from field: string family_name = 3;
      */
-    lastName: string;
+    familyName: string;
     /**
      * @generated from field: string name = 4;
      */
@@ -173,6 +173,36 @@ export declare class UserProfile extends Message<UserProfile> {
     customAttributes: {
         [key: string]: string;
     };
+    /**
+     * @generated from field: string first_name = 21 [deprecated = true];
+     * @deprecated
+     */
+    firstName: string;
+    /**
+     * @generated from field: string last_name = 22 [deprecated = true];
+     * @deprecated
+     */
+    lastName: string;
+    /**
+     * @generated from field: string preferred_username = 12;
+     */
+    preferredUsername: string;
+    /**
+     * @generated from field: bool phone_number_verified = 13;
+     */
+    phoneNumberVerified: boolean;
+    /**
+     * @generated from field: string picture = 14;
+     */
+    picture: string;
+    /**
+     * @generated from field: repeated string groups = 15;
+     */
+    groups: string[];
+    /**
+     * @generated from field: string gender = 16;
+     */
+    gender: string;
     constructor(data?: PartialMessage<UserProfile>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.commons.UserProfile";

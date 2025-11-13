@@ -229,14 +229,14 @@ export class UserProfile extends Message<UserProfile> {
   id = "";
 
   /**
-   * @generated from field: string first_name = 2;
+   * @generated from field: string given_name = 2;
    */
-  firstName = "";
+  givenName = "";
 
   /**
-   * @generated from field: string last_name = 3;
+   * @generated from field: string family_name = 3;
    */
-  lastName = "";
+  familyName = "";
 
   /**
    * @generated from field: string name = 4;
@@ -268,6 +268,43 @@ export class UserProfile extends Message<UserProfile> {
    */
   customAttributes: { [key: string]: string } = {};
 
+  /**
+   * @generated from field: string first_name = 21 [deprecated = true];
+   * @deprecated
+   */
+  firstName = "";
+
+  /**
+   * @generated from field: string last_name = 22 [deprecated = true];
+   * @deprecated
+   */
+  lastName = "";
+
+  /**
+   * @generated from field: string preferred_username = 12;
+   */
+  preferredUsername = "";
+
+  /**
+   * @generated from field: bool phone_number_verified = 13;
+   */
+  phoneNumberVerified = false;
+
+  /**
+   * @generated from field: string picture = 14;
+   */
+  picture = "";
+
+  /**
+   * @generated from field: repeated string groups = 15;
+   */
+  groups: string[] = [];
+
+  /**
+   * @generated from field: string gender = 16;
+   */
+  gender = "";
+
   constructor(data?: PartialMessage<UserProfile>) {
     super();
     proto3.util.initPartial(data, this);
@@ -277,14 +314,21 @@ export class UserProfile extends Message<UserProfile> {
   static readonly typeName = "scalekit.v1.commons.UserProfile";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "first_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "last_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "given_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "family_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "locale", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 6, name: "email_verified", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
     { no: 7, name: "phone_number", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
     { no: 9, name: "custom_attributes", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
+    { no: 21, name: "first_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 22, name: "last_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 12, name: "preferred_username", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 13, name: "phone_number_verified", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 14, name: "picture", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 15, name: "groups", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 16, name: "gender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserProfile {

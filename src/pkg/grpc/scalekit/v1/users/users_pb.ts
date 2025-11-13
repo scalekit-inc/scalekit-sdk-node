@@ -1303,14 +1303,14 @@ export class CreateUser extends Message<CreateUser> {
  */
 export class CreateUserProfile extends Message<CreateUserProfile> {
   /**
-   * @generated from field: string first_name = 2;
+   * @generated from field: string given_name = 2;
    */
-  firstName = "";
+  givenName = "";
 
   /**
-   * @generated from field: string last_name = 3;
+   * @generated from field: string family_name = 3;
    */
-  lastName = "";
+  familyName = "";
 
   /**
    * @generated from field: string name = 4;
@@ -1337,6 +1337,38 @@ export class CreateUserProfile extends Message<CreateUserProfile> {
    */
   customAttributes: { [key: string]: string } = {};
 
+  /**
+   * @generated from field: string preferred_username = 10;
+   */
+  preferredUsername = "";
+
+  /**
+   * @generated from field: optional string picture = 11;
+   */
+  picture?: string;
+
+  /**
+   * @generated from field: optional string gender = 12;
+   */
+  gender?: string;
+
+  /**
+   * @generated from field: repeated string groups = 13;
+   */
+  groups: string[] = [];
+
+  /**
+   * @generated from field: string first_name = 21 [deprecated = true];
+   * @deprecated
+   */
+  firstName = "";
+
+  /**
+   * @generated from field: string last_name = 22 [deprecated = true];
+   * @deprecated
+   */
+  lastName = "";
+
   constructor(data?: PartialMessage<CreateUserProfile>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1345,13 +1377,19 @@ export class CreateUserProfile extends Message<CreateUserProfile> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "scalekit.v1.users.CreateUserProfile";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 2, name: "first_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "last_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "given_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "family_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 5, name: "locale", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 7, name: "phone_number", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 8, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
     { no: 9, name: "custom_attributes", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
+    { no: 10, name: "preferred_username", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 11, name: "picture", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 12, name: "gender", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 13, name: "groups", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 21, name: "first_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 22, name: "last_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateUserProfile {
@@ -1376,14 +1414,14 @@ export class CreateUserProfile extends Message<CreateUserProfile> {
  */
 export class UpdateUserProfile extends Message<UpdateUserProfile> {
   /**
-   * @generated from field: optional string first_name = 2;
+   * @generated from field: optional string given_name = 2;
    */
-  firstName?: string;
+  givenName?: string;
 
   /**
-   * @generated from field: optional string last_name = 3;
+   * @generated from field: optional string family_name = 3;
    */
-  lastName?: string;
+  familyName?: string;
 
   /**
    * @generated from field: optional string name = 4;
@@ -1410,6 +1448,38 @@ export class UpdateUserProfile extends Message<UpdateUserProfile> {
    */
   customAttributes: { [key: string]: string } = {};
 
+  /**
+   * @generated from field: optional string first_name = 21 [deprecated = true];
+   * @deprecated
+   */
+  firstName?: string;
+
+  /**
+   * @generated from field: optional string last_name = 22 [deprecated = true];
+   * @deprecated
+   */
+  lastName?: string;
+
+  /**
+   * @generated from field: optional string preferred_username = 10;
+   */
+  preferredUsername?: string;
+
+  /**
+   * @generated from field: optional string picture = 11;
+   */
+  picture?: string;
+
+  /**
+   * @generated from field: optional string gender = 12;
+   */
+  gender?: string;
+
+  /**
+   * @generated from field: repeated string groups = 13;
+   */
+  groups: string[] = [];
+
   constructor(data?: PartialMessage<UpdateUserProfile>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1418,13 +1488,19 @@ export class UpdateUserProfile extends Message<UpdateUserProfile> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "scalekit.v1.users.UpdateUserProfile";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 2, name: "first_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
-    { no: 3, name: "last_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 2, name: "given_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 3, name: "family_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 4, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 5, name: "locale", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 7, name: "phone_number", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 8, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
     { no: 9, name: "custom_attributes", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
+    { no: 21, name: "first_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 22, name: "last_name", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 10, name: "preferred_username", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 11, name: "picture", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 12, name: "gender", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 13, name: "groups", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateUserProfile {
@@ -1920,17 +1996,12 @@ export class Permission extends Message<Permission> {
   name = "";
 
   /**
-   * @generated from field: string display_name = 3;
-   */
-  displayName = "";
-
-  /**
-   * @generated from field: string description = 4;
+   * @generated from field: string description = 3;
    */
   description = "";
 
   /**
-   * @generated from field: repeated string tags = 5;
+   * @generated from field: repeated string tags = 4;
    */
   tags: string[] = [];
 
@@ -1944,9 +2015,8 @@ export class Permission extends Message<Permission> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 3, name: "display_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 4, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 5, name: "tags", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 3, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 4, name: "tags", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Permission {

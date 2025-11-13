@@ -1,5 +1,5 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, Struct, Timestamp } from "@bufbuild/protobuf";
+import { Duration, Message, proto3, Struct, Timestamp } from "@bufbuild/protobuf";
 import { Domain } from "../domains/domains_pb.js";
 /**
  * @generated from enum scalekit.v1.connections.CodeChallengeType
@@ -231,7 +231,11 @@ export declare enum ConnectionType {
     /**
      * @generated from enum value: API_KEY = 8;
      */
-    API_KEY = 8
+    API_KEY = 8,
+    /**
+     * @generated from enum value: WEBAUTHN = 9;
+     */
+    WEBAUTHN = 9
 }
 /**
  * @generated from enum scalekit.v1.connections.ConnectionStatus
@@ -326,6 +330,61 @@ export declare enum ConnectionProvider {
      * @generated from enum value: ADFS = 16;
      */
     ADFS = 16
+}
+/**
+ * @generated from message scalekit.v1.connections.UpdateConnectionUserManagementSettingsRequest
+ */
+export declare class UpdateConnectionUserManagementSettingsRequest extends Message<UpdateConnectionUserManagementSettingsRequest> {
+    /**
+     * @generated from field: string connection_id = 1;
+     */
+    connectionId: string;
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionUserManagementSettings settings = 2;
+     */
+    settings?: ConnectionUserManagementSettings;
+    constructor(data?: PartialMessage<UpdateConnectionUserManagementSettingsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.UpdateConnectionUserManagementSettingsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnectionUserManagementSettingsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsRequest;
+    static equals(a: UpdateConnectionUserManagementSettingsRequest | PlainMessage<UpdateConnectionUserManagementSettingsRequest> | undefined, b: UpdateConnectionUserManagementSettingsRequest | PlainMessage<UpdateConnectionUserManagementSettingsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.ConnectionUserManagementSettings
+ */
+export declare class ConnectionUserManagementSettings extends Message<ConnectionUserManagementSettings> {
+    /**
+     * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 1;
+     */
+    syncUserProfileOnSignin?: boolean;
+    constructor(data?: PartialMessage<ConnectionUserManagementSettings>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.ConnectionUserManagementSettings";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConnectionUserManagementSettings;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ConnectionUserManagementSettings;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ConnectionUserManagementSettings;
+    static equals(a: ConnectionUserManagementSettings | PlainMessage<ConnectionUserManagementSettings> | undefined, b: ConnectionUserManagementSettings | PlainMessage<ConnectionUserManagementSettings> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.UpdateConnectionUserManagementSettingsResponse
+ */
+export declare class UpdateConnectionUserManagementSettingsResponse extends Message<UpdateConnectionUserManagementSettingsResponse> {
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionUserManagementSettings settings = 1;
+     */
+    settings?: ConnectionUserManagementSettings;
+    constructor(data?: PartialMessage<UpdateConnectionUserManagementSettingsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.UpdateConnectionUserManagementSettingsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnectionUserManagementSettingsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsResponse;
+    static equals(a: UpdateConnectionUserManagementSettingsResponse | PlainMessage<UpdateConnectionUserManagementSettingsResponse> | undefined, b: UpdateConnectionUserManagementSettingsResponse | PlainMessage<UpdateConnectionUserManagementSettingsResponse> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.connections.AssignDomainsToConnectionRequest
@@ -587,6 +646,12 @@ export declare class Connection extends Message<Connection> {
         value: StaticAuthConfig;
         case: "staticConfig";
     } | {
+        /**
+         * @generated from field: scalekit.v1.connections.WebAuthConfiguration webauthn_config = 27;
+         */
+        value: WebAuthConfiguration;
+        case: "webauthnConfig";
+    } | {
         case: undefined;
         value?: undefined;
     };
@@ -602,6 +667,10 @@ export declare class Connection extends Message<Connection> {
      * @generated from field: repeated scalekit.v1.domains.Domain domains = 24;
      */
     domains: Domain[];
+    /**
+     * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 28;
+     */
+    syncUserProfileOnSignin?: boolean;
     constructor(data?: PartialMessage<Connection>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.Connection";
@@ -738,6 +807,12 @@ export declare class UpdateConnection extends Message<UpdateConnection> {
         value: StaticAuthConfig;
         case: "staticConfig";
     } | {
+        /**
+         * @generated from field: scalekit.v1.connections.WebAuthConfiguration webauthn_config = 24;
+         */
+        value: WebAuthConfiguration;
+        case: "webauthnConfig";
+    } | {
         case: undefined;
         value?: undefined;
     };
@@ -749,6 +824,10 @@ export declare class UpdateConnection extends Message<UpdateConnection> {
      * @generated from field: string provider_key = 21;
      */
     providerKey: string;
+    /**
+     * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 25;
+     */
+    syncUserProfileOnSignin?: boolean;
     constructor(data?: PartialMessage<UpdateConnection>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.UpdateConnection";
@@ -1341,6 +1420,202 @@ export declare class StaticAuthConfig extends Message<StaticAuthConfig> {
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StaticAuthConfig;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StaticAuthConfig;
     static equals(a: StaticAuthConfig | PlainMessage<StaticAuthConfig> | undefined, b: StaticAuthConfig | PlainMessage<StaticAuthConfig> | undefined): boolean;
+}
+/**
+ * WebAuthConfiguration defines WebAuthn (passkeys) configuration limited to RP and Attestation
+ *
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration
+ */
+export declare class WebAuthConfiguration extends Message<WebAuthConfiguration> {
+    /**
+     * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Rp rp = 1;
+     */
+    rp?: WebAuthConfiguration_Rp;
+    /**
+     * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Attestation attestation = 2;
+     */
+    attestation?: WebAuthConfiguration_Attestation;
+    /**
+     * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Authenticators authenticators = 3;
+     */
+    authenticators?: WebAuthConfiguration_Authenticators;
+    /**
+     * @generated from field: scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection authenticator_selection = 4;
+     */
+    authenticatorSelection?: WebAuthConfiguration_AuthenticatorSelection;
+    /**
+     * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Timeout timeout = 5;
+     */
+    timeout?: WebAuthConfiguration_Timeout;
+    /**
+     * @generated from field: bool enable_auto_registration = 6;
+     */
+    enableAutoRegistration: boolean;
+    /**
+     * @generated from field: bool show_passkey_button = 7;
+     */
+    showPasskeyButton: boolean;
+    /**
+     * @generated from field: bool enable_conditional_login = 8;
+     */
+    enableConditionalLogin: boolean;
+    constructor(data?: PartialMessage<WebAuthConfiguration>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration;
+    static equals(a: WebAuthConfiguration | PlainMessage<WebAuthConfiguration> | undefined, b: WebAuthConfiguration | PlainMessage<WebAuthConfiguration> | undefined): boolean;
+}
+/**
+ * Rp contains relying party identifiers and origins
+ *
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration.Rp
+ */
+export declare class WebAuthConfiguration_Rp extends Message<WebAuthConfiguration_Rp> {
+    /**
+     * Relying party IDs (derived from environment domain and verified custom domain)
+     * At least one required; must be hostnames without scheme or path
+     *
+     * @generated from field: repeated string ids = 1;
+     */
+    ids: string[];
+    /**
+     * Allowed origins corresponding to the RP IDs (https://<domain>)
+     * At least one required; must be HTTPS origins
+     *
+     * @generated from field: repeated string origins = 2;
+     */
+    origins: string[];
+    constructor(data?: PartialMessage<WebAuthConfiguration_Rp>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Rp";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Rp;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Rp;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Rp;
+    static equals(a: WebAuthConfiguration_Rp | PlainMessage<WebAuthConfiguration_Rp> | undefined, b: WebAuthConfiguration_Rp | PlainMessage<WebAuthConfiguration_Rp> | undefined): boolean;
+}
+/**
+ * Attestation preferences for registration
+ *
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration.Attestation
+ */
+export declare class WebAuthConfiguration_Attestation extends Message<WebAuthConfiguration_Attestation> {
+    /**
+     * Conveyance preference
+     *
+     * @generated from field: google.protobuf.StringValue conveyance_preference = 1;
+     */
+    conveyancePreference?: string;
+    /**
+     * Enterprise-approved IDs (optional allowlist when enterprise attestation is used)
+     *
+     * @generated from field: repeated string enterprise_approved_ids = 2;
+     */
+    enterpriseApprovedIds: string[];
+    constructor(data?: PartialMessage<WebAuthConfiguration_Attestation>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Attestation";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Attestation;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Attestation;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Attestation;
+    static equals(a: WebAuthConfiguration_Attestation | PlainMessage<WebAuthConfiguration_Attestation> | undefined, b: WebAuthConfiguration_Attestation | PlainMessage<WebAuthConfiguration_Attestation> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration.Authenticators
+ */
+export declare class WebAuthConfiguration_Authenticators extends Message<WebAuthConfiguration_Authenticators> {
+    /**
+     * @generated from field: google.protobuf.BoolValue validate_entry = 1;
+     */
+    validateEntry?: boolean;
+    /**
+     * @generated from field: google.protobuf.BoolValue validate_entry_permit_zero_aaguid = 2;
+     */
+    validateEntryPermitZeroAaguid?: boolean;
+    /**
+     * @generated from field: google.protobuf.BoolValue validate_anchors = 3;
+     */
+    validateAnchors?: boolean;
+    /**
+     * @generated from field: google.protobuf.BoolValue validate_status = 4;
+     */
+    validateStatus?: boolean;
+    /**
+     * @generated from field: google.protobuf.BoolValue validate_attestation_type = 5;
+     */
+    validateAttestationType?: boolean;
+    /**
+     * @generated from field: repeated string desired_authenticator_status = 6;
+     */
+    desiredAuthenticatorStatus: string[];
+    /**
+     * @generated from field: repeated string undesired_authenticator_status = 7;
+     */
+    undesiredAuthenticatorStatus: string[];
+    constructor(data?: PartialMessage<WebAuthConfiguration_Authenticators>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Authenticators";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Authenticators;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Authenticators;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Authenticators;
+    static equals(a: WebAuthConfiguration_Authenticators | PlainMessage<WebAuthConfiguration_Authenticators> | undefined, b: WebAuthConfiguration_Authenticators | PlainMessage<WebAuthConfiguration_Authenticators> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection
+ */
+export declare class WebAuthConfiguration_AuthenticatorSelection extends Message<WebAuthConfiguration_AuthenticatorSelection> {
+    /**
+     * User verification requirement
+     *
+     * @generated from field: google.protobuf.StringValue user_verification = 1;
+     */
+    userVerification?: string;
+    /**
+     * @generated from field: google.protobuf.StringValue authenticator_attachment = 2;
+     */
+    authenticatorAttachment?: string;
+    constructor(data?: PartialMessage<WebAuthConfiguration_AuthenticatorSelection>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_AuthenticatorSelection;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_AuthenticatorSelection;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_AuthenticatorSelection;
+    static equals(a: WebAuthConfiguration_AuthenticatorSelection | PlainMessage<WebAuthConfiguration_AuthenticatorSelection> | undefined, b: WebAuthConfiguration_AuthenticatorSelection | PlainMessage<WebAuthConfiguration_AuthenticatorSelection> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration.Timeout
+ */
+export declare class WebAuthConfiguration_Timeout extends Message<WebAuthConfiguration_Timeout> {
+    /**
+     * @generated from field: google.protobuf.Duration registration = 1;
+     */
+    registration?: Duration;
+    /**
+     * @generated from field: google.protobuf.Duration registration_uvd = 2;
+     */
+    registrationUvd?: Duration;
+    /**
+     * @generated from field: google.protobuf.Duration login = 3;
+     */
+    login?: Duration;
+    /**
+     * @generated from field: google.protobuf.Duration login_uvd = 4;
+     */
+    loginUvd?: Duration;
+    constructor(data?: PartialMessage<WebAuthConfiguration_Timeout>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Timeout";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Timeout;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Timeout;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Timeout;
+    static equals(a: WebAuthConfiguration_Timeout | PlainMessage<WebAuthConfiguration_Timeout> | undefined, b: WebAuthConfiguration_Timeout | PlainMessage<WebAuthConfiguration_Timeout> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.connections.SAMLConnectionConfigRequest

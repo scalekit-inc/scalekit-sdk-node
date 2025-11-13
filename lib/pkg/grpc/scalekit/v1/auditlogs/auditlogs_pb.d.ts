@@ -28,6 +28,10 @@ export declare class ListAuthLogRequest extends Message<ListAuthLogRequest> {
      * @generated from field: google.protobuf.Timestamp end_time = 6;
      */
     endTime?: Timestamp;
+    /**
+     * @generated from field: string resource_id = 7;
+     */
+    resourceId: string;
     constructor(data?: PartialMessage<ListAuthLogRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.auditlogs.ListAuthLogRequest";
@@ -114,6 +118,18 @@ export declare class AuthLogRequest extends Message<AuthLogRequest> {
      * @generated from field: string workflow = 11;
      */
     workflow: string;
+    /**
+     * @generated from field: string resource_id = 12;
+     */
+    resourceId: string;
+    /**
+     * @generated from field: string resource_name = 13;
+     */
+    resourceName: string;
+    /**
+     * @generated from field: string resource_type = 14;
+     */
+    resourceType: string;
     constructor(data?: PartialMessage<AuthLogRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.auditlogs.AuthLogRequest";

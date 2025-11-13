@@ -416,84 +416,14 @@ export class SessionDetails extends Message<SessionDetails> {
   status = "";
 
   /**
-   * @generated from field: string initial_user_agent = 12;
+   * @generated from field: scalekit.v1.sessions.DeviceDetails device = 12;
    */
-  initialUserAgent = "";
+  device?: DeviceDetails;
 
   /**
-   * @generated from field: string initial_os = 13;
+   * @generated from field: google.protobuf.Timestamp last_active_at = 13;
    */
-  initialOs = "";
-
-  /**
-   * @generated from field: string initial_os_version = 14;
-   */
-  initialOsVersion = "";
-
-  /**
-   * @generated from field: string initial_browser = 15;
-   */
-  initialBrowser = "";
-
-  /**
-   * @generated from field: string initial_browser_version = 16;
-   */
-  initialBrowserVersion = "";
-
-  /**
-   * @generated from field: string initial_device_type = 17;
-   */
-  initialDeviceType = "";
-
-  /**
-   * @generated from field: string initial_ip = 19;
-   */
-  initialIp = "";
-
-  /**
-   * @generated from field: scalekit.v1.sessions.Location initial_location = 20;
-   */
-  initialLocation?: Location;
-
-  /**
-   * @generated from field: string latest_user_agent = 21;
-   */
-  latestUserAgent = "";
-
-  /**
-   * @generated from field: string latest_os = 22;
-   */
-  latestOs = "";
-
-  /**
-   * @generated from field: string latest_os_version = 23;
-   */
-  latestOsVersion = "";
-
-  /**
-   * @generated from field: string latest_browser = 24;
-   */
-  latestBrowser = "";
-
-  /**
-   * @generated from field: string latest_browser_version = 25;
-   */
-  latestBrowserVersion = "";
-
-  /**
-   * @generated from field: string latest_device_type = 26;
-   */
-  latestDeviceType = "";
-
-  /**
-   * @generated from field: string latest_ip = 28;
-   */
-  latestIp = "";
-
-  /**
-   * @generated from field: scalekit.v1.sessions.Location latest_location = 29;
-   */
-  latestLocation?: Location;
+  lastActiveAt?: Timestamp;
 
   constructor(data?: PartialMessage<SessionDetails>) {
     super();
@@ -514,22 +444,8 @@ export class SessionDetails extends Message<SessionDetails> {
     { no: 9, name: "expired_at", kind: "message", T: Timestamp },
     { no: 10, name: "logout_at", kind: "message", T: Timestamp },
     { no: 11, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 12, name: "initial_user_agent", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 13, name: "initial_os", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 14, name: "initial_os_version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 15, name: "initial_browser", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 16, name: "initial_browser_version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 17, name: "initial_device_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 19, name: "initial_ip", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 20, name: "initial_location", kind: "message", T: Location },
-    { no: 21, name: "latest_user_agent", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 22, name: "latest_os", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 23, name: "latest_os_version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 24, name: "latest_browser", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 25, name: "latest_browser_version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 26, name: "latest_device_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 28, name: "latest_ip", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 29, name: "latest_location", kind: "message", T: Location },
+    { no: 12, name: "device", kind: "message", T: DeviceDetails },
+    { no: 13, name: "last_active_at", kind: "message", T: Timestamp },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SessionDetails {
@@ -546,6 +462,85 @@ export class SessionDetails extends Message<SessionDetails> {
 
   static equals(a: SessionDetails | PlainMessage<SessionDetails> | undefined, b: SessionDetails | PlainMessage<SessionDetails> | undefined): boolean {
     return proto3.util.equals(SessionDetails, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.sessions.DeviceDetails
+ */
+export class DeviceDetails extends Message<DeviceDetails> {
+  /**
+   * @generated from field: string user_agent = 12;
+   */
+  userAgent = "";
+
+  /**
+   * @generated from field: string os = 13;
+   */
+  os = "";
+
+  /**
+   * @generated from field: string os_version = 14;
+   */
+  osVersion = "";
+
+  /**
+   * @generated from field: string browser = 15;
+   */
+  browser = "";
+
+  /**
+   * @generated from field: string browser_version = 16;
+   */
+  browserVersion = "";
+
+  /**
+   * @generated from field: string device_type = 17;
+   */
+  deviceType = "";
+
+  /**
+   * @generated from field: string ip = 19;
+   */
+  ip = "";
+
+  /**
+   * @generated from field: scalekit.v1.sessions.Location location = 20;
+   */
+  location?: Location;
+
+  constructor(data?: PartialMessage<DeviceDetails>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.sessions.DeviceDetails";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 12, name: "user_agent", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 13, name: "os", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 14, name: "os_version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 15, name: "browser", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 16, name: "browser_version", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 17, name: "device_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 19, name: "ip", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 20, name: "location", kind: "message", T: Location },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeviceDetails {
+    return new DeviceDetails().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeviceDetails {
+    return new DeviceDetails().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeviceDetails {
+    return new DeviceDetails().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: DeviceDetails | PlainMessage<DeviceDetails> | undefined, b: DeviceDetails | PlainMessage<DeviceDetails> | undefined): boolean {
+    return proto3.util.equals(DeviceDetails, a, b);
   }
 }
 
@@ -598,6 +593,11 @@ export class RevokedSessionDetails extends Message<RevokedSessionDetails> {
    */
   status = "";
 
+  /**
+   * @generated from field: google.protobuf.Timestamp last_active_at = 12;
+   */
+  lastActiveAt?: Timestamp;
+
   constructor(data?: PartialMessage<RevokedSessionDetails>) {
     super();
     proto3.util.initPartial(data, this);
@@ -615,6 +615,7 @@ export class RevokedSessionDetails extends Message<RevokedSessionDetails> {
     { no: 9, name: "expired_at", kind: "message", T: Timestamp },
     { no: 10, name: "logout_at", kind: "message", T: Timestamp },
     { no: 11, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 12, name: "last_active_at", kind: "message", T: Timestamp },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RevokedSessionDetails {
