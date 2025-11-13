@@ -221,69 +221,13 @@ export declare class SessionDetails extends Message<SessionDetails> {
      */
     status: string;
     /**
-     * @generated from field: string initial_user_agent = 12;
+     * @generated from field: scalekit.v1.sessions.DeviceDetails device = 12;
      */
-    initialUserAgent: string;
+    device?: DeviceDetails;
     /**
-     * @generated from field: string initial_os = 13;
+     * @generated from field: google.protobuf.Timestamp last_active_at = 13;
      */
-    initialOs: string;
-    /**
-     * @generated from field: string initial_os_version = 14;
-     */
-    initialOsVersion: string;
-    /**
-     * @generated from field: string initial_browser = 15;
-     */
-    initialBrowser: string;
-    /**
-     * @generated from field: string initial_browser_version = 16;
-     */
-    initialBrowserVersion: string;
-    /**
-     * @generated from field: string initial_device_type = 17;
-     */
-    initialDeviceType: string;
-    /**
-     * @generated from field: string initial_ip = 19;
-     */
-    initialIp: string;
-    /**
-     * @generated from field: scalekit.v1.sessions.Location initial_location = 20;
-     */
-    initialLocation?: Location;
-    /**
-     * @generated from field: string latest_user_agent = 21;
-     */
-    latestUserAgent: string;
-    /**
-     * @generated from field: string latest_os = 22;
-     */
-    latestOs: string;
-    /**
-     * @generated from field: string latest_os_version = 23;
-     */
-    latestOsVersion: string;
-    /**
-     * @generated from field: string latest_browser = 24;
-     */
-    latestBrowser: string;
-    /**
-     * @generated from field: string latest_browser_version = 25;
-     */
-    latestBrowserVersion: string;
-    /**
-     * @generated from field: string latest_device_type = 26;
-     */
-    latestDeviceType: string;
-    /**
-     * @generated from field: string latest_ip = 28;
-     */
-    latestIp: string;
-    /**
-     * @generated from field: scalekit.v1.sessions.Location latest_location = 29;
-     */
-    latestLocation?: Location;
+    lastActiveAt?: Timestamp;
     constructor(data?: PartialMessage<SessionDetails>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.sessions.SessionDetails";
@@ -292,6 +236,51 @@ export declare class SessionDetails extends Message<SessionDetails> {
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SessionDetails;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SessionDetails;
     static equals(a: SessionDetails | PlainMessage<SessionDetails> | undefined, b: SessionDetails | PlainMessage<SessionDetails> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.sessions.DeviceDetails
+ */
+export declare class DeviceDetails extends Message<DeviceDetails> {
+    /**
+     * @generated from field: string user_agent = 12;
+     */
+    userAgent: string;
+    /**
+     * @generated from field: string os = 13;
+     */
+    os: string;
+    /**
+     * @generated from field: string os_version = 14;
+     */
+    osVersion: string;
+    /**
+     * @generated from field: string browser = 15;
+     */
+    browser: string;
+    /**
+     * @generated from field: string browser_version = 16;
+     */
+    browserVersion: string;
+    /**
+     * @generated from field: string device_type = 17;
+     */
+    deviceType: string;
+    /**
+     * @generated from field: string ip = 19;
+     */
+    ip: string;
+    /**
+     * @generated from field: scalekit.v1.sessions.Location location = 20;
+     */
+    location?: Location;
+    constructor(data?: PartialMessage<DeviceDetails>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.sessions.DeviceDetails";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeviceDetails;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeviceDetails;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeviceDetails;
+    static equals(a: DeviceDetails | PlainMessage<DeviceDetails> | undefined, b: DeviceDetails | PlainMessage<DeviceDetails> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.sessions.RevokedSessionDetails
@@ -333,6 +322,10 @@ export declare class RevokedSessionDetails extends Message<RevokedSessionDetails
      * @generated from field: string status = 11;
      */
     status: string;
+    /**
+     * @generated from field: google.protobuf.Timestamp last_active_at = 12;
+     */
+    lastActiveAt?: Timestamp;
     constructor(data?: PartialMessage<RevokedSessionDetails>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.sessions.RevokedSessionDetails";

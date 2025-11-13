@@ -1,6 +1,7 @@
 import ConnectionClient from './connection';
 import DirectoryClient from './directory';
 import DomainClient from './domain';
+import AuthClient from './auth';
 import OrganizationClient from './organization';
 import PasswordlessClient from './passwordless';
 import UserClient from './user';
@@ -30,6 +31,7 @@ export default class ScalekitClient {
     readonly session: SessionClient;
     readonly role: RoleClient;
     readonly permission: PermissionClient;
+    readonly auth: AuthClient;
     constructor(envUrl: string, clientId: string, clientSecret: string);
     /**
      * Returns the authorization url to initiate the authentication request.

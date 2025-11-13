@@ -723,13 +723,13 @@ export declare class CreateUser extends Message<CreateUser> {
  */
 export declare class CreateUserProfile extends Message<CreateUserProfile> {
     /**
-     * @generated from field: string first_name = 2;
+     * @generated from field: string given_name = 2;
      */
-    firstName: string;
+    givenName: string;
     /**
-     * @generated from field: string last_name = 3;
+     * @generated from field: string family_name = 3;
      */
-    lastName: string;
+    familyName: string;
     /**
      * @generated from field: string name = 4;
      */
@@ -754,6 +754,32 @@ export declare class CreateUserProfile extends Message<CreateUserProfile> {
     customAttributes: {
         [key: string]: string;
     };
+    /**
+     * @generated from field: string preferred_username = 10;
+     */
+    preferredUsername: string;
+    /**
+     * @generated from field: optional string picture = 11;
+     */
+    picture?: string;
+    /**
+     * @generated from field: optional string gender = 12;
+     */
+    gender?: string;
+    /**
+     * @generated from field: repeated string groups = 13;
+     */
+    groups: string[];
+    /**
+     * @generated from field: string first_name = 21 [deprecated = true];
+     * @deprecated
+     */
+    firstName: string;
+    /**
+     * @generated from field: string last_name = 22 [deprecated = true];
+     * @deprecated
+     */
+    lastName: string;
     constructor(data?: PartialMessage<CreateUserProfile>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.users.CreateUserProfile";
@@ -768,13 +794,13 @@ export declare class CreateUserProfile extends Message<CreateUserProfile> {
  */
 export declare class UpdateUserProfile extends Message<UpdateUserProfile> {
     /**
-     * @generated from field: optional string first_name = 2;
+     * @generated from field: optional string given_name = 2;
      */
-    firstName?: string;
+    givenName?: string;
     /**
-     * @generated from field: optional string last_name = 3;
+     * @generated from field: optional string family_name = 3;
      */
-    lastName?: string;
+    familyName?: string;
     /**
      * @generated from field: optional string name = 4;
      */
@@ -799,6 +825,32 @@ export declare class UpdateUserProfile extends Message<UpdateUserProfile> {
     customAttributes: {
         [key: string]: string;
     };
+    /**
+     * @generated from field: optional string first_name = 21 [deprecated = true];
+     * @deprecated
+     */
+    firstName?: string;
+    /**
+     * @generated from field: optional string last_name = 22 [deprecated = true];
+     * @deprecated
+     */
+    lastName?: string;
+    /**
+     * @generated from field: optional string preferred_username = 10;
+     */
+    preferredUsername?: string;
+    /**
+     * @generated from field: optional string picture = 11;
+     */
+    picture?: string;
+    /**
+     * @generated from field: optional string gender = 12;
+     */
+    gender?: string;
+    /**
+     * @generated from field: repeated string groups = 13;
+     */
+    groups: string[];
     constructor(data?: PartialMessage<UpdateUserProfile>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.users.UpdateUserProfile";
@@ -1052,15 +1104,11 @@ export declare class Permission extends Message<Permission> {
      */
     name: string;
     /**
-     * @generated from field: string display_name = 3;
-     */
-    displayName: string;
-    /**
-     * @generated from field: string description = 4;
+     * @generated from field: string description = 3;
      */
     description: string;
     /**
-     * @generated from field: repeated string tags = 5;
+     * @generated from field: repeated string tags = 4;
      */
     tags: string[];
     constructor(data?: PartialMessage<Permission>);
