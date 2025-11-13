@@ -29,7 +29,7 @@ export default class AuthClient {
   async updateLoginUserDetails(
     connectionId: string,
     loginRequestId: string,
-    user?: UserInput
+    user: UserInput
   ): Promise<Empty> {
     if (!connectionId || typeof connectionId !== 'string') {
       throw new Error('connectionId must be a non-empty string');
@@ -39,15 +39,15 @@ export default class AuthClient {
       throw new Error('loginRequestId must be a non-empty string');
     }
 
-    let userMessage: User | undefined;
+    if (!user || typeof user !== 'object') {
+      throw new Error('user must be a valid object');
+    }
 
-    if (user) {
-      const { customAttributes, ...rest } = user;
-      userMessage = new User(rest as PartialMessage<User>);
+    const { customAttributes, ...rest } = user;
+    const userMessage = new User(rest as PartialMessage<User>);
 
-      if (customAttributes !== undefined) {
-        userMessage.customAttributes = Struct.fromJson(customAttributes);
-      }
+    if (customAttributes !== undefined) {
+      userMessage.customAttributes = Struct.fromJson(customAttributes);
     }
 
     const request = new UpdateLoginUserDetailsRequest({
