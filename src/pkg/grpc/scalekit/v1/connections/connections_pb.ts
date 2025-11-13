@@ -4,7 +4,7 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { BoolValue, Message, proto3, protoInt64, StringValue, Struct, Timestamp, UInt32Value } from "@bufbuild/protobuf";
+import { BoolValue, Duration, Message, proto3, protoInt64, StringValue, Struct, Timestamp, UInt32Value } from "@bufbuild/protobuf";
 import { Domain } from "../domains/domains_pb.js";
 
 /**
@@ -345,6 +345,11 @@ export enum ConnectionType {
    * @generated from enum value: API_KEY = 8;
    */
   API_KEY = 8,
+
+  /**
+   * @generated from enum value: WEBAUTHN = 9;
+   */
+  WEBAUTHN = 9,
 }
 // Retrieve enum metadata with: proto3.getEnumType(ConnectionType)
 proto3.util.setEnumType(ConnectionType, "scalekit.v1.connections.ConnectionType", [
@@ -357,6 +362,7 @@ proto3.util.setEnumType(ConnectionType, "scalekit.v1.connections.ConnectionType"
   { no: 6, name: "BASIC" },
   { no: 7, name: "BEARER" },
   { no: 8, name: "API_KEY" },
+  { no: 9, name: "WEBAUTHN" },
 ]);
 
 /**
@@ -500,6 +506,123 @@ proto3.util.setEnumType(ConnectionProvider, "scalekit.v1.connections.ConnectionP
   { no: 15, name: "SCALEKIT" },
   { no: 16, name: "ADFS" },
 ]);
+
+/**
+ * @generated from message scalekit.v1.connections.UpdateConnectionUserManagementSettingsRequest
+ */
+export class UpdateConnectionUserManagementSettingsRequest extends Message<UpdateConnectionUserManagementSettingsRequest> {
+  /**
+   * @generated from field: string connection_id = 1;
+   */
+  connectionId = "";
+
+  /**
+   * @generated from field: scalekit.v1.connections.ConnectionUserManagementSettings settings = 2;
+   */
+  settings?: ConnectionUserManagementSettings;
+
+  constructor(data?: PartialMessage<UpdateConnectionUserManagementSettingsRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.UpdateConnectionUserManagementSettingsRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "settings", kind: "message", T: ConnectionUserManagementSettings },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnectionUserManagementSettingsRequest {
+    return new UpdateConnectionUserManagementSettingsRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsRequest {
+    return new UpdateConnectionUserManagementSettingsRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsRequest {
+    return new UpdateConnectionUserManagementSettingsRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UpdateConnectionUserManagementSettingsRequest | PlainMessage<UpdateConnectionUserManagementSettingsRequest> | undefined, b: UpdateConnectionUserManagementSettingsRequest | PlainMessage<UpdateConnectionUserManagementSettingsRequest> | undefined): boolean {
+    return proto3.util.equals(UpdateConnectionUserManagementSettingsRequest, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.ConnectionUserManagementSettings
+ */
+export class ConnectionUserManagementSettings extends Message<ConnectionUserManagementSettings> {
+  /**
+   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 1;
+   */
+  syncUserProfileOnSignin?: boolean;
+
+  constructor(data?: PartialMessage<ConnectionUserManagementSettings>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.ConnectionUserManagementSettings";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "sync_user_profile_on_signin", kind: "message", T: BoolValue },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConnectionUserManagementSettings {
+    return new ConnectionUserManagementSettings().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ConnectionUserManagementSettings {
+    return new ConnectionUserManagementSettings().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ConnectionUserManagementSettings {
+    return new ConnectionUserManagementSettings().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ConnectionUserManagementSettings | PlainMessage<ConnectionUserManagementSettings> | undefined, b: ConnectionUserManagementSettings | PlainMessage<ConnectionUserManagementSettings> | undefined): boolean {
+    return proto3.util.equals(ConnectionUserManagementSettings, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.UpdateConnectionUserManagementSettingsResponse
+ */
+export class UpdateConnectionUserManagementSettingsResponse extends Message<UpdateConnectionUserManagementSettingsResponse> {
+  /**
+   * @generated from field: scalekit.v1.connections.ConnectionUserManagementSettings settings = 1;
+   */
+  settings?: ConnectionUserManagementSettings;
+
+  constructor(data?: PartialMessage<UpdateConnectionUserManagementSettingsResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.UpdateConnectionUserManagementSettingsResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "settings", kind: "message", T: ConnectionUserManagementSettings },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnectionUserManagementSettingsResponse {
+    return new UpdateConnectionUserManagementSettingsResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsResponse {
+    return new UpdateConnectionUserManagementSettingsResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsResponse {
+    return new UpdateConnectionUserManagementSettingsResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: UpdateConnectionUserManagementSettingsResponse | PlainMessage<UpdateConnectionUserManagementSettingsResponse> | undefined, b: UpdateConnectionUserManagementSettingsResponse | PlainMessage<UpdateConnectionUserManagementSettingsResponse> | undefined): boolean {
+    return proto3.util.equals(UpdateConnectionUserManagementSettingsResponse, a, b);
+  }
+}
 
 /**
  * @generated from message scalekit.v1.connections.AssignDomainsToConnectionRequest
@@ -947,6 +1070,12 @@ export class Connection extends Message<Connection> {
      */
     value: StaticAuthConfig;
     case: "staticConfig";
+  } | {
+    /**
+     * @generated from field: scalekit.v1.connections.WebAuthConfiguration webauthn_config = 27;
+     */
+    value: WebAuthConfiguration;
+    case: "webauthnConfig";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   /**
@@ -963,6 +1092,11 @@ export class Connection extends Message<Connection> {
    * @generated from field: repeated scalekit.v1.domains.Domain domains = 24;
    */
   domains: Domain[] = [];
+
+  /**
+   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 28;
+   */
+  syncUserProfileOnSignin?: boolean;
 
   constructor(data?: PartialMessage<Connection>) {
     super();
@@ -990,9 +1124,11 @@ export class Connection extends Message<Connection> {
     { no: 20, name: "oauth_config", kind: "message", T: OAuthConnectionConfig, oneof: "settings" },
     { no: 22, name: "passwordless_config", kind: "message", T: PasswordLessConfig, oneof: "settings" },
     { no: 26, name: "static_config", kind: "message", T: StaticAuthConfig, oneof: "settings" },
+    { no: 27, name: "webauthn_config", kind: "message", T: WebAuthConfiguration, oneof: "settings" },
     { no: 25, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 23, name: "provider_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 24, name: "domains", kind: "message", T: Domain, repeated: true },
+    { no: 28, name: "sync_user_profile_on_signin", kind: "message", T: BoolValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Connection {
@@ -1208,6 +1344,12 @@ export class UpdateConnection extends Message<UpdateConnection> {
      */
     value: StaticAuthConfig;
     case: "staticConfig";
+  } | {
+    /**
+     * @generated from field: scalekit.v1.connections.WebAuthConfiguration webauthn_config = 24;
+     */
+    value: WebAuthConfiguration;
+    case: "webauthnConfig";
   } | { case: undefined; value?: undefined } = { case: undefined };
 
   /**
@@ -1219,6 +1361,11 @@ export class UpdateConnection extends Message<UpdateConnection> {
    * @generated from field: string provider_key = 21;
    */
   providerKey = "";
+
+  /**
+   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 25;
+   */
+  syncUserProfileOnSignin?: boolean;
 
   constructor(data?: PartialMessage<UpdateConnection>) {
     super();
@@ -1239,8 +1386,10 @@ export class UpdateConnection extends Message<UpdateConnection> {
     { no: 18, name: "oauth_config", kind: "message", T: OAuthConnectionConfig, oneof: "settings" },
     { no: 20, name: "passwordless_config", kind: "message", T: PasswordLessConfig, oneof: "settings" },
     { no: 23, name: "static_config", kind: "message", T: StaticAuthConfig, oneof: "settings" },
+    { no: 24, name: "webauthn_config", kind: "message", T: WebAuthConfiguration, oneof: "settings" },
     { no: 22, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 21, name: "provider_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 25, name: "sync_user_profile_on_signin", kind: "message", T: BoolValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnection {
@@ -2363,6 +2512,360 @@ export class StaticAuthConfig extends Message<StaticAuthConfig> {
 
   static equals(a: StaticAuthConfig | PlainMessage<StaticAuthConfig> | undefined, b: StaticAuthConfig | PlainMessage<StaticAuthConfig> | undefined): boolean {
     return proto3.util.equals(StaticAuthConfig, a, b);
+  }
+}
+
+/**
+ * WebAuthConfiguration defines WebAuthn (passkeys) configuration limited to RP and Attestation
+ *
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration
+ */
+export class WebAuthConfiguration extends Message<WebAuthConfiguration> {
+  /**
+   * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Rp rp = 1;
+   */
+  rp?: WebAuthConfiguration_Rp;
+
+  /**
+   * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Attestation attestation = 2;
+   */
+  attestation?: WebAuthConfiguration_Attestation;
+
+  /**
+   * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Authenticators authenticators = 3;
+   */
+  authenticators?: WebAuthConfiguration_Authenticators;
+
+  /**
+   * @generated from field: scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection authenticator_selection = 4;
+   */
+  authenticatorSelection?: WebAuthConfiguration_AuthenticatorSelection;
+
+  /**
+   * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Timeout timeout = 5;
+   */
+  timeout?: WebAuthConfiguration_Timeout;
+
+  /**
+   * @generated from field: bool enable_auto_registration = 6;
+   */
+  enableAutoRegistration = false;
+
+  /**
+   * @generated from field: bool show_passkey_button = 7;
+   */
+  showPasskeyButton = false;
+
+  /**
+   * @generated from field: bool enable_conditional_login = 8;
+   */
+  enableConditionalLogin = false;
+
+  constructor(data?: PartialMessage<WebAuthConfiguration>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "rp", kind: "message", T: WebAuthConfiguration_Rp },
+    { no: 2, name: "attestation", kind: "message", T: WebAuthConfiguration_Attestation },
+    { no: 3, name: "authenticators", kind: "message", T: WebAuthConfiguration_Authenticators },
+    { no: 4, name: "authenticator_selection", kind: "message", T: WebAuthConfiguration_AuthenticatorSelection },
+    { no: 5, name: "timeout", kind: "message", T: WebAuthConfiguration_Timeout },
+    { no: 6, name: "enable_auto_registration", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 7, name: "show_passkey_button", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 8, name: "enable_conditional_login", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration {
+    return new WebAuthConfiguration().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration {
+    return new WebAuthConfiguration().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration {
+    return new WebAuthConfiguration().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: WebAuthConfiguration | PlainMessage<WebAuthConfiguration> | undefined, b: WebAuthConfiguration | PlainMessage<WebAuthConfiguration> | undefined): boolean {
+    return proto3.util.equals(WebAuthConfiguration, a, b);
+  }
+}
+
+/**
+ * Rp contains relying party identifiers and origins
+ *
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration.Rp
+ */
+export class WebAuthConfiguration_Rp extends Message<WebAuthConfiguration_Rp> {
+  /**
+   * Relying party IDs (derived from environment domain and verified custom domain)
+   * At least one required; must be hostnames without scheme or path
+   *
+   * @generated from field: repeated string ids = 1;
+   */
+  ids: string[] = [];
+
+  /**
+   * Allowed origins corresponding to the RP IDs (https://<domain>)
+   * At least one required; must be HTTPS origins
+   *
+   * @generated from field: repeated string origins = 2;
+   */
+  origins: string[] = [];
+
+  constructor(data?: PartialMessage<WebAuthConfiguration_Rp>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Rp";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "ids", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 2, name: "origins", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Rp {
+    return new WebAuthConfiguration_Rp().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Rp {
+    return new WebAuthConfiguration_Rp().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Rp {
+    return new WebAuthConfiguration_Rp().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: WebAuthConfiguration_Rp | PlainMessage<WebAuthConfiguration_Rp> | undefined, b: WebAuthConfiguration_Rp | PlainMessage<WebAuthConfiguration_Rp> | undefined): boolean {
+    return proto3.util.equals(WebAuthConfiguration_Rp, a, b);
+  }
+}
+
+/**
+ * Attestation preferences for registration
+ *
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration.Attestation
+ */
+export class WebAuthConfiguration_Attestation extends Message<WebAuthConfiguration_Attestation> {
+  /**
+   * Conveyance preference
+   *
+   * @generated from field: google.protobuf.StringValue conveyance_preference = 1;
+   */
+  conveyancePreference?: string;
+
+  /**
+   * Enterprise-approved IDs (optional allowlist when enterprise attestation is used)
+   *
+   * @generated from field: repeated string enterprise_approved_ids = 2;
+   */
+  enterpriseApprovedIds: string[] = [];
+
+  constructor(data?: PartialMessage<WebAuthConfiguration_Attestation>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Attestation";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "conveyance_preference", kind: "message", T: StringValue },
+    { no: 2, name: "enterprise_approved_ids", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Attestation {
+    return new WebAuthConfiguration_Attestation().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Attestation {
+    return new WebAuthConfiguration_Attestation().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Attestation {
+    return new WebAuthConfiguration_Attestation().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: WebAuthConfiguration_Attestation | PlainMessage<WebAuthConfiguration_Attestation> | undefined, b: WebAuthConfiguration_Attestation | PlainMessage<WebAuthConfiguration_Attestation> | undefined): boolean {
+    return proto3.util.equals(WebAuthConfiguration_Attestation, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration.Authenticators
+ */
+export class WebAuthConfiguration_Authenticators extends Message<WebAuthConfiguration_Authenticators> {
+  /**
+   * @generated from field: google.protobuf.BoolValue validate_entry = 1;
+   */
+  validateEntry?: boolean;
+
+  /**
+   * @generated from field: google.protobuf.BoolValue validate_entry_permit_zero_aaguid = 2;
+   */
+  validateEntryPermitZeroAaguid?: boolean;
+
+  /**
+   * @generated from field: google.protobuf.BoolValue validate_anchors = 3;
+   */
+  validateAnchors?: boolean;
+
+  /**
+   * @generated from field: google.protobuf.BoolValue validate_status = 4;
+   */
+  validateStatus?: boolean;
+
+  /**
+   * @generated from field: google.protobuf.BoolValue validate_attestation_type = 5;
+   */
+  validateAttestationType?: boolean;
+
+  /**
+   * @generated from field: repeated string desired_authenticator_status = 6;
+   */
+  desiredAuthenticatorStatus: string[] = [];
+
+  /**
+   * @generated from field: repeated string undesired_authenticator_status = 7;
+   */
+  undesiredAuthenticatorStatus: string[] = [];
+
+  constructor(data?: PartialMessage<WebAuthConfiguration_Authenticators>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Authenticators";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "validate_entry", kind: "message", T: BoolValue },
+    { no: 2, name: "validate_entry_permit_zero_aaguid", kind: "message", T: BoolValue },
+    { no: 3, name: "validate_anchors", kind: "message", T: BoolValue },
+    { no: 4, name: "validate_status", kind: "message", T: BoolValue },
+    { no: 5, name: "validate_attestation_type", kind: "message", T: BoolValue },
+    { no: 6, name: "desired_authenticator_status", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 7, name: "undesired_authenticator_status", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Authenticators {
+    return new WebAuthConfiguration_Authenticators().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Authenticators {
+    return new WebAuthConfiguration_Authenticators().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Authenticators {
+    return new WebAuthConfiguration_Authenticators().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: WebAuthConfiguration_Authenticators | PlainMessage<WebAuthConfiguration_Authenticators> | undefined, b: WebAuthConfiguration_Authenticators | PlainMessage<WebAuthConfiguration_Authenticators> | undefined): boolean {
+    return proto3.util.equals(WebAuthConfiguration_Authenticators, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection
+ */
+export class WebAuthConfiguration_AuthenticatorSelection extends Message<WebAuthConfiguration_AuthenticatorSelection> {
+  /**
+   * User verification requirement
+   *
+   * @generated from field: google.protobuf.StringValue user_verification = 1;
+   */
+  userVerification?: string;
+
+  /**
+   * @generated from field: google.protobuf.StringValue authenticator_attachment = 2;
+   */
+  authenticatorAttachment?: string;
+
+  constructor(data?: PartialMessage<WebAuthConfiguration_AuthenticatorSelection>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "user_verification", kind: "message", T: StringValue },
+    { no: 2, name: "authenticator_attachment", kind: "message", T: StringValue },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_AuthenticatorSelection {
+    return new WebAuthConfiguration_AuthenticatorSelection().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_AuthenticatorSelection {
+    return new WebAuthConfiguration_AuthenticatorSelection().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_AuthenticatorSelection {
+    return new WebAuthConfiguration_AuthenticatorSelection().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: WebAuthConfiguration_AuthenticatorSelection | PlainMessage<WebAuthConfiguration_AuthenticatorSelection> | undefined, b: WebAuthConfiguration_AuthenticatorSelection | PlainMessage<WebAuthConfiguration_AuthenticatorSelection> | undefined): boolean {
+    return proto3.util.equals(WebAuthConfiguration_AuthenticatorSelection, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.connections.WebAuthConfiguration.Timeout
+ */
+export class WebAuthConfiguration_Timeout extends Message<WebAuthConfiguration_Timeout> {
+  /**
+   * @generated from field: google.protobuf.Duration registration = 1;
+   */
+  registration?: Duration;
+
+  /**
+   * @generated from field: google.protobuf.Duration registration_uvd = 2;
+   */
+  registrationUvd?: Duration;
+
+  /**
+   * @generated from field: google.protobuf.Duration login = 3;
+   */
+  login?: Duration;
+
+  /**
+   * @generated from field: google.protobuf.Duration login_uvd = 4;
+   */
+  loginUvd?: Duration;
+
+  constructor(data?: PartialMessage<WebAuthConfiguration_Timeout>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Timeout";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "registration", kind: "message", T: Duration },
+    { no: 2, name: "registration_uvd", kind: "message", T: Duration },
+    { no: 3, name: "login", kind: "message", T: Duration },
+    { no: 4, name: "login_uvd", kind: "message", T: Duration },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Timeout {
+    return new WebAuthConfiguration_Timeout().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Timeout {
+    return new WebAuthConfiguration_Timeout().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Timeout {
+    return new WebAuthConfiguration_Timeout().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: WebAuthConfiguration_Timeout | PlainMessage<WebAuthConfiguration_Timeout> | undefined, b: WebAuthConfiguration_Timeout | PlainMessage<WebAuthConfiguration_Timeout> | undefined): boolean {
+    return proto3.util.equals(WebAuthConfiguration_Timeout, a, b);
   }
 }
 

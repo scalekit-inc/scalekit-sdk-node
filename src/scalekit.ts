@@ -7,6 +7,7 @@ import { IdTokenClaimToUserMap } from './constants/user';
 import CoreClient from './core';
 import DirectoryClient from './directory';
 import DomainClient from './domain';
+import AuthClient from './auth';
 import OrganizationClient from './organization';
 import PasswordlessClient from './passwordless';
 import UserClient from './user';
@@ -43,6 +44,7 @@ export default class ScalekitClient {
   readonly session: SessionClient;
   readonly role: RoleClient;
   readonly permission: PermissionClient;
+  readonly auth: AuthClient;
   constructor(
     envUrl: string,
     clientId: string,
@@ -90,6 +92,10 @@ export default class ScalekitClient {
       this.coreClient
     );
     this.permission = new PermissionClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.auth = new AuthClient(
       this.grpcConnect,
       this.coreClient
     );

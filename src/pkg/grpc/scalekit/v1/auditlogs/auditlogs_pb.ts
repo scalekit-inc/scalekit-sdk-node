@@ -40,6 +40,11 @@ export class ListAuthLogRequest extends Message<ListAuthLogRequest> {
    */
   endTime?: Timestamp;
 
+  /**
+   * @generated from field: string resource_id = 7;
+   */
+  resourceId = "";
+
   constructor(data?: PartialMessage<ListAuthLogRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -54,6 +59,7 @@ export class ListAuthLogRequest extends Message<ListAuthLogRequest> {
     { no: 4, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 5, name: "start_time", kind: "message", T: Timestamp },
     { no: 6, name: "end_time", kind: "message", T: Timestamp },
+    { no: 7, name: "resource_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAuthLogRequest {
@@ -187,6 +193,21 @@ export class AuthLogRequest extends Message<AuthLogRequest> {
    */
   workflow = "";
 
+  /**
+   * @generated from field: string resource_id = 12;
+   */
+  resourceId = "";
+
+  /**
+   * @generated from field: string resource_name = 13;
+   */
+  resourceName = "";
+
+  /**
+   * @generated from field: string resource_type = 14;
+   */
+  resourceType = "";
+
   constructor(data?: PartialMessage<AuthLogRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -206,6 +227,9 @@ export class AuthLogRequest extends Message<AuthLogRequest> {
     { no: 9, name: "timestamp", kind: "message", T: Timestamp },
     { no: 10, name: "connection_details", kind: "message", T: ConnectionDetails, repeated: true },
     { no: 11, name: "workflow", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 12, name: "resource_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 13, name: "resource_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 14, name: "resource_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AuthLogRequest {
