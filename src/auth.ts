@@ -23,7 +23,7 @@ export default class AuthClient {
    * Update user details for an ongoing login request.
    * @param {string} connectionId The connection ID used for authentication.
    * @param {string} loginRequestId The login request identifier issued during auth initiation.
-   * @param {UserInput} user Optional user details to associate with the login request.
+   * @param {UserInput} user User details to associate with the login request.
    * @returns {Promise<Empty>} Empty response.
    */
   async updateLoginUserDetails(
