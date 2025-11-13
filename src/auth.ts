@@ -6,7 +6,7 @@ import { AuthService } from './pkg/grpc/scalekit/v1/auth/auth_connect';
 import { UpdateLoginUserDetailsRequest, User } from './pkg/grpc/scalekit/v1/auth/auth_pb';
 
 type UserInput = PartialMessage<User> & {
-  customAttributes?: Record<string, unknown>;
+  customAttributes?: Record<string, JsonValue>;
 };
 
 export default class AuthClient {
@@ -46,7 +46,7 @@ export default class AuthClient {
       userMessage = new User(rest as PartialMessage<User>);
 
       if (customAttributes !== undefined) {
-        userMessage.customAttributes = Struct.fromJson(customAttributes as JsonValue);
+        userMessage.customAttributes = Struct.fromJson(customAttributes);
       }
     }
 
