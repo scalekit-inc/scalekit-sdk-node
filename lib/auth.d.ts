@@ -17,6 +17,6 @@ export default class AuthClient {
      * @param {UserInput} user Optional user details to associate with the login request.
      * @returns {Promise<Empty>} Empty response.
      */
-    updateLoginUserDetails(connectionId: string, loginRequestId: string, user?: UserInput): Promise<Empty>;
+    updateLoginUserDetails(connectionId: string, loginRequestId: string, user: UserInput): Promise<Empty>;
 }
 export {};
