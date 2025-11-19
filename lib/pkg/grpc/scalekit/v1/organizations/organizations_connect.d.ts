@@ -1,4 +1,4 @@
-import { CreateOrganizationRequest, CreateOrganizationResponse, CreateOrganizationSessionSettingsRequest, CreateOrganizationSessionSettingsResponse, DeleteOrganizationRequest, DeleteOrganizationSessionSettingsRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetOrganizationSessionSettingsRequest, GetOrganizationSessionSettingsResponse, GetOrganizationUserManagementSettingsRequest, GetOrganizationUserManagementSettingsResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSessionSettingsRequest, UpdateOrganizationSessionSettingsResponse, UpdateOrganizationSettingsRequest, UpdateUserManagementSettingsRequest, UpdateUserManagementSettingsResponse } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, CreateOrganizationSessionSettingsRequest, CreateOrganizationSessionSettingsResponse, DeleteOrganizationRequest, DeleteOrganizationSessionSettingsRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetOrganizationSessionSettingsRequest, GetOrganizationSessionSettingsResponse, GetOrganizationUserManagementSettingsRequest, GetOrganizationUserManagementSettingsResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSessionSettingsRequest, UpdateOrganizationSessionSettingsResponse, UpdateOrganizationSettingsRequest, UpsertUserManagementSettingsRequest, UpsertUserManagementSettingsResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.organizations.OrganizationService
@@ -150,12 +150,12 @@ export declare const OrganizationService: {
         /**
          * Update user management setting for an organization
          *
-         * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateUserManagementSettings
+         * @generated from rpc scalekit.v1.organizations.OrganizationService.UpsertUserManagementSettings
          */
-        readonly updateUserManagementSettings: {
-            readonly name: "UpdateUserManagementSettings";
-            readonly I: typeof UpdateUserManagementSettingsRequest;
-            readonly O: typeof UpdateUserManagementSettingsResponse;
+        readonly upsertUserManagementSettings: {
+            readonly name: "UpsertUserManagementSettings";
+            readonly I: typeof UpsertUserManagementSettingsRequest;
+            readonly O: typeof UpsertUserManagementSettingsResponse;
             readonly kind: MethodKind.Unary;
         };
         /**
