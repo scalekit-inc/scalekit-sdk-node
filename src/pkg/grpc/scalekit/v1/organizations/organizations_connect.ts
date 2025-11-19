@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { CreateOrganizationRequest, CreateOrganizationResponse, CreateOrganizationSessionSettingsRequest, CreateOrganizationSessionSettingsResponse, DeleteOrganizationRequest, DeleteOrganizationSessionSettingsRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetOrganizationSessionSettingsRequest, GetOrganizationSessionSettingsResponse, GetOrganizationUserManagementSettingsRequest, GetOrganizationUserManagementSettingsResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSessionSettingsRequest, UpdateOrganizationSessionSettingsResponse, UpdateOrganizationSettingsRequest, UpdateUserManagementSettingsRequest, UpdateUserManagementSettingsResponse } from "./organizations_pb.js";
+import { CreateOrganizationRequest, CreateOrganizationResponse, CreateOrganizationSessionSettingsRequest, CreateOrganizationSessionSettingsResponse, DeleteOrganizationRequest, DeleteOrganizationSessionSettingsRequest, DeletePortalLinkByIdRequest, DeletePortalLinkRequest, GeneratePortalLinkRequest, GeneratePortalLinkResponse, GetOrganizationRequest, GetOrganizationResponse, GetOrganizationSessionSettingsRequest, GetOrganizationSessionSettingsResponse, GetOrganizationUserManagementSettingsRequest, GetOrganizationUserManagementSettingsResponse, GetPortalLinkRequest, GetPortalLinksResponse, ListOrganizationsRequest, ListOrganizationsResponse, SearchOrganizationsRequest, SearchOrganizationsResponse, UpdateOrganizationRequest, UpdateOrganizationResponse, UpdateOrganizationSessionSettingsRequest, UpdateOrganizationSessionSettingsResponse, UpdateOrganizationSettingsRequest, UpsertUserManagementSettingsRequest, UpsertUserManagementSettingsResponse } from "./organizations_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -156,12 +156,12 @@ export const OrganizationService = {
     /**
      * Update user management setting for an organization
      *
-     * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateUserManagementSettings
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.UpsertUserManagementSettings
      */
-    updateUserManagementSettings: {
-      name: "UpdateUserManagementSettings",
-      I: UpdateUserManagementSettingsRequest,
-      O: UpdateUserManagementSettingsResponse,
+    upsertUserManagementSettings: {
+      name: "UpsertUserManagementSettings",
+      I: UpsertUserManagementSettingsRequest,
+      O: UpsertUserManagementSettingsResponse,
       kind: MethodKind.Unary,
     },
     /**

@@ -4,7 +4,7 @@
 // @ts-nocheck
 
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { BoolValue, FieldMask, Int32Value, Message, NullValue, proto3, Timestamp } from "@bufbuild/protobuf";
+import { BoolValue, FieldMask, Int32Value, Message, proto3, Timestamp } from "@bufbuild/protobuf";
 import { RegionCode } from "../commons/commons_pb.js";
 
 /**
@@ -1216,22 +1216,9 @@ export class UpdateOrganizationSessionSettingsResponse extends Message<UpdateOrg
  */
 export class OrganizationUserManagementSettings extends Message<OrganizationUserManagementSettings> {
   /**
-   * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 1;
+   * @generated from field: google.protobuf.Int32Value max_allowed_users = 1;
    */
-  jitProvisioningWithSsoEnabled?: boolean;
-
-  /**
-   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 2;
-   */
-  syncUserProfileOnSignin?: boolean;
-
-  /**
-   * Deprecated placeholder to ensure google.protobuf.NullValue is referenced in the schema, preventing unused-definition warnings.
-   *
-   * @generated from field: google.protobuf.NullValue deprecated_placeholder = 99 [deprecated = true];
-   * @deprecated
-   */
-  deprecatedPlaceholder = NullValue.NULL_VALUE;
+  maxAllowedUsers?: number;
 
   constructor(data?: PartialMessage<OrganizationUserManagementSettings>) {
     super();
@@ -1241,9 +1228,7 @@ export class OrganizationUserManagementSettings extends Message<OrganizationUser
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "scalekit.v1.organizations.OrganizationUserManagementSettings";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "jit_provisioning_with_sso_enabled", kind: "message", T: BoolValue },
-    { no: 2, name: "sync_user_profile_on_signin", kind: "message", T: BoolValue },
-    { no: 99, name: "deprecated_placeholder", kind: "enum", T: proto3.getEnumType(NullValue) },
+    { no: 1, name: "max_allowed_users", kind: "message", T: Int32Value },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationUserManagementSettings {
@@ -1626,9 +1611,9 @@ export class OrganizationSettingsFeature extends Message<OrganizationSettingsFea
 }
 
 /**
- * @generated from message scalekit.v1.organizations.UpdateUserManagementSettingsRequest
+ * @generated from message scalekit.v1.organizations.UpsertUserManagementSettingsRequest
  */
-export class UpdateUserManagementSettingsRequest extends Message<UpdateUserManagementSettingsRequest> {
+export class UpsertUserManagementSettingsRequest extends Message<UpsertUserManagementSettingsRequest> {
   /**
    * @generated from field: string organization_id = 1;
    */
@@ -1639,69 +1624,69 @@ export class UpdateUserManagementSettingsRequest extends Message<UpdateUserManag
    */
   settings?: OrganizationUserManagementSettings;
 
-  constructor(data?: PartialMessage<UpdateUserManagementSettingsRequest>) {
+  constructor(data?: PartialMessage<UpsertUserManagementSettingsRequest>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.organizations.UpdateUserManagementSettingsRequest";
+  static readonly typeName = "scalekit.v1.organizations.UpsertUserManagementSettingsRequest";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "settings", kind: "message", T: OrganizationUserManagementSettings },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateUserManagementSettingsRequest {
-    return new UpdateUserManagementSettingsRequest().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpsertUserManagementSettingsRequest {
+    return new UpsertUserManagementSettingsRequest().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsRequest {
-    return new UpdateUserManagementSettingsRequest().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpsertUserManagementSettingsRequest {
+    return new UpsertUserManagementSettingsRequest().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsRequest {
-    return new UpdateUserManagementSettingsRequest().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpsertUserManagementSettingsRequest {
+    return new UpsertUserManagementSettingsRequest().fromJsonString(jsonString, options);
   }
 
-  static equals(a: UpdateUserManagementSettingsRequest | PlainMessage<UpdateUserManagementSettingsRequest> | undefined, b: UpdateUserManagementSettingsRequest | PlainMessage<UpdateUserManagementSettingsRequest> | undefined): boolean {
-    return proto3.util.equals(UpdateUserManagementSettingsRequest, a, b);
+  static equals(a: UpsertUserManagementSettingsRequest | PlainMessage<UpsertUserManagementSettingsRequest> | undefined, b: UpsertUserManagementSettingsRequest | PlainMessage<UpsertUserManagementSettingsRequest> | undefined): boolean {
+    return proto3.util.equals(UpsertUserManagementSettingsRequest, a, b);
   }
 }
 
 /**
- * @generated from message scalekit.v1.organizations.UpdateUserManagementSettingsResponse
+ * @generated from message scalekit.v1.organizations.UpsertUserManagementSettingsResponse
  */
-export class UpdateUserManagementSettingsResponse extends Message<UpdateUserManagementSettingsResponse> {
+export class UpsertUserManagementSettingsResponse extends Message<UpsertUserManagementSettingsResponse> {
   /**
    * @generated from field: scalekit.v1.organizations.OrganizationUserManagementSettings settings = 1;
    */
   settings?: OrganizationUserManagementSettings;
 
-  constructor(data?: PartialMessage<UpdateUserManagementSettingsResponse>) {
+  constructor(data?: PartialMessage<UpsertUserManagementSettingsResponse>) {
     super();
     proto3.util.initPartial(data, this);
   }
 
   static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.organizations.UpdateUserManagementSettingsResponse";
+  static readonly typeName = "scalekit.v1.organizations.UpsertUserManagementSettingsResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "settings", kind: "message", T: OrganizationUserManagementSettings },
   ]);
 
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateUserManagementSettingsResponse {
-    return new UpdateUserManagementSettingsResponse().fromBinary(bytes, options);
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpsertUserManagementSettingsResponse {
+    return new UpsertUserManagementSettingsResponse().fromBinary(bytes, options);
   }
 
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsResponse {
-    return new UpdateUserManagementSettingsResponse().fromJson(jsonValue, options);
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpsertUserManagementSettingsResponse {
+    return new UpsertUserManagementSettingsResponse().fromJson(jsonValue, options);
   }
 
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateUserManagementSettingsResponse {
-    return new UpdateUserManagementSettingsResponse().fromJsonString(jsonString, options);
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpsertUserManagementSettingsResponse {
+    return new UpsertUserManagementSettingsResponse().fromJsonString(jsonString, options);
   }
 
-  static equals(a: UpdateUserManagementSettingsResponse | PlainMessage<UpdateUserManagementSettingsResponse> | undefined, b: UpdateUserManagementSettingsResponse | PlainMessage<UpdateUserManagementSettingsResponse> | undefined): boolean {
-    return proto3.util.equals(UpdateUserManagementSettingsResponse, a, b);
+  static equals(a: UpsertUserManagementSettingsResponse | PlainMessage<UpsertUserManagementSettingsResponse> | undefined, b: UpsertUserManagementSettingsResponse | PlainMessage<UpsertUserManagementSettingsResponse> | undefined): boolean {
+    return proto3.util.equals(UpsertUserManagementSettingsResponse, a, b);
   }
 }
 
