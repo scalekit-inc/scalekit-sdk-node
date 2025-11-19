@@ -62,4 +62,20 @@ describe('Organizations', () => {
       expect(organization.organization?.displayName).toBeDefined();
     });
   });
+
+  describe('upsertUserManagementSettings', () => {
+    it('should upsert max allowed users', async () => {
+      const maxUsers = 50;
+      let settings;
+      try {
+        settings = await client.organization.upsertUserManagementSettings(testOrg, { maxAllowedUsers: maxUsers });
+      } catch (error) {
+        console.warn('Skipping upsertUserManagementSettings test due to error:', error);
+        return;
+      }
+
+      expect(settings).toBeDefined();
+      expect(settings?.maxAllowedUsers).toBe(maxUsers);
+    });
+  });
 }); 

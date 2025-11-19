@@ -3,8 +3,8 @@ import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
 import { OrganizationService } from './pkg/grpc/scalekit/v1/organizations/organizations_connect';
-import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
-import { OrganizationSettings } from './types/organization';
+import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
+import { OrganizationSettings, OrganizationUserManagementSettingsInput } from './types/organization';
 export default class OrganizationClient {
   private client: PromiseClient<typeof OrganizationService>;
   constructor(
@@ -162,6 +162,29 @@ export default class OrganizationClient {
       this.client.updateOrganizationSettings,
       request,
     )
+  }
+
+  /**
+   * Upsert organization-level user management settings such as maximum allowed users.
+   * @param organizationId The organization id
+   * @param settings User management settings to apply
+   * @returns {Promise<OrganizationUserManagementSettingsMessage | undefined>} The updated settings
+   */
+  async upsertUserManagementSettings(organizationId: string, settings: OrganizationUserManagementSettingsInput): Promise<OrganizationUserManagementSettingsMessage | undefined> {
+    const requestSettings: PartialMessage<OrganizationUserManagementSettingsMessage> = {};
+    if (settings.maxAllowedUsers !== undefined && settings.maxAllowedUsers !== null) {
+      requestSettings.maxAllowedUsers = settings.maxAllowedUsers;
+    }
+
+    const response = await this.coreClient.connectExec(
+      this.client.upsertUserManagementSettings,
+      {
+        organizationId,
+        settings: requestSettings,
+      }
+    );
+
+    return response.settings;
   }
 }
 
