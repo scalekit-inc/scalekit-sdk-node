@@ -1,8 +1,8 @@
 import { Empty, PartialMessage } from '@bufbuild/protobuf';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
-import { OrganizationSettings } from './types/organization';
+import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
+import { OrganizationSettings, OrganizationUserManagementSettingsInput } from './types/organization';
 export default class OrganizationClient {
     private readonly grpcConncet;
     private readonly coreClient;
@@ -74,4 +74,11 @@ export default class OrganizationClient {
      * @returns {Promise<GetOrganizationResponse>} The updated organization
      */
     updateOrganizationSettings(organizationId: string, settings: OrganizationSettings): Promise<GetOrganizationResponse>;
+    /**
+     * Upsert organization-level user management settings such as maximum allowed users.
+     * @param organizationId The organization id
+     * @param settings User management settings to apply
+     * @returns {Promise<OrganizationUserManagementSettingsMessage | undefined>} The updated settings
+     */
+    upsertUserManagementSettings(organizationId: string, settings: OrganizationUserManagementSettingsInput): Promise<OrganizationUserManagementSettingsMessage | undefined>;
 }
