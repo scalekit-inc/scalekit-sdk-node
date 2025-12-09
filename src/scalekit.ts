@@ -14,6 +14,7 @@ import UserClient from './user';
 import SessionClient from './session';
 import RoleClient from './role';
 import PermissionClient from './permission';
+import WebAuthnClient from './webauthn';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse ,TokenValidationOptions } from './types/scalekit';
 import { WebhookVerificationError, ScalekitValidateTokenFailureException } from './errors/base-exception';
@@ -45,6 +46,7 @@ export default class ScalekitClient {
   readonly role: RoleClient;
   readonly permission: PermissionClient;
   readonly auth: AuthClient;
+  readonly webauthn: WebAuthnClient;
   constructor(
     envUrl: string,
     clientId: string,
@@ -96,6 +98,10 @@ export default class ScalekitClient {
       this.coreClient
     );
     this.auth = new AuthClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.webauthn = new WebAuthnClient(
       this.grpcConnect,
       this.coreClient
     );

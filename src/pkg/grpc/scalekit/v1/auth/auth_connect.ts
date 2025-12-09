@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { DiscoveryAuthMethodRequest, DiscoveryAuthMethodResponse, GetAuthCustomizationsRequest, GetAuthCustomizationsResponse, GetAuthErrorRequest, GetAuthErrorResponse, GetAuthFeaturesResponse, GetAuthStateResponse, ListAuthMethodsRequest, ListAuthMethodsResponse, ListUserOrganizationsResponse, SignupOrganizationRequest, SignupOrganizationResponse, UpdateLoginUserDetailsRequest, VerifyPasswordLessRequest, VerifyPasswordLessResponse } from "./auth_pb.js";
+import { DiscoveryAuthMethodRequest, DiscoveryAuthMethodResponse, GetAuthCustomizationsRequest, GetAuthCustomizationsResponse, GetAuthErrorRequest, GetAuthErrorResponse, GetAuthFeaturesResponse, GetAuthStateResponse, ListAuthMethodsRequest, ListAuthMethodsResponse, ListUserOrganizationsResponse, SignupOrganizationRequest, SignupOrganizationResponse, UpdateLoginUserDetailsRequest, VerifyPasswordLessOtpRequest, VerifyPasswordLessOtpResponse } from "./auth_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -35,8 +35,8 @@ export const AuthService = {
      */
     verifyPasswordLessOtp: {
       name: "VerifyPasswordLessOtp",
-      I: VerifyPasswordLessRequest,
-      O: VerifyPasswordLessResponse,
+      I: VerifyPasswordLessOtpRequest,
+      O: VerifyPasswordLessOtpResponse,
       kind: MethodKind.Unary,
     },
     /**
