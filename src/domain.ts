@@ -23,17 +23,7 @@ export default class DomainClient {
    * @returns {Promise<CreateDomainResponse>} The created domain
   */
   async createDomain(organizationId: string, name: string, options?: { domainType?: DomainType | string }): Promise<CreateDomainResponse> {
-    let domainTypeValue: DomainType | undefined;
-    if (options?.domainType) {
-      if (typeof options.domainType === 'string') {
-        domainTypeValue = DomainType[options.domainType as keyof typeof DomainType];
-        if (domainTypeValue === undefined) {
-          throw new Error('Invalid domain type');
-        }
-      } else {
-        domainTypeValue = options.domainType;
-      }
-    }
+    const domainTypeValue = this.resolveDomainType(options?.domainType);
 
     return this.coreClient.connectExec(
       this.client.createDomain,
@@ -69,6 +59,21 @@ export default class DomainClient {
     );
   }
 
+  private resolveDomainType(domainType?: DomainType | string): DomainType | undefined {
+    if (!domainType) {
+      return undefined;
+    }
+    
+    if (typeof domainType === 'string') {
+      const resolved = DomainType[domainType as keyof typeof DomainType];
+      if (resolved === undefined) {
+        throw new Error(`Invalid domain type: ${domainType}. Expected ALLOWED_EMAIL_DOMAIN or ORGANIZATION_DOMAIN`);
+      }
+      return resolved;
+    }
+    return domainType;
+  }
+
   /**
    * List domains for an organization 
    * @param organizationId The organization id
@@ -77,17 +82,7 @@ export default class DomainClient {
    * @returns {Promise<ListDomainResponse>} The list of domains for the organization
    */
   async listDomains(organizationId: string, options?: { domainType?: DomainType | string }): Promise<ListDomainResponse> {
-    let domainTypeValue: DomainType | undefined;
-    if (options?.domainType) {
-      if (typeof options.domainType === 'string') {
-        domainTypeValue = DomainType[options.domainType as keyof typeof DomainType];
-        if (domainTypeValue === undefined) {
-          throw new Error('Invalid domain type');
-        }
-      } else {
-        domainTypeValue = options.domainType;
-      }
-    }
+    const domainTypeValue = this.resolveDomainType(options?.domainType);
 
     return this.coreClient.connectExec(
       this.client.listDomains,
