@@ -34,7 +34,7 @@ export default class DomainClient {
         },
         domain: {
           domain: name,
-          ...(domainTypeValue && { domainType: domainTypeValue })
+          ...(domainTypeValue !== undefined && { domainType: domainTypeValue })
         }
       }
     )
@@ -91,7 +91,7 @@ export default class DomainClient {
           case: 'organizationId',
           value: organizationId
         },
-        ...(domainTypeValue && { domainType: domainTypeValue })
+        ...(domainTypeValue !== undefined && { domainType: domainTypeValue })
       },
     );
   }
