@@ -60,7 +60,7 @@ export default class DomainClient {
   }
 
   private resolveDomainType(domainType?: DomainType | string): DomainType | undefined {
-    if (!domainType) {
+    if (domainType == null) {
       return undefined;
     }
     
