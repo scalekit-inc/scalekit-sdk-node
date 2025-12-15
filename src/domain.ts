@@ -72,16 +72,31 @@ export default class DomainClient {
   /**
    * List domains for an organization 
    * @param organizationId The organization id
+   * @param options Optional parameters for filtering domains
+   * @param {DomainType | string} options.domainType Filter domains by type (ALLOWED_EMAIL_DOMAIN or ORGANIZATION_DOMAIN)
    * @returns {Promise<ListDomainResponse>} The list of domains for the organization
    */
-  async listDomains(organizationId: string): Promise<ListDomainResponse> {
+  async listDomains(organizationId: string, options?: { domainType?: DomainType | string }): Promise<ListDomainResponse> {
+    let domainTypeValue: DomainType | undefined;
+    if (options?.domainType) {
+      if (typeof options.domainType === 'string') {
+        domainTypeValue = DomainType[options.domainType as keyof typeof DomainType];
+        if (domainTypeValue === undefined) {
+          throw new Error('Invalid domain type');
+        }
+      } else {
+        domainTypeValue = options.domainType;
+      }
+    }
+
     return this.coreClient.connectExec(
       this.client.listDomains,
       {
         identities: {
           case: 'organizationId',
           value: organizationId
-        }
+        },
+        ...(domainTypeValue && { domainType: domainTypeValue })
       },
     );
   }
