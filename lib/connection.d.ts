@@ -13,7 +13,7 @@ import { GetConnectionResponse, ToggleConnectionResponse, ListConnectionsRespons
  * const scalekitClient = new ScalekitClient(envUrl, clientId, clientSecret);
  * const connectionClient = scalekitClient.connection;
  *
- * @see {@link https://docs.scalekit.com/apis/connection | Connection API Documentation}
+ * @see {@link https://docs.scalekit.com/apis/#tag/connections | Connection API Documentation}
  */
 export default class ConnectionClient {
     private readonly grpcConncet;
@@ -71,7 +71,7 @@ export default class ConnectionClient {
      *   }
      * });
      *
-     * @see {@link https://docs.scalekit.com/apis/connection#list-connections | List Connections API}
+     * @see {@link https://docs.scalekit.com/apis/#tag/connections | List Connections API}
      * @see {@link listConnections} - List all connections for an organization
      */
     listConnectionsByDomain(domain: string): Promise<ListConnectionsResponse>;
@@ -105,7 +105,7 @@ export default class ConnectionClient {
      *   console.log('No SSO connections enabled for this organization');
      * }
      *
-     * @see {@link https://docs.scalekit.com/apis/connection#list-connections | List Connections API}
+     * @see {@link https://docs.scalekit.com/apis/#tag/connections | List Connections API}
      * @see {@link getConnection} - Get details of a specific connection
      * @see {@link enableConnection} - Enable a connection
      * @see {@link disableConnection} - Disable a connection
@@ -148,7 +148,7 @@ export default class ConnectionClient {
      *   }
      * }
      *
-     * @see {@link https://docs.scalekit.com/apis/connection#enable-connection | Enable Connection API}
+     * @see {@link https://docs.scalekit.com/apis/#tag/connections | Enable Connection API}
      * @see {@link disableConnection} - Disable a connection
      * @see {@link listConnections} - List all connections
      */
@@ -193,7 +193,7 @@ export default class ConnectionClient {
      *   }
      * }
      *
-     * @see {@link https://docs.scalekit.com/apis/connection#disable-connection | Disable Connection API}
+     * @see {@link https://docs.scalekit.com/apis/#tag/connections | Disable Connection API}
      * @see {@link enableConnection} - Enable a connection
      * @see {@link listConnections} - List all connections
      */

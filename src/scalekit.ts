@@ -1,22 +1,33 @@
-import crypto from 'crypto';
-import * as jose from 'jose';
-import QueryString from 'qs';
-import GrpcConnect from './connect';
-import ConnectionClient from './connection';
-import { IdTokenClaimToUserMap } from './constants/user';
-import CoreClient from './core';
-import DirectoryClient from './directory';
-import DomainClient from './domain';
-import AuthClient from './auth';
-import OrganizationClient from './organization';
-import PasswordlessClient from './passwordless';
-import UserClient from './user';
-import SessionClient from './session';
-import RoleClient from './role';
-import PermissionClient from './permission';
-import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
-import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse ,TokenValidationOptions } from './types/scalekit';
-import { WebhookVerificationError, ScalekitValidateTokenFailureException } from './errors/base-exception';
+import crypto from "crypto";
+import * as jose from "jose";
+import QueryString from "qs";
+import GrpcConnect from "./connect";
+import ConnectionClient from "./connection";
+import { IdTokenClaimToUserMap } from "./constants/user";
+import CoreClient from "./core";
+import DirectoryClient from "./directory";
+import DomainClient from "./domain";
+import AuthClient from "./auth";
+import OrganizationClient from "./organization";
+import PasswordlessClient from "./passwordless";
+import UserClient from "./user";
+import SessionClient from "./session";
+import RoleClient from "./role";
+import PermissionClient from "./permission";
+import { IdpInitiatedLoginClaims, IdTokenClaim, User } from "./types/auth";
+import {
+  AuthenticationOptions,
+  AuthenticationResponse,
+  AuthorizationUrlOptions,
+  GrantType,
+  LogoutUrlOptions,
+  RefreshTokenResponse,
+  TokenValidationOptions,
+} from "./types/scalekit";
+import {
+  WebhookVerificationError,
+  ScalekitValidateTokenFailureException,
+} from "./errors/base-exception";
 
 const authorizeEndpoint = "oauth/authorize";
 const logoutEndpoint = "oidc/logout";
@@ -62,60 +73,26 @@ export default class ScalekitClient {
   readonly role: RoleClient;
   readonly permission: PermissionClient;
   readonly auth: AuthClient;
-  constructor(
-    envUrl: string,
-    clientId: string,
-    clientSecret: string
-  ) {
-    this.coreClient = new CoreClient(
-      envUrl,
-      clientId,
-      clientSecret
-    );
-    this.grpcConnect = new GrpcConnect(
-      this.coreClient
-    );
+  constructor(envUrl: string, clientId: string, clientSecret: string) {
+    this.coreClient = new CoreClient(envUrl, clientId, clientSecret);
+    this.grpcConnect = new GrpcConnect(this.coreClient);
 
     this.organization = new OrganizationClient(
       this.grpcConnect,
       this.coreClient
     );
-    this.connection = new ConnectionClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.domain = new DomainClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.directory = new DirectoryClient(
-      this.grpcConnect,
-      this.coreClient
-    );
+    this.connection = new ConnectionClient(this.grpcConnect, this.coreClient);
+    this.domain = new DomainClient(this.grpcConnect, this.coreClient);
+    this.directory = new DirectoryClient(this.grpcConnect, this.coreClient);
     this.passwordless = new PasswordlessClient(
       this.grpcConnect,
       this.coreClient
     );
-    this.user = new UserClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.session = new SessionClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.role = new RoleClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.permission = new PermissionClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.auth = new AuthClient(
-      this.grpcConnect,
-      this.coreClient
-    );
+    this.user = new UserClient(this.grpcConnect, this.coreClient);
+    this.session = new SessionClient(this.grpcConnect, this.coreClient);
+    this.role = new RoleClient(this.grpcConnect, this.coreClient);
+    this.permission = new PermissionClient(this.grpcConnect, this.coreClient);
+    this.auth = new AuthClient(this.grpcConnect, this.coreClient);
   }
 
   /**
@@ -184,7 +161,7 @@ export default class ScalekitClient {
    *   }
    * );
    *
-   * @see {@link https://docs.scalekit.com/apis/authentication | Authentication API Documentation}
+   * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Authentication API Documentation}
    * @see {@link authenticateWithCode} - Use this method to exchange the authorization code for tokens
    */
   getAuthorizationUrl(
@@ -192,14 +169,14 @@ export default class ScalekitClient {
     options?: AuthorizationUrlOptions
   ): string {
     const defaultOptions: AuthorizationUrlOptions = {
-      scopes: ['openid', 'profile', 'email']
-    }
+      scopes: ["openid", "profile", "email"],
+    };
     options = {
       ...defaultOptions,
-      ...options
-    }
+      ...options,
+    };
     const qs = QueryString.stringify({
-      response_type: 'code',
+      response_type: "code",
       client_id: this.coreClient.clientId,
       redirect_uri: redirectUri,
       scope: options.scopes?.join(" "),
@@ -209,14 +186,18 @@ export default class ScalekitClient {
       ...(options.domainHint && { domain_hint: options.domainHint }),
       ...(options.domainHint && { domain: options.domainHint }),
       ...(options.connectionId && { connection_id: options.connectionId }),
-      ...(options.organizationId && { organization_id: options.organizationId }),
+      ...(options.organizationId && {
+        organization_id: options.organizationId,
+      }),
       ...(options.codeChallenge && { code_challenge: options.codeChallenge }),
-      ...(options.codeChallengeMethod && { code_challenge_method: options.codeChallengeMethod }),
+      ...(options.codeChallengeMethod && {
+        code_challenge_method: options.codeChallengeMethod,
+      }),
       ...(options.provider && { provider: options.provider }),
-      ...(options.prompt && { prompt: options.prompt })
-    })
+      ...(options.prompt && { prompt: options.prompt }),
+    });
 
-    return `${this.coreClient.envUrl}/${authorizeEndpoint}?${qs}`
+    return `${this.coreClient.envUrl}/${authorizeEndpoint}?${qs}`;
   }
 
   /**
@@ -279,24 +260,26 @@ export default class ScalekitClient {
    *   // Use result.user, result.accessToken, etc.
    * });
    *
-   * @see {@link https://docs.scalekit.com/apis/authentication | Authentication API Documentation}
+   * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Authentication API Documentation}
    * @see {@link getAuthorizationUrl} - Generate the authorization URL first
    * @see {@link validateAccessToken} - Validate tokens in subsequent requests
    */
   async authenticateWithCode(
     code: string,
     redirectUri: string,
-    options?: AuthenticationOptions,
+    options?: AuthenticationOptions
   ): Promise<AuthenticationResponse> {
-    const res = await this.coreClient.authenticate(QueryString.stringify({
-      code: code,
-      redirect_uri: redirectUri,
-      grant_type: GrantType.AuthorizationCode,
-      client_id: this.coreClient.clientId,
-      client_secret: this.coreClient.clientSecret,
-      ...(options?.codeVerifier && { code_verifier: options.codeVerifier })
-    }))
-    const { id_token, access_token, expires_in , refresh_token } = res.data;
+    const res = await this.coreClient.authenticate(
+      QueryString.stringify({
+        code: code,
+        redirect_uri: redirectUri,
+        grant_type: GrantType.AuthorizationCode,
+        client_id: this.coreClient.clientId,
+        client_secret: this.coreClient.clientSecret,
+        ...(options?.codeVerifier && { code_verifier: options.codeVerifier }),
+      })
+    );
+    const { id_token, access_token, expires_in, refresh_token } = res.data;
     const claims = jose.decodeJwt<IdTokenClaim>(id_token);
     const user = <User>{};
     for (const [k, v] of Object.entries(claims)) {
@@ -310,8 +293,8 @@ export default class ScalekitClient {
       idToken: id_token,
       accessToken: access_token,
       expiresIn: expires_in,
-      refreshToken: refresh_token
-    }
+      refreshToken: refresh_token,
+    };
   }
 
   /**
@@ -366,18 +349,27 @@ export default class ScalekitClient {
    * @see {@link https://docs.scalekit.com/sso/guides/idp-initiated-sso | IdP-Initiated SSO Documentation}
    * @see {@link getAuthorizationUrl} - Use the claims to construct the authorization URL
    */
-  async getIdpInitiatedLoginClaims(idpInitiatedLoginToken: string, options?: TokenValidationOptions): Promise<IdpInitiatedLoginClaims> {
-    return this.validateToken<IdpInitiatedLoginClaims>(idpInitiatedLoginToken, options);
+  async getIdpInitiatedLoginClaims(
+    idpInitiatedLoginToken: string,
+    options?: TokenValidationOptions
+  ): Promise<IdpInitiatedLoginClaims> {
+    return this.validateToken<IdpInitiatedLoginClaims>(
+      idpInitiatedLoginToken,
+      options
+    );
   }
 
   /**
    * Validates the access token and returns a boolean result.
-   * 
+   *
    * @param {string} token The token to be validated.
    * @param {TokenValidationOptions} options Optional validation options for issuer, audience, and scopes
    * @return {Promise<boolean>} Returns true if the token is valid, false otherwise.
    */
-  async validateAccessToken(token: string, options?: TokenValidationOptions): Promise<boolean> {
+  async validateAccessToken(
+    token: string,
+    options?: TokenValidationOptions
+  ): Promise<boolean> {
     try {
       await this.validateToken(token, options);
       return true;
@@ -386,8 +378,6 @@ export default class ScalekitClient {
     }
   }
 
-
-
   /**
    * Returns the logout URL that can be used to log out the user.
    * @param {LogoutUrlOptions} options Logout URL options
@@ -395,7 +385,7 @@ export default class ScalekitClient {
    * @param {string} options.postLogoutRedirectUri URL to redirect after logout
    * @param {string} options.state Opaque value to maintain state between request and callback
    * @returns {string} The logout URL
-   * 
+   *
    * @example
    * const scalekit = new Scalekit(envUrl, clientId, clientSecret);
    * const logoutUrl = scalekit.getLogoutUrl({
@@ -406,11 +396,13 @@ export default class ScalekitClient {
   getLogoutUrl(options?: LogoutUrlOptions): string {
     const qs = QueryString.stringify({
       ...(options?.idTokenHint && { id_token_hint: options.idTokenHint }),
-      ...(options?.postLogoutRedirectUri && { post_logout_redirect_uri: options.postLogoutRedirectUri }),
-      ...(options?.state && { state: options.state })
+      ...(options?.postLogoutRedirectUri && {
+        post_logout_redirect_uri: options.postLogoutRedirectUri,
+      }),
+      ...(options?.state && { state: options.state }),
     });
 
-    return `${this.coreClient.envUrl}/${logoutEndpoint}${qs ? `?${qs}` : ''}`;
+    return `${this.coreClient.envUrl}/${logoutEndpoint}${qs ? `?${qs}` : ""}`;
   }
 
   /**
@@ -465,33 +457,53 @@ export default class ScalekitClient {
    * @see {@link https://docs.scalekit.com/webhooks | Webhook Documentation}
    * @see {@link verifyInterceptorPayload} - Similar method for interceptor payloads
    */
-  verifyWebhookPayload(secret: string, headers: Record<string, string>, payload: string): boolean {
-    const webhookId = headers['webhook-id'];
-    const webhookTimestamp = headers['webhook-timestamp'];
-    const webhookSignature = headers['webhook-signature'];
-    
-    return this.verifyPayloadSignature(secret, webhookId, webhookTimestamp, webhookSignature, payload);
+  verifyWebhookPayload(
+    secret: string,
+    headers: Record<string, string>,
+    payload: string
+  ): boolean {
+    const webhookId = headers["webhook-id"];
+    const webhookTimestamp = headers["webhook-timestamp"];
+    const webhookSignature = headers["webhook-signature"];
+
+    return this.verifyPayloadSignature(
+      secret,
+      webhookId,
+      webhookTimestamp,
+      webhookSignature,
+      payload
+    );
   }
 
   /**
    * Verify interceptor payload
-   * 
+   *
    * @param {string} secret The secret
    * @param {Record<string, string>} headers The headers
    * @param {string} payload The payload
    * @return {boolean} Returns true if the payload is valid.
    */
-  verifyInterceptorPayload(secret: string, headers: Record<string, string>, payload: string): boolean {
-    const interceptorId = headers['interceptor-id'];
-    const interceptorTimestamp = headers['interceptor-timestamp'];
-    const interceptorSignature = headers['interceptor-signature'];
-    
-    return this.verifyPayloadSignature(secret, interceptorId, interceptorTimestamp, interceptorSignature, payload);
+  verifyInterceptorPayload(
+    secret: string,
+    headers: Record<string, string>,
+    payload: string
+  ): boolean {
+    const interceptorId = headers["interceptor-id"];
+    const interceptorTimestamp = headers["interceptor-timestamp"];
+    const interceptorSignature = headers["interceptor-signature"];
+
+    return this.verifyPayloadSignature(
+      secret,
+      interceptorId,
+      interceptorTimestamp,
+      interceptorSignature,
+      payload
+    );
   }
 
   /**
    * Common payload signature verification logic
-   * 
+   *
    * @param {string} secret The secret
    * @param {string} id The webhook/interceptor id
    * @param {string} timestamp The timestamp
@@ -499,62 +511,78 @@ export default class ScalekitClient {
    * @param {string} payload The payload
    * @return {boolean} Returns true if the payload signature is valid.
    */
-  private verifyPayloadSignature(secret: string, id: string, timestamp: string, signature: string, payload: string): boolean {
+  private verifyPayloadSignature(
+    secret: string,
+    id: string,
+    timestamp: string,
+    signature: string,
+    payload: string
+  ): boolean {
     if (!id || !timestamp || !signature) {
       throw new WebhookVerificationError("Missing required headers");
     }
-    
+
     const secretParts = secret.split("_");
     if (secretParts.length < 2) {
       throw new WebhookVerificationError("Invalid secret");
     }
-    
+
     try {
       const timestampDate = this.verifyTimestamp(timestamp);
-      const data = `${id}.${Math.floor(timestampDate.getTime() / 1000)}.${payload}`;
-      const secretBytes = Buffer.from(secretParts[1], 'base64');
+      const data = `${id}.${Math.floor(
+        timestampDate.getTime() / 1000
+      )}.${payload}`;
+      const secretBytes = Buffer.from(secretParts[1], "base64");
       const computedSignature = this.computeSignature(secretBytes, data);
       const receivedSignatures = signature.split(" ");
-      
+
       for (const versionedSignature of receivedSignatures) {
         const [version, receivedSignature] = versionedSignature.split(",");
         if (version !== WEBHOOK_SIGNATURE_VERSION) {
           continue;
         }
-        if (crypto.timingSafeEqual(Buffer.from(receivedSignature, 'base64'), Buffer.from(computedSignature, 'base64'))) {
+        if (
+          crypto.timingSafeEqual(
+            Buffer.from(receivedSignature, "base64"),
+            Buffer.from(computedSignature, "base64")
+          )
+        ) {
           return true;
         }
       }
 
-      throw new WebhookVerificationError("Invalid signature");
+      throw new WebhookVerificationError("Invalid Signature");
     } catch (error) {
       if (error instanceof WebhookVerificationError) {
         throw error;
       }
-      throw new WebhookVerificationError("Invalid signature");
+      throw new WebhookVerificationError("Invalid Signature");
     }
   }
 
   /**
    * Validates a token and returns its payload if valid.
    * Supports issuer, audience, and scope validation.
-   * 
+   *
    * @param {string} token The token to be validated
    * @param {TokenValidationOptions} options Optional validation options for issuer, audience, and scopes
    * @return {Promise<T>} Returns the token payload if valid
    * @throws {ScalekitValidateTokenFailureException} If token is invalid or missing required scopes
    */
-  async validateToken<T>(token: string, options?: TokenValidationOptions): Promise<T> {
+  async validateToken<T>(
+    token: string,
+    options?: TokenValidationOptions
+  ): Promise<T> {
     await this.coreClient.getJwks();
     const jwks = jose.createLocalJWKSet({
-      keys: this.coreClient.keys
-    })
+      keys: this.coreClient.keys,
+    });
     try {
       const { payload } = await jose.jwtVerify<T>(token, jwks, {
         ...(options?.issuer && { issuer: options.issuer }),
-        ...(options?.audience && { audience: options.audience })
+        ...(options?.audience && { audience: options.audience }),
       });
-      
+
       if (options?.requiredScopes && options.requiredScopes.length > 0) {
         this.verifyScopes(token, options.requiredScopes);
       }
@@ -567,7 +595,7 @@ export default class ScalekitClient {
 
   /**
    * Verify that the token contains the required scopes
-   * 
+   *
    * @param {string} token The token to verify
    * @param {string[]} requiredScopes The scopes that must be present in the token
    * @return {boolean} Returns true if all required scopes are present
@@ -576,19 +604,23 @@ export default class ScalekitClient {
   verifyScopes(token: string, requiredScopes: string[]): boolean {
     const payload = jose.decodeJwt(token);
     const scopes = this.extractScopesFromPayload(payload);
-    
-    const missingScopes = requiredScopes.filter(scope => !scopes.includes(scope));
-    
+
+    const missingScopes = requiredScopes.filter(
+      (scope) => !scopes.includes(scope)
+    );
+
     if (missingScopes.length > 0) {
-      throw new ScalekitValidateTokenFailureException(`Token missing required scopes: ${missingScopes.join(', ')}`);
+      throw new ScalekitValidateTokenFailureException(
+        `Token missing required scopes: ${missingScopes.join(", ")}`
+      );
     }
-    
+
     return true;
   }
 
   /**
    * Extract scopes from token payload
-   * 
+   *
    * @param {any} payload The token payload
    * @return {string[]} Array of scopes found in the token
    */
@@ -601,7 +633,7 @@ export default class ScalekitClient {
 
   /**
    * Verify the timestamp
-   * 
+   *
    * @param {string} timestampStr The timestamp string
    * @return {Date} Returns the timestamp
    */
@@ -623,13 +655,16 @@ export default class ScalekitClient {
 
   /**
    * Compute the signature
-   * 
+   *
    * @param {Buffer} secretBytes The secret bytes
    * @param {string} data The data to be signed
    * @return {string} Returns the signature
    */
   private computeSignature(secretBytes: Buffer, data: string): string {
-    return crypto.createHmac('sha256', secretBytes).update(data).digest('base64');
+    return crypto
+      .createHmac("sha256", secretBytes)
+      .update(data)
+      .digest("base64");
   }
 
   /**
@@ -690,24 +725,32 @@ export default class ScalekitClient {
    *   next();
    * });
    *
-   * @see {@link https://docs.scalekit.com/apis/authentication | Authentication API Documentation}
+   * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Authentication API Documentation}
    * @see {@link authenticateWithCode} - Initial authentication to obtain tokens
    */
-  async refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse> {
+  async refreshAccessToken(
+    refreshToken: string
+  ): Promise<RefreshTokenResponse> {
     if (!refreshToken) {
       throw new Error("Refresh token is required");
     }
 
     let res;
     try {
-      res = await this.coreClient.authenticate(QueryString.stringify({
-        grant_type: GrantType.RefreshToken,
-        client_id: this.coreClient.clientId,
-        client_secret: this.coreClient.clientSecret,
-        refresh_token: refreshToken
-      }));
+      res = await this.coreClient.authenticate(
+        QueryString.stringify({
+          grant_type: GrantType.RefreshToken,
+          client_id: this.coreClient.clientId,
+          client_secret: this.coreClient.clientSecret,
+          refresh_token: refreshToken,
+        })
+      );
     } catch (error) {
-      throw new Error(`Failed to refresh token: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to refresh token: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
 
     if (!res || !res.data) {
@@ -726,8 +769,7 @@ export default class ScalekitClient {
 
     return {
       accessToken: access_token,
-      refreshToken: refresh_token
+      refreshToken: refresh_token,
     };
   }
 }
-

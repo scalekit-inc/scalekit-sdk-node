@@ -16,7 +16,7 @@ import { Empty } from '@bufbuild/protobuf';
  * const scalekitClient = new ScalekitClient(envUrl, clientId, clientSecret);
  * const domainClient = scalekitClient.domain;
  *
- * @see {@link https://docs.scalekit.com/apis/domain | Domain API Documentation}
+ * @see {@link https://docs.scalekit.com/apis/#tag/domains | Domain API Documentation}
  */
 export default class DomainClient {
   private client: PromiseClient<typeof DomainService>;
@@ -115,7 +115,7 @@ export default class DomainClient {
    * await scalekitClient.domain.deleteDomain('org_123456', 'domain_abc123');
    * console.log('Domain deleted successfully');
    *
-   * @see {@link https://docs.scalekit.com/apis/domain#delete-domain | Delete Domain API}
+   * @see {@link https://docs.scalekit.com/apis/#tag/domains | Delete Domain API}
    * @see {@link createDomain} - Add a new domain
    * @see {@link listDomains} - List all domains for an organization
    */

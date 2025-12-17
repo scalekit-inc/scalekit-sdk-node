@@ -13,7 +13,7 @@ type UserInput = PartialMessage<User> & {
  * const scalekitClient = new ScalekitClient(envUrl, clientId, clientSecret);
  * const authClient = scalekitClient.auth;
  *
- * @see {@link https://docs.scalekit.com/apis/authentication | Authentication API Documentation}
+ * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Authentication API Documentation}
  */
 export default class AuthClient {
     private readonly grpcConnect;
@@ -47,7 +47,7 @@ export default class AuthClient {
      * );
      *
      *
-     * @see {@link https://docs.scalekit.com/apis/authentication#update-login-user-details | Update Login User Details API}
+     * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Update Login User Details API}
      */
     updateLoginUserDetails(connectionId: string, loginRequestId: string, user: UserInput): Promise<Empty>;
 }

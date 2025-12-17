@@ -1,15 +1,15 @@
-import ConnectionClient from './connection';
-import DirectoryClient from './directory';
-import DomainClient from './domain';
-import AuthClient from './auth';
-import OrganizationClient from './organization';
-import PasswordlessClient from './passwordless';
-import UserClient from './user';
-import SessionClient from './session';
-import RoleClient from './role';
-import PermissionClient from './permission';
-import { IdpInitiatedLoginClaims } from './types/auth';
-import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse, TokenValidationOptions } from './types/scalekit';
+import ConnectionClient from "./connection";
+import DirectoryClient from "./directory";
+import DomainClient from "./domain";
+import AuthClient from "./auth";
+import OrganizationClient from "./organization";
+import PasswordlessClient from "./passwordless";
+import UserClient from "./user";
+import SessionClient from "./session";
+import RoleClient from "./role";
+import PermissionClient from "./permission";
+import { IdpInitiatedLoginClaims } from "./types/auth";
+import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse, TokenValidationOptions } from "./types/scalekit";
 /**
  * Main Scalekit SDK client for enterprise authentication and user management.
  *
@@ -116,7 +116,7 @@ export default class ScalekitClient {
      *   }
      * );
      *
-     * @see {@link https://docs.scalekit.com/apis/authentication | Authentication API Documentation}
+     * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Authentication API Documentation}
      * @see {@link authenticateWithCode} - Use this method to exchange the authorization code for tokens
      */
     getAuthorizationUrl(redirectUri: string, options?: AuthorizationUrlOptions): string;
@@ -180,7 +180,7 @@ export default class ScalekitClient {
      *   // Use result.user, result.accessToken, etc.
      * });
      *
-     * @see {@link https://docs.scalekit.com/apis/authentication | Authentication API Documentation}
+     * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Authentication API Documentation}
      * @see {@link getAuthorizationUrl} - Generate the authorization URL first
      * @see {@link validateAccessToken} - Validate tokens in subsequent requests
      */
@@ -434,7 +434,7 @@ export default class ScalekitClient {
      *   next();
      * });
      *
-     * @see {@link https://docs.scalekit.com/apis/authentication | Authentication API Documentation}
+     * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Authentication API Documentation}
      * @see {@link authenticateWithCode} - Initial authentication to obtain tokens
      */
     refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse>;

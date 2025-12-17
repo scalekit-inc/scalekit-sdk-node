@@ -24,7 +24,7 @@ import {
  * const scalekitClient = new ScalekitClient(envUrl, clientId, clientSecret);
  * const directoryClient = scalekitClient.directory;
  *
- * @see {@link https://docs.scalekit.com/apis/directory | Directory API Documentation}
+ * @see {@link https://docs.scalekit.com/apis/#tag/directory | Directory API Documentation}
  * @see {@link https://docs.scalekit.com/scim | SCIM Directory Sync Guide}
  */
 export default class DirectoryClient {
@@ -131,7 +131,7 @@ export default class DirectoryClient {
    *
    * console.log(`${response.users.length} users updated since last sync`);
    *
-   * @see {@link https://docs.scalekit.com/apis/directory#list-directory-users | List Directory Users API}
+   * @see {@link https://docs.scalekit.com/apis/#tag/directory | List Directory Users API}
    * @see {@link listDirectoryGroups} - List directory groups
    * @see {@link listDirectories} - List all directories for an organization
    */

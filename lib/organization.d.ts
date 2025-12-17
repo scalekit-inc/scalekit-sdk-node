@@ -14,7 +14,7 @@ import { OrganizationSettings, OrganizationUserManagementSettingsInput } from '.
  * const scalekitClient = new ScalekitClient(envUrl, clientId, clientSecret);
  * const orgClient = scalekitClient.organization;
  *
- * @see {@link https://docs.scalekit.com/apis/organization | Organization API Documentation}
+ * @see {@link https://docs.scalekit.com/apis/#tag/organizations | Organization API Documentation}
  */
 export default class OrganizationClient {
     private readonly grpcConncet;
@@ -53,7 +53,7 @@ export default class OrganizationClient {
      * );
      * // Now you can look up this organization using either Scalekit ID or your external ID
      *
-     * @see {@link https://docs.scalekit.com/apis/organization#create-organization | Create Organization API}
+     * @see {@link https://docs.scalekit.com/apis/#tag/organizations | Create Organization API}
      * @see {@link getOrganization} - Retrieve organization by Scalekit ID
      * @see {@link getOrganizationByExternalId} - Retrieve organization by your external ID
      */
@@ -102,7 +102,7 @@ export default class OrganizationClient {
      *
      * console.log('Fetched all organizations:', allOrgs.length);
      *
-     * @see {@link https://docs.scalekit.com/apis/organization#list-organizations | List Organizations API}
+     * @see {@link https://docs.scalekit.com/apis/#tag/organizations | List Organizations API}
      * @see {@link getOrganization} - Get a specific organization by ID
      */
     listOrganization(options?: {
@@ -183,7 +183,7 @@ export default class OrganizationClient {
      *          This link expires in 60 seconds.`
      * });
      *
-     * @see {@link https://docs.scalekit.com/apis/organization#generate-portal-link | Generate Portal Link API}
+     * @see {@link https://docs.scalekit.com/apis/#tag/organizations | Generate Portal Link API}
      * @see {@link https://docs.scalekit.com/directory/guides/admin-portal/ | Admin Portal Guide}
      */
     generatePortalLink(organizationId: string): Promise<Link>;

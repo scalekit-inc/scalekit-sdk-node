@@ -9,7 +9,7 @@
  * const scalekitClient = new ScalekitClient(envUrl, clientId, clientSecret);
  * const userClient = scalekitClient.user;
  *
- * @see {@link https://docs.scalekit.com/apis/user | User API Documentation}
+ * @see {@link https://docs.scalekit.com/apis/#tag/users | User API Documentation}
  */
 import { Empty } from '@bufbuild/protobuf';
 import GrpcConnect from './connect';
@@ -74,7 +74,7 @@ export default class UserClient {
      *   }
      * );
      *
-     * @see {@link https://docs.scalekit.com/apis/user#create-user | Create User API}
+     * @see {@link https://docs.scalekit.com/apis/#tag/users | Create User API}
      * @see {@link createMembership} - Add existing user to another organization
      * @see {@link resendInvite} - Resend invitation email to a user
      */
