@@ -1,3 +1,16 @@
+/**
+ * Client for managing users and their organization memberships.
+ *
+ * This client provides comprehensive user management capabilities including creating users,
+ * managing their memberships across organizations, updating user profiles, and handling
+ * invitation emails. Users can belong to multiple organizations with different roles.
+ *
+ * @example
+ * const scalekitClient = new ScalekitClient(envUrl, clientId, clientSecret);
+ * const userClient = scalekitClient.user;
+ *
+ * @see {@link https://docs.scalekit.com/apis/user | User API Documentation}
+ */
 import { Empty, PartialMessage } from '@bufbuild/protobuf';
 import { PromiseClient } from '@connectrpc/connect';
 import GrpcConnect from './connect';
@@ -42,10 +55,61 @@ export default class UserClient {
   }
 
   /**
-   * Create a new user and add them to an organization
-   * @param {string} organizationId The organization id
-   * @param {CreateUserRequest} options The user creation options
-   * @returns {Promise<CreateUserAndMembershipResponse>} The created user
+   * Creates a new user and adds them as a member of an organization in a single operation.
+   *
+   * This is the primary method for user provisioning. It creates the user account and establishes
+   * their membership in the specified organization. Optionally sends an invitation email to the user
+   * with instructions to activate their account.
+   *
+   * @param {string} organizationId - The organization ID to add the user to
+   * @param {CreateUserRequest} options - User creation configuration
+   * @param {string} options.email - User's email address (required, must be unique)
+   * @param {object} [options.userProfile] - Optional user profile information
+   * @param {string} [options.userProfile.firstName] - User's first name
+   * @param {string} [options.userProfile.lastName] - User's last name
+   * @param {Record<string, string>} [options.metadata] - Custom metadata key-value pairs
+   * @param {boolean} [options.sendInvitationEmail=true] - Whether to send invitation email to the user
+   *
+   * @returns {Promise<CreateUserAndMembershipResponse>} Response containing:
+   *   - user: The created user object with profile and membership details
+   *
+   * @throws {Error} When organizationId is missing or invalid
+   * @throws {Error} When email is missing or already exists
+   * @throws {Error} When user creation fails
+   *
+   * @example
+   * // Create user with profile and send invitation
+   * const response = await scalekitClient.user.createUserAndMembership(
+   *   'org_123456',
+   *   {
+   *     email: 'john.doe@company.com',
+   *     userProfile: {
+   *       firstName: 'John',
+   *       lastName: 'Doe'
+   *     },
+   *     sendInvitationEmail: true,
+   *     metadata: {
+   *       department: 'Engineering',
+   *       role: 'Developer'
+   *     }
+   *   }
+   * );
+   *
+   * console.log('User created:', response.user.id);
+   *
+   * @example
+   * // Create user without sending invitation
+   * const response = await scalekitClient.user.createUserAndMembership(
+   *   'org_123456',
+   *   {
+   *     email: 'jane.smith@company.com',
+   *     sendInvitationEmail: false
+   *   }
+   * );
+   *
+   * @see {@link https://docs.scalekit.com/apis/user#create-user | Create User API}
+   * @see {@link createMembership} - Add existing user to another organization
+   * @see {@link resendInvite} - Resend invitation email to a user
    */
   async createUserAndMembership(organizationId: string, options: CreateUserRequest): Promise<CreateUserAndMembershipResponse> {
     if (!organizationId) {
