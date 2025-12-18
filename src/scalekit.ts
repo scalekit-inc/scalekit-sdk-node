@@ -42,7 +42,7 @@ const WEBHOOK_SIGNATURE_VERSION = "v1";
  * This is the primary entry point for interacting with Scalekit's authentication services,
  * including SSO, SCIM, user management, roles, permissions, and passwordless authentication.
  *
- * You can find the Enironment URL, Client ID and Client Secret in Scalekit Dashboard -> Developers (Settings) -> API Credentials
+ * You can find the Environment URL, Client ID and Client Secret in Scalekit Dashboard -> Developers (Settings) -> API Credentials
  *
  * @param {string} envUrl - The Scalekit environment URL (e.g., "https://yourorg.scalekit.com" or your configured custom domain like "https://auth.yourapp.ai")
  * @param {string} clientId - Your Scalekit client ID from the Scalekit Dashboard
