@@ -250,7 +250,6 @@ export default class ConnectionClient {
    * );
    *
    * console.log('Connection disabled:', !response.connection.enabled); // true
-
    *
    * @see {@link https://docs.scalekit.com/apis/#tag/connections | Disable Connection API}
    * @see {@link enableConnection} - Enable a connection
