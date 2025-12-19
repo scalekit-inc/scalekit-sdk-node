@@ -35,7 +35,7 @@ import {
 } from "./pkg/grpc/scalekit/v1/roles/roles_pb";
 
 /**
- * Client for managing roless at both environment and organization levels.
+ * Client for managing roles at both environment and organization levels.
  *
  * Roles define sets of permissions that control user access to resources and operations.
  * This client provides comprehensive role management including role hierarchies, permission
