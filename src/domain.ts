@@ -204,8 +204,6 @@ export default class DomainClient {
    *   d => d.domainType === 'ORGANIZATION_DOMAIN' && d.verificationStatus === 'VERIFIED'
    * );
    * console.log('Verified SSO domains:', verifiedSSODomains.map(d => d.domain));
-   *
-   
    * @see {@link https://docs.scalekit.com/apis/#tag/domains | List Domains API}
    * @see {@link createDomain} - Add a new domain
    * @see {@link getDomain} - Get details for a specific domain
