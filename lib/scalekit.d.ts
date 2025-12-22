@@ -55,7 +55,7 @@ export default class ScalekitClient {
     readonly auth: AuthClient;
     constructor(envUrl: string, clientId: string, clientSecret: string);
     /**
-     * Utility method to generates the OAuth 2.0 authorization URL to initiate the SSO authentication flow.
+     * Utility method to generate the OAuth 2.0 authorization URL to initiate the SSO authentication flow.
      *
      * This method doesn't make any network calls but instead generates a fully formed Authorization URL
      * as a string that you can redirect your users to initiate authentication.
@@ -326,7 +326,7 @@ export default class ScalekitClient {
      * checks the signature and timestamp to prevent replay attacks (5-minute tolerance window)
      *
      * @param {string} secret Your interceptor signing secret that you can copy from Scalekit Dashboard
-     * @param {Record<string, string>} headers The HTTP headers from the intereceptor request
+     * @param {Record<string, string>} headers The HTTP headers from the interceptor request
      * @param {string} payload The raw webhook request body as a string
      * @return {boolean} Returns true if the interceptor payload is valid.
      */
