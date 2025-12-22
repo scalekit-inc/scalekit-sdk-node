@@ -44,9 +44,9 @@ export declare class User extends Message<User> {
         [key: string]: string;
     };
     /**
-     * @generated from field: google.protobuf.Timestamp last_login = 10;
+     * @generated from field: google.protobuf.Timestamp last_login_time = 10;
      */
-    lastLogin?: Timestamp;
+    lastLoginTime?: Timestamp;
     constructor(data?: PartialMessage<User>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.users.User";

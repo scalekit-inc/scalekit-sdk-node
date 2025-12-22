@@ -1,4 +1,4 @@
-import { AssignDomainsToConnectionRequest, AssignDomainsToConnectionResponse, CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetConnectionTestResultRequest, GetConnectionTestResultResponse, GetEnvironmentConnectionRequest, ListAppConnectionsRequest, ListAppConnectionsResponse, ListConnectionsRequest, ListConnectionsResponse, ListOrganizationConnectionsRequest, ListOrganizationConnectionsResponse, SearchOrganizationConnectionsRequest, SearchOrganizationConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateConnectionUserManagementSettingsRequest, UpdateConnectionUserManagementSettingsResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
+import { AssignDomainsToConnectionRequest, AssignDomainsToConnectionResponse, CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetConnectionTestResultRequest, GetConnectionTestResultResponse, GetEnvironmentConnectionRequest, ListAppConnectionsRequest, ListAppConnectionsResponse, ListConnectionsRequest, ListConnectionsResponse, ListOrganizationConnectionsRequest, ListOrganizationConnectionsResponse, SearchOrganizationConnectionsRequest, SearchOrganizationConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.connections.ConnectionService
@@ -166,15 +166,6 @@ export declare const ConnectionService: {
             readonly name: "ListAppConnections";
             readonly I: typeof ListAppConnectionsRequest;
             readonly O: typeof ListAppConnectionsResponse;
-            readonly kind: MethodKind.Unary;
-        };
-        /**
-         * @generated from rpc scalekit.v1.connections.ConnectionService.UpdateConnectionUserManagementSettings
-         */
-        readonly updateConnectionUserManagementSettings: {
-            readonly name: "UpdateConnectionUserManagementSettings";
-            readonly I: typeof UpdateConnectionUserManagementSettingsRequest;
-            readonly O: typeof UpdateConnectionUserManagementSettingsResponse;
             readonly kind: MethodKind.Unary;
         };
     };

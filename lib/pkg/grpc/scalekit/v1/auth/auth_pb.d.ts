@@ -273,34 +273,34 @@ export declare class GetAuthFeaturesResponse extends Message<GetAuthFeaturesResp
     static equals(a: GetAuthFeaturesResponse | PlainMessage<GetAuthFeaturesResponse> | undefined, b: GetAuthFeaturesResponse | PlainMessage<GetAuthFeaturesResponse> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.auth.VerifyPasswordLessRequest
+ * @generated from message scalekit.v1.auth.VerifyPasswordLessOtpRequest
  */
-export declare class VerifyPasswordLessRequest extends Message<VerifyPasswordLessRequest> {
+export declare class VerifyPasswordLessOtpRequest extends Message<VerifyPasswordLessOtpRequest> {
     /**
      * @generated from field: scalekit.v1.auth.OTPRequest otp_req = 2;
      */
     otpReq?: OTPRequest;
-    constructor(data?: PartialMessage<VerifyPasswordLessRequest>);
+    constructor(data?: PartialMessage<VerifyPasswordLessOtpRequest>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.auth.VerifyPasswordLessRequest";
+    static readonly typeName = "scalekit.v1.auth.VerifyPasswordLessOtpRequest";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VerifyPasswordLessRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VerifyPasswordLessRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VerifyPasswordLessRequest;
-    static equals(a: VerifyPasswordLessRequest | PlainMessage<VerifyPasswordLessRequest> | undefined, b: VerifyPasswordLessRequest | PlainMessage<VerifyPasswordLessRequest> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VerifyPasswordLessOtpRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VerifyPasswordLessOtpRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VerifyPasswordLessOtpRequest;
+    static equals(a: VerifyPasswordLessOtpRequest | PlainMessage<VerifyPasswordLessOtpRequest> | undefined, b: VerifyPasswordLessOtpRequest | PlainMessage<VerifyPasswordLessOtpRequest> | undefined): boolean;
 }
 /**
- * @generated from message scalekit.v1.auth.VerifyPasswordLessResponse
+ * @generated from message scalekit.v1.auth.VerifyPasswordLessOtpResponse
  */
-export declare class VerifyPasswordLessResponse extends Message<VerifyPasswordLessResponse> {
-    constructor(data?: PartialMessage<VerifyPasswordLessResponse>);
+export declare class VerifyPasswordLessOtpResponse extends Message<VerifyPasswordLessOtpResponse> {
+    constructor(data?: PartialMessage<VerifyPasswordLessOtpResponse>);
     static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.auth.VerifyPasswordLessResponse";
+    static readonly typeName = "scalekit.v1.auth.VerifyPasswordLessOtpResponse";
     static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VerifyPasswordLessResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VerifyPasswordLessResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VerifyPasswordLessResponse;
-    static equals(a: VerifyPasswordLessResponse | PlainMessage<VerifyPasswordLessResponse> | undefined, b: VerifyPasswordLessResponse | PlainMessage<VerifyPasswordLessResponse> | undefined): boolean;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VerifyPasswordLessOtpResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VerifyPasswordLessOtpResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VerifyPasswordLessOtpResponse;
+    static equals(a: VerifyPasswordLessOtpResponse | PlainMessage<VerifyPasswordLessOtpResponse> | undefined, b: VerifyPasswordLessOtpResponse | PlainMessage<VerifyPasswordLessOtpResponse> | undefined): boolean;
 }
 /**
  * @generated from message scalekit.v1.auth.OTPRequest

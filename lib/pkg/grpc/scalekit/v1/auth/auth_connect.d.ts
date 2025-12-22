@@ -1,4 +1,4 @@
-import { DiscoveryAuthMethodRequest, DiscoveryAuthMethodResponse, GetAuthCustomizationsRequest, GetAuthCustomizationsResponse, GetAuthErrorRequest, GetAuthErrorResponse, GetAuthFeaturesResponse, GetAuthStateResponse, ListAuthMethodsRequest, ListAuthMethodsResponse, ListUserOrganizationsResponse, SignupOrganizationRequest, SignupOrganizationResponse, UpdateLoginUserDetailsRequest, VerifyPasswordLessRequest, VerifyPasswordLessResponse } from "./auth_pb.js";
+import { DiscoveryAuthMethodRequest, DiscoveryAuthMethodResponse, GetAuthCustomizationsRequest, GetAuthCustomizationsResponse, GetAuthErrorRequest, GetAuthErrorResponse, GetAuthFeaturesResponse, GetAuthStateResponse, ListAuthMethodsRequest, ListAuthMethodsResponse, ListUserOrganizationsResponse, SignupOrganizationRequest, SignupOrganizationResponse, UpdateLoginUserDetailsRequest, VerifyPasswordLessOtpRequest, VerifyPasswordLessOtpResponse } from "./auth_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.auth.AuthService
@@ -29,8 +29,8 @@ export declare const AuthService: {
          */
         readonly verifyPasswordLessOtp: {
             readonly name: "VerifyPasswordLessOtp";
-            readonly I: typeof VerifyPasswordLessRequest;
-            readonly O: typeof VerifyPasswordLessResponse;
+            readonly I: typeof VerifyPasswordLessOtpRequest;
+            readonly O: typeof VerifyPasswordLessOtpResponse;
             readonly kind: MethodKind.Unary;
         };
         /**

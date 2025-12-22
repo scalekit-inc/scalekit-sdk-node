@@ -1,15 +1,16 @@
-import ConnectionClient from "./connection";
-import DirectoryClient from "./directory";
-import DomainClient from "./domain";
-import AuthClient from "./auth";
-import OrganizationClient from "./organization";
-import PasswordlessClient from "./passwordless";
-import UserClient from "./user";
-import SessionClient from "./session";
-import RoleClient from "./role";
-import PermissionClient from "./permission";
-import { IdpInitiatedLoginClaims } from "./types/auth";
-import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse, TokenValidationOptions } from "./types/scalekit";
+import ConnectionClient from './connection';
+import DirectoryClient from './directory';
+import DomainClient from './domain';
+import AuthClient from './auth';
+import OrganizationClient from './organization';
+import PasswordlessClient from './passwordless';
+import UserClient from './user';
+import SessionClient from './session';
+import RoleClient from './role';
+import PermissionClient from './permission';
+import WebAuthnClient from './webauthn';
+import { IdpInitiatedLoginClaims } from './types/auth';
+import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse, TokenValidationOptions } from './types/scalekit';
 /**
  * Main Scalekit SDK client for enterprise authentication and user management.
  *
@@ -49,6 +50,7 @@ export default class ScalekitClient {
     readonly role: RoleClient;
     readonly permission: PermissionClient;
     readonly auth: AuthClient;
+    readonly webauthn: WebAuthnClient;
     constructor(envUrl: string, clientId: string, clientSecret: string);
     /**
      * Generates the OAuth 2.0 authorization URL to initiate the SSO authentication flow.
