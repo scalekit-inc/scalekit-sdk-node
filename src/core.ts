@@ -1,18 +1,21 @@
-import { Code, ConnectError } from '@connectrpc/connect';
+import { Code, ConnectError } from "@connectrpc/connect";
 import axios, { Axios, AxiosError, AxiosResponse, HttpStatusCode } from "axios";
-import { JWK } from 'jose';
+import { JWK } from "jose";
 import os from "os";
 import QueryString from "qs";
-import { GrantType } from './types/scalekit';
-import { TokenResponse } from './types/auth';
-import { ScalekitException, ScalekitServerException } from './errors/base-exception';
+import { GrantType } from "./types/scalekit";
+import { TokenResponse } from "./types/auth";
+import {
+  ScalekitException,
+  ScalekitServerException,
+} from "./errors/base-exception";
 
 export const headers = {
   "user-agent": "user-agent",
   "x-sdk-version": "x-sdk-version",
   "x-api-version": "x-api-version",
-  "authorization": "authorization"
-}
+  authorization: "authorization",
+};
 
 const tokenEndpoint = "oauth/token";
 const jwksEndpoint = "keys";
@@ -22,7 +25,9 @@ export default class CoreClient {
   public axios: Axios;
   public sdkVersion = `Scalekit-Node/2.1.7`;
   public apiVersion = "20250830";
-  public userAgent = `${this.sdkVersion} Node/${process.version} (${process.platform}; ${os.arch()})`;
+  public userAgent = `${this.sdkVersion} Node/${process.version} (${
+    process.platform
+  }; ${os.arch()})`;
   constructor(
     readonly envUrl: string,
     readonly clientId: string,
@@ -30,24 +35,27 @@ export default class CoreClient {
   ) {
     this.axios = axios.create({ baseURL: envUrl });
     this.axios.interceptors.request.use((config) => {
-      config.headers[headers['user-agent']] = this.userAgent;
-      config.headers[headers['x-sdk-version']] = this.sdkVersion;
-      config.headers[headers['x-api-version']] = this.apiVersion;
+      config.headers[headers["user-agent"]] = this.userAgent;
+      config.headers[headers["x-sdk-version"]] = this.sdkVersion;
+      config.headers[headers["x-api-version"]] = this.apiVersion;
       if (this.accessToken) {
         config.headers[headers.authorization] = `Bearer ${this.accessToken}`;
       }
 
       return config;
     });
-    this.authenticateClient();
+    // removing token creation at the time of constructor and instead letting the retry functionality handle generating a token whenever required.
+    //this.authenticateClient();
   }
 
   private async authenticateClient() {
-    const res = await this.authenticate(QueryString.stringify({
-      grant_type: GrantType.ClientCredentials,
-      client_id: this.clientId,
-      client_secret: this.clientSecret
-    }))
+    const res = await this.authenticate(
+      QueryString.stringify({
+        grant_type: GrantType.ClientCredentials,
+        client_id: this.clientId,
+        client_secret: this.clientSecret,
+      })
+    );
 
     this.accessToken = res.data.access_token;
   }
@@ -57,26 +65,24 @@ export default class CoreClient {
    * @returns {Promise<AxiosResponse<TokenResponse>>} Returns access token and id token
    */
   async authenticate(data: string): Promise<AxiosResponse<TokenResponse, any>> {
-    return this.axios.post<TokenResponse>(
-      tokenEndpoint,
-      data,
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        }
-      }
-    )
+    return this.axios.post<TokenResponse>(tokenEndpoint, data, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
   }
 
   /**
    * Get the JWKS from the server and store it in the client instance
-   * @returns {Promise<void>} Returns nothing   
+   * @returns {Promise<void>} Returns nothing
    */
   async getJwks(): Promise<void> {
     if (this.keys.length) {
       return Promise.resolve();
     }
-    const { data: { keys } } = await this.axios.get<{ keys: JWK[] }>(jwksEndpoint);
+    const {
+      data: { keys },
+    } = await this.axios.get<{ keys: JWK[] }>(jwksEndpoint);
     this.keys = keys;
   }
 
@@ -90,13 +96,13 @@ export default class CoreClient {
   async connectExec<TRequest, TResponse>(
     fn: (request: TRequest) => Promise<TResponse>,
     data: TRequest,
-    retryLeft: number = 1,
+    retryLeft: number = 1
   ): Promise<TResponse> {
     try {
       const res = await fn(data);
       return res;
     } catch (error) {
-      // Handle gRPC Connect errors 
+      // Handle gRPC Connect errors
       if (error instanceof ConnectError) {
         if (retryLeft > 0) {
           const serverException = new ScalekitServerException(error);
