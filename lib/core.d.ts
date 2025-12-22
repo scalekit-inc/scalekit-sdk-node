@@ -1,6 +1,6 @@
 import { Axios, AxiosResponse } from "axios";
-import { JWK } from 'jose';
-import { TokenResponse } from './types/auth';
+import { JWK } from "jose";
+import { TokenResponse } from "./types/auth";
 export declare const headers: {
     "user-agent": string;
     "x-sdk-version": string;

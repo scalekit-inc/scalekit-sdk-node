@@ -11,14 +11,18 @@ import PermissionClient from "./permission";
 import { IdpInitiatedLoginClaims } from "./types/auth";
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse, TokenValidationOptions } from "./types/scalekit";
 /**
- * Main Scalekit SDK client for enterprise authentication and user management.
+ * Main Scalekit SDK client for interacting with all Scalekit API endpoints.
+ *
+ * TIP: You can use it as a singleton object - that is you can initialize it just once and use the same client variable wherever required.
  *
  * This is the primary entry point for interacting with Scalekit's authentication services,
  * including SSO, SCIM, user management, roles, permissions, and passwordless authentication.
  *
- * @param {string} envUrl - The Scalekit environment URL (e.g., "https://yourorg.scalekit.com")
- * @param {string} clientId - Your Scalekit client ID from the dashboard
- * @param {string} clientSecret - Your Scalekit client secret from the dashboard
+ * You can find the Environment URL, Client ID and Client Secret in Scalekit Dashboard -> Developers (Settings) -> API Credentials
+ *
+ * @param {string} envUrl - The Scalekit environment URL (e.g., "https://yourorg.scalekit.com" or your configured custom domain like "https://auth.yourapp.ai")
+ * @param {string} clientId - Your Scalekit client ID from the Scalekit Dashboard
+ * @param {string} clientSecret - Your Scalekit client secret from the Scalekit Dashboard
  *
  * @example
  * // Initialize the Scalekit client
@@ -51,11 +55,10 @@ export default class ScalekitClient {
     readonly auth: AuthClient;
     constructor(envUrl: string, clientId: string, clientSecret: string);
     /**
-     * Generates the OAuth 2.0 authorization URL to initiate the SSO authentication flow.
+     * Utility method to generates the OAuth 2.0 authorization URL to initiate the SSO authentication flow.
      *
-     * This method constructs the authorization URL where users will be redirected to authenticate
-     * via their organization's identity provider (IdP). It supports various authentication scenarios
-     * including SSO, social logins, and PKCE flows.
+     * This method doesn't make any network calls but instead generates a fully formed Authorization URL
+     * as a string that you can redirect your users to initiate authentication.
      *
      * @param {string} redirectUri - The URL where users will be redirected after authentication.
      *                               Must match one of the redirect URIs configured in your Scalekit dashboard.
@@ -69,13 +72,13 @@ export default class ScalekitClient {
      * @param {string} [options.organizationId] - Organization ID to authenticate against.
      * @param {string} [options.provider] - Social login provider (e.g., 'google', 'github', 'microsoft').
      * @param {string} [options.codeChallenge] - PKCE code challenge for enhanced security in public clients.
-     * @param {string} [options.codeChallengeMethod] - Method used to generate the code challenge (typically 'S256').
+     * @param {string} [options.codeChallengeMethod] - Method used to generate the code challenge (we support only 'S256').
      * @param {string} [options.prompt] - Controls the authorization server's authentication behavior (e.g., 'login', 'consent', 'create').
      *
      * @returns {string} The complete authorization URL to redirect the user to
      *
      * @example
-     * // Basic SSO authentication
+     * // Initiate Enterprise SSO authentication for a given org_id
      * const authUrl = scalekitClient.getAuthorizationUrl(
      *   'https://yourapp.com/auth/callback',
      *   {
@@ -86,7 +89,8 @@ export default class ScalekitClient {
      * // Redirect user to authUrl
      *
      * @example
-     * // SSO with specific connection
+     * // Initiate Enterprise SSO authentication for a specific connection id
+     * // optionally, pass the loginhint to the 3rd party identity provider.
      * const authUrl = scalekitClient.getAuthorizationUrl(
      *   'https://yourapp.com/auth/callback',
      *   {
@@ -180,7 +184,6 @@ export default class ScalekitClient {
      *   // Use result.user, result.accessToken, etc.
      * });
      *
-     * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Authentication API Documentation}
      * @see {@link getAuthorizationUrl} - Generate the authorization URL first
      * @see {@link validateAccessToken} - Validate tokens in subsequent requests
      */
@@ -190,7 +193,7 @@ export default class ScalekitClient {
      *
      * Use this method when handling IdP-initiated SSO flows, where the authentication is
      * initiated from the identity provider's portal rather than your application. This validates
-     * the token and returns the necessary information to complete the authentication flow.
+     * the token and returns the necessary information to initiate a new SP Initiated SSO workflow.
      *
      * @param {string} idpInitiatedLoginToken - The token received in the 'idp_initiated_login' query parameter
      * @param {TokenValidationOptions} [options] - Optional token validation configuration
@@ -234,7 +237,7 @@ export default class ScalekitClient {
      *   // Handle normal callback flow...
      * });
      *
-     * @see {@link https://docs.scalekit.com/sso/guides/idp-initiated-sso | IdP-Initiated SSO Documentation}
+     * @see {@link https://docs.scalekit.com/sso/guides/idp-init-sso/ | IdP-Initiated SSO Documentation}
      * @see {@link getAuthorizationUrl} - Use the claims to construct the authorization URL
      */
     getIdpInitiatedLoginClaims(idpInitiatedLoginToken: string, options?: TokenValidationOptions): Promise<IdpInitiatedLoginClaims>;
@@ -311,17 +314,21 @@ export default class ScalekitClient {
      *   }
      * });
      *
-     * @see {@link https://docs.scalekit.com/webhooks | Webhook Documentation}
+     * @see {@link https://docs.scalekit.com/reference/webhooks/overview/ | Webhook Documentation}
      * @see {@link verifyInterceptorPayload} - Similar method for interceptor payloads
      */
     verifyWebhookPayload(secret: string, headers: Record<string, string>, payload: string): boolean;
     /**
-     * Verify interceptor payload
+     * Verifies the authenticity and integrity of interceptor payloads from Scalekit.
      *
-     * @param {string} secret The secret
-     * @param {Record<string, string>} headers The headers
-     * @param {string} payload The payload
-     * @return {boolean} Returns true if the payload is valid.
+     * Use this method to validate HTTP interceptor requests from Scalekit by verifying the HMAC signature.
+     * This ensures the interceptor payload was sent by Scalekit and hasn't been tampered with. The method
+     * checks the signature and timestamp to prevent replay attacks (5-minute tolerance window)
+     *
+     * @param {string} secret Your interceptor signing secret that you can copy from Scalekit Dashboard
+     * @param {Record<string, string>} headers The HTTP headers from the intereceptor request
+     * @param {string} payload The raw webhook request body as a string
+     * @return {boolean} Returns true if the interceptor payload is valid.
      */
     verifyInterceptorPayload(secret: string, headers: Record<string, string>, payload: string): boolean;
     /**
@@ -336,7 +343,7 @@ export default class ScalekitClient {
      */
     private verifyPayloadSignature;
     /**
-     * Validates a token and returns its payload if valid.
+     * Validates a token and returns the claims as json payload if valid.
      * Supports issuer, audience, and scope validation.
      *
      * @param {string} token The token to be validated
@@ -434,8 +441,6 @@ export default class ScalekitClient {
      *   next();
      * });
      *
-     * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Authentication API Documentation}
-     * @see {@link authenticateWithCode} - Initial authentication to obtain tokens
      */
     refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse>;
 }

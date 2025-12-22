@@ -1,11 +1,11 @@
-import GrpcConnect from './connect';
-import CoreClient from './core';
-import { GetConnectionResponse, ToggleConnectionResponse, ListConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
+import GrpcConnect from "./connect";
+import CoreClient from "./core";
+import { GetConnectionResponse, ToggleConnectionResponse, ListConnectionsResponse } from "./pkg/grpc/scalekit/v1/connections/connections_pb";
 /**
- * Client for managing SSO connections for organizations.
+ * Client for managing enterprise SSO connections for organizations.
  *
  * Connections represent the SSO integration between an organization and their identity provider (IdP).
- * Each organization can have multiple connections supporting different protocols (SAML, OIDC) and
+ * Each organization can have an enterprise connection supporting different protocols (SAML, OIDC) and
  * providers (Okta, Azure AD, Google Workspace, etc.). Use this client to retrieve connection details,
  * list connections, and enable/disable them.
  *
@@ -21,10 +21,59 @@ export default class ConnectionClient {
     private client;
     constructor(grpcConncet: GrpcConnect, coreClient: CoreClient);
     /**
-     * Get a connection by id and organization id
-     * @param organizationId The organization id
-     * @param id The connection id
-     * @returns {Promise<GetConnectionResponse>} The connection
+     * Retrieves complete configuration and status details for a specific SSO connection.
+     *
+     * Use this method to fetch comprehensive information about an organization's SSO connection,
+     * including provider settings, protocol details (SAML/OIDC), enabled status, and configuration
+     * metadata. This is useful for verifying connection setup, auditing configurations, checking
+     * connection health before authentication flows, or displaying connection details to administrators.
+     *
+     * @param {string} organizationId - The organization ID that owns the connection (format: "org_...")
+     * @param {string} id - The connection identifier to retrieve (format: "conn_...")
+     *
+     * @returns {Promise<GetConnectionResponse>} Response containing:
+     *   - connection: Complete connection object with:
+     *     - id: Unique connection identifier
+     *     - organizationId: Parent organization ID
+     *     - provider: Identity provider name (e.g., "okta", "azure_ad", "google")
+     *     - type: Protocol type ("saml", "oidc")
+     *     - enabled: Whether the connection is active
+     *     - status: Configuration status
+     *     - domains: Associated email domains for this connection
+     *     - metadata: Provider-specific configuration details
+     *     - createTime: When the connection was created
+     *     - updateTime: When the connection was last modified
+     *
+     * @throws {Error} If the organization or connection is not found
+     *
+     * @example
+     * // Get connection details
+     * const response = await scalekitClient.connection.getConnection(
+     *   'org_123456',
+     *   'conn_abc123'
+     * );
+     *
+     * const conn = response.connection;
+     * console.log('Provider:', conn.provider);
+     * console.log('Type:', conn.type);
+     * console.log('Status:', conn.enabled ? 'Enabled' : 'Disabled');
+     * console.log('Domains:', conn.domains);
+     *
+     * @example
+     * // Verify connection is ready for authentication
+     * const response = await scalekitClient.connection.getConnection(orgId, connId);
+     *
+     * if (response.connection.enabled && response.connection.status === 'active') {
+     *   console.log('Connection is ready for SSO authentication');
+     * } else {
+     *   console.log('Connection not ready:', response.connection.status);
+     * }
+     *
+     *
+     * @see {@link https://docs.scalekit.com/apis/#tag/connections | Get Connection API}
+     * @see {@link listConnections} - List all connections for an organization
+     * @see {@link enableConnection} - Enable this connection
+     * @see {@link disableConnection} - Disable this connection
      */
     getConnection(organizationId: string, id: string): Promise<GetConnectionResponse>;
     /**
@@ -78,7 +127,7 @@ export default class ConnectionClient {
     /**
      * Lists all SSO connections configured for an organization.
      *
-     * Retrieves all SSO connections (SAML, OIDC, social) that have been configured for
+     * Retrieves all enterprise SSO connections (SAML, OIDC) that have been configured for
      * the specified organization. Each connection includes details about the provider,
      * status, and configuration.
      *
@@ -132,21 +181,6 @@ export default class ConnectionClient {
      *
      * console.log('Connection enabled:', response.connection.enabled); // true
      *
-     * @example
-     * // Enable connection after successful configuration test
-     * async function activateSSO(orgId, connId) {
-     *   try {
-     *     // Test the connection first
-     *     const connection = await scalekitClient.connection.getConnection(orgId, connId);
-     *
-     *     if (connection.status === 'configured') {
-     *       await scalekitClient.connection.enableConnection(orgId, connId);
-     *       console.log('SSO connection activated successfully');
-     *     }
-     *   } catch (error) {
-     *     console.error('Failed to enable connection:', error);
-     *   }
-     * }
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/connections | Enable Connection API}
      * @see {@link disableConnection} - Disable a connection
@@ -173,25 +207,6 @@ export default class ConnectionClient {
      * );
      *
      * console.log('Connection disabled:', !response.connection.enabled); // true
-     *
-     * @example
-     * // Temporarily disable connection for maintenance
-     * async function performConnectionMaintenance(orgId, connId) {
-     *   // Disable the connection
-     *   await scalekitClient.connection.disableConnection(orgId, connId);
-     *   console.log('Connection disabled for maintenance');
-     *
-     *   try {
-     *     // Perform maintenance tasks
-     *     await updateConnectionConfig(orgId, connId);
-     *
-     *     // Re-enable the connection
-     *     await scalekitClient.connection.enableConnection(orgId, connId);
-     *     console.log('Connection re-enabled after maintenance');
-     *   } catch (error) {
-     *     console.error('Maintenance failed:', error);
-     *   }
-     * }
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/connections | Disable Connection API}
      * @see {@link enableConnection} - Enable a connection
