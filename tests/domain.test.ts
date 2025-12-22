@@ -149,6 +149,60 @@ describe('Domains', () => {
       expect(domainTypes).toContain(DomainType.ALLOWED_EMAIL_DOMAIN);
       expect(domainTypes).toContain(DomainType.ORGANIZATION_DOMAIN);
     });
+
+    it('should list domains filtered by ALLOWED_EMAIL_DOMAIN type', async () => {
+      // Create domains of different types
+      const { domainName: allowedDomainName } = await TestDomainManager.createTestDomain(client, testOrg, 'allowed');
+      const { domainName: orgDomainName } = await TestDomainManager.createTestDomain(client, testOrg, 'organization');
+      
+      // Filter by ALLOWED_EMAIL_DOMAIN type
+      const response = await client.domain.listDomains(testOrg, {
+        domainType: DomainType.ALLOWED_EMAIL_DOMAIN
+      });
+      
+      expect(response).toBeDefined();
+      expect(response.domains).toBeDefined();
+      expect(Array.isArray(response.domains)).toBe(true);
+      
+      // Verify all returned domains are of type ALLOWED_EMAIL_DOMAIN
+      response.domains.forEach(domain => {
+        expect(domain.domainType).toBe(DomainType.ALLOWED_EMAIL_DOMAIN);
+      });
+      
+      // Verify the allowed domain is in the filtered list
+      const domainNames = response.domains.map(d => d.domain);
+      expect(domainNames).toContain(allowedDomainName);
+      
+      // Verify the organization domain is NOT in the filtered list
+      expect(domainNames).not.toContain(orgDomainName);
+    });
+
+    it('should list domains filtered by ORGANIZATION_DOMAIN type', async () => {
+      // Create domains of different types
+      const { domainName: allowedDomainName } = await TestDomainManager.createTestDomain(client, testOrg, 'allowed');
+      const { domainName: orgDomainName } = await TestDomainManager.createTestDomain(client, testOrg, 'organization');
+      
+      // Filter by ORGANIZATION_DOMAIN type
+      const response = await client.domain.listDomains(testOrg, {
+        domainType: DomainType.ORGANIZATION_DOMAIN
+      });
+      
+      expect(response).toBeDefined();
+      expect(response.domains).toBeDefined();
+      expect(Array.isArray(response.domains)).toBe(true);
+      
+      // Verify all returned domains are of type ORGANIZATION_DOMAIN
+      response.domains.forEach(domain => {
+        expect(domain.domainType).toBe(DomainType.ORGANIZATION_DOMAIN);
+      });
+      
+      // Verify the organization domain is in the filtered list
+      const domainNames = response.domains.map(d => d.domain);
+      expect(domainNames).toContain(orgDomainName);
+      
+      // Verify the allowed domain is NOT in the filtered list
+      expect(domainNames).not.toContain(allowedDomainName);
+    });
   });
 
   describe('getDomain', () => {
