@@ -487,7 +487,7 @@ export default class ScalekitClient {
    *
    * @param {string} secret Your interceptor signing secret that you can copy from Scalekit Dashboard
    * @param {Record<string, string>} headers The HTTP headers from the interceptor request
-   * @param {string} payload The raw webhook request body as a string
+   * @param {string} payload The raw interceptor request body as a string
    * @return {boolean} Returns true if the interceptor payload is valid.
    */
   verifyInterceptorPayload(
