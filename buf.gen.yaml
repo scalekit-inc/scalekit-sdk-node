@@ -19,3 +19,4 @@ types:
     - scalekit.v1.sessions
     - scalekit.v1.roles
     - scalekit.v1.auth
+    - scalekit.v1.auth.webauthn

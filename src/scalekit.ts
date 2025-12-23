@@ -1,33 +1,23 @@
-import crypto from "crypto";
-import * as jose from "jose";
-import QueryString from "qs";
-import GrpcConnect from "./connect";
-import ConnectionClient from "./connection";
-import { IdTokenClaimToUserMap } from "./constants/user";
-import CoreClient from "./core";
-import DirectoryClient from "./directory";
-import DomainClient from "./domain";
-import AuthClient from "./auth";
-import OrganizationClient from "./organization";
-import PasswordlessClient from "./passwordless";
-import UserClient from "./user";
-import SessionClient from "./session";
-import RoleClient from "./role";
-import PermissionClient from "./permission";
-import { IdpInitiatedLoginClaims, IdTokenClaim, User } from "./types/auth";
-import {
-  AuthenticationOptions,
-  AuthenticationResponse,
-  AuthorizationUrlOptions,
-  GrantType,
-  LogoutUrlOptions,
-  RefreshTokenResponse,
-  TokenValidationOptions,
-} from "./types/scalekit";
-import {
-  WebhookVerificationError,
-  ScalekitValidateTokenFailureException,
-} from "./errors/base-exception";
+import crypto from 'crypto';
+import * as jose from 'jose';
+import QueryString from 'qs';
+import GrpcConnect from './connect';
+import ConnectionClient from './connection';
+import { IdTokenClaimToUserMap } from './constants/user';
+import CoreClient from './core';
+import DirectoryClient from './directory';
+import DomainClient from './domain';
+import AuthClient from './auth';
+import OrganizationClient from './organization';
+import PasswordlessClient from './passwordless';
+import UserClient from './user';
+import SessionClient from './session';
+import RoleClient from './role';
+import PermissionClient from './permission';
+import WebAuthnClient from './webauthn';
+import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
+import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse ,TokenValidationOptions } from './types/scalekit';
+import { WebhookVerificationError, ScalekitValidateTokenFailureException } from './errors/base-exception';
 
 const authorizeEndpoint = "oauth/authorize";
 const logoutEndpoint = "oidc/logout";
@@ -77,9 +67,20 @@ export default class ScalekitClient {
   readonly role: RoleClient;
   readonly permission: PermissionClient;
   readonly auth: AuthClient;
-  constructor(envUrl: string, clientId: string, clientSecret: string) {
-    this.coreClient = new CoreClient(envUrl, clientId, clientSecret);
-    this.grpcConnect = new GrpcConnect(this.coreClient);
+  readonly webauthn: WebAuthnClient;
+  constructor(
+    envUrl: string,
+    clientId: string,
+    clientSecret: string
+  ) {
+    this.coreClient = new CoreClient(
+      envUrl,
+      clientId,
+      clientSecret
+    );
+    this.grpcConnect = new GrpcConnect(
+      this.coreClient
+    );
 
     this.organization = new OrganizationClient(
       this.grpcConnect,
@@ -92,11 +93,30 @@ export default class ScalekitClient {
       this.grpcConnect,
       this.coreClient
     );
-    this.user = new UserClient(this.grpcConnect, this.coreClient);
-    this.session = new SessionClient(this.grpcConnect, this.coreClient);
-    this.role = new RoleClient(this.grpcConnect, this.coreClient);
-    this.permission = new PermissionClient(this.grpcConnect, this.coreClient);
-    this.auth = new AuthClient(this.grpcConnect, this.coreClient);
+    this.user = new UserClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.session = new SessionClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.role = new RoleClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.permission = new PermissionClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.auth = new AuthClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.webauthn = new WebAuthnClient(
+      this.grpcConnect,
+      this.coreClient
+    );
   }
 
   /**

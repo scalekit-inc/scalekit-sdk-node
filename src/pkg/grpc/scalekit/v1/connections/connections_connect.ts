@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { AssignDomainsToConnectionRequest, AssignDomainsToConnectionResponse, CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetConnectionTestResultRequest, GetConnectionTestResultResponse, GetEnvironmentConnectionRequest, ListAppConnectionsRequest, ListAppConnectionsResponse, ListConnectionsRequest, ListConnectionsResponse, ListOrganizationConnectionsRequest, ListOrganizationConnectionsResponse, SearchOrganizationConnectionsRequest, SearchOrganizationConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateConnectionUserManagementSettingsRequest, UpdateConnectionUserManagementSettingsResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
+import { AssignDomainsToConnectionRequest, AssignDomainsToConnectionResponse, CreateConnectionRequest, CreateConnectionResponse, CreateEnvironmentConnectionRequest, DeleteConnectionRequest, DeleteEnvironmentConnectionRequest, GetConnectionRequest, GetConnectionResponse, GetConnectionTestResultRequest, GetConnectionTestResultResponse, GetEnvironmentConnectionRequest, ListAppConnectionsRequest, ListAppConnectionsResponse, ListConnectionsRequest, ListConnectionsResponse, ListOrganizationConnectionsRequest, ListOrganizationConnectionsResponse, SearchOrganizationConnectionsRequest, SearchOrganizationConnectionsResponse, ToggleConnectionRequest, ToggleConnectionResponse, ToggleEnvironmentConnectionRequest, UpdateConnectionRequest, UpdateConnectionResponse, UpdateEnvironmentConnectionRequest } from "./connections_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -172,15 +172,6 @@ export const ConnectionService = {
       name: "ListAppConnections",
       I: ListAppConnectionsRequest,
       O: ListAppConnectionsResponse,
-      kind: MethodKind.Unary,
-    },
-    /**
-     * @generated from rpc scalekit.v1.connections.ConnectionService.UpdateConnectionUserManagementSettings
-     */
-    updateConnectionUserManagementSettings: {
-      name: "UpdateConnectionUserManagementSettings",
-      I: UpdateConnectionUserManagementSettingsRequest,
-      O: UpdateConnectionUserManagementSettingsResponse,
       kind: MethodKind.Unary,
     },
   }

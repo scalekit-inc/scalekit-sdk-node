@@ -57,9 +57,9 @@ export class User extends Message<User> {
   metadata: { [key: string]: string } = {};
 
   /**
-   * @generated from field: google.protobuf.Timestamp last_login = 10;
+   * @generated from field: google.protobuf.Timestamp last_login_time = 10;
    */
-  lastLogin?: Timestamp;
+  lastLoginTime?: Timestamp;
 
   constructor(data?: PartialMessage<User>) {
     super();
@@ -78,7 +78,7 @@ export class User extends Message<User> {
     { no: 7, name: "memberships", kind: "message", T: OrganizationMembership, repeated: true },
     { no: 8, name: "user_profile", kind: "message", T: UserProfile },
     { no: 9, name: "metadata", kind: "map", K: 9 /* ScalarType.STRING */, V: {kind: "scalar", T: 9 /* ScalarType.STRING */} },
-    { no: 10, name: "last_login", kind: "message", T: Timestamp },
+    { no: 10, name: "last_login_time", kind: "message", T: Timestamp },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): User {
