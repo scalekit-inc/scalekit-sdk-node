@@ -74,6 +74,116 @@ proto3.util.setEnumType(MembershipStatus, "scalekit.v1.commons.MembershipStatus"
 ]);
 
 /**
+ * @generated from enum scalekit.v1.commons.IdentityProviderType
+ */
+export enum IdentityProviderType {
+  /**
+   * @generated from enum value: IDENTITY_PROVIDER_UNSPECIFIED = 0;
+   */
+  IDENTITY_PROVIDER_UNSPECIFIED = 0,
+
+  /**
+   * @generated from enum value: OKTA = 1;
+   */
+  OKTA = 1,
+
+  /**
+   * @generated from enum value: GOOGLE = 2;
+   */
+  GOOGLE = 2,
+
+  /**
+   * @generated from enum value: MICROSOFT_AD = 3;
+   */
+  MICROSOFT_AD = 3,
+
+  /**
+   * @generated from enum value: AUTH0 = 4;
+   */
+  AUTH0 = 4,
+
+  /**
+   * @generated from enum value: ONELOGIN = 5;
+   */
+  ONELOGIN = 5,
+
+  /**
+   * @generated from enum value: PING_IDENTITY = 6;
+   */
+  PING_IDENTITY = 6,
+
+  /**
+   * @generated from enum value: JUMPCLOUD = 7;
+   */
+  JUMPCLOUD = 7,
+
+  /**
+   * @generated from enum value: CUSTOM = 8;
+   */
+  CUSTOM = 8,
+
+  /**
+   * @generated from enum value: GITHUB = 9;
+   */
+  GITHUB = 9,
+
+  /**
+   * @generated from enum value: GITLAB = 10;
+   */
+  GITLAB = 10,
+
+  /**
+   * @generated from enum value: LINKEDIN = 11;
+   */
+  LINKEDIN = 11,
+
+  /**
+   * @generated from enum value: SALESFORCE = 12;
+   */
+  SALESFORCE = 12,
+
+  /**
+   * @generated from enum value: MICROSOFT = 13;
+   */
+  MICROSOFT = 13,
+
+  /**
+   * @generated from enum value: IDP_SIMULATOR = 14;
+   */
+  IDP_SIMULATOR = 14,
+
+  /**
+   * @generated from enum value: SCALEKIT = 15;
+   */
+  SCALEKIT = 15,
+
+  /**
+   * @generated from enum value: ADFS = 16;
+   */
+  ADFS = 16,
+}
+// Retrieve enum metadata with: proto3.getEnumType(IdentityProviderType)
+proto3.util.setEnumType(IdentityProviderType, "scalekit.v1.commons.IdentityProviderType", [
+  { no: 0, name: "IDENTITY_PROVIDER_UNSPECIFIED" },
+  { no: 1, name: "OKTA" },
+  { no: 2, name: "GOOGLE" },
+  { no: 3, name: "MICROSOFT_AD" },
+  { no: 4, name: "AUTH0" },
+  { no: 5, name: "ONELOGIN" },
+  { no: 6, name: "PING_IDENTITY" },
+  { no: 7, name: "JUMPCLOUD" },
+  { no: 8, name: "CUSTOM" },
+  { no: 9, name: "GITHUB" },
+  { no: 10, name: "GITLAB" },
+  { no: 11, name: "LINKEDIN" },
+  { no: 12, name: "SALESFORCE" },
+  { no: 13, name: "MICROSOFT" },
+  { no: 14, name: "IDP_SIMULATOR" },
+  { no: 15, name: "SCALEKIT" },
+  { no: 16, name: "ADFS" },
+]);
+
+/**
  * @generated from message scalekit.v1.commons.OrganizationMembership
  */
 export class OrganizationMembership extends Message<OrganizationMembership> {
@@ -132,6 +242,11 @@ export class OrganizationMembership extends Message<OrganizationMembership> {
    */
   expiresAt?: Timestamp;
 
+  /**
+   * @generated from field: optional string provisioning_method = 14;
+   */
+  provisioningMethod?: string;
+
   constructor(data?: PartialMessage<OrganizationMembership>) {
     super();
     proto3.util.initPartial(data, this);
@@ -151,6 +266,7 @@ export class OrganizationMembership extends Message<OrganizationMembership> {
     { no: 11, name: "created_at", kind: "message", T: Timestamp, opt: true },
     { no: 12, name: "accepted_at", kind: "message", T: Timestamp, opt: true },
     { no: 13, name: "expires_at", kind: "message", T: Timestamp, opt: true },
+    { no: 14, name: "provisioning_method", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationMembership {
@@ -305,6 +421,11 @@ export class UserProfile extends Message<UserProfile> {
    */
   gender = "";
 
+  /**
+   * @generated from field: repeated scalekit.v1.commons.ExternalIdentity external_identities = 10;
+   */
+  externalIdentities: ExternalIdentity[] = [];
+
   constructor(data?: PartialMessage<UserProfile>) {
     super();
     proto3.util.initPartial(data, this);
@@ -329,6 +450,7 @@ export class UserProfile extends Message<UserProfile> {
     { no: 14, name: "picture", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 15, name: "groups", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
     { no: 16, name: "gender", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 10, name: "external_identities", kind: "message", T: ExternalIdentity, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserProfile {
@@ -345,6 +467,101 @@ export class UserProfile extends Message<UserProfile> {
 
   static equals(a: UserProfile | PlainMessage<UserProfile> | undefined, b: UserProfile | PlainMessage<UserProfile> | undefined): boolean {
     return proto3.util.equals(UserProfile, a, b);
+  }
+}
+
+/**
+ * @generated from message scalekit.v1.commons.ExternalIdentity
+ */
+export class ExternalIdentity extends Message<ExternalIdentity> {
+  /**
+   * Identifier for this connection.
+   *
+   * @generated from field: string connection_id = 1;
+   */
+  connectionId = "";
+
+  /**
+   * Connection name.
+   *
+   * @generated from field: string connection_type = 2;
+   */
+  connectionType = "";
+
+  /**
+   * Name of connection, e.g. Google.
+   *
+   * @generated from field: scalekit.v1.commons.IdentityProviderType connection_provider = 3;
+   */
+  connectionProvider = IdentityProviderType.IDENTITY_PROVIDER_UNSPECIFIED;
+
+  /**
+   * Unique identifier of the user for this identity.
+   *
+   * @generated from field: string connection_user_id = 4;
+   */
+  connectionUserId = "";
+
+  /**
+   * Whether this identity is from a social provider (true) or not (false).
+   *
+   * @generated from field: bool is_social = 5;
+   */
+  isSocial = false;
+
+  /**
+   * Last successful login time with this IdP for the user.
+   *
+   * @generated from field: google.protobuf.Timestamp last_login_time = 6;
+   */
+  lastLoginTime?: Timestamp;
+
+  /**
+   * Creation of this external identity with the IdP for the user.
+   *
+   * @generated from field: google.protobuf.Timestamp created_time = 7;
+   */
+  createdTime?: Timestamp;
+
+  /**
+   * Last time when sync of data happened for this user from external IdP.
+   *
+   * @generated from field: google.protobuf.Timestamp last_synced_time = 8;
+   */
+  lastSyncedTime?: Timestamp;
+
+  constructor(data?: PartialMessage<ExternalIdentity>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.commons.ExternalIdentity";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "connection_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 3, name: "connection_provider", kind: "enum", T: proto3.getEnumType(IdentityProviderType) },
+    { no: 4, name: "connection_user_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "is_social", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
+    { no: 6, name: "last_login_time", kind: "message", T: Timestamp },
+    { no: 7, name: "created_time", kind: "message", T: Timestamp },
+    { no: 8, name: "last_synced_time", kind: "message", T: Timestamp },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExternalIdentity {
+    return new ExternalIdentity().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ExternalIdentity {
+    return new ExternalIdentity().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ExternalIdentity {
+    return new ExternalIdentity().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: ExternalIdentity | PlainMessage<ExternalIdentity> | undefined, b: ExternalIdentity | PlainMessage<ExternalIdentity> | undefined): boolean {
+    return proto3.util.equals(ExternalIdentity, a, b);
   }
 }
 

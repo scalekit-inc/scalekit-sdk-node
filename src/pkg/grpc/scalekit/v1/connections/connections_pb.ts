@@ -508,123 +508,6 @@ proto3.util.setEnumType(ConnectionProvider, "scalekit.v1.connections.ConnectionP
 ]);
 
 /**
- * @generated from message scalekit.v1.connections.UpdateConnectionUserManagementSettingsRequest
- */
-export class UpdateConnectionUserManagementSettingsRequest extends Message<UpdateConnectionUserManagementSettingsRequest> {
-  /**
-   * @generated from field: string connection_id = 1;
-   */
-  connectionId = "";
-
-  /**
-   * @generated from field: scalekit.v1.connections.ConnectionUserManagementSettings settings = 2;
-   */
-  settings?: ConnectionUserManagementSettings;
-
-  constructor(data?: PartialMessage<UpdateConnectionUserManagementSettingsRequest>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.connections.UpdateConnectionUserManagementSettingsRequest";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "connection_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 2, name: "settings", kind: "message", T: ConnectionUserManagementSettings },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnectionUserManagementSettingsRequest {
-    return new UpdateConnectionUserManagementSettingsRequest().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsRequest {
-    return new UpdateConnectionUserManagementSettingsRequest().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsRequest {
-    return new UpdateConnectionUserManagementSettingsRequest().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: UpdateConnectionUserManagementSettingsRequest | PlainMessage<UpdateConnectionUserManagementSettingsRequest> | undefined, b: UpdateConnectionUserManagementSettingsRequest | PlainMessage<UpdateConnectionUserManagementSettingsRequest> | undefined): boolean {
-    return proto3.util.equals(UpdateConnectionUserManagementSettingsRequest, a, b);
-  }
-}
-
-/**
- * @generated from message scalekit.v1.connections.ConnectionUserManagementSettings
- */
-export class ConnectionUserManagementSettings extends Message<ConnectionUserManagementSettings> {
-  /**
-   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 1;
-   */
-  syncUserProfileOnSignin?: boolean;
-
-  constructor(data?: PartialMessage<ConnectionUserManagementSettings>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.connections.ConnectionUserManagementSettings";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "sync_user_profile_on_signin", kind: "message", T: BoolValue },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConnectionUserManagementSettings {
-    return new ConnectionUserManagementSettings().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ConnectionUserManagementSettings {
-    return new ConnectionUserManagementSettings().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ConnectionUserManagementSettings {
-    return new ConnectionUserManagementSettings().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: ConnectionUserManagementSettings | PlainMessage<ConnectionUserManagementSettings> | undefined, b: ConnectionUserManagementSettings | PlainMessage<ConnectionUserManagementSettings> | undefined): boolean {
-    return proto3.util.equals(ConnectionUserManagementSettings, a, b);
-  }
-}
-
-/**
- * @generated from message scalekit.v1.connections.UpdateConnectionUserManagementSettingsResponse
- */
-export class UpdateConnectionUserManagementSettingsResponse extends Message<UpdateConnectionUserManagementSettingsResponse> {
-  /**
-   * @generated from field: scalekit.v1.connections.ConnectionUserManagementSettings settings = 1;
-   */
-  settings?: ConnectionUserManagementSettings;
-
-  constructor(data?: PartialMessage<UpdateConnectionUserManagementSettingsResponse>) {
-    super();
-    proto3.util.initPartial(data, this);
-  }
-
-  static readonly runtime: typeof proto3 = proto3;
-  static readonly typeName = "scalekit.v1.connections.UpdateConnectionUserManagementSettingsResponse";
-  static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "settings", kind: "message", T: ConnectionUserManagementSettings },
-  ]);
-
-  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnectionUserManagementSettingsResponse {
-    return new UpdateConnectionUserManagementSettingsResponse().fromBinary(bytes, options);
-  }
-
-  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsResponse {
-    return new UpdateConnectionUserManagementSettingsResponse().fromJson(jsonValue, options);
-  }
-
-  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsResponse {
-    return new UpdateConnectionUserManagementSettingsResponse().fromJsonString(jsonString, options);
-  }
-
-  static equals(a: UpdateConnectionUserManagementSettingsResponse | PlainMessage<UpdateConnectionUserManagementSettingsResponse> | undefined, b: UpdateConnectionUserManagementSettingsResponse | PlainMessage<UpdateConnectionUserManagementSettingsResponse> | undefined): boolean {
-    return proto3.util.equals(UpdateConnectionUserManagementSettingsResponse, a, b);
-  }
-}
-
-/**
  * @generated from message scalekit.v1.connections.AssignDomainsToConnectionRequest
  */
 export class AssignDomainsToConnectionRequest extends Message<AssignDomainsToConnectionRequest> {
@@ -1093,11 +976,6 @@ export class Connection extends Message<Connection> {
    */
   domains: Domain[] = [];
 
-  /**
-   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 28;
-   */
-  syncUserProfileOnSignin?: boolean;
-
   constructor(data?: PartialMessage<Connection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1128,7 +1006,6 @@ export class Connection extends Message<Connection> {
     { no: 25, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 23, name: "provider_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 24, name: "domains", kind: "message", T: Domain, repeated: true },
-    { no: 28, name: "sync_user_profile_on_signin", kind: "message", T: BoolValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Connection {
@@ -1362,11 +1239,6 @@ export class UpdateConnection extends Message<UpdateConnection> {
    */
   providerKey = "";
 
-  /**
-   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 25;
-   */
-  syncUserProfileOnSignin?: boolean;
-
   constructor(data?: PartialMessage<UpdateConnection>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1389,7 +1261,6 @@ export class UpdateConnection extends Message<UpdateConnection> {
     { no: 24, name: "webauthn_config", kind: "message", T: WebAuthConfiguration, oneof: "settings" },
     { no: 22, name: "key_id", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 21, name: "provider_key", kind: "scalar", T: 9 /* ScalarType.STRING */ },
-    { no: 25, name: "sync_user_profile_on_signin", kind: "message", T: BoolValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnection {
@@ -2260,6 +2131,16 @@ export class OIDCConnectionConfig extends Message<OIDCConnectionConfig> {
    */
   backchannelLogoutRedirectUri?: string;
 
+  /**
+   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 17;
+   */
+  syncUserProfileOnLogin?: boolean;
+
+  /**
+   * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 18;
+   */
+  jitProvisioningWithSsoEnabled?: boolean;
+
   constructor(data?: PartialMessage<OIDCConnectionConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2283,6 +2164,8 @@ export class OIDCConnectionConfig extends Message<OIDCConnectionConfig> {
     { no: 14, name: "idp_logout_required", kind: "message", T: BoolValue },
     { no: 15, name: "post_logout_redirect_uri", kind: "message", T: StringValue },
     { no: 16, name: "backchannel_logout_redirect_uri", kind: "message", T: StringValue },
+    { no: 17, name: "sync_user_profile_on_login", kind: "message", T: BoolValue },
+    { no: 18, name: "jit_provisioning_with_sso_enabled", kind: "message", T: BoolValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OIDCConnectionConfig {
@@ -2366,6 +2249,11 @@ export class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
    */
   customScopeName?: string;
 
+  /**
+   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 18;
+   */
+  syncUserProfileOnLogin?: boolean;
+
   constructor(data?: PartialMessage<OAuthConnectionConfig>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2386,6 +2274,7 @@ export class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
     { no: 15, name: "use_platform_creds", kind: "message", T: BoolValue },
     { no: 16, name: "access_type", kind: "message", T: StringValue },
     { no: 17, name: "custom_scope_name", kind: "message", T: StringValue },
+    { no: 18, name: "sync_user_profile_on_login", kind: "message", T: BoolValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OAuthConnectionConfig {
@@ -2968,6 +2857,16 @@ export class SAMLConnectionConfigRequest extends Message<SAMLConnectionConfigReq
    */
   spSloUrl?: string;
 
+  /**
+   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 23;
+   */
+  syncUserProfileOnLogin?: boolean;
+
+  /**
+   * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 24;
+   */
+  jitProvisioningWithSsoEnabled?: boolean;
+
   constructor(data?: PartialMessage<SAMLConnectionConfigRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -2995,6 +2894,8 @@ export class SAMLConnectionConfigRequest extends Message<SAMLConnectionConfigReq
     { no: 20, name: "sp_entity_id", kind: "message", T: StringValue },
     { no: 21, name: "sp_assertion_url", kind: "message", T: StringValue },
     { no: 22, name: "sp_slo_url", kind: "message", T: StringValue },
+    { no: 23, name: "sync_user_profile_on_login", kind: "message", T: BoolValue },
+    { no: 24, name: "jit_provisioning_with_sso_enabled", kind: "message", T: BoolValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SAMLConnectionConfigRequest {
@@ -3123,6 +3024,16 @@ export class SAMLConnectionConfigResponse extends Message<SAMLConnectionConfigRe
    */
   spSloUrl?: string;
 
+  /**
+   * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 22;
+   */
+  syncUserProfileOnLogin?: boolean;
+
+  /**
+   * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 23;
+   */
+  jitProvisioningWithSsoEnabled?: boolean;
+
   constructor(data?: PartialMessage<SAMLConnectionConfigResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -3152,6 +3063,8 @@ export class SAMLConnectionConfigResponse extends Message<SAMLConnectionConfigRe
     { no: 19, name: "certificate_id", kind: "message", T: StringValue },
     { no: 20, name: "idp_slo_required", kind: "message", T: BoolValue },
     { no: 21, name: "sp_slo_url", kind: "message", T: StringValue },
+    { no: 22, name: "sync_user_profile_on_login", kind: "message", T: BoolValue },
+    { no: 23, name: "jit_provisioning_with_sso_enabled", kind: "message", T: BoolValue },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SAMLConnectionConfigResponse {

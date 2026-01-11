@@ -332,61 +332,6 @@ export declare enum ConnectionProvider {
     ADFS = 16
 }
 /**
- * @generated from message scalekit.v1.connections.UpdateConnectionUserManagementSettingsRequest
- */
-export declare class UpdateConnectionUserManagementSettingsRequest extends Message<UpdateConnectionUserManagementSettingsRequest> {
-    /**
-     * @generated from field: string connection_id = 1;
-     */
-    connectionId: string;
-    /**
-     * @generated from field: scalekit.v1.connections.ConnectionUserManagementSettings settings = 2;
-     */
-    settings?: ConnectionUserManagementSettings;
-    constructor(data?: PartialMessage<UpdateConnectionUserManagementSettingsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.UpdateConnectionUserManagementSettingsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnectionUserManagementSettingsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsRequest;
-    static equals(a: UpdateConnectionUserManagementSettingsRequest | PlainMessage<UpdateConnectionUserManagementSettingsRequest> | undefined, b: UpdateConnectionUserManagementSettingsRequest | PlainMessage<UpdateConnectionUserManagementSettingsRequest> | undefined): boolean;
-}
-/**
- * @generated from message scalekit.v1.connections.ConnectionUserManagementSettings
- */
-export declare class ConnectionUserManagementSettings extends Message<ConnectionUserManagementSettings> {
-    /**
-     * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 1;
-     */
-    syncUserProfileOnSignin?: boolean;
-    constructor(data?: PartialMessage<ConnectionUserManagementSettings>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.ConnectionUserManagementSettings";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConnectionUserManagementSettings;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ConnectionUserManagementSettings;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ConnectionUserManagementSettings;
-    static equals(a: ConnectionUserManagementSettings | PlainMessage<ConnectionUserManagementSettings> | undefined, b: ConnectionUserManagementSettings | PlainMessage<ConnectionUserManagementSettings> | undefined): boolean;
-}
-/**
- * @generated from message scalekit.v1.connections.UpdateConnectionUserManagementSettingsResponse
- */
-export declare class UpdateConnectionUserManagementSettingsResponse extends Message<UpdateConnectionUserManagementSettingsResponse> {
-    /**
-     * @generated from field: scalekit.v1.connections.ConnectionUserManagementSettings settings = 1;
-     */
-    settings?: ConnectionUserManagementSettings;
-    constructor(data?: PartialMessage<UpdateConnectionUserManagementSettingsResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.UpdateConnectionUserManagementSettingsResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnectionUserManagementSettingsResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateConnectionUserManagementSettingsResponse;
-    static equals(a: UpdateConnectionUserManagementSettingsResponse | PlainMessage<UpdateConnectionUserManagementSettingsResponse> | undefined, b: UpdateConnectionUserManagementSettingsResponse | PlainMessage<UpdateConnectionUserManagementSettingsResponse> | undefined): boolean;
-}
-/**
  * @generated from message scalekit.v1.connections.AssignDomainsToConnectionRequest
  */
 export declare class AssignDomainsToConnectionRequest extends Message<AssignDomainsToConnectionRequest> {
@@ -667,10 +612,6 @@ export declare class Connection extends Message<Connection> {
      * @generated from field: repeated scalekit.v1.domains.Domain domains = 24;
      */
     domains: Domain[];
-    /**
-     * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 28;
-     */
-    syncUserProfileOnSignin?: boolean;
     constructor(data?: PartialMessage<Connection>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.Connection";
@@ -824,10 +765,6 @@ export declare class UpdateConnection extends Message<UpdateConnection> {
      * @generated from field: string provider_key = 21;
      */
     providerKey: string;
-    /**
-     * @generated from field: google.protobuf.BoolValue sync_user_profile_on_signin = 25;
-     */
-    syncUserProfileOnSignin?: boolean;
     constructor(data?: PartialMessage<UpdateConnection>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.UpdateConnection";
@@ -1293,6 +1230,14 @@ export declare class OIDCConnectionConfig extends Message<OIDCConnectionConfig> 
      * @generated from field: google.protobuf.StringValue backchannel_logout_redirect_uri = 16;
      */
     backchannelLogoutRedirectUri?: string;
+    /**
+     * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 17;
+     */
+    syncUserProfileOnLogin?: boolean;
+    /**
+     * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 18;
+     */
+    jitProvisioningWithSsoEnabled?: boolean;
     constructor(data?: PartialMessage<OIDCConnectionConfig>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.OIDCConnectionConfig";
@@ -1354,6 +1299,10 @@ export declare class OAuthConnectionConfig extends Message<OAuthConnectionConfig
      * @generated from field: google.protobuf.StringValue custom_scope_name = 17;
      */
     customScopeName?: string;
+    /**
+     * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 18;
+     */
+    syncUserProfileOnLogin?: boolean;
     constructor(data?: PartialMessage<OAuthConnectionConfig>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.OAuthConnectionConfig";
@@ -1697,6 +1646,14 @@ export declare class SAMLConnectionConfigRequest extends Message<SAMLConnectionC
      * @generated from field: google.protobuf.StringValue sp_slo_url = 22;
      */
     spSloUrl?: string;
+    /**
+     * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 23;
+     */
+    syncUserProfileOnLogin?: boolean;
+    /**
+     * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 24;
+     */
+    jitProvisioningWithSsoEnabled?: boolean;
     constructor(data?: PartialMessage<SAMLConnectionConfigRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.SAMLConnectionConfigRequest";
@@ -1794,6 +1751,14 @@ export declare class SAMLConnectionConfigResponse extends Message<SAMLConnection
      * @generated from field: google.protobuf.StringValue sp_slo_url = 21;
      */
     spSloUrl?: string;
+    /**
+     * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 22;
+     */
+    syncUserProfileOnLogin?: boolean;
+    /**
+     * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 23;
+     */
+    jitProvisioningWithSsoEnabled?: boolean;
     constructor(data?: PartialMessage<SAMLConnectionConfigResponse>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.SAMLConnectionConfigResponse";
