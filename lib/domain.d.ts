@@ -124,6 +124,7 @@ export default class DomainClient {
      * @see {@link listDomains} - List all domains for an organization
      */
     getDomain(organizationId: string, domainId: string): Promise<GetDomainResponse>;
+    private resolveDomainType;
     /**
      * Retrieves all domain configurations for an organization.
      *
@@ -136,6 +137,8 @@ export default class DomainClient {
      *
      * @param {string} organizationId - The organization ID (format: "org_...")
      *
+     * @param options Optional parameters for filtering domains
+     * @param {DomainType | string} options.domainType Filter domains by type (ALLOWED_EMAIL_DOMAIN or ORGANIZATION_DOMAIN)
      * @returns {Promise<ListDomainResponse>} List of all domains with their configurations
      *
      * @example
@@ -158,7 +161,9 @@ export default class DomainClient {
      * @see {@link getDomain} - Get details for a specific domain
      * @see {@link deleteDomain} - Remove a domain
      */
-    listDomains(organizationId: string): Promise<ListDomainResponse>;
+    listDomains(organizationId: string, options?: {
+        domainType?: DomainType | string;
+    }): Promise<ListDomainResponse>;
     /**
      * Deletes a domain from an organization.
      *
