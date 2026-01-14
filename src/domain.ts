@@ -114,7 +114,7 @@ export default class DomainClient {
       },
       domain: {
         domain: name,
-        ...(domainTypeValue && { domainType: domainTypeValue }),
+        ...(!!domainTypeValue && { domainType: domainTypeValue }),
       },
     });
   }
@@ -175,6 +175,20 @@ export default class DomainClient {
     });
   }
 
+  private resolveDomainType(
+    domainType?: DomainType | string
+  ): DomainType | undefined {
+    if (domainType == null) return;
+    if (typeof domainType !== 'string') return domainType;
+    const resolved = DomainType[domainType as keyof typeof DomainType];
+    if (resolved === undefined) {
+      throw new Error(
+        `Invalid domain type: ${domainType}. Expected ALLOWED_EMAIL_DOMAIN or ORGANIZATION_DOMAIN`
+      );
+    }
+    return resolved;
+  }
+
   /**
    * Retrieves all domain configurations for an organization.
    *
@@ -187,6 +201,8 @@ export default class DomainClient {
    *
    * @param {string} organizationId - The organization ID (format: "org_...")
    *
+   * @param options Optional parameters for filtering domains
+   * @param {DomainType | string} options.domainType Filter domains by type (ALLOWED_EMAIL_DOMAIN or ORGANIZATION_DOMAIN)
    * @returns {Promise<ListDomainResponse>} List of all domains with their configurations
    *
    * @example
@@ -209,13 +225,19 @@ export default class DomainClient {
    * @see {@link getDomain} - Get details for a specific domain
    * @see {@link deleteDomain} - Remove a domain
    */
-  async listDomains(organizationId: string): Promise<ListDomainResponse> {
-    return this.coreClient.connectExec(this.client.listDomains, {
-      identities: {
-        case: "organizationId",
-        value: organizationId,
+  async listDomains(organizationId: string, options?: { domainType?: DomainType | string }): Promise<ListDomainResponse> {
+    const domainTypeValue = this.resolveDomainType(options?.domainType);
+
+    return this.coreClient.connectExec(
+      this.client.listDomains,
+      {
+        identities: {
+          case: 'organizationId',
+          value: organizationId
+        },
+        ...(!!domainTypeValue && { domainType: domainTypeValue })
       },
-    });
+    );
   }
 
   /**
