@@ -1,5 +1,3 @@
-# Reference
-
 ## ScalekitClient
 
 <details><summary><code>client.<a href="/src/scalekit.ts">getAuthorizationUrl</a>(redirectUri, options?) -> string</code></summary>
