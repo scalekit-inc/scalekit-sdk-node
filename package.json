@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@bufbuild/buf": "^1.36.0",
-    "@bufbuild/protoc-gen-es": "^1.10.0",
+    "@bufbuild/protoc-gen-es": "^2.10.0",
     "@connectrpc/protoc-gen-connect-es": "^1.4.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.14.10",
