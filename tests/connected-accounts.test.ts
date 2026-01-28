@@ -12,6 +12,8 @@ describe('Connected Accounts', () => {
   let client: ScalekitClient;
   let testOrg: string;
   let testConnectedAccountId: string | null = null;
+  let testConnector: string | null = null;
+  let testIdentifier: string | null = null;
 
   beforeEach(async () => {
     // Use global client
@@ -19,22 +21,31 @@ describe('Connected Accounts', () => {
     
     // Create test organization for each test
     testOrg = await TestOrganizationManager.createTestOrganization(client);
+    
+    // Reset test state
+    testConnectedAccountId = null;
+    testConnector = null;
+    testIdentifier = null;
   });
 
   afterEach(async () => {
     // Clean up test connected account if created
-    if (testConnectedAccountId) {
+    if (testConnectedAccountId && testConnector && testIdentifier) {
       try {
         await client.connectedAccounts.deleteConnectedAccount({
-          connector: 'test_connector',
-          identifier: 'test_identifier',
+          connector: testConnector,
+          identifier: testIdentifier,
           connectedAccountId: testConnectedAccountId,
         });
       } catch (error) {
         // Account may already be deleted or not exist
       }
-      testConnectedAccountId = null;
     }
+    
+    // Reset test state
+    testConnectedAccountId = null;
+    testConnector = null;
+    testIdentifier = null;
     
     // Clean up test organization
     await TestOrganizationManager.cleanupTestOrganization(client, testOrg);
@@ -148,6 +159,8 @@ describe('Connected Accounts', () => {
         
         if (response.connectedAccount?.id) {
           testConnectedAccountId = response.connectedAccount.id;
+          testConnector = connector;
+          testIdentifier = identifier;
         }
       } catch (error: any) {
         // Expected errors: connector not found, invalid credentials, etc.
@@ -189,6 +202,8 @@ describe('Connected Accounts', () => {
         expect(response).toBeDefined();
         if (response.connectedAccount?.id) {
           testConnectedAccountId = response.connectedAccount.id;
+          testConnector = connector;
+          testIdentifier = identifier;
         }
       } catch (error: any) {
         // Expected errors: connector not found, invalid credentials, etc.
