@@ -3,7 +3,7 @@
 /* eslint-disable */
 // @ts-nocheck
 
-import { AssignUserRolesRequest, AssignUserRolesResponse, CreateMembershipRequest, CreateMembershipResponse, CreateUserAndMembershipRequest, CreateUserAndMembershipResponse, DeleteMembershipRequest, DeleteUserRequest, GetUserRequest, GetUserResponse, ListOrganizationUsersRequest, ListOrganizationUsersResponse, ListUserPermissionsRequest, ListUserPermissionsResponse, ListUserRolesRequest, ListUserRolesResponse, ListUsersRequest, ListUsersResponse, RemoveUserRoleRequest, ResendInviteRequest, ResendInviteResponse, SearchOrganizationUsersRequest, SearchOrganizationUsersResponse, SearchUsersRequest, SearchUsersResponse, UpdateMembershipRequest, UpdateMembershipResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
+import { AssignUserRolesRequest, AssignUserRolesResponse, CreateMembershipRequest, CreateMembershipResponse, CreateUserAndMembershipRequest, CreateUserAndMembershipResponse, DeleteMembershipRequest, DeleteUserRequest, GetCurrentUserRequest, GetCurrentUserResponse, GetUserRequest, GetUserResponse, ListOrganizationUsersRequest, ListOrganizationUsersResponse, ListUserPermissionsRequest, ListUserPermissionsResponse, ListUserRolesRequest, ListUserRolesResponse, ListUsersRequest, ListUsersResponse, RemoveUserRoleRequest, ResendInviteRequest, ResendInviteResponse, SearchOrganizationUsersRequest, SearchOrganizationUsersResponse, SearchUsersRequest, SearchUsersResponse, UpdateMembershipRequest, UpdateMembershipResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 
 /**
@@ -21,6 +21,15 @@ export const UserService = {
       name: "GetUser",
       I: GetUserRequest,
       O: GetUserResponse,
+      kind: MethodKind.Unary,
+    },
+    /**
+     * @generated from rpc scalekit.v1.users.UserService.GetCurrentUser
+     */
+    getCurrentUser: {
+      name: "GetCurrentUser",
+      I: GetCurrentUserRequest,
+      O: GetCurrentUserResponse,
       kind: MethodKind.Unary,
     },
     /**
