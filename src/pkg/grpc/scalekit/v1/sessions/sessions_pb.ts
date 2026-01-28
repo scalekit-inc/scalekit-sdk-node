@@ -425,6 +425,11 @@ export class SessionDetails extends Message<SessionDetails> {
    */
   lastActiveAt?: Timestamp;
 
+  /**
+   * @generated from field: repeated scalekit.v1.sessions.AuthenticatedClients authenticated_clients = 14;
+   */
+  authenticatedClients: AuthenticatedClients[] = [];
+
   constructor(data?: PartialMessage<SessionDetails>) {
     super();
     proto3.util.initPartial(data, this);
@@ -446,6 +451,7 @@ export class SessionDetails extends Message<SessionDetails> {
     { no: 11, name: "status", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 12, name: "device", kind: "message", T: DeviceDetails },
     { no: 13, name: "last_active_at", kind: "message", T: Timestamp },
+    { no: 14, name: "authenticated_clients", kind: "message", T: AuthenticatedClients, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SessionDetails {
@@ -693,6 +699,51 @@ export class Location extends Message<Location> {
 
   static equals(a: Location | PlainMessage<Location> | undefined, b: Location | PlainMessage<Location> | undefined): boolean {
     return proto3.util.equals(Location, a, b);
+  }
+}
+
+/**
+ * AuthenticatedClients represents an authenticated client in a session along with its organization context.
+ *
+ * @generated from message scalekit.v1.sessions.AuthenticatedClients
+ */
+export class AuthenticatedClients extends Message<AuthenticatedClients> {
+  /**
+   * @generated from field: string client_id = 1;
+   */
+  clientId = "";
+
+  /**
+   * @generated from field: string organization_id = 2;
+   */
+  organizationId = "";
+
+  constructor(data?: PartialMessage<AuthenticatedClients>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.sessions.AuthenticatedClients";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "client_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 2, name: "organization_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AuthenticatedClients {
+    return new AuthenticatedClients().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AuthenticatedClients {
+    return new AuthenticatedClients().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AuthenticatedClients {
+    return new AuthenticatedClients().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: AuthenticatedClients | PlainMessage<AuthenticatedClients> | undefined, b: AuthenticatedClients | PlainMessage<AuthenticatedClients> | undefined): boolean {
+    return proto3.util.equals(AuthenticatedClients, a, b);
   }
 }
 

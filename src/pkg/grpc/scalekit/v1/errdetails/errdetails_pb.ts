@@ -288,11 +288,6 @@ export class RequestInfo extends Message<RequestInfo> {
  */
 export class ResourceInfo extends Message<ResourceInfo> {
   /**
-   * @generated from field: string resource_type = 1;
-   */
-  resourceType = "";
-
-  /**
    * @generated from field: string resource_name = 2;
    */
   resourceName = "";
@@ -311,6 +306,18 @@ export class ResourceInfo extends Message<ResourceInfo> {
    */
   description = "";
 
+  /**
+   * The required permissions needed to access the resource.
+   *
+   * @generated from field: repeated string required_permissions = 5;
+   */
+  requiredPermissions: string[] = [];
+
+  /**
+   * @generated from field: string user = 6;
+   */
+  user = "";
+
   constructor(data?: PartialMessage<ResourceInfo>) {
     super();
     proto3.util.initPartial(data, this);
@@ -319,10 +326,11 @@ export class ResourceInfo extends Message<ResourceInfo> {
   static readonly runtime: typeof proto3 = proto3;
   static readonly typeName = "scalekit.v1.errdetails.ResourceInfo";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
-    { no: 1, name: "resource_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 2, name: "resource_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 3, name: "owner", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 5, name: "required_permissions", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 6, name: "user", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResourceInfo {

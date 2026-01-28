@@ -7,10 +7,38 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, MethodOptions, proto3 } from "@bufbuild/protobuf";
 
 /**
+ * @generated from enum scalekit.v1.options.Policy
+ */
+export enum Policy {
+  /**
+   * @generated from enum value: DENY = 0;
+   */
+  DENY = 0,
+
+  /**
+   * @generated from enum value: PARTIAL = 1;
+   */
+  PARTIAL = 1,
+
+  /**
+   * @generated from enum value: ALLOW = 2;
+   */
+  ALLOW = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(Policy)
+proto3.util.setEnumType(Policy, "scalekit.v1.options.Policy", [
+  { no: 0, name: "DENY" },
+  { no: 1, name: "PARTIAL" },
+  { no: 2, name: "ALLOW" },
+]);
+
+/**
  * @generated from enum scalekit.v1.options.AuthenticationType
  */
 export enum AuthenticationType {
   /**
+   * API is Blocked to access
+   *
    * API is blocked / private  and default
    *
    * @generated from enum value: BLOCKED = 0;
@@ -25,6 +53,8 @@ export enum AuthenticationType {
   NONE = 1,
 
   /**
+   * Workspace auth option is for Scalekit Dashboard
+   *
    * workspace_id is in claims
    *
    * @generated from enum value: WORKSPACE = 64;
@@ -32,6 +62,8 @@ export enum AuthenticationType {
   WORKSPACE = 64,
 
   /**
+   * Customer portal is for customer admin portal access
+   *
    * claims has organisation ID
    *
    * @generated from enum value: CUSTOMER_PORTAL = 32;
@@ -39,18 +71,23 @@ export enum AuthenticationType {
   CUSTOMER_PORTAL = 32,
 
   /**
-   * claims has UI in audience
+   * (UI audience in claims) this is for API that need to work on env.scalekit.com scoped access alone.
    *
    * @generated from enum value: SESSION = 16;
    */
   SESSION = 16,
 
   /**
-   * workspace_id is in claims and UI in audience
-   *
    * @generated from enum value: WORKSPACE_SESSION = 80;
    */
   WORKSPACE_SESSION = 80,
+
+  /**
+   * workspace_id is in claims and UI in audience
+   *
+   * @generated from enum value: WORKSPACE_CLIENT = 68;
+   */
+  WORKSPACE_CLIENT = 68,
 
   /**
    * @generated from enum value: WORKSPACE_SESSION_CUSTOMER_PORTAL = 112;
@@ -65,6 +102,18 @@ export enum AuthenticationType {
   WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT = 116,
 
   /**
+   * @generated from enum value: WORKSPACE_CUSTOMER_PORTAL_CLIENT = 100;
+   */
+  WORKSPACE_CUSTOMER_PORTAL_CLIENT = 100,
+
+  /**
+   * workspace_id,organization_id is in claims and client Id is in subject
+   *
+   * @generated from enum value: WORKSPACE_CUSTOMER_PORTAL = 96;
+   */
+  WORKSPACE_CUSTOMER_PORTAL = 96,
+
+  /**
    * user_id is in claims
    *
    * @generated from enum value: USER = 8;
@@ -72,6 +121,8 @@ export enum AuthenticationType {
   USER = 8,
 
   /**
+   * client is environment primary client ID
+   *
    * client Id is in subject
    *
    * @generated from enum value: CLIENT = 4;
@@ -107,8 +158,11 @@ proto3.util.setEnumType(AuthenticationType, "scalekit.v1.options.AuthenticationT
   { no: 32, name: "CUSTOMER_PORTAL" },
   { no: 16, name: "SESSION" },
   { no: 80, name: "WORKSPACE_SESSION" },
+  { no: 68, name: "WORKSPACE_CLIENT" },
   { no: 112, name: "WORKSPACE_SESSION_CUSTOMER_PORTAL" },
   { no: 116, name: "WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT" },
+  { no: 100, name: "WORKSPACE_CUSTOMER_PORTAL_CLIENT" },
+  { no: 96, name: "WORKSPACE_CUSTOMER_PORTAL" },
   { no: 8, name: "USER" },
   { no: 4, name: "CLIENT" },
   { no: 20, name: "SESSION_CLIENT" },
@@ -126,9 +180,14 @@ export class AuthOption extends Message<AuthOption> {
   authenticationType = AuthenticationType.BLOCKED;
 
   /**
-   * @generated from field: string permission = 1;
+   * @generated from field: repeated string permissions = 1;
    */
-  permission = "";
+  permissions: string[] = [];
+
+  /**
+   * @generated from field: scalekit.v1.options.Policy policy = 2;
+   */
+  policy = Policy.DENY;
 
   constructor(data?: PartialMessage<AuthOption>) {
     super();
@@ -139,7 +198,8 @@ export class AuthOption extends Message<AuthOption> {
   static readonly typeName = "scalekit.v1.options.AuthOption";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 3, name: "authentication_type", kind: "enum", T: proto3.getEnumType(AuthenticationType) },
-    { no: 1, name: "permission", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 1, name: "permissions", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
+    { no: 2, name: "policy", kind: "enum", T: proto3.getEnumType(Policy) },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AuthOption {

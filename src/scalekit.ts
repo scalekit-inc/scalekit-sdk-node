@@ -5,6 +5,8 @@ import GrpcConnect from './connect';
 import ConnectionClient from './connection';
 import { IdTokenClaimToUserMap } from './constants/user';
 import CoreClient from './core';
+import ToolsClient from './tools';
+import ConnectedAccountsClient from './connected-accounts';
 import DirectoryClient from './directory';
 import DomainClient from './domain';
 import AuthClient from './auth';
@@ -60,6 +62,8 @@ export default class ScalekitClient {
   readonly organization: OrganizationClient;
   readonly connection: ConnectionClient;
   readonly domain: DomainClient;
+  readonly tools: ToolsClient;
+  readonly connectedAccounts: ConnectedAccountsClient;
   readonly directory: DirectoryClient;
   readonly passwordless: PasswordlessClient;
   readonly user: UserClient;
@@ -88,6 +92,11 @@ export default class ScalekitClient {
     );
     this.connection = new ConnectionClient(this.grpcConnect, this.coreClient);
     this.domain = new DomainClient(this.grpcConnect, this.coreClient);
+    this.tools = new ToolsClient(this.grpcConnect, this.coreClient);
+    this.connectedAccounts = new ConnectedAccountsClient(
+      this.grpcConnect,
+      this.coreClient
+    );
     this.directory = new DirectoryClient(this.grpcConnect, this.coreClient);
     this.passwordless = new PasswordlessClient(
       this.grpcConnect,

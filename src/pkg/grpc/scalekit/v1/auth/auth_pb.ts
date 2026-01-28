@@ -116,6 +116,26 @@ export enum AuthState {
    * @generated from enum value: WEBAUTHN_VERIFIED = 15;
    */
   WEBAUTHN_VERIFIED = 15,
+
+  /**
+   * @generated from enum value: VERIFICATION_MAGIC_LINK_SENT = 16;
+   */
+  VERIFICATION_MAGIC_LINK_SENT = 16,
+
+  /**
+   * @generated from enum value: VERIFICATION_MAGIC_LINK_OTP_SENT = 17;
+   */
+  VERIFICATION_MAGIC_LINK_OTP_SENT = 17,
+
+  /**
+   * @generated from enum value: VERIFICATION_OTP_SENT = 18;
+   */
+  VERIFICATION_OTP_SENT = 18,
+
+  /**
+   * @generated from enum value: VERIFICATION_COMPLETED = 19;
+   */
+  VERIFICATION_COMPLETED = 19,
 }
 // Retrieve enum metadata with: proto3.getEnumType(AuthState)
 proto3.util.setEnumType(AuthState, "scalekit.v1.auth.AuthState", [
@@ -135,6 +155,10 @@ proto3.util.setEnumType(AuthState, "scalekit.v1.auth.AuthState", [
   { no: 13, name: "AUTHENTICATION_COMPLETED" },
   { no: 14, name: "AUTHENTICATION_FAILED" },
   { no: 15, name: "WEBAUTHN_VERIFIED" },
+  { no: 16, name: "VERIFICATION_MAGIC_LINK_SENT" },
+  { no: 17, name: "VERIFICATION_MAGIC_LINK_OTP_SENT" },
+  { no: 18, name: "VERIFICATION_OTP_SENT" },
+  { no: 19, name: "VERIFICATION_COMPLETED" },
 ]);
 
 /**
@@ -1073,6 +1097,11 @@ export class GetAuthStateResponse extends Message<GetAuthStateResponse> {
    */
   authState = AuthState.AUTH_STATE_UNSPECIFIED;
 
+  /**
+   * @generated from field: scalekit.v1.auth.UserDetails user = 2;
+   */
+  user?: UserDetails;
+
   constructor(data?: PartialMessage<GetAuthStateResponse>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1082,6 +1111,7 @@ export class GetAuthStateResponse extends Message<GetAuthStateResponse> {
   static readonly typeName = "scalekit.v1.auth.GetAuthStateResponse";
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "auth_state", kind: "enum", T: proto3.getEnumType(AuthState) },
+    { no: 2, name: "user", kind: "message", T: UserDetails },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetAuthStateResponse {

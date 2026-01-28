@@ -414,6 +414,82 @@ export class GetUserResponse extends Message<GetUserResponse> {
 }
 
 /**
+ * @generated from message scalekit.v1.users.GetCurrentUserResponse
+ */
+export class GetCurrentUserResponse extends Message<GetCurrentUserResponse> {
+  /**
+   * @generated from field: scalekit.v1.users.User user = 1;
+   */
+  user?: User;
+
+  /**
+   * @generated from field: string current_session_id = 2;
+   */
+  currentSessionId = "";
+
+  constructor(data?: PartialMessage<GetCurrentUserResponse>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.GetCurrentUserResponse";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+    { no: 1, name: "user", kind: "message", T: User },
+    { no: 2, name: "current_session_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetCurrentUserResponse {
+    return new GetCurrentUserResponse().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetCurrentUserResponse {
+    return new GetCurrentUserResponse().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetCurrentUserResponse {
+    return new GetCurrentUserResponse().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetCurrentUserResponse | PlainMessage<GetCurrentUserResponse> | undefined, b: GetCurrentUserResponse | PlainMessage<GetCurrentUserResponse> | undefined): boolean {
+    return proto3.util.equals(GetCurrentUserResponse, a, b);
+  }
+}
+
+/**
+ * Empty message - user ID extracted from authentication context
+ *
+ * @generated from message scalekit.v1.users.GetCurrentUserRequest
+ */
+export class GetCurrentUserRequest extends Message<GetCurrentUserRequest> {
+  constructor(data?: PartialMessage<GetCurrentUserRequest>) {
+    super();
+    proto3.util.initPartial(data, this);
+  }
+
+  static readonly runtime: typeof proto3 = proto3;
+  static readonly typeName = "scalekit.v1.users.GetCurrentUserRequest";
+  static readonly fields: FieldList = proto3.util.newFieldList(() => [
+  ]);
+
+  static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetCurrentUserRequest {
+    return new GetCurrentUserRequest().fromBinary(bytes, options);
+  }
+
+  static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetCurrentUserRequest {
+    return new GetCurrentUserRequest().fromJson(jsonValue, options);
+  }
+
+  static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetCurrentUserRequest {
+    return new GetCurrentUserRequest().fromJsonString(jsonString, options);
+  }
+
+  static equals(a: GetCurrentUserRequest | PlainMessage<GetCurrentUserRequest> | undefined, b: GetCurrentUserRequest | PlainMessage<GetCurrentUserRequest> | undefined): boolean {
+    return proto3.util.equals(GetCurrentUserRequest, a, b);
+  }
+}
+
+/**
  * @generated from message scalekit.v1.users.ListOrganizationUsersRequest
  */
 export class ListOrganizationUsersRequest extends Message<ListOrganizationUsersRequest> {

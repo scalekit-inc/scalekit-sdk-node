@@ -7,6 +7,32 @@ import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialM
 import { Message, proto3, protoInt64, Timestamp } from "@bufbuild/protobuf";
 
 /**
+ * @generated from enum scalekit.v1.roles.PermissionType
+ */
+export enum PermissionType {
+  /**
+   * @generated from enum value: ALL = 0;
+   */
+  ALL = 0,
+
+  /**
+   * @generated from enum value: SCALEKIT = 1;
+   */
+  SCALEKIT = 1,
+
+  /**
+   * @generated from enum value: ENVIRONMENT = 2;
+   */
+  ENVIRONMENT = 2,
+}
+// Retrieve enum metadata with: proto3.getEnumType(PermissionType)
+proto3.util.setEnumType(PermissionType, "scalekit.v1.roles.PermissionType", [
+  { no: 0, name: "ALL" },
+  { no: 1, name: "SCALEKIT" },
+  { no: 2, name: "ENVIRONMENT" },
+]);
+
+/**
  * @generated from message scalekit.v1.roles.Role
  */
 export class Role extends Message<Role> {
@@ -1421,6 +1447,11 @@ export class Permission extends Message<Permission> {
    */
   updateTime?: Timestamp;
 
+  /**
+   * @generated from field: bool is_scalekit_permission = 6;
+   */
+  isScalekitPermission = false;
+
   constructor(data?: PartialMessage<Permission>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1434,6 +1465,7 @@ export class Permission extends Message<Permission> {
     { no: 3, name: "description", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 4, name: "create_time", kind: "message", T: Timestamp },
     { no: 5, name: "update_time", kind: "message", T: Timestamp },
+    { no: 6, name: "is_scalekit_permission", kind: "scalar", T: 8 /* ScalarType.BOOL */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Permission {
@@ -1809,6 +1841,11 @@ export class ListPermissionsRequest extends Message<ListPermissionsRequest> {
    */
   pageSize?: number;
 
+  /**
+   * @generated from field: scalekit.v1.roles.PermissionType type = 3;
+   */
+  type = PermissionType.ALL;
+
   constructor(data?: PartialMessage<ListPermissionsRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -1819,6 +1856,7 @@ export class ListPermissionsRequest extends Message<ListPermissionsRequest> {
   static readonly fields: FieldList = proto3.util.newFieldList(() => [
     { no: 1, name: "page_token", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
     { no: 2, name: "page_size", kind: "scalar", T: 13 /* ScalarType.UINT32 */, opt: true },
+    { no: 3, name: "type", kind: "enum", T: proto3.getEnumType(PermissionType) },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListPermissionsRequest {
