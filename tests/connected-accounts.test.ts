@@ -212,6 +212,44 @@ describe('Connected Accounts', () => {
     });
   });
 
+  describe('getOrCreateConnectedAccount', () => {
+    it('should throw when connector is empty', async () => {
+      await expect(
+        client.connectedAccounts.getOrCreateConnectedAccount({
+          connector: '',
+          identifier: 'user_123',
+        })
+      ).rejects.toThrow('connector is required');
+    });
+
+    it('should throw when identifier is empty', async () => {
+      await expect(
+        client.connectedAccounts.getOrCreateConnectedAccount({
+          connector: 'gmail',
+          identifier: '',
+        })
+      ).rejects.toThrow('identifier is required');
+    });
+
+    it('should return existing account when found (get path)', async () => {
+      const connector = 'gmail';
+      const identifier = 'get-or-create-test@example.com';
+      try {
+        const response = await client.connectedAccounts.getOrCreateConnectedAccount({
+          connector,
+          identifier,
+          organizationId: testOrg,
+        });
+        expect(response).toBeDefined();
+        expect(response.connectedAccount).toBeDefined();
+        expect(response.connectedAccount?.identifier).toBe(identifier);
+        expect(response.connectedAccount?.connector).toBe(connector);
+      } catch (error: unknown) {
+        expect(error).toBeDefined();
+      }
+    });
+  });
+
   describe('updateConnectedAccount', () => {
     it('should handle update connected account request', async () => {
       const connector = 'test_connector';

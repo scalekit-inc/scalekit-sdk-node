@@ -1,6 +1,7 @@
+import { PartialMessage } from "@bufbuild/protobuf";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
-import { CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse } from "./pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb";
+import { AuthorizationDetails, CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse } from "./pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb";
 /**
  * Client for managing connected accounts for third-party integrations.
  *
@@ -42,6 +43,28 @@ export default class ConnectedAccountsClient {
         connectedAccount: CreateConnectedAccount;
         organizationId?: string;
         userId?: string;
+    }): Promise<CreateConnectedAccountResponse>;
+    /**
+     * Gets an existing connected account by connector and identifier, or creates one if none exists.
+     * Mirrors the Python SDK `get_or_create_connected_account`. When creating, the backend may require
+     * valid authorization details; if omitted, a minimal payload is sent and the server may return
+     * a validation error.
+     *
+     * @param params Get-or-create parameters
+     * @param params.connector Connector identifier (required)
+     * @param params.identifier Connected account identifier (required)
+     * @param params.authorizationDetails Optional auth details for the create path (OAuth token or static auth)
+     * @param params.organizationId Optional organization ID
+     * @param params.userId Optional user ID
+     * @param params.apiConfig Optional API config for the create path
+     */
+    getOrCreateConnectedAccount(params: {
+        connector: string;
+        identifier: string;
+        authorizationDetails?: PartialMessage<AuthorizationDetails>;
+        organizationId?: string;
+        userId?: string;
+        apiConfig?: Record<string, unknown>;
     }): Promise<CreateConnectedAccountResponse>;
     /**
      * Updates an existing connected account.

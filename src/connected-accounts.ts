@@ -2,8 +2,10 @@ import { PartialMessage } from "@bufbuild/protobuf";
 import { PromiseClient } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
+import { ScalekitNotFoundException } from "./errors";
 import { ConnectedAccountService } from "./pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_connect";
 import {
+  AuthorizationDetails,
   CreateConnectedAccount,
   CreateConnectedAccountRequest,
   CreateConnectedAccountResponse,
@@ -15,6 +17,7 @@ import {
   GetMagicLinkForConnectedAccountResponse,
   ListConnectedAccountsRequest,
   ListConnectedAccountsResponse,
+  OauthToken,
   UpdateConnectedAccount,
   UpdateConnectedAccountRequest,
   UpdateConnectedAccountResponse,
@@ -125,6 +128,78 @@ export default class ConnectedAccountsClient {
       this.client.createConnectedAccount,
       request
     );
+  }
+
+  /**
+   * Gets an existing connected account by connector and identifier, or creates one if none exists.
+   * Mirrors the Python SDK `get_or_create_connected_account`. When creating, the backend may require
+   * valid authorization details; if omitted, a minimal payload is sent and the server may return
+   * a validation error.
+   *
+   * @param params Get-or-create parameters
+   * @param params.connector Connector identifier (required)
+   * @param params.identifier Connected account identifier (required)
+   * @param params.authorizationDetails Optional auth details for the create path (OAuth token or static auth)
+   * @param params.organizationId Optional organization ID
+   * @param params.userId Optional user ID
+   * @param params.apiConfig Optional API config for the create path
+   */
+  async getOrCreateConnectedAccount(params: {
+    connector: string;
+    identifier: string;
+    authorizationDetails?: PartialMessage<AuthorizationDetails>;
+    organizationId?: string;
+    userId?: string;
+    apiConfig?: Record<string, unknown>;
+  }): Promise<CreateConnectedAccountResponse> {
+    const {
+      connector,
+      identifier,
+      authorizationDetails,
+      organizationId,
+      userId,
+      apiConfig,
+    } = params;
+
+    if (!connector?.trim()) {
+      throw new Error("connector is required");
+    }
+    if (!identifier?.trim()) {
+      throw new Error("identifier is required");
+    }
+
+    try {
+      const getResponse = await this.getConnectedAccountByIdentifier({
+        connector,
+        identifier,
+        organizationId,
+        userId,
+      });
+      return new CreateConnectedAccountResponse({
+        connectedAccount: getResponse.connectedAccount,
+      });
+    } catch (err) {
+      if (!(err instanceof ScalekitNotFoundException)) {
+        throw err;
+      }
+    }
+
+    const connectedAccountPayload = new CreateConnectedAccount({
+      authorizationDetails: authorizationDetails
+        ? (authorizationDetails as AuthorizationDetails)
+        : new AuthorizationDetails({
+            details: { case: "oauthToken", value: new OauthToken({}) },
+          }),
+      ...(apiConfig != null && { apiConfig: apiConfig as unknown as CreateConnectedAccount["apiConfig"] }),
+    });
+
+    return this.createConnectedAccount({
+      connector,
+      identifier,
+      connectedAccount: connectedAccountPayload,
+      organizationId,
+      userId,
+    });
   }
 
   /**
