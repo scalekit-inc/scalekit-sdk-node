@@ -1,10 +1,29 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, MethodOptions, proto3 } from "@bufbuild/protobuf";
 /**
+ * @generated from enum scalekit.v1.options.Policy
+ */
+export declare enum Policy {
+    /**
+     * @generated from enum value: DENY = 0;
+     */
+    DENY = 0,
+    /**
+     * @generated from enum value: PARTIAL = 1;
+     */
+    PARTIAL = 1,
+    /**
+     * @generated from enum value: ALLOW = 2;
+     */
+    ALLOW = 2
+}
+/**
  * @generated from enum scalekit.v1.options.AuthenticationType
  */
 export declare enum AuthenticationType {
     /**
+     * API is Blocked to access
+     *
      * API is blocked / private  and default
      *
      * @generated from enum value: BLOCKED = 0;
@@ -17,29 +36,37 @@ export declare enum AuthenticationType {
      */
     NONE = 1,
     /**
+     * Workspace auth option is for Scalekit Dashboard
+     *
      * workspace_id is in claims
      *
      * @generated from enum value: WORKSPACE = 64;
      */
     WORKSPACE = 64,
     /**
+     * Customer portal is for customer admin portal access
+     *
      * claims has organisation ID
      *
      * @generated from enum value: CUSTOMER_PORTAL = 32;
      */
     CUSTOMER_PORTAL = 32,
     /**
-     * claims has UI in audience
+     * (UI audience in claims) this is for API that need to work on env.scalekit.com scoped access alone.
      *
      * @generated from enum value: SESSION = 16;
      */
     SESSION = 16,
     /**
-     * workspace_id is in claims and UI in audience
-     *
      * @generated from enum value: WORKSPACE_SESSION = 80;
      */
     WORKSPACE_SESSION = 80,
+    /**
+     * workspace_id is in claims and UI in audience
+     *
+     * @generated from enum value: WORKSPACE_CLIENT = 68;
+     */
+    WORKSPACE_CLIENT = 68,
     /**
      * @generated from enum value: WORKSPACE_SESSION_CUSTOMER_PORTAL = 112;
      */
@@ -51,12 +78,24 @@ export declare enum AuthenticationType {
      */
     WORKSPACE_SESSION_CUSTOMER_PORTAL_CLIENT = 116,
     /**
+     * @generated from enum value: WORKSPACE_CUSTOMER_PORTAL_CLIENT = 100;
+     */
+    WORKSPACE_CUSTOMER_PORTAL_CLIENT = 100,
+    /**
+     * workspace_id,organization_id is in claims and client Id is in subject
+     *
+     * @generated from enum value: WORKSPACE_CUSTOMER_PORTAL = 96;
+     */
+    WORKSPACE_CUSTOMER_PORTAL = 96,
+    /**
      * user_id is in claims
      *
      * @generated from enum value: USER = 8;
      */
     USER = 8,
     /**
+     * client is environment primary client ID
+     *
      * client Id is in subject
      *
      * @generated from enum value: CLIENT = 4;
@@ -90,9 +129,13 @@ export declare class AuthOption extends Message<AuthOption> {
      */
     authenticationType: AuthenticationType;
     /**
-     * @generated from field: string permission = 1;
+     * @generated from field: repeated string permissions = 1;
      */
-    permission: string;
+    permissions: string[];
+    /**
+     * @generated from field: scalekit.v1.options.Policy policy = 2;
+     */
+    policy: Policy;
     constructor(data?: PartialMessage<AuthOption>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.options.AuthOption";

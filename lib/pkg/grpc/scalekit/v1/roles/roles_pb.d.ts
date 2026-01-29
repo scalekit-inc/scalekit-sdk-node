@@ -1,6 +1,23 @@
 import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
 import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
 /**
+ * @generated from enum scalekit.v1.roles.PermissionType
+ */
+export declare enum PermissionType {
+    /**
+     * @generated from enum value: ALL = 0;
+     */
+    ALL = 0,
+    /**
+     * @generated from enum value: SCALEKIT = 1;
+     */
+    SCALEKIT = 1,
+    /**
+     * @generated from enum value: ENVIRONMENT = 2;
+     */
+    ENVIRONMENT = 2
+}
+/**
  * @generated from message scalekit.v1.roles.Role
  */
 export declare class Role extends Message<Role> {
@@ -712,6 +729,10 @@ export declare class Permission extends Message<Permission> {
      * @generated from field: google.protobuf.Timestamp update_time = 5;
      */
     updateTime?: Timestamp;
+    /**
+     * @generated from field: bool is_scalekit_permission = 6;
+     */
+    isScalekitPermission: boolean;
     constructor(data?: PartialMessage<Permission>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.roles.Permission";
@@ -901,6 +922,10 @@ export declare class ListPermissionsRequest extends Message<ListPermissionsReque
      * @generated from field: optional uint32 page_size = 2;
      */
     pageSize?: number;
+    /**
+     * @generated from field: scalekit.v1.roles.PermissionType type = 3;
+     */
+    type: PermissionType;
     constructor(data?: PartialMessage<ListPermissionsRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.roles.ListPermissionsRequest";

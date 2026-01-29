@@ -1,4 +1,6 @@
 import ConnectionClient from './connection';
+import ToolsClient from './tools';
+import ConnectedAccountsClient from './connected-accounts';
 import DirectoryClient from './directory';
 import DomainClient from './domain';
 import AuthClient from './auth';
@@ -47,6 +49,8 @@ export default class ScalekitClient {
     readonly organization: OrganizationClient;
     readonly connection: ConnectionClient;
     readonly domain: DomainClient;
+    readonly tools: ToolsClient;
+    readonly connectedAccounts: ConnectedAccountsClient;
     readonly directory: DirectoryClient;
     readonly passwordless: PasswordlessClient;
     readonly user: UserClient;

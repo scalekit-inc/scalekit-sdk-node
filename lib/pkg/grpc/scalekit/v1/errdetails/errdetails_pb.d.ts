@@ -160,10 +160,6 @@ export declare class RequestInfo extends Message<RequestInfo> {
  */
 export declare class ResourceInfo extends Message<ResourceInfo> {
     /**
-     * @generated from field: string resource_type = 1;
-     */
-    resourceType: string;
-    /**
      * @generated from field: string resource_name = 2;
      */
     resourceName: string;
@@ -179,6 +175,16 @@ export declare class ResourceInfo extends Message<ResourceInfo> {
      * @generated from field: string description = 4;
      */
     description: string;
+    /**
+     * The required permissions needed to access the resource.
+     *
+     * @generated from field: repeated string required_permissions = 5;
+     */
+    requiredPermissions: string[];
+    /**
+     * @generated from field: string user = 6;
+     */
+    user: string;
     constructor(data?: PartialMessage<ResourceInfo>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.errdetails.ResourceInfo";

@@ -37,15 +37,15 @@ export declare class FinishRegistrationRequest extends Message<FinishRegistratio
     /**
      * @generated from field: bytes credential_id = 1;
      */
-    credentialId: Uint8Array;
+    credentialId: Uint8Array<ArrayBuffer>;
     /**
      * @generated from field: bytes attestation_object = 2;
      */
-    attestationObject: Uint8Array;
+    attestationObject: Uint8Array<ArrayBuffer>;
     /**
      * @generated from field: bytes client_data_json = 3;
      */
-    clientDataJson: Uint8Array;
+    clientDataJson: Uint8Array<ArrayBuffer>;
     /**
      * @generated from field: string type = 4;
      */
@@ -137,7 +137,7 @@ export declare class FinishAuthenticationRequest extends Message<FinishAuthentic
     /**
      * @generated from field: bytes credential_id = 2;
      */
-    credentialId: Uint8Array;
+    credentialId: Uint8Array<ArrayBuffer>;
     /**
      * @generated from field: google.protobuf.Struct client_extension_results = 3;
      */
@@ -170,19 +170,19 @@ export declare class AuthenticatorAssertionResponse extends Message<Authenticato
     /**
      * @generated from field: bytes authenticator_data = 1;
      */
-    authenticatorData: Uint8Array;
+    authenticatorData: Uint8Array<ArrayBuffer>;
     /**
      * @generated from field: bytes client_data_json = 2;
      */
-    clientDataJson: Uint8Array;
+    clientDataJson: Uint8Array<ArrayBuffer>;
     /**
      * @generated from field: bytes signature = 3;
      */
-    signature: Uint8Array;
+    signature: Uint8Array<ArrayBuffer>;
     /**
      * @generated from field: bytes user_handle = 4;
      */
-    userHandle: Uint8Array;
+    userHandle: Uint8Array<ArrayBuffer>;
     constructor(data?: PartialMessage<AuthenticatorAssertionResponse>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.auth.webauthn.AuthenticatorAssertionResponse";
@@ -433,7 +433,7 @@ export declare class WebAuthnCredential extends Message<WebAuthnCredential> {
     /**
      * @generated from field: bytes credential_id = 3;
      */
-    credentialId: Uint8Array;
+    credentialId: Uint8Array<ArrayBuffer>;
     /**
      * @generated from field: string attestation_type = 4;
      */

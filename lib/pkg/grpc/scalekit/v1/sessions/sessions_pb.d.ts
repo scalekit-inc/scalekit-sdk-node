@@ -228,6 +228,10 @@ export declare class SessionDetails extends Message<SessionDetails> {
      * @generated from field: google.protobuf.Timestamp last_active_at = 13;
      */
     lastActiveAt?: Timestamp;
+    /**
+     * @generated from field: repeated scalekit.v1.sessions.AuthenticatedClients authenticated_clients = 14;
+     */
+    authenticatedClients: AuthenticatedClients[];
     constructor(data?: PartialMessage<SessionDetails>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.sessions.SessionDetails";
@@ -367,4 +371,27 @@ export declare class Location extends Message<Location> {
     static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Location;
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Location;
     static equals(a: Location | PlainMessage<Location> | undefined, b: Location | PlainMessage<Location> | undefined): boolean;
+}
+/**
+ * AuthenticatedClients represents an authenticated client in a session along with its organization context.
+ *
+ * @generated from message scalekit.v1.sessions.AuthenticatedClients
+ */
+export declare class AuthenticatedClients extends Message<AuthenticatedClients> {
+    /**
+     * @generated from field: string client_id = 1;
+     */
+    clientId: string;
+    /**
+     * @generated from field: string organization_id = 2;
+     */
+    organizationId: string;
+    constructor(data?: PartialMessage<AuthenticatedClients>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.sessions.AuthenticatedClients";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AuthenticatedClients;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AuthenticatedClients;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AuthenticatedClients;
+    static equals(a: AuthenticatedClients | PlainMessage<AuthenticatedClients> | undefined, b: AuthenticatedClients | PlainMessage<AuthenticatedClients> | undefined): boolean;
 }
