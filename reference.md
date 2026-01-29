@@ -5263,7 +5263,7 @@ const names = await scalekitClient.tools.listTools({
 </dl>
 </details>
 
-<details><summary><code>client.tools.<a href="/src/tools.ts">listScopedTools</a>(identifier, options?) -> Promise&lt;ListScopedToolsResponse&gt;</code></summary>
+<details><summary><code>client.tools.<a href="/src/tools.ts">listScopedTools</a>(identifier, options) -> Promise&lt;ListScopedToolsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5275,7 +5275,7 @@ const names = await scalekitClient.tools.listTools({
 <dl>
 <dd>
 
-Lists tools scoped to a specific connected account identifier. Filter is required by the API and must include at least one of: providers, toolNames, or connectionNames (each array must have at least one value).
+Lists tools scoped to a specific connected account identifier. The filter is required by the API: you must pass a filter object with at least one non-empty array among `providers`, `toolNames`, or `connectionNames`. Empty arrays or omitting the filter will result in an error.
 </dd>
 </dl>
 </dd>
@@ -5290,7 +5290,7 @@ Lists tools scoped to a specific connected account identifier. Filter is require
 <dd>
 
 ```typescript
-// List scoped tools with filter (required)
+// List scoped tools (filter is required; at least one of providers, toolNames, or connectionNames must be a non-empty array)
 const response = await scalekitClient.tools.listScopedTools('user@example.com', {
   filter: {
     providers: ['GOOGLE'],
@@ -5327,10 +5327,10 @@ const nextPage = await scalekitClient.tools.listScopedTools('user@example.com', 
 <dl>
 <dd>
 
-**options:** `object` (optional)
-- `filter?: object` - Required by API. At least one of: providers, toolNames, connectionNames (non-empty arrays)
-- `pageSize?: number` - Maximum number of tools per page
-- `pageToken?: string` - Token from a previous response for pagination
+**options:** `object` - Required. Must include a filter (required by the API).
+- `filter:` `object` - Required by the API. Must contain at least one non-empty array: `providers`, `toolNames`, or `connectionNames`. Example: `{ providers: ['GOOGLE'] }` or `{ toolNames: ['gmail_send_email'] }`.
+- `pageSize?:` `number` - Maximum number of tools per page
+- `pageToken?:` `string` - Token from a previous response for pagination
 
 </dd>
 </dl>
