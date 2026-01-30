@@ -45,6 +45,16 @@ export class ListAuthLogRequest extends Message<ListAuthLogRequest> {
    */
   resourceId = "";
 
+  /**
+   * @generated from field: string connected_account_identifier = 8;
+   */
+  connectedAccountIdentifier = "";
+
+  /**
+   * @generated from field: string client_id = 9;
+   */
+  clientId = "";
+
   constructor(data?: PartialMessage<ListAuthLogRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -60,6 +70,8 @@ export class ListAuthLogRequest extends Message<ListAuthLogRequest> {
     { no: 5, name: "start_time", kind: "message", T: Timestamp },
     { no: 6, name: "end_time", kind: "message", T: Timestamp },
     { no: 7, name: "resource_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 8, name: "connected_account_identifier", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 9, name: "client_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAuthLogRequest {
@@ -208,6 +220,26 @@ export class AuthLogRequest extends Message<AuthLogRequest> {
    */
   resourceType = "";
 
+  /**
+   * @generated from field: string connected_account_identifier = 15;
+   */
+  connectedAccountIdentifier = "";
+
+  /**
+   * @generated from field: string client_id = 16;
+   */
+  clientId = "";
+
+  /**
+   * @generated from field: string client_name = 17;
+   */
+  clientName = "";
+
+  /**
+   * @generated from field: string client_type = 18;
+   */
+  clientType = "";
+
   constructor(data?: PartialMessage<AuthLogRequest>) {
     super();
     proto3.util.initPartial(data, this);
@@ -230,6 +262,10 @@ export class AuthLogRequest extends Message<AuthLogRequest> {
     { no: 12, name: "resource_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 13, name: "resource_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
     { no: 14, name: "resource_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 15, name: "connected_account_identifier", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 16, name: "client_id", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 17, name: "client_name", kind: "scalar", T: 9 /* ScalarType.STRING */ },
+    { no: 18, name: "client_type", kind: "scalar", T: 9 /* ScalarType.STRING */ },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AuthLogRequest {

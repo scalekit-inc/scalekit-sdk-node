@@ -247,6 +247,11 @@ export class OrganizationMembership extends Message<OrganizationMembership> {
    */
   provisioningMethod?: string;
 
+  /**
+   * @generated from field: repeated string permissions = 15;
+   */
+  permissions: string[] = [];
+
   constructor(data?: PartialMessage<OrganizationMembership>) {
     super();
     proto3.util.initPartial(data, this);
@@ -267,6 +272,7 @@ export class OrganizationMembership extends Message<OrganizationMembership> {
     { no: 12, name: "accepted_at", kind: "message", T: Timestamp, opt: true },
     { no: 13, name: "expires_at", kind: "message", T: Timestamp, opt: true },
     { no: 14, name: "provisioning_method", kind: "scalar", T: 9 /* ScalarType.STRING */, opt: true },
+    { no: 15, name: "permissions", kind: "scalar", T: 9 /* ScalarType.STRING */, repeated: true },
   ]);
 
   static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationMembership {

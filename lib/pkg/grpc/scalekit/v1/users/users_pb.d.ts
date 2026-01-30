@@ -228,6 +228,42 @@ export declare class GetUserResponse extends Message<GetUserResponse> {
     static equals(a: GetUserResponse | PlainMessage<GetUserResponse> | undefined, b: GetUserResponse | PlainMessage<GetUserResponse> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.users.GetCurrentUserResponse
+ */
+export declare class GetCurrentUserResponse extends Message<GetCurrentUserResponse> {
+    /**
+     * @generated from field: scalekit.v1.users.User user = 1;
+     */
+    user?: User;
+    /**
+     * @generated from field: string current_session_id = 2;
+     */
+    currentSessionId: string;
+    constructor(data?: PartialMessage<GetCurrentUserResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.GetCurrentUserResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetCurrentUserResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetCurrentUserResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetCurrentUserResponse;
+    static equals(a: GetCurrentUserResponse | PlainMessage<GetCurrentUserResponse> | undefined, b: GetCurrentUserResponse | PlainMessage<GetCurrentUserResponse> | undefined): boolean;
+}
+/**
+ * Empty message - user ID extracted from authentication context
+ *
+ * @generated from message scalekit.v1.users.GetCurrentUserRequest
+ */
+export declare class GetCurrentUserRequest extends Message<GetCurrentUserRequest> {
+    constructor(data?: PartialMessage<GetCurrentUserRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.GetCurrentUserRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetCurrentUserRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetCurrentUserRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetCurrentUserRequest;
+    static equals(a: GetCurrentUserRequest | PlainMessage<GetCurrentUserRequest> | undefined, b: GetCurrentUserRequest | PlainMessage<GetCurrentUserRequest> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.users.ListOrganizationUsersRequest
  */
 export declare class ListOrganizationUsersRequest extends Message<ListOrganizationUsersRequest> {

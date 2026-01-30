@@ -5191,4 +5191,675 @@ await scalekitClient.auth.updateLoginUserDetails(
 </dl>
 </details>
 
+## Tools
+
+<details><summary><code>client.tools.<a href="/src/tools.ts">listTools</a>(options?) -> Promise&lt;ListToolsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists tools available in your workspace with optional filtering and pagination. Use filter to narrow by provider, identifier, or tool names. Use summary filter to return only tool names.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+// List all tools
+const response = await scalekitClient.tools.listTools();
+
+// List tools with filter and pagination
+const filtered = await scalekitClient.tools.listTools({
+  filter: { provider: 'GOOGLE', toolName: ['gmail_send_email'] },
+  pageSize: 20,
+  pageToken: response.nextPageToken,
+});
+
+// List only tool names (summary mode)
+const names = await scalekitClient.tools.listTools({
+  filter: { summary: true },
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**options:** `object` (optional)
+- `filter?: object` - Filter by provider, identifier, toolName, summary
+- `pageSize?: number` - Maximum number of tools per page
+- `pageToken?: string` - Token from a previous response for pagination
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.tools.<a href="/src/tools.ts">listScopedTools</a>(identifier, options) -> Promise&lt;ListScopedToolsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists tools scoped to a specific connected account identifier. The filter is required by the API: you must pass a filter object with at least one non-empty array among `providers`, `toolNames`, or `connectionNames`. Empty arrays or omitting the filter will result in an error.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+// List scoped tools (filter is required; at least one of providers, toolNames, or connectionNames must be a non-empty array)
+const response = await scalekitClient.tools.listScopedTools('user@example.com', {
+  filter: {
+    providers: ['GOOGLE'],
+    toolNames: ['gmail_send_email'],
+  },
+  pageSize: 10,
+});
+
+// Paginate scoped tools
+const nextPage = await scalekitClient.tools.listScopedTools('user@example.com', {
+  filter: { providers: ['GOOGLE'] },
+  pageSize: 10,
+  pageToken: response.nextPageToken,
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**identifier:** `string` - Connected account identifier (e.g., email or workspace ID) to scope the tools list
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `object` - Required. Must include a filter (required by the API).
+- `filter:` `object` - Required by the API. Must contain at least one non-empty array: `providers`, `toolNames`, or `connectionNames`. Example: `{ providers: ['GOOGLE'] }` or `{ toolNames: ['gmail_send_email'] }`.
+- `pageSize?:` `number` - Maximum number of tools per page
+- `pageToken?:` `string` - Token from a previous response for pagination
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.tools.<a href="/src/tools.ts">executeTool</a>(params) -> Promise&lt;ExecuteToolResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Executes a tool using credentials from a connected account. Identify the connected account either by connectedAccountId or by the combination of identifier, connector, and optional organizationId/userId.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+// Execute with connected account ID
+const result = await scalekitClient.tools.executeTool({
+  toolName: 'gmail_send_email',
+  connectedAccountId: 'ca_123',
+  params: {
+    to: 'user@example.com',
+    subject: 'Hello',
+    body: 'Hello World',
+  },
+});
+
+// Execute with identifier and connector
+const result2 = await scalekitClient.tools.executeTool({
+  toolName: 'gmail_send_email',
+  identifier: 'user@example.com',
+  connector: 'google_workspace',
+  organizationId: 'org_123',
+  params: { to: 'user@example.com', subject: 'Test', body: 'Body' },
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `toolName:` `string` - Name of the tool to execute
+- `identifier?:` `string` - Connected account identifier (e.g., email, workspace ID)
+- `params?:` `Record<string, unknown>` - JSON parameters for the tool
+- `connectedAccountId?:` `string` - Direct ID of the connected account (ca_...)
+- `connector?:` `string` - Connector/provider name when using identifier-based lookup
+- `organizationId?:` `string` - Organization ID to scope the lookup
+- `userId?:` `string` - User ID to scope the lookup
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Connected Accounts
+
+<details><summary><code>client.connectedAccounts.<a href="/src/connected-accounts.ts">listConnectedAccounts</a>(options?) -> Promise&lt;ListConnectedAccountsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists connected accounts with optional filters (organization, user, connector, identifier, provider, query) and pagination.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+// List all connected accounts
+const response = await scalekitClient.connectedAccounts.listConnectedAccounts();
+
+// List with filters and pagination
+const filtered = await scalekitClient.connectedAccounts.listConnectedAccounts({
+  organizationId: 'org_123',
+  connector: 'notion',
+  pageSize: 10,
+  pageToken: response.nextPageToken,
+});
+
+// Search by query
+const search = await scalekitClient.connectedAccounts.listConnectedAccounts({
+  query: 'google',
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**options:** `object` (optional)
+- `organizationId?: string` - Filter by organization ID
+- `userId?: string` - Filter by user ID
+- `connector?: string` - Filter by connector (e.g., notion, slack)
+- `identifier?: string` - Filter by account identifier
+- `provider?: string` - Filter by provider (e.g., google)
+- `pageSize?: number` - Results per page
+- `pageToken?: string` - Pagination token
+- `query?: string` - Text search query
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.connectedAccounts.<a href="/src/connected-accounts.ts">createConnectedAccount</a>(params) -> Promise&lt;CreateConnectedAccountResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new connected account with OAuth or static auth details. Optionally scope to an organization or user.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import {
+  CreateConnectedAccount,
+  AuthorizationDetails,
+  OauthToken,
+} from '@scalekit-sdk/node';
+
+const oauthToken = new OauthToken({
+  accessToken: 'ya29.xxx',
+  refreshToken: '1//xxx',
+  scopes: ['read', 'write'],
+});
+const authDetails = new AuthorizationDetails({
+  details: { case: 'oauthToken', value: oauthToken },
+});
+const connectedAccount = new CreateConnectedAccount({
+  authorizationDetails: authDetails,
+});
+
+const response = await scalekitClient.connectedAccounts.createConnectedAccount({
+  connector: 'notion',
+  identifier: 'workspace_123',
+  connectedAccount,
+  organizationId: 'org_123',
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `connector:` `string` - Connector identifier (e.g., notion, gmail)
+- `identifier:` `string` - Unique identifier for the account in the third-party service
+- `connectedAccount:` `CreateConnectedAccount` - Auth details (e.g., OAuth tokens)
+- `organizationId?:` `string` - Scope to organization
+- `userId?:` `string` - Scope to user
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.connectedAccounts.<a href="/src/connected-accounts.ts">updateConnectedAccount</a>(params) -> Promise&lt;UpdateConnectedAccountResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates an existing connected account. Target by connector + identifier, or by connectedAccountId.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const updatedAuth = new AuthorizationDetails({
+  details: {
+    case: 'oauthToken',
+    value: new OauthToken({
+      accessToken: 'new_access_token',
+      refreshToken: 'new_refresh_token',
+      scopes: ['read', 'write', 'admin'],
+    }),
+  },
+});
+const updatePayload = new UpdateConnectedAccount({
+  authorizationDetails: updatedAuth,
+});
+
+await scalekitClient.connectedAccounts.updateConnectedAccount({
+  connector: 'notion',
+  identifier: 'workspace_123',
+  connectedAccount: updatePayload,
+  connectedAccountId: 'ca_123', // optional; or use connector + identifier
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `connector:` `string` - Connector identifier
+- `identifier:` `string` - Account identifier
+- `connectedAccount:` `UpdateConnectedAccount` - Updated auth/config
+- `organizationId?:` `string` - Organization scope
+- `userId?:` `string` - User scope
+- `connectedAccountId?:` `string` - Target by account ID (ca_...)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.connectedAccounts.<a href="/src/connected-accounts.ts">deleteConnectedAccount</a>(params) -> Promise&lt;DeleteConnectedAccountResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes a connected account and revokes its credentials. Target by connector + identifier, or by connectedAccountId.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.connectedAccounts.deleteConnectedAccount({
+  connector: 'notion',
+  identifier: 'workspace_123',
+  organizationId: 'org_123',
+});
+
+// Or by account ID
+await scalekitClient.connectedAccounts.deleteConnectedAccount({
+  connector: 'notion',
+  identifier: 'workspace_123',
+  connectedAccountId: 'ca_123',
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `connector:` `string` - Connector identifier
+- `identifier:` `string` - Account identifier
+- `organizationId?:` `string` - Organization scope
+- `userId?:` `string` - User scope
+- `connectedAccountId?:` `string` - Target by account ID (ca_...)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.connectedAccounts.<a href="/src/connected-accounts.ts">getMagicLinkForConnectedAccount</a>(params) -> Promise&lt;GetMagicLinkForConnectedAccountResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generates a time-limited magic link for connecting or re-authorizing a third-party account (OAuth flow).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const response = await scalekitClient.connectedAccounts.getMagicLinkForConnectedAccount({
+  connector: 'notion',
+  identifier: 'workspace_123',
+  organizationId: 'org_123',
+});
+
+// Redirect user to response.link; link expires at response.expiry
+console.log(response.link, response.expiry);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `connector:` `string` - Connector identifier
+- `identifier:` `string` - Account identifier
+- `organizationId?:` `string` - Organization scope
+- `userId?:` `string` - User scope
+- `connectedAccountId?:` `string` - Target by account ID (ca_...)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.connectedAccounts.<a href="/src/connected-accounts.ts">getConnectedAccountByIdentifier</a>(params) -> Promise&lt;GetConnectedAccountByIdentifierResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves full authentication details for a connected account (including tokens). Returns sensitive data; protect access appropriately.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const response = await scalekitClient.connectedAccounts.getConnectedAccountByIdentifier({
+  connector: 'notion',
+  identifier: 'workspace_123',
+  organizationId: 'org_123',
+});
+
+const account = response.connectedAccount;
+// account.authorizationDetails, account.id, etc.
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `connector:` `string` - Connector identifier
+- `identifier:` `string` - Account identifier
+- `organizationId?:` `string` - Organization scope
+- `userId?:` `string` - User scope
+- `connectedAccountId?:` `string` - Target by account ID (ca_...)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ____

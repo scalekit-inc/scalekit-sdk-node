@@ -172,6 +172,10 @@ export declare class OrganizationMembership extends Message<OrganizationMembersh
      * @generated from field: optional string provisioning_method = 14;
      */
     provisioningMethod?: string;
+    /**
+     * @generated from field: repeated string permissions = 15;
+     */
+    permissions: string[];
     constructor(data?: PartialMessage<OrganizationMembership>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.commons.OrganizationMembership";

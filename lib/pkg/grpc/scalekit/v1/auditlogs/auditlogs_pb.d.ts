@@ -32,6 +32,14 @@ export declare class ListAuthLogRequest extends Message<ListAuthLogRequest> {
      * @generated from field: string resource_id = 7;
      */
     resourceId: string;
+    /**
+     * @generated from field: string connected_account_identifier = 8;
+     */
+    connectedAccountIdentifier: string;
+    /**
+     * @generated from field: string client_id = 9;
+     */
+    clientId: string;
     constructor(data?: PartialMessage<ListAuthLogRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.auditlogs.ListAuthLogRequest";
@@ -130,6 +138,22 @@ export declare class AuthLogRequest extends Message<AuthLogRequest> {
      * @generated from field: string resource_type = 14;
      */
     resourceType: string;
+    /**
+     * @generated from field: string connected_account_identifier = 15;
+     */
+    connectedAccountIdentifier: string;
+    /**
+     * @generated from field: string client_id = 16;
+     */
+    clientId: string;
+    /**
+     * @generated from field: string client_name = 17;
+     */
+    clientName: string;
+    /**
+     * @generated from field: string client_type = 18;
+     */
+    clientType: string;
     constructor(data?: PartialMessage<AuthLogRequest>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.auditlogs.AuthLogRequest";

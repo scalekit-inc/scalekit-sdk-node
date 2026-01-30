@@ -85,7 +85,23 @@ export declare enum AuthState {
     /**
      * @generated from enum value: WEBAUTHN_VERIFIED = 15;
      */
-    WEBAUTHN_VERIFIED = 15
+    WEBAUTHN_VERIFIED = 15,
+    /**
+     * @generated from enum value: VERIFICATION_MAGIC_LINK_SENT = 16;
+     */
+    VERIFICATION_MAGIC_LINK_SENT = 16,
+    /**
+     * @generated from enum value: VERIFICATION_MAGIC_LINK_OTP_SENT = 17;
+     */
+    VERIFICATION_MAGIC_LINK_OTP_SENT = 17,
+    /**
+     * @generated from enum value: VERIFICATION_OTP_SENT = 18;
+     */
+    VERIFICATION_OTP_SENT = 18,
+    /**
+     * @generated from enum value: VERIFICATION_COMPLETED = 19;
+     */
+    VERIFICATION_COMPLETED = 19
 }
 /**
  * @generated from message scalekit.v1.auth.ListAuthMethodsRequest
@@ -568,6 +584,10 @@ export declare class GetAuthStateResponse extends Message<GetAuthStateResponse> 
      * @generated from field: scalekit.v1.auth.AuthState auth_state = 1;
      */
     authState: AuthState;
+    /**
+     * @generated from field: scalekit.v1.auth.UserDetails user = 2;
+     */
+    user?: UserDetails;
     constructor(data?: PartialMessage<GetAuthStateResponse>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.auth.GetAuthStateResponse";
