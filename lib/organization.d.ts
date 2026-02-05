@@ -1,4 +1,5 @@
-import { Empty, PartialMessage } from "@bufbuild/protobuf";
+import type { MessageShape } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
 import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, UpdateOrganization, UpdateOrganizationResponse } from "./pkg/grpc/scalekit/v1/organizations/organizations_pb";
@@ -17,10 +18,10 @@ import { OrganizationSettings, OrganizationUserManagementSettingsInput } from ".
  * @see {@link https://docs.scalekit.com/apis/#tag/organizations | Organization API Documentation}
  */
 export default class OrganizationClient {
-    private readonly grpcConncet;
+    private readonly grpcConnect;
     private readonly coreClient;
     private client;
-    constructor(grpcConncet: GrpcConnect, coreClient: CoreClient);
+    constructor(grpcConnect: GrpcConnect, coreClient: CoreClient);
     /**
      * Creates a new organization (tenant) in your Scalekit application.
      *
@@ -201,7 +202,7 @@ export default class OrganizationClient {
      * unchanged. Note that the region code cannot be modified once set.
      *
      * @param {string} id - The Scalekit organization identifier (format: "org_...")
-     * @param {PartialMessage<UpdateOrganization>} organization - Object containing fields to update:
+     * @param {Partial<UpdateOrganization>} organization - Object containing fields to update:
      *   - displayName?: New display name for the organization
      *   - externalId?: New external ID to map to your system
      *   - metadata?: Custom key-value pairs for storing additional data
@@ -240,7 +241,7 @@ export default class OrganizationClient {
      * @see {@link updateOrganizationByExternalId} - Update using your external ID
      * @see {@link getOrganization} - Retrieve current organization details
      */
-    updateOrganization(id: string, organization: PartialMessage<UpdateOrganization>): Promise<UpdateOrganizationResponse>;
+    updateOrganization(id: string, organization: Partial<UpdateOrganization>): Promise<UpdateOrganizationResponse>;
     /**
      * Updates an organization's properties using your system's external identifier.
      *
@@ -249,7 +250,7 @@ export default class OrganizationClient {
      * Only specified fields will be updated; all other fields remain unchanged.
      *
      * @param {string} externalId - Your system's unique identifier for the organization
-     * @param {PartialMessage<UpdateOrganization>} organization - Object containing fields to update:
+     * @param {Partial<UpdateOrganization>} organization - Object containing fields to update:
      *   - displayName?: New display name for the organization
      *   - externalId?: New external ID (useful for migrating identifiers)
      *   - metadata?: Custom key-value pairs for storing additional data
@@ -294,7 +295,7 @@ export default class OrganizationClient {
      * @see {@link updateOrganization} - Update using Scalekit ID
      * @see {@link getOrganizationByExternalId} - Retrieve organization by external ID
      */
-    updateOrganizationByExternalId(externalId: string, organization: PartialMessage<UpdateOrganization>): Promise<UpdateOrganizationResponse>;
+    updateOrganizationByExternalId(externalId: string, organization: Partial<UpdateOrganization>): Promise<UpdateOrganizationResponse>;
     /**
      * Permanently deletes an organization from your Scalekit environment.
      *
@@ -303,7 +304,7 @@ export default class OrganizationClient {
      *
      * @param {string} organizationId - The Scalekit organization identifier to delete
      *
-     * @returns {Promise<Empty>} Empty response on successful deletion
+     * @returns {Promise<MessageShape<EmptySchema>>} Empty response on successful deletion
      *
      * @throws {Error} If the organization is not found or deletion fails
      *
@@ -330,7 +331,7 @@ export default class OrganizationClient {
      * @see {@link https://docs.scalekit.com/apis/#tag/organizations | Delete Organization API}
      * @see {@link getOrganization} - Check if organization exists before deletion
      */
-    deleteOrganization(organizationId: string): Promise<Empty>;
+    deleteOrganization(organizationId: string): Promise<MessageShape<typeof EmptySchema>>;
     /**
      * Creates a single use Admin Portal URL valid for 1 minute.
      *

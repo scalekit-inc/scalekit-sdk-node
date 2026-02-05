@@ -1,9 +1,9 @@
-import { ServiceType } from '@bufbuild/protobuf';
-import { PromiseClient } from '@connectrpc/connect';
+import type { DescService } from '@bufbuild/protobuf';
+import { type Client } from '@connectrpc/connect';
 import CoreClient from './core';
 export default class GrpcConnect {
     private readonly coreClient;
     private transport;
     constructor(coreClient: CoreClient);
-    createClient<T extends ServiceType>(service: T): PromiseClient<T>;
+    createClient<T extends DescService>(service: T): Client<T>;
 }

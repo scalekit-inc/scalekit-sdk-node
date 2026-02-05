@@ -1,127 +1,14 @@
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
+import type { GenEnum, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import type { Message } from "@bufbuild/protobuf";
 /**
- * @generated from enum scalekit.v1.commons.RegionCode
+ * Describes the file scalekit/v1/commons/commons.proto.
  */
-export declare enum RegionCode {
-    /**
-     *
-     * If the region code is unspecified the selected region will automatically be decided based on the origin of the call.
-     *
-     * @generated from enum value: REGION_CODE_UNSPECIFIED = 0;
-     */
-    REGION_CODE_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: US = 1;
-     */
-    US = 1,
-    /**
-     * @generated from enum value: EU = 2;
-     */
-    EU = 2
-}
-/**
- * @generated from enum scalekit.v1.commons.MembershipStatus
- */
-export declare enum MembershipStatus {
-    /**
-     * @generated from enum value: Membership_Status_UNSPECIFIED = 0;
-     */
-    Membership_Status_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: ACTIVE = 1;
-     */
-    ACTIVE = 1,
-    /**
-     * @generated from enum value: INACTIVE = 2;
-     */
-    INACTIVE = 2,
-    /**
-     * @generated from enum value: PENDING_INVITE = 3;
-     */
-    PENDING_INVITE = 3,
-    /**
-     * @generated from enum value: INVITE_EXPIRED = 4;
-     */
-    INVITE_EXPIRED = 4
-}
-/**
- * @generated from enum scalekit.v1.commons.IdentityProviderType
- */
-export declare enum IdentityProviderType {
-    /**
-     * @generated from enum value: IDENTITY_PROVIDER_UNSPECIFIED = 0;
-     */
-    IDENTITY_PROVIDER_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: OKTA = 1;
-     */
-    OKTA = 1,
-    /**
-     * @generated from enum value: GOOGLE = 2;
-     */
-    GOOGLE = 2,
-    /**
-     * @generated from enum value: MICROSOFT_AD = 3;
-     */
-    MICROSOFT_AD = 3,
-    /**
-     * @generated from enum value: AUTH0 = 4;
-     */
-    AUTH0 = 4,
-    /**
-     * @generated from enum value: ONELOGIN = 5;
-     */
-    ONELOGIN = 5,
-    /**
-     * @generated from enum value: PING_IDENTITY = 6;
-     */
-    PING_IDENTITY = 6,
-    /**
-     * @generated from enum value: JUMPCLOUD = 7;
-     */
-    JUMPCLOUD = 7,
-    /**
-     * @generated from enum value: CUSTOM = 8;
-     */
-    CUSTOM = 8,
-    /**
-     * @generated from enum value: GITHUB = 9;
-     */
-    GITHUB = 9,
-    /**
-     * @generated from enum value: GITLAB = 10;
-     */
-    GITLAB = 10,
-    /**
-     * @generated from enum value: LINKEDIN = 11;
-     */
-    LINKEDIN = 11,
-    /**
-     * @generated from enum value: SALESFORCE = 12;
-     */
-    SALESFORCE = 12,
-    /**
-     * @generated from enum value: MICROSOFT = 13;
-     */
-    MICROSOFT = 13,
-    /**
-     * @generated from enum value: IDP_SIMULATOR = 14;
-     */
-    IDP_SIMULATOR = 14,
-    /**
-     * @generated from enum value: SCALEKIT = 15;
-     */
-    SCALEKIT = 15,
-    /**
-     * @generated from enum value: ADFS = 16;
-     */
-    ADFS = 16
-}
+export declare const file_scalekit_v1_commons_commons: GenFile;
 /**
  * @generated from message scalekit.v1.commons.OrganizationMembership
  */
-export declare class OrganizationMembership extends Message<OrganizationMembership> {
+export type OrganizationMembership = Message<"scalekit.v1.commons.OrganizationMembership"> & {
     /**
      * @generated from field: string organization_id = 1;
      */
@@ -172,19 +59,20 @@ export declare class OrganizationMembership extends Message<OrganizationMembersh
      * @generated from field: optional string provisioning_method = 14;
      */
     provisioningMethod?: string;
-    constructor(data?: PartialMessage<OrganizationMembership>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.commons.OrganizationMembership";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OrganizationMembership;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OrganizationMembership;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OrganizationMembership;
-    static equals(a: OrganizationMembership | PlainMessage<OrganizationMembership> | undefined, b: OrganizationMembership | PlainMessage<OrganizationMembership> | undefined): boolean;
-}
+    /**
+     * @generated from field: repeated string permissions = 15;
+     */
+    permissions: string[];
+};
+/**
+ * Describes the message scalekit.v1.commons.OrganizationMembership.
+ * Use `create(OrganizationMembershipSchema)` to create a new message.
+ */
+export declare const OrganizationMembershipSchema: GenMessage<OrganizationMembership>;
 /**
  * @generated from message scalekit.v1.commons.Role
  */
-export declare class Role extends Message<Role> {
+export type Role = Message<"scalekit.v1.commons.Role"> & {
     /**
      * @generated from field: string id = 1;
      */
@@ -197,19 +85,16 @@ export declare class Role extends Message<Role> {
      * @generated from field: string display_name = 3;
      */
     displayName: string;
-    constructor(data?: PartialMessage<Role>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.commons.Role";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Role;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Role;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Role;
-    static equals(a: Role | PlainMessage<Role> | undefined, b: Role | PlainMessage<Role> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.commons.Role.
+ * Use `create(RoleSchema)` to create a new message.
+ */
+export declare const RoleSchema: GenMessage<Role>;
 /**
  * @generated from message scalekit.v1.commons.UserProfile
  */
-export declare class UserProfile extends Message<UserProfile> {
+export type UserProfile = Message<"scalekit.v1.commons.UserProfile"> & {
     /**
      * @generated from field: string id = 1;
      */
@@ -284,19 +169,16 @@ export declare class UserProfile extends Message<UserProfile> {
      * @generated from field: repeated scalekit.v1.commons.ExternalIdentity external_identities = 10;
      */
     externalIdentities: ExternalIdentity[];
-    constructor(data?: PartialMessage<UserProfile>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.commons.UserProfile";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserProfile;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UserProfile;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UserProfile;
-    static equals(a: UserProfile | PlainMessage<UserProfile> | undefined, b: UserProfile | PlainMessage<UserProfile> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.commons.UserProfile.
+ * Use `create(UserProfileSchema)` to create a new message.
+ */
+export declare const UserProfileSchema: GenMessage<UserProfile>;
 /**
  * @generated from message scalekit.v1.commons.ExternalIdentity
  */
-export declare class ExternalIdentity extends Message<ExternalIdentity> {
+export type ExternalIdentity = Message<"scalekit.v1.commons.ExternalIdentity"> & {
     /**
      * Identifier for this connection.
      *
@@ -345,12 +227,139 @@ export declare class ExternalIdentity extends Message<ExternalIdentity> {
      * @generated from field: google.protobuf.Timestamp last_synced_time = 8;
      */
     lastSyncedTime?: Timestamp;
-    constructor(data?: PartialMessage<ExternalIdentity>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.commons.ExternalIdentity";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ExternalIdentity;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ExternalIdentity;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ExternalIdentity;
-    static equals(a: ExternalIdentity | PlainMessage<ExternalIdentity> | undefined, b: ExternalIdentity | PlainMessage<ExternalIdentity> | undefined): boolean;
+};
+/**
+ * Describes the message scalekit.v1.commons.ExternalIdentity.
+ * Use `create(ExternalIdentitySchema)` to create a new message.
+ */
+export declare const ExternalIdentitySchema: GenMessage<ExternalIdentity>;
+/**
+ * @generated from enum scalekit.v1.commons.RegionCode
+ */
+export declare enum RegionCode {
+    /**
+     *
+     * If the region code is unspecified the selected region will automatically be decided based on the origin of the call.
+     *
+     * @generated from enum value: REGION_CODE_UNSPECIFIED = 0;
+     */
+    REGION_CODE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: US = 1;
+     */
+    US = 1,
+    /**
+     * @generated from enum value: EU = 2;
+     */
+    EU = 2
 }
+/**
+ * Describes the enum scalekit.v1.commons.RegionCode.
+ */
+export declare const RegionCodeSchema: GenEnum<RegionCode>;
+/**
+ * @generated from enum scalekit.v1.commons.MembershipStatus
+ */
+export declare enum MembershipStatus {
+    /**
+     * @generated from enum value: Membership_Status_UNSPECIFIED = 0;
+     */
+    Membership_Status_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: ACTIVE = 1;
+     */
+    ACTIVE = 1,
+    /**
+     * @generated from enum value: INACTIVE = 2;
+     */
+    INACTIVE = 2,
+    /**
+     * @generated from enum value: PENDING_INVITE = 3;
+     */
+    PENDING_INVITE = 3,
+    /**
+     * @generated from enum value: INVITE_EXPIRED = 4;
+     */
+    INVITE_EXPIRED = 4
+}
+/**
+ * Describes the enum scalekit.v1.commons.MembershipStatus.
+ */
+export declare const MembershipStatusSchema: GenEnum<MembershipStatus>;
+/**
+ * @generated from enum scalekit.v1.commons.IdentityProviderType
+ */
+export declare enum IdentityProviderType {
+    /**
+     * @generated from enum value: IDENTITY_PROVIDER_UNSPECIFIED = 0;
+     */
+    IDENTITY_PROVIDER_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: OKTA = 1;
+     */
+    OKTA = 1,
+    /**
+     * @generated from enum value: GOOGLE = 2;
+     */
+    GOOGLE = 2,
+    /**
+     * @generated from enum value: MICROSOFT_AD = 3;
+     */
+    MICROSOFT_AD = 3,
+    /**
+     * @generated from enum value: AUTH0 = 4;
+     */
+    AUTH0 = 4,
+    /**
+     * @generated from enum value: ONELOGIN = 5;
+     */
+    ONELOGIN = 5,
+    /**
+     * @generated from enum value: PING_IDENTITY = 6;
+     */
+    PING_IDENTITY = 6,
+    /**
+     * @generated from enum value: JUMPCLOUD = 7;
+     */
+    JUMPCLOUD = 7,
+    /**
+     * @generated from enum value: CUSTOM = 8;
+     */
+    CUSTOM = 8,
+    /**
+     * @generated from enum value: GITHUB = 9;
+     */
+    GITHUB = 9,
+    /**
+     * @generated from enum value: GITLAB = 10;
+     */
+    GITLAB = 10,
+    /**
+     * @generated from enum value: LINKEDIN = 11;
+     */
+    LINKEDIN = 11,
+    /**
+     * @generated from enum value: SALESFORCE = 12;
+     */
+    SALESFORCE = 12,
+    /**
+     * @generated from enum value: MICROSOFT = 13;
+     */
+    MICROSOFT = 13,
+    /**
+     * @generated from enum value: IDP_SIMULATOR = 14;
+     */
+    IDP_SIMULATOR = 14,
+    /**
+     * @generated from enum value: SCALEKIT = 15;
+     */
+    SCALEKIT = 15,
+    /**
+     * @generated from enum value: ADFS = 16;
+     */
+    ADFS = 16
+}
+/**
+ * Describes the enum scalekit.v1.commons.IdentityProviderType.
+ */
+export declare const IdentityProviderTypeSchema: GenEnum<IdentityProviderType>;

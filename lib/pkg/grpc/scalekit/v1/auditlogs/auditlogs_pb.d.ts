@@ -1,9 +1,14 @@
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
+import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import type { Message } from "@bufbuild/protobuf";
+/**
+ * Describes the file scalekit/v1/auditlogs/auditlogs.proto.
+ */
+export declare const file_scalekit_v1_auditlogs_auditlogs: GenFile;
 /**
  * @generated from message scalekit.v1.auditlogs.ListAuthLogRequest
  */
-export declare class ListAuthLogRequest extends Message<ListAuthLogRequest> {
+export type ListAuthLogRequest = Message<"scalekit.v1.auditlogs.ListAuthLogRequest"> & {
     /**
      * @generated from field: uint32 page_size = 1;
      */
@@ -32,19 +37,24 @@ export declare class ListAuthLogRequest extends Message<ListAuthLogRequest> {
      * @generated from field: string resource_id = 7;
      */
     resourceId: string;
-    constructor(data?: PartialMessage<ListAuthLogRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.auditlogs.ListAuthLogRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAuthLogRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAuthLogRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAuthLogRequest;
-    static equals(a: ListAuthLogRequest | PlainMessage<ListAuthLogRequest> | undefined, b: ListAuthLogRequest | PlainMessage<ListAuthLogRequest> | undefined): boolean;
-}
+    /**
+     * @generated from field: string connected_account_identifier = 8;
+     */
+    connectedAccountIdentifier: string;
+    /**
+     * @generated from field: string client_id = 9;
+     */
+    clientId: string;
+};
+/**
+ * Describes the message scalekit.v1.auditlogs.ListAuthLogRequest.
+ * Use `create(ListAuthLogRequestSchema)` to create a new message.
+ */
+export declare const ListAuthLogRequestSchema: GenMessage<ListAuthLogRequest>;
 /**
  * @generated from message scalekit.v1.auditlogs.ListAuthLogResponse
  */
-export declare class ListAuthLogResponse extends Message<ListAuthLogResponse> {
+export type ListAuthLogResponse = Message<"scalekit.v1.auditlogs.ListAuthLogResponse"> & {
     /**
      * @generated from field: string next_page_token = 1;
      */
@@ -61,19 +71,16 @@ export declare class ListAuthLogResponse extends Message<ListAuthLogResponse> {
      * @generated from field: repeated scalekit.v1.auditlogs.AuthLogRequest authRequests = 4;
      */
     authRequests: AuthLogRequest[];
-    constructor(data?: PartialMessage<ListAuthLogResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.auditlogs.ListAuthLogResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAuthLogResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAuthLogResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAuthLogResponse;
-    static equals(a: ListAuthLogResponse | PlainMessage<ListAuthLogResponse> | undefined, b: ListAuthLogResponse | PlainMessage<ListAuthLogResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.auditlogs.ListAuthLogResponse.
+ * Use `create(ListAuthLogResponseSchema)` to create a new message.
+ */
+export declare const ListAuthLogResponseSchema: GenMessage<ListAuthLogResponse>;
 /**
  * @generated from message scalekit.v1.auditlogs.AuthLogRequest
  */
-export declare class AuthLogRequest extends Message<AuthLogRequest> {
+export type AuthLogRequest = Message<"scalekit.v1.auditlogs.AuthLogRequest"> & {
     /**
      * @generated from field: string organization_id = 1;
      */
@@ -130,19 +137,32 @@ export declare class AuthLogRequest extends Message<AuthLogRequest> {
      * @generated from field: string resource_type = 14;
      */
     resourceType: string;
-    constructor(data?: PartialMessage<AuthLogRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.auditlogs.AuthLogRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AuthLogRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AuthLogRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AuthLogRequest;
-    static equals(a: AuthLogRequest | PlainMessage<AuthLogRequest> | undefined, b: AuthLogRequest | PlainMessage<AuthLogRequest> | undefined): boolean;
-}
+    /**
+     * @generated from field: string connected_account_identifier = 15;
+     */
+    connectedAccountIdentifier: string;
+    /**
+     * @generated from field: string client_id = 16;
+     */
+    clientId: string;
+    /**
+     * @generated from field: string client_name = 17;
+     */
+    clientName: string;
+    /**
+     * @generated from field: string client_type = 18;
+     */
+    clientType: string;
+};
+/**
+ * Describes the message scalekit.v1.auditlogs.AuthLogRequest.
+ * Use `create(AuthLogRequestSchema)` to create a new message.
+ */
+export declare const AuthLogRequestSchema: GenMessage<AuthLogRequest>;
 /**
  * @generated from message scalekit.v1.auditlogs.ConnectionDetails
  */
-export declare class ConnectionDetails extends Message<ConnectionDetails> {
+export type ConnectionDetails = Message<"scalekit.v1.auditlogs.ConnectionDetails"> & {
     /**
      * @generated from field: string connection_id = 1;
      */
@@ -159,12 +179,22 @@ export declare class ConnectionDetails extends Message<ConnectionDetails> {
      * @generated from field: string connection_provider = 4;
      */
     connectionProvider: string;
-    constructor(data?: PartialMessage<ConnectionDetails>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.auditlogs.ConnectionDetails";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ConnectionDetails;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ConnectionDetails;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ConnectionDetails;
-    static equals(a: ConnectionDetails | PlainMessage<ConnectionDetails> | undefined, b: ConnectionDetails | PlainMessage<ConnectionDetails> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.auditlogs.ConnectionDetails.
+ * Use `create(ConnectionDetailsSchema)` to create a new message.
+ */
+export declare const ConnectionDetailsSchema: GenMessage<ConnectionDetails>;
+/**
+ * @generated from service scalekit.v1.auditlogs.AuditLogsService
+ */
+export declare const AuditLogsService: GenService<{
+    /**
+     * @generated from rpc scalekit.v1.auditlogs.AuditLogsService.ListAuthRequests
+     */
+    listAuthRequests: {
+        methodKind: "unary";
+        input: typeof ListAuthLogRequestSchema;
+        output: typeof ListAuthLogResponseSchema;
+    };
+}>;

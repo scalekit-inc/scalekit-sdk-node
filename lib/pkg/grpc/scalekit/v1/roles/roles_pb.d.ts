@@ -1,9 +1,14 @@
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
+import type { Message } from "@bufbuild/protobuf";
+/**
+ * Describes the file scalekit/v1/roles/roles.proto.
+ */
+export declare const file_scalekit_v1_roles_roles: GenFile;
 /**
  * @generated from message scalekit.v1.roles.Role
  */
-export declare class Role extends Message<Role> {
+export type Role = Message<"scalekit.v1.roles.Role"> & {
     /**
      * @generated from field: string id = 1;
      */
@@ -44,19 +49,16 @@ export declare class Role extends Message<Role> {
      * @generated from field: bool is_org_role = 11;
      */
     isOrgRole: boolean;
-    constructor(data?: PartialMessage<Role>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.Role";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Role;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Role;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Role;
-    static equals(a: Role | PlainMessage<Role> | undefined, b: Role | PlainMessage<Role> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.Role.
+ * Use `create(RoleSchema)` to create a new message.
+ */
+export declare const RoleSchema: GenMessage<Role>;
 /**
  * @generated from message scalekit.v1.roles.CreateRole
  */
-export declare class CreateRole extends Message<CreateRole> {
+export type CreateRole = Message<"scalekit.v1.roles.CreateRole"> & {
     /**
      * @generated from field: string name = 2;
      */
@@ -77,19 +79,16 @@ export declare class CreateRole extends Message<CreateRole> {
      * @generated from field: repeated string permissions = 9;
      */
     permissions: string[];
-    constructor(data?: PartialMessage<CreateRole>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.CreateRole";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateRole;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateRole;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateRole;
-    static equals(a: CreateRole | PlainMessage<CreateRole> | undefined, b: CreateRole | PlainMessage<CreateRole> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.CreateRole.
+ * Use `create(CreateRoleSchema)` to create a new message.
+ */
+export declare const CreateRoleSchema: GenMessage<CreateRole>;
 /**
  * @generated from message scalekit.v1.roles.CreateOrganizationRole
  */
-export declare class CreateOrganizationRole extends Message<CreateOrganizationRole> {
+export type CreateOrganizationRole = Message<"scalekit.v1.roles.CreateOrganizationRole"> & {
     /**
      * @generated from field: string name = 2;
      */
@@ -110,53 +109,44 @@ export declare class CreateOrganizationRole extends Message<CreateOrganizationRo
      * @generated from field: repeated string permissions = 9;
      */
     permissions: string[];
-    constructor(data?: PartialMessage<CreateOrganizationRole>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.CreateOrganizationRole";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateOrganizationRole;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateOrganizationRole;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateOrganizationRole;
-    static equals(a: CreateOrganizationRole | PlainMessage<CreateOrganizationRole> | undefined, b: CreateOrganizationRole | PlainMessage<CreateOrganizationRole> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.CreateOrganizationRole.
+ * Use `create(CreateOrganizationRoleSchema)` to create a new message.
+ */
+export declare const CreateOrganizationRoleSchema: GenMessage<CreateOrganizationRole>;
 /**
  * @generated from message scalekit.v1.roles.CreateRoleRequest
  */
-export declare class CreateRoleRequest extends Message<CreateRoleRequest> {
+export type CreateRoleRequest = Message<"scalekit.v1.roles.CreateRoleRequest"> & {
     /**
      * @generated from field: scalekit.v1.roles.CreateRole role = 2;
      */
     role?: CreateRole;
-    constructor(data?: PartialMessage<CreateRoleRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.CreateRoleRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateRoleRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateRoleRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateRoleRequest;
-    static equals(a: CreateRoleRequest | PlainMessage<CreateRoleRequest> | undefined, b: CreateRoleRequest | PlainMessage<CreateRoleRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.CreateRoleRequest.
+ * Use `create(CreateRoleRequestSchema)` to create a new message.
+ */
+export declare const CreateRoleRequestSchema: GenMessage<CreateRoleRequest>;
 /**
  * @generated from message scalekit.v1.roles.CreateRoleResponse
  */
-export declare class CreateRoleResponse extends Message<CreateRoleResponse> {
+export type CreateRoleResponse = Message<"scalekit.v1.roles.CreateRoleResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
     role?: Role;
-    constructor(data?: PartialMessage<CreateRoleResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.CreateRoleResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateRoleResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateRoleResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateRoleResponse;
-    static equals(a: CreateRoleResponse | PlainMessage<CreateRoleResponse> | undefined, b: CreateRoleResponse | PlainMessage<CreateRoleResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.CreateRoleResponse.
+ * Use `create(CreateRoleResponseSchema)` to create a new message.
+ */
+export declare const CreateRoleResponseSchema: GenMessage<CreateRoleResponse>;
 /**
  * @generated from message scalekit.v1.roles.GetRoleRequest
  */
-export declare class GetRoleRequest extends Message<GetRoleRequest> {
+export type GetRoleRequest = Message<"scalekit.v1.roles.GetRoleRequest"> & {
     /**
      * @generated from field: string role_name = 2;
      */
@@ -165,70 +155,58 @@ export declare class GetRoleRequest extends Message<GetRoleRequest> {
      * @generated from field: optional string include = 3;
      */
     include?: string;
-    constructor(data?: PartialMessage<GetRoleRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.GetRoleRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetRoleRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetRoleRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetRoleRequest;
-    static equals(a: GetRoleRequest | PlainMessage<GetRoleRequest> | undefined, b: GetRoleRequest | PlainMessage<GetRoleRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.GetRoleRequest.
+ * Use `create(GetRoleRequestSchema)` to create a new message.
+ */
+export declare const GetRoleRequestSchema: GenMessage<GetRoleRequest>;
 /**
  * @generated from message scalekit.v1.roles.GetRoleResponse
  */
-export declare class GetRoleResponse extends Message<GetRoleResponse> {
+export type GetRoleResponse = Message<"scalekit.v1.roles.GetRoleResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
     role?: Role;
-    constructor(data?: PartialMessage<GetRoleResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.GetRoleResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetRoleResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetRoleResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetRoleResponse;
-    static equals(a: GetRoleResponse | PlainMessage<GetRoleResponse> | undefined, b: GetRoleResponse | PlainMessage<GetRoleResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.GetRoleResponse.
+ * Use `create(GetRoleResponseSchema)` to create a new message.
+ */
+export declare const GetRoleResponseSchema: GenMessage<GetRoleResponse>;
 /**
  * @generated from message scalekit.v1.roles.ListRolesRequest
  */
-export declare class ListRolesRequest extends Message<ListRolesRequest> {
+export type ListRolesRequest = Message<"scalekit.v1.roles.ListRolesRequest"> & {
     /**
      * @generated from field: optional string include = 2;
      */
     include?: string;
-    constructor(data?: PartialMessage<ListRolesRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListRolesRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListRolesRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListRolesRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListRolesRequest;
-    static equals(a: ListRolesRequest | PlainMessage<ListRolesRequest> | undefined, b: ListRolesRequest | PlainMessage<ListRolesRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.ListRolesRequest.
+ * Use `create(ListRolesRequestSchema)` to create a new message.
+ */
+export declare const ListRolesRequestSchema: GenMessage<ListRolesRequest>;
 /**
  * @generated from message scalekit.v1.roles.ListRolesResponse
  */
-export declare class ListRolesResponse extends Message<ListRolesResponse> {
+export type ListRolesResponse = Message<"scalekit.v1.roles.ListRolesResponse"> & {
     /**
      * @generated from field: repeated scalekit.v1.roles.Role roles = 1;
      */
     roles: Role[];
-    constructor(data?: PartialMessage<ListRolesResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListRolesResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListRolesResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListRolesResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListRolesResponse;
-    static equals(a: ListRolesResponse | PlainMessage<ListRolesResponse> | undefined, b: ListRolesResponse | PlainMessage<ListRolesResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.ListRolesResponse.
+ * Use `create(ListRolesResponseSchema)` to create a new message.
+ */
+export declare const ListRolesResponseSchema: GenMessage<ListRolesResponse>;
 /**
  * @generated from message scalekit.v1.roles.UpdateRole
  */
-export declare class UpdateRole extends Message<UpdateRole> {
+export type UpdateRole = Message<"scalekit.v1.roles.UpdateRole"> & {
     /**
      * @generated from field: optional string display_name = 1;
      */
@@ -245,19 +223,16 @@ export declare class UpdateRole extends Message<UpdateRole> {
      * @generated from field: repeated string permissions = 7;
      */
     permissions: string[];
-    constructor(data?: PartialMessage<UpdateRole>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdateRole";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateRole;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateRole;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateRole;
-    static equals(a: UpdateRole | PlainMessage<UpdateRole> | undefined, b: UpdateRole | PlainMessage<UpdateRole> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdateRole.
+ * Use `create(UpdateRoleSchema)` to create a new message.
+ */
+export declare const UpdateRoleSchema: GenMessage<UpdateRole>;
 /**
  * @generated from message scalekit.v1.roles.UpdateRoleRequest
  */
-export declare class UpdateRoleRequest extends Message<UpdateRoleRequest> {
+export type UpdateRoleRequest = Message<"scalekit.v1.roles.UpdateRoleRequest"> & {
     /**
      * @generated from field: string role_name = 2;
      */
@@ -266,36 +241,30 @@ export declare class UpdateRoleRequest extends Message<UpdateRoleRequest> {
      * @generated from field: scalekit.v1.roles.UpdateRole role = 3;
      */
     role?: UpdateRole;
-    constructor(data?: PartialMessage<UpdateRoleRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdateRoleRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateRoleRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateRoleRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateRoleRequest;
-    static equals(a: UpdateRoleRequest | PlainMessage<UpdateRoleRequest> | undefined, b: UpdateRoleRequest | PlainMessage<UpdateRoleRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdateRoleRequest.
+ * Use `create(UpdateRoleRequestSchema)` to create a new message.
+ */
+export declare const UpdateRoleRequestSchema: GenMessage<UpdateRoleRequest>;
 /**
  * @generated from message scalekit.v1.roles.UpdateRoleResponse
  */
-export declare class UpdateRoleResponse extends Message<UpdateRoleResponse> {
+export type UpdateRoleResponse = Message<"scalekit.v1.roles.UpdateRoleResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
     role?: Role;
-    constructor(data?: PartialMessage<UpdateRoleResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdateRoleResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateRoleResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateRoleResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateRoleResponse;
-    static equals(a: UpdateRoleResponse | PlainMessage<UpdateRoleResponse> | undefined, b: UpdateRoleResponse | PlainMessage<UpdateRoleResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdateRoleResponse.
+ * Use `create(UpdateRoleResponseSchema)` to create a new message.
+ */
+export declare const UpdateRoleResponseSchema: GenMessage<UpdateRoleResponse>;
 /**
  * @generated from message scalekit.v1.roles.DeleteRoleRequest
  */
-export declare class DeleteRoleRequest extends Message<DeleteRoleRequest> {
+export type DeleteRoleRequest = Message<"scalekit.v1.roles.DeleteRoleRequest"> & {
     /**
      * @generated from field: string role_name = 2;
      */
@@ -309,19 +278,16 @@ export declare class DeleteRoleRequest extends Message<DeleteRoleRequest> {
      * @generated from field: optional string reassign_role_name = 4;
      */
     reassignRoleName?: string;
-    constructor(data?: PartialMessage<DeleteRoleRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.DeleteRoleRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteRoleRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteRoleRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteRoleRequest;
-    static equals(a: DeleteRoleRequest | PlainMessage<DeleteRoleRequest> | undefined, b: DeleteRoleRequest | PlainMessage<DeleteRoleRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.DeleteRoleRequest.
+ * Use `create(DeleteRoleRequestSchema)` to create a new message.
+ */
+export declare const DeleteRoleRequestSchema: GenMessage<DeleteRoleRequest>;
 /**
  * @generated from message scalekit.v1.roles.CreateOrganizationRoleRequest
  */
-export declare class CreateOrganizationRoleRequest extends Message<CreateOrganizationRoleRequest> {
+export type CreateOrganizationRoleRequest = Message<"scalekit.v1.roles.CreateOrganizationRoleRequest"> & {
     /**
      * @generated from field: string org_id = 1;
      */
@@ -330,36 +296,30 @@ export declare class CreateOrganizationRoleRequest extends Message<CreateOrganiz
      * @generated from field: scalekit.v1.roles.CreateOrganizationRole role = 2;
      */
     role?: CreateOrganizationRole;
-    constructor(data?: PartialMessage<CreateOrganizationRoleRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.CreateOrganizationRoleRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateOrganizationRoleRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateOrganizationRoleRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateOrganizationRoleRequest;
-    static equals(a: CreateOrganizationRoleRequest | PlainMessage<CreateOrganizationRoleRequest> | undefined, b: CreateOrganizationRoleRequest | PlainMessage<CreateOrganizationRoleRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.CreateOrganizationRoleRequest.
+ * Use `create(CreateOrganizationRoleRequestSchema)` to create a new message.
+ */
+export declare const CreateOrganizationRoleRequestSchema: GenMessage<CreateOrganizationRoleRequest>;
 /**
  * @generated from message scalekit.v1.roles.CreateOrganizationRoleResponse
  */
-export declare class CreateOrganizationRoleResponse extends Message<CreateOrganizationRoleResponse> {
+export type CreateOrganizationRoleResponse = Message<"scalekit.v1.roles.CreateOrganizationRoleResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
     role?: Role;
-    constructor(data?: PartialMessage<CreateOrganizationRoleResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.CreateOrganizationRoleResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateOrganizationRoleResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateOrganizationRoleResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateOrganizationRoleResponse;
-    static equals(a: CreateOrganizationRoleResponse | PlainMessage<CreateOrganizationRoleResponse> | undefined, b: CreateOrganizationRoleResponse | PlainMessage<CreateOrganizationRoleResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.CreateOrganizationRoleResponse.
+ * Use `create(CreateOrganizationRoleResponseSchema)` to create a new message.
+ */
+export declare const CreateOrganizationRoleResponseSchema: GenMessage<CreateOrganizationRoleResponse>;
 /**
  * @generated from message scalekit.v1.roles.GetOrganizationRoleRequest
  */
-export declare class GetOrganizationRoleRequest extends Message<GetOrganizationRoleRequest> {
+export type GetOrganizationRoleRequest = Message<"scalekit.v1.roles.GetOrganizationRoleRequest"> & {
     /**
      * @generated from field: string org_id = 1;
      */
@@ -372,36 +332,30 @@ export declare class GetOrganizationRoleRequest extends Message<GetOrganizationR
      * @generated from field: optional string include = 3;
      */
     include?: string;
-    constructor(data?: PartialMessage<GetOrganizationRoleRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.GetOrganizationRoleRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOrganizationRoleRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOrganizationRoleRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOrganizationRoleRequest;
-    static equals(a: GetOrganizationRoleRequest | PlainMessage<GetOrganizationRoleRequest> | undefined, b: GetOrganizationRoleRequest | PlainMessage<GetOrganizationRoleRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.GetOrganizationRoleRequest.
+ * Use `create(GetOrganizationRoleRequestSchema)` to create a new message.
+ */
+export declare const GetOrganizationRoleRequestSchema: GenMessage<GetOrganizationRoleRequest>;
 /**
  * @generated from message scalekit.v1.roles.GetOrganizationRoleResponse
  */
-export declare class GetOrganizationRoleResponse extends Message<GetOrganizationRoleResponse> {
+export type GetOrganizationRoleResponse = Message<"scalekit.v1.roles.GetOrganizationRoleResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
     role?: Role;
-    constructor(data?: PartialMessage<GetOrganizationRoleResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.GetOrganizationRoleResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOrganizationRoleResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOrganizationRoleResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOrganizationRoleResponse;
-    static equals(a: GetOrganizationRoleResponse | PlainMessage<GetOrganizationRoleResponse> | undefined, b: GetOrganizationRoleResponse | PlainMessage<GetOrganizationRoleResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.GetOrganizationRoleResponse.
+ * Use `create(GetOrganizationRoleResponseSchema)` to create a new message.
+ */
+export declare const GetOrganizationRoleResponseSchema: GenMessage<GetOrganizationRoleResponse>;
 /**
  * @generated from message scalekit.v1.roles.ListOrganizationRolesRequest
  */
-export declare class ListOrganizationRolesRequest extends Message<ListOrganizationRolesRequest> {
+export type ListOrganizationRolesRequest = Message<"scalekit.v1.roles.ListOrganizationRolesRequest"> & {
     /**
      * @generated from field: string org_id = 1;
      */
@@ -410,36 +364,30 @@ export declare class ListOrganizationRolesRequest extends Message<ListOrganizati
      * @generated from field: optional string include = 2;
      */
     include?: string;
-    constructor(data?: PartialMessage<ListOrganizationRolesRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListOrganizationRolesRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListOrganizationRolesRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListOrganizationRolesRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListOrganizationRolesRequest;
-    static equals(a: ListOrganizationRolesRequest | PlainMessage<ListOrganizationRolesRequest> | undefined, b: ListOrganizationRolesRequest | PlainMessage<ListOrganizationRolesRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.ListOrganizationRolesRequest.
+ * Use `create(ListOrganizationRolesRequestSchema)` to create a new message.
+ */
+export declare const ListOrganizationRolesRequestSchema: GenMessage<ListOrganizationRolesRequest>;
 /**
  * @generated from message scalekit.v1.roles.ListOrganizationRolesResponse
  */
-export declare class ListOrganizationRolesResponse extends Message<ListOrganizationRolesResponse> {
+export type ListOrganizationRolesResponse = Message<"scalekit.v1.roles.ListOrganizationRolesResponse"> & {
     /**
      * @generated from field: repeated scalekit.v1.roles.Role roles = 1;
      */
     roles: Role[];
-    constructor(data?: PartialMessage<ListOrganizationRolesResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListOrganizationRolesResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListOrganizationRolesResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListOrganizationRolesResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListOrganizationRolesResponse;
-    static equals(a: ListOrganizationRolesResponse | PlainMessage<ListOrganizationRolesResponse> | undefined, b: ListOrganizationRolesResponse | PlainMessage<ListOrganizationRolesResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.ListOrganizationRolesResponse.
+ * Use `create(ListOrganizationRolesResponseSchema)` to create a new message.
+ */
+export declare const ListOrganizationRolesResponseSchema: GenMessage<ListOrganizationRolesResponse>;
 /**
  * @generated from message scalekit.v1.roles.UpdateOrganizationRoleRequest
  */
-export declare class UpdateOrganizationRoleRequest extends Message<UpdateOrganizationRoleRequest> {
+export type UpdateOrganizationRoleRequest = Message<"scalekit.v1.roles.UpdateOrganizationRoleRequest"> & {
     /**
      * @generated from field: string org_id = 1;
      */
@@ -452,36 +400,30 @@ export declare class UpdateOrganizationRoleRequest extends Message<UpdateOrganiz
      * @generated from field: scalekit.v1.roles.UpdateRole role = 3;
      */
     role?: UpdateRole;
-    constructor(data?: PartialMessage<UpdateOrganizationRoleRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdateOrganizationRoleRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateOrganizationRoleRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateOrganizationRoleRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateOrganizationRoleRequest;
-    static equals(a: UpdateOrganizationRoleRequest | PlainMessage<UpdateOrganizationRoleRequest> | undefined, b: UpdateOrganizationRoleRequest | PlainMessage<UpdateOrganizationRoleRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdateOrganizationRoleRequest.
+ * Use `create(UpdateOrganizationRoleRequestSchema)` to create a new message.
+ */
+export declare const UpdateOrganizationRoleRequestSchema: GenMessage<UpdateOrganizationRoleRequest>;
 /**
  * @generated from message scalekit.v1.roles.UpdateOrganizationRoleResponse
  */
-export declare class UpdateOrganizationRoleResponse extends Message<UpdateOrganizationRoleResponse> {
+export type UpdateOrganizationRoleResponse = Message<"scalekit.v1.roles.UpdateOrganizationRoleResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
     role?: Role;
-    constructor(data?: PartialMessage<UpdateOrganizationRoleResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdateOrganizationRoleResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateOrganizationRoleResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateOrganizationRoleResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateOrganizationRoleResponse;
-    static equals(a: UpdateOrganizationRoleResponse | PlainMessage<UpdateOrganizationRoleResponse> | undefined, b: UpdateOrganizationRoleResponse | PlainMessage<UpdateOrganizationRoleResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdateOrganizationRoleResponse.
+ * Use `create(UpdateOrganizationRoleResponseSchema)` to create a new message.
+ */
+export declare const UpdateOrganizationRoleResponseSchema: GenMessage<UpdateOrganizationRoleResponse>;
 /**
  * @generated from message scalekit.v1.roles.DeleteOrganizationRoleRequest
  */
-export declare class DeleteOrganizationRoleRequest extends Message<DeleteOrganizationRoleRequest> {
+export type DeleteOrganizationRoleRequest = Message<"scalekit.v1.roles.DeleteOrganizationRoleRequest"> & {
     /**
      * @generated from field: string org_id = 1;
      */
@@ -494,53 +436,44 @@ export declare class DeleteOrganizationRoleRequest extends Message<DeleteOrganiz
      * @generated from field: optional string reassign_role_name = 3;
      */
     reassignRoleName?: string;
-    constructor(data?: PartialMessage<DeleteOrganizationRoleRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.DeleteOrganizationRoleRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteOrganizationRoleRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteOrganizationRoleRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteOrganizationRoleRequest;
-    static equals(a: DeleteOrganizationRoleRequest | PlainMessage<DeleteOrganizationRoleRequest> | undefined, b: DeleteOrganizationRoleRequest | PlainMessage<DeleteOrganizationRoleRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.DeleteOrganizationRoleRequest.
+ * Use `create(DeleteOrganizationRoleRequestSchema)` to create a new message.
+ */
+export declare const DeleteOrganizationRoleRequestSchema: GenMessage<DeleteOrganizationRoleRequest>;
 /**
  * @generated from message scalekit.v1.roles.GetRoleUsersCountRequest
  */
-export declare class GetRoleUsersCountRequest extends Message<GetRoleUsersCountRequest> {
+export type GetRoleUsersCountRequest = Message<"scalekit.v1.roles.GetRoleUsersCountRequest"> & {
     /**
      * @generated from field: string role_name = 2;
      */
     roleName: string;
-    constructor(data?: PartialMessage<GetRoleUsersCountRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.GetRoleUsersCountRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetRoleUsersCountRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetRoleUsersCountRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetRoleUsersCountRequest;
-    static equals(a: GetRoleUsersCountRequest | PlainMessage<GetRoleUsersCountRequest> | undefined, b: GetRoleUsersCountRequest | PlainMessage<GetRoleUsersCountRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.GetRoleUsersCountRequest.
+ * Use `create(GetRoleUsersCountRequestSchema)` to create a new message.
+ */
+export declare const GetRoleUsersCountRequestSchema: GenMessage<GetRoleUsersCountRequest>;
 /**
  * @generated from message scalekit.v1.roles.GetRoleUsersCountResponse
  */
-export declare class GetRoleUsersCountResponse extends Message<GetRoleUsersCountResponse> {
+export type GetRoleUsersCountResponse = Message<"scalekit.v1.roles.GetRoleUsersCountResponse"> & {
     /**
      * @generated from field: int64 count = 1;
      */
     count: bigint;
-    constructor(data?: PartialMessage<GetRoleUsersCountResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.GetRoleUsersCountResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetRoleUsersCountResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetRoleUsersCountResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetRoleUsersCountResponse;
-    static equals(a: GetRoleUsersCountResponse | PlainMessage<GetRoleUsersCountResponse> | undefined, b: GetRoleUsersCountResponse | PlainMessage<GetRoleUsersCountResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.GetRoleUsersCountResponse.
+ * Use `create(GetRoleUsersCountResponseSchema)` to create a new message.
+ */
+export declare const GetRoleUsersCountResponseSchema: GenMessage<GetRoleUsersCountResponse>;
 /**
  * @generated from message scalekit.v1.roles.GetOrganizationRoleUsersCountRequest
  */
-export declare class GetOrganizationRoleUsersCountRequest extends Message<GetOrganizationRoleUsersCountRequest> {
+export type GetOrganizationRoleUsersCountRequest = Message<"scalekit.v1.roles.GetOrganizationRoleUsersCountRequest"> & {
     /**
      * @generated from field: string org_id = 1;
      */
@@ -549,36 +482,30 @@ export declare class GetOrganizationRoleUsersCountRequest extends Message<GetOrg
      * @generated from field: string role_name = 2;
      */
     roleName: string;
-    constructor(data?: PartialMessage<GetOrganizationRoleUsersCountRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.GetOrganizationRoleUsersCountRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOrganizationRoleUsersCountRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOrganizationRoleUsersCountRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOrganizationRoleUsersCountRequest;
-    static equals(a: GetOrganizationRoleUsersCountRequest | PlainMessage<GetOrganizationRoleUsersCountRequest> | undefined, b: GetOrganizationRoleUsersCountRequest | PlainMessage<GetOrganizationRoleUsersCountRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.GetOrganizationRoleUsersCountRequest.
+ * Use `create(GetOrganizationRoleUsersCountRequestSchema)` to create a new message.
+ */
+export declare const GetOrganizationRoleUsersCountRequestSchema: GenMessage<GetOrganizationRoleUsersCountRequest>;
 /**
  * @generated from message scalekit.v1.roles.GetOrganizationRoleUsersCountResponse
  */
-export declare class GetOrganizationRoleUsersCountResponse extends Message<GetOrganizationRoleUsersCountResponse> {
+export type GetOrganizationRoleUsersCountResponse = Message<"scalekit.v1.roles.GetOrganizationRoleUsersCountResponse"> & {
     /**
      * @generated from field: int64 count = 1;
      */
     count: bigint;
-    constructor(data?: PartialMessage<GetOrganizationRoleUsersCountResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.GetOrganizationRoleUsersCountResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOrganizationRoleUsersCountResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOrganizationRoleUsersCountResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOrganizationRoleUsersCountResponse;
-    static equals(a: GetOrganizationRoleUsersCountResponse | PlainMessage<GetOrganizationRoleUsersCountResponse> | undefined, b: GetOrganizationRoleUsersCountResponse | PlainMessage<GetOrganizationRoleUsersCountResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.GetOrganizationRoleUsersCountResponse.
+ * Use `create(GetOrganizationRoleUsersCountResponseSchema)` to create a new message.
+ */
+export declare const GetOrganizationRoleUsersCountResponseSchema: GenMessage<GetOrganizationRoleUsersCountResponse>;
 /**
  * @generated from message scalekit.v1.roles.UpdateDefaultRolesRequest
  */
-export declare class UpdateDefaultRolesRequest extends Message<UpdateDefaultRolesRequest> {
+export type UpdateDefaultRolesRequest = Message<"scalekit.v1.roles.UpdateDefaultRolesRequest"> & {
     /**
      * @generated from field: scalekit.v1.roles.UpdateDefaultRole default_creator = 2 [deprecated = true];
      * @deprecated
@@ -597,19 +524,16 @@ export declare class UpdateDefaultRolesRequest extends Message<UpdateDefaultRole
      * @generated from field: optional string default_member_role = 5;
      */
     defaultMemberRole?: string;
-    constructor(data?: PartialMessage<UpdateDefaultRolesRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdateDefaultRolesRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateDefaultRolesRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateDefaultRolesRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateDefaultRolesRequest;
-    static equals(a: UpdateDefaultRolesRequest | PlainMessage<UpdateDefaultRolesRequest> | undefined, b: UpdateDefaultRolesRequest | PlainMessage<UpdateDefaultRolesRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdateDefaultRolesRequest.
+ * Use `create(UpdateDefaultRolesRequestSchema)` to create a new message.
+ */
+export declare const UpdateDefaultRolesRequestSchema: GenMessage<UpdateDefaultRolesRequest>;
 /**
  * @generated from message scalekit.v1.roles.UpdateDefaultOrganizationRolesRequest
  */
-export declare class UpdateDefaultOrganizationRolesRequest extends Message<UpdateDefaultOrganizationRolesRequest> {
+export type UpdateDefaultOrganizationRolesRequest = Message<"scalekit.v1.roles.UpdateDefaultOrganizationRolesRequest"> & {
     /**
      * @generated from field: string org_id = 1;
      */
@@ -618,19 +542,16 @@ export declare class UpdateDefaultOrganizationRolesRequest extends Message<Updat
      * @generated from field: string default_member_role = 2;
      */
     defaultMemberRole: string;
-    constructor(data?: PartialMessage<UpdateDefaultOrganizationRolesRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdateDefaultOrganizationRolesRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateDefaultOrganizationRolesRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateDefaultOrganizationRolesRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateDefaultOrganizationRolesRequest;
-    static equals(a: UpdateDefaultOrganizationRolesRequest | PlainMessage<UpdateDefaultOrganizationRolesRequest> | undefined, b: UpdateDefaultOrganizationRolesRequest | PlainMessage<UpdateDefaultOrganizationRolesRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdateDefaultOrganizationRolesRequest.
+ * Use `create(UpdateDefaultOrganizationRolesRequestSchema)` to create a new message.
+ */
+export declare const UpdateDefaultOrganizationRolesRequestSchema: GenMessage<UpdateDefaultOrganizationRolesRequest>;
 /**
  * @generated from message scalekit.v1.roles.UpdateDefaultRolesResponse
  */
-export declare class UpdateDefaultRolesResponse extends Message<UpdateDefaultRolesResponse> {
+export type UpdateDefaultRolesResponse = Message<"scalekit.v1.roles.UpdateDefaultRolesResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Role default_creator = 1;
      */
@@ -639,36 +560,30 @@ export declare class UpdateDefaultRolesResponse extends Message<UpdateDefaultRol
      * @generated from field: scalekit.v1.roles.Role default_member = 2;
      */
     defaultMember?: Role;
-    constructor(data?: PartialMessage<UpdateDefaultRolesResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdateDefaultRolesResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateDefaultRolesResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateDefaultRolesResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateDefaultRolesResponse;
-    static equals(a: UpdateDefaultRolesResponse | PlainMessage<UpdateDefaultRolesResponse> | undefined, b: UpdateDefaultRolesResponse | PlainMessage<UpdateDefaultRolesResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdateDefaultRolesResponse.
+ * Use `create(UpdateDefaultRolesResponseSchema)` to create a new message.
+ */
+export declare const UpdateDefaultRolesResponseSchema: GenMessage<UpdateDefaultRolesResponse>;
 /**
  * @generated from message scalekit.v1.roles.UpdateDefaultOrganizationRolesResponse
  */
-export declare class UpdateDefaultOrganizationRolesResponse extends Message<UpdateDefaultOrganizationRolesResponse> {
+export type UpdateDefaultOrganizationRolesResponse = Message<"scalekit.v1.roles.UpdateDefaultOrganizationRolesResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Role default_member = 2;
      */
     defaultMember?: Role;
-    constructor(data?: PartialMessage<UpdateDefaultOrganizationRolesResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdateDefaultOrganizationRolesResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateDefaultOrganizationRolesResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateDefaultOrganizationRolesResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateDefaultOrganizationRolesResponse;
-    static equals(a: UpdateDefaultOrganizationRolesResponse | PlainMessage<UpdateDefaultOrganizationRolesResponse> | undefined, b: UpdateDefaultOrganizationRolesResponse | PlainMessage<UpdateDefaultOrganizationRolesResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdateDefaultOrganizationRolesResponse.
+ * Use `create(UpdateDefaultOrganizationRolesResponseSchema)` to create a new message.
+ */
+export declare const UpdateDefaultOrganizationRolesResponseSchema: GenMessage<UpdateDefaultOrganizationRolesResponse>;
 /**
  * @generated from message scalekit.v1.roles.UpdateDefaultRole
  */
-export declare class UpdateDefaultRole extends Message<UpdateDefaultRole> {
+export type UpdateDefaultRole = Message<"scalekit.v1.roles.UpdateDefaultRole"> & {
     /**
      * @generated from field: string id = 1;
      */
@@ -677,21 +592,18 @@ export declare class UpdateDefaultRole extends Message<UpdateDefaultRole> {
      * @generated from field: optional string name = 2;
      */
     name?: string;
-    constructor(data?: PartialMessage<UpdateDefaultRole>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdateDefaultRole";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateDefaultRole;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateDefaultRole;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateDefaultRole;
-    static equals(a: UpdateDefaultRole | PlainMessage<UpdateDefaultRole> | undefined, b: UpdateDefaultRole | PlainMessage<UpdateDefaultRole> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdateDefaultRole.
+ * Use `create(UpdateDefaultRoleSchema)` to create a new message.
+ */
+export declare const UpdateDefaultRoleSchema: GenMessage<UpdateDefaultRole>;
 /**
  * Permission Entity
  *
  * @generated from message scalekit.v1.roles.Permission
  */
-export declare class Permission extends Message<Permission> {
+export type Permission = Message<"scalekit.v1.roles.Permission"> & {
     /**
      * @generated from field: string id = 1;
      */
@@ -712,21 +624,22 @@ export declare class Permission extends Message<Permission> {
      * @generated from field: google.protobuf.Timestamp update_time = 5;
      */
     updateTime?: Timestamp;
-    constructor(data?: PartialMessage<Permission>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.Permission";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Permission;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Permission;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Permission;
-    static equals(a: Permission | PlainMessage<Permission> | undefined, b: Permission | PlainMessage<Permission> | undefined): boolean;
-}
+    /**
+     * @generated from field: bool is_scalekit_permission = 6;
+     */
+    isScalekitPermission: boolean;
+};
+/**
+ * Describes the message scalekit.v1.roles.Permission.
+ * Use `create(PermissionSchema)` to create a new message.
+ */
+export declare const PermissionSchema: GenMessage<Permission>;
 /**
  * RolePermissions represents a permission with role source information
  *
  * @generated from message scalekit.v1.roles.RolePermission
  */
-export declare class RolePermission extends Message<RolePermission> {
+export type RolePermission = Message<"scalekit.v1.roles.RolePermission"> & {
     /**
      * @generated from field: string id = 1;
      */
@@ -751,19 +664,16 @@ export declare class RolePermission extends Message<RolePermission> {
      * @generated from field: string role_name = 6;
      */
     roleName: string;
-    constructor(data?: PartialMessage<RolePermission>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.RolePermission";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RolePermission;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RolePermission;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RolePermission;
-    static equals(a: RolePermission | PlainMessage<RolePermission> | undefined, b: RolePermission | PlainMessage<RolePermission> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.RolePermission.
+ * Use `create(RolePermissionSchema)` to create a new message.
+ */
+export declare const RolePermissionSchema: GenMessage<RolePermission>;
 /**
  * @generated from message scalekit.v1.roles.CreatePermission
  */
-export declare class CreatePermission extends Message<CreatePermission> {
+export type CreatePermission = Message<"scalekit.v1.roles.CreatePermission"> & {
     /**
      * @generated from field: string name = 1;
      */
@@ -772,89 +682,74 @@ export declare class CreatePermission extends Message<CreatePermission> {
      * @generated from field: string description = 2;
      */
     description: string;
-    constructor(data?: PartialMessage<CreatePermission>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.CreatePermission";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreatePermission;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreatePermission;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreatePermission;
-    static equals(a: CreatePermission | PlainMessage<CreatePermission> | undefined, b: CreatePermission | PlainMessage<CreatePermission> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.CreatePermission.
+ * Use `create(CreatePermissionSchema)` to create a new message.
+ */
+export declare const CreatePermissionSchema: GenMessage<CreatePermission>;
 /**
  * Permission Request/Response Messages
  *
  * @generated from message scalekit.v1.roles.CreatePermissionRequest
  */
-export declare class CreatePermissionRequest extends Message<CreatePermissionRequest> {
+export type CreatePermissionRequest = Message<"scalekit.v1.roles.CreatePermissionRequest"> & {
     /**
      * @generated from field: scalekit.v1.roles.CreatePermission permission = 1;
      */
     permission?: CreatePermission;
-    constructor(data?: PartialMessage<CreatePermissionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.CreatePermissionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreatePermissionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreatePermissionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreatePermissionRequest;
-    static equals(a: CreatePermissionRequest | PlainMessage<CreatePermissionRequest> | undefined, b: CreatePermissionRequest | PlainMessage<CreatePermissionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.CreatePermissionRequest.
+ * Use `create(CreatePermissionRequestSchema)` to create a new message.
+ */
+export declare const CreatePermissionRequestSchema: GenMessage<CreatePermissionRequest>;
 /**
  * @generated from message scalekit.v1.roles.CreatePermissionResponse
  */
-export declare class CreatePermissionResponse extends Message<CreatePermissionResponse> {
+export type CreatePermissionResponse = Message<"scalekit.v1.roles.CreatePermissionResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Permission permission = 1;
      */
     permission?: Permission;
-    constructor(data?: PartialMessage<CreatePermissionResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.CreatePermissionResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreatePermissionResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreatePermissionResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreatePermissionResponse;
-    static equals(a: CreatePermissionResponse | PlainMessage<CreatePermissionResponse> | undefined, b: CreatePermissionResponse | PlainMessage<CreatePermissionResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.CreatePermissionResponse.
+ * Use `create(CreatePermissionResponseSchema)` to create a new message.
+ */
+export declare const CreatePermissionResponseSchema: GenMessage<CreatePermissionResponse>;
 /**
  * @generated from message scalekit.v1.roles.GetPermissionRequest
  */
-export declare class GetPermissionRequest extends Message<GetPermissionRequest> {
+export type GetPermissionRequest = Message<"scalekit.v1.roles.GetPermissionRequest"> & {
     /**
      * @generated from field: string permission_name = 1;
      */
     permissionName: string;
-    constructor(data?: PartialMessage<GetPermissionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.GetPermissionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPermissionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetPermissionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetPermissionRequest;
-    static equals(a: GetPermissionRequest | PlainMessage<GetPermissionRequest> | undefined, b: GetPermissionRequest | PlainMessage<GetPermissionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.GetPermissionRequest.
+ * Use `create(GetPermissionRequestSchema)` to create a new message.
+ */
+export declare const GetPermissionRequestSchema: GenMessage<GetPermissionRequest>;
 /**
  * @generated from message scalekit.v1.roles.GetPermissionResponse
  */
-export declare class GetPermissionResponse extends Message<GetPermissionResponse> {
+export type GetPermissionResponse = Message<"scalekit.v1.roles.GetPermissionResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Permission permission = 1;
      */
     permission?: Permission;
-    constructor(data?: PartialMessage<GetPermissionResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.GetPermissionResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetPermissionResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetPermissionResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetPermissionResponse;
-    static equals(a: GetPermissionResponse | PlainMessage<GetPermissionResponse> | undefined, b: GetPermissionResponse | PlainMessage<GetPermissionResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.GetPermissionResponse.
+ * Use `create(GetPermissionResponseSchema)` to create a new message.
+ */
+export declare const GetPermissionResponseSchema: GenMessage<GetPermissionResponse>;
 /**
  * @generated from message scalekit.v1.roles.UpdatePermissionRequest
  */
-export declare class UpdatePermissionRequest extends Message<UpdatePermissionRequest> {
+export type UpdatePermissionRequest = Message<"scalekit.v1.roles.UpdatePermissionRequest"> & {
     /**
      * @generated from field: string permission_name = 1;
      */
@@ -863,36 +758,30 @@ export declare class UpdatePermissionRequest extends Message<UpdatePermissionReq
      * @generated from field: scalekit.v1.roles.CreatePermission permission = 3;
      */
     permission?: CreatePermission;
-    constructor(data?: PartialMessage<UpdatePermissionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdatePermissionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdatePermissionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdatePermissionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdatePermissionRequest;
-    static equals(a: UpdatePermissionRequest | PlainMessage<UpdatePermissionRequest> | undefined, b: UpdatePermissionRequest | PlainMessage<UpdatePermissionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdatePermissionRequest.
+ * Use `create(UpdatePermissionRequestSchema)` to create a new message.
+ */
+export declare const UpdatePermissionRequestSchema: GenMessage<UpdatePermissionRequest>;
 /**
  * @generated from message scalekit.v1.roles.UpdatePermissionResponse
  */
-export declare class UpdatePermissionResponse extends Message<UpdatePermissionResponse> {
+export type UpdatePermissionResponse = Message<"scalekit.v1.roles.UpdatePermissionResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Permission permission = 1;
      */
     permission?: Permission;
-    constructor(data?: PartialMessage<UpdatePermissionResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.UpdatePermissionResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdatePermissionResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdatePermissionResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdatePermissionResponse;
-    static equals(a: UpdatePermissionResponse | PlainMessage<UpdatePermissionResponse> | undefined, b: UpdatePermissionResponse | PlainMessage<UpdatePermissionResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.UpdatePermissionResponse.
+ * Use `create(UpdatePermissionResponseSchema)` to create a new message.
+ */
+export declare const UpdatePermissionResponseSchema: GenMessage<UpdatePermissionResponse>;
 /**
  * @generated from message scalekit.v1.roles.ListPermissionsRequest
  */
-export declare class ListPermissionsRequest extends Message<ListPermissionsRequest> {
+export type ListPermissionsRequest = Message<"scalekit.v1.roles.ListPermissionsRequest"> & {
     /**
      * @generated from field: optional string page_token = 1;
      */
@@ -901,19 +790,20 @@ export declare class ListPermissionsRequest extends Message<ListPermissionsReque
      * @generated from field: optional uint32 page_size = 2;
      */
     pageSize?: number;
-    constructor(data?: PartialMessage<ListPermissionsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListPermissionsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListPermissionsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListPermissionsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListPermissionsRequest;
-    static equals(a: ListPermissionsRequest | PlainMessage<ListPermissionsRequest> | undefined, b: ListPermissionsRequest | PlainMessage<ListPermissionsRequest> | undefined): boolean;
-}
+    /**
+     * @generated from field: scalekit.v1.roles.PermissionType type = 3;
+     */
+    type: PermissionType;
+};
+/**
+ * Describes the message scalekit.v1.roles.ListPermissionsRequest.
+ * Use `create(ListPermissionsRequestSchema)` to create a new message.
+ */
+export declare const ListPermissionsRequestSchema: GenMessage<ListPermissionsRequest>;
 /**
  * @generated from message scalekit.v1.roles.ListPermissionsResponse
  */
-export declare class ListPermissionsResponse extends Message<ListPermissionsResponse> {
+export type ListPermissionsResponse = Message<"scalekit.v1.roles.ListPermissionsResponse"> & {
     /**
      * @generated from field: repeated scalekit.v1.roles.Permission permissions = 1;
      */
@@ -930,70 +820,58 @@ export declare class ListPermissionsResponse extends Message<ListPermissionsResp
      * @generated from field: uint32 total_size = 4;
      */
     totalSize: number;
-    constructor(data?: PartialMessage<ListPermissionsResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListPermissionsResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListPermissionsResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListPermissionsResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListPermissionsResponse;
-    static equals(a: ListPermissionsResponse | PlainMessage<ListPermissionsResponse> | undefined, b: ListPermissionsResponse | PlainMessage<ListPermissionsResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.ListPermissionsResponse.
+ * Use `create(ListPermissionsResponseSchema)` to create a new message.
+ */
+export declare const ListPermissionsResponseSchema: GenMessage<ListPermissionsResponse>;
 /**
  * @generated from message scalekit.v1.roles.DeletePermissionRequest
  */
-export declare class DeletePermissionRequest extends Message<DeletePermissionRequest> {
+export type DeletePermissionRequest = Message<"scalekit.v1.roles.DeletePermissionRequest"> & {
     /**
      * @generated from field: string permission_name = 1;
      */
     permissionName: string;
-    constructor(data?: PartialMessage<DeletePermissionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.DeletePermissionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeletePermissionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeletePermissionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeletePermissionRequest;
-    static equals(a: DeletePermissionRequest | PlainMessage<DeletePermissionRequest> | undefined, b: DeletePermissionRequest | PlainMessage<DeletePermissionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.DeletePermissionRequest.
+ * Use `create(DeletePermissionRequestSchema)` to create a new message.
+ */
+export declare const DeletePermissionRequestSchema: GenMessage<DeletePermissionRequest>;
 /**
  * @generated from message scalekit.v1.roles.ListRolePermissionsRequest
  */
-export declare class ListRolePermissionsRequest extends Message<ListRolePermissionsRequest> {
+export type ListRolePermissionsRequest = Message<"scalekit.v1.roles.ListRolePermissionsRequest"> & {
     /**
      * @generated from field: string role_name = 1;
      */
     roleName: string;
-    constructor(data?: PartialMessage<ListRolePermissionsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListRolePermissionsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListRolePermissionsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListRolePermissionsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListRolePermissionsRequest;
-    static equals(a: ListRolePermissionsRequest | PlainMessage<ListRolePermissionsRequest> | undefined, b: ListRolePermissionsRequest | PlainMessage<ListRolePermissionsRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.ListRolePermissionsRequest.
+ * Use `create(ListRolePermissionsRequestSchema)` to create a new message.
+ */
+export declare const ListRolePermissionsRequestSchema: GenMessage<ListRolePermissionsRequest>;
 /**
  * @generated from message scalekit.v1.roles.ListRolePermissionsResponse
  */
-export declare class ListRolePermissionsResponse extends Message<ListRolePermissionsResponse> {
+export type ListRolePermissionsResponse = Message<"scalekit.v1.roles.ListRolePermissionsResponse"> & {
     /**
      * @generated from field: repeated scalekit.v1.roles.Permission permissions = 1;
      */
     permissions: Permission[];
-    constructor(data?: PartialMessage<ListRolePermissionsResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListRolePermissionsResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListRolePermissionsResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListRolePermissionsResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListRolePermissionsResponse;
-    static equals(a: ListRolePermissionsResponse | PlainMessage<ListRolePermissionsResponse> | undefined, b: ListRolePermissionsResponse | PlainMessage<ListRolePermissionsResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.ListRolePermissionsResponse.
+ * Use `create(ListRolePermissionsResponseSchema)` to create a new message.
+ */
+export declare const ListRolePermissionsResponseSchema: GenMessage<ListRolePermissionsResponse>;
 /**
  * @generated from message scalekit.v1.roles.AddPermissionsToRoleRequest
  */
-export declare class AddPermissionsToRoleRequest extends Message<AddPermissionsToRoleRequest> {
+export type AddPermissionsToRoleRequest = Message<"scalekit.v1.roles.AddPermissionsToRoleRequest"> & {
     /**
      * @generated from field: string role_name = 1;
      */
@@ -1002,36 +880,30 @@ export declare class AddPermissionsToRoleRequest extends Message<AddPermissionsT
      * @generated from field: repeated string permission_names = 2;
      */
     permissionNames: string[];
-    constructor(data?: PartialMessage<AddPermissionsToRoleRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.AddPermissionsToRoleRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddPermissionsToRoleRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AddPermissionsToRoleRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AddPermissionsToRoleRequest;
-    static equals(a: AddPermissionsToRoleRequest | PlainMessage<AddPermissionsToRoleRequest> | undefined, b: AddPermissionsToRoleRequest | PlainMessage<AddPermissionsToRoleRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.AddPermissionsToRoleRequest.
+ * Use `create(AddPermissionsToRoleRequestSchema)` to create a new message.
+ */
+export declare const AddPermissionsToRoleRequestSchema: GenMessage<AddPermissionsToRoleRequest>;
 /**
  * @generated from message scalekit.v1.roles.AddPermissionsToRoleResponse
  */
-export declare class AddPermissionsToRoleResponse extends Message<AddPermissionsToRoleResponse> {
+export type AddPermissionsToRoleResponse = Message<"scalekit.v1.roles.AddPermissionsToRoleResponse"> & {
     /**
      * @generated from field: repeated scalekit.v1.roles.Permission permissions = 1;
      */
     permissions: Permission[];
-    constructor(data?: PartialMessage<AddPermissionsToRoleResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.AddPermissionsToRoleResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AddPermissionsToRoleResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AddPermissionsToRoleResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AddPermissionsToRoleResponse;
-    static equals(a: AddPermissionsToRoleResponse | PlainMessage<AddPermissionsToRoleResponse> | undefined, b: AddPermissionsToRoleResponse | PlainMessage<AddPermissionsToRoleResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.AddPermissionsToRoleResponse.
+ * Use `create(AddPermissionsToRoleResponseSchema)` to create a new message.
+ */
+export declare const AddPermissionsToRoleResponseSchema: GenMessage<AddPermissionsToRoleResponse>;
 /**
  * @generated from message scalekit.v1.roles.RemovePermissionFromRoleRequest
  */
-export declare class RemovePermissionFromRoleRequest extends Message<RemovePermissionFromRoleRequest> {
+export type RemovePermissionFromRoleRequest = Message<"scalekit.v1.roles.RemovePermissionFromRoleRequest"> & {
     /**
      * @generated from field: string role_name = 1;
      */
@@ -1040,104 +912,86 @@ export declare class RemovePermissionFromRoleRequest extends Message<RemovePermi
      * @generated from field: string permission_name = 2;
      */
     permissionName: string;
-    constructor(data?: PartialMessage<RemovePermissionFromRoleRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.RemovePermissionFromRoleRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RemovePermissionFromRoleRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RemovePermissionFromRoleRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RemovePermissionFromRoleRequest;
-    static equals(a: RemovePermissionFromRoleRequest | PlainMessage<RemovePermissionFromRoleRequest> | undefined, b: RemovePermissionFromRoleRequest | PlainMessage<RemovePermissionFromRoleRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.RemovePermissionFromRoleRequest.
+ * Use `create(RemovePermissionFromRoleRequestSchema)` to create a new message.
+ */
+export declare const RemovePermissionFromRoleRequestSchema: GenMessage<RemovePermissionFromRoleRequest>;
 /**
  * @generated from message scalekit.v1.roles.ListEffectiveRolePermissionsRequest
  */
-export declare class ListEffectiveRolePermissionsRequest extends Message<ListEffectiveRolePermissionsRequest> {
+export type ListEffectiveRolePermissionsRequest = Message<"scalekit.v1.roles.ListEffectiveRolePermissionsRequest"> & {
     /**
      * @generated from field: string role_name = 1;
      */
     roleName: string;
-    constructor(data?: PartialMessage<ListEffectiveRolePermissionsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListEffectiveRolePermissionsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListEffectiveRolePermissionsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListEffectiveRolePermissionsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListEffectiveRolePermissionsRequest;
-    static equals(a: ListEffectiveRolePermissionsRequest | PlainMessage<ListEffectiveRolePermissionsRequest> | undefined, b: ListEffectiveRolePermissionsRequest | PlainMessage<ListEffectiveRolePermissionsRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.ListEffectiveRolePermissionsRequest.
+ * Use `create(ListEffectiveRolePermissionsRequestSchema)` to create a new message.
+ */
+export declare const ListEffectiveRolePermissionsRequestSchema: GenMessage<ListEffectiveRolePermissionsRequest>;
 /**
  * @generated from message scalekit.v1.roles.ListEffectiveRolePermissionsResponse
  */
-export declare class ListEffectiveRolePermissionsResponse extends Message<ListEffectiveRolePermissionsResponse> {
+export type ListEffectiveRolePermissionsResponse = Message<"scalekit.v1.roles.ListEffectiveRolePermissionsResponse"> & {
     /**
      * @generated from field: repeated scalekit.v1.roles.Permission permissions = 1;
      */
     permissions: Permission[];
-    constructor(data?: PartialMessage<ListEffectiveRolePermissionsResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListEffectiveRolePermissionsResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListEffectiveRolePermissionsResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListEffectiveRolePermissionsResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListEffectiveRolePermissionsResponse;
-    static equals(a: ListEffectiveRolePermissionsResponse | PlainMessage<ListEffectiveRolePermissionsResponse> | undefined, b: ListEffectiveRolePermissionsResponse | PlainMessage<ListEffectiveRolePermissionsResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.ListEffectiveRolePermissionsResponse.
+ * Use `create(ListEffectiveRolePermissionsResponseSchema)` to create a new message.
+ */
+export declare const ListEffectiveRolePermissionsResponseSchema: GenMessage<ListEffectiveRolePermissionsResponse>;
 /**
  * @generated from message scalekit.v1.roles.ListDependentRolesRequest
  */
-export declare class ListDependentRolesRequest extends Message<ListDependentRolesRequest> {
+export type ListDependentRolesRequest = Message<"scalekit.v1.roles.ListDependentRolesRequest"> & {
     /**
      * @generated from field: string role_name = 1;
      */
     roleName: string;
-    constructor(data?: PartialMessage<ListDependentRolesRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListDependentRolesRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListDependentRolesRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListDependentRolesRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListDependentRolesRequest;
-    static equals(a: ListDependentRolesRequest | PlainMessage<ListDependentRolesRequest> | undefined, b: ListDependentRolesRequest | PlainMessage<ListDependentRolesRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.ListDependentRolesRequest.
+ * Use `create(ListDependentRolesRequestSchema)` to create a new message.
+ */
+export declare const ListDependentRolesRequestSchema: GenMessage<ListDependentRolesRequest>;
 /**
  * @generated from message scalekit.v1.roles.ListDependentRolesResponse
  */
-export declare class ListDependentRolesResponse extends Message<ListDependentRolesResponse> {
+export type ListDependentRolesResponse = Message<"scalekit.v1.roles.ListDependentRolesResponse"> & {
     /**
      * @generated from field: repeated scalekit.v1.roles.Role roles = 1;
      */
     roles: Role[];
-    constructor(data?: PartialMessage<ListDependentRolesResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.ListDependentRolesResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListDependentRolesResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListDependentRolesResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListDependentRolesResponse;
-    static equals(a: ListDependentRolesResponse | PlainMessage<ListDependentRolesResponse> | undefined, b: ListDependentRolesResponse | PlainMessage<ListDependentRolesResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.ListDependentRolesResponse.
+ * Use `create(ListDependentRolesResponseSchema)` to create a new message.
+ */
+export declare const ListDependentRolesResponseSchema: GenMessage<ListDependentRolesResponse>;
 /**
  * @generated from message scalekit.v1.roles.DeleteRoleBaseRequest
  */
-export declare class DeleteRoleBaseRequest extends Message<DeleteRoleBaseRequest> {
+export type DeleteRoleBaseRequest = Message<"scalekit.v1.roles.DeleteRoleBaseRequest"> & {
     /**
      * @generated from field: string role_name = 1;
      */
     roleName: string;
-    constructor(data?: PartialMessage<DeleteRoleBaseRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.DeleteRoleBaseRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteRoleBaseRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteRoleBaseRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteRoleBaseRequest;
-    static equals(a: DeleteRoleBaseRequest | PlainMessage<DeleteRoleBaseRequest> | undefined, b: DeleteRoleBaseRequest | PlainMessage<DeleteRoleBaseRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.roles.DeleteRoleBaseRequest.
+ * Use `create(DeleteRoleBaseRequestSchema)` to create a new message.
+ */
+export declare const DeleteRoleBaseRequestSchema: GenMessage<DeleteRoleBaseRequest>;
 /**
  * @generated from message scalekit.v1.roles.DeleteOrganizationRoleBaseRequest
  */
-export declare class DeleteOrganizationRoleBaseRequest extends Message<DeleteOrganizationRoleBaseRequest> {
+export type DeleteOrganizationRoleBaseRequest = Message<"scalekit.v1.roles.DeleteOrganizationRoleBaseRequest"> & {
     /**
      * @generated from field: string org_id = 1;
      */
@@ -1146,12 +1000,249 @@ export declare class DeleteOrganizationRoleBaseRequest extends Message<DeleteOrg
      * @generated from field: string role_name = 2;
      */
     roleName: string;
-    constructor(data?: PartialMessage<DeleteOrganizationRoleBaseRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.roles.DeleteOrganizationRoleBaseRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteOrganizationRoleBaseRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteOrganizationRoleBaseRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteOrganizationRoleBaseRequest;
-    static equals(a: DeleteOrganizationRoleBaseRequest | PlainMessage<DeleteOrganizationRoleBaseRequest> | undefined, b: DeleteOrganizationRoleBaseRequest | PlainMessage<DeleteOrganizationRoleBaseRequest> | undefined): boolean;
+};
+/**
+ * Describes the message scalekit.v1.roles.DeleteOrganizationRoleBaseRequest.
+ * Use `create(DeleteOrganizationRoleBaseRequestSchema)` to create a new message.
+ */
+export declare const DeleteOrganizationRoleBaseRequestSchema: GenMessage<DeleteOrganizationRoleBaseRequest>;
+/**
+ * @generated from enum scalekit.v1.roles.PermissionType
+ */
+export declare enum PermissionType {
+    /**
+     * @generated from enum value: ALL = 0;
+     */
+    ALL = 0,
+    /**
+     * @generated from enum value: SCALEKIT = 1;
+     */
+    SCALEKIT = 1,
+    /**
+     * @generated from enum value: ENVIRONMENT = 2;
+     */
+    ENVIRONMENT = 2
 }
+/**
+ * Describes the enum scalekit.v1.roles.PermissionType.
+ */
+export declare const PermissionTypeSchema: GenEnum<PermissionType>;
+/**
+ * @generated from service scalekit.v1.roles.RolesService
+ */
+export declare const RolesService: GenService<{
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.CreateRole
+     */
+    createRole: {
+        methodKind: "unary";
+        input: typeof CreateRoleRequestSchema;
+        output: typeof CreateRoleResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.UpdateRole
+     */
+    updateRole: {
+        methodKind: "unary";
+        input: typeof UpdateRoleRequestSchema;
+        output: typeof UpdateRoleResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.GetRole
+     */
+    getRole: {
+        methodKind: "unary";
+        input: typeof GetRoleRequestSchema;
+        output: typeof GetRoleResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.ListRoles
+     */
+    listRoles: {
+        methodKind: "unary";
+        input: typeof ListRolesRequestSchema;
+        output: typeof ListRolesResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.DeleteRole
+     */
+    deleteRole: {
+        methodKind: "unary";
+        input: typeof DeleteRoleRequestSchema;
+        output: typeof EmptySchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.CreateOrganizationRole
+     */
+    createOrganizationRole: {
+        methodKind: "unary";
+        input: typeof CreateOrganizationRoleRequestSchema;
+        output: typeof CreateOrganizationRoleResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.UpdateOrganizationRole
+     */
+    updateOrganizationRole: {
+        methodKind: "unary";
+        input: typeof UpdateOrganizationRoleRequestSchema;
+        output: typeof UpdateOrganizationRoleResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.GetOrganizationRole
+     */
+    getOrganizationRole: {
+        methodKind: "unary";
+        input: typeof GetOrganizationRoleRequestSchema;
+        output: typeof GetOrganizationRoleResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.ListOrganizationRoles
+     */
+    listOrganizationRoles: {
+        methodKind: "unary";
+        input: typeof ListOrganizationRolesRequestSchema;
+        output: typeof ListOrganizationRolesResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.DeleteOrganizationRole
+     */
+    deleteOrganizationRole: {
+        methodKind: "unary";
+        input: typeof DeleteOrganizationRoleRequestSchema;
+        output: typeof EmptySchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.GetRoleUsersCount
+     */
+    getRoleUsersCount: {
+        methodKind: "unary";
+        input: typeof GetRoleUsersCountRequestSchema;
+        output: typeof GetRoleUsersCountResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.GetOrganizationRoleUsersCount
+     */
+    getOrganizationRoleUsersCount: {
+        methodKind: "unary";
+        input: typeof GetOrganizationRoleUsersCountRequestSchema;
+        output: typeof GetOrganizationRoleUsersCountResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.UpdateDefaultRoles
+     */
+    updateDefaultRoles: {
+        methodKind: "unary";
+        input: typeof UpdateDefaultRolesRequestSchema;
+        output: typeof UpdateDefaultRolesResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.UpdateDefaultOrganizationRoles
+     */
+    updateDefaultOrganizationRoles: {
+        methodKind: "unary";
+        input: typeof UpdateDefaultOrganizationRolesRequestSchema;
+        output: typeof UpdateDefaultOrganizationRolesResponseSchema;
+    };
+    /**
+     * Role Hierarchy Management RPCs
+     *
+     * @generated from rpc scalekit.v1.roles.RolesService.ListDependentRoles
+     */
+    listDependentRoles: {
+        methodKind: "unary";
+        input: typeof ListDependentRolesRequestSchema;
+        output: typeof ListDependentRolesResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.DeleteRoleBase
+     */
+    deleteRoleBase: {
+        methodKind: "unary";
+        input: typeof DeleteRoleBaseRequestSchema;
+        output: typeof EmptySchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.DeleteOrganizationRoleBase
+     */
+    deleteOrganizationRoleBase: {
+        methodKind: "unary";
+        input: typeof DeleteOrganizationRoleBaseRequestSchema;
+        output: typeof EmptySchema;
+    };
+    /**
+     * Permission Management RPCs
+     *
+     * @generated from rpc scalekit.v1.roles.RolesService.CreatePermission
+     */
+    createPermission: {
+        methodKind: "unary";
+        input: typeof CreatePermissionRequestSchema;
+        output: typeof CreatePermissionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.GetPermission
+     */
+    getPermission: {
+        methodKind: "unary";
+        input: typeof GetPermissionRequestSchema;
+        output: typeof GetPermissionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.UpdatePermission
+     */
+    updatePermission: {
+        methodKind: "unary";
+        input: typeof UpdatePermissionRequestSchema;
+        output: typeof UpdatePermissionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.ListPermissions
+     */
+    listPermissions: {
+        methodKind: "unary";
+        input: typeof ListPermissionsRequestSchema;
+        output: typeof ListPermissionsResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.DeletePermission
+     */
+    deletePermission: {
+        methodKind: "unary";
+        input: typeof DeletePermissionRequestSchema;
+        output: typeof EmptySchema;
+    };
+    /**
+     * Role-Permission Management RPCs
+     *
+     * @generated from rpc scalekit.v1.roles.RolesService.ListRolePermissions
+     */
+    listRolePermissions: {
+        methodKind: "unary";
+        input: typeof ListRolePermissionsRequestSchema;
+        output: typeof ListRolePermissionsResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.AddPermissionsToRole
+     */
+    addPermissionsToRole: {
+        methodKind: "unary";
+        input: typeof AddPermissionsToRoleRequestSchema;
+        output: typeof AddPermissionsToRoleResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.RemovePermissionFromRole
+     */
+    removePermissionFromRole: {
+        methodKind: "unary";
+        input: typeof RemovePermissionFromRoleRequestSchema;
+        output: typeof EmptySchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.roles.RolesService.ListEffectiveRolePermissions
+     */
+    listEffectiveRolePermissions: {
+        methodKind: "unary";
+        input: typeof ListEffectiveRolePermissionsRequestSchema;
+        output: typeof ListEffectiveRolePermissionsResponseSchema;
+    };
+}>;

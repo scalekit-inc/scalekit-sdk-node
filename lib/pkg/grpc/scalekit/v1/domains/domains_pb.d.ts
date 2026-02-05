@@ -1,51 +1,14 @@
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import type { BoolValueSchema, EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
+import type { Message } from "@bufbuild/protobuf";
 /**
- * @generated from enum scalekit.v1.domains.VerificationStatus
+ * Describes the file scalekit/v1/domains/domains.proto.
  */
-export declare enum VerificationStatus {
-    /**
-     * @generated from enum value: VERIFICATION_STATUS_UNSPECIFIED = 0;
-     */
-    VERIFICATION_STATUS_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: PENDING = 1;
-     */
-    PENDING = 1,
-    /**
-     * @generated from enum value: VERIFIED = 2;
-     */
-    VERIFIED = 2,
-    /**
-     * @generated from enum value: FAILED = 3;
-     */
-    FAILED = 3,
-    /**
-     * @generated from enum value: AUTO_VERIFIED = 4;
-     */
-    AUTO_VERIFIED = 4
-}
-/**
- * @generated from enum scalekit.v1.domains.DomainType
- */
-export declare enum DomainType {
-    /**
-     * @generated from enum value: DOMAIN_TYPE_UNSPECIFIED = 0;
-     */
-    DOMAIN_TYPE_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: ALLOWED_EMAIL_DOMAIN = 1;
-     */
-    ALLOWED_EMAIL_DOMAIN = 1,
-    /**
-     * @generated from enum value: ORGANIZATION_DOMAIN = 2;
-     */
-    ORGANIZATION_DOMAIN = 2
-}
+export declare const file_scalekit_v1_domains_domains: GenFile;
 /**
  * @generated from message scalekit.v1.domains.CreateDomainRequest
  */
-export declare class CreateDomainRequest extends Message<CreateDomainRequest> {
+export type CreateDomainRequest = Message<"scalekit.v1.domains.CreateDomainRequest"> & {
     /**
      * @generated from oneof scalekit.v1.domains.CreateDomainRequest.identities
      */
@@ -73,36 +36,30 @@ export declare class CreateDomainRequest extends Message<CreateDomainRequest> {
      * @generated from field: scalekit.v1.domains.CreateDomain domain = 4;
      */
     domain?: CreateDomain;
-    constructor(data?: PartialMessage<CreateDomainRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.CreateDomainRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateDomainRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateDomainRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateDomainRequest;
-    static equals(a: CreateDomainRequest | PlainMessage<CreateDomainRequest> | undefined, b: CreateDomainRequest | PlainMessage<CreateDomainRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.CreateDomainRequest.
+ * Use `create(CreateDomainRequestSchema)` to create a new message.
+ */
+export declare const CreateDomainRequestSchema: GenMessage<CreateDomainRequest>;
 /**
  * @generated from message scalekit.v1.domains.CreateDomainResponse
  */
-export declare class CreateDomainResponse extends Message<CreateDomainResponse> {
+export type CreateDomainResponse = Message<"scalekit.v1.domains.CreateDomainResponse"> & {
     /**
      * @generated from field: scalekit.v1.domains.Domain domain = 1;
      */
     domain?: Domain;
-    constructor(data?: PartialMessage<CreateDomainResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.CreateDomainResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateDomainResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateDomainResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateDomainResponse;
-    static equals(a: CreateDomainResponse | PlainMessage<CreateDomainResponse> | undefined, b: CreateDomainResponse | PlainMessage<CreateDomainResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.CreateDomainResponse.
+ * Use `create(CreateDomainResponseSchema)` to create a new message.
+ */
+export declare const CreateDomainResponseSchema: GenMessage<CreateDomainResponse>;
 /**
  * @generated from message scalekit.v1.domains.CreateDomain
  */
-export declare class CreateDomain extends Message<CreateDomain> {
+export type CreateDomain = Message<"scalekit.v1.domains.CreateDomain"> & {
     /**
      * @generated from field: string domain = 1;
      */
@@ -111,19 +68,16 @@ export declare class CreateDomain extends Message<CreateDomain> {
      * @generated from field: scalekit.v1.domains.DomainType domain_type = 2;
      */
     domainType: DomainType;
-    constructor(data?: PartialMessage<CreateDomain>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.CreateDomain";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateDomain;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateDomain;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateDomain;
-    static equals(a: CreateDomain | PlainMessage<CreateDomain> | undefined, b: CreateDomain | PlainMessage<CreateDomain> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.CreateDomain.
+ * Use `create(CreateDomainSchema)` to create a new message.
+ */
+export declare const CreateDomainSchema: GenMessage<CreateDomain>;
 /**
  * @generated from message scalekit.v1.domains.UpdateDomainRequest
  */
-export declare class UpdateDomainRequest extends Message<UpdateDomainRequest> {
+export type UpdateDomainRequest = Message<"scalekit.v1.domains.UpdateDomainRequest"> & {
     /**
      * @generated from oneof scalekit.v1.domains.UpdateDomainRequest.identities
      */
@@ -155,49 +109,39 @@ export declare class UpdateDomainRequest extends Message<UpdateDomainRequest> {
      * @generated from field: scalekit.v1.domains.UpdateDomain domain = 5;
      */
     domain?: UpdateDomain;
-    constructor(data?: PartialMessage<UpdateDomainRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.UpdateDomainRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateDomainRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateDomainRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateDomainRequest;
-    static equals(a: UpdateDomainRequest | PlainMessage<UpdateDomainRequest> | undefined, b: UpdateDomainRequest | PlainMessage<UpdateDomainRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.UpdateDomainRequest.
+ * Use `create(UpdateDomainRequestSchema)` to create a new message.
+ */
+export declare const UpdateDomainRequestSchema: GenMessage<UpdateDomainRequest>;
 /**
  * @generated from message scalekit.v1.domains.UpdateDomain
  */
-export declare class UpdateDomain extends Message<UpdateDomain> {
-    constructor(data?: PartialMessage<UpdateDomain>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.UpdateDomain";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateDomain;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateDomain;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateDomain;
-    static equals(a: UpdateDomain | PlainMessage<UpdateDomain> | undefined, b: UpdateDomain | PlainMessage<UpdateDomain> | undefined): boolean;
-}
+export type UpdateDomain = Message<"scalekit.v1.domains.UpdateDomain"> & {};
+/**
+ * Describes the message scalekit.v1.domains.UpdateDomain.
+ * Use `create(UpdateDomainSchema)` to create a new message.
+ */
+export declare const UpdateDomainSchema: GenMessage<UpdateDomain>;
 /**
  * @generated from message scalekit.v1.domains.UpdateDomainResponse
  */
-export declare class UpdateDomainResponse extends Message<UpdateDomainResponse> {
+export type UpdateDomainResponse = Message<"scalekit.v1.domains.UpdateDomainResponse"> & {
     /**
      * @generated from field: scalekit.v1.domains.Domain domain = 1;
      */
     domain?: Domain;
-    constructor(data?: PartialMessage<UpdateDomainResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.UpdateDomainResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateDomainResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateDomainResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateDomainResponse;
-    static equals(a: UpdateDomainResponse | PlainMessage<UpdateDomainResponse> | undefined, b: UpdateDomainResponse | PlainMessage<UpdateDomainResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.UpdateDomainResponse.
+ * Use `create(UpdateDomainResponseSchema)` to create a new message.
+ */
+export declare const UpdateDomainResponseSchema: GenMessage<UpdateDomainResponse>;
 /**
  * @generated from message scalekit.v1.domains.GetDomainRequest
  */
-export declare class GetDomainRequest extends Message<GetDomainRequest> {
+export type GetDomainRequest = Message<"scalekit.v1.domains.GetDomainRequest"> & {
     /**
      * @generated from oneof scalekit.v1.domains.GetDomainRequest.identities
      */
@@ -221,36 +165,30 @@ export declare class GetDomainRequest extends Message<GetDomainRequest> {
      * @generated from field: string id = 3;
      */
     id: string;
-    constructor(data?: PartialMessage<GetDomainRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.GetDomainRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetDomainRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetDomainRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetDomainRequest;
-    static equals(a: GetDomainRequest | PlainMessage<GetDomainRequest> | undefined, b: GetDomainRequest | PlainMessage<GetDomainRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.GetDomainRequest.
+ * Use `create(GetDomainRequestSchema)` to create a new message.
+ */
+export declare const GetDomainRequestSchema: GenMessage<GetDomainRequest>;
 /**
  * @generated from message scalekit.v1.domains.GetDomainResponse
  */
-export declare class GetDomainResponse extends Message<GetDomainResponse> {
+export type GetDomainResponse = Message<"scalekit.v1.domains.GetDomainResponse"> & {
     /**
      * @generated from field: scalekit.v1.domains.Domain domain = 1;
      */
     domain?: Domain;
-    constructor(data?: PartialMessage<GetDomainResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.GetDomainResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetDomainResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetDomainResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetDomainResponse;
-    static equals(a: GetDomainResponse | PlainMessage<GetDomainResponse> | undefined, b: GetDomainResponse | PlainMessage<GetDomainResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.GetDomainResponse.
+ * Use `create(GetDomainResponseSchema)` to create a new message.
+ */
+export declare const GetDomainResponseSchema: GenMessage<GetDomainResponse>;
 /**
  * @generated from message scalekit.v1.domains.DeleteDomainRequest
  */
-export declare class DeleteDomainRequest extends Message<DeleteDomainRequest> {
+export type DeleteDomainRequest = Message<"scalekit.v1.domains.DeleteDomainRequest"> & {
     /**
      * @generated from field: string id = 1;
      */
@@ -278,19 +216,16 @@ export declare class DeleteDomainRequest extends Message<DeleteDomainRequest> {
      * @generated from field: optional string connection_id = 4;
      */
     connectionId?: string;
-    constructor(data?: PartialMessage<DeleteDomainRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.DeleteDomainRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteDomainRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteDomainRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteDomainRequest;
-    static equals(a: DeleteDomainRequest | PlainMessage<DeleteDomainRequest> | undefined, b: DeleteDomainRequest | PlainMessage<DeleteDomainRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.DeleteDomainRequest.
+ * Use `create(DeleteDomainRequestSchema)` to create a new message.
+ */
+export declare const DeleteDomainRequestSchema: GenMessage<DeleteDomainRequest>;
 /**
  * @generated from message scalekit.v1.domains.ListDomainRequest
  */
-export declare class ListDomainRequest extends Message<ListDomainRequest> {
+export type ListDomainRequest = Message<"scalekit.v1.domains.ListDomainRequest"> & {
     /**
      * @generated from oneof scalekit.v1.domains.ListDomainRequest.identities
      */
@@ -330,19 +265,16 @@ export declare class ListDomainRequest extends Message<ListDomainRequest> {
      * @generated from field: scalekit.v1.domains.DomainType domain_type = 7;
      */
     domainType: DomainType;
-    constructor(data?: PartialMessage<ListDomainRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.ListDomainRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListDomainRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListDomainRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListDomainRequest;
-    static equals(a: ListDomainRequest | PlainMessage<ListDomainRequest> | undefined, b: ListDomainRequest | PlainMessage<ListDomainRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.ListDomainRequest.
+ * Use `create(ListDomainRequestSchema)` to create a new message.
+ */
+export declare const ListDomainRequestSchema: GenMessage<ListDomainRequest>;
 /**
  * @generated from message scalekit.v1.domains.VerifyDomainRequest
  */
-export declare class VerifyDomainRequest extends Message<VerifyDomainRequest> {
+export type VerifyDomainRequest = Message<"scalekit.v1.domains.VerifyDomainRequest"> & {
     /**
      * @generated from oneof scalekit.v1.domains.VerifyDomainRequest.identities
      */
@@ -366,19 +298,16 @@ export declare class VerifyDomainRequest extends Message<VerifyDomainRequest> {
      * @generated from field: string id = 4;
      */
     id: string;
-    constructor(data?: PartialMessage<VerifyDomainRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.VerifyDomainRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VerifyDomainRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VerifyDomainRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VerifyDomainRequest;
-    static equals(a: VerifyDomainRequest | PlainMessage<VerifyDomainRequest> | undefined, b: VerifyDomainRequest | PlainMessage<VerifyDomainRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.VerifyDomainRequest.
+ * Use `create(VerifyDomainRequestSchema)` to create a new message.
+ */
+export declare const VerifyDomainRequestSchema: GenMessage<VerifyDomainRequest>;
 /**
  * @generated from message scalekit.v1.domains.ListDomainResponse
  */
-export declare class ListDomainResponse extends Message<ListDomainResponse> {
+export type ListDomainResponse = Message<"scalekit.v1.domains.ListDomainResponse"> & {
     /**
      * @generated from field: int32 page_size = 1;
      */
@@ -391,53 +320,44 @@ export declare class ListDomainResponse extends Message<ListDomainResponse> {
      * @generated from field: repeated scalekit.v1.domains.Domain domains = 3;
      */
     domains: Domain[];
-    constructor(data?: PartialMessage<ListDomainResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.ListDomainResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListDomainResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListDomainResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListDomainResponse;
-    static equals(a: ListDomainResponse | PlainMessage<ListDomainResponse> | undefined, b: ListDomainResponse | PlainMessage<ListDomainResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.ListDomainResponse.
+ * Use `create(ListDomainResponseSchema)` to create a new message.
+ */
+export declare const ListDomainResponseSchema: GenMessage<ListDomainResponse>;
 /**
  * @generated from message scalekit.v1.domains.ListAuthorizedDomainRequest
  */
-export declare class ListAuthorizedDomainRequest extends Message<ListAuthorizedDomainRequest> {
+export type ListAuthorizedDomainRequest = Message<"scalekit.v1.domains.ListAuthorizedDomainRequest"> & {
     /**
      * @generated from field: string origin = 1;
      */
     origin: string;
-    constructor(data?: PartialMessage<ListAuthorizedDomainRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.ListAuthorizedDomainRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAuthorizedDomainRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAuthorizedDomainRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAuthorizedDomainRequest;
-    static equals(a: ListAuthorizedDomainRequest | PlainMessage<ListAuthorizedDomainRequest> | undefined, b: ListAuthorizedDomainRequest | PlainMessage<ListAuthorizedDomainRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.ListAuthorizedDomainRequest.
+ * Use `create(ListAuthorizedDomainRequestSchema)` to create a new message.
+ */
+export declare const ListAuthorizedDomainRequestSchema: GenMessage<ListAuthorizedDomainRequest>;
 /**
  * @generated from message scalekit.v1.domains.ListAuthorizedDomainResponse
  */
-export declare class ListAuthorizedDomainResponse extends Message<ListAuthorizedDomainResponse> {
+export type ListAuthorizedDomainResponse = Message<"scalekit.v1.domains.ListAuthorizedDomainResponse"> & {
     /**
      * @generated from field: repeated string domains = 1;
      */
     domains: string[];
-    constructor(data?: PartialMessage<ListAuthorizedDomainResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.ListAuthorizedDomainResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAuthorizedDomainResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAuthorizedDomainResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAuthorizedDomainResponse;
-    static equals(a: ListAuthorizedDomainResponse | PlainMessage<ListAuthorizedDomainResponse> | undefined, b: ListAuthorizedDomainResponse | PlainMessage<ListAuthorizedDomainResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.domains.ListAuthorizedDomainResponse.
+ * Use `create(ListAuthorizedDomainResponseSchema)` to create a new message.
+ */
+export declare const ListAuthorizedDomainResponseSchema: GenMessage<ListAuthorizedDomainResponse>;
 /**
  * @generated from message scalekit.v1.domains.Domain
  */
-export declare class Domain extends Message<Domain> {
+export type Domain = Message<"scalekit.v1.domains.Domain"> & {
     /**
      * @generated from field: string id = 1;
      */
@@ -478,12 +398,120 @@ export declare class Domain extends Message<Domain> {
      * @generated from field: scalekit.v1.domains.DomainType domain_type = 12;
      */
     domainType: DomainType;
-    constructor(data?: PartialMessage<Domain>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.domains.Domain";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Domain;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Domain;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Domain;
-    static equals(a: Domain | PlainMessage<Domain> | undefined, b: Domain | PlainMessage<Domain> | undefined): boolean;
+};
+/**
+ * Describes the message scalekit.v1.domains.Domain.
+ * Use `create(DomainSchema)` to create a new message.
+ */
+export declare const DomainSchema: GenMessage<Domain>;
+/**
+ * @generated from enum scalekit.v1.domains.VerificationStatus
+ */
+export declare enum VerificationStatus {
+    /**
+     * @generated from enum value: VERIFICATION_STATUS_UNSPECIFIED = 0;
+     */
+    VERIFICATION_STATUS_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: PENDING = 1;
+     */
+    PENDING = 1,
+    /**
+     * @generated from enum value: VERIFIED = 2;
+     */
+    VERIFIED = 2,
+    /**
+     * @generated from enum value: FAILED = 3;
+     */
+    FAILED = 3,
+    /**
+     * @generated from enum value: AUTO_VERIFIED = 4;
+     */
+    AUTO_VERIFIED = 4
 }
+/**
+ * Describes the enum scalekit.v1.domains.VerificationStatus.
+ */
+export declare const VerificationStatusSchema: GenEnum<VerificationStatus>;
+/**
+ * @generated from enum scalekit.v1.domains.DomainType
+ */
+export declare enum DomainType {
+    /**
+     * @generated from enum value: DOMAIN_TYPE_UNSPECIFIED = 0;
+     */
+    DOMAIN_TYPE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: ALLOWED_EMAIL_DOMAIN = 1;
+     */
+    ALLOWED_EMAIL_DOMAIN = 1,
+    /**
+     * @generated from enum value: ORGANIZATION_DOMAIN = 2;
+     */
+    ORGANIZATION_DOMAIN = 2
+}
+/**
+ * Describes the enum scalekit.v1.domains.DomainType.
+ */
+export declare const DomainTypeSchema: GenEnum<DomainType>;
+/**
+ * @generated from service scalekit.v1.domains.DomainService
+ */
+export declare const DomainService: GenService<{
+    /**
+     * @generated from rpc scalekit.v1.domains.DomainService.CreateDomain
+     */
+    createDomain: {
+        methodKind: "unary";
+        input: typeof CreateDomainRequestSchema;
+        output: typeof CreateDomainResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.domains.DomainService.UpdateDomain
+     */
+    updateDomain: {
+        methodKind: "unary";
+        input: typeof UpdateDomainRequestSchema;
+        output: typeof UpdateDomainResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.domains.DomainService.VerifyDomain
+     */
+    verifyDomain: {
+        methodKind: "unary";
+        input: typeof VerifyDomainRequestSchema;
+        output: typeof BoolValueSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.domains.DomainService.GetDomain
+     */
+    getDomain: {
+        methodKind: "unary";
+        input: typeof GetDomainRequestSchema;
+        output: typeof GetDomainResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.domains.DomainService.DeleteDomain
+     */
+    deleteDomain: {
+        methodKind: "unary";
+        input: typeof DeleteDomainRequestSchema;
+        output: typeof EmptySchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.domains.DomainService.ListDomains
+     */
+    listDomains: {
+        methodKind: "unary";
+        input: typeof ListDomainRequestSchema;
+        output: typeof ListDomainResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.domains.DomainService.ListAuthorizedDomains
+     */
+    listAuthorizedDomains: {
+        methodKind: "unary";
+        input: typeof ListAuthorizedDomainRequestSchema;
+        output: typeof ListAuthorizedDomainResponseSchema;
+    };
+}>;

@@ -1,9 +1,7 @@
 version: v1
 plugins:
   - plugin: es
-    opt: target=ts
-    out: src/pkg/grpc
-  - plugin: connect-es
+    path: node_modules/.bin/protoc-gen-es
     opt: target=ts
     out: src/pkg/grpc
 types:

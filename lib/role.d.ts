@@ -1,4 +1,5 @@
-import { Empty } from "@bufbuild/protobuf";
+import type { MessageShape } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
 import { CreateRoleResponse, UpdateRoleResponse, GetRoleResponse, ListRolesResponse, CreateOrganizationRoleResponse, UpdateOrganizationRoleResponse, GetOrganizationRoleResponse, ListOrganizationRolesResponse, GetRoleUsersCountResponse, GetOrganizationRoleUsersCountResponse, UpdateDefaultOrganizationRolesResponse, CreateRole, UpdateRole, CreateOrganizationRole } from "./pkg/grpc/scalekit/v1/roles/roles_pb";
@@ -119,14 +120,14 @@ export default class RoleClient {
      * @param {string} roleName - Role to delete
      * @param {string} [reassignRoleName] - Target role for user migration
      *
-     * @returns {Promise<Empty>} Empty response on success
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
      *
      * @example
      * await scalekitClient.role.deleteRole('old_role', 'new_role');
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/roles | Delete Role API}
      */
-    deleteRole(roleName: string, reassignRoleName?: string): Promise<Empty>;
+    deleteRole(roleName: string, reassignRoleName?: string): Promise<MessageShape<typeof EmptySchema>>;
     /**
      * Gets the number of users assigned to an environment role.
      *
@@ -234,7 +235,7 @@ export default class RoleClient {
      * @param {string} roleName - Role to delete
      * @param {string} [reassignRoleName] - Target role for user migration
      *
-     * @returns {Promise<Empty>} Empty response on success
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
      *
      * @example
      * await scalekitClient.role.deleteOrganizationRole(
@@ -245,7 +246,7 @@ export default class RoleClient {
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/roles | Delete Organization Role API}
      */
-    deleteOrganizationRole(orgId: string, roleName: string, reassignRoleName?: string): Promise<Empty>;
+    deleteOrganizationRole(orgId: string, roleName: string, reassignRoleName?: string): Promise<MessageShape<typeof EmptySchema>>;
     /**
      * Gets the number of users assigned to an organization role.
      *
@@ -289,12 +290,12 @@ export default class RoleClient {
      * @param {string} orgId - Organization identifier
      * @param {string} roleName - Role to remove inheritance from
      *
-     * @returns {Promise<Empty>} Empty response on success
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
      *
      * @example
      * await scalekitClient.role.deleteOrganizationRoleBase('org_123456', 'custom_role');
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/roles | Delete Organization Role Base API}
      */
-    deleteOrganizationRoleBase(orgId: string, roleName: string): Promise<Empty>;
+    deleteOrganizationRoleBase(orgId: string, roleName: string): Promise<MessageShape<typeof EmptySchema>>;
 }

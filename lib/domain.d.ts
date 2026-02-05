@@ -1,7 +1,8 @@
+import type { MessageShape } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
 import { CreateDomainResponse, GetDomainResponse, ListDomainResponse, DomainType } from "./pkg/grpc/scalekit/v1/domains/domains_pb";
-import { Empty } from "@bufbuild/protobuf";
 /**
  * Client for managing domains for organizations.
  *
@@ -16,10 +17,10 @@ import { Empty } from "@bufbuild/protobuf";
  * @see {@link https://docs.scalekit.com/apis/#tag/domains | Domain API Documentation}
  */
 export default class DomainClient {
-    private readonly grpcConncet;
+    private readonly grpcConnect;
     private readonly coreClient;
     private client;
-    constructor(grpcConncet: GrpcConnect, coreClient: CoreClient);
+    constructor(grpcConnect: GrpcConnect, coreClient: CoreClient);
     /**
      * Adds a new domain configuration to an organization for SSO routing or user suggestions.
      *
@@ -173,7 +174,7 @@ export default class DomainClient {
      * @param {string} organizationId - The organization ID
      * @param {string} domainId - The domain ID to delete
      *
-     * @returns {Promise<Empty>} Empty response on successful deletion
+     * @returns {Promise<MessageShape<EmptySchema>>} Empty response on successful deletion
      *
      * @example
      * // Remove a domain from an organization
@@ -184,5 +185,5 @@ export default class DomainClient {
      * @see {@link createDomain} - Add a new domain
      * @see {@link listDomains} - List all domains for an organization
      */
-    deleteDomain(organizationId: string, domainId: string): Promise<Empty>;
+    deleteDomain(organizationId: string, domainId: string): Promise<MessageShape<typeof EmptySchema>>;
 }

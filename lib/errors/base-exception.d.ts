@@ -1,6 +1,6 @@
 import { ConnectError, Code } from '@connectrpc/connect';
 import { AxiosResponse } from 'axios';
-import { ErrorInfo } from '../pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
+import type { ErrorInfo } from '../pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
 export declare class ScalekitException extends Error {
     constructor(error: any);
 }

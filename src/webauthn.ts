@@ -1,18 +1,19 @@
-import { PromiseClient } from '@connectrpc/connect';
+import { create } from '@bufbuild/protobuf';
+import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { WebAuthnService } from './pkg/grpc/scalekit/v1/auth/webauthn_connect';
+import { WebAuthnService } from './pkg/grpc/scalekit/v1/auth/webauthn_pb';
 import {
-  ListCredentialsRequest,
+  ListCredentialsRequestSchema,
+  UpdateCredentialRequestSchema,
+  DeleteCredentialRequestSchema,
   ListCredentialsResponse,
-  UpdateCredentialRequest,
   UpdateCredentialResponse,
-  DeleteCredentialRequest,
   DeleteCredentialResponse
 } from './pkg/grpc/scalekit/v1/auth/webauthn_pb';
 
 export default class WebAuthnClient {
-  private client: PromiseClient<typeof WebAuthnService>;
+  private client: Client<typeof WebAuthnService>;
 
   constructor(
     private readonly grpcConnect: GrpcConnect,
@@ -33,7 +34,7 @@ export default class WebAuthnClient {
       throw new Error('userId must be a non-empty string');
     }
 
-    const request = new ListCredentialsRequest({
+    const request = create(ListCredentialsRequestSchema, {
       userId
     });
 
@@ -62,7 +63,7 @@ export default class WebAuthnClient {
       throw new Error('displayName must be a non-empty string');
     }
 
-    const request = new UpdateCredentialRequest({
+    const request = create(UpdateCredentialRequestSchema, {
       credentialId,
       displayName
     });
@@ -85,7 +86,7 @@ export default class WebAuthnClient {
       throw new Error('credentialId must be a non-empty string');
     }
 
-    const request = new DeleteCredentialRequest({
+    const request = create(DeleteCredentialRequestSchema, {
       credentialId
     });
 

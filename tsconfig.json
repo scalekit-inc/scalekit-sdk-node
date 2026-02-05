@@ -2,6 +2,7 @@
   "compilerOptions": {
     "noImplicitAny": false,
     "target": "ES6",
+    "lib": ["ES2020"],
     "module": "commonjs",
     "declaration": true,
     "strictNullChecks": true,
@@ -11,7 +12,7 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "typeRoots": ["src/types"],
+    "typeRoots": ["src/types", "node_modules/@types"],
     "moduleResolution": "Node"
   },
   "include": ["src"],

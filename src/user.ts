@@ -11,11 +11,13 @@
  *
  * @see {@link https://docs.scalekit.com/apis/#tag/users | User API Documentation}
  */
-import { Empty, PartialMessage } from "@bufbuild/protobuf";
-import { PromiseClient } from "@connectrpc/connect";
+import type { MessageShape } from "@bufbuild/protobuf";
+import { create } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
+import type { Client } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
-import { UserService } from "./pkg/grpc/scalekit/v1/users/users_connect";
+import { UserService } from "./pkg/grpc/scalekit/v1/users/users_pb";
 import {
   CreateUserAndMembershipRequest,
   CreateUserAndMembershipResponse,
@@ -30,8 +32,13 @@ import {
   UpdateUser,
   CreateUser,
   CreateUserProfile,
+  CreateUserSchema,
+  CreateUserProfileSchema,
+  UpdateUserSchema,
+  CreateUserAndMembershipRequestSchema,
   CreateMembershipRequest,
   CreateMembershipResponse,
+  CreateMembershipRequestSchema,
   DeleteMembershipRequest,
   UpdateMembershipRequest,
   UpdateMembershipResponse,
@@ -39,8 +46,11 @@ import {
   ListOrganizationUsersResponse,
   CreateMembership,
   UpdateMembership,
+  CreateMembershipSchema,
+  UpdateMembershipSchema,
   ResendInviteRequest,
   ResendInviteResponse,
+  ResendInviteRequestSchema,
 } from "./pkg/grpc/scalekit/v1/users/users_pb";
 import {
   CreateUserRequest,
@@ -48,7 +58,7 @@ import {
 } from "./types/user";
 
 export default class UserClient {
-  private client: PromiseClient<typeof UserService>;
+  private client: Client<typeof UserService>;
 
   constructor(
     private readonly grpcConnect: GrpcConnect,
@@ -125,10 +135,10 @@ export default class UserClient {
       throw new Error("email is required");
     }
 
-    const user = new CreateUser({
+    const user = create(CreateUserSchema, {
       email: options.email,
       userProfile: options.userProfile
-        ? new CreateUserProfile({
+        ? create(CreateUserProfileSchema, {
             firstName: options.userProfile.firstName,
             lastName: options.userProfile.lastName,
           })
@@ -136,14 +146,11 @@ export default class UserClient {
       metadata: options.metadata,
     });
 
-    const request: PartialMessage<CreateUserAndMembershipRequest> = {
+    const request = create(CreateUserAndMembershipRequestSchema, {
       organizationId,
       user,
-    };
-
-    if (options.sendInvitationEmail !== undefined) {
-      request.sendInvitationEmail = options.sendInvitationEmail;
-    }
+      sendInvitationEmail: options.sendInvitationEmail,
+    });
 
     const response = await this.coreClient.connectExec(
       this.client.createUserAndMembership,
@@ -382,7 +389,7 @@ export default class UserClient {
     userId: string,
     options: UpdateUserRequestType
   ): Promise<UpdateUserResponse> {
-    const updateUser = new UpdateUser({
+    const updateUser = create(UpdateUserSchema, {
       userProfile: options.userProfile
         ? {
             firstName: options.userProfile.firstName,
@@ -411,7 +418,7 @@ export default class UserClient {
    *
    * @param {string} userId - The Scalekit user identifier to delete (format: "usr_...")
    *
-   * @returns {Promise<Empty>} Empty response on successful deletion
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on successful deletion
    *
    * @throws {Error} If the user is not found or deletion fails
    *
@@ -441,7 +448,7 @@ export default class UserClient {
    * @see {@link deleteMembership} - Remove user from a specific organization only
    * @see {@link getUser} - Check if user exists before deletion
    */
-  async deleteUser(userId: string): Promise<Empty> {
+  async deleteUser(userId: string): Promise<MessageShape<typeof EmptySchema>> {
     return this.coreClient.connectExec(this.client.deleteUser, {
       identities: {
         case: "id",
@@ -525,23 +532,20 @@ export default class UserClient {
       sendInvitationEmail?: boolean;
     } = {}
   ): Promise<CreateMembershipResponse> {
-    const membership = new CreateMembership({
+    const membership = create(CreateMembershipSchema, {
       roles: options.roles?.map((role) => ({ name: role })) || [],
       metadata: options.metadata || {},
     });
 
-    const request: PartialMessage<CreateMembershipRequest> = {
+    const request = create(CreateMembershipRequestSchema, {
       organizationId,
       identities: {
         case: "id",
         value: userId,
       },
       membership,
-    };
-
-    if (options.sendInvitationEmail !== undefined) {
-      request.sendInvitationEmail = options.sendInvitationEmail;
-    }
+      sendInvitationEmail: options.sendInvitationEmail,
+    });
 
     return this.coreClient.connectExec(this.client.createMembership, request);
   }
@@ -557,7 +561,7 @@ export default class UserClient {
    * @param {string} organizationId - The organization ID to remove the user from (format: "org_...")
    * @param {string} userId - The user ID to remove (format: "usr_...")
    *
-   * @returns {Promise<Empty>} Empty response on successful removal
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on successful removal
    *
    * @throws {Error} If the user or organization is not found
    * @throws {Error} If the membership doesn't exist
@@ -591,7 +595,7 @@ export default class UserClient {
   async deleteMembership(
     organizationId: string,
     userId: string
-  ): Promise<Empty> {
+  ): Promise<MessageShape<typeof EmptySchema>> {
     return this.coreClient.connectExec(this.client.deleteMembership, {
       organizationId,
       identities: {
@@ -682,7 +686,7 @@ export default class UserClient {
       metadata?: Record<string, string>;
     } = {}
   ): Promise<UpdateMembershipResponse> {
-    const membership = new UpdateMembership({
+    const membership = create(UpdateMembershipSchema, {
       roles: options.roles?.map((role) => ({ name: role })) || [],
       metadata: options.metadata || {},
     });
@@ -815,7 +819,7 @@ export default class UserClient {
       throw new Error("userId is required");
     }
 
-    const request = new ResendInviteRequest({
+    const request = create(ResendInviteRequestSchema, {
       organizationId,
       id: userId,
     });

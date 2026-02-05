@@ -16,10 +16,10 @@ import { GetConnectionResponse, ToggleConnectionResponse, ListConnectionsRespons
  * @see {@link https://docs.scalekit.com/apis/#tag/connections | Connection API Documentation}
  */
 export default class ConnectionClient {
-    private readonly grpcConncet;
+    private readonly grpcConnect;
     private readonly coreClient;
     private client;
-    constructor(grpcConncet: GrpcConnect, coreClient: CoreClient);
+    constructor(grpcConnect: GrpcConnect, coreClient: CoreClient);
     /**
      * Retrieves complete configuration and status details for a specific SSO connection.
      *

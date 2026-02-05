@@ -1,9 +1,12 @@
-import { Empty, PartialMessage, JsonValue } from "@bufbuild/protobuf";
+import type { JsonObject } from "@bufbuild/protobuf";
+import type { MessageShape } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
 import CoreClient from "./core";
 import GrpcConnect from "./connect";
-import { User } from "./pkg/grpc/scalekit/v1/auth/auth_pb";
-type UserInput = PartialMessage<User> & {
-    customAttributes?: Record<string, JsonValue>;
+import { type User } from "./pkg/grpc/scalekit/v1/auth/auth_pb";
+/** User input for updateLoginUserDetails; customAttributes is a plain object (proto Struct → JsonObject in v2). */
+type UserInput = Partial<User> & {
+    customAttributes?: JsonObject;
 };
 /**
  * If you are using Auth for MCP solution of Scalekit in "Bring your own Auth" mode, this client helps updating Scalekit with the currently logged in user details for the ongoing authentication request.
@@ -30,7 +33,7 @@ export default class AuthClient {
      * @param {string} [user.email] - User's email address
      * @param {string} [user.sub] - Unique user identifier (subject)
      *
-     * @returns {Promise<Empty>} Empty response on successful update
+     * @returns {Promise<MessageShape<EmptySchema>>} Empty response on successful update
      *
      * @throws {Error} When connectionId is missing or invalid
      * @throws {Error} When loginRequestId is missing or invalid
@@ -49,6 +52,6 @@ export default class AuthClient {
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Update Login User Details API}
      */
-    updateLoginUserDetails(connectionId: string, loginRequestId: string, user: UserInput): Promise<Empty>;
+    updateLoginUserDetails(connectionId: string, loginRequestId: string, user: UserInput): Promise<MessageShape<typeof EmptySchema>>;
 }
 export {};

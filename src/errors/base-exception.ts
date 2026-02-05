@@ -1,6 +1,7 @@
 import { ConnectError, Code } from '@connectrpc/connect';
 import { AxiosResponse } from 'axios';
-import { ErrorInfo } from '../pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
+import type { ErrorInfo } from '../pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
+import { ErrorInfoSchema } from '../pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
 
 // gRPC to HTTP status mapping
 const GRPC_TO_HTTP: Record<number, number> = {
@@ -106,7 +107,7 @@ export class ScalekitServerException extends ScalekitException {
       this._grpcStatus = error.code;
       this._httpStatus = GRPC_TO_HTTP[error.code] || 500;
       this._message = error.message;
-      this._errDetails = error.findDetails(ErrorInfo);
+      this._errDetails = error.findDetails(ErrorInfoSchema);
       this._errorCode = null;
 
       // Unpack error details

@@ -1,5 +1,5 @@
-import { ServiceType } from '@bufbuild/protobuf';
-import { PromiseClient, Transport, createPromiseClient } from '@connectrpc/connect';
+import type { DescService } from '@bufbuild/protobuf';
+import { type Client, type Transport, createClient } from '@connectrpc/connect';
 import { createGrpcTransport } from '@connectrpc/connect-node';
 import CoreClient, { headers } from './core';
 
@@ -10,7 +10,6 @@ export default class GrpcConnect {
   ) {
     this.transport = createGrpcTransport({
       baseUrl: this.coreClient.envUrl,
-      httpVersion: "2",
       interceptors: [
         (next) => {
           return (req) => {
@@ -27,7 +26,7 @@ export default class GrpcConnect {
     });
   }
 
-  createClient<T extends ServiceType>(service: T): PromiseClient<T> {
-    return createPromiseClient(service, this.transport);
+  createClient<T extends DescService>(service: T): Client<T> {
+    return createClient(service, this.transport);
   }
 }

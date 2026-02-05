@@ -1,8 +1,17 @@
+import { create } from '@bufbuild/protobuf';
 import { CreateUserRequest, UpdateUserRequest } from '../../src/types/user';
 import { TemplateType } from '../../src/pkg/grpc/scalekit/v1/auth/passwordless_pb';
 import { DomainType } from '../../src/pkg/grpc/scalekit/v1/domains/domains_pb';
-import { CreateRole, UpdateRole, CreateOrganizationRole } from '../../src/pkg/grpc/scalekit/v1/roles/roles_pb';
-import { CreatePermission } from '../../src/pkg/grpc/scalekit/v1/roles/roles_pb';
+import {
+  CreateRole,
+  UpdateRole,
+  CreateOrganizationRole,
+  CreatePermission,
+  CreateRoleSchema,
+  UpdateRoleSchema,
+  CreateOrganizationRoleSchema,
+  CreatePermissionSchema,
+} from '../../src/pkg/grpc/scalekit/v1/roles/roles_pb';
 
 /**
  * Test data generation utilities to reduce redundancy across test files
@@ -200,7 +209,7 @@ export class TestDataGenerator {
   static generateRoleData(overrides: Partial<CreateRole> = {}): CreateRole {
     const uniqueId = this.generateUniqueId();
     
-    return new CreateRole({
+    return create(CreateRoleSchema, {
       name: `test_role_${uniqueId}`,
       displayName: `Test Role ${uniqueId}`,
       description: `Test role description ${uniqueId}`,
@@ -214,12 +223,12 @@ export class TestDataGenerator {
    */
   static generateRoleUpdateData(overrides: Partial<UpdateRole> = {}): UpdateRole {
     const uniqueId = this.generateUniqueId();
-    
-    return new UpdateRole({
+    const init = {
       displayName: `Updated Role ${uniqueId}`,
       description: `Updated role description ${uniqueId}`,
       ...overrides
-    });
+    };
+    return create(UpdateRoleSchema, init as Parameters<typeof create>[1]);
   }
 
   /**
@@ -228,7 +237,7 @@ export class TestDataGenerator {
   static generateOrganizationRoleData(overrides: Partial<CreateOrganizationRole> = {}): CreateOrganizationRole {
     const uniqueId = this.generateUniqueId();
     
-    return new CreateOrganizationRole({
+    return create(CreateOrganizationRoleSchema, {
       name: `test_org_role_${uniqueId}`,
       displayName: `Test Organization Role ${uniqueId}`,
       description: `Test organization role description ${uniqueId}`,
@@ -243,7 +252,7 @@ export class TestDataGenerator {
   static generatePermissionData(overrides: Partial<CreatePermission> = {}): CreatePermission {
     const uniqueId = this.generateUniqueId();
     
-    return new CreatePermission({
+    return create(CreatePermissionSchema, {
       name: `test_permission_${uniqueId}`,
       description: `Test permission description ${uniqueId}`,
       ...overrides

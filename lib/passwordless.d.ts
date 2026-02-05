@@ -2,10 +2,10 @@ import GrpcConnect from './connect';
 import CoreClient from './core';
 import { SendPasswordlessResponse, VerifyPasswordLessResponse, TemplateType } from './pkg/grpc/scalekit/v1/auth/passwordless_pb';
 export default class PasswordlessClient {
-    private readonly grpcConncet;
+    private readonly grpcConnect;
     private readonly coreClient;
     private client;
-    constructor(grpcConncet: GrpcConnect, coreClient: CoreClient);
+    constructor(grpcConnect: GrpcConnect, coreClient: CoreClient);
     /**
      * Send a passwordless authentication email
      * @param {string} email The email address to send the passwordless link to
