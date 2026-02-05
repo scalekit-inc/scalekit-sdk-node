@@ -1,8 +1,8 @@
-import { Timestamp } from "@bufbuild/protobuf";
-import { PromiseClient } from "@connectrpc/connect";
+import { timestampFromDate } from "@bufbuild/protobuf/wkt";
+import type { Client } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
-import { DirectoryService } from "./pkg/grpc/scalekit/v1/directories/directories_connect";
+import { DirectoryService } from "./pkg/grpc/scalekit/v1/directories/directories_pb";
 import {
   GetDirectoryResponse,
   Directory,
@@ -28,12 +28,12 @@ import {
  * @see {@link https://docs.scalekit.com/directory/scim/quickstart/ | SCIM Directory Sync Guide}
  */
 export default class DirectoryClient {
-  private client: PromiseClient<typeof DirectoryService>;
+  private client: Client<typeof DirectoryService>;
   constructor(
-    private readonly grpcConncet: GrpcConnect,
+    private readonly grpcConnect: GrpcConnect,
     private readonly coreClient: CoreClient
   ) {
-    this.client = this.grpcConncet.createClient(DirectoryService);
+    this.client = this.grpcConnect.createClient(DirectoryService);
   }
 
   /**
@@ -249,7 +249,7 @@ export default class DirectoryClient {
       requestOptions = {
         ...options,
         ...(options.updatedAfter && {
-          updatedAfter: Timestamp.fromDate(new Date(options.updatedAfter)),
+          updatedAfter: timestampFromDate(new Date(options.updatedAfter)),
         }),
       };
     }
@@ -333,7 +333,7 @@ export default class DirectoryClient {
       requestOptions = {
         ...options,
         ...(options.updatedAfter && {
-          updatedAfter: Timestamp.fromDate(new Date(options.updatedAfter)),
+          updatedAfter: timestampFromDate(new Date(options.updatedAfter)),
         }),
       };
     }

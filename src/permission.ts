@@ -1,8 +1,10 @@
-import { Empty, PartialMessage } from "@bufbuild/protobuf";
-import { PromiseClient } from "@connectrpc/connect";
+import type { MessageShape } from "@bufbuild/protobuf";
+import { create } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
+import type { Client } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
-import { RolesService } from "./pkg/grpc/scalekit/v1/roles/roles_connect";
+import { RolesService } from "./pkg/grpc/scalekit/v1/roles/roles_pb";
 import {
   CreatePermissionRequest,
   CreatePermissionResponse,
@@ -21,6 +23,7 @@ import {
   ListEffectiveRolePermissionsRequest,
   ListEffectiveRolePermissionsResponse,
   CreatePermission,
+  ListPermissionsRequestSchema,
 } from "./pkg/grpc/scalekit/v1/roles/roles_pb";
 
 /**
@@ -42,7 +45,7 @@ import {
  * @see {@link https://docs.scalekit.com/apis/#tag/permissions | Permission API Documentation}
  */
 export default class PermissionClient {
-  private client: PromiseClient<typeof RolesService>;
+  private client: Client<typeof RolesService>;
 
   constructor(
     private readonly grpcConnect: GrpcConnect,
@@ -132,13 +135,10 @@ export default class PermissionClient {
     pageToken?: string,
     pageSize?: number
   ): Promise<ListPermissionsResponse> {
-    const request: PartialMessage<ListPermissionsRequest> = {};
-    if (pageToken) {
-      request.pageToken = pageToken;
-    }
-    if (pageSize) {
-      request.pageSize = pageSize;
-    }
+    const request = create(ListPermissionsRequestSchema, {
+      pageToken,
+      pageSize,
+    });
 
     return this.coreClient.connectExec(this.client.listPermissions, request);
   }
@@ -178,14 +178,14 @@ export default class PermissionClient {
    *
    * @param {string} permissionName - Permission identifier to delete
    *
-   * @returns {Promise<Empty>} Empty response on success
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
    *
    * @example
    * await scalekitClient.permission.deletePermission('deprecated:feature');
    *
    * @see {@link https://docs.scalekit.com/apis/#tag/permissions | Delete Permission API}
    */
-  async deletePermission(permissionName: string): Promise<Empty> {
+  async deletePermission(permissionName: string): Promise<MessageShape<typeof EmptySchema>> {
     return this.coreClient.connectExec(this.client.deletePermission, {
       permissionName,
     });
@@ -259,7 +259,7 @@ export default class PermissionClient {
    * @param {string} roleName - Role to modify
    * @param {string} permissionName - Permission to remove
    *
-   * @returns {Promise<Empty>} Empty response on success
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
    *
    * @example
    * // Remove delete permission from editor role
@@ -270,7 +270,7 @@ export default class PermissionClient {
   async removePermissionFromRole(
     roleName: string,
     permissionName: string
-  ): Promise<Empty> {
+  ): Promise<MessageShape<typeof EmptySchema>> {
     return this.coreClient.connectExec(this.client.removePermissionFromRole, {
       roleName,
       permissionName,

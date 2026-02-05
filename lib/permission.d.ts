@@ -1,4 +1,5 @@
-import { Empty } from "@bufbuild/protobuf";
+import type { MessageShape } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
 import { CreatePermissionResponse, GetPermissionResponse, UpdatePermissionResponse, ListPermissionsResponse, ListRolePermissionsResponse, AddPermissionsToRoleResponse, ListEffectiveRolePermissionsResponse, CreatePermission } from "./pkg/grpc/scalekit/v1/roles/roles_pb";
@@ -117,14 +118,14 @@ export default class PermissionClient {
      *
      * @param {string} permissionName - Permission identifier to delete
      *
-     * @returns {Promise<Empty>} Empty response on success
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
      *
      * @example
      * await scalekitClient.permission.deletePermission('deprecated:feature');
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/permissions | Delete Permission API}
      */
-    deletePermission(permissionName: string): Promise<Empty>;
+    deletePermission(permissionName: string): Promise<MessageShape<typeof EmptySchema>>;
     /**
      * Lists direct permissions assigned to a role (excluding inherited permissions).
      *
@@ -177,7 +178,7 @@ export default class PermissionClient {
      * @param {string} roleName - Role to modify
      * @param {string} permissionName - Permission to remove
      *
-     * @returns {Promise<Empty>} Empty response on success
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
      *
      * @example
      * // Remove delete permission from editor role
@@ -185,7 +186,7 @@ export default class PermissionClient {
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/permissions | Remove Permission from Role API}
      */
-    removePermissionFromRole(roleName: string, permissionName: string): Promise<Empty>;
+    removePermissionFromRole(roleName: string, permissionName: string): Promise<MessageShape<typeof EmptySchema>>;
     /**
      * Lists all effective permissions for a role including both direct and inherited permissions.
      *

@@ -1,340 +1,15 @@
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Duration, Message, proto3, Struct, Timestamp } from "@bufbuild/protobuf";
-import { Domain } from "../domains/domains_pb.js";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import type { Duration, EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
+import type { Domain } from "../domains/domains_pb";
+import type { JsonObject, Message } from "@bufbuild/protobuf";
 /**
- * @generated from enum scalekit.v1.connections.CodeChallengeType
+ * Describes the file scalekit/v1/connections/connections.proto.
  */
-export declare enum CodeChallengeType {
-    /**
-     * @generated from enum value: CODE_CHALLENGE_TYPE_UNSPECIFIED = 0;
-     */
-    CODE_CHALLENGE_TYPE_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: NUMERIC = 1;
-     */
-    NUMERIC = 1,
-    /**
-     * @generated from enum value: ALPHANUMERIC = 2;
-     */
-    ALPHANUMERIC = 2
-}
-/**
- * @generated from enum scalekit.v1.connections.ConfigurationType
- */
-export declare enum ConfigurationType {
-    /**
-     * @generated from enum value: CONFIGURATION_TYPE_UNSPECIFIED = 0;
-     */
-    CONFIGURATION_TYPE_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: DISCOVERY = 1;
-     */
-    DISCOVERY = 1,
-    /**
-     * @generated from enum value: MANUAL = 2;
-     */
-    MANUAL = 2
-}
-/**
- * @generated from enum scalekit.v1.connections.NameIdFormat
- */
-export declare enum NameIdFormat {
-    /**
-     * @generated from enum value: NAME_ID_FORMAT_NIL = 0;
-     */
-    NAME_ID_FORMAT_NIL = 0,
-    /**
-     * @generated from enum value: UNSPECIFIED = 1;
-     */
-    UNSPECIFIED = 1,
-    /**
-     * @generated from enum value: EMAIL = 2;
-     */
-    EMAIL = 2,
-    /**
-     * @generated from enum value: TRANSIENT = 3;
-     */
-    TRANSIENT = 3,
-    /**
-     * @generated from enum value: PERSISTENT = 4;
-     */
-    PERSISTENT = 4
-}
-/**
- * @generated from enum scalekit.v1.connections.PasswordlessType
- */
-export declare enum PasswordlessType {
-    /**
-     * @generated from enum value: PasswordlessType_UNSPECIFIED = 0;
-     */
-    PasswordlessType_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: LINK = 1;
-     */
-    LINK = 1,
-    /**
-     * @generated from enum value: OTP = 2;
-     */
-    OTP = 2,
-    /**
-     * @generated from enum value: LINK_OTP = 3;
-     */
-    LINK_OTP = 3
-}
-/**
- * @generated from enum scalekit.v1.connections.TestResultStatus
- */
-export declare enum TestResultStatus {
-    /**
-     * @generated from enum value: PENDING = 0;
-     */
-    PENDING = 0,
-    /**
-     * @generated from enum value: SUCCESS = 1;
-     */
-    SUCCESS = 1,
-    /**
-     * @generated from enum value: FAILURE = 2;
-     */
-    FAILURE = 2
-}
-/**
- * enums all
- *
- * @generated from enum scalekit.v1.connections.SAMLSigningOptions
- */
-export declare enum SAMLSigningOptions {
-    /**
-     * @generated from enum value: SAML_SIGNING_OPTIONS_UNSPECIFIED = 0;
-     */
-    SAML_SIGNING_OPTIONS_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: NO_SIGNING = 1;
-     */
-    NO_SIGNING = 1,
-    /**
-     * @generated from enum value: SAML_ONLY_RESPONSE_SIGNING = 2;
-     */
-    SAML_ONLY_RESPONSE_SIGNING = 2,
-    /**
-     * @generated from enum value: SAML_ONLY_ASSERTION_SIGNING = 3;
-     */
-    SAML_ONLY_ASSERTION_SIGNING = 3,
-    /**
-     * @generated from enum value: SAML_RESPONSE_ASSERTION_SIGNING = 4;
-     */
-    SAML_RESPONSE_ASSERTION_SIGNING = 4,
-    /**
-     * @generated from enum value: SAML_RESPONSE_OR_ASSERTION_SIGNING = 5;
-     */
-    SAML_RESPONSE_OR_ASSERTION_SIGNING = 5
-}
-/**
- * @generated from enum scalekit.v1.connections.RequestBinding
- */
-export declare enum RequestBinding {
-    /**
-     * @generated from enum value: REQUEST_BINDING_UNSPECIFIED = 0;
-     */
-    REQUEST_BINDING_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: HTTP_POST = 1;
-     */
-    HTTP_POST = 1,
-    /**
-     * @generated from enum value: HTTP_REDIRECT = 2;
-     */
-    HTTP_REDIRECT = 2
-}
-/**
- * @generated from enum scalekit.v1.connections.TokenAuthType
- */
-export declare enum TokenAuthType {
-    /**
-     * @generated from enum value: TOKEN_AUTH_TYPE_UNSPECIFIED = 0;
-     */
-    TOKEN_AUTH_TYPE_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: URL_PARAMS = 1;
-     */
-    URL_PARAMS = 1,
-    /**
-     * @generated from enum value: BASIC_AUTH = 2;
-     */
-    BASIC_AUTH = 2
-}
-/**
- * @generated from enum scalekit.v1.connections.OIDCScope
- */
-export declare enum OIDCScope {
-    /**
-     * @generated from enum value: OIDC_SCOPE_UNSPECIFIED = 0;
-     */
-    OIDC_SCOPE_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: openid = 1;
-     */
-    openid = 1,
-    /**
-     * @generated from enum value: profile = 2;
-     */
-    profile = 2,
-    /**
-     * @generated from enum value: email = 3;
-     */
-    email = 3,
-    /**
-     * @generated from enum value: address = 4;
-     */
-    address = 4,
-    /**
-     * @generated from enum value: phone = 5;
-     */
-    phone = 5
-}
-/**
- * @generated from enum scalekit.v1.connections.ConnectionType
- */
-export declare enum ConnectionType {
-    /**
-     * @generated from enum value: INVALID = 0;
-     */
-    INVALID = 0,
-    /**
-     * @generated from enum value: OIDC = 1;
-     */
-    OIDC = 1,
-    /**
-     * @generated from enum value: SAML = 2;
-     */
-    SAML = 2,
-    /**
-     * @generated from enum value: PASSWORD = 3;
-     */
-    PASSWORD = 3,
-    /**
-     * @generated from enum value: OAUTH = 4;
-     */
-    OAUTH = 4,
-    /**
-     * @generated from enum value: PASSWORDLESS = 5;
-     */
-    PASSWORDLESS = 5,
-    /**
-     * @generated from enum value: BASIC = 6;
-     */
-    BASIC = 6,
-    /**
-     * @generated from enum value: BEARER = 7;
-     */
-    BEARER = 7,
-    /**
-     * @generated from enum value: API_KEY = 8;
-     */
-    API_KEY = 8,
-    /**
-     * @generated from enum value: WEBAUTHN = 9;
-     */
-    WEBAUTHN = 9
-}
-/**
- * @generated from enum scalekit.v1.connections.ConnectionStatus
- */
-export declare enum ConnectionStatus {
-    /**
-     * @generated from enum value: CONNECTION_STATUS_UNSPECIFIED = 0;
-     */
-    CONNECTION_STATUS_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: DRAFT = 1;
-     */
-    DRAFT = 1,
-    /**
-     * @generated from enum value: IN_PROGRESS = 2;
-     */
-    IN_PROGRESS = 2,
-    /**
-     * @generated from enum value: COMPLETED = 3;
-     */
-    COMPLETED = 3
-}
-/**
- * @generated from enum scalekit.v1.connections.ConnectionProvider
- */
-export declare enum ConnectionProvider {
-    /**
-     * @generated from enum value: CONNECTION_PROVIDER_UNSPECIFIED = 0;
-     */
-    CONNECTION_PROVIDER_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: OKTA = 1;
-     */
-    OKTA = 1,
-    /**
-     * @generated from enum value: GOOGLE = 2;
-     */
-    GOOGLE = 2,
-    /**
-     * @generated from enum value: MICROSOFT_AD = 3;
-     */
-    MICROSOFT_AD = 3,
-    /**
-     * @generated from enum value: AUTH0 = 4;
-     */
-    AUTH0 = 4,
-    /**
-     * @generated from enum value: ONELOGIN = 5;
-     */
-    ONELOGIN = 5,
-    /**
-     * @generated from enum value: PING_IDENTITY = 6;
-     */
-    PING_IDENTITY = 6,
-    /**
-     * @generated from enum value: JUMPCLOUD = 7;
-     */
-    JUMPCLOUD = 7,
-    /**
-     * @generated from enum value: CUSTOM = 8;
-     */
-    CUSTOM = 8,
-    /**
-     * @generated from enum value: GITHUB = 9;
-     */
-    GITHUB = 9,
-    /**
-     * @generated from enum value: GITLAB = 10;
-     */
-    GITLAB = 10,
-    /**
-     * @generated from enum value: LINKEDIN = 11;
-     */
-    LINKEDIN = 11,
-    /**
-     * @generated from enum value: SALESFORCE = 12;
-     */
-    SALESFORCE = 12,
-    /**
-     * @generated from enum value: MICROSOFT = 13;
-     */
-    MICROSOFT = 13,
-    /**
-     * @generated from enum value: IDP_SIMULATOR = 14;
-     */
-    IDP_SIMULATOR = 14,
-    /**
-     * @generated from enum value: SCALEKIT = 15;
-     */
-    SCALEKIT = 15,
-    /**
-     * @generated from enum value: ADFS = 16;
-     */
-    ADFS = 16
-}
+export declare const file_scalekit_v1_connections_connections: GenFile;
 /**
  * @generated from message scalekit.v1.connections.AssignDomainsToConnectionRequest
  */
-export declare class AssignDomainsToConnectionRequest extends Message<AssignDomainsToConnectionRequest> {
+export type AssignDomainsToConnectionRequest = Message<"scalekit.v1.connections.AssignDomainsToConnectionRequest"> & {
     /**
      * @generated from field: string organization_id = 1;
      */
@@ -347,66 +22,53 @@ export declare class AssignDomainsToConnectionRequest extends Message<AssignDoma
      * @generated from field: repeated string domain_ids = 3;
      */
     domainIds: string[];
-    constructor(data?: PartialMessage<AssignDomainsToConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.AssignDomainsToConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignDomainsToConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionRequest;
-    static equals(a: AssignDomainsToConnectionRequest | PlainMessage<AssignDomainsToConnectionRequest> | undefined, b: AssignDomainsToConnectionRequest | PlainMessage<AssignDomainsToConnectionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.AssignDomainsToConnectionRequest.
+ * Use `create(AssignDomainsToConnectionRequestSchema)` to create a new message.
+ */
+export declare const AssignDomainsToConnectionRequestSchema: GenMessage<AssignDomainsToConnectionRequest>;
 /**
  * @generated from message scalekit.v1.connections.AssignDomainsToConnectionResponse
  */
-export declare class AssignDomainsToConnectionResponse extends Message<AssignDomainsToConnectionResponse> {
+export type AssignDomainsToConnectionResponse = Message<"scalekit.v1.connections.AssignDomainsToConnectionResponse"> & {
     /**
      * @generated from field: scalekit.v1.connections.Connection connection = 1;
      */
     connection?: Connection;
-    constructor(data?: PartialMessage<AssignDomainsToConnectionResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.AssignDomainsToConnectionResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): AssignDomainsToConnectionResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): AssignDomainsToConnectionResponse;
-    static equals(a: AssignDomainsToConnectionResponse | PlainMessage<AssignDomainsToConnectionResponse> | undefined, b: AssignDomainsToConnectionResponse | PlainMessage<AssignDomainsToConnectionResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.AssignDomainsToConnectionResponse.
+ * Use `create(AssignDomainsToConnectionResponseSchema)` to create a new message.
+ */
+export declare const AssignDomainsToConnectionResponseSchema: GenMessage<AssignDomainsToConnectionResponse>;
 /**
  * @generated from message scalekit.v1.connections.GetProvidersRequest
  */
-export declare class GetProvidersRequest extends Message<GetProvidersRequest> {
-    constructor(data?: PartialMessage<GetProvidersRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetProvidersRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetProvidersRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetProvidersRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetProvidersRequest;
-    static equals(a: GetProvidersRequest | PlainMessage<GetProvidersRequest> | undefined, b: GetProvidersRequest | PlainMessage<GetProvidersRequest> | undefined): boolean;
-}
+export type GetProvidersRequest = Message<"scalekit.v1.connections.GetProvidersRequest"> & {};
+/**
+ * Describes the message scalekit.v1.connections.GetProvidersRequest.
+ * Use `create(GetProvidersRequestSchema)` to create a new message.
+ */
+export declare const GetProvidersRequestSchema: GenMessage<GetProvidersRequest>;
 /**
  * @generated from message scalekit.v1.connections.GetProvidersResponse
  */
-export declare class GetProvidersResponse extends Message<GetProvidersResponse> {
+export type GetProvidersResponse = Message<"scalekit.v1.connections.GetProvidersResponse"> & {
     /**
      * @generated from field: repeated scalekit.v1.connections.Provider providers = 1;
      */
     providers: Provider[];
-    constructor(data?: PartialMessage<GetProvidersResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetProvidersResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetProvidersResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetProvidersResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetProvidersResponse;
-    static equals(a: GetProvidersResponse | PlainMessage<GetProvidersResponse> | undefined, b: GetProvidersResponse | PlainMessage<GetProvidersResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetProvidersResponse.
+ * Use `create(GetProvidersResponseSchema)` to create a new message.
+ */
+export declare const GetProvidersResponseSchema: GenMessage<GetProvidersResponse>;
 /**
  * @generated from message scalekit.v1.connections.Provider
  */
-export declare class Provider extends Message<Provider> {
+export type Provider = Message<"scalekit.v1.connections.Provider"> & {
     /**
      * @generated from field: string key_id = 1;
      */
@@ -419,19 +81,16 @@ export declare class Provider extends Message<Provider> {
      * @generated from field: optional string description = 3;
      */
     description?: string;
-    constructor(data?: PartialMessage<Provider>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.Provider";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Provider;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Provider;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Provider;
-    static equals(a: Provider | PlainMessage<Provider> | undefined, b: Provider | PlainMessage<Provider> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.Provider.
+ * Use `create(ProviderSchema)` to create a new message.
+ */
+export declare const ProviderSchema: GenMessage<Provider>;
 /**
  * @generated from message scalekit.v1.connections.CreateEnvironmentConnectionRequest
  */
-export declare class CreateEnvironmentConnectionRequest extends Message<CreateEnvironmentConnectionRequest> {
+export type CreateEnvironmentConnectionRequest = Message<"scalekit.v1.connections.CreateEnvironmentConnectionRequest"> & {
     /**
      * @generated from field: scalekit.v1.connections.CreateConnection connection = 1;
      */
@@ -440,19 +99,16 @@ export declare class CreateEnvironmentConnectionRequest extends Message<CreateEn
      * @generated from field: optional scalekit.v1.connections.Flags flags = 2;
      */
     flags?: Flags;
-    constructor(data?: PartialMessage<CreateEnvironmentConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.CreateEnvironmentConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateEnvironmentConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateEnvironmentConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateEnvironmentConnectionRequest;
-    static equals(a: CreateEnvironmentConnectionRequest | PlainMessage<CreateEnvironmentConnectionRequest> | undefined, b: CreateEnvironmentConnectionRequest | PlainMessage<CreateEnvironmentConnectionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.CreateEnvironmentConnectionRequest.
+ * Use `create(CreateEnvironmentConnectionRequestSchema)` to create a new message.
+ */
+export declare const CreateEnvironmentConnectionRequestSchema: GenMessage<CreateEnvironmentConnectionRequest>;
 /**
  * @generated from message scalekit.v1.connections.CreateConnectionRequest
  */
-export declare class CreateConnectionRequest extends Message<CreateConnectionRequest> {
+export type CreateConnectionRequest = Message<"scalekit.v1.connections.CreateConnectionRequest"> & {
     /**
      * @generated from field: string organization_id = 1;
      */
@@ -461,19 +117,16 @@ export declare class CreateConnectionRequest extends Message<CreateConnectionReq
      * @generated from field: scalekit.v1.connections.CreateConnection connection = 3;
      */
     connection?: CreateConnection;
-    constructor(data?: PartialMessage<CreateConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.CreateConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateConnectionRequest;
-    static equals(a: CreateConnectionRequest | PlainMessage<CreateConnectionRequest> | undefined, b: CreateConnectionRequest | PlainMessage<CreateConnectionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.CreateConnectionRequest.
+ * Use `create(CreateConnectionRequestSchema)` to create a new message.
+ */
+export declare const CreateConnectionRequestSchema: GenMessage<CreateConnectionRequest>;
 /**
  * @generated from message scalekit.v1.connections.CreateConnection
  */
-export declare class CreateConnection extends Message<CreateConnection> {
+export type CreateConnection = Message<"scalekit.v1.connections.CreateConnection"> & {
     /**
      * @generated from field: scalekit.v1.connections.ConnectionProvider provider = 1;
      */
@@ -490,19 +143,16 @@ export declare class CreateConnection extends Message<CreateConnection> {
      * @generated from field: optional string key_id = 4;
      */
     keyId?: string;
-    constructor(data?: PartialMessage<CreateConnection>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.CreateConnection";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateConnection;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateConnection;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateConnection;
-    static equals(a: CreateConnection | PlainMessage<CreateConnection> | undefined, b: CreateConnection | PlainMessage<CreateConnection> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.CreateConnection.
+ * Use `create(CreateConnectionSchema)` to create a new message.
+ */
+export declare const CreateConnectionSchema: GenMessage<CreateConnection>;
 /**
  * @generated from message scalekit.v1.connections.Connection
  */
-export declare class Connection extends Message<Connection> {
+export type Connection = Message<"scalekit.v1.connections.Connection"> & {
     /**
      * @generated from field: string id = 1;
      */
@@ -612,36 +262,30 @@ export declare class Connection extends Message<Connection> {
      * @generated from field: repeated scalekit.v1.domains.Domain domains = 24;
      */
     domains: Domain[];
-    constructor(data?: PartialMessage<Connection>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.Connection";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Connection;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Connection;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Connection;
-    static equals(a: Connection | PlainMessage<Connection> | undefined, b: Connection | PlainMessage<Connection> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.Connection.
+ * Use `create(ConnectionSchema)` to create a new message.
+ */
+export declare const ConnectionSchema: GenMessage<Connection>;
 /**
  * @generated from message scalekit.v1.connections.CreateConnectionResponse
  */
-export declare class CreateConnectionResponse extends Message<CreateConnectionResponse> {
+export type CreateConnectionResponse = Message<"scalekit.v1.connections.CreateConnectionResponse"> & {
     /**
      * @generated from field: scalekit.v1.connections.Connection connection = 1;
      */
     connection?: Connection;
-    constructor(data?: PartialMessage<CreateConnectionResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.CreateConnectionResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): CreateConnectionResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): CreateConnectionResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): CreateConnectionResponse;
-    static equals(a: CreateConnectionResponse | PlainMessage<CreateConnectionResponse> | undefined, b: CreateConnectionResponse | PlainMessage<CreateConnectionResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.CreateConnectionResponse.
+ * Use `create(CreateConnectionResponseSchema)` to create a new message.
+ */
+export declare const CreateConnectionResponseSchema: GenMessage<CreateConnectionResponse>;
 /**
  * @generated from message scalekit.v1.connections.UpdateEnvironmentConnectionRequest
  */
-export declare class UpdateEnvironmentConnectionRequest extends Message<UpdateEnvironmentConnectionRequest> {
+export type UpdateEnvironmentConnectionRequest = Message<"scalekit.v1.connections.UpdateEnvironmentConnectionRequest"> & {
     /**
      * @generated from field: string connection_id = 1;
      */
@@ -650,19 +294,16 @@ export declare class UpdateEnvironmentConnectionRequest extends Message<UpdateEn
      * @generated from field: scalekit.v1.connections.UpdateConnection connection = 3;
      */
     connection?: UpdateConnection;
-    constructor(data?: PartialMessage<UpdateEnvironmentConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.UpdateEnvironmentConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateEnvironmentConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateEnvironmentConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateEnvironmentConnectionRequest;
-    static equals(a: UpdateEnvironmentConnectionRequest | PlainMessage<UpdateEnvironmentConnectionRequest> | undefined, b: UpdateEnvironmentConnectionRequest | PlainMessage<UpdateEnvironmentConnectionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.UpdateEnvironmentConnectionRequest.
+ * Use `create(UpdateEnvironmentConnectionRequestSchema)` to create a new message.
+ */
+export declare const UpdateEnvironmentConnectionRequestSchema: GenMessage<UpdateEnvironmentConnectionRequest>;
 /**
  * @generated from message scalekit.v1.connections.UpdateConnectionRequest
  */
-export declare class UpdateConnectionRequest extends Message<UpdateConnectionRequest> {
+export type UpdateConnectionRequest = Message<"scalekit.v1.connections.UpdateConnectionRequest"> & {
     /**
      * @generated from field: string organization_id = 1;
      */
@@ -675,19 +316,16 @@ export declare class UpdateConnectionRequest extends Message<UpdateConnectionReq
      * @generated from field: scalekit.v1.connections.UpdateConnection connection = 4;
      */
     connection?: UpdateConnection;
-    constructor(data?: PartialMessage<UpdateConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.UpdateConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateConnectionRequest;
-    static equals(a: UpdateConnectionRequest | PlainMessage<UpdateConnectionRequest> | undefined, b: UpdateConnectionRequest | PlainMessage<UpdateConnectionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.UpdateConnectionRequest.
+ * Use `create(UpdateConnectionRequestSchema)` to create a new message.
+ */
+export declare const UpdateConnectionRequestSchema: GenMessage<UpdateConnectionRequest>;
 /**
  * @generated from message scalekit.v1.connections.UpdateConnection
  */
-export declare class UpdateConnection extends Message<UpdateConnection> {
+export type UpdateConnection = Message<"scalekit.v1.connections.UpdateConnection"> & {
     /**
      * @generated from field: scalekit.v1.connections.ConnectionProvider provider = 2;
      */
@@ -765,53 +403,44 @@ export declare class UpdateConnection extends Message<UpdateConnection> {
      * @generated from field: string provider_key = 21;
      */
     providerKey: string;
-    constructor(data?: PartialMessage<UpdateConnection>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.UpdateConnection";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnection;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateConnection;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateConnection;
-    static equals(a: UpdateConnection | PlainMessage<UpdateConnection> | undefined, b: UpdateConnection | PlainMessage<UpdateConnection> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.UpdateConnection.
+ * Use `create(UpdateConnectionSchema)` to create a new message.
+ */
+export declare const UpdateConnectionSchema: GenMessage<UpdateConnection>;
 /**
  * @generated from message scalekit.v1.connections.UpdateConnectionResponse
  */
-export declare class UpdateConnectionResponse extends Message<UpdateConnectionResponse> {
+export type UpdateConnectionResponse = Message<"scalekit.v1.connections.UpdateConnectionResponse"> & {
     /**
      * @generated from field: scalekit.v1.connections.Connection connection = 1;
      */
     connection?: Connection;
-    constructor(data?: PartialMessage<UpdateConnectionResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.UpdateConnectionResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UpdateConnectionResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UpdateConnectionResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UpdateConnectionResponse;
-    static equals(a: UpdateConnectionResponse | PlainMessage<UpdateConnectionResponse> | undefined, b: UpdateConnectionResponse | PlainMessage<UpdateConnectionResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.UpdateConnectionResponse.
+ * Use `create(UpdateConnectionResponseSchema)` to create a new message.
+ */
+export declare const UpdateConnectionResponseSchema: GenMessage<UpdateConnectionResponse>;
 /**
  * @generated from message scalekit.v1.connections.DeleteEnvironmentConnectionRequest
  */
-export declare class DeleteEnvironmentConnectionRequest extends Message<DeleteEnvironmentConnectionRequest> {
+export type DeleteEnvironmentConnectionRequest = Message<"scalekit.v1.connections.DeleteEnvironmentConnectionRequest"> & {
     /**
      * @generated from field: string connection_id = 3;
      */
     connectionId: string;
-    constructor(data?: PartialMessage<DeleteEnvironmentConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.DeleteEnvironmentConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteEnvironmentConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteEnvironmentConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteEnvironmentConnectionRequest;
-    static equals(a: DeleteEnvironmentConnectionRequest | PlainMessage<DeleteEnvironmentConnectionRequest> | undefined, b: DeleteEnvironmentConnectionRequest | PlainMessage<DeleteEnvironmentConnectionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.DeleteEnvironmentConnectionRequest.
+ * Use `create(DeleteEnvironmentConnectionRequestSchema)` to create a new message.
+ */
+export declare const DeleteEnvironmentConnectionRequestSchema: GenMessage<DeleteEnvironmentConnectionRequest>;
 /**
  * @generated from message scalekit.v1.connections.DeleteConnectionRequest
  */
-export declare class DeleteConnectionRequest extends Message<DeleteConnectionRequest> {
+export type DeleteConnectionRequest = Message<"scalekit.v1.connections.DeleteConnectionRequest"> & {
     /**
      * @generated from field: string organization_id = 1;
      */
@@ -820,36 +449,30 @@ export declare class DeleteConnectionRequest extends Message<DeleteConnectionReq
      * @generated from field: string id = 3;
      */
     id: string;
-    constructor(data?: PartialMessage<DeleteConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.DeleteConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeleteConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeleteConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeleteConnectionRequest;
-    static equals(a: DeleteConnectionRequest | PlainMessage<DeleteConnectionRequest> | undefined, b: DeleteConnectionRequest | PlainMessage<DeleteConnectionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.DeleteConnectionRequest.
+ * Use `create(DeleteConnectionRequestSchema)` to create a new message.
+ */
+export declare const DeleteConnectionRequestSchema: GenMessage<DeleteConnectionRequest>;
 /**
  * @generated from message scalekit.v1.connections.GetEnvironmentConnectionRequest
  */
-export declare class GetEnvironmentConnectionRequest extends Message<GetEnvironmentConnectionRequest> {
+export type GetEnvironmentConnectionRequest = Message<"scalekit.v1.connections.GetEnvironmentConnectionRequest"> & {
     /**
      * @generated from field: string connection_id = 1;
      */
     connectionId: string;
-    constructor(data?: PartialMessage<GetEnvironmentConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetEnvironmentConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetEnvironmentConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetEnvironmentConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetEnvironmentConnectionRequest;
-    static equals(a: GetEnvironmentConnectionRequest | PlainMessage<GetEnvironmentConnectionRequest> | undefined, b: GetEnvironmentConnectionRequest | PlainMessage<GetEnvironmentConnectionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetEnvironmentConnectionRequest.
+ * Use `create(GetEnvironmentConnectionRequestSchema)` to create a new message.
+ */
+export declare const GetEnvironmentConnectionRequestSchema: GenMessage<GetEnvironmentConnectionRequest>;
 /**
  * @generated from message scalekit.v1.connections.GetConnectionRequest
  */
-export declare class GetConnectionRequest extends Message<GetConnectionRequest> {
+export type GetConnectionRequest = Message<"scalekit.v1.connections.GetConnectionRequest"> & {
     /**
      * @generated from field: string organization_id = 1;
      */
@@ -858,36 +481,30 @@ export declare class GetConnectionRequest extends Message<GetConnectionRequest> 
      * @generated from field: string id = 3;
      */
     id: string;
-    constructor(data?: PartialMessage<GetConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionRequest;
-    static equals(a: GetConnectionRequest | PlainMessage<GetConnectionRequest> | undefined, b: GetConnectionRequest | PlainMessage<GetConnectionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetConnectionRequest.
+ * Use `create(GetConnectionRequestSchema)` to create a new message.
+ */
+export declare const GetConnectionRequestSchema: GenMessage<GetConnectionRequest>;
 /**
  * @generated from message scalekit.v1.connections.GetConnectionResponse
  */
-export declare class GetConnectionResponse extends Message<GetConnectionResponse> {
+export type GetConnectionResponse = Message<"scalekit.v1.connections.GetConnectionResponse"> & {
     /**
      * @generated from field: scalekit.v1.connections.Connection connection = 1;
      */
     connection?: Connection;
-    constructor(data?: PartialMessage<GetConnectionResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetConnectionResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionResponse;
-    static equals(a: GetConnectionResponse | PlainMessage<GetConnectionResponse> | undefined, b: GetConnectionResponse | PlainMessage<GetConnectionResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetConnectionResponse.
+ * Use `create(GetConnectionResponseSchema)` to create a new message.
+ */
+export declare const GetConnectionResponseSchema: GenMessage<GetConnectionResponse>;
 /**
  * @generated from message scalekit.v1.connections.ListConnectionsRequest
  */
-export declare class ListConnectionsRequest extends Message<ListConnectionsRequest> {
+export type ListConnectionsRequest = Message<"scalekit.v1.connections.ListConnectionsRequest"> & {
     /**
      * @generated from field: optional string organization_id = 1;
      */
@@ -900,36 +517,30 @@ export declare class ListConnectionsRequest extends Message<ListConnectionsReque
      * @generated from field: optional string include = 4;
      */
     include?: string;
-    constructor(data?: PartialMessage<ListConnectionsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.ListConnectionsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListConnectionsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListConnectionsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListConnectionsRequest;
-    static equals(a: ListConnectionsRequest | PlainMessage<ListConnectionsRequest> | undefined, b: ListConnectionsRequest | PlainMessage<ListConnectionsRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.ListConnectionsRequest.
+ * Use `create(ListConnectionsRequestSchema)` to create a new message.
+ */
+export declare const ListConnectionsRequestSchema: GenMessage<ListConnectionsRequest>;
 /**
  * @generated from message scalekit.v1.connections.ListConnectionsResponse
  */
-export declare class ListConnectionsResponse extends Message<ListConnectionsResponse> {
+export type ListConnectionsResponse = Message<"scalekit.v1.connections.ListConnectionsResponse"> & {
     /**
      * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 1;
      */
     connections: ListConnection[];
-    constructor(data?: PartialMessage<ListConnectionsResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.ListConnectionsResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListConnectionsResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListConnectionsResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListConnectionsResponse;
-    static equals(a: ListConnectionsResponse | PlainMessage<ListConnectionsResponse> | undefined, b: ListConnectionsResponse | PlainMessage<ListConnectionsResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.ListConnectionsResponse.
+ * Use `create(ListConnectionsResponseSchema)` to create a new message.
+ */
+export declare const ListConnectionsResponseSchema: GenMessage<ListConnectionsResponse>;
 /**
  * @generated from message scalekit.v1.connections.ListConnection
  */
-export declare class ListConnection extends Message<ListConnection> {
+export type ListConnection = Message<"scalekit.v1.connections.ListConnection"> & {
     /**
      * @generated from field: string id = 1;
      */
@@ -978,19 +589,16 @@ export declare class ListConnection extends Message<ListConnection> {
      * @generated from field: google.protobuf.Timestamp created_at = 12;
      */
     createdAt?: Timestamp;
-    constructor(data?: PartialMessage<ListConnection>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.ListConnection";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListConnection;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListConnection;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListConnection;
-    static equals(a: ListConnection | PlainMessage<ListConnection> | undefined, b: ListConnection | PlainMessage<ListConnection> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.ListConnection.
+ * Use `create(ListConnectionSchema)` to create a new message.
+ */
+export declare const ListConnectionSchema: GenMessage<ListConnection>;
 /**
  * @generated from message scalekit.v1.connections.ListOrganizationConnectionsRequest
  */
-export declare class ListOrganizationConnectionsRequest extends Message<ListOrganizationConnectionsRequest> {
+export type ListOrganizationConnectionsRequest = Message<"scalekit.v1.connections.ListOrganizationConnectionsRequest"> & {
     /**
      * @generated from field: uint32 page_size = 1;
      */
@@ -999,19 +607,16 @@ export declare class ListOrganizationConnectionsRequest extends Message<ListOrga
      * @generated from field: string page_token = 2;
      */
     pageToken: string;
-    constructor(data?: PartialMessage<ListOrganizationConnectionsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.ListOrganizationConnectionsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListOrganizationConnectionsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsRequest;
-    static equals(a: ListOrganizationConnectionsRequest | PlainMessage<ListOrganizationConnectionsRequest> | undefined, b: ListOrganizationConnectionsRequest | PlainMessage<ListOrganizationConnectionsRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.ListOrganizationConnectionsRequest.
+ * Use `create(ListOrganizationConnectionsRequestSchema)` to create a new message.
+ */
+export declare const ListOrganizationConnectionsRequestSchema: GenMessage<ListOrganizationConnectionsRequest>;
 /**
  * @generated from message scalekit.v1.connections.ListOrganizationConnectionsResponse
  */
-export declare class ListOrganizationConnectionsResponse extends Message<ListOrganizationConnectionsResponse> {
+export type ListOrganizationConnectionsResponse = Message<"scalekit.v1.connections.ListOrganizationConnectionsResponse"> & {
     /**
      * @generated from field: string next_page_token = 1;
      */
@@ -1028,19 +633,16 @@ export declare class ListOrganizationConnectionsResponse extends Message<ListOrg
      * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 4;
      */
     connections: ListConnection[];
-    constructor(data?: PartialMessage<ListOrganizationConnectionsResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.ListOrganizationConnectionsResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListOrganizationConnectionsResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListOrganizationConnectionsResponse;
-    static equals(a: ListOrganizationConnectionsResponse | PlainMessage<ListOrganizationConnectionsResponse> | undefined, b: ListOrganizationConnectionsResponse | PlainMessage<ListOrganizationConnectionsResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.ListOrganizationConnectionsResponse.
+ * Use `create(ListOrganizationConnectionsResponseSchema)` to create a new message.
+ */
+export declare const ListOrganizationConnectionsResponseSchema: GenMessage<ListOrganizationConnectionsResponse>;
 /**
  * @generated from message scalekit.v1.connections.SearchOrganizationConnectionsRequest
  */
-export declare class SearchOrganizationConnectionsRequest extends Message<SearchOrganizationConnectionsRequest> {
+export type SearchOrganizationConnectionsRequest = Message<"scalekit.v1.connections.SearchOrganizationConnectionsRequest"> & {
     /**
      * @generated from field: optional string query = 1;
      */
@@ -1069,19 +671,16 @@ export declare class SearchOrganizationConnectionsRequest extends Message<Search
      * @generated from field: string page_token = 6;
      */
     pageToken: string;
-    constructor(data?: PartialMessage<SearchOrganizationConnectionsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.SearchOrganizationConnectionsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchOrganizationConnectionsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsRequest;
-    static equals(a: SearchOrganizationConnectionsRequest | PlainMessage<SearchOrganizationConnectionsRequest> | undefined, b: SearchOrganizationConnectionsRequest | PlainMessage<SearchOrganizationConnectionsRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.SearchOrganizationConnectionsRequest.
+ * Use `create(SearchOrganizationConnectionsRequestSchema)` to create a new message.
+ */
+export declare const SearchOrganizationConnectionsRequestSchema: GenMessage<SearchOrganizationConnectionsRequest>;
 /**
  * @generated from message scalekit.v1.connections.SearchOrganizationConnectionsResponse
  */
-export declare class SearchOrganizationConnectionsResponse extends Message<SearchOrganizationConnectionsResponse> {
+export type SearchOrganizationConnectionsResponse = Message<"scalekit.v1.connections.SearchOrganizationConnectionsResponse"> & {
     /**
      * @generated from field: string next_page_token = 1;
      */
@@ -1098,36 +697,30 @@ export declare class SearchOrganizationConnectionsResponse extends Message<Searc
      * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 4;
      */
     connections: ListConnection[];
-    constructor(data?: PartialMessage<SearchOrganizationConnectionsResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.SearchOrganizationConnectionsResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SearchOrganizationConnectionsResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SearchOrganizationConnectionsResponse;
-    static equals(a: SearchOrganizationConnectionsResponse | PlainMessage<SearchOrganizationConnectionsResponse> | undefined, b: SearchOrganizationConnectionsResponse | PlainMessage<SearchOrganizationConnectionsResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.SearchOrganizationConnectionsResponse.
+ * Use `create(SearchOrganizationConnectionsResponseSchema)` to create a new message.
+ */
+export declare const SearchOrganizationConnectionsResponseSchema: GenMessage<SearchOrganizationConnectionsResponse>;
 /**
  * @generated from message scalekit.v1.connections.ToggleEnvironmentConnectionRequest
  */
-export declare class ToggleEnvironmentConnectionRequest extends Message<ToggleEnvironmentConnectionRequest> {
+export type ToggleEnvironmentConnectionRequest = Message<"scalekit.v1.connections.ToggleEnvironmentConnectionRequest"> & {
     /**
      * @generated from field: string connection_id = 2;
      */
     connectionId: string;
-    constructor(data?: PartialMessage<ToggleEnvironmentConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.ToggleEnvironmentConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ToggleEnvironmentConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ToggleEnvironmentConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ToggleEnvironmentConnectionRequest;
-    static equals(a: ToggleEnvironmentConnectionRequest | PlainMessage<ToggleEnvironmentConnectionRequest> | undefined, b: ToggleEnvironmentConnectionRequest | PlainMessage<ToggleEnvironmentConnectionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.ToggleEnvironmentConnectionRequest.
+ * Use `create(ToggleEnvironmentConnectionRequestSchema)` to create a new message.
+ */
+export declare const ToggleEnvironmentConnectionRequestSchema: GenMessage<ToggleEnvironmentConnectionRequest>;
 /**
  * @generated from message scalekit.v1.connections.ToggleConnectionRequest
  */
-export declare class ToggleConnectionRequest extends Message<ToggleConnectionRequest> {
+export type ToggleConnectionRequest = Message<"scalekit.v1.connections.ToggleConnectionRequest"> & {
     /**
      * @generated from field: string organization_id = 1;
      */
@@ -1136,19 +729,16 @@ export declare class ToggleConnectionRequest extends Message<ToggleConnectionReq
      * @generated from field: string id = 3;
      */
     id: string;
-    constructor(data?: PartialMessage<ToggleConnectionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.ToggleConnectionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ToggleConnectionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ToggleConnectionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ToggleConnectionRequest;
-    static equals(a: ToggleConnectionRequest | PlainMessage<ToggleConnectionRequest> | undefined, b: ToggleConnectionRequest | PlainMessage<ToggleConnectionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.ToggleConnectionRequest.
+ * Use `create(ToggleConnectionRequestSchema)` to create a new message.
+ */
+export declare const ToggleConnectionRequestSchema: GenMessage<ToggleConnectionRequest>;
 /**
  * @generated from message scalekit.v1.connections.ToggleConnectionResponse
  */
-export declare class ToggleConnectionResponse extends Message<ToggleConnectionResponse> {
+export type ToggleConnectionResponse = Message<"scalekit.v1.connections.ToggleConnectionResponse"> & {
     /**
      * @generated from field: bool enabled = 1;
      */
@@ -1157,19 +747,16 @@ export declare class ToggleConnectionResponse extends Message<ToggleConnectionRe
      * @generated from field: optional string error_message = 2;
      */
     errorMessage?: string;
-    constructor(data?: PartialMessage<ToggleConnectionResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.ToggleConnectionResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ToggleConnectionResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ToggleConnectionResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ToggleConnectionResponse;
-    static equals(a: ToggleConnectionResponse | PlainMessage<ToggleConnectionResponse> | undefined, b: ToggleConnectionResponse | PlainMessage<ToggleConnectionResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.ToggleConnectionResponse.
+ * Use `create(ToggleConnectionResponseSchema)` to create a new message.
+ */
+export declare const ToggleConnectionResponseSchema: GenMessage<ToggleConnectionResponse>;
 /**
  * @generated from message scalekit.v1.connections.OIDCConnectionConfig
  */
-export declare class OIDCConnectionConfig extends Message<OIDCConnectionConfig> {
+export type OIDCConnectionConfig = Message<"scalekit.v1.connections.OIDCConnectionConfig"> & {
     /**
      * @generated from field: google.protobuf.StringValue issuer = 1;
      */
@@ -1238,19 +825,16 @@ export declare class OIDCConnectionConfig extends Message<OIDCConnectionConfig> 
      * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 18;
      */
     jitProvisioningWithSsoEnabled?: boolean;
-    constructor(data?: PartialMessage<OIDCConnectionConfig>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.OIDCConnectionConfig";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OIDCConnectionConfig;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OIDCConnectionConfig;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OIDCConnectionConfig;
-    static equals(a: OIDCConnectionConfig | PlainMessage<OIDCConnectionConfig> | undefined, b: OIDCConnectionConfig | PlainMessage<OIDCConnectionConfig> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.OIDCConnectionConfig.
+ * Use `create(OIDCConnectionConfigSchema)` to create a new message.
+ */
+export declare const OIDCConnectionConfigSchema: GenMessage<OIDCConnectionConfig>;
 /**
  * @generated from message scalekit.v1.connections.OAuthConnectionConfig
  */
-export declare class OAuthConnectionConfig extends Message<OAuthConnectionConfig> {
+export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnectionConfig"> & {
     /**
      * @generated from field: google.protobuf.StringValue authorize_uri = 3;
      */
@@ -1303,19 +887,16 @@ export declare class OAuthConnectionConfig extends Message<OAuthConnectionConfig
      * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 18;
      */
     syncUserProfileOnLogin?: boolean;
-    constructor(data?: PartialMessage<OAuthConnectionConfig>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.OAuthConnectionConfig";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OAuthConnectionConfig;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OAuthConnectionConfig;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OAuthConnectionConfig;
-    static equals(a: OAuthConnectionConfig | PlainMessage<OAuthConnectionConfig> | undefined, b: OAuthConnectionConfig | PlainMessage<OAuthConnectionConfig> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.OAuthConnectionConfig.
+ * Use `create(OAuthConnectionConfigSchema)` to create a new message.
+ */
+export declare const OAuthConnectionConfigSchema: GenMessage<OAuthConnectionConfig>;
 /**
  * @generated from message scalekit.v1.connections.PasswordLessConfig
  */
-export declare class PasswordLessConfig extends Message<PasswordLessConfig> {
+export type PasswordLessConfig = Message<"scalekit.v1.connections.PasswordLessConfig"> & {
     /**
      * @generated from field: scalekit.v1.connections.PasswordlessType type = 1;
      */
@@ -1344,38 +925,32 @@ export declare class PasswordLessConfig extends Message<PasswordLessConfig> {
      * @generated from field: optional google.protobuf.BoolValue regenerate_passwordless_credentials_on_resend = 7;
      */
     regeneratePasswordlessCredentialsOnResend?: boolean;
-    constructor(data?: PartialMessage<PasswordLessConfig>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.PasswordLessConfig";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PasswordLessConfig;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PasswordLessConfig;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PasswordLessConfig;
-    static equals(a: PasswordLessConfig | PlainMessage<PasswordLessConfig> | undefined, b: PasswordLessConfig | PlainMessage<PasswordLessConfig> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.PasswordLessConfig.
+ * Use `create(PasswordLessConfigSchema)` to create a new message.
+ */
+export declare const PasswordLessConfigSchema: GenMessage<PasswordLessConfig>;
 /**
  * @generated from message scalekit.v1.connections.StaticAuthConfig
  */
-export declare class StaticAuthConfig extends Message<StaticAuthConfig> {
+export type StaticAuthConfig = Message<"scalekit.v1.connections.StaticAuthConfig"> & {
     /**
      * @generated from field: google.protobuf.Struct static_config = 1;
      */
-    staticConfig?: Struct;
-    constructor(data?: PartialMessage<StaticAuthConfig>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.StaticAuthConfig";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): StaticAuthConfig;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): StaticAuthConfig;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): StaticAuthConfig;
-    static equals(a: StaticAuthConfig | PlainMessage<StaticAuthConfig> | undefined, b: StaticAuthConfig | PlainMessage<StaticAuthConfig> | undefined): boolean;
-}
+    staticConfig?: JsonObject;
+};
+/**
+ * Describes the message scalekit.v1.connections.StaticAuthConfig.
+ * Use `create(StaticAuthConfigSchema)` to create a new message.
+ */
+export declare const StaticAuthConfigSchema: GenMessage<StaticAuthConfig>;
 /**
  * WebAuthConfiguration defines WebAuthn (passkeys) configuration limited to RP and Attestation
  *
  * @generated from message scalekit.v1.connections.WebAuthConfiguration
  */
-export declare class WebAuthConfiguration extends Message<WebAuthConfiguration> {
+export type WebAuthConfiguration = Message<"scalekit.v1.connections.WebAuthConfiguration"> & {
     /**
      * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Rp rp = 1;
      */
@@ -1408,21 +983,18 @@ export declare class WebAuthConfiguration extends Message<WebAuthConfiguration> 
      * @generated from field: bool enable_conditional_login = 8;
      */
     enableConditionalLogin: boolean;
-    constructor(data?: PartialMessage<WebAuthConfiguration>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration;
-    static equals(a: WebAuthConfiguration | PlainMessage<WebAuthConfiguration> | undefined, b: WebAuthConfiguration | PlainMessage<WebAuthConfiguration> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.WebAuthConfiguration.
+ * Use `create(WebAuthConfigurationSchema)` to create a new message.
+ */
+export declare const WebAuthConfigurationSchema: GenMessage<WebAuthConfiguration>;
 /**
  * Rp contains relying party identifiers and origins
  *
  * @generated from message scalekit.v1.connections.WebAuthConfiguration.Rp
  */
-export declare class WebAuthConfiguration_Rp extends Message<WebAuthConfiguration_Rp> {
+export type WebAuthConfiguration_Rp = Message<"scalekit.v1.connections.WebAuthConfiguration.Rp"> & {
     /**
      * Relying party IDs (derived from environment domain and verified custom domain)
      * At least one required; must be hostnames without scheme or path
@@ -1437,21 +1009,18 @@ export declare class WebAuthConfiguration_Rp extends Message<WebAuthConfiguratio
      * @generated from field: repeated string origins = 2;
      */
     origins: string[];
-    constructor(data?: PartialMessage<WebAuthConfiguration_Rp>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Rp";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Rp;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Rp;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Rp;
-    static equals(a: WebAuthConfiguration_Rp | PlainMessage<WebAuthConfiguration_Rp> | undefined, b: WebAuthConfiguration_Rp | PlainMessage<WebAuthConfiguration_Rp> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.WebAuthConfiguration.Rp.
+ * Use `create(WebAuthConfiguration_RpSchema)` to create a new message.
+ */
+export declare const WebAuthConfiguration_RpSchema: GenMessage<WebAuthConfiguration_Rp>;
 /**
  * Attestation preferences for registration
  *
  * @generated from message scalekit.v1.connections.WebAuthConfiguration.Attestation
  */
-export declare class WebAuthConfiguration_Attestation extends Message<WebAuthConfiguration_Attestation> {
+export type WebAuthConfiguration_Attestation = Message<"scalekit.v1.connections.WebAuthConfiguration.Attestation"> & {
     /**
      * Conveyance preference
      *
@@ -1464,19 +1033,16 @@ export declare class WebAuthConfiguration_Attestation extends Message<WebAuthCon
      * @generated from field: repeated string enterprise_approved_ids = 2;
      */
     enterpriseApprovedIds: string[];
-    constructor(data?: PartialMessage<WebAuthConfiguration_Attestation>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Attestation";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Attestation;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Attestation;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Attestation;
-    static equals(a: WebAuthConfiguration_Attestation | PlainMessage<WebAuthConfiguration_Attestation> | undefined, b: WebAuthConfiguration_Attestation | PlainMessage<WebAuthConfiguration_Attestation> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.WebAuthConfiguration.Attestation.
+ * Use `create(WebAuthConfiguration_AttestationSchema)` to create a new message.
+ */
+export declare const WebAuthConfiguration_AttestationSchema: GenMessage<WebAuthConfiguration_Attestation>;
 /**
  * @generated from message scalekit.v1.connections.WebAuthConfiguration.Authenticators
  */
-export declare class WebAuthConfiguration_Authenticators extends Message<WebAuthConfiguration_Authenticators> {
+export type WebAuthConfiguration_Authenticators = Message<"scalekit.v1.connections.WebAuthConfiguration.Authenticators"> & {
     /**
      * @generated from field: google.protobuf.BoolValue validate_entry = 1;
      */
@@ -1505,19 +1071,16 @@ export declare class WebAuthConfiguration_Authenticators extends Message<WebAuth
      * @generated from field: repeated string undesired_authenticator_status = 7;
      */
     undesiredAuthenticatorStatus: string[];
-    constructor(data?: PartialMessage<WebAuthConfiguration_Authenticators>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Authenticators";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Authenticators;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Authenticators;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Authenticators;
-    static equals(a: WebAuthConfiguration_Authenticators | PlainMessage<WebAuthConfiguration_Authenticators> | undefined, b: WebAuthConfiguration_Authenticators | PlainMessage<WebAuthConfiguration_Authenticators> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.WebAuthConfiguration.Authenticators.
+ * Use `create(WebAuthConfiguration_AuthenticatorsSchema)` to create a new message.
+ */
+export declare const WebAuthConfiguration_AuthenticatorsSchema: GenMessage<WebAuthConfiguration_Authenticators>;
 /**
  * @generated from message scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection
  */
-export declare class WebAuthConfiguration_AuthenticatorSelection extends Message<WebAuthConfiguration_AuthenticatorSelection> {
+export type WebAuthConfiguration_AuthenticatorSelection = Message<"scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection"> & {
     /**
      * User verification requirement
      *
@@ -1528,19 +1091,16 @@ export declare class WebAuthConfiguration_AuthenticatorSelection extends Message
      * @generated from field: google.protobuf.StringValue authenticator_attachment = 2;
      */
     authenticatorAttachment?: string;
-    constructor(data?: PartialMessage<WebAuthConfiguration_AuthenticatorSelection>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_AuthenticatorSelection;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_AuthenticatorSelection;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_AuthenticatorSelection;
-    static equals(a: WebAuthConfiguration_AuthenticatorSelection | PlainMessage<WebAuthConfiguration_AuthenticatorSelection> | undefined, b: WebAuthConfiguration_AuthenticatorSelection | PlainMessage<WebAuthConfiguration_AuthenticatorSelection> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection.
+ * Use `create(WebAuthConfiguration_AuthenticatorSelectionSchema)` to create a new message.
+ */
+export declare const WebAuthConfiguration_AuthenticatorSelectionSchema: GenMessage<WebAuthConfiguration_AuthenticatorSelection>;
 /**
  * @generated from message scalekit.v1.connections.WebAuthConfiguration.Timeout
  */
-export declare class WebAuthConfiguration_Timeout extends Message<WebAuthConfiguration_Timeout> {
+export type WebAuthConfiguration_Timeout = Message<"scalekit.v1.connections.WebAuthConfiguration.Timeout"> & {
     /**
      * @generated from field: google.protobuf.Duration registration = 1;
      */
@@ -1557,19 +1117,16 @@ export declare class WebAuthConfiguration_Timeout extends Message<WebAuthConfigu
      * @generated from field: google.protobuf.Duration login_uvd = 4;
      */
     loginUvd?: Duration;
-    constructor(data?: PartialMessage<WebAuthConfiguration_Timeout>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.WebAuthConfiguration.Timeout";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): WebAuthConfiguration_Timeout;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Timeout;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): WebAuthConfiguration_Timeout;
-    static equals(a: WebAuthConfiguration_Timeout | PlainMessage<WebAuthConfiguration_Timeout> | undefined, b: WebAuthConfiguration_Timeout | PlainMessage<WebAuthConfiguration_Timeout> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.WebAuthConfiguration.Timeout.
+ * Use `create(WebAuthConfiguration_TimeoutSchema)` to create a new message.
+ */
+export declare const WebAuthConfiguration_TimeoutSchema: GenMessage<WebAuthConfiguration_Timeout>;
 /**
  * @generated from message scalekit.v1.connections.SAMLConnectionConfigRequest
  */
-export declare class SAMLConnectionConfigRequest extends Message<SAMLConnectionConfigRequest> {
+export type SAMLConnectionConfigRequest = Message<"scalekit.v1.connections.SAMLConnectionConfigRequest"> & {
     /**
      * @generated from field: google.protobuf.StringValue idp_metadata_url = 1;
      */
@@ -1654,19 +1211,16 @@ export declare class SAMLConnectionConfigRequest extends Message<SAMLConnectionC
      * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 24;
      */
     jitProvisioningWithSsoEnabled?: boolean;
-    constructor(data?: PartialMessage<SAMLConnectionConfigRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.SAMLConnectionConfigRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SAMLConnectionConfigRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SAMLConnectionConfigRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SAMLConnectionConfigRequest;
-    static equals(a: SAMLConnectionConfigRequest | PlainMessage<SAMLConnectionConfigRequest> | undefined, b: SAMLConnectionConfigRequest | PlainMessage<SAMLConnectionConfigRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.SAMLConnectionConfigRequest.
+ * Use `create(SAMLConnectionConfigRequestSchema)` to create a new message.
+ */
+export declare const SAMLConnectionConfigRequestSchema: GenMessage<SAMLConnectionConfigRequest>;
 /**
  * @generated from message scalekit.v1.connections.SAMLConnectionConfigResponse
  */
-export declare class SAMLConnectionConfigResponse extends Message<SAMLConnectionConfigResponse> {
+export type SAMLConnectionConfigResponse = Message<"scalekit.v1.connections.SAMLConnectionConfigResponse"> & {
     /**
      * @generated from field: string sp_entity_id = 1;
      */
@@ -1759,19 +1313,16 @@ export declare class SAMLConnectionConfigResponse extends Message<SAMLConnection
      * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 23;
      */
     jitProvisioningWithSsoEnabled?: boolean;
-    constructor(data?: PartialMessage<SAMLConnectionConfigResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.SAMLConnectionConfigResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SAMLConnectionConfigResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SAMLConnectionConfigResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SAMLConnectionConfigResponse;
-    static equals(a: SAMLConnectionConfigResponse | PlainMessage<SAMLConnectionConfigResponse> | undefined, b: SAMLConnectionConfigResponse | PlainMessage<SAMLConnectionConfigResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.SAMLConnectionConfigResponse.
+ * Use `create(SAMLConnectionConfigResponseSchema)` to create a new message.
+ */
+export declare const SAMLConnectionConfigResponseSchema: GenMessage<SAMLConnectionConfigResponse>;
 /**
  * @generated from message scalekit.v1.connections.IDPCertificate
  */
-export declare class IDPCertificate extends Message<IDPCertificate> {
+export type IDPCertificate = Message<"scalekit.v1.connections.IDPCertificate"> & {
     /**
      * @generated from field: string certificate = 1;
      */
@@ -1792,53 +1343,44 @@ export declare class IDPCertificate extends Message<IDPCertificate> {
      * @generated from field: string issuer = 5;
      */
     issuer: string;
-    constructor(data?: PartialMessage<IDPCertificate>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.IDPCertificate";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): IDPCertificate;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): IDPCertificate;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): IDPCertificate;
-    static equals(a: IDPCertificate | PlainMessage<IDPCertificate> | undefined, b: IDPCertificate | PlainMessage<IDPCertificate> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.IDPCertificate.
+ * Use `create(IDPCertificateSchema)` to create a new message.
+ */
+export declare const IDPCertificateSchema: GenMessage<IDPCertificate>;
 /**
  * @generated from message scalekit.v1.connections.GetOIDCMetadataRequest
  */
-export declare class GetOIDCMetadataRequest extends Message<GetOIDCMetadataRequest> {
+export type GetOIDCMetadataRequest = Message<"scalekit.v1.connections.GetOIDCMetadataRequest"> & {
     /**
      * @generated from field: scalekit.v1.connections.OIDCMetadataRequest metadata = 1;
      */
     metadata?: OIDCMetadataRequest;
-    constructor(data?: PartialMessage<GetOIDCMetadataRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetOIDCMetadataRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOIDCMetadataRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOIDCMetadataRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOIDCMetadataRequest;
-    static equals(a: GetOIDCMetadataRequest | PlainMessage<GetOIDCMetadataRequest> | undefined, b: GetOIDCMetadataRequest | PlainMessage<GetOIDCMetadataRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetOIDCMetadataRequest.
+ * Use `create(GetOIDCMetadataRequestSchema)` to create a new message.
+ */
+export declare const GetOIDCMetadataRequestSchema: GenMessage<GetOIDCMetadataRequest>;
 /**
  * @generated from message scalekit.v1.connections.OIDCMetadataRequest
  */
-export declare class OIDCMetadataRequest extends Message<OIDCMetadataRequest> {
+export type OIDCMetadataRequest = Message<"scalekit.v1.connections.OIDCMetadataRequest"> & {
     /**
      * @generated from field: string issuer = 1;
      */
     issuer: string;
-    constructor(data?: PartialMessage<OIDCMetadataRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.OIDCMetadataRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): OIDCMetadataRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): OIDCMetadataRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): OIDCMetadataRequest;
-    static equals(a: OIDCMetadataRequest | PlainMessage<OIDCMetadataRequest> | undefined, b: OIDCMetadataRequest | PlainMessage<OIDCMetadataRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.OIDCMetadataRequest.
+ * Use `create(OIDCMetadataRequestSchema)` to create a new message.
+ */
+export declare const OIDCMetadataRequestSchema: GenMessage<OIDCMetadataRequest>;
 /**
  * @generated from message scalekit.v1.connections.GetOIDCMetadataResponse
  */
-export declare class GetOIDCMetadataResponse extends Message<GetOIDCMetadataResponse> {
+export type GetOIDCMetadataResponse = Message<"scalekit.v1.connections.GetOIDCMetadataResponse"> & {
     /**
      * @generated from field: string issuer = 1;
      */
@@ -1859,53 +1401,44 @@ export declare class GetOIDCMetadataResponse extends Message<GetOIDCMetadataResp
      * @generated from field: string jwks_uri = 5;
      */
     jwksUri: string;
-    constructor(data?: PartialMessage<GetOIDCMetadataResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetOIDCMetadataResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetOIDCMetadataResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetOIDCMetadataResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetOIDCMetadataResponse;
-    static equals(a: GetOIDCMetadataResponse | PlainMessage<GetOIDCMetadataResponse> | undefined, b: GetOIDCMetadataResponse | PlainMessage<GetOIDCMetadataResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetOIDCMetadataResponse.
+ * Use `create(GetOIDCMetadataResponseSchema)` to create a new message.
+ */
+export declare const GetOIDCMetadataResponseSchema: GenMessage<GetOIDCMetadataResponse>;
 /**
  * @generated from message scalekit.v1.connections.GetSAMLMetadataRequest
  */
-export declare class GetSAMLMetadataRequest extends Message<GetSAMLMetadataRequest> {
+export type GetSAMLMetadataRequest = Message<"scalekit.v1.connections.GetSAMLMetadataRequest"> & {
     /**
      * @generated from field: scalekit.v1.connections.SAMLMetadataRequest metadata = 1;
      */
     metadata?: SAMLMetadataRequest;
-    constructor(data?: PartialMessage<GetSAMLMetadataRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetSAMLMetadataRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetSAMLMetadataRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetSAMLMetadataRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetSAMLMetadataRequest;
-    static equals(a: GetSAMLMetadataRequest | PlainMessage<GetSAMLMetadataRequest> | undefined, b: GetSAMLMetadataRequest | PlainMessage<GetSAMLMetadataRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetSAMLMetadataRequest.
+ * Use `create(GetSAMLMetadataRequestSchema)` to create a new message.
+ */
+export declare const GetSAMLMetadataRequestSchema: GenMessage<GetSAMLMetadataRequest>;
 /**
  * @generated from message scalekit.v1.connections.SAMLMetadataRequest
  */
-export declare class SAMLMetadataRequest extends Message<SAMLMetadataRequest> {
+export type SAMLMetadataRequest = Message<"scalekit.v1.connections.SAMLMetadataRequest"> & {
     /**
      * @generated from field: string metadata_url = 1;
      */
     metadataUrl: string;
-    constructor(data?: PartialMessage<SAMLMetadataRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.SAMLMetadataRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SAMLMetadataRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SAMLMetadataRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SAMLMetadataRequest;
-    static equals(a: SAMLMetadataRequest | PlainMessage<SAMLMetadataRequest> | undefined, b: SAMLMetadataRequest | PlainMessage<SAMLMetadataRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.SAMLMetadataRequest.
+ * Use `create(SAMLMetadataRequestSchema)` to create a new message.
+ */
+export declare const SAMLMetadataRequestSchema: GenMessage<SAMLMetadataRequest>;
 /**
  * @generated from message scalekit.v1.connections.GetSAMLMetadataResponse
  */
-export declare class GetSAMLMetadataResponse extends Message<GetSAMLMetadataResponse> {
+export type GetSAMLMetadataResponse = Message<"scalekit.v1.connections.GetSAMLMetadataResponse"> & {
     /**
      * @generated from field: string idp_entity_id = 1;
      */
@@ -1934,53 +1467,44 @@ export declare class GetSAMLMetadataResponse extends Message<GetSAMLMetadataResp
      * @generated from field: bool want_assertions_signed = 7;
      */
     wantAssertionsSigned: boolean;
-    constructor(data?: PartialMessage<GetSAMLMetadataResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetSAMLMetadataResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetSAMLMetadataResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetSAMLMetadataResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetSAMLMetadataResponse;
-    static equals(a: GetSAMLMetadataResponse | PlainMessage<GetSAMLMetadataResponse> | undefined, b: GetSAMLMetadataResponse | PlainMessage<GetSAMLMetadataResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetSAMLMetadataResponse.
+ * Use `create(GetSAMLMetadataResponseSchema)` to create a new message.
+ */
+export declare const GetSAMLMetadataResponseSchema: GenMessage<GetSAMLMetadataResponse>;
 /**
  * @generated from message scalekit.v1.connections.GetSAMLCertificateDetailsRequest
  */
-export declare class GetSAMLCertificateDetailsRequest extends Message<GetSAMLCertificateDetailsRequest> {
+export type GetSAMLCertificateDetailsRequest = Message<"scalekit.v1.connections.GetSAMLCertificateDetailsRequest"> & {
     /**
      * @generated from field: scalekit.v1.connections.SAMLCertificateRequest certificate = 1;
      */
     certificate?: SAMLCertificateRequest;
-    constructor(data?: PartialMessage<GetSAMLCertificateDetailsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetSAMLCertificateDetailsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetSAMLCertificateDetailsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetSAMLCertificateDetailsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetSAMLCertificateDetailsRequest;
-    static equals(a: GetSAMLCertificateDetailsRequest | PlainMessage<GetSAMLCertificateDetailsRequest> | undefined, b: GetSAMLCertificateDetailsRequest | PlainMessage<GetSAMLCertificateDetailsRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetSAMLCertificateDetailsRequest.
+ * Use `create(GetSAMLCertificateDetailsRequestSchema)` to create a new message.
+ */
+export declare const GetSAMLCertificateDetailsRequestSchema: GenMessage<GetSAMLCertificateDetailsRequest>;
 /**
  * @generated from message scalekit.v1.connections.SAMLCertificateRequest
  */
-export declare class SAMLCertificateRequest extends Message<SAMLCertificateRequest> {
+export type SAMLCertificateRequest = Message<"scalekit.v1.connections.SAMLCertificateRequest"> & {
     /**
      * @generated from field: string text = 1;
      */
     text: string;
-    constructor(data?: PartialMessage<SAMLCertificateRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.SAMLCertificateRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SAMLCertificateRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SAMLCertificateRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SAMLCertificateRequest;
-    static equals(a: SAMLCertificateRequest | PlainMessage<SAMLCertificateRequest> | undefined, b: SAMLCertificateRequest | PlainMessage<SAMLCertificateRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.SAMLCertificateRequest.
+ * Use `create(SAMLCertificateRequestSchema)` to create a new message.
+ */
+export declare const SAMLCertificateRequestSchema: GenMessage<SAMLCertificateRequest>;
 /**
  * @generated from message scalekit.v1.connections.GetSAMLCertificateDetailsResponse
  */
-export declare class GetSAMLCertificateDetailsResponse extends Message<GetSAMLCertificateDetailsResponse> {
+export type GetSAMLCertificateDetailsResponse = Message<"scalekit.v1.connections.GetSAMLCertificateDetailsResponse"> & {
     /**
      * @generated from field: string text = 1;
      */
@@ -2001,19 +1525,16 @@ export declare class GetSAMLCertificateDetailsResponse extends Message<GetSAMLCe
      * @generated from field: string issuer = 5;
      */
     issuer: string;
-    constructor(data?: PartialMessage<GetSAMLCertificateDetailsResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetSAMLCertificateDetailsResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetSAMLCertificateDetailsResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetSAMLCertificateDetailsResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetSAMLCertificateDetailsResponse;
-    static equals(a: GetSAMLCertificateDetailsResponse | PlainMessage<GetSAMLCertificateDetailsResponse> | undefined, b: GetSAMLCertificateDetailsResponse | PlainMessage<GetSAMLCertificateDetailsResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetSAMLCertificateDetailsResponse.
+ * Use `create(GetSAMLCertificateDetailsResponseSchema)` to create a new message.
+ */
+export declare const GetSAMLCertificateDetailsResponseSchema: GenMessage<GetSAMLCertificateDetailsResponse>;
 /**
  * @generated from message scalekit.v1.connections.GetConnectionTestResultRequest
  */
-export declare class GetConnectionTestResultRequest extends Message<GetConnectionTestResultRequest> {
+export type GetConnectionTestResultRequest = Message<"scalekit.v1.connections.GetConnectionTestResultRequest"> & {
     /**
      * @generated from field: string connection_id = 1;
      */
@@ -2022,19 +1543,16 @@ export declare class GetConnectionTestResultRequest extends Message<GetConnectio
      * @generated from field: string test_request_id = 2;
      */
     testRequestId: string;
-    constructor(data?: PartialMessage<GetConnectionTestResultRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetConnectionTestResultRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionTestResultRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionTestResultRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionTestResultRequest;
-    static equals(a: GetConnectionTestResultRequest | PlainMessage<GetConnectionTestResultRequest> | undefined, b: GetConnectionTestResultRequest | PlainMessage<GetConnectionTestResultRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetConnectionTestResultRequest.
+ * Use `create(GetConnectionTestResultRequestSchema)` to create a new message.
+ */
+export declare const GetConnectionTestResultRequestSchema: GenMessage<GetConnectionTestResultRequest>;
 /**
  * @generated from message scalekit.v1.connections.GetConnectionTestResultResponse
  */
-export declare class GetConnectionTestResultResponse extends Message<GetConnectionTestResultResponse> {
+export type GetConnectionTestResultResponse = Message<"scalekit.v1.connections.GetConnectionTestResultResponse"> & {
     /**
      * @generated from field: scalekit.v1.connections.TestResultStatus status = 1;
      */
@@ -2055,32 +1573,25 @@ export declare class GetConnectionTestResultResponse extends Message<GetConnecti
      * @generated from field: optional string error_details = 5;
      */
     errorDetails?: string;
-    constructor(data?: PartialMessage<GetConnectionTestResultResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.GetConnectionTestResultResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetConnectionTestResultResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetConnectionTestResultResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetConnectionTestResultResponse;
-    static equals(a: GetConnectionTestResultResponse | PlainMessage<GetConnectionTestResultResponse> | undefined, b: GetConnectionTestResultResponse | PlainMessage<GetConnectionTestResultResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.GetConnectionTestResultResponse.
+ * Use `create(GetConnectionTestResultResponseSchema)` to create a new message.
+ */
+export declare const GetConnectionTestResultResponseSchema: GenMessage<GetConnectionTestResultResponse>;
 /**
  * @generated from message scalekit.v1.connections.PasswordConnectionConfig
  */
-export declare class PasswordConnectionConfig extends Message<PasswordConnectionConfig> {
-    constructor(data?: PartialMessage<PasswordConnectionConfig>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.PasswordConnectionConfig";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PasswordConnectionConfig;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PasswordConnectionConfig;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PasswordConnectionConfig;
-    static equals(a: PasswordConnectionConfig | PlainMessage<PasswordConnectionConfig> | undefined, b: PasswordConnectionConfig | PlainMessage<PasswordConnectionConfig> | undefined): boolean;
-}
+export type PasswordConnectionConfig = Message<"scalekit.v1.connections.PasswordConnectionConfig"> & {};
+/**
+ * Describes the message scalekit.v1.connections.PasswordConnectionConfig.
+ * Use `create(PasswordConnectionConfigSchema)` to create a new message.
+ */
+export declare const PasswordConnectionConfigSchema: GenMessage<PasswordConnectionConfig>;
 /**
  * @generated from message scalekit.v1.connections.Flags
  */
-export declare class Flags extends Message<Flags> {
+export type Flags = Message<"scalekit.v1.connections.Flags"> & {
     /**
      * @generated from field: bool is_login = 1;
      */
@@ -2089,19 +1600,16 @@ export declare class Flags extends Message<Flags> {
      * @generated from field: bool is_app = 2;
      */
     isApp: boolean;
-    constructor(data?: PartialMessage<Flags>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.Flags";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Flags;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Flags;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Flags;
-    static equals(a: Flags | PlainMessage<Flags> | undefined, b: Flags | PlainMessage<Flags> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.Flags.
+ * Use `create(FlagsSchema)` to create a new message.
+ */
+export declare const FlagsSchema: GenMessage<Flags>;
 /**
  * @generated from message scalekit.v1.connections.ListAppConnectionsRequest
  */
-export declare class ListAppConnectionsRequest extends Message<ListAppConnectionsRequest> {
+export type ListAppConnectionsRequest = Message<"scalekit.v1.connections.ListAppConnectionsRequest"> & {
     /**
      * @generated from field: uint32 page_size = 1;
      */
@@ -2114,19 +1622,16 @@ export declare class ListAppConnectionsRequest extends Message<ListAppConnection
      * @generated from field: optional string provider = 3;
      */
     provider?: string;
-    constructor(data?: PartialMessage<ListAppConnectionsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.ListAppConnectionsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAppConnectionsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAppConnectionsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAppConnectionsRequest;
-    static equals(a: ListAppConnectionsRequest | PlainMessage<ListAppConnectionsRequest> | undefined, b: ListAppConnectionsRequest | PlainMessage<ListAppConnectionsRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.connections.ListAppConnectionsRequest.
+ * Use `create(ListAppConnectionsRequestSchema)` to create a new message.
+ */
+export declare const ListAppConnectionsRequestSchema: GenMessage<ListAppConnectionsRequest>;
 /**
  * @generated from message scalekit.v1.connections.ListAppConnectionsResponse
  */
-export declare class ListAppConnectionsResponse extends Message<ListAppConnectionsResponse> {
+export type ListAppConnectionsResponse = Message<"scalekit.v1.connections.ListAppConnectionsResponse"> & {
     /**
      * @generated from field: repeated scalekit.v1.connections.ListConnection connections = 1;
      */
@@ -2143,12 +1648,536 @@ export declare class ListAppConnectionsResponse extends Message<ListAppConnectio
      * @generated from field: uint32 total_size = 4;
      */
     totalSize: number;
-    constructor(data?: PartialMessage<ListAppConnectionsResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.connections.ListAppConnectionsResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAppConnectionsResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAppConnectionsResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAppConnectionsResponse;
-    static equals(a: ListAppConnectionsResponse | PlainMessage<ListAppConnectionsResponse> | undefined, b: ListAppConnectionsResponse | PlainMessage<ListAppConnectionsResponse> | undefined): boolean;
+};
+/**
+ * Describes the message scalekit.v1.connections.ListAppConnectionsResponse.
+ * Use `create(ListAppConnectionsResponseSchema)` to create a new message.
+ */
+export declare const ListAppConnectionsResponseSchema: GenMessage<ListAppConnectionsResponse>;
+/**
+ * @generated from enum scalekit.v1.connections.CodeChallengeType
+ */
+export declare enum CodeChallengeType {
+    /**
+     * @generated from enum value: CODE_CHALLENGE_TYPE_UNSPECIFIED = 0;
+     */
+    CODE_CHALLENGE_TYPE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: NUMERIC = 1;
+     */
+    NUMERIC = 1,
+    /**
+     * @generated from enum value: ALPHANUMERIC = 2;
+     */
+    ALPHANUMERIC = 2
 }
+/**
+ * Describes the enum scalekit.v1.connections.CodeChallengeType.
+ */
+export declare const CodeChallengeTypeSchema: GenEnum<CodeChallengeType>;
+/**
+ * @generated from enum scalekit.v1.connections.ConfigurationType
+ */
+export declare enum ConfigurationType {
+    /**
+     * @generated from enum value: CONFIGURATION_TYPE_UNSPECIFIED = 0;
+     */
+    CONFIGURATION_TYPE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: DISCOVERY = 1;
+     */
+    DISCOVERY = 1,
+    /**
+     * @generated from enum value: MANUAL = 2;
+     */
+    MANUAL = 2
+}
+/**
+ * Describes the enum scalekit.v1.connections.ConfigurationType.
+ */
+export declare const ConfigurationTypeSchema: GenEnum<ConfigurationType>;
+/**
+ * @generated from enum scalekit.v1.connections.NameIdFormat
+ */
+export declare enum NameIdFormat {
+    /**
+     * @generated from enum value: NAME_ID_FORMAT_NIL = 0;
+     */
+    NAME_ID_FORMAT_NIL = 0,
+    /**
+     * @generated from enum value: UNSPECIFIED = 1;
+     */
+    UNSPECIFIED = 1,
+    /**
+     * @generated from enum value: EMAIL = 2;
+     */
+    EMAIL = 2,
+    /**
+     * @generated from enum value: TRANSIENT = 3;
+     */
+    TRANSIENT = 3,
+    /**
+     * @generated from enum value: PERSISTENT = 4;
+     */
+    PERSISTENT = 4
+}
+/**
+ * Describes the enum scalekit.v1.connections.NameIdFormat.
+ */
+export declare const NameIdFormatSchema: GenEnum<NameIdFormat>;
+/**
+ * @generated from enum scalekit.v1.connections.PasswordlessType
+ */
+export declare enum PasswordlessType {
+    /**
+     * @generated from enum value: PasswordlessType_UNSPECIFIED = 0;
+     */
+    PasswordlessType_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: LINK = 1;
+     */
+    LINK = 1,
+    /**
+     * @generated from enum value: OTP = 2;
+     */
+    OTP = 2,
+    /**
+     * @generated from enum value: LINK_OTP = 3;
+     */
+    LINK_OTP = 3
+}
+/**
+ * Describes the enum scalekit.v1.connections.PasswordlessType.
+ */
+export declare const PasswordlessTypeSchema: GenEnum<PasswordlessType>;
+/**
+ * @generated from enum scalekit.v1.connections.TestResultStatus
+ */
+export declare enum TestResultStatus {
+    /**
+     * @generated from enum value: PENDING = 0;
+     */
+    PENDING = 0,
+    /**
+     * @generated from enum value: SUCCESS = 1;
+     */
+    SUCCESS = 1,
+    /**
+     * @generated from enum value: FAILURE = 2;
+     */
+    FAILURE = 2
+}
+/**
+ * Describes the enum scalekit.v1.connections.TestResultStatus.
+ */
+export declare const TestResultStatusSchema: GenEnum<TestResultStatus>;
+/**
+ * enums all
+ *
+ * @generated from enum scalekit.v1.connections.SAMLSigningOptions
+ */
+export declare enum SAMLSigningOptions {
+    /**
+     * @generated from enum value: SAML_SIGNING_OPTIONS_UNSPECIFIED = 0;
+     */
+    SAML_SIGNING_OPTIONS_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: NO_SIGNING = 1;
+     */
+    NO_SIGNING = 1,
+    /**
+     * @generated from enum value: SAML_ONLY_RESPONSE_SIGNING = 2;
+     */
+    SAML_ONLY_RESPONSE_SIGNING = 2,
+    /**
+     * @generated from enum value: SAML_ONLY_ASSERTION_SIGNING = 3;
+     */
+    SAML_ONLY_ASSERTION_SIGNING = 3,
+    /**
+     * @generated from enum value: SAML_RESPONSE_ASSERTION_SIGNING = 4;
+     */
+    SAML_RESPONSE_ASSERTION_SIGNING = 4,
+    /**
+     * @generated from enum value: SAML_RESPONSE_OR_ASSERTION_SIGNING = 5;
+     */
+    SAML_RESPONSE_OR_ASSERTION_SIGNING = 5
+}
+/**
+ * Describes the enum scalekit.v1.connections.SAMLSigningOptions.
+ */
+export declare const SAMLSigningOptionsSchema: GenEnum<SAMLSigningOptions>;
+/**
+ * @generated from enum scalekit.v1.connections.RequestBinding
+ */
+export declare enum RequestBinding {
+    /**
+     * @generated from enum value: REQUEST_BINDING_UNSPECIFIED = 0;
+     */
+    REQUEST_BINDING_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: HTTP_POST = 1;
+     */
+    HTTP_POST = 1,
+    /**
+     * @generated from enum value: HTTP_REDIRECT = 2;
+     */
+    HTTP_REDIRECT = 2
+}
+/**
+ * Describes the enum scalekit.v1.connections.RequestBinding.
+ */
+export declare const RequestBindingSchema: GenEnum<RequestBinding>;
+/**
+ * @generated from enum scalekit.v1.connections.TokenAuthType
+ */
+export declare enum TokenAuthType {
+    /**
+     * @generated from enum value: TOKEN_AUTH_TYPE_UNSPECIFIED = 0;
+     */
+    TOKEN_AUTH_TYPE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: URL_PARAMS = 1;
+     */
+    URL_PARAMS = 1,
+    /**
+     * @generated from enum value: BASIC_AUTH = 2;
+     */
+    BASIC_AUTH = 2
+}
+/**
+ * Describes the enum scalekit.v1.connections.TokenAuthType.
+ */
+export declare const TokenAuthTypeSchema: GenEnum<TokenAuthType>;
+/**
+ * @generated from enum scalekit.v1.connections.OIDCScope
+ */
+export declare enum OIDCScope {
+    /**
+     * @generated from enum value: OIDC_SCOPE_UNSPECIFIED = 0;
+     */
+    OIDC_SCOPE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: openid = 1;
+     */
+    openid = 1,
+    /**
+     * @generated from enum value: profile = 2;
+     */
+    profile = 2,
+    /**
+     * @generated from enum value: email = 3;
+     */
+    email = 3,
+    /**
+     * @generated from enum value: address = 4;
+     */
+    address = 4,
+    /**
+     * @generated from enum value: phone = 5;
+     */
+    phone = 5
+}
+/**
+ * Describes the enum scalekit.v1.connections.OIDCScope.
+ */
+export declare const OIDCScopeSchema: GenEnum<OIDCScope>;
+/**
+ * @generated from enum scalekit.v1.connections.ConnectionType
+ */
+export declare enum ConnectionType {
+    /**
+     * @generated from enum value: INVALID = 0;
+     */
+    INVALID = 0,
+    /**
+     * @generated from enum value: OIDC = 1;
+     */
+    OIDC = 1,
+    /**
+     * @generated from enum value: SAML = 2;
+     */
+    SAML = 2,
+    /**
+     * @generated from enum value: PASSWORD = 3;
+     */
+    PASSWORD = 3,
+    /**
+     * @generated from enum value: OAUTH = 4;
+     */
+    OAUTH = 4,
+    /**
+     * @generated from enum value: PASSWORDLESS = 5;
+     */
+    PASSWORDLESS = 5,
+    /**
+     * @generated from enum value: BASIC = 6;
+     */
+    BASIC = 6,
+    /**
+     * @generated from enum value: BEARER = 7;
+     */
+    BEARER = 7,
+    /**
+     * @generated from enum value: API_KEY = 8;
+     */
+    API_KEY = 8,
+    /**
+     * @generated from enum value: WEBAUTHN = 9;
+     */
+    WEBAUTHN = 9
+}
+/**
+ * Describes the enum scalekit.v1.connections.ConnectionType.
+ */
+export declare const ConnectionTypeSchema: GenEnum<ConnectionType>;
+/**
+ * @generated from enum scalekit.v1.connections.ConnectionStatus
+ */
+export declare enum ConnectionStatus {
+    /**
+     * @generated from enum value: CONNECTION_STATUS_UNSPECIFIED = 0;
+     */
+    CONNECTION_STATUS_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: DRAFT = 1;
+     */
+    DRAFT = 1,
+    /**
+     * @generated from enum value: IN_PROGRESS = 2;
+     */
+    IN_PROGRESS = 2,
+    /**
+     * @generated from enum value: COMPLETED = 3;
+     */
+    COMPLETED = 3
+}
+/**
+ * Describes the enum scalekit.v1.connections.ConnectionStatus.
+ */
+export declare const ConnectionStatusSchema: GenEnum<ConnectionStatus>;
+/**
+ * @generated from enum scalekit.v1.connections.ConnectionProvider
+ */
+export declare enum ConnectionProvider {
+    /**
+     * @generated from enum value: CONNECTION_PROVIDER_UNSPECIFIED = 0;
+     */
+    CONNECTION_PROVIDER_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: OKTA = 1;
+     */
+    OKTA = 1,
+    /**
+     * @generated from enum value: GOOGLE = 2;
+     */
+    GOOGLE = 2,
+    /**
+     * @generated from enum value: MICROSOFT_AD = 3;
+     */
+    MICROSOFT_AD = 3,
+    /**
+     * @generated from enum value: AUTH0 = 4;
+     */
+    AUTH0 = 4,
+    /**
+     * @generated from enum value: ONELOGIN = 5;
+     */
+    ONELOGIN = 5,
+    /**
+     * @generated from enum value: PING_IDENTITY = 6;
+     */
+    PING_IDENTITY = 6,
+    /**
+     * @generated from enum value: JUMPCLOUD = 7;
+     */
+    JUMPCLOUD = 7,
+    /**
+     * @generated from enum value: CUSTOM = 8;
+     */
+    CUSTOM = 8,
+    /**
+     * @generated from enum value: GITHUB = 9;
+     */
+    GITHUB = 9,
+    /**
+     * @generated from enum value: GITLAB = 10;
+     */
+    GITLAB = 10,
+    /**
+     * @generated from enum value: LINKEDIN = 11;
+     */
+    LINKEDIN = 11,
+    /**
+     * @generated from enum value: SALESFORCE = 12;
+     */
+    SALESFORCE = 12,
+    /**
+     * @generated from enum value: MICROSOFT = 13;
+     */
+    MICROSOFT = 13,
+    /**
+     * @generated from enum value: IDP_SIMULATOR = 14;
+     */
+    IDP_SIMULATOR = 14,
+    /**
+     * @generated from enum value: SCALEKIT = 15;
+     */
+    SCALEKIT = 15,
+    /**
+     * @generated from enum value: ADFS = 16;
+     */
+    ADFS = 16
+}
+/**
+ * Describes the enum scalekit.v1.connections.ConnectionProvider.
+ */
+export declare const ConnectionProviderSchema: GenEnum<ConnectionProvider>;
+/**
+ * @generated from service scalekit.v1.connections.ConnectionService
+ */
+export declare const ConnectionService: GenService<{
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.CreateEnvironmentConnection
+     */
+    createEnvironmentConnection: {
+        methodKind: "unary";
+        input: typeof CreateEnvironmentConnectionRequestSchema;
+        output: typeof CreateConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.CreateConnection
+     */
+    createConnection: {
+        methodKind: "unary";
+        input: typeof CreateConnectionRequestSchema;
+        output: typeof CreateConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.AssignDomainsToConnection
+     */
+    assignDomainsToConnection: {
+        methodKind: "unary";
+        input: typeof AssignDomainsToConnectionRequestSchema;
+        output: typeof AssignDomainsToConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.GetEnvironmentConnection
+     */
+    getEnvironmentConnection: {
+        methodKind: "unary";
+        input: typeof GetEnvironmentConnectionRequestSchema;
+        output: typeof GetConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.GetConnection
+     */
+    getConnection: {
+        methodKind: "unary";
+        input: typeof GetConnectionRequestSchema;
+        output: typeof GetConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.ListConnections
+     */
+    listConnections: {
+        methodKind: "unary";
+        input: typeof ListConnectionsRequestSchema;
+        output: typeof ListConnectionsResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.ListOrganizationConnections
+     */
+    listOrganizationConnections: {
+        methodKind: "unary";
+        input: typeof ListOrganizationConnectionsRequestSchema;
+        output: typeof ListOrganizationConnectionsResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.SearchOrganizationConnections
+     */
+    searchOrganizationConnections: {
+        methodKind: "unary";
+        input: typeof SearchOrganizationConnectionsRequestSchema;
+        output: typeof SearchOrganizationConnectionsResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.UpdateEnvironmentConnection
+     */
+    updateEnvironmentConnection: {
+        methodKind: "unary";
+        input: typeof UpdateEnvironmentConnectionRequestSchema;
+        output: typeof UpdateConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.UpdateConnection
+     */
+    updateConnection: {
+        methodKind: "unary";
+        input: typeof UpdateConnectionRequestSchema;
+        output: typeof UpdateConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.DeleteEnvironmentConnection
+     */
+    deleteEnvironmentConnection: {
+        methodKind: "unary";
+        input: typeof DeleteEnvironmentConnectionRequestSchema;
+        output: typeof EmptySchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.DeleteConnection
+     */
+    deleteConnection: {
+        methodKind: "unary";
+        input: typeof DeleteConnectionRequestSchema;
+        output: typeof EmptySchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.EnableEnvironmentConnection
+     */
+    enableEnvironmentConnection: {
+        methodKind: "unary";
+        input: typeof ToggleEnvironmentConnectionRequestSchema;
+        output: typeof ToggleConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.EnableConnection
+     */
+    enableConnection: {
+        methodKind: "unary";
+        input: typeof ToggleConnectionRequestSchema;
+        output: typeof ToggleConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.DisableEnvironmentConnection
+     */
+    disableEnvironmentConnection: {
+        methodKind: "unary";
+        input: typeof ToggleEnvironmentConnectionRequestSchema;
+        output: typeof ToggleConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.DisableConnection
+     */
+    disableConnection: {
+        methodKind: "unary";
+        input: typeof ToggleConnectionRequestSchema;
+        output: typeof ToggleConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.GetConnectionTestResult
+     */
+    getConnectionTestResult: {
+        methodKind: "unary";
+        input: typeof GetConnectionTestResultRequestSchema;
+        output: typeof GetConnectionTestResultResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.ListAppConnections
+     */
+    listAppConnections: {
+        methodKind: "unary";
+        input: typeof ListAppConnectionsRequestSchema;
+        output: typeof ListAppConnectionsResponseSchema;
+    };
+}>;

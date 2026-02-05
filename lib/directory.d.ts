@@ -17,10 +17,10 @@ import { GetDirectoryResponse, Directory, ListDirectoriesResponse, ListDirectory
  * @see {@link https://docs.scalekit.com/directory/scim/quickstart/ | SCIM Directory Sync Guide}
  */
 export default class DirectoryClient {
-    private readonly grpcConncet;
+    private readonly grpcConnect;
     private readonly coreClient;
     private client;
-    constructor(grpcConncet: GrpcConnect, coreClient: CoreClient);
+    constructor(grpcConnect: GrpcConnect, coreClient: CoreClient);
     /**
      * Retrieves all SCIM directories configured for an organization.
      *

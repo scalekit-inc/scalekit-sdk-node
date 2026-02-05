@@ -1,26 +1,28 @@
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3, Timestamp } from "@bufbuild/protobuf";
+import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import type { Message } from "@bufbuild/protobuf";
+/**
+ * Describes the file scalekit/v1/sessions/sessions.proto.
+ */
+export declare const file_scalekit_v1_sessions_sessions: GenFile;
 /**
  * @generated from message scalekit.v1.sessions.SessionDetailsRequest
  */
-export declare class SessionDetailsRequest extends Message<SessionDetailsRequest> {
+export type SessionDetailsRequest = Message<"scalekit.v1.sessions.SessionDetailsRequest"> & {
     /**
      * @generated from field: string session_id = 1;
      */
     sessionId: string;
-    constructor(data?: PartialMessage<SessionDetailsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.SessionDetailsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SessionDetailsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SessionDetailsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SessionDetailsRequest;
-    static equals(a: SessionDetailsRequest | PlainMessage<SessionDetailsRequest> | undefined, b: SessionDetailsRequest | PlainMessage<SessionDetailsRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.sessions.SessionDetailsRequest.
+ * Use `create(SessionDetailsRequestSchema)` to create a new message.
+ */
+export declare const SessionDetailsRequestSchema: GenMessage<SessionDetailsRequest>;
 /**
  * @generated from message scalekit.v1.sessions.UserSessionDetailsRequest
  */
-export declare class UserSessionDetailsRequest extends Message<UserSessionDetailsRequest> {
+export type UserSessionDetailsRequest = Message<"scalekit.v1.sessions.UserSessionDetailsRequest"> & {
     /**
      * @generated from field: string user_id = 1;
      */
@@ -37,19 +39,16 @@ export declare class UserSessionDetailsRequest extends Message<UserSessionDetail
      * @generated from field: scalekit.v1.sessions.UserSessionFilter filter = 4;
      */
     filter?: UserSessionFilter;
-    constructor(data?: PartialMessage<UserSessionDetailsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.UserSessionDetailsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserSessionDetailsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UserSessionDetailsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UserSessionDetailsRequest;
-    static equals(a: UserSessionDetailsRequest | PlainMessage<UserSessionDetailsRequest> | undefined, b: UserSessionDetailsRequest | PlainMessage<UserSessionDetailsRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.sessions.UserSessionDetailsRequest.
+ * Use `create(UserSessionDetailsRequestSchema)` to create a new message.
+ */
+export declare const UserSessionDetailsRequestSchema: GenMessage<UserSessionDetailsRequest>;
 /**
  * @generated from message scalekit.v1.sessions.UserSessionFilter
  */
-export declare class UserSessionFilter extends Message<UserSessionFilter> {
+export type UserSessionFilter = Message<"scalekit.v1.sessions.UserSessionFilter"> & {
     /**
      * @generated from field: repeated string status = 1;
      */
@@ -62,70 +61,58 @@ export declare class UserSessionFilter extends Message<UserSessionFilter> {
      * @generated from field: google.protobuf.Timestamp end_time = 3;
      */
     endTime?: Timestamp;
-    constructor(data?: PartialMessage<UserSessionFilter>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.UserSessionFilter";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserSessionFilter;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UserSessionFilter;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UserSessionFilter;
-    static equals(a: UserSessionFilter | PlainMessage<UserSessionFilter> | undefined, b: UserSessionFilter | PlainMessage<UserSessionFilter> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.sessions.UserSessionFilter.
+ * Use `create(UserSessionFilterSchema)` to create a new message.
+ */
+export declare const UserSessionFilterSchema: GenMessage<UserSessionFilter>;
 /**
  * @generated from message scalekit.v1.sessions.RevokeSessionRequest
  */
-export declare class RevokeSessionRequest extends Message<RevokeSessionRequest> {
+export type RevokeSessionRequest = Message<"scalekit.v1.sessions.RevokeSessionRequest"> & {
     /**
      * @generated from field: string session_id = 1;
      */
     sessionId: string;
-    constructor(data?: PartialMessage<RevokeSessionRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.RevokeSessionRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RevokeSessionRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RevokeSessionRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RevokeSessionRequest;
-    static equals(a: RevokeSessionRequest | PlainMessage<RevokeSessionRequest> | undefined, b: RevokeSessionRequest | PlainMessage<RevokeSessionRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.sessions.RevokeSessionRequest.
+ * Use `create(RevokeSessionRequestSchema)` to create a new message.
+ */
+export declare const RevokeSessionRequestSchema: GenMessage<RevokeSessionRequest>;
 /**
  * @generated from message scalekit.v1.sessions.RevokeSessionResponse
  */
-export declare class RevokeSessionResponse extends Message<RevokeSessionResponse> {
+export type RevokeSessionResponse = Message<"scalekit.v1.sessions.RevokeSessionResponse"> & {
     /**
      * @generated from field: scalekit.v1.sessions.RevokedSessionDetails revoked_session = 1;
      */
     revokedSession?: RevokedSessionDetails;
-    constructor(data?: PartialMessage<RevokeSessionResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.RevokeSessionResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RevokeSessionResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RevokeSessionResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RevokeSessionResponse;
-    static equals(a: RevokeSessionResponse | PlainMessage<RevokeSessionResponse> | undefined, b: RevokeSessionResponse | PlainMessage<RevokeSessionResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.sessions.RevokeSessionResponse.
+ * Use `create(RevokeSessionResponseSchema)` to create a new message.
+ */
+export declare const RevokeSessionResponseSchema: GenMessage<RevokeSessionResponse>;
 /**
  * @generated from message scalekit.v1.sessions.RevokeAllUserSessionsRequest
  */
-export declare class RevokeAllUserSessionsRequest extends Message<RevokeAllUserSessionsRequest> {
+export type RevokeAllUserSessionsRequest = Message<"scalekit.v1.sessions.RevokeAllUserSessionsRequest"> & {
     /**
      * @generated from field: string user_id = 1;
      */
     userId: string;
-    constructor(data?: PartialMessage<RevokeAllUserSessionsRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.RevokeAllUserSessionsRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RevokeAllUserSessionsRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RevokeAllUserSessionsRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RevokeAllUserSessionsRequest;
-    static equals(a: RevokeAllUserSessionsRequest | PlainMessage<RevokeAllUserSessionsRequest> | undefined, b: RevokeAllUserSessionsRequest | PlainMessage<RevokeAllUserSessionsRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.sessions.RevokeAllUserSessionsRequest.
+ * Use `create(RevokeAllUserSessionsRequestSchema)` to create a new message.
+ */
+export declare const RevokeAllUserSessionsRequestSchema: GenMessage<RevokeAllUserSessionsRequest>;
 /**
  * @generated from message scalekit.v1.sessions.RevokeAllUserSessionsResponse
  */
-export declare class RevokeAllUserSessionsResponse extends Message<RevokeAllUserSessionsResponse> {
+export type RevokeAllUserSessionsResponse = Message<"scalekit.v1.sessions.RevokeAllUserSessionsResponse"> & {
     /**
      * @generated from field: repeated scalekit.v1.sessions.RevokedSessionDetails revoked_sessions = 1;
      */
@@ -134,19 +121,16 @@ export declare class RevokeAllUserSessionsResponse extends Message<RevokeAllUser
      * @generated from field: uint32 total_revoked = 2;
      */
     totalRevoked: number;
-    constructor(data?: PartialMessage<RevokeAllUserSessionsResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.RevokeAllUserSessionsResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RevokeAllUserSessionsResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RevokeAllUserSessionsResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RevokeAllUserSessionsResponse;
-    static equals(a: RevokeAllUserSessionsResponse | PlainMessage<RevokeAllUserSessionsResponse> | undefined, b: RevokeAllUserSessionsResponse | PlainMessage<RevokeAllUserSessionsResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.sessions.RevokeAllUserSessionsResponse.
+ * Use `create(RevokeAllUserSessionsResponseSchema)` to create a new message.
+ */
+export declare const RevokeAllUserSessionsResponseSchema: GenMessage<RevokeAllUserSessionsResponse>;
 /**
  * @generated from message scalekit.v1.sessions.UserSessionDetails
  */
-export declare class UserSessionDetails extends Message<UserSessionDetails> {
+export type UserSessionDetails = Message<"scalekit.v1.sessions.UserSessionDetails"> & {
     /**
      * @generated from field: repeated scalekit.v1.sessions.SessionDetails sessions = 1;
      */
@@ -163,19 +147,16 @@ export declare class UserSessionDetails extends Message<UserSessionDetails> {
      * @generated from field: uint32 total_size = 4;
      */
     totalSize: number;
-    constructor(data?: PartialMessage<UserSessionDetails>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.UserSessionDetails";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): UserSessionDetails;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): UserSessionDetails;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): UserSessionDetails;
-    static equals(a: UserSessionDetails | PlainMessage<UserSessionDetails> | undefined, b: UserSessionDetails | PlainMessage<UserSessionDetails> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.sessions.UserSessionDetails.
+ * Use `create(UserSessionDetailsSchema)` to create a new message.
+ */
+export declare const UserSessionDetailsSchema: GenMessage<UserSessionDetails>;
 /**
  * @generated from message scalekit.v1.sessions.SessionDetails
  */
-export declare class SessionDetails extends Message<SessionDetails> {
+export type SessionDetails = Message<"scalekit.v1.sessions.SessionDetails"> & {
     /**
      * @generated from field: string session_id = 1;
      */
@@ -228,19 +209,20 @@ export declare class SessionDetails extends Message<SessionDetails> {
      * @generated from field: google.protobuf.Timestamp last_active_at = 13;
      */
     lastActiveAt?: Timestamp;
-    constructor(data?: PartialMessage<SessionDetails>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.SessionDetails";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SessionDetails;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SessionDetails;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SessionDetails;
-    static equals(a: SessionDetails | PlainMessage<SessionDetails> | undefined, b: SessionDetails | PlainMessage<SessionDetails> | undefined): boolean;
-}
+    /**
+     * @generated from field: repeated scalekit.v1.sessions.AuthenticatedClients authenticated_clients = 14;
+     */
+    authenticatedClients: AuthenticatedClients[];
+};
+/**
+ * Describes the message scalekit.v1.sessions.SessionDetails.
+ * Use `create(SessionDetailsSchema)` to create a new message.
+ */
+export declare const SessionDetailsSchema: GenMessage<SessionDetails>;
 /**
  * @generated from message scalekit.v1.sessions.DeviceDetails
  */
-export declare class DeviceDetails extends Message<DeviceDetails> {
+export type DeviceDetails = Message<"scalekit.v1.sessions.DeviceDetails"> & {
     /**
      * @generated from field: string user_agent = 12;
      */
@@ -273,19 +255,16 @@ export declare class DeviceDetails extends Message<DeviceDetails> {
      * @generated from field: scalekit.v1.sessions.Location location = 20;
      */
     location?: Location;
-    constructor(data?: PartialMessage<DeviceDetails>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.DeviceDetails";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DeviceDetails;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DeviceDetails;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DeviceDetails;
-    static equals(a: DeviceDetails | PlainMessage<DeviceDetails> | undefined, b: DeviceDetails | PlainMessage<DeviceDetails> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.sessions.DeviceDetails.
+ * Use `create(DeviceDetailsSchema)` to create a new message.
+ */
+export declare const DeviceDetailsSchema: GenMessage<DeviceDetails>;
 /**
  * @generated from message scalekit.v1.sessions.RevokedSessionDetails
  */
-export declare class RevokedSessionDetails extends Message<RevokedSessionDetails> {
+export type RevokedSessionDetails = Message<"scalekit.v1.sessions.RevokedSessionDetails"> & {
     /**
      * @generated from field: string session_id = 1;
      */
@@ -326,19 +305,16 @@ export declare class RevokedSessionDetails extends Message<RevokedSessionDetails
      * @generated from field: google.protobuf.Timestamp last_active_at = 12;
      */
     lastActiveAt?: Timestamp;
-    constructor(data?: PartialMessage<RevokedSessionDetails>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.RevokedSessionDetails";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RevokedSessionDetails;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RevokedSessionDetails;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RevokedSessionDetails;
-    static equals(a: RevokedSessionDetails | PlainMessage<RevokedSessionDetails> | undefined, b: RevokedSessionDetails | PlainMessage<RevokedSessionDetails> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.sessions.RevokedSessionDetails.
+ * Use `create(RevokedSessionDetailsSchema)` to create a new message.
+ */
+export declare const RevokedSessionDetailsSchema: GenMessage<RevokedSessionDetails>;
 /**
  * @generated from message scalekit.v1.sessions.Location
  */
-export declare class Location extends Message<Location> {
+export type Location = Message<"scalekit.v1.sessions.Location"> & {
     /**
      * @generated from field: string region = 1;
      */
@@ -359,12 +335,66 @@ export declare class Location extends Message<Location> {
      * @generated from field: string longitude = 5;
      */
     longitude: string;
-    constructor(data?: PartialMessage<Location>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.sessions.Location";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): Location;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): Location;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): Location;
-    static equals(a: Location | PlainMessage<Location> | undefined, b: Location | PlainMessage<Location> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.sessions.Location.
+ * Use `create(LocationSchema)` to create a new message.
+ */
+export declare const LocationSchema: GenMessage<Location>;
+/**
+ * AuthenticatedClients represents an authenticated client in a session along with its organization context.
+ *
+ * @generated from message scalekit.v1.sessions.AuthenticatedClients
+ */
+export type AuthenticatedClients = Message<"scalekit.v1.sessions.AuthenticatedClients"> & {
+    /**
+     * @generated from field: string client_id = 1;
+     */
+    clientId: string;
+    /**
+     * @generated from field: string organization_id = 2;
+     */
+    organizationId: string;
+};
+/**
+ * Describes the message scalekit.v1.sessions.AuthenticatedClients.
+ * Use `create(AuthenticatedClientsSchema)` to create a new message.
+ */
+export declare const AuthenticatedClientsSchema: GenMessage<AuthenticatedClients>;
+/**
+ * @generated from service scalekit.v1.sessions.SessionService
+ */
+export declare const SessionService: GenService<{
+    /**
+     * @generated from rpc scalekit.v1.sessions.SessionService.GetSession
+     */
+    getSession: {
+        methodKind: "unary";
+        input: typeof SessionDetailsRequestSchema;
+        output: typeof SessionDetailsSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.sessions.SessionService.RevokeSession
+     */
+    revokeSession: {
+        methodKind: "unary";
+        input: typeof RevokeSessionRequestSchema;
+        output: typeof RevokeSessionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.sessions.SessionService.GetUserSessions
+     */
+    getUserSessions: {
+        methodKind: "unary";
+        input: typeof UserSessionDetailsRequestSchema;
+        output: typeof UserSessionDetailsSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.sessions.SessionService.RevokeAllUserSessions
+     */
+    revokeAllUserSessions: {
+        methodKind: "unary";
+        input: typeof RevokeAllUserSessionsRequestSchema;
+        output: typeof RevokeAllUserSessionsResponseSchema;
+    };
+}>;

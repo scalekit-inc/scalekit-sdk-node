@@ -1,23 +1,24 @@
-import { PartialMessage } from "@bufbuild/protobuf";
-import { PromiseClient } from "@connectrpc/connect";
+import { create } from "@bufbuild/protobuf";
+import { timestampFromDate } from "@bufbuild/protobuf/wkt";
+import type { Client } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
-import { SessionService } from "./pkg/grpc/scalekit/v1/sessions/sessions_connect";
 import {
+  SessionService,
   SessionDetailsRequest,
   SessionDetails,
   UserSessionDetailsRequest,
   UserSessionDetails,
-  UserSessionFilter,
+  UserSessionDetailsRequestSchema,
+  UserSessionFilterSchema,
   RevokeSessionRequest,
   RevokeSessionResponse,
   RevokeAllUserSessionsRequest,
   RevokeAllUserSessionsResponse,
 } from "./pkg/grpc/scalekit/v1/sessions/sessions_pb";
-import { Timestamp } from "@bufbuild/protobuf";
 
 export default class SessionClient {
-  private client: PromiseClient<typeof SessionService>;
+  private client: Client<typeof SessionService>;
 
   constructor(
     private readonly grpcConnect: GrpcConnect,
@@ -145,35 +146,20 @@ export default class SessionClient {
       };
     }
   ): Promise<UserSessionDetails> {
-    const request: PartialMessage<UserSessionDetailsRequest> = {
+    const filter = options?.filter
+      ? create(UserSessionFilterSchema, {
+          status: options.filter.status,
+          startTime: options.filter.startTime ? timestampFromDate(options.filter.startTime) : undefined,
+          endTime: options.filter.endTime ? timestampFromDate(options.filter.endTime) : undefined,
+        })
+      : undefined;
+
+    const request = create(UserSessionDetailsRequestSchema, {
       userId,
-    };
-
-    if (options?.pageSize !== undefined) {
-      request.pageSize = options.pageSize;
-    }
-
-    if (options?.pageToken) {
-      request.pageToken = options.pageToken;
-    }
-
-    if (options?.filter) {
-      const filter = new UserSessionFilter();
-
-      if (options.filter.status) {
-        filter.status = options.filter.status;
-      }
-
-      if (options.filter.startTime) {
-        filter.startTime = Timestamp.fromDate(options.filter.startTime);
-      }
-
-      if (options.filter.endTime) {
-        filter.endTime = Timestamp.fromDate(options.filter.endTime);
-      }
-
-      request.filter = filter;
-    }
+      pageSize: options?.pageSize,
+      pageToken: options?.pageToken,
+      filter,
+    });
 
     return this.coreClient.connectExec(this.client.getUserSessions, request);
   }

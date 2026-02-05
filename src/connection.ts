@@ -1,7 +1,7 @@
-import { PromiseClient } from "@connectrpc/connect";
+import type { Client } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
-import { ConnectionService } from "./pkg/grpc/scalekit/v1/connections/connections_connect";
+import { ConnectionService } from "./pkg/grpc/scalekit/v1/connections/connections_pb";
 import {
   GetConnectionResponse,
   ToggleConnectionResponse,
@@ -23,12 +23,12 @@ import {
  * @see {@link https://docs.scalekit.com/apis/#tag/connections | Connection API Documentation}
  */
 export default class ConnectionClient {
-  private client: PromiseClient<typeof ConnectionService>;
+  private client: Client<typeof ConnectionService>;
   constructor(
-    private readonly grpcConncet: GrpcConnect,
+    private readonly grpcConnect: GrpcConnect,
     private readonly coreClient: CoreClient
   ) {
-    this.client = this.grpcConncet.createClient(ConnectionService);
+    this.client = this.grpcConnect.createClient(ConnectionService);
   }
 
   /**
