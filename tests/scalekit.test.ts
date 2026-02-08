@@ -1,5 +1,5 @@
 import ScalekitClient from '../src/scalekit';
-import { AuthenticationOptions } from '../src/types/scalekit';
+import { ScalekitValidateTokenFailureException } from '../src/errors/base-exception';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { TestDataGenerator } from './utils/test-data';
 
@@ -99,6 +99,31 @@ describe('ScalekitClient', () => {
         // Expected failure with mock token
         expect(error).toBeDefined();
       }
+    });
+  });
+
+  describe('getAccessTokenClaims', () => {
+    it('should throw ScalekitValidateTokenFailureException for invalid token', async () => {
+      await expect(client.getAccessTokenClaims('invalid')).rejects.toThrow(
+        ScalekitValidateTokenFailureException
+      );
+    });
+
+    it('should return AccessTokenClaims for valid client-credentials token', async () => {
+      const accessToken = await client.getClientAccessToken();
+      const claims = await client.getAccessTokenClaims(accessToken);
+
+      expect(claims).toBeDefined();
+      expect(typeof claims.sub).toBe('string');
+      expect(claims.sub.length).toBeGreaterThan(0);
+      expect(typeof claims.iss).toBe('string');
+      expect(claims.iss.length).toBeGreaterThan(0);
+      expect(typeof claims.iat).toBe('number');
+      expect(typeof claims.exp).toBe('number');
+      expect(claims.exp).toBeGreaterThan(claims.iat);
+      expect(claims.claims).toBeDefined();
+      expect(typeof claims.claims).toBe('object');
+      expect(claims.claims.sub).toBe(claims.sub);
     });
   });
 }); 

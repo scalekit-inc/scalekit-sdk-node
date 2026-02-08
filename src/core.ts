@@ -48,7 +48,7 @@ export default class CoreClient {
     //this.authenticateClient();
   }
 
-  private async authenticateClient() {
+  async authenticateClient() {
     const res = await this.authenticate(
       QueryString.stringify({
         grant_type: GrantType.ClientCredentials,

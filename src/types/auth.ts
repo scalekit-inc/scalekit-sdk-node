@@ -17,6 +17,7 @@ export type User = {
   updatedAt: string | undefined;
   identities: Identity[];
   metadata: string | undefined;
+  claims: Record<string, any>;
 }
 
 export type Identity = {
@@ -56,6 +57,16 @@ export type IdTokenClaim = {
   updated_at: string | undefined;
   identities: IdTokenClaimIdentity[];
   metadata: string | undefined;
+  claims: Record<string, any>;
+}
+
+export type AccessTokenClaims = {
+  sub: string;
+  iss: string;
+  aud?: string[];
+  iat: number;
+  exp: number;
+  claims: Record<string, any>;
 }
 
 export type TokenResponse = {

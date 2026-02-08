@@ -15,7 +15,7 @@ import SessionClient from './session';
 import RoleClient from './role';
 import PermissionClient from './permission';
 import WebAuthnClient from './webauthn';
-import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
+import { IdpInitiatedLoginClaims, IdTokenClaim, AccessTokenClaims, User } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse ,TokenValidationOptions } from './types/scalekit';
 import { WebhookVerificationError, ScalekitValidateTokenFailureException } from './errors/base-exception';
 
@@ -303,13 +303,17 @@ export default class ScalekitClient {
       })
     );
     const { id_token, access_token, expires_in, refresh_token } = res.data;
-    const claims = jose.decodeJwt<IdTokenClaim>(id_token);
+    const rawClaims = jose.decodeJwt<Record<string, any>>(id_token);
+  
+    
+    // Map to User and include all claims
     const user = <User>{};
-    for (const [k, v] of Object.entries(claims)) {
+    for (const [k, v] of Object.entries(rawClaims)) {
       if (IdTokenClaimToUserMap[k]) {
         user[IdTokenClaimToUserMap[k]] = v;
       }
     }
+    user.claims =  rawClaims
 
     return {
       user,
@@ -398,6 +402,93 @@ export default class ScalekitClient {
       return true;
     } catch (_) {
       return false;
+    }
+  }
+
+  /**
+   * Obtains an access token using the client credentials grant.
+   * Uses the same credentials as this client (client ID and secret).
+   * Useful when you need the raw access token (e.g. for testing or passing to another service).
+   *
+   * @returns {Promise<string>} The access token
+   *
+   * @example
+   * const accessToken = await scalekitClient.getClientAccessToken();
+   * const claims = await scalekitClient.getAccessTokenClaims(accessToken);
+   */
+  async getClientAccessToken(): Promise<string> {
+    await this.coreClient.authenticateClient();
+    if (!this.coreClient.accessToken) {
+      throw new Error('Failed to obtain client access token');
+    }
+    return this.coreClient.accessToken;
+  }
+
+  /**
+   * Extracts and validates claims from an access token.
+   *
+   * Use this method to get the claims from an access token, including both standard
+   * OAuth 2.0 claims (sub, iss, aud, iat, exp) and any additional custom claims.
+   * All claims (including typed ones) are available in the `claims` property.
+   *
+   * @param {string} accessToken - The access token to extract claims from
+   * @param {TokenValidationOptions} [options] - Optional token validation configuration
+   * @param {string} [options.issuer] - Expected token issuer for validation
+   * @param {string[]} [options.audience] - Expected token audience for validation
+   *
+   * @returns {Promise<AccessTokenClaims>} Claims containing:
+   *   - sub: Subject identifier (user ID)
+   *   - iss: Token issuer
+   *   - aud: Token audience (optional)
+   *   - iat: Issued at timestamp
+   *   - exp: Expiration timestamp
+   *   - claims: All claims from the token (including typed ones)
+   *
+   * @throws {ScalekitValidateTokenFailureException} When token validation fails
+   *
+   * @example
+   * // Extract access token claims
+   * const accessToken = req.headers.authorization?.replace('Bearer ', '');
+   * if (accessToken) {
+   *   try {
+   *     const claims = await scalekitClient.getAccessTokenClaims(accessToken);
+   *     console.log('User ID:', claims.sub);
+   *     console.log('All claims:', claims.claims);
+   *   } catch (error) {
+   *     console.error('Token validation failed:', error);
+   *   }
+   * }
+   *
+   * @see {@link validateAccessToken} - Validate token without extracting claims
+   * @see {@link validateToken} - Generic token validation method
+   */
+  async getAccessTokenClaims(
+    accessToken: string,
+    options?: TokenValidationOptions
+  ): Promise<AccessTokenClaims> {
+    await this.coreClient.getJwks();
+    const jwks = jose.createLocalJWKSet({
+      keys: this.coreClient.keys,
+    });
+    try {
+      const { payload } = await jose.jwtVerify<Record<string, any>>(accessToken, jwks, {
+        ...(options?.issuer && { issuer: options.issuer }),
+        ...(options?.audience && { audience: options.audience }),
+      });
+
+      if (options?.requiredScopes && options.requiredScopes.length > 0) {
+        this.verifyScopes(accessToken, options.requiredScopes);
+      }
+
+      // Populate AccessTokenClaims with typed fields and all claims
+      const accessTokenClaims: AccessTokenClaims = {
+        ...payload as AccessTokenClaims,
+        claims: { ...payload },
+      };
+
+      return accessTokenClaims;
+    } catch (error) {
+      throw new ScalekitValidateTokenFailureException(error);
     }
   }
 
@@ -591,6 +682,9 @@ export default class ScalekitClient {
    * Validates a token and returns the claims as json payload if valid.
    * Supports issuer, audience, and scope validation.
    *
+   * The returned object includes a `claims` field with the raw JWT payload for
+   * use with IdTokenClaim / AccessTokenClaims or any type that exposes custom claims.
+   *
    * @param {string} token The token to be validated
    * @param {TokenValidationOptions} options Optional validation options for issuer, audience, and scopes
    * @return {Promise<T>} Returns the token payload if valid
@@ -605,7 +699,7 @@ export default class ScalekitClient {
       keys: this.coreClient.keys,
     });
     try {
-      const { payload } = await jose.jwtVerify<T>(token, jwks, {
+      const { payload } = await jose.jwtVerify<Record<string, any>>(token, jwks, {
         ...(options?.issuer && { issuer: options.issuer }),
         ...(options?.audience && { audience: options.audience }),
       });
@@ -614,7 +708,8 @@ export default class ScalekitClient {
         this.verifyScopes(token, options.requiredScopes);
       }
 
-      return payload;
+      // Expose raw JWT payload as claims for IdTokenClaim / AccessTokenClaims (and any T that has claims)
+      return { ...payload, claims: { ...payload } } as T;
     } catch (error) {
       throw new ScalekitValidateTokenFailureException(error);
     }
