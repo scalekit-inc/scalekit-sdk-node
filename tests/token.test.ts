@@ -1,6 +1,6 @@
 import ScalekitClient from '../src/scalekit';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { TestDataGenerator, TestOrganizationManager } from './utils/test-data';
+import { TestDataGenerator, TestOrganizationManager, TestUserManager } from './utils/test-data';
 
 describe('Tokens', () => {
   let client: ScalekitClient;
@@ -8,7 +8,6 @@ describe('Tokens', () => {
   let testTokenId: string | null;
 
   beforeEach(async () => {
-    // Use global client
     client = global.client;
 
     // Create test organization for each test
@@ -60,18 +59,35 @@ describe('Tokens', () => {
 
       testTokenId = response.tokenId;
     });
+
+    it('should create a user-scoped token', async () => {
+      // Create a user with active membership (sendInvitationEmail=false)
+      const testUser = await TestUserManager.createTestUser(client, testOrg, {
+        sendInvitationEmail: false,
+      });
+
+      const response = await client.token.createToken(testOrg, {
+        userId: testUser.userId,
+        description: 'User scoped token',
+      });
+
+      expect(response).toBeDefined();
+      expect(response.token).toBeDefined();
+      expect(response.tokenId).toBeDefined();
+      expect(response.tokenId.startsWith('apit_')).toBe(true);
+
+      testTokenId = response.tokenId;
+    });
   });
 
   describe('validateToken', () => {
     it('should validate a token by opaque string', async () => {
-      // First create a token
       const createResponse = await client.token.createToken(testOrg, {
         description: 'Token to validate'
       });
       testTokenId = createResponse.tokenId;
       const opaqueToken = createResponse.token;
 
-      // Validate the token
       const response = await client.token.validateToken(opaqueToken);
 
       expect(response).toBeDefined();
@@ -80,13 +96,11 @@ describe('Tokens', () => {
     });
 
     it('should validate a token by token_id', async () => {
-      // First create a token
       const createResponse = await client.token.createToken(testOrg, {
         description: 'Token to validate by ID'
       });
       testTokenId = createResponse.tokenId;
 
-      // Validate using token_id
       const response = await client.token.validateToken(testTokenId);
 
       expect(response).toBeDefined();
@@ -96,13 +110,11 @@ describe('Tokens', () => {
 
   describe('listTokens', () => {
     it('should list tokens for an organization', async () => {
-      // Create a token first
       const createResponse = await client.token.createToken(testOrg, {
         description: 'Token for list test'
       });
       testTokenId = createResponse.tokenId;
 
-      // List tokens
       const response = await client.token.listTokens(testOrg, {
         pageSize: 10
       });
@@ -116,25 +128,46 @@ describe('Tokens', () => {
 
     it('should handle pagination', async () => {
       // Create multiple tokens
+      const tokenIds: string[] = [];
       for (let i = 0; i < 3; i++) {
-        await client.token.createToken(testOrg, {
+        const resp = await client.token.createToken(testOrg, {
           description: `Token ${i} for pagination test`
         });
+        tokenIds.push(resp.tokenId);
       }
+      // Use first token for cleanup tracking
+      testTokenId = tokenIds[0];
 
-      // List with small page size
+      // List with page size 1
       const firstPage = await client.token.listTokens(testOrg, {
-        pageSize: 2
+        pageSize: 1
       });
 
       expect(firstPage).toBeDefined();
-      expect(firstPage.tokens.length).toBeLessThanOrEqual(2);
+      expect(firstPage.tokens.length).toBe(1);
+      expect(firstPage.nextPageToken).toBeDefined();
+
+      // Get next page
+      const secondPage = await client.token.listTokens(testOrg, {
+        pageSize: 1,
+        pageToken: firstPage.nextPageToken,
+      });
+
+      expect(secondPage).toBeDefined();
+      expect(secondPage.tokens.length).toBe(1);
+
+      // Ensure different tokens on different pages
+      expect(firstPage.tokens[0].tokenId).not.toBe(secondPage.tokens[0].tokenId);
+
+      // Clean up extra tokens
+      for (const id of tokenIds.slice(1)) {
+        try { await client.token.invalidateToken(id); } catch (_) {}
+      }
     });
   });
 
   describe('invalidateToken', () => {
-    it('should invalidate a token', async () => {
-      // Create a token
+    it('should invalidate a token and validate should throw', async () => {
       const createResponse = await client.token.createToken(testOrg, {
         description: 'Token to invalidate'
       });
@@ -143,17 +176,16 @@ describe('Tokens', () => {
       // Invalidate the token
       await client.token.invalidateToken(tokenId);
 
-      // Token should not be in the list anymore
-      const listResponse = await client.token.listTokens(testOrg);
-      const tokenIds = listResponse.tokens.map(t => t.tokenId);
-      expect(tokenIds).not.toContain(tokenId);
+      // Verify token is no longer valid by attempting to validate
+      await expect(
+        client.token.validateToken(tokenId)
+      ).rejects.toThrow();
 
-      // Set to null since already invalidated
+      // Already invalidated
       testTokenId = null;
     });
 
     it('should be idempotent (succeed even if already invalidated)', async () => {
-      // Create a token
       const createResponse = await client.token.createToken(testOrg, {
         description: 'Token for idempotent test'
       });
@@ -163,7 +195,7 @@ describe('Tokens', () => {
       await client.token.invalidateToken(tokenId);
       await client.token.invalidateToken(tokenId);
 
-      // Set to null since already invalidated
+      // Already invalidated
       testTokenId = null;
     });
   });

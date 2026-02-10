@@ -18,3 +18,4 @@ types:
     - scalekit.v1.roles
     - scalekit.v1.auth
     - scalekit.v1.auth.webauthn
+    - scalekit.v1.tokens
