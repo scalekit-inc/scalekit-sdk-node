@@ -1,22 +1,23 @@
-import { PromiseClient } from '@connectrpc/connect';
+import { create } from '@bufbuild/protobuf';
+import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { PasswordlessService } from './pkg/grpc/scalekit/v1/auth/passwordless_connect';
-import { 
-  SendPasswordlessResponse, 
+import { PasswordlessService } from './pkg/grpc/scalekit/v1/auth/passwordless_pb';
+import {
+  SendPasswordlessRequestSchema,
+  VerifyPasswordLessRequestSchema,
+  SendPasswordlessResponse,
   VerifyPasswordLessResponse,
   TemplateType,
-  SendPasswordlessRequest,
-  VerifyPasswordLessRequest
 } from './pkg/grpc/scalekit/v1/auth/passwordless_pb';
 
 export default class PasswordlessClient {
-  private client: PromiseClient<typeof PasswordlessService>;
+  private client: Client<typeof PasswordlessService>;
   constructor(
-    private readonly grpcConncet: GrpcConnect,
+    private readonly grpcConnect: GrpcConnect,
     private readonly coreClient: CoreClient
   ) {
-    this.client = this.grpcConncet.createClient(PasswordlessService);
+    this.client = this.grpcConnect.createClient(PasswordlessService);
   }
 
   /**
@@ -68,7 +69,7 @@ export default class PasswordlessClient {
       throw new Error('Magic link auth URI must be a string');
     }
 
-    const request: SendPasswordlessRequest = new SendPasswordlessRequest({
+    const request = create(SendPasswordlessRequestSchema, {
       email,
       template: templateValue,
       state: options?.state,
@@ -103,7 +104,7 @@ export default class PasswordlessClient {
       throw new Error('Either code or linkToken must be provided');
     }
 
-    const request = new VerifyPasswordLessRequest({
+    const request = create(VerifyPasswordLessRequestSchema, {
       authRequestId,
       authCredential: credential.code 
         ? { case: "code", value: credential.code }

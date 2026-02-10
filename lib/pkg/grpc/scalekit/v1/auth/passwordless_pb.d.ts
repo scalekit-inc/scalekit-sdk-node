@@ -1,47 +1,13 @@
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import type { Message } from "@bufbuild/protobuf";
 /**
- * @generated from enum scalekit.v1.auth.passwordless.TemplateType
+ * Describes the file scalekit/v1/auth/passwordless.proto.
  */
-export declare enum TemplateType {
-    /**
-     * @generated from enum value: UNSPECIFIED = 0;
-     */
-    UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: SIGNIN = 1;
-     */
-    SIGNIN = 1,
-    /**
-     * @generated from enum value: SIGNUP = 2;
-     */
-    SIGNUP = 2
-}
-/**
- * @generated from enum scalekit.v1.auth.passwordless.PasswordlessType
- */
-export declare enum PasswordlessType {
-    /**
-     * @generated from enum value: PASSWORDLESS_TYPE_UNSPECIFIED = 0;
-     */
-    PASSWORDLESS_TYPE_UNSPECIFIED = 0,
-    /**
-     * @generated from enum value: OTP = 1;
-     */
-    OTP = 1,
-    /**
-     * @generated from enum value: LINK = 2;
-     */
-    LINK = 2,
-    /**
-     * @generated from enum value: LINK_OTP = 3;
-     */
-    LINK_OTP = 3
-}
+export declare const file_scalekit_v1_auth_passwordless: GenFile;
 /**
  * @generated from message scalekit.v1.auth.passwordless.SendPasswordlessRequest
  */
-export declare class SendPasswordlessRequest extends Message<SendPasswordlessRequest> {
+export type SendPasswordlessRequest = Message<"scalekit.v1.auth.passwordless.SendPasswordlessRequest"> & {
     /**
      * @generated from field: string email = 1;
      */
@@ -68,19 +34,16 @@ export declare class SendPasswordlessRequest extends Message<SendPasswordlessReq
     templateVariables: {
         [key: string]: string;
     };
-    constructor(data?: PartialMessage<SendPasswordlessRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.auth.passwordless.SendPasswordlessRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendPasswordlessRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SendPasswordlessRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SendPasswordlessRequest;
-    static equals(a: SendPasswordlessRequest | PlainMessage<SendPasswordlessRequest> | undefined, b: SendPasswordlessRequest | PlainMessage<SendPasswordlessRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.auth.passwordless.SendPasswordlessRequest.
+ * Use `create(SendPasswordlessRequestSchema)` to create a new message.
+ */
+export declare const SendPasswordlessRequestSchema: GenMessage<SendPasswordlessRequest>;
 /**
  * @generated from message scalekit.v1.auth.passwordless.SendPasswordlessResponse
  */
-export declare class SendPasswordlessResponse extends Message<SendPasswordlessResponse> {
+export type SendPasswordlessResponse = Message<"scalekit.v1.auth.passwordless.SendPasswordlessResponse"> & {
     /**
      * @generated from field: string auth_request_id = 1;
      */
@@ -97,19 +60,16 @@ export declare class SendPasswordlessResponse extends Message<SendPasswordlessRe
      * @generated from field: scalekit.v1.auth.passwordless.PasswordlessType passwordless_type = 4;
      */
     passwordlessType: PasswordlessType;
-    constructor(data?: PartialMessage<SendPasswordlessResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.auth.passwordless.SendPasswordlessResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): SendPasswordlessResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): SendPasswordlessResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): SendPasswordlessResponse;
-    static equals(a: SendPasswordlessResponse | PlainMessage<SendPasswordlessResponse> | undefined, b: SendPasswordlessResponse | PlainMessage<SendPasswordlessResponse> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.auth.passwordless.SendPasswordlessResponse.
+ * Use `create(SendPasswordlessResponseSchema)` to create a new message.
+ */
+export declare const SendPasswordlessResponseSchema: GenMessage<SendPasswordlessResponse>;
 /**
  * @generated from message scalekit.v1.auth.passwordless.VerifyPasswordLessRequest
  */
-export declare class VerifyPasswordLessRequest extends Message<VerifyPasswordLessRequest> {
+export type VerifyPasswordLessRequest = Message<"scalekit.v1.auth.passwordless.VerifyPasswordLessRequest"> & {
     /**
      * @generated from oneof scalekit.v1.auth.passwordless.VerifyPasswordLessRequest.auth_credential
      */
@@ -133,36 +93,30 @@ export declare class VerifyPasswordLessRequest extends Message<VerifyPasswordLes
      * @generated from field: optional string auth_request_id = 3;
      */
     authRequestId?: string;
-    constructor(data?: PartialMessage<VerifyPasswordLessRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.auth.passwordless.VerifyPasswordLessRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VerifyPasswordLessRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VerifyPasswordLessRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VerifyPasswordLessRequest;
-    static equals(a: VerifyPasswordLessRequest | PlainMessage<VerifyPasswordLessRequest> | undefined, b: VerifyPasswordLessRequest | PlainMessage<VerifyPasswordLessRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.auth.passwordless.VerifyPasswordLessRequest.
+ * Use `create(VerifyPasswordLessRequestSchema)` to create a new message.
+ */
+export declare const VerifyPasswordLessRequestSchema: GenMessage<VerifyPasswordLessRequest>;
 /**
  * @generated from message scalekit.v1.auth.passwordless.ResendPasswordlessRequest
  */
-export declare class ResendPasswordlessRequest extends Message<ResendPasswordlessRequest> {
+export type ResendPasswordlessRequest = Message<"scalekit.v1.auth.passwordless.ResendPasswordlessRequest"> & {
     /**
      * @generated from field: string auth_request_id = 1;
      */
     authRequestId: string;
-    constructor(data?: PartialMessage<ResendPasswordlessRequest>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.auth.passwordless.ResendPasswordlessRequest";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResendPasswordlessRequest;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ResendPasswordlessRequest;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ResendPasswordlessRequest;
-    static equals(a: ResendPasswordlessRequest | PlainMessage<ResendPasswordlessRequest> | undefined, b: ResendPasswordlessRequest | PlainMessage<ResendPasswordlessRequest> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.auth.passwordless.ResendPasswordlessRequest.
+ * Use `create(ResendPasswordlessRequestSchema)` to create a new message.
+ */
+export declare const ResendPasswordlessRequestSchema: GenMessage<ResendPasswordlessRequest>;
 /**
  * @generated from message scalekit.v1.auth.passwordless.VerifyPasswordLessResponse
  */
-export declare class VerifyPasswordLessResponse extends Message<VerifyPasswordLessResponse> {
+export type VerifyPasswordLessResponse = Message<"scalekit.v1.auth.passwordless.VerifyPasswordLessResponse"> & {
     /**
      * @generated from field: string email = 1;
      */
@@ -179,12 +133,84 @@ export declare class VerifyPasswordLessResponse extends Message<VerifyPasswordLe
      * @generated from field: scalekit.v1.auth.passwordless.PasswordlessType passwordless_type = 4;
      */
     passwordlessType: PasswordlessType;
-    constructor(data?: PartialMessage<VerifyPasswordLessResponse>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.auth.passwordless.VerifyPasswordLessResponse";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): VerifyPasswordLessResponse;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): VerifyPasswordLessResponse;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): VerifyPasswordLessResponse;
-    static equals(a: VerifyPasswordLessResponse | PlainMessage<VerifyPasswordLessResponse> | undefined, b: VerifyPasswordLessResponse | PlainMessage<VerifyPasswordLessResponse> | undefined): boolean;
+};
+/**
+ * Describes the message scalekit.v1.auth.passwordless.VerifyPasswordLessResponse.
+ * Use `create(VerifyPasswordLessResponseSchema)` to create a new message.
+ */
+export declare const VerifyPasswordLessResponseSchema: GenMessage<VerifyPasswordLessResponse>;
+/**
+ * @generated from enum scalekit.v1.auth.passwordless.TemplateType
+ */
+export declare enum TemplateType {
+    /**
+     * @generated from enum value: UNSPECIFIED = 0;
+     */
+    UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: SIGNIN = 1;
+     */
+    SIGNIN = 1,
+    /**
+     * @generated from enum value: SIGNUP = 2;
+     */
+    SIGNUP = 2
 }
+/**
+ * Describes the enum scalekit.v1.auth.passwordless.TemplateType.
+ */
+export declare const TemplateTypeSchema: GenEnum<TemplateType>;
+/**
+ * @generated from enum scalekit.v1.auth.passwordless.PasswordlessType
+ */
+export declare enum PasswordlessType {
+    /**
+     * @generated from enum value: PASSWORDLESS_TYPE_UNSPECIFIED = 0;
+     */
+    PASSWORDLESS_TYPE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: OTP = 1;
+     */
+    OTP = 1,
+    /**
+     * @generated from enum value: LINK = 2;
+     */
+    LINK = 2,
+    /**
+     * @generated from enum value: LINK_OTP = 3;
+     */
+    LINK_OTP = 3
+}
+/**
+ * Describes the enum scalekit.v1.auth.passwordless.PasswordlessType.
+ */
+export declare const PasswordlessTypeSchema: GenEnum<PasswordlessType>;
+/**
+ * @generated from service scalekit.v1.auth.passwordless.PasswordlessService
+ */
+export declare const PasswordlessService: GenService<{
+    /**
+     * @generated from rpc scalekit.v1.auth.passwordless.PasswordlessService.SendPasswordlessEmail
+     */
+    sendPasswordlessEmail: {
+        methodKind: "unary";
+        input: typeof SendPasswordlessRequestSchema;
+        output: typeof SendPasswordlessResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.auth.passwordless.PasswordlessService.VerifyPasswordlessEmail
+     */
+    verifyPasswordlessEmail: {
+        methodKind: "unary";
+        input: typeof VerifyPasswordLessRequestSchema;
+        output: typeof VerifyPasswordLessResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.auth.passwordless.PasswordlessService.ResendPasswordlessEmail
+     */
+    resendPasswordlessEmail: {
+        methodKind: "unary";
+        input: typeof ResendPasswordlessRequestSchema;
+        output: typeof SendPasswordlessResponseSchema;
+    };
+}>;

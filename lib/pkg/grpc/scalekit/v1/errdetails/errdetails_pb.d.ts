@@ -1,9 +1,13 @@
-import type { BinaryReadOptions, FieldList, JsonReadOptions, JsonValue, PartialMessage, PlainMessage } from "@bufbuild/protobuf";
-import { Message, proto3 } from "@bufbuild/protobuf";
+import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import type { Message } from "@bufbuild/protobuf";
+/**
+ * Describes the file scalekit/v1/errdetails/errdetails.proto.
+ */
+export declare const file_scalekit_v1_errdetails_errdetails: GenFile;
 /**
  * @generated from message scalekit.v1.errdetails.ErrorInfo
  */
-export declare class ErrorInfo extends Message<ErrorInfo> {
+export type ErrorInfo = Message<"scalekit.v1.errdetails.ErrorInfo"> & {
     /**
      * @generated from field: string error_code = 1;
      */
@@ -36,21 +40,18 @@ export declare class ErrorInfo extends Message<ErrorInfo> {
      * @generated from field: optional scalekit.v1.errdetails.ToolErrorInfo tool_error_info = 9;
      */
     toolErrorInfo?: ToolErrorInfo;
-    constructor(data?: PartialMessage<ErrorInfo>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.ErrorInfo";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ErrorInfo;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ErrorInfo;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ErrorInfo;
-    static equals(a: ErrorInfo | PlainMessage<ErrorInfo> | undefined, b: ErrorInfo | PlainMessage<ErrorInfo> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.errdetails.ErrorInfo.
+ * Use `create(ErrorInfoSchema)` to create a new message.
+ */
+export declare const ErrorInfoSchema: GenMessage<ErrorInfo>;
 /**
  * Describes additional debugging info.
  *
  * @generated from message scalekit.v1.errdetails.DebugInfo
  */
-export declare class DebugInfo extends Message<DebugInfo> {
+export type DebugInfo = Message<"scalekit.v1.errdetails.DebugInfo"> & {
     /**
      * The stack trace entries indicating where the error occurred.
      *
@@ -63,43 +64,37 @@ export declare class DebugInfo extends Message<DebugInfo> {
      * @generated from field: string detail = 2;
      */
     detail: string;
-    constructor(data?: PartialMessage<DebugInfo>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.DebugInfo";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): DebugInfo;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): DebugInfo;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): DebugInfo;
-    static equals(a: DebugInfo | PlainMessage<DebugInfo> | undefined, b: DebugInfo | PlainMessage<DebugInfo> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.errdetails.DebugInfo.
+ * Use `create(DebugInfoSchema)` to create a new message.
+ */
+export declare const DebugInfoSchema: GenMessage<DebugInfo>;
 /**
  * Describes violations in a client request. This error type focuses on the
  * syntactic aspects of the request.
  *
  * @generated from message scalekit.v1.errdetails.ValidationErrorInfo
  */
-export declare class ValidationErrorInfo extends Message<ValidationErrorInfo> {
+export type ValidationErrorInfo = Message<"scalekit.v1.errdetails.ValidationErrorInfo"> & {
     /**
      * Describes all violations in a client request.
      *
      * @generated from field: repeated scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation field_violations = 1;
      */
     fieldViolations: ValidationErrorInfo_FieldViolation[];
-    constructor(data?: PartialMessage<ValidationErrorInfo>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.ValidationErrorInfo";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidationErrorInfo;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ValidationErrorInfo;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ValidationErrorInfo;
-    static equals(a: ValidationErrorInfo | PlainMessage<ValidationErrorInfo> | undefined, b: ValidationErrorInfo | PlainMessage<ValidationErrorInfo> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.errdetails.ValidationErrorInfo.
+ * Use `create(ValidationErrorInfoSchema)` to create a new message.
+ */
+export declare const ValidationErrorInfoSchema: GenMessage<ValidationErrorInfo>;
 /**
  * A message type used to describe a single bad request field.
  *
  * @generated from message scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation
  */
-export declare class ValidationErrorInfo_FieldViolation extends Message<ValidationErrorInfo_FieldViolation> {
+export type ValidationErrorInfo_FieldViolation = Message<"scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation"> & {
     /**
      * @generated from field: string field = 1;
      */
@@ -114,22 +109,19 @@ export declare class ValidationErrorInfo_FieldViolation extends Message<Validati
      * @generated from field: string constraint = 3;
      */
     constraint: string;
-    constructor(data?: PartialMessage<ValidationErrorInfo_FieldViolation>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ValidationErrorInfo_FieldViolation;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ValidationErrorInfo_FieldViolation;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ValidationErrorInfo_FieldViolation;
-    static equals(a: ValidationErrorInfo_FieldViolation | PlainMessage<ValidationErrorInfo_FieldViolation> | undefined, b: ValidationErrorInfo_FieldViolation | PlainMessage<ValidationErrorInfo_FieldViolation> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.errdetails.ValidationErrorInfo.FieldViolation.
+ * Use `create(ValidationErrorInfo_FieldViolationSchema)` to create a new message.
+ */
+export declare const ValidationErrorInfo_FieldViolationSchema: GenMessage<ValidationErrorInfo_FieldViolation>;
 /**
  * Contains metadata about the request that clients can attach when filing a bug
  * or providing other forms of feedback.
  *
  * @generated from message scalekit.v1.errdetails.RequestInfo
  */
-export declare class RequestInfo extends Message<RequestInfo> {
+export type RequestInfo = Message<"scalekit.v1.errdetails.RequestInfo"> & {
     /**
      * An opaque string that should only be interpreted by the service generating
      * it. For example, it can be used to identify requests in the service's logs.
@@ -144,25 +136,18 @@ export declare class RequestInfo extends Message<RequestInfo> {
      * @generated from field: string serving_data = 2;
      */
     servingData: string;
-    constructor(data?: PartialMessage<RequestInfo>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.RequestInfo";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): RequestInfo;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): RequestInfo;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): RequestInfo;
-    static equals(a: RequestInfo | PlainMessage<RequestInfo> | undefined, b: RequestInfo | PlainMessage<RequestInfo> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.errdetails.RequestInfo.
+ * Use `create(RequestInfoSchema)` to create a new message.
+ */
+export declare const RequestInfoSchema: GenMessage<RequestInfo>;
 /**
  * Describes the resource that is being accessed.
  *
  * @generated from message scalekit.v1.errdetails.ResourceInfo
  */
-export declare class ResourceInfo extends Message<ResourceInfo> {
-    /**
-     * @generated from field: string resource_type = 1;
-     */
-    resourceType: string;
+export type ResourceInfo = Message<"scalekit.v1.errdetails.ResourceInfo"> & {
     /**
      * @generated from field: string resource_name = 2;
      */
@@ -179,36 +164,40 @@ export declare class ResourceInfo extends Message<ResourceInfo> {
      * @generated from field: string description = 4;
      */
     description: string;
-    constructor(data?: PartialMessage<ResourceInfo>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.ResourceInfo";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ResourceInfo;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ResourceInfo;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ResourceInfo;
-    static equals(a: ResourceInfo | PlainMessage<ResourceInfo> | undefined, b: ResourceInfo | PlainMessage<ResourceInfo> | undefined): boolean;
-}
+    /**
+     * The required permissions needed to access the resource.
+     *
+     * @generated from field: repeated string required_permissions = 5;
+     */
+    requiredPermissions: string[];
+    /**
+     * @generated from field: string user = 6;
+     */
+    user: string;
+};
+/**
+ * Describes the message scalekit.v1.errdetails.ResourceInfo.
+ * Use `create(ResourceInfoSchema)` to create a new message.
+ */
+export declare const ResourceInfoSchema: GenMessage<ResourceInfo>;
 /**
  * @generated from message scalekit.v1.errdetails.HelpInfo
  */
-export declare class HelpInfo extends Message<HelpInfo> {
+export type HelpInfo = Message<"scalekit.v1.errdetails.HelpInfo"> & {
     /**
      * @generated from field: repeated scalekit.v1.errdetails.HelpInfo.Link links = 1;
      */
     links: HelpInfo_Link[];
-    constructor(data?: PartialMessage<HelpInfo>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.HelpInfo";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HelpInfo;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): HelpInfo;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): HelpInfo;
-    static equals(a: HelpInfo | PlainMessage<HelpInfo> | undefined, b: HelpInfo | PlainMessage<HelpInfo> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.errdetails.HelpInfo.
+ * Use `create(HelpInfoSchema)` to create a new message.
+ */
+export declare const HelpInfoSchema: GenMessage<HelpInfo>;
 /**
  * @generated from message scalekit.v1.errdetails.HelpInfo.Link
  */
-export declare class HelpInfo_Link extends Message<HelpInfo_Link> {
+export type HelpInfo_Link = Message<"scalekit.v1.errdetails.HelpInfo.Link"> & {
     /**
      * @generated from field: string description = 1;
      */
@@ -217,19 +206,16 @@ export declare class HelpInfo_Link extends Message<HelpInfo_Link> {
      * @generated from field: string url = 2;
      */
     url: string;
-    constructor(data?: PartialMessage<HelpInfo_Link>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.HelpInfo.Link";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): HelpInfo_Link;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): HelpInfo_Link;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): HelpInfo_Link;
-    static equals(a: HelpInfo_Link | PlainMessage<HelpInfo_Link> | undefined, b: HelpInfo_Link | PlainMessage<HelpInfo_Link> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.errdetails.HelpInfo.Link.
+ * Use `create(HelpInfo_LinkSchema)` to create a new message.
+ */
+export declare const HelpInfo_LinkSchema: GenMessage<HelpInfo_Link>;
 /**
  * @generated from message scalekit.v1.errdetails.LocalizedMessageInfo
  */
-export declare class LocalizedMessageInfo extends Message<LocalizedMessageInfo> {
+export type LocalizedMessageInfo = Message<"scalekit.v1.errdetails.LocalizedMessageInfo"> & {
     /**
      * @generated from field: string locale = 1;
      */
@@ -238,19 +224,16 @@ export declare class LocalizedMessageInfo extends Message<LocalizedMessageInfo> 
      * @generated from field: string message = 2;
      */
     message: string;
-    constructor(data?: PartialMessage<LocalizedMessageInfo>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.LocalizedMessageInfo";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): LocalizedMessageInfo;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): LocalizedMessageInfo;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): LocalizedMessageInfo;
-    static equals(a: LocalizedMessageInfo | PlainMessage<LocalizedMessageInfo> | undefined, b: LocalizedMessageInfo | PlainMessage<LocalizedMessageInfo> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.errdetails.LocalizedMessageInfo.
+ * Use `create(LocalizedMessageInfoSchema)` to create a new message.
+ */
+export declare const LocalizedMessageInfoSchema: GenMessage<LocalizedMessageInfo>;
 /**
  * @generated from message scalekit.v1.errdetails.ToolErrorInfo
  */
-export declare class ToolErrorInfo extends Message<ToolErrorInfo> {
+export type ToolErrorInfo = Message<"scalekit.v1.errdetails.ToolErrorInfo"> & {
     /**
      * @generated from field: string execution_id = 1;
      */
@@ -263,12 +246,9 @@ export declare class ToolErrorInfo extends Message<ToolErrorInfo> {
      * @generated from field: string tool_error_code = 3;
      */
     toolErrorCode: string;
-    constructor(data?: PartialMessage<ToolErrorInfo>);
-    static readonly runtime: typeof proto3;
-    static readonly typeName = "scalekit.v1.errdetails.ToolErrorInfo";
-    static readonly fields: FieldList;
-    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ToolErrorInfo;
-    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ToolErrorInfo;
-    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ToolErrorInfo;
-    static equals(a: ToolErrorInfo | PlainMessage<ToolErrorInfo> | undefined, b: ToolErrorInfo | PlainMessage<ToolErrorInfo> | undefined): boolean;
-}
+};
+/**
+ * Describes the message scalekit.v1.errdetails.ToolErrorInfo.
+ * Use `create(ToolErrorInfoSchema)` to create a new message.
+ */
+export declare const ToolErrorInfoSchema: GenMessage<ToolErrorInfo>;

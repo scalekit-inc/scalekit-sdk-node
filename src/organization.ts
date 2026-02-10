@@ -1,8 +1,10 @@
-import { Empty, PartialMessage } from "@bufbuild/protobuf";
-import { PromiseClient } from "@connectrpc/connect";
+import type { MessageShape } from "@bufbuild/protobuf";
+import { create } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
+import type { Client } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
-import { OrganizationService } from "./pkg/grpc/scalekit/v1/organizations/organizations_connect";
+import { OrganizationService } from "./pkg/grpc/scalekit/v1/organizations/organizations_pb";
 import {
   CreateOrganizationResponse,
   GetOrganizationResponse,
@@ -11,6 +13,7 @@ import {
   OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage,
   UpdateOrganization,
   UpdateOrganizationResponse,
+  UpdateOrganizationSchema,
 } from "./pkg/grpc/scalekit/v1/organizations/organizations_pb";
 import {
   OrganizationSettings,
@@ -31,12 +34,12 @@ import {
  * @see {@link https://docs.scalekit.com/apis/#tag/organizations | Organization API Documentation}
  */
 export default class OrganizationClient {
-  private client: PromiseClient<typeof OrganizationService>;
+  private client: Client<typeof OrganizationService>;
   constructor(
-    private readonly grpcConncet: GrpcConnect,
+    private readonly grpcConnect: GrpcConnect,
     private readonly coreClient: CoreClient
   ) {
-    this.client = this.grpcConncet.createClient(OrganizationService);
+    this.client = this.grpcConnect.createClient(OrganizationService);
   }
 
   /**
@@ -248,7 +251,7 @@ export default class OrganizationClient {
    * unchanged. Note that the region code cannot be modified once set.
    *
    * @param {string} id - The Scalekit organization identifier (format: "org_...")
-   * @param {PartialMessage<UpdateOrganization>} organization - Object containing fields to update:
+   * @param {Partial<UpdateOrganization>} organization - Object containing fields to update:
    *   - displayName?: New display name for the organization
    *   - externalId?: New external ID to map to your system
    *   - metadata?: Custom key-value pairs for storing additional data
@@ -289,11 +292,11 @@ export default class OrganizationClient {
    */
   async updateOrganization(
     id: string,
-    organization: PartialMessage<UpdateOrganization>
+    organization: Partial<UpdateOrganization>
   ): Promise<UpdateOrganizationResponse> {
     return this.coreClient.connectExec(this.client.updateOrganization, {
       identities: { case: "id", value: id },
-      organization,
+      organization: create(UpdateOrganizationSchema, organization as Parameters<typeof create<typeof UpdateOrganizationSchema>>[1]),
     });
   }
 
@@ -305,7 +308,7 @@ export default class OrganizationClient {
    * Only specified fields will be updated; all other fields remain unchanged.
    *
    * @param {string} externalId - Your system's unique identifier for the organization
-   * @param {PartialMessage<UpdateOrganization>} organization - Object containing fields to update:
+   * @param {Partial<UpdateOrganization>} organization - Object containing fields to update:
    *   - displayName?: New display name for the organization
    *   - externalId?: New external ID (useful for migrating identifiers)
    *   - metadata?: Custom key-value pairs for storing additional data
@@ -352,11 +355,11 @@ export default class OrganizationClient {
    */
   async updateOrganizationByExternalId(
     externalId: string,
-    organization: PartialMessage<UpdateOrganization>
+    organization: Partial<UpdateOrganization>
   ): Promise<UpdateOrganizationResponse> {
     return this.coreClient.connectExec(this.client.updateOrganization, {
       identities: { case: "externalId", value: externalId },
-      organization,
+      organization: create(UpdateOrganizationSchema, organization as Parameters<typeof create<typeof UpdateOrganizationSchema>>[1]),
     });
   }
 
@@ -368,7 +371,7 @@ export default class OrganizationClient {
    *
    * @param {string} organizationId - The Scalekit organization identifier to delete
    *
-   * @returns {Promise<Empty>} Empty response on successful deletion
+   * @returns {Promise<MessageShape<EmptySchema>>} Empty response on successful deletion
    *
    * @throws {Error} If the organization is not found or deletion fails
    *
@@ -395,7 +398,7 @@ export default class OrganizationClient {
    * @see {@link https://docs.scalekit.com/apis/#tag/organizations | Delete Organization API}
    * @see {@link getOrganization} - Check if organization exists before deletion
    */
-  async deleteOrganization(organizationId: string): Promise<Empty> {
+  async deleteOrganization(organizationId: string): Promise<MessageShape<typeof EmptySchema>> {
     return this.coreClient.connectExec(this.client.deleteOrganization, {
       identities: { case: "id", value: organizationId },
     });
@@ -546,7 +549,7 @@ export default class OrganizationClient {
     organizationId: string,
     settings: OrganizationUserManagementSettingsInput
   ): Promise<OrganizationUserManagementSettingsMessage | undefined> {
-    const requestSettings: PartialMessage<OrganizationUserManagementSettingsMessage> =
+    const requestSettings: Partial<OrganizationUserManagementSettingsMessage> =
       {};
     if (
       settings.maxAllowedUsers !== undefined &&

@@ -1,8 +1,10 @@
-import { Empty, PartialMessage } from "@bufbuild/protobuf";
-import { PromiseClient } from "@connectrpc/connect";
+import type { MessageShape } from "@bufbuild/protobuf";
+import { create } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
+import type { Client } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
-import { RolesService } from "./pkg/grpc/scalekit/v1/roles/roles_connect";
+import { RolesService } from "./pkg/grpc/scalekit/v1/roles/roles_pb";
 import {
   CreateRoleRequest,
   CreateRoleResponse,
@@ -22,6 +24,8 @@ import {
   ListOrganizationRolesRequest,
   ListOrganizationRolesResponse,
   DeleteOrganizationRoleRequest,
+  DeleteRoleRequestSchema,
+  DeleteOrganizationRoleRequestSchema,
   GetRoleUsersCountRequest,
   GetRoleUsersCountResponse,
   GetOrganizationRoleUsersCountRequest,
@@ -52,7 +56,7 @@ import {
  * @see {@link https://docs.scalekit.com/apis/#tag/roles | Role API Documentation}
  */
 export default class RoleClient {
-  private client: PromiseClient<typeof RolesService>;
+  private client: Client<typeof RolesService>;
 
   constructor(
     private readonly grpcConnect: GrpcConnect,
@@ -174,7 +178,7 @@ export default class RoleClient {
    * @param {string} roleName - Role to delete
    * @param {string} [reassignRoleName] - Target role for user migration
    *
-   * @returns {Promise<Empty>} Empty response on success
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
    *
    * @example
    * await scalekitClient.role.deleteRole('old_role', 'new_role');
@@ -184,11 +188,11 @@ export default class RoleClient {
   async deleteRole(
     roleName: string,
     reassignRoleName?: string
-  ): Promise<Empty> {
-    const request: PartialMessage<DeleteRoleRequest> = { roleName };
-    if (reassignRoleName) {
-      request.reassignRoleName = reassignRoleName;
-    }
+  ): Promise<MessageShape<typeof EmptySchema>> {
+    const request = create(DeleteRoleRequestSchema, {
+      roleName,
+      reassignRoleName,
+    });
 
     return this.coreClient.connectExec(this.client.deleteRole, request);
   }
@@ -345,7 +349,7 @@ export default class RoleClient {
    * @param {string} roleName - Role to delete
    * @param {string} [reassignRoleName] - Target role for user migration
    *
-   * @returns {Promise<Empty>} Empty response on success
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
    *
    * @example
    * await scalekitClient.role.deleteOrganizationRole(
@@ -360,14 +364,12 @@ export default class RoleClient {
     orgId: string,
     roleName: string,
     reassignRoleName?: string
-  ): Promise<Empty> {
-    const request: PartialMessage<DeleteOrganizationRoleRequest> = {
+  ): Promise<MessageShape<typeof EmptySchema>> {
+    const request = create(DeleteOrganizationRoleRequestSchema, {
       orgId,
       roleName,
-    };
-    if (reassignRoleName) {
-      request.reassignRoleName = reassignRoleName;
-    }
+      reassignRoleName,
+    });
 
     return this.coreClient.connectExec(
       this.client.deleteOrganizationRole,
@@ -442,7 +444,7 @@ export default class RoleClient {
    * @param {string} orgId - Organization identifier
    * @param {string} roleName - Role to remove inheritance from
    *
-   * @returns {Promise<Empty>} Empty response on success
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
    *
    * @example
    * await scalekitClient.role.deleteOrganizationRoleBase('org_123456', 'custom_role');
@@ -452,7 +454,7 @@ export default class RoleClient {
   async deleteOrganizationRoleBase(
     orgId: string,
     roleName: string
-  ): Promise<Empty> {
+  ): Promise<MessageShape<typeof EmptySchema>> {
     return this.coreClient.connectExec(this.client.deleteOrganizationRoleBase, {
       orgId,
       roleName,

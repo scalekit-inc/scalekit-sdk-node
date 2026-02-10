@@ -1,15 +1,20 @@
-import { Empty, PartialMessage, Struct, JsonValue } from "@bufbuild/protobuf";
-import { PromiseClient } from "@connectrpc/connect";
+import type { JsonObject } from "@bufbuild/protobuf";
+import { create } from "@bufbuild/protobuf";
+import type { MessageShape } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
 import CoreClient from "./core";
+import type { Client } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
-import { AuthService } from "./pkg/grpc/scalekit/v1/auth/auth_connect";
 import {
-  UpdateLoginUserDetailsRequest,
-  User,
+  AuthService,
+  UpdateLoginUserDetailsRequestSchema,
+  UserSchema,
+  type User,
 } from "./pkg/grpc/scalekit/v1/auth/auth_pb";
 
-type UserInput = PartialMessage<User> & {
-  customAttributes?: Record<string, JsonValue>;
+/** User input for updateLoginUserDetails; customAttributes is a plain object (proto Struct → JsonObject in v2). */
+type UserInput = Partial<User> & {
+  customAttributes?: JsonObject;
 };
 
 /**
@@ -23,7 +28,7 @@ type UserInput = PartialMessage<User> & {
  * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Authentication API Documentation}
  */
 export default class AuthClient {
-  private readonly client: PromiseClient<typeof AuthService>;
+  private readonly client: Client<typeof AuthService>;
 
   constructor(
     private readonly grpcConnect: GrpcConnect,
@@ -42,7 +47,7 @@ export default class AuthClient {
    * @param {string} [user.email] - User's email address
    * @param {string} [user.sub] - Unique user identifier (subject)
    *
-   * @returns {Promise<Empty>} Empty response on successful update
+   * @returns {Promise<MessageShape<EmptySchema>>} Empty response on successful update
    *
    * @throws {Error} When connectionId is missing or invalid
    * @throws {Error} When loginRequestId is missing or invalid
@@ -65,7 +70,7 @@ export default class AuthClient {
     connectionId: string,
     loginRequestId: string,
     user: UserInput
-  ): Promise<Empty> {
+  ): Promise<MessageShape<typeof EmptySchema>> {
     if (!connectionId || typeof connectionId !== "string") {
       throw new Error("connectionId must be a non-empty string");
     }
@@ -78,14 +83,9 @@ export default class AuthClient {
       throw new Error("user must be a valid object");
     }
 
-    const { customAttributes, ...rest } = user;
-    const userMessage = new User(rest as PartialMessage<User>);
+    const userMessage = create(UserSchema, user as Parameters<typeof create<typeof UserSchema>>[1]);
 
-    if (customAttributes !== undefined) {
-      userMessage.customAttributes = Struct.fromJson(customAttributes);
-    }
-
-    const request = new UpdateLoginUserDetailsRequest({
+    const request = create(UpdateLoginUserDetailsRequestSchema, {
       connectionId,
       loginRequestId,
       user: userMessage,

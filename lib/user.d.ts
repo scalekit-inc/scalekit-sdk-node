@@ -11,7 +11,8 @@
  *
  * @see {@link https://docs.scalekit.com/apis/#tag/users | User API Documentation}
  */
-import { Empty } from "@bufbuild/protobuf";
+import type { MessageShape } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
 import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse } from "./pkg/grpc/scalekit/v1/users/users_pb";
@@ -297,7 +298,7 @@ export default class UserClient {
      *
      * @param {string} userId - The Scalekit user identifier to delete (format: "usr_...")
      *
-     * @returns {Promise<Empty>} Empty response on successful deletion
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on successful deletion
      *
      * @throws {Error} If the user is not found or deletion fails
      *
@@ -327,7 +328,7 @@ export default class UserClient {
      * @see {@link deleteMembership} - Remove user from a specific organization only
      * @see {@link getUser} - Check if user exists before deletion
      */
-    deleteUser(userId: string): Promise<Empty>;
+    deleteUser(userId: string): Promise<MessageShape<typeof EmptySchema>>;
     /**
      * Adds an existing user as a member of a new organization with specified roles.
      *
@@ -410,7 +411,7 @@ export default class UserClient {
      * @param {string} organizationId - The organization ID to remove the user from (format: "org_...")
      * @param {string} userId - The user ID to remove (format: "usr_...")
      *
-     * @returns {Promise<Empty>} Empty response on successful removal
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on successful removal
      *
      * @throws {Error} If the user or organization is not found
      * @throws {Error} If the membership doesn't exist
@@ -441,7 +442,7 @@ export default class UserClient {
      * @see {@link createMembership} - Add user to an organization
      * @see {@link updateMembership} - Modify user's roles in organization
      */
-    deleteMembership(organizationId: string, userId: string): Promise<Empty>;
+    deleteMembership(organizationId: string, userId: string): Promise<MessageShape<typeof EmptySchema>>;
     /**
      * Updates a user's roles and metadata within a specific organization.
      *

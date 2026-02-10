@@ -45,7 +45,7 @@
 2. Get your `env_url`, `client_id` and `client_secret` from the Scalekit dashboard.
 
 <div style="border: 1px solid #ccc; padding: 10px; border-radius: 5px; background-color: #f9f9f9;">
-  <strong>Note:</strong> Our NodeJS SDK currently supports NodeJS versions >=18 as it is the min LTS version that is maintained by the NodeJS ecosystem.
+  <strong>Note:</strong> Our Node.js SDK requires Node.js 18.14.1 or later .
 </div>
 
 ## Installation
@@ -64,11 +64,11 @@ pnpm add @scalekit-sdk/node
 
 The Scalekit Node.js SDK has been tested with and requires the following:
 
-| Component | Version  |
-| --------- | -------- |
-| Node.js   | 16.0.0+  |
+| Component | Version   |
+| --------- | --------- |
+| Node.js   | 18.14.1+  |
 
-> **Note:** While Node.js 16.0.0 is the minimum requirement, we recommend using Node.js versions >=18 LTS for improved performance and long-term support.
+> **Note:** Node.js 18.14.1 or later is required (see `engines.node` in package.json). We recommend using the current LTS release for best support.
 
 
 ## Usage
