@@ -1,10 +1,11 @@
-import { Empty } from "@bufbuild/protobuf";
-import { PromiseClient } from "@connectrpc/connect";
-import { Timestamp } from "@bufbuild/protobuf";
+import type { MessageShape } from "@bufbuild/protobuf";
+import { EmptySchema } from "@bufbuild/protobuf/wkt";
+import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import type { Client } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
-import { ApiTokenService } from "./pkg/grpc/scalekit/v1/tokens/tokens_connect";
 import {
+  ApiTokenService,
   CreateTokenResponse,
   ValidateTokenResponse,
   ListTokensResponse,
@@ -51,7 +52,7 @@ export interface ListTokensOptions {
  * @see {@link https://docs.scalekit.com/apis/#tag/tokens | Token API Documentation}
  */
 export default class TokenClient {
-  private client: PromiseClient<typeof ApiTokenService>;
+  private client: Client<typeof ApiTokenService>;
   constructor(
     private readonly grpcConnect: GrpcConnect,
     private readonly coreClient: CoreClient
@@ -153,7 +154,7 @@ export default class TokenClient {
    *
    * @param {string} token - The opaque token string or token_id (apit_xxxxx)
    *
-   * @returns {Promise<Empty>} Empty response on success
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
    *
    * @example
    * // Revoke a token
@@ -166,7 +167,7 @@ export default class TokenClient {
    *
    * @see {@link https://docs.scalekit.com/apis/#tag/tokens | Invalidate Token API}
    */
-  async invalidateToken(token: string): Promise<Empty> {
+  async invalidateToken(token: string): Promise<MessageShape<typeof EmptySchema>> {
     if (!token) {
       throw new Error("token is required");
     }
