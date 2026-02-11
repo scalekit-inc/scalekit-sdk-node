@@ -4,6 +4,7 @@ import type { Timestamp } from "@bufbuild/protobuf/wkt";
 import type { Client } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
+import { ScalekitValidateTokenFailureException } from "./errors/base-exception";
 import {
   ApiTokenService,
   CreateTokenResponse,
@@ -141,9 +142,13 @@ export default class TokenClient {
     if (!token) {
       throw new Error("token is required");
     }
-    return this.coreClient.connectExec(this.client.validateToken, {
-      token,
-    });
+    try {
+      return await this.coreClient.connectExec(this.client.validateToken, {
+        token,
+      });
+    } catch (error) {
+      throw new ScalekitValidateTokenFailureException(error);
+    }
   }
 
   /**

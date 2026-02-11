@@ -1,4 +1,5 @@
 import ScalekitClient from '../src/scalekit';
+import { ScalekitValidateTokenFailureException } from '../src/errors/base-exception';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { TestDataGenerator, TestOrganizationManager, TestUserManager } from './utils/test-data';
 
@@ -179,7 +180,7 @@ describe('Tokens', () => {
       // Verify token is no longer valid by attempting to validate
       await expect(
         client.token.validateToken(tokenId)
-      ).rejects.toThrow();
+      ).rejects.toThrow(ScalekitValidateTokenFailureException);
 
       // Already invalidated
       testTokenId = null;
