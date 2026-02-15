@@ -1,8 +1,3 @@
-# Scalekit Node.js SDK Reference
-
-[![npm version](https://img.shields.io/npm/v/@scalekit-sdk/node.svg)](https://npmjs.com/package/@scalekit-sdk/node)
-[![License](https://img.shields.io/npm/l/@scalekit-sdk/node.svg)](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/LICENSE)
-
 ## Table of Contents
 
 - [Getting Started](#getting-started)
