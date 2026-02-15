@@ -22,6 +22,7 @@ npm test && npm run lint
 TypeScript 5.x (documentation target; examples mus: Follow standard conventions
 
 ## Recent Changes
+- 001-sdk-reference-docs: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
 - 001-sdk-reference-docs: Added TypeScript 5.x (documentation target; examples mus + @scalekit-sdk/node v2.2.0 (the SDK being
 

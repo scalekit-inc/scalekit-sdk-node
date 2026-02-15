@@ -5,7 +5,7 @@ description: "Task list for SDK Reference Documentation"
 # Tasks: SDK Reference Documentation
 
 **Input**: Design documents from `/specs/001-sdk-reference-docs/`
-**Prerequisites**: plan.md (required), spec.md (required), research.md, data-model.md
+**Prerequisites**: plan.md (required), spec.md (required), research.md, data-model.md, quickstart.md
 
 **Tests**: Not explicitly requested. Test tasks omitted.
 
@@ -16,9 +16,15 @@ description: "Task list for SDK Reference Documentation"
 - **[P]**: Can run in parallel (different files/sections, no dependencies)
 - **[Story]**: Which user story this task belongs to
 
-## Phase 1: Setup
+## Path Conventions
 
-**Purpose**: Create the REFERENCE.md file scaffold and document structure
+- **Repository root**: `REFERENCE.md`
+- **Package config**: `package.json`
+- **Source files**: `src/*.ts`
+
+## Phase 1: Setup (Shared Infrastructure)
+
+**Purpose**: Project initialization and basic structure
 
 - [ ] T001 Create REFERENCE.md at repository root with title, badges, and table of contents linking to all 12 domain sections per data-model.md hierarchy in REFERENCE.md
 - [ ] T002 Add Getting Started section with ScalekitClient constructor documentation (📝 Description, 🔌 Usage with initialization example, ⚙️ Parameters table for envUrl/clientId/clientSecret) and Source link to src/scalekit.ts in REFERENCE.md
@@ -28,108 +34,94 @@ description: "Task list for SDK Reference Documentation"
 
 ---
 
-## Phase 2: Foundational (ScalekitClient Core Methods)
+## Phase 2: Foundational (Prerequisites for All Stories)
 
-**Purpose**: Document the 10 core authentication methods on ScalekitClient - these are the most critical methods developers use first
+**Purpose**: Prepare REFERENCE.md with correct hrefs and core structure
 
-**⚠️ CRITICAL**: These methods must be documented before domain client sections because they are the entry point to all SDK usage
+- [ ] T004 Convert all relative hrefs in REFERENCE.md to absolute GitHub URLs (e.g., change `/src/scalekit.ts` to `https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts`) per research.md GitHub Base URL
 
-- [ ] T004 [P] [US1] Document `getAuthorizationUrl` method entry (📝/🔌/⚙️ template, signature from src/scalekit.ts, Source link) in REFERENCE.md ScalekitClient section
-- [ ] T005 [P] [US1] Document `authenticateWithCode` method entry (📝/🔌/⚙️ template, signature from src/scalekit.ts, Source link) in REFERENCE.md ScalekitClient section
-- [ ] T006 [P] [US1] Document `getIdpInitiatedLoginClaims` method entry (📝/🔌/⚙️ template, signature from src/scalekit.ts, Source link) in REFERENCE.md ScalekitClient section
-- [ ] T007 [P] [US1] Document `validateAccessToken` method entry (📝/🔌/⚙️ template, signature from src/scalekit.ts, Source link) in REFERENCE.md ScalekitClient section
-- [ ] T008 [P] [US1] Document `getLogoutUrl` method entry (📝/🔌/⚙️ template, signature from src/scalekit.ts, Source link) in REFERENCE.md ScalekitClient section
-- [ ] T009 [P] [US1] Document `refreshAccessToken` method entry (📝/🔌/⚙️ template, signature from src/scalekit.ts, Source link) in REFERENCE.md ScalekitClient section
-- [ ] T010 [P] [US1] Document `validateToken` method entry (📝/🔌/⚙️ template, signature from src/scalekit.ts, Source link) in REFERENCE.md ScalekitClient section
-- [ ] T011 [P] [US1] Document `verifyScopes` method entry (📝/🔌/⚙️ template, signature from src/scalekit.ts, Source link) in REFERENCE.md ScalekitClient section
-- [ ] T012 [P] [US1] Document `verifyWebhookPayload` method entry (📝/🔌/⚙️ template, signature from src/scalekit.ts, Source link) in REFERENCE.md ScalekitClient section
-- [ ] T013 [P] [US1] Document `verifyInterceptorPayload` method entry (📝/🔌/⚙️ template, signature from src/scalekit.ts, Source link) in REFERENCE.md ScalekitClient section
-
-**Checkpoint**: All ScalekitClient core methods documented with accurate signatures and working examples
+**Checkpoint**: All links in REFERENCE.md use absolute GitHub URLs
 
 ---
 
-## Phase 3: User Story 1+2 - Organizations, Connections, Domains (Priority: P1)
+## Phase 3: User Story 1 - Method Signatures + User Story 2 - Code Examples
 
-**Goal**: Document the three most common domain clients developers interact with after authentication
+**Goal**: Document accurate method signatures with working code examples for all public methods
 
-**Independent Test**: Developer can look up any Organization/Connection/Domain method and find accurate signature + working example
+**Independent Test**: Developer can look up any method signature and copy a working example that compiles
 
-- [ ] T014 [P] [US1] Document all 10 OrganizationClient methods (createOrganization, listOrganization, getOrganization, getOrganizationByExternalId, updateOrganization, updateOrganizationByExternalId, deleteOrganization, generatePortalLink, updateOrganizationSettings, upsertUserManagementSettings) using 📝/🔌/⚙️ template with signatures from src/organization.ts in REFERENCE.md Organizations section
-- [ ] T015 [P] [US1] Document all 5 ConnectionClient methods (getConnection, listConnections, listConnectionsByDomain, enableConnection, disableConnection) using 📝/🔌/⚙️ template with signatures from src/connection.ts in REFERENCE.md Connections section
-- [ ] T016 [P] [US1] Document all 4 DomainClient methods (createDomain, getDomain, listDomains, deleteDomain) using 📝/🔌/⚙️ template with signatures from src/domain.ts in REFERENCE.md Domains section
+- [X] T005 [P] [US1] [US2] Document `getAuthorizationUrl` method entry (📝 Description, 🔌 Usage example, ⚙️ Parameters table, Source link) using template from data-model.md in REFERENCE.md ScalekitClient section
+- [X] T006 [P] [US1] [US2] Document `authenticateWithCode` method entry (📝 Description, 🔌 Usage example, ⚙️ Parameters table, Source link) using template from data-model.md in REFERENCE.md ScalekitClient section
+- [X] T007 [P] [US1] [US2] Document `getIdpInitiatedLoginClaims` method entry (📝 Description, 🔌 Usage example, ⚙️ Parameters table, Source link) using template from data-model.md in REFERENCE.md ScalekitClient section
+- [X] T008 [P] [US1] [US2] Document `validateAccessToken` method entry (📝 Description, 🔌 Usage example, ⚙️ Parameters table, Source link) using template from data-model.md in REFERENCE.md ScalekitClient section
+- [X] T009 [P] [US1] [US2] Document `getLogoutUrl` method entry (📝 Description, 🔌 Usage example, ⚙️ Parameters table, Source link) using template from data-model.md in REFERENCE.md ScalekitClient section
+- [X] T010 [P] [US1] [US2] Document `refreshAccessToken` method entry (📝 Description, 🔌 Usage example, ⚙️ Parameters table, Source link) using template from data-model.md in REFERENCE.md ScalekitClient section
+- [X] T011 [P] [US1] [US2] Document `validateToken` method entry (📝 Description, 🔌 Usage example, ⚙️ Parameters table, Source link) using template from data-model.md in REFERENCE.md ScalekitClient section
+- [X] T012 [P] [US1] [US2] Document `verifyScopes` method entry (📝 Description, 🔌 Usage example, ⚙️ Parameters table, Source link) using template from data-model.md in REFERENCE.md ScalekitClient section
+- [X] T013 [P] [US1] [US2] Document `verifyWebhookPayload` method entry (📝 Description, 🔌 Usage example, ⚙️ Parameters table, Source link) using template from data-model.md in REFERENCE.md ScalekitClient section
+- [X] T014 [P] [US1] [US2] Document `verifyInterceptorPayload` method entry (📝 Description, 🔌 Usage example, ⚙️ Parameters table, Source link) using template from data-model.md in REFERENCE.md ScalekitClient section
+- [X] T015 [P] [US1] [US2] Document all 10 OrganizationClient methods (createOrganization, listOrganization, getOrganization, getOrganizationByExternalId, updateOrganization, updateOrganizationByExternalId, deleteOrganization, generatePortalLink, updateOrganizationSettings, upsertUserManagementSettings) using template from data-model.md with signatures from src/organization.ts in REFERENCE.md Organizations section
+- [X] T016 [P] [US1] [US2] Document all 5 ConnectionClient methods (getConnection, listConnections, listConnectionsByDomain, enableConnection, disableConnection) using template from data-model.md with signatures from src/connection.ts in REFERENCE.md Connections section
+- [X] T017 [P] [US1] [US2] Document all 4 DomainClient methods (createDomain, getDomain, listDomains, deleteDomain) using template from data-model.md with signatures from src/domain.ts in REFERENCE.md Domains section
+- [X] T018 [P] [US1] [US2] Document all 7 DirectoryClient methods using template from data-model.md with signatures from src/directory.ts in REFERENCE.md Directories section
+- [X] T019 [P] [US1] [US2] Document all 10 UserClient methods using template from data-model.md with signatures from src/user.ts in REFERENCE.md Users section
+- [X] T020 [P] [US1] [US2] Document all 4 SessionClient methods using template from data-model.md with signatures from src/session.ts in REFERENCE.md Sessions section
+- [X] T021 [P] [US1] [US2] Document all 14 RoleClient methods using template from data-model.md with signatures from src/role.ts in REFERENCE.md Roles section
+- [X] T022 [P] [US1] [US2] Document all 9 PermissionClient methods using template from data-model.md with signatures from src/permission.ts in REFERENCE.md Permissions section
+- [X] T023 [P] [US1] [US2] Document all 3 PasswordlessClient methods using template from data-model.md with signatures from src/passwordless.ts in REFERENCE.md Passwordless section
+- [X] T024 [P] [US1] [US2] Document AuthClient method using template from data-model.md with signatures from src/auth.ts in REFERENCE.md Auth section
+- [X] T025 [P] [US1] [US2] Document all 3 WebAuthnClient methods using template from data-model.md with signatures from src/webauthn.ts in REFERENCE.md WebAuthn section
 
-**Checkpoint**: Organizations, Connections, and Domains sections complete with all method entries
-
----
-
-## Phase 4: User Story 1+2 - Directory, Users, Sessions (Priority: P1)
-
-**Goal**: Document directory sync, user management, and session management domains
-
-**Independent Test**: Developer can look up any Directory/User/Session method and find accurate signature + working example
-
-- [ ] T017 [P] [US1] Document all 7 DirectoryClient methods (listDirectories, getDirectory, getPrimaryDirectoryByOrganizationId, listDirectoryUsers, listDirectoryGroups, enableDirectory, disableDirectory) using 📝/🔌/⚙️ template with signatures from src/directory.ts in REFERENCE.md Directories section
-- [ ] T018 [P] [US1] Document all 10 UserClient methods (createUserAndMembership, getUser, listUsers, updateUser, deleteUser, createMembership, deleteMembership, updateMembership, listOrganizationUsers, resendInvite) using 📝/🔌/⚙️ template with signatures from src/user.ts in REFERENCE.md Users section
-- [ ] T019 [P] [US1] Document all 4 SessionClient methods (getSession, getUserSessions, revokeSession, revokeAllUserSessions) using 📝/🔌/⚙️ template with signatures from src/session.ts in REFERENCE.md Sessions section
-
-**Checkpoint**: Directory, Users, and Sessions sections complete
-
----
-
-## Phase 5: User Story 1+2 - Roles, Permissions, Remaining Clients (Priority: P1)
-
-**Goal**: Document RBAC and remaining smaller domain clients
-
-**Independent Test**: Developer can look up any Role/Permission/Passwordless/Auth/WebAuthn method and find accurate signature + working example
-
-- [ ] T020 [P] [US1] Document all 14 RoleClient methods (createRole, getRole, listRoles, updateRole, deleteRole, getRoleUsersCount, createOrganizationRole, getOrganizationRole, listOrganizationRoles, updateOrganizationRole, deleteOrganizationRole, getOrganizationRoleUsersCount, updateDefaultOrganizationRoles, deleteOrganizationRoleBase) using 📝/🔌/⚙️ template with signatures from src/role.ts in REFERENCE.md Roles section
-- [ ] T021 [P] [US1] Document all 9 PermissionClient methods (createPermission, getPermission, listPermissions, updatePermission, deletePermission, listRolePermissions, addPermissionsToRole, removePermissionFromRole, listEffectiveRolePermissions) using 📝/🔌/⚙️ template with signatures from src/permission.ts in REFERENCE.md Permissions section
-- [ ] T022 [P] [US1] Document all 3 PasswordlessClient methods (sendPasswordlessEmail, verifyPasswordlessEmail, resendPasswordlessEmail) using 📝/🔌/⚙️ template with signatures from src/passwordless.ts in REFERENCE.md Passwordless section
-- [ ] T023 [P] [US1] Document AuthClient method (updateLoginUserDetails) using 📝/🔌/⚙️ template with signature from src/auth.ts in REFERENCE.md Auth section
-- [ ] T024 [P] [US1] Document all 3 WebAuthnClient methods (listCredentials, updateCredential, deleteCredential) using 📝/🔌/⚙️ template with signatures from src/webauthn.ts in REFERENCE.md WebAuthn section
-
-**Checkpoint**: All 11 domain client sections complete. US1 (signatures) and US2 (examples) fully satisfied.
+**Checkpoint**: All 80+ public methods documented with accurate signatures and working examples
 
 ---
 
-## Phase 6: User Story 3 - Domain Navigation Structure (Priority: P2)
+## Phase 4: User Story 3 - Domain Navigation
 
-**Goal**: Ensure collapsible domain grouping, table of contents, and navigation work correctly
+**Goal**: Ensure developers can navigate by API domain with functional TOC and collapsible sections
 
 **Independent Test**: Developer can navigate to any domain section from the TOC and expand/collapse individual methods
 
-- [ ] T025 [US3] Verify and finalize table of contents with anchor links to all 12 domain sections (ScalekitClient + 11 domain clients) in REFERENCE.md
-- [ ] T026 [US3] Verify all `<details>` collapsible sections render correctly in GitHub Markdown preview for REFERENCE.md
-- [ ] T027 [US3] Add domain section headers with brief descriptions and `Access via scalekitClient.<property>` notes for each of the 11 domain client sections in REFERENCE.md
+- [X] T026 [US3] Verify and finalize table of contents with anchor links to all 12 domain sections (ScalekitClient + 11 domain clients) in REFERENCE.md
+- [X] T027 [US3] Verify all `<details>` collapsible sections render correctly in GitHub Markdown preview for REFERENCE.md
+- [X] T028 [US3] Add domain section headers with brief descriptions and `Access via scalekitClient.<property>` notes for each of the 11 domain client sections in REFERENCE.md
 
 **Checkpoint**: Navigation structure complete. Developer can browse by domain.
 
 ---
 
-## Phase 7: User Story 4 - Error Handling Documentation (Priority: P2)
+## Phase 5: User Story 4 - Error Handling
 
-**Goal**: Document the exception class hierarchy and error handling patterns
+**Goal**: Document exception hierarchy and error handling patterns
 
 **Independent Test**: Developer can find the exception hierarchy and understand which exceptions to catch
 
-- [ ] T028 [US4] Document the exception class hierarchy (ScalekitException → WebhookVerificationError, ScalekitValidateTokenFailureException, ScalekitServerException → 12 specific exceptions) with HTTP status mappings in REFERENCE.md Error Handling section. Source links to src/errors/base-exception.ts and src/errors/specific-exceptions.ts
-- [ ] T029 [US4] Add error handling usage example showing try/catch with ScalekitServerException and specific exception types in REFERENCE.md Error Handling section
-- [ ] T030 [US4] Document ScalekitServerException public properties (grpcStatus, httpStatus, errorCode, message, errDetails, unpackedDetails) in REFERENCE.md Error Handling section
+- [X] T029 [US4] Document the exception class hierarchy (ScalekitException → WebhookVerificationError, ScalekitValidateTokenFailureException, ScalekitServerException → 12 specific exceptions) with HTTP status mappings in REFERENCE.md Error Handling section. Source links to src/errors/base-exception.ts and src/errors/specific-exceptions.ts
+- [X] T030 [US4] Add error handling usage example showing try/catch with ScalekitServerException and specific exception types in REFERENCE.md Error Handling section
+- [X] T031 [US4] Document ScalekitServerException public properties (grpcStatus, httpStatus, errorCode, message, errDetails, unpackedDetails) in REFERENCE.md Error Handling section
 
 **Checkpoint**: Error handling section complete. US4 fully satisfied.
 
 ---
 
-## Phase 8: Polish & Cross-Cutting Concerns
+## Phase 6: Polish & Cross-Cutting Concerns
 
-**Purpose**: Final validation, type definitions, and package configuration
+**Purpose**: Final validation and enhancements
 
-- [ ] T031 [P] Add Type Definitions section documenting key exported types (AuthorizationUrlOptions, AuthenticationOptions, AuthenticationResponse, TokenValidationOptions, LogoutUrlOptions, RefreshTokenResponse, User, Identity, IdpInitiatedLoginClaims, CreateUserRequest, UpdateUserRequest, OrganizationSettings, GrantType) in REFERENCE.md
-- [ ] T032 Verify all method signatures in REFERENCE.md match source code exactly by cross-referencing each entry against its source file (src/scalekit.ts, src/organization.ts, src/connection.ts, src/domain.ts, src/directory.ts, src/user.ts, src/session.ts, src/role.ts, src/permission.ts, src/passwordless.ts, src/auth.ts, src/webauthn.ts)
-- [ ] T033 Verify all GitHub source links in REFERENCE.md use absolute URLs pointing to https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/ (no relative paths)
-- [ ] T034 Verify all usage code examples in REFERENCE.md are syntactically valid TypeScript (correct imports, proper async/await, accurate parameter types)
-- [ ] T035 Verify REFERENCE.md renders correctly in GitHub Markdown (collapsible sections, tables, code blocks, anchor links all functional)
+- [X] T032 [P] Add Type Definitions section documenting key exported types (AuthorizationUrlOptions, AuthenticationResponse, User, Identity, IdpInitiatedLoginClaims, CreateUserRequest, UpdateUserRequest, OrganizationSettings, GrantType) in REFERENCE.md
+- [X] T033 Verify all method signatures in REFERENCE.md match source code exactly by cross-referencing each entry against its source file
+- [X] T034 Verify all GitHub source links in REFERENCE.md use absolute URLs pointing to https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/
+- [X] T035 Verify all usage code examples in REFERENCE.md are syntactically valid TypeScript
+- [X] T036 Verify REFERENCE.md renders correctly in GitHub Markdown (collapsible sections, tables, code blocks, anchor links all functional)
+
+---
+
+## Phase 7: Documentation Example Tests
+
+**Purpose**: Validate REFERENCE.md code examples to satisfy Constitution IV
+
+- [X] T037 Run TypeScript compilation on all REFERENCE.md examples to ensure syntax validity
+- [X] T038 [Optional] Add integration tests that execute key examples against a mock SDK environment
 
 ---
 
@@ -139,19 +131,17 @@ description: "Task list for SDK Reference Documentation"
 
 - **Setup (Phase 1)**: No dependencies - can start immediately
 - **Foundational (Phase 2)**: Depends on T001 (scaffold exists)
-- **Phases 3-5 (Domain Clients)**: Depend on Phase 1 scaffold. Can run in parallel with each other.
-- **Phase 6 (Navigation)**: Depends on Phases 3-5 completion (all sections exist)
-- **Phase 7 (Errors)**: Depends on Phase 1 scaffold. Can run in parallel with Phases 3-5.
-- **Phase 8 (Polish)**: Depends on all previous phases
+- **US1+US2 (Phase 3)**: Depends on Phase 1 scaffold and Phase 2 href conversion
+- **US3 (Phase 4)**: Depends on Phase 3 completion (all sections exist)
+- **US4 (Phase 5)**: Depends on Phase 1 scaffold
+- **Polish (Phase 6)**: Depends on all previous phases
+- **Tests (Phase 7)**: Depends on Phase 3 examples
 
 ### Parallel Opportunities
 
-- All T004-T013 (ScalekitClient methods) can run in parallel
-- T014, T015, T016 (Orgs/Connections/Domains) can run in parallel
-- T017, T018, T019 (Directory/Users/Sessions) can run in parallel
-- T020-T024 (Roles/Permissions/Passwordless/Auth/WebAuthn) can run in parallel
-- Phases 3, 4, 5 can run in parallel with each other
-- Phase 7 (Errors) can run in parallel with Phases 3-5
+- All T005-T025 (method documentation) can run in parallel per domain
+- T032-T036 (validation tasks) can run in parallel
+- Phases 1,2,4,5 can overlap with Phase 3
 
 ### Within Each Domain Task
 
@@ -167,22 +157,21 @@ description: "Task list for SDK Reference Documentation"
 
 ## Implementation Strategy
 
-### MVP First (Phase 1 + 2)
+### MVP First (Phase 1 + 3)
 
 1. Complete Phase 1: Create REFERENCE.md scaffold
-2. Complete Phase 2: Document ScalekitClient core methods
+2. Complete Phase 3: Document ScalekitClient core methods + 2-3 domain clients
 3. **STOP and VALIDATE**: Verify signatures match source, examples compile
 4. This alone provides value - core auth methods are most frequently referenced
 
 ### Incremental Delivery
 
-1. Phase 1 + 2 → ScalekitClient documented (MVP)
-2. Phase 3 → Organizations/Connections/Domains added
-3. Phase 4 → Directory/Users/Sessions added
-4. Phase 5 → Roles/Permissions/remaining clients added
-5. Phase 6 → Navigation verified
-6. Phase 7 → Error handling documented
-7. Phase 8 → Full validation pass
+1. Phase 1 + 2 → REFERENCE.md with correct links (foundation)
+2. Phase 3 → All method signatures + examples added
+3. Phase 4 → Navigation verified
+4. Phase 5 → Error handling documented
+5. Phase 6 → Full validation pass
+6. Phase 7 → Example tests
 
 ---
 

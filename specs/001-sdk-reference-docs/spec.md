@@ -129,7 +129,8 @@ modes (e.g., not found, unauthorized, rate limited).
 - **FR-001**: REFERENCE.md MUST document every public method on
   ScalekitClient (constructor, getAuthorizationUrl, authenticateWithCode,
   getIdpInitiatedLoginClaims, validateAccessToken, getLogoutUrl,
-  refreshAccessToken, verifyWebhookPayload, verifyInterceptorPayload).
+  refreshAccessToken, validateToken, verifyScopes, verifyWebhookPayload,
+  verifyInterceptorPayload).
 - **FR-002**: REFERENCE.md MUST document every public method on all domain
   clients (OrganizationClient, ConnectionClient, DomainClient,
   DirectoryClient, UserClient, SessionClient, RoleClient,
@@ -164,6 +165,7 @@ modes (e.g., not found, unauthorized, rate limited).
 - **FR-012**: Each method entry MUST include a "Source" link pointing to
   the source file on the `main` branch of the GitHub repository. Links
   MUST always target the `main` branch, not version tags.
+- **FR-013**: REFERENCE.md MUST include a Type Definitions section documenting key exported types (e.g., AuthorizationUrlOptions, AuthenticationResponse, User) with brief descriptions and links to source.
 
 ### Key Entities
 
@@ -193,7 +195,7 @@ modes (e.g., not found, unauthorized, rate limited).
   real-world invocation pattern.
 - **SC-005**: A developer unfamiliar with the SDK can find the correct
   method and understand how to call it within 60 seconds of opening
-  REFERENCE.md.
+  REFERENCE.md (validated by: TOC links functional, collapsible sections render in GitHub, and no more than 3 clicks to method).
 - **SC-006**: REFERENCE.md covers all 11 API domains with navigable
   section groupings.
 
@@ -206,6 +208,7 @@ modes (e.g., not found, unauthorized, rate limited).
 - Q: Should source links pin to a version tag or always point to `main`? → A: Always link to `main` branch. Links stay current with the latest release.
 - Q: What should the filename casing be? → A: `REFERENCE.md` (uppercase). All references normalized from `reference.md` to `REFERENCE.md`.
 - Q: Must every method entry follow the same icon-labeled collapsible template? → A: Yes. Every method MUST use the consistent template: `<details>` collapsible with method signature in `<summary>`, then 📝 Description, 🔌 Usage (code example), ⚙️ Parameters (table), and Source link. No deviations.
+- Q: What is the exact format for GitHub source links in REFERENCE.md? → A: https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/file.ts
 
 ### Assumptions
 

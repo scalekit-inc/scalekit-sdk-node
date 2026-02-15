@@ -1,6 +1,61 @@
+# Scalekit Node.js SDK Reference
+
+[![npm version](https://img.shields.io/npm/v/@scalekit-sdk/node.svg)](https://npmjs.com/package/@scalekit-sdk/node)
+[![License](https://img.shields.io/npm/l/@scalekit-sdk/node.svg)](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/LICENSE)
+
+## Table of Contents
+
+- [Getting Started](#getting-started)
+- [ScalekitClient](#scalekitclient)
+- [Organizations](#organizations)
+- [Connections](#connections)
+- [Domains](#domains)
+- [Directories](#directories)
+- [Users & Memberships](#users--memberships)
+- [Sessions](#sessions)
+- [Roles](#roles)
+- [Permissions](#permissions)
+- [Passwordless](#passwordless)
+- [Auth](#auth)
+- [WebAuthn](#webauthn)
+- [Error Handling](#error-handling)
+- [Type Definitions](#type-definitions)
+
+## Getting Started
+
+<details>
+<summary><code>new ScalekitClient(envUrl, clientId, clientSecret)</code></summary>
+
+#### 📝 Description
+Initialize the Scalekit client to interact with all Scalekit API endpoints. This is the primary entry point for authentication services including SSO, SCIM, user management, roles, permissions, and passwordless authentication.
+
+Find your Environment URL, Client ID, and Client Secret in Scalekit Dashboard → Developers (Settings) → API Credentials.
+
+#### 🔌 Usage
+```typescript
+import { ScalekitClient } from '@scalekit-sdk/node';
+
+const scalekitClient = new ScalekitClient(
+  process.env.SCALEKIT_ENV_URL!,
+  process.env.SCALEKIT_CLIENT_ID!,
+  process.env.SCALEKIT_CLIENT_SECRET!
+);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| envUrl | `string` | Yes | The Scalekit environment URL (e.g., "https://yourorg.scalekit.com" or your configured custom domain like "https://auth.yourapp.ai") |
+| clientId | `string` | Yes | Your Scalekit client ID from the Scalekit Dashboard |
+| clientSecret | `string` | Yes | Your Scalekit client secret from the Scalekit Dashboard |
+
+**Source**: [src/scalekit.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts)
+
+</details>
+
 ## ScalekitClient
 
-<details><summary><code>client.<a href="/src/scalekit.ts">getAuthorizationUrl</a>(redirectUri, options?) -> string</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/scalekit.ts">getAuthorizationUrl</a>(redirectUri, options?) -> string</code></summary>
 <dl>
 <dd>
 
@@ -83,7 +138,7 @@ const authUrl = scalekitClient.getAuthorizationUrl(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="/src/scalekit.ts">authenticateWithCode</a>(code, redirectUri, options?) -> Promise&lt;AuthenticationResponse&gt;</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/scalekit.ts">authenticateWithCode</a>(code, redirectUri, options?) -> Promise&lt;AuthenticationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -168,7 +223,7 @@ app.get('/auth/callback', async (req, res) => {
 </dl>
 </details>
 
-<details><summary><code>client.<a href="/src/scalekit.ts">getIdpInitiatedLoginClaims</a>(idpInitiatedLoginToken, options?) -> Promise&lt;IdpInitiatedLoginClaims&gt;</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-nodehttps://github.com/scalekit-inc/scalekit-sdk-node/src/scalekit.ts">getIdpInitiatedLoginClaims</a>(idpInitiatedLoginToken, options?) -> Promise&lt;IdpInitiatedLoginClaims&gt;</code></summary>
 <dl>
 <dd>
 
@@ -250,7 +305,7 @@ app.get('/auth/callback', async (req, res) => {
 </dl>
 </details>
 
-<details><summary><code>client.<a href="/src/scalekit.ts">validateAccessToken</a>(token, options?) -> Promise&lt;boolean&gt;</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-nodehttps://github.com/scalekit-inc/scalekit-sdk-node/src/scalekit.ts">validateAccessToken</a>(token, options?) -> Promise&lt;boolean&gt;</code></summary>
 <dl>
 <dd>
 
@@ -315,7 +370,7 @@ if (isValid) {
 </dl>
 </details>
 
-<details><summary><code>client.<a href="/src/scalekit.ts">getLogoutUrl</a>(options?) -> string</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-nodehttps://github.com/scalekit-inc/scalekit-sdk-node/src/scalekit.ts">getLogoutUrl</a>(options?) -> string</code></summary>
 <dl>
 <dd>
 
@@ -375,7 +430,129 @@ const logoutUrl = scalekitClient.getLogoutUrl({
 </dl>
 </details>
 
-<details><summary><code>client.<a href="/src/scalekit.ts">verifyWebhookPayload</a>(secret, headers, payload) -> boolean</code></summary>
+<details>
+<summary><code>client.validateAccessToken(token, options?) -> Promise&lt;boolean&gt;</code></summary>
+
+#### 📝 Description
+Validate an access token to ensure it's authentic and hasn't expired. This method performs signature verification and checks token validity against Scalekit's public keys.
+
+#### 🔌 Usage
+```typescript
+const isValid = await scalekitClient.validateAccessToken(accessToken);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| token | `string` | Yes | The access token to validate |
+| options | `TokenValidationOptions` | No | Optional validation options |
+
+**Returns**: `Promise<boolean>` - True if the token is valid, false otherwise.
+
+**Source**: [src/scalekit.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts)
+
+</details>
+
+<details>
+<summary><code>client.getLogoutUrl(options?) -> string</code></summary>
+
+#### 📝 Description
+Generate the OAuth 2.0 logout URL to end the user's session and redirect them after logout.
+
+#### 🔌 Usage
+```typescript
+const logoutUrl = scalekitClient.getLogoutUrl({
+  postLogoutRedirectUri: 'https://example.com',
+  state: 'some-state'
+});
+// Redirect user to logoutUrl
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| options | `LogoutUrlOptions` | No | Optional logout options |
+
+**Returns**: `string` - The complete logout URL.
+
+**Source**: [src/scalekit.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts)
+
+</details>
+
+<details>
+<summary><code>client.refreshAccessToken(refreshToken) -> Promise&lt;RefreshTokenResponse&gt;</code></summary>
+
+#### 📝 Description
+Refresh an expired access token using a valid refresh token. This exchanges the refresh token for a new access token and optionally a new refresh token.
+
+#### 🔌 Usage
+```typescript
+const result = await scalekitClient.refreshAccessToken(oldRefreshToken);
+// Store the new tokens
+await storeTokens(userId, {
+  accessToken: result.accessToken,
+  refreshToken: result.refreshToken
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| refreshToken | `string` | Yes | The refresh token to use for obtaining new tokens |
+
+**Returns**: `Promise<RefreshTokenResponse>` - Object containing new access token and optionally new refresh token.
+
+**Source**: [src/scalekit.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts)
+
+</details>
+
+<details>
+<summary><code>client.validateToken(token, options?) -> Promise&lt;T&gt;</code></summary>
+
+#### 📝 Description
+Decode and validate a JWT token, returning the payload. This method verifies the token's signature and claims.
+
+#### 🔌 Usage
+```typescript
+const payload = await scalekitClient.validateToken(accessToken);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| token | `string` | Yes | The JWT token to validate |
+| options | `TokenValidationOptions` | No | Optional validation options |
+
+**Returns**: `Promise<T>` - The decoded token payload.
+
+**Source**: [src/scalekit.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts)
+
+</details>
+
+<details>
+<summary><code>client.verifyScopes(token, requiredScopes) -> boolean</code></summary>
+
+#### 📝 Description
+Verify that a token contains all required scopes. This checks if the token's scope claim includes the specified scopes.
+
+#### 🔌 Usage
+```typescript
+const hasScopes = scalekitClient.verifyScopes(accessToken, ['read:user', 'write:user']);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| token | `string` | Yes | The JWT token to check |
+| requiredScopes | `string[]` | Yes | Array of required scopes |
+
+**Returns**: `boolean` - True if the token has all required scopes.
+
+**Source**: [src/scalekit.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts)
+
+</details>
+
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-nodehttps://github.com/scalekit-inc/scalekit-sdk-node/src/scalekit.ts">verifyWebhookPayload</a>(secret, headers, payload) -> boolean</code></summary>
 <dl>
 <dd>
 
@@ -468,7 +645,7 @@ app.post('/webhooks/scalekit', express.raw({ type: 'application/json' }), (req, 
 </dl>
 </details>
 
-<details><summary><code>client.<a href="/src/scalekit.ts">verifyInterceptorPayload</a>(secret, headers, payload) -> boolean</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/scalekit.ts">verifyInterceptorPayload</a>(secret, headers, payload) -> boolean</code></summary>
 <dl>
 <dd>
 
@@ -540,9 +717,290 @@ const isValid = scalekitClient.verifyInterceptorPayload(secret, headers, payload
 </dl>
 </details>
 
+## Connections
+
+<details>
+<summary><strong>Connections</strong> - Manage SSO connections and identity providers</summary>
+
+Access via `scalekitClient.connection`.
+
+<details>
+<summary><code>connection.getConnection(id) -> Promise&lt;GetConnectionResponse&gt;</code></summary>
+
+#### 📝 Description
+Retrieves a specific SSO connection by ID.
+
+#### 🔌 Usage
+```typescript
+const connection = await scalekitClient.connection.getConnection('conn_123');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| id | `string` | Yes | Connection ID |
+
+**Returns**: `Promise<GetConnectionResponse>` - Connection details.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
+<summary><code>connection.listConnections(options?) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists all SSO connections with pagination.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.connection.listConnections({ pageSize: 10 });
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| options | `{ pageSize?: number; pageToken?: string }` | No | Pagination options |
+
+**Returns**: `Promise<ListConnectionsResponse>` - Paginated connections.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
+<summary><code>connection.listConnectionsByDomain(domain, options?) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists connections filtered by domain.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.connection.listConnectionsByDomain('example.com');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| domain | `string` | Yes | Domain to filter by |
+| options | `{ pageSize?: number; pageToken?: string }` | No | Pagination options |
+
+**Returns**: `Promise<ListConnectionsResponse>` - Filtered connections.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
+<summary><code>connection.enableConnection(connectionId) -> Promise&lt;MessageShape&lt;typeof EmptySchema&gt;&gt;</code></summary>
+
+#### 📝 Description
+Enables an SSO connection.
+
+#### 🔌 Usage
+```typescript
+await scalekitClient.connection.enableConnection('conn_123');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| connectionId | `string` | Yes | Connection ID |
+
+**Returns**: `Promise<MessageShape<typeof EmptySchema>>` - Empty on success.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
+<summary><code>connection.disableConnection(connectionId) -> Promise&lt;MessageShape&lt;typeof EmptySchema&gt;&gt;</code></summary>
+
+#### 📝 Description
+Disables an SSO connection.
+
+#### 🔌 Usage
+```typescript
+await scalekitClient.connection.disableConnection('conn_123');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| connectionId | `string` | Yes | Connection ID |
+
+**Returns**: `Promise<MessageShape<typeof EmptySchema>>` - Empty on success.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+</details>
+
+## Domains
+
+<details>
+<summary><strong>Domains</strong> - Manage verified domains for organizations</summary>
+
+Access via `scalekitClient.domain`.
+
+<details>
+<summary><code>domain.createDomain(domain) -> Promise&lt;CreateDomainResponse&gt;</code></summary>
+
+#### 📝 Description
+Creates and verifies a new domain for an organization.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.domain.createDomain('example.com');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| domain | `string` | Yes | Domain name to create |
+
+**Returns**: `Promise<CreateDomainResponse>` - Created domain.
+
+**Source**: [src/domain.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/domain.ts)
+
+</details>
+
+<details>
+<summary><code>domain.getDomain(domain) -> Promise&lt;GetDomainResponse&gt;</code></summary>
+
+#### 📝 Description
+Retrieves domain information.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.domain.getDomain('example.com');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| domain | `string` | Yes | Domain name |
+
+**Returns**: `Promise<GetDomainResponse>` - Domain details.
+
+**Source**: [src/domain.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/domain.ts)
+
+</details>
+
+<details>
+<summary><code>domain.listDomains(options?) -> Promise&lt;ListDomainsResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists all domains with pagination.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.domain.listDomains({ pageSize: 10 });
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| options | `{ pageSize?: number; pageToken?: string }` | No | Pagination options |
+
+**Returns**: `Promise<ListDomainsResponse>` - Paginated domains.
+
+**Source**: [src/domain.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/domain.ts)
+
+</details>
+
+<details>
+<summary><code>domain.deleteDomain(domain) -> Promise&lt;MessageShape&lt;typeof EmptySchema&gt;&gt;</code></summary>
+
+#### 📝 Description
+Deletes a domain.
+
+#### 🔌 Usage
+```typescript
+await scalekitClient.domain.deleteDomain('example.com');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| domain | `string` | Yes | Domain name to delete |
+
+**Returns**: `Promise<MessageShape<typeof EmptySchema>>` - Empty on success.
+
+**Source**: [src/domain.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/domain.ts)
+
+</details>
+
+</details>
+
+## Error Handling
+
+### Exception Hierarchy
+
+Scalekit SDK uses a typed exception hierarchy rooted at `ScalekitException`:
+
+- `ScalekitException` (base)
+  - `ScalekitValidateTokenFailureException` - Token validation failures
+  - `ScalekitServerException` - HTTP errors (400-599)
+    - Specific subclasses for each status code (400, 401, 403, 404, 409, 422, 429, 500, 502, 503, 504)
+  - `WebhookVerificationError` - Webhook signature verification failures
+
+### Usage Example
+
+```typescript
+import { ScalekitServerException } from '@scalekit-sdk/node';
+
+try {
+  const result = await scalekitClient.organization.getOrganization('invalid_id');
+} catch (error) {
+  if (error instanceof ScalekitServerException) {
+    console.log('HTTP Status:', error.httpStatus);
+    console.log('Error Code:', error.errorCode);
+    console.log('Message:', error.message);
+  }
+}
+```
+
+### ScalekitServerException Properties
+
+- `grpcStatus`: gRPC status code
+- `httpStatus`: HTTP status code (e.g., 404)
+- `errorCode`: Scalekit error code
+- `message`: Error message
+- `errDetails`: Additional error details
+- `unpackedDetails`: Unpacked protobuf details
+
+## Type Definitions
+
+### Authentication Types
+
+- `AuthorizationUrlOptions`: Options for generating auth URLs
+- `AuthenticationOptions`: Options for authentication
+- `AuthenticationResponse`: Response from authentication
+- `TokenValidationOptions`: Options for token validation
+- `LogoutUrlOptions`: Options for logout URLs
+- `RefreshTokenResponse`: Response from token refresh
+
+### User Types
+
+- `User`: User object
+- `Identity`: User identity
+- `IdpInitiatedLoginClaims`: Claims from IdP-initiated login
+
+### Organization Types
+
+- `CreateUserRequest`: Request to create user
+- `UpdateUserRequest`: Request to update user
+- `OrganizationSettings`: Organization settings
+
+### Grant Types
+
+- `GrantType`: OAuth grant types
+
 ## Organizations
 
-<details><summary><code>client.organization.<a href="/src/organization.ts">createOrganization</a>(name, options?) -> Promise&lt;CreateOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/organization.ts">createOrganization</a>(name, options?) -> Promise&lt;CreateOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -612,7 +1070,7 @@ console.log('Organization ID:', org.organization.id);
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="/src/organization.ts">listOrganization</a>(options?) -> Promise&lt;ListOrganizationsResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/organization.ts">listOrganization</a>(options?) -> Promise&lt;ListOrganizationsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -675,7 +1133,7 @@ console.log('Total:', response.totalSize);
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="/src/organization.ts">getOrganization</a>(id) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/organization.ts">getOrganization</a>(id) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -735,7 +1193,7 @@ console.log('External ID:', org.externalId);
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="/src/organization.ts">getOrganizationByExternalId</a>(externalId) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/organization.ts">getOrganizationByExternalId</a>(externalId) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -795,7 +1253,7 @@ console.log('Organization:', org.displayName);
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="/src/organization.ts">updateOrganization</a>(id, organization) -> Promise&lt;UpdateOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/organization.ts">updateOrganization</a>(id, organization) -> Promise&lt;UpdateOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -865,7 +1323,7 @@ const response = await scalekitClient.organization.updateOrganization('org_12345
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="/src/organization.ts">updateOrganizationByExternalId</a>(externalId, organization) -> Promise&lt;UpdateOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/organization.ts">updateOrganizationByExternalId</a>(externalId, organization) -> Promise&lt;UpdateOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -932,7 +1390,7 @@ const response = await scalekitClient.organization.updateOrganizationByExternalI
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="/src/organization.ts">deleteOrganization</a>(organizationId) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/organization.ts">deleteOrganization</a>(organizationId) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -989,7 +1447,7 @@ console.log('Organization deleted successfully');
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="/src/organization.ts">generatePortalLink</a>(organizationId) -> Promise&lt;Link&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/organization.ts">generatePortalLink</a>(organizationId) -> Promise&lt;Link&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1051,7 +1509,7 @@ app.get('/admin/sso-settings', async (req, res) => {
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="/src/organization.ts">updateOrganizationSettings</a>(organizationId, settings) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/organization.ts">updateOrganizationSettings</a>(organizationId, settings) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1120,7 +1578,7 @@ const response = await scalekitClient.organization.updateOrganizationSettings('o
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="/src/organization.ts">upsertUserManagementSettings</a>(organizationId, settings) -> Promise&lt;OrganizationUserManagementSettings | undefined&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/organization.ts">upsertUserManagementSettings</a>(organizationId, settings) -> Promise&lt;OrganizationUserManagementSettings | undefined&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1191,7 +1649,7 @@ console.log('Max users allowed:', settings?.maxAllowedUsers);
 
 ## Connections
 
-<details><summary><code>client.connection.<a href="/src/connection.ts">getConnection</a>(organizationId, id) -> Promise&lt;GetConnectionResponse&gt;</code></summary>
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/connection.ts">getConnection</a>(organizationId, id) -> Promise&lt;GetConnectionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1263,7 +1721,7 @@ console.log('Status:', conn.enabled ? 'Enabled' : 'Disabled');
 </dl>
 </details>
 
-<details><summary><code>client.connection.<a href="/src/connection.ts">listConnectionsByDomain</a>(domain) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/connection.ts">listConnectionsByDomain</a>(domain) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1325,7 +1783,7 @@ if (response.connections.length > 0) {
 </dl>
 </details>
 
-<details><summary><code>client.connection.<a href="/src/connection.ts">listConnections</a>(organizationId) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/connection.ts">listConnections</a>(organizationId) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1386,7 +1844,7 @@ response.connections.forEach(conn => {
 </dl>
 </details>
 
-<details><summary><code>client.connection.<a href="/src/connection.ts">enableConnection</a>(organizationId, id) -> Promise&lt;ToggleConnectionResponse&gt;</code></summary>
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/connection.ts">enableConnection</a>(organizationId, id) -> Promise&lt;ToggleConnectionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1455,7 +1913,7 @@ console.log('Connection enabled:', response.connection.enabled);
 </dl>
 </details>
 
-<details><summary><code>client.connection.<a href="/src/connection.ts">disableConnection</a>(organizationId, id) -> Promise&lt;ToggleConnectionResponse&gt;</code></summary>
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/connection.ts">disableConnection</a>(organizationId, id) -> Promise&lt;ToggleConnectionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1526,7 +1984,7 @@ console.log('Connection disabled:', !response.connection.enabled);
 
 ## Users
 
-<details><summary><code>client.user.<a href="/src/user.ts">createUserAndMembership</a>(organizationId, options) -> Promise&lt;CreateUserAndMembershipResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/user.ts">createUserAndMembership</a>(organizationId, options) -> Promise&lt;CreateUserAndMembershipResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1609,7 +2067,7 @@ console.log('User created:', response.user.id);
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="/src/user.ts">getUser</a>(userId) -> Promise&lt;GetUserResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/user.ts">getUser</a>(userId) -> Promise&lt;GetUserResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1670,7 +2128,7 @@ console.log('Organizations:', user.memberships?.length);
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="/src/user.ts">listUsers</a>(options?) -> Promise&lt;ListUsersResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/user.ts">listUsers</a>(options?) -> Promise&lt;ListUsersResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1733,7 +2191,7 @@ console.log('Total users:', response.totalSize);
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="/src/user.ts">updateUser</a>(userId, options) -> Promise&lt;UpdateUserResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/user.ts">updateUser</a>(userId, options) -> Promise&lt;UpdateUserResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1806,7 +2264,7 @@ const response = await scalekitClient.user.updateUser('usr_123456', {
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="/src/user.ts">deleteUser</a>(userId) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/user.ts">deleteUser</a>(userId) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1863,7 +2321,7 @@ console.log('User deleted successfully');
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="/src/user.ts">createMembership</a>(organizationId, userId, options?) -> Promise&lt;CreateMembershipResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/user.ts">createMembership</a>(organizationId, userId, options?) -> Promise&lt;CreateMembershipResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1945,7 +2403,7 @@ const response = await scalekitClient.user.createMembership(
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="/src/user.ts">deleteMembership</a>(organizationId, userId) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/user.ts">deleteMembership</a>(organizationId, userId) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2010,7 +2468,7 @@ console.log('User removed from organization');
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="/src/user.ts">updateMembership</a>(organizationId, userId, options?) -> Promise&lt;UpdateMembershipResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/user.ts">updateMembership</a>(organizationId, userId, options?) -> Promise&lt;UpdateMembershipResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2088,7 +2546,7 @@ const response = await scalekitClient.user.updateMembership(
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="/src/user.ts">listOrganizationUsers</a>(organizationId, options?) -> Promise&lt;ListOrganizationUsersResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/user.ts">listOrganizationUsers</a>(organizationId, options?) -> Promise&lt;ListOrganizationUsersResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2159,7 +2617,7 @@ console.log('Total members:', response.totalSize);
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="/src/user.ts">resendInvite</a>(organizationId, userId) -> Promise&lt;ResendInviteResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/user.ts">resendInvite</a>(organizationId, userId) -> Promise&lt;ResendInviteResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2226,7 +2684,7 @@ console.log('Invitation resent:', response.invite);
 
 ## Domains
 
-<details><summary><code>client.domain.<a href="/src/domain.ts">createDomain</a>(organizationId, name, options?) -> Promise&lt;CreateDomainResponse&gt;</code></summary>
+<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/domain.ts">createDomain</a>(organizationId, name, options?) -> Promise&lt;CreateDomainResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2309,7 +2767,7 @@ console.log('Domain created:', response.domain.id);
 </dl>
 </details>
 
-<details><summary><code>client.domain.<a href="/src/domain.ts">getDomain</a>(organizationId, domainId) -> Promise&lt;GetDomainResponse&gt;</code></summary>
+<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/domain.ts">getDomain</a>(organizationId, domainId) -> Promise&lt;GetDomainResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2380,7 +2838,7 @@ console.log('Verified:', response.domain.verificationStatus);
 </dl>
 </details>
 
-<details><summary><code>client.domain.<a href="/src/domain.ts">listDomains</a>(organizationId, options?) -> Promise&lt;ListDomainResponse&gt;</code></summary>
+<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/domain.ts">listDomains</a>(organizationId, options?) -> Promise&lt;ListDomainResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2450,7 +2908,7 @@ response.domains.forEach(domain => {
 </dl>
 </details>
 
-<details><summary><code>client.domain.<a href="/src/domain.ts">deleteDomain</a>(organizationId, domainId) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/domain.ts">deleteDomain</a>(organizationId, domainId) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2517,7 +2975,7 @@ console.log('Domain deleted successfully');
 
 ## Directories
 
-<details><summary><code>client.directory.<a href="/src/directory.ts">listDirectories</a>(organizationId) -> Promise&lt;ListDirectoriesResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/directory.ts">listDirectories</a>(organizationId) -> Promise&lt;ListDirectoriesResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2579,7 +3037,7 @@ response.directories.forEach(dir => {
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="/src/directory.ts">getDirectory</a>(organizationId, directoryId) -> Promise&lt;GetDirectoryResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/directory.ts">getDirectory</a>(organizationId, directoryId) -> Promise&lt;GetDirectoryResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2651,7 +3109,7 @@ console.log('Users:', dir.userCount);
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="/src/directory.ts">getPrimaryDirectoryByOrganizationId</a>(organizationId) -> Promise&lt;Directory&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/directory.ts">getPrimaryDirectoryByOrganizationId</a>(organizationId) -> Promise&lt;Directory&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2710,7 +3168,7 @@ console.log('Users:', directory.userCount);
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="/src/directory.ts">listDirectoryUsers</a>(organizationId, directoryId, options?) -> Promise&lt;ListDirectoryUsersResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/directory.ts">listDirectoryUsers</a>(organizationId, directoryId, options?) -> Promise&lt;ListDirectoryUsersResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2793,7 +3251,7 @@ console.log(`Found ${response.totalSize} users`);
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="/src/directory.ts">listDirectoryGroups</a>(organizationId, directoryId, options?) -> Promise&lt;ListDirectoryGroupsResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/directory.ts">listDirectoryGroups</a>(organizationId, directoryId, options?) -> Promise&lt;ListDirectoryGroupsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2875,7 +3333,7 @@ console.log(`Found ${response.totalSize} groups`);
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="/src/directory.ts">enableDirectory</a>(organizationId, directoryId) -> Promise&lt;ToggleDirectoryResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/directory.ts">enableDirectory</a>(organizationId, directoryId) -> Promise&lt;ToggleDirectoryResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2944,7 +3402,7 @@ console.log('Directory enabled:', response.directory.enabled);
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="/src/directory.ts">disableDirectory</a>(organizationId, directoryId) -> Promise&lt;ToggleDirectoryResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/directory.ts">disableDirectory</a>(organizationId, directoryId) -> Promise&lt;ToggleDirectoryResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3015,7 +3473,7 @@ console.log('Directory disabled:', !response.directory.enabled);
 
 ## Sessions
 
-<details><summary><code>client.session.<a href="/src/session.ts">getSession</a>(sessionId) -> Promise&lt;SessionDetails&gt;</code></summary>
+<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/session.ts">getSession</a>(sessionId) -> Promise&lt;SessionDetails&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3076,7 +3534,7 @@ console.log('Location:', session.geoLocation);
 </dl>
 </details>
 
-<details><summary><code>client.session.<a href="/src/session.ts">getUserSessions</a>(userId, options?) -> Promise&lt;UserSessionDetails&gt;</code></summary>
+<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/session.ts">getUserSessions</a>(userId, options?) -> Promise&lt;UserSessionDetails&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3151,7 +3609,7 @@ console.log(`User has ${response.totalSize} active sessions`);
 </dl>
 </details>
 
-<details><summary><code>client.session.<a href="/src/session.ts">revokeSession</a>(sessionId) -> Promise&lt;RevokeSessionResponse&gt;</code></summary>
+<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/session.ts">revokeSession</a>(sessionId) -> Promise&lt;RevokeSessionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3208,7 +3666,7 @@ console.log('Session revoked at:', response.revokedAt);
 </dl>
 </details>
 
-<details><summary><code>client.session.<a href="/src/session.ts">revokeAllUserSessions</a>(userId) -> Promise&lt;RevokeAllUserSessionsResponse&gt;</code></summary>
+<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/session.ts">revokeAllUserSessions</a>(userId) -> Promise&lt;RevokeAllUserSessionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3268,7 +3726,7 @@ console.log(`Revoked ${response.totalCount} sessions`);
 
 ## Roles
 
-<details><summary><code>client.role.<a href="/src/role.ts">createRole</a>(role) -> Promise&lt;CreateRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">createRole</a>(role) -> Promise&lt;CreateRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3334,7 +3792,7 @@ const response = await scalekitClient.role.createRole({
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">getRole</a>(roleName) -> Promise&lt;GetRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">getRole</a>(roleName) -> Promise&lt;GetRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3390,7 +3848,7 @@ console.log('Permissions:', response.role.permissions);
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">listRoles</a>() -> Promise&lt;ListRolesResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">listRoles</a>() -> Promise&lt;ListRolesResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3447,7 +3905,7 @@ None
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">updateRole</a>(roleName, role) -> Promise&lt;UpdateRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">updateRole</a>(roleName, role) -> Promise&lt;UpdateRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3514,7 +3972,7 @@ await scalekitClient.role.updateRole('content_editor', {
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">deleteRole</a>(roleName, reassignRoleName?) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">deleteRole</a>(roleName, reassignRoleName?) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3578,7 +4036,7 @@ await scalekitClient.role.deleteRole('old_role', 'new_role');
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">getRoleUsersCount</a>(roleName) -> Promise&lt;GetRoleUsersCountResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">getRoleUsersCount</a>(roleName) -> Promise&lt;GetRoleUsersCountResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3635,7 +4093,7 @@ console.log(`${response.count} users have admin role`);
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">createOrganizationRole</a>(orgId, role) -> Promise&lt;CreateOrganizationRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">createOrganizationRole</a>(orgId, role) -> Promise&lt;CreateOrganizationRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3704,7 +4162,7 @@ await scalekitClient.role.createOrganizationRole('org_123456', {
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">getOrganizationRole</a>(orgId, roleName) -> Promise&lt;GetOrganizationRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">getOrganizationRole</a>(orgId, roleName) -> Promise&lt;GetOrganizationRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3771,7 +4229,7 @@ console.log('Permissions:', response.role.permissions);
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">listOrganizationRoles</a>(orgId) -> Promise&lt;ListOrganizationRolesResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">listOrganizationRoles</a>(orgId) -> Promise&lt;ListOrganizationRolesResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3830,7 +4288,7 @@ response.roles.forEach(role => {
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">updateOrganizationRole</a>(orgId, roleName, role) -> Promise&lt;UpdateOrganizationRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">updateOrganizationRole</a>(orgId, roleName, role) -> Promise&lt;UpdateOrganizationRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3904,7 +4362,7 @@ await scalekitClient.role.updateOrganizationRole('org_123456', 'department_lead'
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">deleteOrganizationRole</a>(orgId, roleName, reassignRoleName?) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">deleteOrganizationRole</a>(orgId, roleName, reassignRoleName?) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3980,7 +4438,7 @@ await scalekitClient.role.deleteOrganizationRole(
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">getOrganizationRoleUsersCount</a>(orgId, roleName) -> Promise&lt;GetOrganizationRoleUsersCountResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">getOrganizationRoleUsersCount</a>(orgId, roleName) -> Promise&lt;GetOrganizationRoleUsersCountResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4047,7 +4505,7 @@ console.log(`${response.count} admins in this organization`);
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">updateDefaultOrganizationRoles</a>(orgId, defaultMemberRole) -> Promise&lt;UpdateDefaultOrganizationRolesResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">updateDefaultOrganizationRoles</a>(orgId, defaultMemberRole) -> Promise&lt;UpdateDefaultOrganizationRolesResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4111,7 +4569,7 @@ await scalekitClient.role.updateDefaultOrganizationRoles('org_123456', 'member')
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="/src/role.ts">deleteOrganizationRoleBase</a>(orgId, roleName) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/role.ts">deleteOrganizationRoleBase</a>(orgId, roleName) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4177,7 +4635,7 @@ await scalekitClient.role.deleteOrganizationRoleBase('org_123456', 'custom_role'
 
 ## Permissions
 
-<details><summary><code>client.permission.<a href="/src/permission.ts">createPermission</a>(permission) -> Promise&lt;CreatePermissionResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/permission.ts">createPermission</a>(permission) -> Promise&lt;CreatePermissionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4238,7 +4696,7 @@ await scalekitClient.permission.createPermission({
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="/src/permission.ts">getPermission</a>(permissionName) -> Promise&lt;GetPermissionResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/permission.ts">getPermission</a>(permissionName) -> Promise&lt;GetPermissionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4293,7 +4751,7 @@ console.log('Description:', response.permission.description);
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="/src/permission.ts">listPermissions</a>(pageToken?, pageSize?) -> Promise&lt;ListPermissionsResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/permission.ts">listPermissions</a>(pageToken?, pageSize?) -> Promise&lt;ListPermissionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4360,7 +4818,7 @@ response.permissions.forEach(perm => {
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="/src/permission.ts">updatePermission</a>(permissionName, permission) -> Promise&lt;UpdatePermissionResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/permission.ts">updatePermission</a>(permissionName, permission) -> Promise&lt;UpdatePermissionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4427,7 +4885,7 @@ await scalekitClient.permission.updatePermission('read:invoices', {
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="/src/permission.ts">deletePermission</a>(permissionName) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/permission.ts">deletePermission</a>(permissionName) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4483,7 +4941,7 @@ await scalekitClient.permission.deletePermission('deprecated:feature');
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="/src/permission.ts">listRolePermissions</a>(roleName) -> Promise&lt;ListRolePermissionsResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/permission.ts">listRolePermissions</a>(roleName) -> Promise&lt;ListRolePermissionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4540,7 +4998,7 @@ console.log('Direct permissions:', response.permissions);
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="/src/permission.ts">addPermissionsToRole</a>(roleName, permissionNames) -> Promise&lt;AddPermissionsToRoleResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/permission.ts">addPermissionsToRole</a>(roleName, permissionNames) -> Promise&lt;AddPermissionsToRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4608,7 +5066,7 @@ await scalekitClient.permission.addPermissionsToRole('editor', [
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="/src/permission.ts">removePermissionFromRole</a>(roleName, permissionName) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/permission.ts">removePermissionFromRole</a>(roleName, permissionName) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4672,7 +5130,7 @@ await scalekitClient.permission.removePermissionFromRole('editor', 'delete:docum
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="/src/permission.ts">listEffectiveRolePermissions</a>(roleName) -> Promise&lt;ListEffectiveRolePermissionsResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/permission.ts">listEffectiveRolePermissions</a>(roleName) -> Promise&lt;ListEffectiveRolePermissionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4732,7 +5190,7 @@ console.log('Total effective permissions:', response.permissions.length);
 
 ## Passwordless
 
-<details><summary><code>client.passwordless.<a href="/src/passwordless.ts">sendPasswordlessEmail</a>(email, options?) -> Promise&lt;SendPasswordlessResponse&gt;</code></summary>
+<details><summary><code>client.passwordless.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/passwordless.ts">sendPasswordlessEmail</a>(email, options?) -> Promise&lt;SendPasswordlessResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4808,7 +5266,7 @@ console.log('Auth Request ID:', response.authRequestId);
 </dl>
 </details>
 
-<details><summary><code>client.passwordless.<a href="/src/passwordless.ts">verifyPasswordlessEmail</a>(credential, authRequestId?) -> Promise&lt;VerifyPasswordLessResponse&gt;</code></summary>
+<details><summary><code>client.passwordless.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/passwordless.ts">verifyPasswordlessEmail</a>(credential, authRequestId?) -> Promise&lt;VerifyPasswordLessResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4877,7 +5335,7 @@ console.log('Email:', response.email);
 </dl>
 </details>
 
-<details><summary><code>client.passwordless.<a href="/src/passwordless.ts">resendPasswordlessEmail</a>(authRequestId) -> Promise&lt;SendPasswordlessResponse&gt;</code></summary>
+<details><summary><code>client.passwordless.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/passwordless.ts">resendPasswordlessEmail</a>(authRequestId) -> Promise&lt;SendPasswordlessResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4933,7 +5391,7 @@ const response = await scalekitClient.passwordless.resendPasswordlessEmail('auth
 
 ## WebAuthn
 
-<details><summary><code>client.webauthn.<a href="/src/webauthn.ts">listCredentials</a>(userId) -> Promise&lt;ListCredentialsResponse&gt;</code></summary>
+<details><summary><code>client.webauthn.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/webauthn.ts">listCredentials</a>(userId) -> Promise&lt;ListCredentialsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4988,7 +5446,7 @@ console.log('Credentials:', response.credentials);
 </dl>
 </details>
 
-<details><summary><code>client.webauthn.<a href="/src/webauthn.ts">updateCredential</a>(credentialId, displayName) -> Promise&lt;UpdateCredentialResponse&gt;</code></summary>
+<details><summary><code>client.webauthn.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/webauthn.ts">updateCredential</a>(credentialId, displayName) -> Promise&lt;UpdateCredentialResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5053,7 +5511,7 @@ const response = await scalekitClient.webauthn.updateCredential(
 </dl>
 </details>
 
-<details><summary><code>client.webauthn.<a href="/src/webauthn.ts">deleteCredential</a>(credentialId) -> Promise&lt;DeleteCredentialResponse&gt;</code></summary>
+<details><summary><code>client.webauthn.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/webauthn.ts">deleteCredential</a>(credentialId) -> Promise&lt;DeleteCredentialResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5110,7 +5568,7 @@ console.log('Deleted:', response.success);
 
 ## Auth
 
-<details><summary><code>client.auth.<a href="/src/auth.ts">updateLoginUserDetails</a>(connectionId, loginRequestId, user) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.auth.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/src/auth.ts">updateLoginUserDetails</a>(connectionId, loginRequestId, user) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
