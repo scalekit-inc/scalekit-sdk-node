@@ -71,7 +71,7 @@ Untested code paths in auth flows create silent failure modes.
 
 Every public method, class, and interface MUST have JSDoc documentation
 with `@param`, `@returns`, `@throws`, and `@example` tags. The README
-MUST be kept current with API changes. `reference.md` MUST be updated to
+MUST be kept current with API changes. `REFERENCE.md` MUST be updated to
 reflect all SDK methods with usage examples following the established
 collapsible format:
 
@@ -82,7 +82,7 @@ collapsible format:
 - Every method MUST have at least one real-world usage example.
 - Breaking changes MUST be documented in CHANGELOG.md with migration
   guides.
-- `reference.md` MUST be included in the npm package for offline
+- `REFERENCE.md` MUST be included in the npm package for offline
   reference.
 
 **Rationale**: Documentation is the primary interface for SDK consumers.
@@ -137,7 +137,7 @@ Incomplete or stale docs are functionally equivalent to missing features.
 - CHANGELOG.md MUST be updated with every release.
 - Breaking changes MUST include a migration guide in docs.
 - The npm package MUST include only built artifacts (`lib/`) and
-  essential files (README, LICENSE, reference.md, package.json).
+  essential files (README, LICENSE, REFERENCE.md, package.json).
 
 ## Governance
 
@@ -158,7 +158,7 @@ documentation standards. The following governance rules apply:
    and backward compatibility.
 4. **Documentation Independence**: Documentation-only improvements are
    encouraged and MAY be merged independently of code changes.
-5. **Runtime Guidance**: Use the project README and `reference.md` as
+5. **Runtime Guidance**: Use the project README and `REFERENCE.md` as
    the primary developer-facing guidance documents.
 
 **Version**: 1.0.0 | **Ratified**: 2026-02-15 | **Last Amended**: 2026-02-15
