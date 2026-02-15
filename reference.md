@@ -50,7 +50,7 @@ const scalekitClient = new ScalekitClient(
 
 ## ScalekitClient
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/scalekit.ts">getAuthorizationUrl</a>(redirectUri, options?) -> string</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts">getAuthorizationUrl</a>(redirectUri, options?) -> string</code></summary>
 <dl>
 <dd>
 
@@ -133,7 +133,7 @@ const authUrl = scalekitClient.getAuthorizationUrl(
 </dl>
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/scalekit.ts">authenticateWithCode</a>(code, redirectUri, options?) -> Promise&lt;AuthenticationResponse&gt;</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts">authenticateWithCode</a>(code, redirectUri, options?) -> Promise&lt;AuthenticationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -218,7 +218,7 @@ app.get('/auth/callback', async (req, res) => {
 </dl>
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-mdhttps://github.com/scalekit-inc/scalekit-sdk-node/src/scalekit.ts">getIdpInitiatedLoginClaims</a>(idpInitiatedLoginToken, options?) -> Promise&lt;IdpInitiatedLoginClaims&gt;</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts">getIdpInitiatedLoginClaims</a>(idpInitiatedLoginToken, options?) -> Promise&lt;IdpInitiatedLoginClaims&gt;</code></summary>
 <dl>
 <dd>
 
@@ -300,7 +300,7 @@ app.get('/auth/callback', async (req, res) => {
 </dl>
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-mdhttps://github.com/scalekit-inc/scalekit-sdk-node/src/scalekit.ts">validateAccessToken</a>(token, options?) -> Promise&lt;boolean&gt;</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts">validateAccessToken</a>(token, options?) -> Promise&lt;boolean&gt;</code></summary>
 <dl>
 <dd>
 
@@ -365,7 +365,7 @@ if (isValid) {
 </dl>
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-mdhttps://github.com/scalekit-inc/scalekit-sdk-node/src/scalekit.ts">getLogoutUrl</a>(options?) -> string</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts">getLogoutUrl</a>(options?) -> string</code></summary>
 <dl>
 <dd>
 
@@ -547,7 +547,7 @@ const hasScopes = scalekitClient.verifyScopes(accessToken, ['read:user', 'write:
 
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-mdhttps://github.com/scalekit-inc/scalekit-sdk-node/src/scalekit.ts">verifyWebhookPayload</a>(secret, headers, payload) -> boolean</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts">verifyWebhookPayload</a>(secret, headers, payload) -> boolean</code></summary>
 <dl>
 <dd>
 
@@ -640,7 +640,7 @@ app.post('/webhooks/scalekit', express.raw({ type: 'application/json' }), (req, 
 </dl>
 </details>
 
-<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/scalekit.ts">verifyInterceptorPayload</a>(secret, headers, payload) -> boolean</code></summary>
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts">verifyInterceptorPayload</a>(secret, headers, payload) -> boolean</code></summary>
 <dl>
 <dd>
 
@@ -995,7 +995,7 @@ try {
 
 ## Organizations
 
-<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/organization.ts">createOrganization</a>(name, options?) -> Promise&lt;CreateOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/organization.ts">createOrganization</a>(name, options?) -> Promise&lt;CreateOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1065,7 +1065,7 @@ console.log('Organization ID:', org.organization.id);
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/organization.ts">listOrganization</a>(options?) -> Promise&lt;ListOrganizationsResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/organization.ts">listOrganization</a>(options?) -> Promise&lt;ListOrganizationsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1128,7 +1128,7 @@ console.log('Total:', response.totalSize);
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/organization.ts">getOrganization</a>(id) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/organization.ts">getOrganization</a>(id) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1188,7 +1188,7 @@ console.log('External ID:', org.externalId);
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/organization.ts">getOrganizationByExternalId</a>(externalId) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/organization.ts">getOrganizationByExternalId</a>(externalId) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1248,7 +1248,7 @@ console.log('Organization:', org.displayName);
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/organization.ts">updateOrganization</a>(id, organization) -> Promise&lt;UpdateOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/organization.ts">updateOrganization</a>(id, organization) -> Promise&lt;UpdateOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1318,7 +1318,7 @@ const response = await scalekitClient.organization.updateOrganization('org_12345
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/organization.ts">updateOrganizationByExternalId</a>(externalId, organization) -> Promise&lt;UpdateOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/organization.ts">updateOrganizationByExternalId</a>(externalId, organization) -> Promise&lt;UpdateOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1385,7 +1385,7 @@ const response = await scalekitClient.organization.updateOrganizationByExternalI
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/organization.ts">deleteOrganization</a>(organizationId) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/organization.ts">deleteOrganization</a>(organizationId) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1442,7 +1442,7 @@ console.log('Organization deleted successfully');
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/organization.ts">generatePortalLink</a>(organizationId) -> Promise&lt;Link&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/organization.ts">generatePortalLink</a>(organizationId) -> Promise&lt;Link&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1504,7 +1504,7 @@ app.get('/admin/sso-settings', async (req, res) => {
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/organization.ts">updateOrganizationSettings</a>(organizationId, settings) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/organization.ts">updateOrganizationSettings</a>(organizationId, settings) -> Promise&lt;GetOrganizationResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1573,7 +1573,7 @@ const response = await scalekitClient.organization.updateOrganizationSettings('o
 </dl>
 </details>
 
-<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/organization.ts">upsertUserManagementSettings</a>(organizationId, settings) -> Promise&lt;OrganizationUserManagementSettings | undefined&gt;</code></summary>
+<details><summary><code>client.organization.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/organization.ts">upsertUserManagementSettings</a>(organizationId, settings) -> Promise&lt;OrganizationUserManagementSettings | undefined&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1644,7 +1644,7 @@ console.log('Max users allowed:', settings?.maxAllowedUsers);
 
 ## Connections
 
-<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/connection.ts">getConnection</a>(organizationId, id) -> Promise&lt;GetConnectionResponse&gt;</code></summary>
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">getConnection</a>(organizationId, id) -> Promise&lt;GetConnectionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1716,7 +1716,7 @@ console.log('Status:', conn.enabled ? 'Enabled' : 'Disabled');
 </dl>
 </details>
 
-<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/connection.ts">listConnectionsByDomain</a>(domain) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">listConnectionsByDomain</a>(domain) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1778,7 +1778,7 @@ if (response.connections.length > 0) {
 </dl>
 </details>
 
-<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/connection.ts">listConnections</a>(organizationId) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">listConnections</a>(organizationId) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1839,7 +1839,7 @@ response.connections.forEach(conn => {
 </dl>
 </details>
 
-<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/connection.ts">enableConnection</a>(organizationId, id) -> Promise&lt;ToggleConnectionResponse&gt;</code></summary>
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">enableConnection</a>(organizationId, id) -> Promise&lt;ToggleConnectionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1908,7 +1908,7 @@ console.log('Connection enabled:', response.connection.enabled);
 </dl>
 </details>
 
-<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/connection.ts">disableConnection</a>(organizationId, id) -> Promise&lt;ToggleConnectionResponse&gt;</code></summary>
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">disableConnection</a>(organizationId, id) -> Promise&lt;ToggleConnectionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -1979,7 +1979,7 @@ console.log('Connection disabled:', !response.connection.enabled);
 
 ## Users
 
-<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/user.ts">createUserAndMembership</a>(organizationId, options) -> Promise&lt;CreateUserAndMembershipResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/user.ts">createUserAndMembership</a>(organizationId, options) -> Promise&lt;CreateUserAndMembershipResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2062,7 +2062,7 @@ console.log('User created:', response.user.id);
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/user.ts">getUser</a>(userId) -> Promise&lt;GetUserResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/user.ts">getUser</a>(userId) -> Promise&lt;GetUserResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2123,7 +2123,7 @@ console.log('Organizations:', user.memberships?.length);
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/user.ts">listUsers</a>(options?) -> Promise&lt;ListUsersResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/user.ts">listUsers</a>(options?) -> Promise&lt;ListUsersResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2186,7 +2186,7 @@ console.log('Total users:', response.totalSize);
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/user.ts">updateUser</a>(userId, options) -> Promise&lt;UpdateUserResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/user.ts">updateUser</a>(userId, options) -> Promise&lt;UpdateUserResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2259,7 +2259,7 @@ const response = await scalekitClient.user.updateUser('usr_123456', {
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/user.ts">deleteUser</a>(userId) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/user.ts">deleteUser</a>(userId) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2316,7 +2316,7 @@ console.log('User deleted successfully');
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/user.ts">createMembership</a>(organizationId, userId, options?) -> Promise&lt;CreateMembershipResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/user.ts">createMembership</a>(organizationId, userId, options?) -> Promise&lt;CreateMembershipResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2398,7 +2398,7 @@ const response = await scalekitClient.user.createMembership(
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/user.ts">deleteMembership</a>(organizationId, userId) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/user.ts">deleteMembership</a>(organizationId, userId) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2463,7 +2463,7 @@ console.log('User removed from organization');
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/user.ts">updateMembership</a>(organizationId, userId, options?) -> Promise&lt;UpdateMembershipResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/user.ts">updateMembership</a>(organizationId, userId, options?) -> Promise&lt;UpdateMembershipResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2541,7 +2541,7 @@ const response = await scalekitClient.user.updateMembership(
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/user.ts">listOrganizationUsers</a>(organizationId, options?) -> Promise&lt;ListOrganizationUsersResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/user.ts">listOrganizationUsers</a>(organizationId, options?) -> Promise&lt;ListOrganizationUsersResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2612,7 +2612,7 @@ console.log('Total members:', response.totalSize);
 </dl>
 </details>
 
-<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/user.ts">resendInvite</a>(organizationId, userId) -> Promise&lt;ResendInviteResponse&gt;</code></summary>
+<details><summary><code>client.user.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/user.ts">resendInvite</a>(organizationId, userId) -> Promise&lt;ResendInviteResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2679,7 +2679,7 @@ console.log('Invitation resent:', response.invite);
 
 ## Domains
 
-<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/domain.ts">createDomain</a>(organizationId, name, options?) -> Promise&lt;CreateDomainResponse&gt;</code></summary>
+<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/domain.ts">createDomain</a>(organizationId, name, options?) -> Promise&lt;CreateDomainResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2762,7 +2762,7 @@ console.log('Domain created:', response.domain.id);
 </dl>
 </details>
 
-<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/domain.ts">getDomain</a>(organizationId, domainId) -> Promise&lt;GetDomainResponse&gt;</code></summary>
+<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/domain.ts">getDomain</a>(organizationId, domainId) -> Promise&lt;GetDomainResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2833,7 +2833,7 @@ console.log('Verified:', response.domain.verificationStatus);
 </dl>
 </details>
 
-<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/domain.ts">listDomains</a>(organizationId, options?) -> Promise&lt;ListDomainResponse&gt;</code></summary>
+<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/domain.ts">listDomains</a>(organizationId, options?) -> Promise&lt;ListDomainResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2903,7 +2903,7 @@ response.domains.forEach(domain => {
 </dl>
 </details>
 
-<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/domain.ts">deleteDomain</a>(organizationId, domainId) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.domain.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/domain.ts">deleteDomain</a>(organizationId, domainId) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -2970,7 +2970,7 @@ console.log('Domain deleted successfully');
 
 ## Directories
 
-<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/directory.ts">listDirectories</a>(organizationId) -> Promise&lt;ListDirectoriesResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/directory.ts">listDirectories</a>(organizationId) -> Promise&lt;ListDirectoriesResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3032,7 +3032,7 @@ response.directories.forEach(dir => {
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/directory.ts">getDirectory</a>(organizationId, directoryId) -> Promise&lt;GetDirectoryResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/directory.ts">getDirectory</a>(organizationId, directoryId) -> Promise&lt;GetDirectoryResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3104,7 +3104,7 @@ console.log('Users:', dir.userCount);
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/directory.ts">getPrimaryDirectoryByOrganizationId</a>(organizationId) -> Promise&lt;Directory&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/directory.ts">getPrimaryDirectoryByOrganizationId</a>(organizationId) -> Promise&lt;Directory&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3163,7 +3163,7 @@ console.log('Users:', directory.userCount);
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/directory.ts">listDirectoryUsers</a>(organizationId, directoryId, options?) -> Promise&lt;ListDirectoryUsersResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/directory.ts">listDirectoryUsers</a>(organizationId, directoryId, options?) -> Promise&lt;ListDirectoryUsersResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3246,7 +3246,7 @@ console.log(`Found ${response.totalSize} users`);
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/directory.ts">listDirectoryGroups</a>(organizationId, directoryId, options?) -> Promise&lt;ListDirectoryGroupsResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/directory.ts">listDirectoryGroups</a>(organizationId, directoryId, options?) -> Promise&lt;ListDirectoryGroupsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3328,7 +3328,7 @@ console.log(`Found ${response.totalSize} groups`);
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/directory.ts">enableDirectory</a>(organizationId, directoryId) -> Promise&lt;ToggleDirectoryResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/directory.ts">enableDirectory</a>(organizationId, directoryId) -> Promise&lt;ToggleDirectoryResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3397,7 +3397,7 @@ console.log('Directory enabled:', response.directory.enabled);
 </dl>
 </details>
 
-<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/directory.ts">disableDirectory</a>(organizationId, directoryId) -> Promise&lt;ToggleDirectoryResponse&gt;</code></summary>
+<details><summary><code>client.directory.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/directory.ts">disableDirectory</a>(organizationId, directoryId) -> Promise&lt;ToggleDirectoryResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3468,7 +3468,7 @@ console.log('Directory disabled:', !response.directory.enabled);
 
 ## Sessions
 
-<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/session.ts">getSession</a>(sessionId) -> Promise&lt;SessionDetails&gt;</code></summary>
+<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/session.ts">getSession</a>(sessionId) -> Promise&lt;SessionDetails&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3529,7 +3529,7 @@ console.log('Location:', session.geoLocation);
 </dl>
 </details>
 
-<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/session.ts">getUserSessions</a>(userId, options?) -> Promise&lt;UserSessionDetails&gt;</code></summary>
+<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/session.ts">getUserSessions</a>(userId, options?) -> Promise&lt;UserSessionDetails&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3604,7 +3604,7 @@ console.log(`User has ${response.totalSize} active sessions`);
 </dl>
 </details>
 
-<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/session.ts">revokeSession</a>(sessionId) -> Promise&lt;RevokeSessionResponse&gt;</code></summary>
+<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/session.ts">revokeSession</a>(sessionId) -> Promise&lt;RevokeSessionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3661,7 +3661,7 @@ console.log('Session revoked at:', response.revokedAt);
 </dl>
 </details>
 
-<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/session.ts">revokeAllUserSessions</a>(userId) -> Promise&lt;RevokeAllUserSessionsResponse&gt;</code></summary>
+<details><summary><code>client.session.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/session.ts">revokeAllUserSessions</a>(userId) -> Promise&lt;RevokeAllUserSessionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3721,7 +3721,7 @@ console.log(`Revoked ${response.totalCount} sessions`);
 
 ## Roles
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">createRole</a>(role) -> Promise&lt;CreateRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">createRole</a>(role) -> Promise&lt;CreateRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3787,7 +3787,7 @@ const response = await scalekitClient.role.createRole({
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">getRole</a>(roleName) -> Promise&lt;GetRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">getRole</a>(roleName) -> Promise&lt;GetRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3843,7 +3843,7 @@ console.log('Permissions:', response.role.permissions);
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">listRoles</a>() -> Promise&lt;ListRolesResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">listRoles</a>() -> Promise&lt;ListRolesResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3900,7 +3900,7 @@ None
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">updateRole</a>(roleName, role) -> Promise&lt;UpdateRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">updateRole</a>(roleName, role) -> Promise&lt;UpdateRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -3967,7 +3967,7 @@ await scalekitClient.role.updateRole('content_editor', {
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">deleteRole</a>(roleName, reassignRoleName?) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">deleteRole</a>(roleName, reassignRoleName?) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4031,7 +4031,7 @@ await scalekitClient.role.deleteRole('old_role', 'new_role');
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">getRoleUsersCount</a>(roleName) -> Promise&lt;GetRoleUsersCountResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">getRoleUsersCount</a>(roleName) -> Promise&lt;GetRoleUsersCountResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4088,7 +4088,7 @@ console.log(`${response.count} users have admin role`);
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">createOrganizationRole</a>(orgId, role) -> Promise&lt;CreateOrganizationRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">createOrganizationRole</a>(orgId, role) -> Promise&lt;CreateOrganizationRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4157,7 +4157,7 @@ await scalekitClient.role.createOrganizationRole('org_123456', {
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">getOrganizationRole</a>(orgId, roleName) -> Promise&lt;GetOrganizationRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">getOrganizationRole</a>(orgId, roleName) -> Promise&lt;GetOrganizationRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4224,7 +4224,7 @@ console.log('Permissions:', response.role.permissions);
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">listOrganizationRoles</a>(orgId) -> Promise&lt;ListOrganizationRolesResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">listOrganizationRoles</a>(orgId) -> Promise&lt;ListOrganizationRolesResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4283,7 +4283,7 @@ response.roles.forEach(role => {
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">updateOrganizationRole</a>(orgId, roleName, role) -> Promise&lt;UpdateOrganizationRoleResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">updateOrganizationRole</a>(orgId, roleName, role) -> Promise&lt;UpdateOrganizationRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4357,7 +4357,7 @@ await scalekitClient.role.updateOrganizationRole('org_123456', 'department_lead'
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">deleteOrganizationRole</a>(orgId, roleName, reassignRoleName?) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">deleteOrganizationRole</a>(orgId, roleName, reassignRoleName?) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4433,7 +4433,7 @@ await scalekitClient.role.deleteOrganizationRole(
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">getOrganizationRoleUsersCount</a>(orgId, roleName) -> Promise&lt;GetOrganizationRoleUsersCountResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">getOrganizationRoleUsersCount</a>(orgId, roleName) -> Promise&lt;GetOrganizationRoleUsersCountResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4500,7 +4500,7 @@ console.log(`${response.count} admins in this organization`);
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">updateDefaultOrganizationRoles</a>(orgId, defaultMemberRole) -> Promise&lt;UpdateDefaultOrganizationRolesResponse&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">updateDefaultOrganizationRoles</a>(orgId, defaultMemberRole) -> Promise&lt;UpdateDefaultOrganizationRolesResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4564,7 +4564,7 @@ await scalekitClient.role.updateDefaultOrganizationRoles('org_123456', 'member')
 </dl>
 </details>
 
-<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/role.ts">deleteOrganizationRoleBase</a>(orgId, roleName) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.role.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/role.ts">deleteOrganizationRoleBase</a>(orgId, roleName) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4630,7 +4630,7 @@ await scalekitClient.role.deleteOrganizationRoleBase('org_123456', 'custom_role'
 
 ## Permissions
 
-<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/permission.ts">createPermission</a>(permission) -> Promise&lt;CreatePermissionResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/permission.ts">createPermission</a>(permission) -> Promise&lt;CreatePermissionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4691,7 +4691,7 @@ await scalekitClient.permission.createPermission({
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/permission.ts">getPermission</a>(permissionName) -> Promise&lt;GetPermissionResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/permission.ts">getPermission</a>(permissionName) -> Promise&lt;GetPermissionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4746,7 +4746,7 @@ console.log('Description:', response.permission.description);
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/permission.ts">listPermissions</a>(pageToken?, pageSize?) -> Promise&lt;ListPermissionsResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/permission.ts">listPermissions</a>(pageToken?, pageSize?) -> Promise&lt;ListPermissionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4813,7 +4813,7 @@ response.permissions.forEach(perm => {
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/permission.ts">updatePermission</a>(permissionName, permission) -> Promise&lt;UpdatePermissionResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/permission.ts">updatePermission</a>(permissionName, permission) -> Promise&lt;UpdatePermissionResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4880,7 +4880,7 @@ await scalekitClient.permission.updatePermission('read:invoices', {
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/permission.ts">deletePermission</a>(permissionName) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/permission.ts">deletePermission</a>(permissionName) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4936,7 +4936,7 @@ await scalekitClient.permission.deletePermission('deprecated:feature');
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/permission.ts">listRolePermissions</a>(roleName) -> Promise&lt;ListRolePermissionsResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/permission.ts">listRolePermissions</a>(roleName) -> Promise&lt;ListRolePermissionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -4993,7 +4993,7 @@ console.log('Direct permissions:', response.permissions);
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/permission.ts">addPermissionsToRole</a>(roleName, permissionNames) -> Promise&lt;AddPermissionsToRoleResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/permission.ts">addPermissionsToRole</a>(roleName, permissionNames) -> Promise&lt;AddPermissionsToRoleResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5061,7 +5061,7 @@ await scalekitClient.permission.addPermissionsToRole('editor', [
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/permission.ts">removePermissionFromRole</a>(roleName, permissionName) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/permission.ts">removePermissionFromRole</a>(roleName, permissionName) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5125,7 +5125,7 @@ await scalekitClient.permission.removePermissionFromRole('editor', 'delete:docum
 </dl>
 </details>
 
-<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/permission.ts">listEffectiveRolePermissions</a>(roleName) -> Promise&lt;ListEffectiveRolePermissionsResponse&gt;</code></summary>
+<details><summary><code>client.permission.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/permission.ts">listEffectiveRolePermissions</a>(roleName) -> Promise&lt;ListEffectiveRolePermissionsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5185,7 +5185,7 @@ console.log('Total effective permissions:', response.permissions.length);
 
 ## Passwordless
 
-<details><summary><code>client.passwordless.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/passwordless.ts">sendPasswordlessEmail</a>(email, options?) -> Promise&lt;SendPasswordlessResponse&gt;</code></summary>
+<details><summary><code>client.passwordless.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/passwordless.ts">sendPasswordlessEmail</a>(email, options?) -> Promise&lt;SendPasswordlessResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5261,7 +5261,7 @@ console.log('Auth Request ID:', response.authRequestId);
 </dl>
 </details>
 
-<details><summary><code>client.passwordless.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/passwordless.ts">verifyPasswordlessEmail</a>(credential, authRequestId?) -> Promise&lt;VerifyPasswordLessResponse&gt;</code></summary>
+<details><summary><code>client.passwordless.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/passwordless.ts">verifyPasswordlessEmail</a>(credential, authRequestId?) -> Promise&lt;VerifyPasswordLessResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5330,7 +5330,7 @@ console.log('Email:', response.email);
 </dl>
 </details>
 
-<details><summary><code>client.passwordless.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/passwordless.ts">resendPasswordlessEmail</a>(authRequestId) -> Promise&lt;SendPasswordlessResponse&gt;</code></summary>
+<details><summary><code>client.passwordless.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/passwordless.ts">resendPasswordlessEmail</a>(authRequestId) -> Promise&lt;SendPasswordlessResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5386,7 +5386,7 @@ const response = await scalekitClient.passwordless.resendPasswordlessEmail('auth
 
 ## WebAuthn
 
-<details><summary><code>client.webauthn.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/webauthn.ts">listCredentials</a>(userId) -> Promise&lt;ListCredentialsResponse&gt;</code></summary>
+<details><summary><code>client.webauthn.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/webauthn.ts">listCredentials</a>(userId) -> Promise&lt;ListCredentialsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5441,7 +5441,7 @@ console.log('Credentials:', response.credentials);
 </dl>
 </details>
 
-<details><summary><code>client.webauthn.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/webauthn.ts">updateCredential</a>(credentialId, displayName) -> Promise&lt;UpdateCredentialResponse&gt;</code></summary>
+<details><summary><code>client.webauthn.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/webauthn.ts">updateCredential</a>(credentialId, displayName) -> Promise&lt;UpdateCredentialResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5506,7 +5506,7 @@ const response = await scalekitClient.webauthn.updateCredential(
 </dl>
 </details>
 
-<details><summary><code>client.webauthn.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/webauthn.ts">deleteCredential</a>(credentialId) -> Promise&lt;DeleteCredentialResponse&gt;</code></summary>
+<details><summary><code>client.webauthn.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/webauthn.ts">deleteCredential</a>(credentialId) -> Promise&lt;DeleteCredentialResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5563,7 +5563,7 @@ console.log('Deleted:', response.success);
 
 ## Auth
 
-<details><summary><code>client.auth.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/speckit-reference-md/src/auth.ts">updateLoginUserDetails</a>(connectionId, loginRequestId, user) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.auth.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/auth.ts">updateLoginUserDetails</a>(connectionId, loginRequestId, user) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
 <dd>
 
