@@ -114,6 +114,8 @@ dist
 .opencode/
 .specify/
 spec/
+specs/
+.claude/
 
 # FuseBox cache
 .fusebox/
