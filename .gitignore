@@ -110,6 +110,13 @@ dist
 # Serverless directories
 .serverless/
 
+#AI tools
+.opencode/
+.specify/
+spec/
+specs/
+.claude/
+
 # FuseBox cache
 .fusebox/
 
