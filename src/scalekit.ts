@@ -685,8 +685,16 @@ export default class ScalekitClient {
         this.verifyScopes(token, options.requiredScopes);
       }
 
-      // Expose raw JWT payload as claims for IdTokenClaim / AccessTokenClaims (and any T that has claims)
-      return { ...payload, claims: { ...payload } } as T;
+      // Normalize aud: JWT can be string | string[], AccessTokenClaims expects string[]
+      const aud =
+        payload.aud === undefined
+          ? undefined
+          : Array.isArray(payload.aud)
+            ? payload.aud
+            : [payload.aud];
+
+      // Expose full payload as claims (like Go SDK); top-level keys satisfy T (IdpInitiatedLoginClaims, AccessTokenClaims, etc.)
+      return { ...payload, aud, claims: { ...payload } } as T;
     } catch (error) {
       throw new ScalekitValidateTokenFailureException(error);
     }
