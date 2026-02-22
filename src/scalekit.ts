@@ -310,6 +310,7 @@ export default class ScalekitClient {
         user[IdTokenClaimToUserMap[k]] = v;
       }
     }
+    user.claims = {...claims} as Record<string, any>;
 
     return {
       user,
@@ -399,6 +400,30 @@ export default class ScalekitClient {
     } catch (_) {
       return false;
     }
+  }
+
+  /**
+   * Validates a token and returns the typed claims with all raw claims included.
+   *
+   * @param {string} token The token to be validated
+   * @param {TokenValidationOptions} [options] Optional validation options for issuer, audience, and scopes
+   * @return {Promise<T>} Returns the validated token claims typed as T (includes a `claims` property with all raw claims)
+   * @throws {ScalekitValidateTokenFailureException} If token is invalid or missing required scopes
+   *
+   * @example
+   * const idTokenClaims = await scalekitClient.getTokenClaims<IdTokenClaim>(idToken);
+   * console.log(idTokenClaims.sub);
+   * console.log(idTokenClaims.claims); // all raw claims
+   *
+   * const accessTokenClaims = await scalekitClient.getTokenClaims<AccessTokenClaims>(accessToken);
+   * console.log(accessTokenClaims.sub);
+   * console.log(accessTokenClaims.claims); // all raw claims
+   */
+  async getTokenClaims<T>(
+    token: string,
+    options?: TokenValidationOptions
+  ): Promise<T> {
+    return this.validateToken<T>(token, options);
   }
 
   /**
@@ -593,7 +618,7 @@ export default class ScalekitClient {
    *
    * @param {string} token The token to be validated
    * @param {TokenValidationOptions} options Optional validation options for issuer, audience, and scopes
-   * @return {Promise<T>} Returns the token payload if valid
+   * @return {Promise<T>} Returns the token payload if valid (includes a `claims` property with all raw claims)
    * @throws {ScalekitValidateTokenFailureException} If token is invalid or missing required scopes
    */
   async validateToken<T>(
@@ -605,7 +630,7 @@ export default class ScalekitClient {
       keys: this.coreClient.keys,
     });
     try {
-      const { payload } = await jose.jwtVerify<T>(token, jwks, {
+      const { payload } = await jose.jwtVerify<Record<string, any>>(token, jwks, {
         ...(options?.issuer && { issuer: options.issuer }),
         ...(options?.audience && { audience: options.audience }),
       });
@@ -614,7 +639,9 @@ export default class ScalekitClient {
         this.verifyScopes(token, options.requiredScopes);
       }
 
-      return payload;
+      payload.claims = { ...payload };
+
+      return payload as T;
     } catch (error) {
       throw new ScalekitValidateTokenFailureException(error);
     }

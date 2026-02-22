@@ -1,7 +1,9 @@
 import ScalekitClient from '../src/scalekit';
 import { AuthenticationOptions } from '../src/types/scalekit';
+import { AccessTokenClaims } from '../src/types/auth';
 import { describe, it, expect, beforeEach } from '@jest/globals';
 import { TestDataGenerator } from './utils/test-data';
+import axios from 'axios';
 
 describe('ScalekitClient', () => {
   let client: ScalekitClient;
@@ -99,6 +101,70 @@ describe('ScalekitClient', () => {
         // Expected failure with mock token
         expect(error).toBeDefined();
       }
+    });
+  });
+
+  describe('getTokenClaims', () => {
+    it('should fetch client access token and validate claims via getTokenClaims', async () => {
+      const envUrl = process.env.SCALEKIT_ENVIRONMENT_URL!;
+      const clientId = process.env.SCALEKIT_CLIENT_ID!;
+      const clientSecret = process.env.SCALEKIT_CLIENT_SECRET!;
+
+      const tokenResponse = await axios.post(
+        `${envUrl}/oauth/token`,
+        new URLSearchParams({
+          grant_type: 'client_credentials',
+          client_id: clientId,
+          client_secret: clientSecret,
+        }).toString(),
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+      );
+
+      const accessToken = tokenResponse.data.access_token;
+      expect(accessToken).toBeDefined();
+      expect(typeof accessToken).toBe('string');
+
+      const result = await client.getTokenClaims<AccessTokenClaims>(accessToken);
+
+      expect(result.sub).toBeDefined();
+      expect(result.iss).toBeDefined();
+      expect(result.iss).toContain(envUrl);
+
+      expect(result.claims).toBeDefined();
+      expect(typeof result.claims).toBe('object');
+      expect(result.claims.sub).toBe(result.sub);
+      expect(result.claims.iss).toBe(result.iss);
+    });
+
+    it('should include all raw JWT fields in claims', async () => {
+      const envUrl = process.env.SCALEKIT_ENVIRONMENT_URL!;
+      const clientId = process.env.SCALEKIT_CLIENT_ID!;
+      const clientSecret = process.env.SCALEKIT_CLIENT_SECRET!;
+
+      const tokenResponse = await axios.post(
+        `${envUrl}/oauth/token`,
+        new URLSearchParams({
+          grant_type: 'client_credentials',
+          client_id: clientId,
+          client_secret: clientSecret,
+        }).toString(),
+        { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+      );
+
+      const accessToken = tokenResponse.data.access_token;
+      const result = await client.getTokenClaims<AccessTokenClaims>(accessToken);
+
+      expect(result.claims.iat).toBeDefined();
+      expect(typeof result.claims.iat).toBe('number');
+      expect(result.claims.exp).toBeDefined();
+      expect(typeof result.claims.exp).toBe('number');
+      expect(result.claims.exp).toBeGreaterThan(result.claims.iat);
+    });
+
+    it('should throw for an invalid token', async () => {
+      await expect(
+        client.getTokenClaims<AccessTokenClaims>('invalid-token')
+      ).rejects.toThrow();
     });
   });
 }); 
