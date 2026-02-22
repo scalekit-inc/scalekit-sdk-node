@@ -1,7 +1,9 @@
+import { generateKeyPair, exportJWK, SignJWT, type KeyLike } from 'jose';
 import ScalekitClient from '../src/scalekit';
 import { AuthenticationOptions } from '../src/types/scalekit';
 import { AccessTokenClaims } from '../src/types/auth';
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { ScalekitValidateTokenFailureException } from '../src/errors/base-exception';
+import { describe, it, expect, beforeEach, beforeAll } from '@jest/globals';
 import { TestDataGenerator } from './utils/test-data';
 import axios from 'axios';
 
@@ -165,6 +167,85 @@ describe('ScalekitClient', () => {
       await expect(
         client.getTokenClaims<AccessTokenClaims>('invalid-token')
       ).rejects.toThrow();
+    });
+  });
+
+  /**
+   * Unit tests for validateToken / getTokenClaims.
+   *
+   * These tests generate a local RSA key pair and inject it directly into the
+   * client so no live Scalekit environment is required.
+   */
+  describe('validateToken (unit)', () => {
+    let unitClient: ScalekitClient;
+    let privateKey: KeyLike;
+
+    const SUBJECT = 'user_unit_01';
+
+    beforeAll(async () => {
+      const envUrl = process.env.SCALEKIT_ENVIRONMENT_URL!;
+      const keyPair = await generateKeyPair('RS256');
+      privateKey = keyPair.privateKey;
+      const publicJwk = await exportJWK(keyPair.publicKey);
+
+      // Constructor makes no network calls — the JWKS cache is injected below.
+      unitClient = new ScalekitClient(envUrl, 'client_id', 'client_secret');
+
+      // Pre-populate the JWKS cache so getJwks() skips the network fetch.
+      (unitClient as any).coreClient.keys = [{ ...publicJwk, alg: 'RS256' }];
+    });
+
+    it('should mirror all raw JWT payload fields in claims', async () => {
+      const envUrl = process.env.SCALEKIT_ENVIRONMENT_URL!;
+      const token = await new SignJWT({ sub: SUBJECT, iss: envUrl, custom: 'hello' })
+        .setProtectedHeader({ alg: 'RS256' })
+        .setIssuedAt()
+        .setExpirationTime('1h')
+        .sign(privateKey);
+
+      const result = await unitClient.validateToken<{ sub: string; iss: string; custom: string }>(token);
+
+      expect(result.sub).toBe(SUBJECT);
+      expect(result.iss).toBe(envUrl);
+      expect(result.claims.sub).toBe(SUBJECT);
+      expect(result.claims.iss).toBe(envUrl);
+      expect(result.claims.custom).toBe('hello');
+      expect(typeof result.claims.iat).toBe('number');
+      expect(typeof result.claims.exp).toBe('number');
+    });
+
+    it('should not nest claims inside claims', async () => {
+      const envUrl = process.env.SCALEKIT_ENVIRONMENT_URL!;
+      const token = await new SignJWT({ sub: SUBJECT, iss: envUrl })
+        .setProtectedHeader({ alg: 'RS256' })
+        .setIssuedAt()
+        .setExpirationTime('1h')
+        .sign(privateKey);
+
+      const result = await unitClient.validateToken<{ sub: string; iss: string }>(token);
+
+      expect(result.claims.claims).toBeUndefined();
+    });
+
+    it('should throw ScalekitValidateTokenFailureException for an invalid token', async () => {
+      await expect(
+        unitClient.validateToken('invalid-token')
+      ).rejects.toBeInstanceOf(ScalekitValidateTokenFailureException);
+    });
+
+    it('should return claims via getTokenClaims', async () => {
+      const envUrl = process.env.SCALEKIT_ENVIRONMENT_URL!;
+      const token = await new SignJWT({ sub: SUBJECT, iss: envUrl })
+        .setProtectedHeader({ alg: 'RS256' })
+        .setIssuedAt()
+        .setExpirationTime('1h')
+        .sign(privateKey);
+
+      const result = await unitClient.getTokenClaims<{ sub: string; iss: string }>(token);
+
+      expect(result.sub).toBe(SUBJECT);
+      expect(result.claims.sub).toBe(SUBJECT);
+      expect(result.claims.iss).toBe(envUrl);
     });
   });
 }); 

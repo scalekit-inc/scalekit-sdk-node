@@ -422,7 +422,7 @@ export default class ScalekitClient {
   async getTokenClaims<T>(
     token: string,
     options?: TokenValidationOptions
-  ): Promise<T> {
+  ): Promise<T & { claims: Record<string, any> }> {
     return this.validateToken<T>(token, options);
   }
 
@@ -624,7 +624,7 @@ export default class ScalekitClient {
   async validateToken<T>(
     token: string,
     options?: TokenValidationOptions
-  ): Promise<T> {
+  ): Promise<T & { claims: Record<string, any> }> {
     await this.coreClient.getJwks();
     const jwks = jose.createLocalJWKSet({
       keys: this.coreClient.keys,
@@ -639,9 +639,7 @@ export default class ScalekitClient {
         this.verifyScopes(token, options.requiredScopes);
       }
 
-      payload.claims = { ...payload };
-
-      return payload as T;
+      return { ...payload, claims: { ...payload } } as T & { claims: Record<string, any> };
     } catch (error) {
       throw new ScalekitValidateTokenFailureException(error);
     }
