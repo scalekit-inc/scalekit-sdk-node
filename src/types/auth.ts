@@ -64,7 +64,7 @@ export type IdTokenClaim = {
 export type AccessTokenClaims = {
   sub: string;
   iss: string;
-  aud: string | string[] | undefined;
+  aud: string[];
   iat: number | undefined;
   exp: number | undefined;
   claims: Record<string, any>;
