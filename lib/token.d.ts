@@ -94,7 +94,8 @@ export default class TokenClient {
      * @returns {Promise<ValidateTokenResponse>} Response containing:
      *   - tokenInfo: Token metadata including organization, user, and custom claims
      *
-     * @throws {Error} If the token is invalid, expired, or not found
+     * @throws {ScalekitValidateTokenFailureException} If the token is invalid, expired, or not found
+     * @throws {ScalekitServerException} If a network or server error occurs
      *
      * @example
      * // Validate a token

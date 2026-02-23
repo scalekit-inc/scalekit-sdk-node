@@ -1,10 +1,11 @@
 import type { MessageShape } from "@bufbuild/protobuf";
 import { EmptySchema } from "@bufbuild/protobuf/wkt";
 import type { Timestamp } from "@bufbuild/protobuf/wkt";
+import { Code } from "@connectrpc/connect";
 import type { Client } from "@connectrpc/connect";
 import GrpcConnect from "./connect";
 import CoreClient from "./core";
-import { ScalekitValidateTokenFailureException } from "./errors/base-exception";
+import { ScalekitServerException, ScalekitValidateTokenFailureException } from "./errors/base-exception";
 import {
   ApiTokenService,
   CreateTokenResponse,
@@ -124,7 +125,8 @@ export default class TokenClient {
    * @returns {Promise<ValidateTokenResponse>} Response containing:
    *   - tokenInfo: Token metadata including organization, user, and custom claims
    *
-   * @throws {Error} If the token is invalid, expired, or not found
+   * @throws {ScalekitValidateTokenFailureException} If the token is invalid, expired, or not found
+   * @throws {ScalekitServerException} If a network or server error occurs
    *
    * @example
    * // Validate a token
@@ -147,7 +149,18 @@ export default class TokenClient {
         token,
       });
     } catch (error) {
-      throw new ScalekitValidateTokenFailureException(error);
+      if (error instanceof ScalekitServerException) {
+        const tokenFailureCodes = new Set([
+          Code.Unauthenticated,
+          Code.NotFound,
+          Code.InvalidArgument,
+          Code.PermissionDenied,
+        ]);
+        if (tokenFailureCodes.has(error.grpcStatus)) {
+          throw new ScalekitValidateTokenFailureException(error);
+        }
+      }
+      throw error;
     }
   }
 
