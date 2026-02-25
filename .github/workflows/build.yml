@@ -2,39 +2,46 @@ name: Build
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
     strategy:
       max-parallel: 1
       matrix:
-        node-version: ['20.x', '22.x']
-
-    # Pass GitHub Secrets as env vars so tests (e.g. integration) can use them.
-    # Create these in: repo Settings → Secrets and variables → Actions.
-    env:
-      SCALEKIT_ENVIRONMENT_URL: ${{ secrets.SCALEKIT_ENVIRONMENT_URL }}
-      SCALEKIT_CLIENT_ID: ${{ secrets.SCALEKIT_CLIENT_ID }}
-      SCALEKIT_CLIENT_SECRET: ${{ secrets.SCALEKIT_CLIENT_SECRET }}
+        node-version: ['20.x', '22.x', '24.x']
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: npm ci
+
+      - name: Prettier
+        run: npm run prettier
 
       - name: Lint
         run: npm run lint
 
+      - name: Build
+        run: npm run build
+
       - name: Test
+        env:
+          SCALEKIT_ENVIRONMENT_URL: ${{ secrets.SCALEKIT_ENVIRONMENT_URL }}
+          SCALEKIT_CLIENT_ID: ${{ secrets.SCALEKIT_CLIENT_ID }}
+          SCALEKIT_CLIENT_SECRET: ${{ secrets.SCALEKIT_CLIENT_SECRET }}
         run: npm test
