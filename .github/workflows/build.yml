@@ -13,6 +13,13 @@ jobs:
       matrix:
         node-version: ['18.x', '20.x']
 
+    # Pass GitHub Secrets as env vars so tests (e.g. integration) can use them.
+    # Create these in: repo Settings → Secrets and variables → Actions.
+    env:
+      SCALEKIT_ENVIRONMENT_URL: ${{ secrets.SCALEKIT_ENVIRONMENT_URL }}
+      SCALEKIT_CLIENT_ID: ${{ secrets.SCALEKIT_CLIENT_ID }}
+      SCALEKIT_CLIENT_SECRET: ${{ secrets.SCALEKIT_CLIENT_SECRET }}
+
     steps:
       - uses: actions/checkout@v4
 
