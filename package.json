@@ -17,6 +17,7 @@
   "scripts": {
     "generate": "npx buf generate $npm_config_src",
     "build": "rm -rf lib && tsc",
+    "lint": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch"
   },
