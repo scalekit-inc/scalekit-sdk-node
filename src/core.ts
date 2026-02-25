@@ -23,7 +23,8 @@ export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
   public axios: Axios;
-  public sdkVersion = `Scalekit-Node/2.3.0`;
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  public sdkVersion = `Scalekit-Node/${(require('../package.json') as { version: string }).version}`;
   public apiVersion = "20260202";
   public userAgent = `${this.sdkVersion} Node/${process.version} (${
     process.platform
