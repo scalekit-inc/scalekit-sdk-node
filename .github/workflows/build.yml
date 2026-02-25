@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: ['18.x', '20.x']
+        node-version: ['20.x', '22.x']
 
     # Pass GitHub Secrets as env vars so tests (e.g. integration) can use them.
     # Create these in: repo Settings → Secrets and variables → Actions.
