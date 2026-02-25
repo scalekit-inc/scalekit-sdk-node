@@ -1,6 +1,11 @@
 import ScalekitClient from '../src/scalekit';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { TestDataGenerator, TestOrganizationManager, TestRoleManager, TestPermissionManager } from './utils/test-data';
+import {
+  TestDataGenerator,
+  TestOrganizationManager,
+  TestRoleManager,
+  TestPermissionManager,
+} from './utils/test-data';
 
 describe('Permissions', () => {
   let client: ScalekitClient;
@@ -12,7 +17,7 @@ describe('Permissions', () => {
   beforeEach(async () => {
     // Use global client
     client = global.client;
-    
+
     // Create test organization for each test
     testOrg = await TestOrganizationManager.createTestOrganization(client);
   });
@@ -23,17 +28,23 @@ describe('Permissions', () => {
       await TestRoleManager.cleanupTestRole(client, testRoleName);
       testRoleName = null;
     }
-    
+
     if (testPermissionName) {
-      await TestPermissionManager.cleanupTestPermission(client, testPermissionName);
+      await TestPermissionManager.cleanupTestPermission(
+        client,
+        testPermissionName
+      );
       testPermissionName = null;
     }
-    
+
     if (testPermissionName2) {
-      await TestPermissionManager.cleanupTestPermission(client, testPermissionName2);
+      await TestPermissionManager.cleanupTestPermission(
+        client,
+        testPermissionName2
+      );
       testPermissionName2 = null;
     }
-    
+
     // Clean up test organization
     await TestOrganizationManager.cleanupTestOrganization(client, testOrg);
   });
@@ -51,8 +62,12 @@ describe('Permissions', () => {
     it('should have role-permission management methods available', () => {
       expect(typeof client.permission.listRolePermissions).toBe('function');
       expect(typeof client.permission.addPermissionsToRole).toBe('function');
-      expect(typeof client.permission.removePermissionFromRole).toBe('function');
-      expect(typeof client.permission.listEffectiveRolePermissions).toBe('function');
+      expect(typeof client.permission.removePermissionFromRole).toBe(
+        'function'
+      );
+      expect(typeof client.permission.listEffectiveRolePermissions).toBe(
+        'function'
+      );
     });
   });
 
@@ -60,30 +75,38 @@ describe('Permissions', () => {
     describe('createPermission', () => {
       it('should create a new permission', async () => {
         const permissionData = TestDataGenerator.generatePermissionData();
-        
-        const response = await client.permission.createPermission(permissionData);
-        
+
+        const response =
+          await client.permission.createPermission(permissionData);
+
         expect(response).toBeDefined();
         expect(response.permission).toBeDefined();
         expect(response.permission?.name).toBe(permissionData.name);
-        expect(response.permission?.description).toBe(permissionData.description);
-        
+        expect(response.permission?.description).toBe(
+          permissionData.description
+        );
+
         testPermissionName = response.permission?.name || null;
       });
 
       it('should throw error when permission name is missing', async () => {
-        const permissionData = TestDataGenerator.generatePermissionData({ name: '' });
-        
+        const permissionData = TestDataGenerator.generatePermissionData({
+          name: '',
+        });
+
         await expect(
           client.permission.createPermission(permissionData)
         ).rejects.toThrow();
       });
 
       it('should allow empty permission description', async () => {
-        const permissionData = TestDataGenerator.generatePermissionData({ description: '' });
-        
-        const response = await client.permission.createPermission(permissionData);
-        
+        const permissionData = TestDataGenerator.generatePermissionData({
+          description: '',
+        });
+
+        const response =
+          await client.permission.createPermission(permissionData);
+
         expect(response).toBeDefined();
         expect(response.permission).toBeDefined();
         expect(response.permission?.name).toBe(permissionData.name);
@@ -95,15 +118,20 @@ describe('Permissions', () => {
       it('should get permission by name', async () => {
         // Create a test permission first
         const permissionData = TestDataGenerator.generatePermissionData();
-        const createResponse = await client.permission.createPermission(permissionData);
+        const createResponse =
+          await client.permission.createPermission(permissionData);
         testPermissionName = createResponse.permission?.name || null;
-        
-        const response = await client.permission.getPermission(testPermissionName!);
-        
+
+        const response = await client.permission.getPermission(
+          testPermissionName!
+        );
+
         expect(response).toBeDefined();
         expect(response.permission).toBeDefined();
         expect(response.permission?.name).toBe(testPermissionName);
-        expect(response.permission?.description).toBe(permissionData.description);
+        expect(response.permission?.description).toBe(
+          permissionData.description
+        );
       });
 
       it('should throw error when permission does not exist', async () => {
@@ -117,18 +145,21 @@ describe('Permissions', () => {
       it('should list all permissions', async () => {
         // Create a test permission first
         const permissionData = TestDataGenerator.generatePermissionData();
-        const createResponse = await client.permission.createPermission(permissionData);
+        const createResponse =
+          await client.permission.createPermission(permissionData);
         testPermissionName = createResponse.permission?.name || null;
-        
+
         const response = await client.permission.listPermissions();
-        
+
         expect(response).toBeDefined();
         expect(response.permissions).toBeDefined();
         expect(Array.isArray(response.permissions)).toBe(true);
         expect(response.permissions.length).toBeGreaterThan(0);
-        
+
         // Verify our test permission is in the list
-        const testPermission = response.permissions.find(permission => permission.name === testPermissionName);
+        const testPermission = response.permissions.find(
+          (permission) => permission.name === testPermissionName
+        );
         expect(testPermission).toBeDefined();
         expect(testPermission?.description).toBe(permissionData.description);
       });
@@ -136,22 +167,27 @@ describe('Permissions', () => {
       it('should handle pagination', async () => {
         // Create multiple test permissions
         const permissionData1 = TestDataGenerator.generatePermissionData();
-        const createResponse1 = await client.permission.createPermission(permissionData1);
+        const createResponse1 =
+          await client.permission.createPermission(permissionData1);
         testPermissionName = createResponse1.permission?.name || null;
-        
+
         const permissionData2 = TestDataGenerator.generatePermissionData();
-        const createResponse2 = await client.permission.createPermission(permissionData2);
+        const createResponse2 =
+          await client.permission.createPermission(permissionData2);
         testPermissionName2 = createResponse2.permission?.name || null;
-        
+
         // List permissions with pagination
         const firstPage = await client.permission.listPermissions(undefined, 1);
-        
+
         expect(firstPage).toBeDefined();
         expect(firstPage.permissions.length).toBeLessThanOrEqual(1);
-        
+
         if (firstPage.nextPageToken) {
-          const secondPage = await client.permission.listPermissions(firstPage.nextPageToken, 1);
-          
+          const secondPage = await client.permission.listPermissions(
+            firstPage.nextPageToken,
+            1
+          );
+
           expect(secondPage).toBeDefined();
           expect(secondPage.permissions).toBeDefined();
         }
@@ -162,15 +198,19 @@ describe('Permissions', () => {
       it('should update an existing permission', async () => {
         // Create a test permission first
         const permissionData = TestDataGenerator.generatePermissionData();
-        const createResponse = await client.permission.createPermission(permissionData);
+        const createResponse =
+          await client.permission.createPermission(permissionData);
         testPermissionName = createResponse.permission?.name || null;
-        
+
         const updateData = TestDataGenerator.generatePermissionData({
           name: testPermissionName!,
-          description: 'Updated permission description'
+          description: 'Updated permission description',
         });
-        const response = await client.permission.updatePermission(testPermissionName!, updateData);
-        
+        const response = await client.permission.updatePermission(
+          testPermissionName!,
+          updateData
+        );
+
         expect(response).toBeDefined();
         expect(response.permission).toBeDefined();
         expect(response.permission?.name).toBe(testPermissionName);
@@ -179,9 +219,12 @@ describe('Permissions', () => {
 
       it('should throw error when updating non-existent permission', async () => {
         const updateData = TestDataGenerator.generatePermissionData();
-        
+
         await expect(
-          client.permission.updatePermission('non.existent.permission', updateData)
+          client.permission.updatePermission(
+            'non.existent.permission',
+            updateData
+          )
         ).rejects.toThrow();
       });
     });
@@ -190,13 +233,16 @@ describe('Permissions', () => {
       it('should delete an existing permission', async () => {
         // Create a test permission first
         const permissionData = TestDataGenerator.generatePermissionData();
-        const createResponse = await client.permission.createPermission(permissionData);
+        const createResponse =
+          await client.permission.createPermission(permissionData);
         const permissionName = createResponse.permission?.name || null;
-        
-        const response = await client.permission.deletePermission(permissionName!);
-        
+
+        const response = await client.permission.deletePermission(
+          permissionName!
+        );
+
         expect(response).toBeDefined();
-        
+
         // Verify permission is deleted
         await expect(
           client.permission.getPermission(permissionName!)
@@ -215,8 +261,10 @@ describe('Permissions', () => {
 
     describe('listRolePermissions', () => {
       it('should list permissions for a role', async () => {
-        const response = await client.permission.listRolePermissions(testRoleName!);
-        
+        const response = await client.permission.listRolePermissions(
+          testRoleName!
+        );
+
         expect(response).toBeDefined();
         expect(response.permissions).toBeDefined();
         expect(Array.isArray(response.permissions)).toBe(true);
@@ -233,28 +281,32 @@ describe('Permissions', () => {
       it('should add permissions to a role', async () => {
         // Create test permissions
         const permissionData1 = TestDataGenerator.generatePermissionData();
-        const createResponse1 = await client.permission.createPermission(permissionData1);
+        const createResponse1 =
+          await client.permission.createPermission(permissionData1);
         testPermissionName = createResponse1.permission?.name || null;
-        
+
         const permissionData2 = TestDataGenerator.generatePermissionData();
-        const createResponse2 = await client.permission.createPermission(permissionData2);
+        const createResponse2 =
+          await client.permission.createPermission(permissionData2);
         testPermissionName2 = createResponse2.permission?.name || null;
-        
+
         // Add permissions to role
-        const response = await client.permission.addPermissionsToRole(testRoleName!, [
-          testPermissionName!,
-          testPermissionName2!
-        ]);
-        
+        const response = await client.permission.addPermissionsToRole(
+          testRoleName!,
+          [testPermissionName!, testPermissionName2!]
+        );
+
         expect(response).toBeDefined();
         expect(response.permissions).toBeDefined();
         expect(Array.isArray(response.permissions)).toBe(true);
         expect(response.permissions.length).toBe(2);
-        
+
         // Verify permissions were added
-        const rolePermissions = await client.permission.listRolePermissions(testRoleName!);
-        const addedPermissions = rolePermissions.permissions.filter(p => 
-          p.name === testPermissionName || p.name === testPermissionName2
+        const rolePermissions = await client.permission.listRolePermissions(
+          testRoleName!
+        );
+        const addedPermissions = rolePermissions.permissions.filter(
+          (p) => p.name === testPermissionName || p.name === testPermissionName2
         );
         expect(addedPermissions.length).toBe(2);
       });
@@ -262,12 +314,16 @@ describe('Permissions', () => {
       it('should add single permission to a role', async () => {
         // Create test permission
         const permissionData = TestDataGenerator.generatePermissionData();
-        const createResponse = await client.permission.createPermission(permissionData);
+        const createResponse =
+          await client.permission.createPermission(permissionData);
         testPermissionName = createResponse.permission?.name || null;
-        
+
         // Add permission to role
-        const response = await client.permission.addPermissionsToRole(testRoleName!, [testPermissionName!]);
-        
+        const response = await client.permission.addPermissionsToRole(
+          testRoleName!,
+          [testPermissionName!]
+        );
+
         expect(response).toBeDefined();
         expect(response.permissions).toBeDefined();
         expect(Array.isArray(response.permissions)).toBe(true);
@@ -276,17 +332,22 @@ describe('Permissions', () => {
 
       it('should throw error when role does not exist', async () => {
         const permissionData = TestDataGenerator.generatePermissionData();
-        const createResponse = await client.permission.createPermission(permissionData);
+        const createResponse =
+          await client.permission.createPermission(permissionData);
         testPermissionName = createResponse.permission?.name || null;
-        
+
         await expect(
-          client.permission.addPermissionsToRole('non-existent-role', [testPermissionName!])
+          client.permission.addPermissionsToRole('non-existent-role', [
+            testPermissionName!,
+          ])
         ).rejects.toThrow();
       });
 
       it('should throw error when permission does not exist', async () => {
         await expect(
-          client.permission.addPermissionsToRole(testRoleName!, ['non.existent.permission'])
+          client.permission.addPermissionsToRole(testRoleName!, [
+            'non.existent.permission',
+          ])
         ).rejects.toThrow();
       });
     });
@@ -295,36 +356,53 @@ describe('Permissions', () => {
       it('should remove permission from a role', async () => {
         // Create test permission
         const permissionData = TestDataGenerator.generatePermissionData();
-        const createResponse = await client.permission.createPermission(permissionData);
+        const createResponse =
+          await client.permission.createPermission(permissionData);
         testPermissionName = createResponse.permission?.name || null;
-        
+
         // Add permission to role first
-        await client.permission.addPermissionsToRole(testRoleName!, [testPermissionName!]);
-        
+        await client.permission.addPermissionsToRole(testRoleName!, [
+          testPermissionName!,
+        ]);
+
         // Remove permission from role
-        const response = await client.permission.removePermissionFromRole(testRoleName!, testPermissionName!);
-        
+        const response = await client.permission.removePermissionFromRole(
+          testRoleName!,
+          testPermissionName!
+        );
+
         expect(response).toBeDefined();
-        
+
         // Verify permission was removed
-        const rolePermissions = await client.permission.listRolePermissions(testRoleName!);
-        const removedPermission = rolePermissions.permissions.find(p => p.name === testPermissionName);
+        const rolePermissions = await client.permission.listRolePermissions(
+          testRoleName!
+        );
+        const removedPermission = rolePermissions.permissions.find(
+          (p) => p.name === testPermissionName
+        );
         expect(removedPermission).toBeUndefined();
       });
 
       it('should throw error when role does not exist', async () => {
         const permissionData = TestDataGenerator.generatePermissionData();
-        const createResponse = await client.permission.createPermission(permissionData);
+        const createResponse =
+          await client.permission.createPermission(permissionData);
         testPermissionName = createResponse.permission?.name || null;
-        
+
         await expect(
-          client.permission.removePermissionFromRole('non-existent-role', testPermissionName!)
+          client.permission.removePermissionFromRole(
+            'non-existent-role',
+            testPermissionName!
+          )
         ).rejects.toThrow();
       });
 
       it('should throw error when permission does not exist', async () => {
         await expect(
-          client.permission.removePermissionFromRole(testRoleName!, 'non.existent.permission')
+          client.permission.removePermissionFromRole(
+            testRoleName!,
+            'non.existent.permission'
+          )
         ).rejects.toThrow();
       });
     });
@@ -333,21 +411,28 @@ describe('Permissions', () => {
       it('should list effective permissions for a role', async () => {
         // Create test permission
         const permissionData = TestDataGenerator.generatePermissionData();
-        const createResponse = await client.permission.createPermission(permissionData);
+        const createResponse =
+          await client.permission.createPermission(permissionData);
         testPermissionName = createResponse.permission?.name || null;
-        
+
         // Add permission to role
-        await client.permission.addPermissionsToRole(testRoleName!, [testPermissionName!]);
-        
+        await client.permission.addPermissionsToRole(testRoleName!, [
+          testPermissionName!,
+        ]);
+
         // Get effective permissions
-        const response = await client.permission.listEffectiveRolePermissions(testRoleName!);
-        
+        const response = await client.permission.listEffectiveRolePermissions(
+          testRoleName!
+        );
+
         expect(response).toBeDefined();
         expect(response.permissions).toBeDefined();
         expect(Array.isArray(response.permissions)).toBe(true);
-        
+
         // Verify our permission is in the effective permissions
-        const effectivePermission = response.permissions.find(p => p.name === testPermissionName);
+        const effectivePermission = response.permissions.find(
+          (p) => p.name === testPermissionName
+        );
         expect(effectivePermission).toBeDefined();
       });
 
@@ -356,33 +441,38 @@ describe('Permissions', () => {
         const baseRoleData = TestDataGenerator.generateRoleData();
         const baseResponse = await client.role.createRole(baseRoleData);
         const baseRoleName = baseResponse.role?.name;
-        
+
         const permissionData = TestDataGenerator.generatePermissionData();
-        const createResponse = await client.permission.createPermission(permissionData);
+        const createResponse =
+          await client.permission.createPermission(permissionData);
         testPermissionName = createResponse.permission?.name || null;
-        
+
         // Add permission to base role
-        await client.permission.addPermissionsToRole(baseRoleName!, [testPermissionName!]);
-        
+        await client.permission.addPermissionsToRole(baseRoleName!, [
+          testPermissionName!,
+        ]);
+
         // Create extended role
         const extendedRoleData = TestDataGenerator.generateRoleData({
-          extends: baseRoleName
+          extends: baseRoleName,
         });
         const extendedResponse = await client.role.createRole(extendedRoleData);
         const extendedRoleName = extendedResponse.role?.name;
-        
+
         // Get effective permissions for extended role (should include inherited permissions)
-        const response = await client.permission.listEffectiveRolePermissions(extendedRoleName!);
-        
+        const response = await client.permission.listEffectiveRolePermissions(
+          extendedRoleName!
+        );
+
         expect(response).toBeDefined();
         expect(response.permissions).toBeDefined();
         expect(Array.isArray(response.permissions)).toBe(true);
-        
+
         // Clean up base role
         if (baseRoleName) {
           await TestRoleManager.cleanupTestRole(client, baseRoleName);
         }
-        
+
         // Clean up extended role
         if (extendedRoleName) {
           await TestRoleManager.cleanupTestRole(client, extendedRoleName);

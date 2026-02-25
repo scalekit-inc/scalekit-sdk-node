@@ -1,10 +1,10 @@
-import type { MessageShape } from "@bufbuild/protobuf";
-import { create } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import type { Client } from "@connectrpc/connect";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { RolesService } from "./pkg/grpc/scalekit/v1/roles/roles_pb";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { create } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import type { Client } from '@connectrpc/connect';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { RolesService } from './pkg/grpc/scalekit/v1/roles/roles_pb';
 import {
   CreateRoleRequest,
   CreateRoleResponse,
@@ -36,7 +36,7 @@ import {
   CreateRole,
   UpdateRole,
   CreateOrganizationRole,
-} from "./pkg/grpc/scalekit/v1/roles/roles_pb";
+} from './pkg/grpc/scalekit/v1/roles/roles_pb';
 
 /**
  * Client for managing roles at both environment and organization levels.

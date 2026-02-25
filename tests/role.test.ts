@@ -1,6 +1,10 @@
 import ScalekitClient from '../src/scalekit';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { TestDataGenerator, TestOrganizationManager, TestRoleManager } from './utils/test-data';
+import {
+  TestDataGenerator,
+  TestOrganizationManager,
+  TestRoleManager,
+} from './utils/test-data';
 
 describe('Roles', () => {
   let client: ScalekitClient;
@@ -11,7 +15,7 @@ describe('Roles', () => {
   beforeEach(async () => {
     // Use global client
     client = global.client;
-    
+
     // Create test organization for each test
     testOrg = await TestOrganizationManager.createTestOrganization(client);
   });
@@ -22,12 +26,16 @@ describe('Roles', () => {
       await TestRoleManager.cleanupTestRole(client, testRoleName);
       testRoleName = null;
     }
-    
+
     if (testOrgRoleName) {
-      await TestRoleManager.cleanupTestOrganizationRole(client, testOrg, testOrgRoleName);
+      await TestRoleManager.cleanupTestOrganizationRole(
+        client,
+        testOrg,
+        testOrgRoleName
+      );
       testOrgRoleName = null;
     }
-    
+
     // Clean up test organization
     await TestOrganizationManager.cleanupTestOrganization(client, testOrg);
   });
@@ -50,7 +58,9 @@ describe('Roles', () => {
       expect(typeof client.role.updateOrganizationRole).toBe('function');
       expect(typeof client.role.deleteOrganizationRole).toBe('function');
       expect(typeof client.role.getOrganizationRoleUsersCount).toBe('function');
-      expect(typeof client.role.updateDefaultOrganizationRoles).toBe('function');
+      expect(typeof client.role.updateDefaultOrganizationRoles).toBe(
+        'function'
+      );
       expect(typeof client.role.deleteOrganizationRoleBase).toBe('function');
     });
   });
@@ -59,31 +69,29 @@ describe('Roles', () => {
     describe('createRole', () => {
       it('should create a new role', async () => {
         const roleData = TestDataGenerator.generateRoleData();
-        
+
         const response = await client.role.createRole(roleData);
-        
+
         expect(response).toBeDefined();
         expect(response.role).toBeDefined();
         expect(response.role?.name).toBe(roleData.name);
         expect(response.role?.displayName).toBe(roleData.displayName);
         expect(response.role?.description).toBe(roleData.description);
-        
+
         testRoleName = response.role?.name || null;
       });
 
       it('should throw error when role name is missing', async () => {
         const roleData = TestDataGenerator.generateRoleData({ name: '' });
-        
-        await expect(
-          client.role.createRole(roleData)
-        ).rejects.toThrow();
+
+        await expect(client.role.createRole(roleData)).rejects.toThrow();
       });
     });
 
     describe('listRoles', () => {
       it('should list all roles', async () => {
         const response = await client.role.listRoles();
-        
+
         expect(response).toBeDefined();
         expect(response.roles).toBeDefined();
         expect(Array.isArray(response.roles)).toBe(true);
@@ -96,9 +104,9 @@ describe('Roles', () => {
         const roleData = TestDataGenerator.generateRoleData();
         const createResponse = await client.role.createRole(roleData);
         testRoleName = createResponse.role?.name || null;
-        
+
         const response = await client.role.getRole(testRoleName!);
-        
+
         expect(response).toBeDefined();
         expect(response.role).toBeDefined();
         expect(response.role?.name).toBe(testRoleName);
@@ -119,10 +127,13 @@ describe('Roles', () => {
         const roleData = TestDataGenerator.generateRoleData();
         const createResponse = await client.role.createRole(roleData);
         testRoleName = createResponse.role?.name || null;
-        
+
         const updateData = TestDataGenerator.generateRoleUpdateData();
-        const response = await client.role.updateRole(testRoleName!, updateData);
-        
+        const response = await client.role.updateRole(
+          testRoleName!,
+          updateData
+        );
+
         expect(response).toBeDefined();
         expect(response.role).toBeDefined();
         expect(response.role?.name).toBe(testRoleName);
@@ -132,7 +143,7 @@ describe('Roles', () => {
 
       it('should throw error when updating non-existent role', async () => {
         const updateData = TestDataGenerator.generateRoleUpdateData();
-        
+
         await expect(
           client.role.updateRole('non-existent-role', updateData)
         ).rejects.toThrow();
@@ -145,15 +156,13 @@ describe('Roles', () => {
         const roleData = TestDataGenerator.generateRoleData();
         const createResponse = await client.role.createRole(roleData);
         const roleName = createResponse.role?.name || null;
-        
+
         const response = await client.role.deleteRole(roleName!);
-        
+
         expect(response).toBeDefined();
-        
+
         // Verify role is deleted
-        await expect(
-          client.role.getRole(roleName!)
-        ).rejects.toThrow();
+        await expect(client.role.getRole(roleName!)).rejects.toThrow();
       });
     });
 
@@ -163,9 +172,9 @@ describe('Roles', () => {
         const roleData = TestDataGenerator.generateRoleData();
         const createResponse = await client.role.createRole(roleData);
         testRoleName = createResponse.role?.name || null;
-        
+
         const response = await client.role.getRoleUsersCount(testRoleName!);
-        
+
         expect(response).toBeDefined();
         expect(Number(response.count)).toBeGreaterThanOrEqual(0);
       });
@@ -176,22 +185,25 @@ describe('Roles', () => {
     describe('createOrganizationRole', () => {
       it('should create a new organization role', async () => {
         const roleData = TestDataGenerator.generateOrganizationRoleData();
-        
-        const response = await client.role.createOrganizationRole(testOrg, roleData);
-        
+
+        const response = await client.role.createOrganizationRole(
+          testOrg,
+          roleData
+        );
+
         expect(response).toBeDefined();
         expect(response.role).toBeDefined();
         expect(response.role?.name).toBe(roleData.name);
         expect(response.role?.displayName).toBe(roleData.displayName);
         expect(response.role?.description).toBe(roleData.description);
         expect(response.role?.isOrgRole).toBe(true);
-        
+
         testOrgRoleName = response.role?.name || null;
       });
 
       it('should throw error when organizationId is missing', async () => {
         const roleData = TestDataGenerator.generateOrganizationRoleData();
-        
+
         await expect(
           client.role.createOrganizationRole('', roleData)
         ).rejects.toThrow();
@@ -202,18 +214,23 @@ describe('Roles', () => {
       it('should list all organization roles', async () => {
         // Create a test organization role first
         const roleData = TestDataGenerator.generateOrganizationRoleData();
-        const createResponse = await client.role.createOrganizationRole(testOrg, roleData);
+        const createResponse = await client.role.createOrganizationRole(
+          testOrg,
+          roleData
+        );
         testOrgRoleName = createResponse.role?.name || null;
-        
+
         const response = await client.role.listOrganizationRoles(testOrg);
-        
+
         expect(response).toBeDefined();
         expect(response.roles).toBeDefined();
         expect(Array.isArray(response.roles)).toBe(true);
         expect(response.roles.length).toBeGreaterThan(0);
-        
+
         // Verify our test role is in the list
-        const testRole = response.roles.find(role => role.name === testOrgRoleName);
+        const testRole = response.roles.find(
+          (role) => role.name === testOrgRoleName
+        );
         expect(testRole).toBeDefined();
         expect(testRole?.isOrgRole).toBe(true);
       });
@@ -223,11 +240,17 @@ describe('Roles', () => {
       it('should get organization role by name', async () => {
         // Create a test organization role first
         const roleData = TestDataGenerator.generateOrganizationRoleData();
-        const createResponse = await client.role.createOrganizationRole(testOrg, roleData);
+        const createResponse = await client.role.createOrganizationRole(
+          testOrg,
+          roleData
+        );
         testOrgRoleName = createResponse.role?.name || null;
-        
-        const response = await client.role.getOrganizationRole(testOrg, testOrgRoleName!);
-        
+
+        const response = await client.role.getOrganizationRole(
+          testOrg,
+          testOrgRoleName!
+        );
+
         expect(response).toBeDefined();
         expect(response.role).toBeDefined();
         expect(response.role?.name).toBe(testOrgRoleName);
@@ -240,12 +263,19 @@ describe('Roles', () => {
       it('should update an existing organization role', async () => {
         // Create a test organization role first
         const roleData = TestDataGenerator.generateOrganizationRoleData();
-        const createResponse = await client.role.createOrganizationRole(testOrg, roleData);
+        const createResponse = await client.role.createOrganizationRole(
+          testOrg,
+          roleData
+        );
         testOrgRoleName = createResponse.role?.name || null;
-        
+
         const updateData = TestDataGenerator.generateRoleUpdateData();
-        const response = await client.role.updateOrganizationRole(testOrg, testOrgRoleName!, updateData);
-        
+        const response = await client.role.updateOrganizationRole(
+          testOrg,
+          testOrgRoleName!,
+          updateData
+        );
+
         expect(response).toBeDefined();
         expect(response.role).toBeDefined();
         expect(response.role?.name).toBe(testOrgRoleName);
@@ -259,13 +289,19 @@ describe('Roles', () => {
       it('should delete an existing organization role', async () => {
         // Create a test organization role first
         const roleData = TestDataGenerator.generateOrganizationRoleData();
-        const createResponse = await client.role.createOrganizationRole(testOrg, roleData);
+        const createResponse = await client.role.createOrganizationRole(
+          testOrg,
+          roleData
+        );
         const roleName = createResponse.role?.name || null;
-        
-        const response = await client.role.deleteOrganizationRole(testOrg, roleName!);
-        
+
+        const response = await client.role.deleteOrganizationRole(
+          testOrg,
+          roleName!
+        );
+
         expect(response).toBeDefined();
-        
+
         // Verify role is deleted
         await expect(
           client.role.getOrganizationRole(testOrg, roleName!)
@@ -277,11 +313,17 @@ describe('Roles', () => {
       it('should get user count for an organization role', async () => {
         // Create a test organization role first
         const roleData = TestDataGenerator.generateOrganizationRoleData();
-        const createResponse = await client.role.createOrganizationRole(testOrg, roleData);
+        const createResponse = await client.role.createOrganizationRole(
+          testOrg,
+          roleData
+        );
         testOrgRoleName = createResponse.role?.name || null;
-        
-        const response = await client.role.getOrganizationRoleUsersCount(testOrg, testOrgRoleName!);
-        
+
+        const response = await client.role.getOrganizationRoleUsersCount(
+          testOrg,
+          testOrgRoleName!
+        );
+
         expect(response).toBeDefined();
         expect(Number(response.count)).toBeGreaterThanOrEqual(0);
       });
@@ -291,11 +333,17 @@ describe('Roles', () => {
       it('should update default organization roles', async () => {
         // Create a test organization role first
         const roleData = TestDataGenerator.generateOrganizationRoleData();
-        const createResponse = await client.role.createOrganizationRole(testOrg, roleData);
+        const createResponse = await client.role.createOrganizationRole(
+          testOrg,
+          roleData
+        );
         testOrgRoleName = createResponse.role?.name || null;
-        
-        const response = await client.role.updateDefaultOrganizationRoles(testOrg, testOrgRoleName!);
-        
+
+        const response = await client.role.updateDefaultOrganizationRoles(
+          testOrg,
+          testOrgRoleName!
+        );
+
         expect(response).toBeDefined();
         expect(response.defaultMember).toBeDefined();
         expect(response.defaultMember?.name).toBe(testOrgRoleName);
@@ -306,16 +354,27 @@ describe('Roles', () => {
       it('should delete organization role base relationship', async () => {
         // Create base org role
         const baseRoleData = TestDataGenerator.generateOrganizationRoleData();
-        const baseResp = await client.role.createOrganizationRole(testOrg, baseRoleData);
+        const baseResp = await client.role.createOrganizationRole(
+          testOrg,
+          baseRoleData
+        );
         const baseRoleName = baseResp.role?.name!;
-        
+
         // Create extended org role which extends base
-        const extendedRoleData = TestDataGenerator.generateOrganizationRoleData({ extends: baseRoleName });
-        const extResp = await client.role.createOrganizationRole(testOrg, extendedRoleData);
+        const extendedRoleData = TestDataGenerator.generateOrganizationRoleData(
+          { extends: baseRoleName }
+        );
+        const extResp = await client.role.createOrganizationRole(
+          testOrg,
+          extendedRoleData
+        );
         testOrgRoleName = extResp.role?.name || null;
-        
-        const response = await client.role.deleteOrganizationRoleBase(testOrg, testOrgRoleName!);
-        
+
+        const response = await client.role.deleteOrganizationRoleBase(
+          testOrg,
+          testOrgRoleName!
+        );
+
         expect(response).toBeDefined();
       });
     });

@@ -9,7 +9,7 @@ describe('Connections', () => {
   beforeEach(async () => {
     // Use global client
     client = global.client;
-    
+
     // Create test organization for each test
     testOrg = await TestOrganizationManager.createTestOrganization(client);
   });
@@ -32,11 +32,12 @@ describe('Connections', () => {
   describe('listConnectionsByDomain', () => {
     it('should list connections by domain', async () => {
       const domain = 'example.com';
-      const connections = await client.connection.listConnectionsByDomain(domain);
+      const connections =
+        await client.connection.listConnectionsByDomain(domain);
 
       expect(connections).toBeDefined();
       expect(connections.connections).toBeDefined();
       expect(Array.isArray(connections.connections)).toBe(true);
     });
   });
-}); 
+});

@@ -9,7 +9,7 @@ describe('Organizations', () => {
   beforeEach(async () => {
     // Use global client
     client = global.client;
-    
+
     // Create test organization for each test
     testOrg = await TestOrganizationManager.createTestOrganization(client);
   });
@@ -21,7 +21,9 @@ describe('Organizations', () => {
 
   describe('listOrganization', () => {
     it('should list organizations', async () => {
-      const organizations = await client.organization.listOrganization(TestDataGenerator.generatePaginationParams());
+      const organizations = await client.organization.listOrganization(
+        TestDataGenerator.generatePaginationParams()
+      );
 
       expect(organizations).toBeDefined();
       expect(organizations.organizations).toBeDefined();
@@ -35,7 +37,9 @@ describe('Organizations', () => {
     });
 
     it('should handle pagination', async () => {
-      const firstPage = await client.organization.listOrganization(TestDataGenerator.generatePaginationParams(5));
+      const firstPage = await client.organization.listOrganization(
+        TestDataGenerator.generatePaginationParams(5)
+      );
 
       expect(firstPage).toBeDefined();
       expect(firstPage.organizations.length).toBeLessThanOrEqual(5);
@@ -43,7 +47,7 @@ describe('Organizations', () => {
       if (firstPage.nextPageToken) {
         const secondPage = await client.organization.listOrganization({
           pageSize: 5,
-          pageToken: firstPage.nextPageToken
+          pageToken: firstPage.nextPageToken,
         });
 
         expect(secondPage).toBeDefined();
@@ -55,7 +59,7 @@ describe('Organizations', () => {
   describe('getOrganization', () => {
     it('should get organization by ID', async () => {
       const organization = await client.organization.getOrganization(testOrg);
-      
+
       expect(organization).toBeDefined();
       expect(organization.organization).toBeDefined();
       expect(organization.organization?.id).toBe(testOrg);
@@ -68,9 +72,15 @@ describe('Organizations', () => {
       const maxUsers = 50;
       let settings;
       try {
-        settings = await client.organization.upsertUserManagementSettings(testOrg, { maxAllowedUsers: maxUsers });
+        settings = await client.organization.upsertUserManagementSettings(
+          testOrg,
+          { maxAllowedUsers: maxUsers }
+        );
       } catch (error) {
-        console.warn('Skipping upsertUserManagementSettings test due to error:', error);
+        console.warn(
+          'Skipping upsertUserManagementSettings test due to error:',
+          error
+        );
         return;
       }
 
@@ -78,4 +88,4 @@ describe('Organizations', () => {
       expect(settings?.maxAllowedUsers).toBe(maxUsers);
     });
   });
-}); 
+});

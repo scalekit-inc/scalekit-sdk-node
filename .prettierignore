@@ -2,3 +2,9 @@ lib/
 node_modules/
 *.min.js
 dist
+.github/
+CLAUDE.md
+jest.config.js
+README.md
+REFERENCE.md
+src/pkg/grpc/

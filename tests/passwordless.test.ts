@@ -14,8 +14,11 @@ describe('Passwordless', () => {
   describe('sendPasswordlessEmail', () => {
     it('should send passwordless email with basic parameters', async () => {
       const email = TestDataGenerator.generateUniqueEmail();
-      
-      const response = await client.passwordless.sendPasswordlessEmail(email, TestDataGenerator.generatePasswordlessEmailData());
+
+      const response = await client.passwordless.sendPasswordlessEmail(
+        email,
+        TestDataGenerator.generatePasswordlessEmailData()
+      );
 
       expect(response).toBeDefined();
       expect(response.authRequestId).toBeDefined();
@@ -26,8 +29,11 @@ describe('Passwordless', () => {
 
     it('should send passwordless email with template variables', async () => {
       const email = TestDataGenerator.generateUniqueEmail();
-      
-      const response = await client.passwordless.sendPasswordlessEmail(email, TestDataGenerator.generatePasswordlessEmailWithTemplateData());
+
+      const response = await client.passwordless.sendPasswordlessEmail(
+        email,
+        TestDataGenerator.generatePasswordlessEmailWithTemplateData()
+      );
 
       expect(response).toBeDefined();
       expect(response.authRequestId).toBeDefined();
@@ -36,17 +42,17 @@ describe('Passwordless', () => {
     it('should throw error for invalid email', async () => {
       await expect(
         client.passwordless.sendPasswordlessEmail('', {
-          template: TemplateType.SIGNIN
+          template: TemplateType.SIGNIN,
         })
       ).rejects.toThrow('Email must be a valid string');
     });
 
     it('should throw error for invalid template type', async () => {
       const email = TestDataGenerator.generateUniqueEmail();
-      
+
       await expect(
         client.passwordless.sendPasswordlessEmail(email, {
-          template: 'INVALID_TEMPLATE' as any
+          template: 'INVALID_TEMPLATE' as any,
         })
       ).rejects.toThrow('Invalid template type');
     });
@@ -62,9 +68,10 @@ describe('Passwordless', () => {
     it('should verify with code', async () => {
       // Mock code for testing - expected to fail
       const credential = TestDataGenerator.generateCredentialData('code');
-      
+
       try {
-        const response = await client.passwordless.verifyPasswordlessEmail(credential);
+        const response =
+          await client.passwordless.verifyPasswordlessEmail(credential);
         expect(response).toBeDefined();
       } catch (error) {
         // Expected failure with mock code
@@ -75,9 +82,10 @@ describe('Passwordless', () => {
     it('should verify with linkToken', async () => {
       // Mock linkToken for testing - expected to fail
       const credential = TestDataGenerator.generateCredentialData('linkToken');
-      
+
       try {
-        const response = await client.passwordless.verifyPasswordlessEmail(credential);
+        const response =
+          await client.passwordless.verifyPasswordlessEmail(credential);
         expect(response).toBeDefined();
       } catch (error) {
         // Expected failure with mock linkToken
@@ -90,8 +98,11 @@ describe('Passwordless', () => {
     it('should resend passwordless email', async () => {
       // Send initial passwordless email
       const email = TestDataGenerator.generateUniqueEmail();
-      
-      const sendResponse = await client.passwordless.sendPasswordlessEmail(email, TestDataGenerator.generatePasswordlessEmailData());
+
+      const sendResponse = await client.passwordless.sendPasswordlessEmail(
+        email,
+        TestDataGenerator.generatePasswordlessEmailData()
+      );
 
       // Resend the email
       const resendResponse = await client.passwordless.resendPasswordlessEmail(
@@ -105,4 +116,4 @@ describe('Passwordless', () => {
       expect(resendResponse.passwordlessType).toBeDefined();
     });
   });
-}); 
+});

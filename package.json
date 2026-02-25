@@ -16,6 +16,7 @@
   },
   "scripts": {
     "generate": "npx buf generate $npm_config_src",
+    "prebuild": "prettier --write .",
     "build": "rm -rf lib && tsc",
     "lint": "tsc --noEmit",
     "prettier": "prettier --check .",
