@@ -17,13 +17,24 @@ import PermissionClient from './permission';
 import WebAuthnClient from './webauthn';
 import TokenClient from './token';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
-import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse ,TokenValidationOptions } from './types/scalekit';
-import { WebhookVerificationError, ScalekitValidateTokenFailureException } from './errors/base-exception';
+import {
+  AuthenticationOptions,
+  AuthenticationResponse,
+  AuthorizationUrlOptions,
+  GrantType,
+  LogoutUrlOptions,
+  RefreshTokenResponse,
+  TokenValidationOptions,
+} from './types/scalekit';
+import {
+  WebhookVerificationError,
+  ScalekitValidateTokenFailureException,
+} from './errors/base-exception';
 
-const authorizeEndpoint = "oauth/authorize";
-const logoutEndpoint = "oidc/logout";
+const authorizeEndpoint = 'oauth/authorize';
+const logoutEndpoint = 'oidc/logout';
 const WEBHOOK_TOLERANCE_IN_SECONDS = 5 * 60; // 5 minutes
-const WEBHOOK_SIGNATURE_VERSION = "v1";
+const WEBHOOK_SIGNATURE_VERSION = 'v1';
 
 /**
  * Main Scalekit SDK client for interacting with all Scalekit API endpoints.
@@ -199,17 +210,17 @@ export default class ScalekitClient {
     options?: AuthorizationUrlOptions
   ): string {
     const defaultOptions: AuthorizationUrlOptions = {
-      scopes: ["openid", "profile", "email"],
+      scopes: ['openid', 'profile', 'email'],
     };
     options = {
       ...defaultOptions,
       ...options,
     };
     const qs = QueryString.stringify({
-      response_type: "code",
+      response_type: 'code',
       client_id: this.coreClient.clientId,
       redirect_uri: redirectUri,
-      scope: options.scopes?.join(" "),
+      scope: options.scopes?.join(' '),
       ...(options.state && { state: options.state }),
       ...(options.nonce && { nonce: options.nonce }),
       ...(options.loginHint && { login_hint: options.loginHint }),
@@ -431,7 +442,7 @@ export default class ScalekitClient {
       ...(options?.state && { state: options.state }),
     });
 
-    return `${this.coreClient.envUrl}/${logoutEndpoint}${qs ? `?${qs}` : ""}`;
+    return `${this.coreClient.envUrl}/${logoutEndpoint}${qs ? `?${qs}` : ''}`;
   }
 
   /**
@@ -491,9 +502,9 @@ export default class ScalekitClient {
     headers: Record<string, string>,
     payload: string
   ): boolean {
-    const webhookId = headers["webhook-id"];
-    const webhookTimestamp = headers["webhook-timestamp"];
-    const webhookSignature = headers["webhook-signature"];
+    const webhookId = headers['webhook-id'];
+    const webhookTimestamp = headers['webhook-timestamp'];
+    const webhookSignature = headers['webhook-signature'];
 
     return this.verifyPayloadSignature(
       secret,
@@ -521,9 +532,9 @@ export default class ScalekitClient {
     headers: Record<string, string>,
     payload: string
   ): boolean {
-    const interceptorId = headers["interceptor-id"];
-    const interceptorTimestamp = headers["interceptor-timestamp"];
-    const interceptorSignature = headers["interceptor-signature"];
+    const interceptorId = headers['interceptor-id'];
+    const interceptorTimestamp = headers['interceptor-timestamp'];
+    const interceptorSignature = headers['interceptor-signature'];
 
     return this.verifyPayloadSignature(
       secret,
@@ -552,12 +563,12 @@ export default class ScalekitClient {
     payload: string
   ): boolean {
     if (!id || !timestamp || !signature) {
-      throw new WebhookVerificationError("Missing required headers");
+      throw new WebhookVerificationError('Missing required headers');
     }
 
-    const secretParts = secret.split("_");
+    const secretParts = secret.split('_');
     if (secretParts.length < 2) {
-      throw new WebhookVerificationError("Invalid secret");
+      throw new WebhookVerificationError('Invalid secret');
     }
 
     try {
@@ -565,31 +576,31 @@ export default class ScalekitClient {
       const data = `${id}.${Math.floor(
         timestampDate.getTime() / 1000
       )}.${payload}`;
-      const secretBytes = Buffer.from(secretParts[1], "base64");
+      const secretBytes = Buffer.from(secretParts[1], 'base64');
       const computedSignature = this.computeSignature(secretBytes, data);
-      const receivedSignatures = signature.split(" ");
+      const receivedSignatures = signature.split(' ');
 
       for (const versionedSignature of receivedSignatures) {
-        const [version, receivedSignature] = versionedSignature.split(",");
+        const [version, receivedSignature] = versionedSignature.split(',');
         if (version !== WEBHOOK_SIGNATURE_VERSION) {
           continue;
         }
         if (
           crypto.timingSafeEqual(
-            Buffer.from(receivedSignature, "base64"),
-            Buffer.from(computedSignature, "base64")
+            Buffer.from(receivedSignature, 'base64'),
+            Buffer.from(computedSignature, 'base64')
           )
         ) {
           return true;
         }
       }
 
-      throw new WebhookVerificationError("Invalid Signature");
+      throw new WebhookVerificationError('Invalid Signature');
     } catch (error) {
       if (error instanceof WebhookVerificationError) {
         throw error;
       }
-      throw new WebhookVerificationError("Invalid Signature");
+      throw new WebhookVerificationError('Invalid Signature');
     }
   }
 
@@ -644,7 +655,7 @@ export default class ScalekitClient {
 
     if (missingScopes.length > 0) {
       throw new ScalekitValidateTokenFailureException(
-        `Token missing required scopes: ${missingScopes.join(", ")}`
+        `Token missing required scopes: ${missingScopes.join(', ')}`
       );
     }
 
@@ -674,13 +685,13 @@ export default class ScalekitClient {
     const now = Math.floor(Date.now() / 1000);
     const timestamp = parseInt(timestampStr, 10);
     if (isNaN(timestamp)) {
-      throw new WebhookVerificationError("Invalid Signature Headers");
+      throw new WebhookVerificationError('Invalid Signature Headers');
     }
     if (now - timestamp > WEBHOOK_TOLERANCE_IN_SECONDS) {
-      throw new WebhookVerificationError("Message timestamp too old");
+      throw new WebhookVerificationError('Message timestamp too old');
     }
     if (timestamp > now + WEBHOOK_TOLERANCE_IN_SECONDS) {
-      throw new WebhookVerificationError("Message timestamp too new");
+      throw new WebhookVerificationError('Message timestamp too new');
     }
 
     return new Date(timestamp * 1000);
@@ -695,9 +706,9 @@ export default class ScalekitClient {
    */
   private computeSignature(secretBytes: Buffer, data: string): string {
     return crypto
-      .createHmac("sha256", secretBytes)
+      .createHmac('sha256', secretBytes)
       .update(data)
-      .digest("base64");
+      .digest('base64');
   }
 
   /**
@@ -763,7 +774,7 @@ export default class ScalekitClient {
     refreshToken: string
   ): Promise<RefreshTokenResponse> {
     if (!refreshToken) {
-      throw new Error("Refresh token is required");
+      throw new Error('Refresh token is required');
     }
 
     let res;
@@ -779,23 +790,23 @@ export default class ScalekitClient {
     } catch (error) {
       throw new Error(
         `Failed to refresh token: ${
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : 'Unknown error'
         }`
       );
     }
 
     if (!res || !res.data) {
-      throw new Error("Invalid response from authentication server");
+      throw new Error('Invalid response from authentication server');
     }
 
     const { access_token, refresh_token } = res.data;
 
     // Validate that all required properties exist
     if (!access_token) {
-      throw new Error("Missing access_token in authentication response");
+      throw new Error('Missing access_token in authentication response');
     }
     if (!refresh_token) {
-      throw new Error("Missing refresh_token in authentication response");
+      throw new Error('Missing refresh_token in authentication response');
     }
 
     return {

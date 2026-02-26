@@ -9,7 +9,7 @@ import {
   DeleteCredentialRequestSchema,
   ListCredentialsResponse,
   UpdateCredentialResponse,
-  DeleteCredentialResponse
+  DeleteCredentialResponse,
 } from './pkg/grpc/scalekit/v1/auth/webauthn_pb';
 
 export default class WebAuthnClient {
@@ -35,13 +35,10 @@ export default class WebAuthnClient {
     }
 
     const request = create(ListCredentialsRequestSchema, {
-      userId
+      userId,
     });
 
-    return this.coreClient.connectExec(
-      this.client.listCredentials,
-      request
-    );
+    return this.coreClient.connectExec(this.client.listCredentials, request);
   }
 
   /**
@@ -65,13 +62,10 @@ export default class WebAuthnClient {
 
     const request = create(UpdateCredentialRequestSchema, {
       credentialId,
-      displayName
+      displayName,
     });
 
-    return this.coreClient.connectExec(
-      this.client.updateCredential,
-      request
-    );
+    return this.coreClient.connectExec(this.client.updateCredential, request);
   }
 
   /**
@@ -81,19 +75,17 @@ export default class WebAuthnClient {
    * - success: Boolean indicating if the deletion was successful
    * - unknownCredentialOptions: Options if the credential was not found
    */
-  async deleteCredential(credentialId: string): Promise<DeleteCredentialResponse> {
+  async deleteCredential(
+    credentialId: string
+  ): Promise<DeleteCredentialResponse> {
     if (!credentialId || typeof credentialId !== 'string') {
       throw new Error('credentialId must be a non-empty string');
     }
 
     const request = create(DeleteCredentialRequestSchema, {
-      credentialId
+      credentialId,
     });
 
-    return this.coreClient.connectExec(
-      this.client.deleteCredential,
-      request
-    );
+    return this.coreClient.connectExec(this.client.deleteCredential, request);
   }
 }
-

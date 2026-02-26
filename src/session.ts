@@ -1,8 +1,8 @@
-import { create } from "@bufbuild/protobuf";
-import { timestampFromDate } from "@bufbuild/protobuf/wkt";
-import type { Client } from "@connectrpc/connect";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
+import { create } from '@bufbuild/protobuf';
+import { timestampFromDate } from '@bufbuild/protobuf/wkt';
+import type { Client } from '@connectrpc/connect';
+import GrpcConnect from './connect';
+import CoreClient from './core';
 import {
   SessionService,
   SessionDetailsRequest,
@@ -15,7 +15,7 @@ import {
   RevokeSessionResponse,
   RevokeAllUserSessionsRequest,
   RevokeAllUserSessionsResponse,
-} from "./pkg/grpc/scalekit/v1/sessions/sessions_pb";
+} from './pkg/grpc/scalekit/v1/sessions/sessions_pb';
 
 export default class SessionClient {
   private client: Client<typeof SessionService>;
@@ -149,8 +149,12 @@ export default class SessionClient {
     const filter = options?.filter
       ? create(UserSessionFilterSchema, {
           status: options.filter.status,
-          startTime: options.filter.startTime ? timestampFromDate(options.filter.startTime) : undefined,
-          endTime: options.filter.endTime ? timestampFromDate(options.filter.endTime) : undefined,
+          startTime: options.filter.startTime
+            ? timestampFromDate(options.filter.startTime)
+            : undefined,
+          endTime: options.filter.endTime
+            ? timestampFromDate(options.filter.endTime)
+            : undefined,
         })
       : undefined;
 
@@ -313,7 +317,7 @@ export default class SessionClient {
     userId: string
   ): Promise<RevokeAllUserSessionsResponse> {
     if (!userId) {
-      throw new Error("userId is required");
+      throw new Error('userId is required');
     }
 
     return this.coreClient.connectExec(this.client.revokeAllUserSessions, {

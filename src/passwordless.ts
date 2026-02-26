@@ -52,7 +52,8 @@ export default class PasswordlessClient {
     let templateValue: TemplateType | undefined;
     if (options?.template) {
       if (typeof options.template === 'string') {
-        templateValue = TemplateType[options.template as keyof typeof TemplateType];
+        templateValue =
+          TemplateType[options.template as keyof typeof TemplateType];
         if (templateValue === undefined) {
           throw new Error('Invalid template type');
         }
@@ -65,7 +66,10 @@ export default class PasswordlessClient {
       throw new Error('State must be a string');
     }
 
-    if (options?.magiclinkAuthUri && typeof options.magiclinkAuthUri !== 'string') {
+    if (
+      options?.magiclinkAuthUri &&
+      typeof options.magiclinkAuthUri !== 'string'
+    ) {
       throw new Error('Magic link auth URI must be a string');
     }
 
@@ -75,7 +79,7 @@ export default class PasswordlessClient {
       state: options?.state,
       magiclinkAuthUri: options?.magiclinkAuthUri,
       expiresIn: options?.expiresIn,
-      templateVariables: options?.templateVariables || {}
+      templateVariables: options?.templateVariables || {},
     });
 
     return this.coreClient.connectExec(
@@ -106,9 +110,9 @@ export default class PasswordlessClient {
 
     const request = create(VerifyPasswordLessRequestSchema, {
       authRequestId,
-      authCredential: credential.code 
-        ? { case: "code", value: credential.code }
-        : { case: "linkToken", value: credential.linkToken! }
+      authCredential: credential.code
+        ? { case: 'code', value: credential.code }
+        : { case: 'linkToken', value: credential.linkToken! },
     });
 
     return this.coreClient.connectExec(
@@ -129,11 +133,8 @@ export default class PasswordlessClient {
   async resendPasswordlessEmail(
     authRequestId: string
   ): Promise<SendPasswordlessResponse> {
-    return this.coreClient.connectExec(
-      this.client.resendPasswordlessEmail,
-      {
-        authRequestId
-      }
-    );
+    return this.coreClient.connectExec(this.client.resendPasswordlessEmail, {
+      authRequestId,
+    });
   }
-} 
+}

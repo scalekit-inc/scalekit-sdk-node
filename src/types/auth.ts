@@ -17,7 +17,7 @@ export type User = {
   updatedAt: string | undefined;
   identities: Identity[];
   metadata: string | undefined;
-}
+};
 
 export type Identity = {
   connectionId: string;
@@ -26,7 +26,7 @@ export type Identity = {
   providerName: string;
   social: boolean;
   providerRawAttributes: string;
-}
+};
 
 export type IdTokenClaimIdentity = {
   connection_id: string;
@@ -35,7 +35,7 @@ export type IdTokenClaimIdentity = {
   provider_name: string;
   social: boolean;
   provider_raw_attributes: string;
-}
+};
 
 export type IdTokenClaim = {
   sub: string;
@@ -56,18 +56,18 @@ export type IdTokenClaim = {
   updated_at: string | undefined;
   identities: IdTokenClaimIdentity[];
   metadata: string | undefined;
-}
+};
 
 export type TokenResponse = {
   access_token: string;
   id_token: string;
   expires_in: number;
   refresh_token: string;
-}
+};
 
-export type IdpInitiatedLoginClaims ={
+export type IdpInitiatedLoginClaims = {
   connection_id: string;
   organization_id: string;
   login_hint: string;
   relay_state?: string;
-}
+};

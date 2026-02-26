@@ -1,31 +1,31 @@
-import { Code, ConnectError } from "@connectrpc/connect";
-import axios, { Axios, AxiosError, AxiosResponse, HttpStatusCode } from "axios";
-import { JWK } from "jose";
-import os from "os";
-import QueryString from "qs";
-import { GrantType } from "./types/scalekit";
-import { TokenResponse } from "./types/auth";
+import { Code, ConnectError } from '@connectrpc/connect';
+import axios, { Axios, AxiosError, AxiosResponse, HttpStatusCode } from 'axios';
+import { JWK } from 'jose';
+import os from 'os';
+import QueryString from 'qs';
+import { GrantType } from './types/scalekit';
+import { TokenResponse } from './types/auth';
 import {
   ScalekitException,
   ScalekitServerException,
-} from "./errors/base-exception";
+} from './errors/base-exception';
 
 export const headers = {
-  "user-agent": "user-agent",
-  "x-sdk-version": "x-sdk-version",
-  "x-api-version": "x-api-version",
-  authorization: "authorization",
+  'user-agent': 'user-agent',
+  'x-sdk-version': 'x-sdk-version',
+  'x-api-version': 'x-api-version',
+  authorization: 'authorization',
 };
 
-const tokenEndpoint = "oauth/token";
-const jwksEndpoint = "keys";
+const tokenEndpoint = 'oauth/token';
+const jwksEndpoint = 'keys';
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
   public axios: Axios;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   public sdkVersion = `Scalekit-Node/${(require('../package.json') as { version: string }).version}`;
-  public apiVersion = "20260202";
+  public apiVersion = "20260226";
   public userAgent = `${this.sdkVersion} Node/${process.version} (${
     process.platform
   }; ${os.arch()})`;
@@ -36,9 +36,9 @@ export default class CoreClient {
   ) {
     this.axios = axios.create({ baseURL: envUrl });
     this.axios.interceptors.request.use((config) => {
-      config.headers[headers["user-agent"]] = this.userAgent;
-      config.headers[headers["x-sdk-version"]] = this.sdkVersion;
-      config.headers[headers["x-api-version"]] = this.apiVersion;
+      config.headers[headers['user-agent']] = this.userAgent;
+      config.headers[headers['x-sdk-version']] = this.sdkVersion;
+      config.headers[headers['x-api-version']] = this.apiVersion;
       if (this.accessToken) {
         config.headers[headers.authorization] = `Bearer ${this.accessToken}`;
       }
@@ -68,7 +68,7 @@ export default class CoreClient {
   async authenticate(data: string): Promise<AxiosResponse<TokenResponse, any>> {
     return this.axios.post<TokenResponse>(tokenEndpoint, data, {
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
     });
   }

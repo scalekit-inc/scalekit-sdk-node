@@ -1,15 +1,15 @@
-import type { MessageShape } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import type { Client } from "@connectrpc/connect";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import type { Client } from '@connectrpc/connect';
+import GrpcConnect from './connect';
+import CoreClient from './core';
 import {
   DomainService,
   CreateDomainResponse,
   GetDomainResponse,
   ListDomainResponse,
   DomainType,
-} from "./pkg/grpc/scalekit/v1/domains/domains_pb";
+} from './pkg/grpc/scalekit/v1/domains/domains_pb';
 
 /**
  * Client for managing domains for organizations.
@@ -97,11 +97,11 @@ export default class DomainClient {
   ): Promise<CreateDomainResponse> {
     let domainTypeValue: DomainType | undefined;
     if (options?.domainType) {
-      if (typeof options.domainType === "string") {
+      if (typeof options.domainType === 'string') {
         domainTypeValue =
           DomainType[options.domainType as keyof typeof DomainType];
         if (domainTypeValue === undefined) {
-          throw new Error("Invalid domain type");
+          throw new Error('Invalid domain type');
         }
       } else {
         domainTypeValue = options.domainType;
@@ -110,7 +110,7 @@ export default class DomainClient {
 
     return this.coreClient.connectExec(this.client.createDomain, {
       identities: {
-        case: "organizationId",
+        case: 'organizationId',
         value: organizationId,
       },
       domain: {
@@ -170,7 +170,7 @@ export default class DomainClient {
     return this.coreClient.connectExec(this.client.getDomain, {
       id: domainId,
       identities: {
-        case: "organizationId",
+        case: 'organizationId',
         value: organizationId,
       },
     });
@@ -226,19 +226,19 @@ export default class DomainClient {
    * @see {@link getDomain} - Get details for a specific domain
    * @see {@link deleteDomain} - Remove a domain
    */
-  async listDomains(organizationId: string, options?: { domainType?: DomainType | string }): Promise<ListDomainResponse> {
+  async listDomains(
+    organizationId: string,
+    options?: { domainType?: DomainType | string }
+  ): Promise<ListDomainResponse> {
     const domainTypeValue = this.resolveDomainType(options?.domainType);
 
-    return this.coreClient.connectExec(
-      this.client.listDomains,
-      {
-        identities: {
-          case: 'organizationId',
-          value: organizationId
-        },
-        ...(!!domainTypeValue && { domainType: domainTypeValue })
+    return this.coreClient.connectExec(this.client.listDomains, {
+      identities: {
+        case: 'organizationId',
+        value: organizationId,
       },
-    );
+      ...(!!domainTypeValue && { domainType: domainTypeValue }),
+    });
   }
 
   /**
@@ -261,11 +261,14 @@ export default class DomainClient {
    * @see {@link createDomain} - Add a new domain
    * @see {@link listDomains} - List all domains for an organization
    */
-  async deleteDomain(organizationId: string, domainId: string): Promise<MessageShape<typeof EmptySchema>> {
+  async deleteDomain(
+    organizationId: string,
+    domainId: string
+  ): Promise<MessageShape<typeof EmptySchema>> {
     return this.coreClient.connectExec(this.client.deleteDomain, {
       id: domainId,
       identities: {
-        case: "organizationId",
+        case: 'organizationId',
         value: organizationId,
       },
     });

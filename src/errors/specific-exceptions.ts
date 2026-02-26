@@ -2,7 +2,7 @@ import { ConnectError } from '@connectrpc/connect';
 import { AxiosResponse } from 'axios';
 import { ScalekitServerException } from './base-exception';
 
-// Specific exception classes 
+// Specific exception classes
 export class ScalekitBadRequestException extends ScalekitServerException {
   constructor(error: AxiosResponse | ConnectError) {
     super(error);
@@ -85,4 +85,4 @@ export class ScalekitUnknownException extends ScalekitServerException {
     super(error);
     this.name = 'ScalekitUnknownException';
   }
-} 
+}

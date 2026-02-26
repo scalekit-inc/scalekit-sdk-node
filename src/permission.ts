@@ -1,10 +1,10 @@
-import type { MessageShape } from "@bufbuild/protobuf";
-import { create } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import type { Client } from "@connectrpc/connect";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { RolesService } from "./pkg/grpc/scalekit/v1/roles/roles_pb";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { create } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import type { Client } from '@connectrpc/connect';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { RolesService } from './pkg/grpc/scalekit/v1/roles/roles_pb';
 import {
   CreatePermissionRequest,
   CreatePermissionResponse,
@@ -24,7 +24,7 @@ import {
   ListEffectiveRolePermissionsResponse,
   CreatePermission,
   ListPermissionsRequestSchema,
-} from "./pkg/grpc/scalekit/v1/roles/roles_pb";
+} from './pkg/grpc/scalekit/v1/roles/roles_pb';
 
 /**
  * Client for managing permissions and role-permission assignments.
@@ -185,7 +185,9 @@ export default class PermissionClient {
    *
    * @see {@link https://docs.scalekit.com/apis/#tag/permissions | Delete Permission API}
    */
-  async deletePermission(permissionName: string): Promise<MessageShape<typeof EmptySchema>> {
+  async deletePermission(
+    permissionName: string
+  ): Promise<MessageShape<typeof EmptySchema>> {
     return this.coreClient.connectExec(this.client.deletePermission, {
       permissionName,
     });

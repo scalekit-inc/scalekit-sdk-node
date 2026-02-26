@@ -20,7 +20,9 @@ beforeAll(() => {
 
   // Check for required environment variables
   if (!environmentUrl) {
-    throw new Error('SCALEKIT_ENVIRONMENT_URL environment variable is required');
+    throw new Error(
+      'SCALEKIT_ENVIRONMENT_URL environment variable is required'
+    );
   }
   if (!clientId) {
     throw new Error('SCALEKIT_CLIENT_ID environment variable is required');
@@ -31,4 +33,4 @@ beforeAll(() => {
 
   // Initialize test client
   global.client = new ScalekitClient(environmentUrl, clientId, clientSecret);
-}); 
+});
