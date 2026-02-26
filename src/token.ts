@@ -254,7 +254,7 @@ export default class TokenClient {
     return this.coreClient.connectExec(this.client.listTokens, {
       organizationId,
       ...(options?.userId && { userId: options.userId }),
-      ...(options?.pageSize && { pageSize: options.pageSize }),
+      ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
       ...(options?.pageToken && { pageToken: options.pageToken }),
     });
   }
