@@ -1,18 +1,21 @@
-import type { MessageShape } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import type { Timestamp } from "@bufbuild/protobuf/wkt";
-import { Code } from "@connectrpc/connect";
-import type { Client } from "@connectrpc/connect";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { ScalekitServerException, ScalekitValidateTokenFailureException } from "./errors/base-exception";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import type { Timestamp } from '@bufbuild/protobuf/wkt';
+import { Code } from '@connectrpc/connect';
+import type { Client } from '@connectrpc/connect';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import {
+  ScalekitServerException,
+  ScalekitValidateTokenFailureException,
+} from './errors/base-exception';
 import {
   ApiTokenService,
   CreateTokenResponse,
   ValidateTokenResponse,
   ListTokensResponse,
   Token,
-} from "./pkg/grpc/scalekit/v1/tokens/tokens_pb";
+} from './pkg/grpc/scalekit/v1/tokens/tokens_pb';
 
 /**
  * Options for creating an API token.
@@ -101,7 +104,7 @@ export default class TokenClient {
     options?: CreateTokenOptions
   ): Promise<CreateTokenResponse> {
     if (!organizationId) {
-      throw new Error("organizationId is required");
+      throw new Error('organizationId is required');
     }
     return this.coreClient.connectExec(this.client.createToken, {
       token: {
@@ -142,7 +145,7 @@ export default class TokenClient {
    */
   async validateToken(token: string): Promise<ValidateTokenResponse> {
     if (!token) {
-      throw new Error("token is required");
+      throw new Error('token is required');
     }
     try {
       return await this.coreClient.connectExec(this.client.validateToken, {
@@ -185,9 +188,11 @@ export default class TokenClient {
    *
    * @see {@link https://docs.scalekit.com/apis/#tag/tokens | Invalidate Token API}
    */
-  async invalidateToken(token: string): Promise<MessageShape<typeof EmptySchema>> {
+  async invalidateToken(
+    token: string
+  ): Promise<MessageShape<typeof EmptySchema>> {
     if (!token) {
-      throw new Error("token is required");
+      throw new Error('token is required');
     }
     return this.coreClient.connectExec(this.client.invalidateToken, {
       token,
@@ -249,7 +254,7 @@ export default class TokenClient {
     options?: ListTokensOptions
   ): Promise<ListTokensResponse> {
     if (!organizationId) {
-      throw new Error("organizationId is required");
+      throw new Error('organizationId is required');
     }
     return this.coreClient.connectExec(this.client.listTokens, {
       organizationId,
@@ -260,4 +265,9 @@ export default class TokenClient {
   }
 }
 
-export { Token, CreateTokenResponse, ValidateTokenResponse, ListTokensResponse };
+export {
+  Token,
+  CreateTokenResponse,
+  ValidateTokenResponse,
+  ListTokensResponse,
+};

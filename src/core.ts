@@ -25,7 +25,7 @@ export default class CoreClient {
   public axios: Axios;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   public sdkVersion = `Scalekit-Node/${(require('../package.json') as { version: string }).version}`;
-  public apiVersion = "20260226";
+  public apiVersion = '20260226';
   public userAgent = `${this.sdkVersion} Node/${process.version} (${
     process.platform
   }; ${os.arch()})`;

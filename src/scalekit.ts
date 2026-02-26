@@ -81,19 +81,9 @@ export default class ScalekitClient {
   readonly auth: AuthClient;
   readonly webauthn: WebAuthnClient;
   readonly token: TokenClient;
-  constructor(
-    envUrl: string,
-    clientId: string,
-    clientSecret: string
-  ) {
-    this.coreClient = new CoreClient(
-      envUrl,
-      clientId,
-      clientSecret
-    );
-    this.grpcConnect = new GrpcConnect(
-      this.coreClient
-    );
+  constructor(envUrl: string, clientId: string, clientSecret: string) {
+    this.coreClient = new CoreClient(envUrl, clientId, clientSecret);
+    this.grpcConnect = new GrpcConnect(this.coreClient);
 
     this.organization = new OrganizationClient(
       this.grpcConnect,
@@ -106,34 +96,13 @@ export default class ScalekitClient {
       this.grpcConnect,
       this.coreClient
     );
-    this.user = new UserClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.session = new SessionClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.role = new RoleClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.permission = new PermissionClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.auth = new AuthClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.webauthn = new WebAuthnClient(
-      this.grpcConnect,
-      this.coreClient
-    );
-    this.token = new TokenClient(
-      this.grpcConnect,
-      this.coreClient
-    );
+    this.user = new UserClient(this.grpcConnect, this.coreClient);
+    this.session = new SessionClient(this.grpcConnect, this.coreClient);
+    this.role = new RoleClient(this.grpcConnect, this.coreClient);
+    this.permission = new PermissionClient(this.grpcConnect, this.coreClient);
+    this.auth = new AuthClient(this.grpcConnect, this.coreClient);
+    this.webauthn = new WebAuthnClient(this.grpcConnect, this.coreClient);
+    this.token = new TokenClient(this.grpcConnect, this.coreClient);
   }
 
   /**
