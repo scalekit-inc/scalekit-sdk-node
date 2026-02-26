@@ -9,7 +9,7 @@ describe('Directories', () => {
   beforeEach(async () => {
     // Use global client
     client = global.client;
-    
+
     // Create test organization for each test
     testOrg = await TestOrganizationManager.createTestOrganization(client);
   });
@@ -32,8 +32,9 @@ describe('Directories', () => {
   describe('getPrimaryDirectoryByOrganizationId', () => {
     it('should get primary directory by organization id', async () => {
       try {
-        const primaryDirectory = await client.directory.getPrimaryDirectoryByOrganizationId(testOrg);
-        
+        const primaryDirectory =
+          await client.directory.getPrimaryDirectoryByOrganizationId(testOrg);
+
         expect(primaryDirectory).toBeDefined();
         expect(primaryDirectory.id).toBeDefined();
         expect(primaryDirectory.organizationId).toBe(testOrg);
@@ -43,4 +44,4 @@ describe('Directories', () => {
       }
     });
   });
-}); 
+});

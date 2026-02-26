@@ -1,12 +1,12 @@
-import type { Client } from "@connectrpc/connect";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { ConnectionService } from "./pkg/grpc/scalekit/v1/connections/connections_pb";
+import type { Client } from '@connectrpc/connect';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { ConnectionService } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 import {
   GetConnectionResponse,
   ToggleConnectionResponse,
   ListConnectionsResponse,
-} from "./pkg/grpc/scalekit/v1/connections/connections_pb";
+} from './pkg/grpc/scalekit/v1/connections/connections_pb';
 
 /**
  * Client for managing enterprise SSO connections for organizations.

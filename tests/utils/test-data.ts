@@ -42,39 +42,43 @@ export class TestDataGenerator {
     const uniqueId = this.generateUniqueId();
     return {
       name: `Test Org ${uniqueId}`,
-      externalId: `ext_org_${uniqueId}`
+      externalId: `ext_org_${uniqueId}`,
     };
   }
 
   /**
    * Generate test user data
    */
-  static generateUserData(overrides: Partial<CreateUserRequest> = {}): CreateUserRequest {
+  static generateUserData(
+    overrides: Partial<CreateUserRequest> = {}
+  ): CreateUserRequest {
     const uniqueEmail = this.generateUniqueEmail();
-    
+
     return {
       email: uniqueEmail,
       userProfile: {
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       },
       metadata: {
-        source: 'test'
+        source: 'test',
       },
-      ...overrides
+      ...overrides,
     };
   }
 
   /**
    * Generate test user update data
    */
-  static generateUserUpdateData(overrides: Partial<UpdateUserRequest> = {}): UpdateUserRequest {
+  static generateUserUpdateData(
+    overrides: Partial<UpdateUserRequest> = {}
+  ): UpdateUserRequest {
     return {
       userProfile: {
         firstName: 'Updated',
-        lastName: 'Name'
+        lastName: 'Name',
       },
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -87,7 +91,7 @@ export class TestDataGenerator {
       state: 'test-state',
       expiresIn: 3600,
       magiclinkAuthUri: 'https://example.com/auth/callback',
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -99,10 +103,10 @@ export class TestDataGenerator {
       template: TemplateType.SIGNUP,
       templateVariables: {
         companyName: 'Test Company',
-        appName: 'Test App'
+        appName: 'Test App',
       },
       magiclinkAuthUri: 'https://example.com/auth/callback',
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -114,15 +118,18 @@ export class TestDataGenerator {
     const payload = '{"test": "data"}';
     const timestamp = Math.floor(Date.now() / 1000).toString();
     const webhookId = 'msg_test_webhook_id';
-    
+
     // Generate valid signature for testing
     const crypto = require('crypto');
     const data = `${webhookId}.${timestamp}.${payload}`;
-    const hmac = crypto.createHmac('sha256', Buffer.from('test-secret', 'base64'));
+    const hmac = crypto.createHmac(
+      'sha256',
+      Buffer.from('test-secret', 'base64')
+    );
     hmac.update(data);
     const computedSignature = hmac.digest('base64');
     const signature = `v1,${computedSignature}`;
-    
+
     return {
       secret,
       payload,
@@ -132,8 +139,8 @@ export class TestDataGenerator {
       headers: {
         'webhook-id': webhookId,
         'webhook-timestamp': timestamp,
-        'webhook-signature': signature
-      }
+        'webhook-signature': signature,
+      },
     };
   }
 
@@ -146,7 +153,7 @@ export class TestDataGenerator {
       state: 'test-state',
       nonce: 'test-nonce',
       prompt: 'login',
-      ...overrides
+      ...overrides,
     };
   }
 
@@ -156,7 +163,7 @@ export class TestDataGenerator {
   static generatePKCEParams() {
     return {
       codeChallenge: 'test-challenge',
-      codeChallengeMethod: 'S256'
+      codeChallengeMethod: 'S256',
     };
   }
 
@@ -166,7 +173,7 @@ export class TestDataGenerator {
   static generatePaginationParams(pageSize: number = 10) {
     return {
       pageSize,
-      pageToken: ''
+      pageToken: '',
     };
   }
 
@@ -187,11 +194,15 @@ export class TestDataGenerator {
   static generateDomainData(domainType?: 'allowed' | 'organization') {
     const uniqueId = this.generateUniqueId();
     const baseDomain = `test-domain-${uniqueId}.com`;
-    
+
     return {
       domain: baseDomain,
-      domainType: domainType === 'allowed' ? 'ALLOWED_EMAIL_DOMAIN' : 
-                  domainType === 'organization' ? 'ORGANIZATION_DOMAIN' : undefined
+      domainType:
+        domainType === 'allowed'
+          ? 'ALLOWED_EMAIL_DOMAIN'
+          : domainType === 'organization'
+            ? 'ORGANIZATION_DOMAIN'
+            : undefined,
     };
   }
 
@@ -208,25 +219,27 @@ export class TestDataGenerator {
    */
   static generateRoleData(overrides: Partial<CreateRole> = {}): CreateRole {
     const uniqueId = this.generateUniqueId();
-    
+
     return create(CreateRoleSchema, {
       name: `test_role_${uniqueId}`,
       displayName: `Test Role ${uniqueId}`,
       description: `Test role description ${uniqueId}`,
       permissions: [], // Initialize empty permissions array
-      ...overrides
+      ...overrides,
     });
   }
 
   /**
    * Generate test role update data
    */
-  static generateRoleUpdateData(overrides: Partial<UpdateRole> = {}): UpdateRole {
+  static generateRoleUpdateData(
+    overrides: Partial<UpdateRole> = {}
+  ): UpdateRole {
     const uniqueId = this.generateUniqueId();
     const init = {
       displayName: `Updated Role ${uniqueId}`,
       description: `Updated role description ${uniqueId}`,
-      ...overrides
+      ...overrides,
     };
     return create(UpdateRoleSchema, init as Parameters<typeof create>[1]);
   }
@@ -234,28 +247,32 @@ export class TestDataGenerator {
   /**
    * Generate test organization role data
    */
-  static generateOrganizationRoleData(overrides: Partial<CreateOrganizationRole> = {}): CreateOrganizationRole {
+  static generateOrganizationRoleData(
+    overrides: Partial<CreateOrganizationRole> = {}
+  ): CreateOrganizationRole {
     const uniqueId = this.generateUniqueId();
-    
+
     return create(CreateOrganizationRoleSchema, {
       name: `test_org_role_${uniqueId}`,
       displayName: `Test Organization Role ${uniqueId}`,
       description: `Test organization role description ${uniqueId}`,
       permissions: [], // Initialize empty permissions array
-      ...overrides
+      ...overrides,
     });
   }
 
   /**
    * Generate test permission data
    */
-  static generatePermissionData(overrides: Partial<CreatePermission> = {}): CreatePermission {
+  static generatePermissionData(
+    overrides: Partial<CreatePermission> = {}
+  ): CreatePermission {
     const uniqueId = this.generateUniqueId();
-    
+
     return create(CreatePermissionSchema, {
       name: `test_permission_${uniqueId}`,
       description: `Test permission description ${uniqueId}`,
-      ...overrides
+      ...overrides,
     });
   }
 }
@@ -270,22 +287,25 @@ export class TestOrganizationManager {
   static async createTestOrganization(client: any): Promise<string> {
     const orgData = TestDataGenerator.generateOrganizationData();
     const orgResponse = await client.organization.createOrganization(
-      orgData.name, 
+      orgData.name,
       { externalId: orgData.externalId }
     );
-    
+
     const testOrg = orgResponse.organization?.id || '';
     if (!testOrg) {
       throw new Error('Failed to create test organization');
     }
-    
+
     return testOrg;
   }
 
   /**
    * Clean up a test organization
    */
-  static async cleanupTestOrganization(client: any, testOrg: string): Promise<void> {
+  static async cleanupTestOrganization(
+    client: any,
+    testOrg: string
+  ): Promise<void> {
     if (testOrg) {
       try {
         await client.organization.deleteOrganization(testOrg);
@@ -303,26 +323,37 @@ export class TestUserManager {
   /**
    * Create a test user and return user data
    */
-  static async createTestUser(client: any, testOrg: string, overrides: Partial<CreateUserRequest> = {}) {
+  static async createTestUser(
+    client: any,
+    testOrg: string,
+    overrides: Partial<CreateUserRequest> = {}
+  ) {
     const userData = TestDataGenerator.generateUserData(overrides);
-    const createResponse = await client.user.createUserAndMembership(testOrg, userData);
+    const createResponse = await client.user.createUserAndMembership(
+      testOrg,
+      userData
+    );
     const createdUserId = createResponse.user?.id;
-    
+
     if (!createdUserId) {
       throw new Error('Failed to create test user');
     }
-    
+
     return {
       userId: createdUserId,
       userData,
-      response: createResponse
+      response: createResponse,
     };
   }
 
   /**
    * Clean up a test user
    */
-  static async cleanupTestUser(client: any, testOrg: string, userId: string): Promise<void> {
+  static async cleanupTestUser(
+    client: any,
+    testOrg: string,
+    userId: string
+  ): Promise<void> {
     if (userId) {
       try {
         // Remove membership if it exists
@@ -330,7 +361,7 @@ export class TestUserManager {
       } catch (error) {
         // Membership may not exist
       }
-      
+
       try {
         await client.user.deleteUser(userId);
       } catch (error) {
@@ -347,31 +378,48 @@ export class TestDomainManager {
   /**
    * Create a test domain and return domain data
    */
-  static async createTestDomain(client: any, testOrg: string, domainType?: 'allowed' | 'organization') {
+  static async createTestDomain(
+    client: any,
+    testOrg: string,
+    domainType?: 'allowed' | 'organization'
+  ) {
     const domainName = TestDataGenerator.generateUniqueDomainName();
-    const options = domainType ? { 
-      domainType: domainType === 'allowed' ? DomainType.ALLOWED_EMAIL_DOMAIN : DomainType.ORGANIZATION_DOMAIN
-    } : undefined;
-    
-    const response = await client.domain.createDomain(testOrg, domainName, options);
+    const options = domainType
+      ? {
+          domainType:
+            domainType === 'allowed'
+              ? DomainType.ALLOWED_EMAIL_DOMAIN
+              : DomainType.ORGANIZATION_DOMAIN,
+        }
+      : undefined;
+
+    const response = await client.domain.createDomain(
+      testOrg,
+      domainName,
+      options
+    );
     const createdDomainId = response.domain?.id;
-    
+
     if (!createdDomainId) {
       throw new Error('Failed to create test domain');
     }
-    
+
     return {
       domainId: createdDomainId,
       domainName,
       domainType: response.domain?.domainType,
-      response
+      response,
     };
   }
 
   /**
    * Clean up a test domain (if domain deletion is supported)
    */
-  static async cleanupTestDomain(client: any, testOrg: string, domainId: string): Promise<void> {
+  static async cleanupTestDomain(
+    client: any,
+    testOrg: string,
+    domainId: string
+  ): Promise<void> {
     if (domainId) {
       try {
         // Note: Domain deletion may not be implemented yet
@@ -390,19 +438,22 @@ export class TestRoleManager {
   /**
    * Create a test role and return role data
    */
-  static async createTestRole(client: any, overrides: Partial<CreateRole> = {}) {
+  static async createTestRole(
+    client: any,
+    overrides: Partial<CreateRole> = {}
+  ) {
     const roleData = TestDataGenerator.generateRoleData(overrides);
     const response = await client.role.createRole(roleData);
     const createdRoleName = response.role?.name;
-    
+
     if (!createdRoleName) {
       throw new Error('Failed to create test role');
     }
-    
+
     return {
       roleName: createdRoleName,
       roleData,
-      response
+      response,
     };
   }
 
@@ -422,26 +473,37 @@ export class TestRoleManager {
   /**
    * Create a test organization role and return role data
    */
-  static async createTestOrganizationRole(client: any, testOrg: string, overrides: Partial<CreateOrganizationRole> = {}) {
+  static async createTestOrganizationRole(
+    client: any,
+    testOrg: string,
+    overrides: Partial<CreateOrganizationRole> = {}
+  ) {
     const roleData = TestDataGenerator.generateOrganizationRoleData(overrides);
-    const response = await client.role.createOrganizationRole(testOrg, roleData);
+    const response = await client.role.createOrganizationRole(
+      testOrg,
+      roleData
+    );
     const createdRoleName = response.role?.name;
-    
+
     if (!createdRoleName) {
       throw new Error('Failed to create test organization role');
     }
-    
+
     return {
       roleName: createdRoleName,
       roleData,
-      response
+      response,
     };
   }
 
   /**
    * Clean up a test organization role
    */
-  static async cleanupTestOrganizationRole(client: any, testOrg: string, roleName: string): Promise<void> {
+  static async cleanupTestOrganizationRole(
+    client: any,
+    testOrg: string,
+    roleName: string
+  ): Promise<void> {
     if (roleName) {
       try {
         await client.role.deleteOrganizationRole(testOrg, roleName);
@@ -459,26 +521,32 @@ export class TestPermissionManager {
   /**
    * Create a test permission and return permission data
    */
-  static async createTestPermission(client: any, overrides: Partial<CreatePermission> = {}) {
+  static async createTestPermission(
+    client: any,
+    overrides: Partial<CreatePermission> = {}
+  ) {
     const permissionData = TestDataGenerator.generatePermissionData(overrides);
     const response = await client.permission.createPermission(permissionData);
     const createdPermissionName = response.permission?.name;
-    
+
     if (!createdPermissionName) {
       throw new Error('Failed to create test permission');
     }
-    
+
     return {
       permissionName: createdPermissionName,
       permissionData,
-      response
+      response,
     };
   }
 
   /**
    * Clean up a test permission
    */
-  static async cleanupTestPermission(client: any, permissionName: string): Promise<void> {
+  static async cleanupTestPermission(
+    client: any,
+    permissionName: string
+  ): Promise<void> {
     if (permissionName) {
       try {
         await client.permission.deletePermission(permissionName);
@@ -487,4 +555,4 @@ export class TestPermissionManager {
       }
     }
   }
-} 
+}

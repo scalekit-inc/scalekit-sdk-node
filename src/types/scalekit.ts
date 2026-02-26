@@ -18,17 +18,17 @@ export type AuthorizationUrlOptions = {
   codeChallengeMethod?: string;
   provider?: string;
   prompt?: string;
-}
+};
 
 export type AuthenticationOptions = {
   codeVerifier?: string;
-}
+};
 
 export type TokenValidationOptions = {
   issuer?: string;
   audience?: string[];
   requiredScopes?: string[];
-}
+};
 
 export type AuthenticationResponse = {
   user: User;
@@ -36,12 +36,12 @@ export type AuthenticationResponse = {
   accessToken: string;
   expiresIn: number;
   refreshToken: string;
-}
+};
 
 export type RefreshTokenResponse = {
   accessToken: string;
   refreshToken: string;
-}
+};
 
 export interface LogoutUrlOptions {
   idTokenHint?: string;
