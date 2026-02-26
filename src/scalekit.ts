@@ -293,7 +293,7 @@ export default class ScalekitClient {
         user[IdTokenClaimToUserMap[k]] = v;
       }
     }
-    user.claims = {...claims} as Record<string, any>;
+    user.claims = { ...claims } as Record<string, any>;
 
     return {
       user,
@@ -613,16 +613,22 @@ export default class ScalekitClient {
       keys: this.coreClient.keys,
     });
     try {
-      const { payload } = await jose.jwtVerify<Record<string, any>>(token, jwks, {
-        ...(options?.issuer && { issuer: options.issuer }),
-        ...(options?.audience && { audience: options.audience }),
-      });
+      const { payload } = await jose.jwtVerify<Record<string, any>>(
+        token,
+        jwks,
+        {
+          ...(options?.issuer && { issuer: options.issuer }),
+          ...(options?.audience && { audience: options.audience }),
+        }
+      );
 
       if (options?.requiredScopes && options.requiredScopes.length > 0) {
         this.verifyScopes(token, options.requiredScopes);
       }
 
-      return { ...payload, claims: { ...payload } } as T & { claims: Record<string, any> };
+      return { ...payload, claims: { ...payload } } as T & {
+        claims: Record<string, any>;
+      };
     } catch (error) {
       throw new ScalekitValidateTokenFailureException(error);
     }

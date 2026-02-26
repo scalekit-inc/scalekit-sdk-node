@@ -20,5 +20,5 @@ export const IdTokenClaimToUserMap: { [k in keyof IdTokenClaim]: keyof User } =
     updated_at: 'updatedAt',
     identities: 'identities',
     metadata: 'metadata',
-    claims: 'claims'
+    claims: 'claims',
   };

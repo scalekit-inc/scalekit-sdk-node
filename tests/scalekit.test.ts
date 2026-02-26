@@ -137,7 +137,8 @@ describe('ScalekitClient', () => {
       expect(accessToken).toBeDefined();
       expect(typeof accessToken).toBe('string');
 
-      const result = await client.getTokenClaims<AccessTokenClaims>(accessToken);
+      const result =
+        await client.getTokenClaims<AccessTokenClaims>(accessToken);
 
       expect(result.sub).toBeDefined();
       expect(result.iss).toBeDefined();
@@ -165,7 +166,8 @@ describe('ScalekitClient', () => {
       );
 
       const accessToken = tokenResponse.data.access_token;
-      const result = await client.getTokenClaims<AccessTokenClaims>(accessToken);
+      const result =
+        await client.getTokenClaims<AccessTokenClaims>(accessToken);
 
       expect(result.claims.iat).toBeDefined();
       expect(typeof result.claims.iat).toBe('number');
@@ -208,13 +210,21 @@ describe('ScalekitClient', () => {
 
     it('should mirror all raw JWT payload fields in claims', async () => {
       const envUrl = process.env.SCALEKIT_ENVIRONMENT_URL!;
-      const token = await new SignJWT({ sub: SUBJECT, iss: envUrl, custom: 'hello' })
+      const token = await new SignJWT({
+        sub: SUBJECT,
+        iss: envUrl,
+        custom: 'hello',
+      })
         .setProtectedHeader({ alg: 'RS256' })
         .setIssuedAt()
         .setExpirationTime('1h')
         .sign(privateKey);
 
-      const result = await unitClient.validateToken<{ sub: string; iss: string; custom: string }>(token);
+      const result = await unitClient.validateToken<{
+        sub: string;
+        iss: string;
+        custom: string;
+      }>(token);
 
       expect(result.sub).toBe(SUBJECT);
       expect(result.iss).toBe(envUrl);
@@ -233,7 +243,10 @@ describe('ScalekitClient', () => {
         .setExpirationTime('1h')
         .sign(privateKey);
 
-      const result = await unitClient.validateToken<{ sub: string; iss: string }>(token);
+      const result = await unitClient.validateToken<{
+        sub: string;
+        iss: string;
+      }>(token);
 
       expect(result.claims.claims).toBeUndefined();
     });
@@ -252,11 +265,14 @@ describe('ScalekitClient', () => {
         .setExpirationTime('1h')
         .sign(privateKey);
 
-      const result = await unitClient.getTokenClaims<{ sub: string; iss: string }>(token);
+      const result = await unitClient.getTokenClaims<{
+        sub: string;
+        iss: string;
+      }>(token);
 
       expect(result.sub).toBe(SUBJECT);
       expect(result.claims.sub).toBe(SUBJECT);
       expect(result.claims.iss).toBe(envUrl);
     });
   });
-}); 
+});

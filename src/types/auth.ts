@@ -19,7 +19,7 @@ export type User = {
   metadata: string | undefined;
   /** All claims from the ID token (raw JWT payload). */
   claims: Record<string, any>;
-}
+};
 
 export type Identity = {
   connectionId: string;
@@ -59,7 +59,7 @@ export type IdTokenClaim = {
   identities: IdTokenClaimIdentity[];
   metadata: string | undefined;
   claims: Record<string, any>;
-}
+};
 
 export type AccessTokenClaims = {
   sub: string;
@@ -68,7 +68,7 @@ export type AccessTokenClaims = {
   iat: number | undefined;
   exp: number | undefined;
   claims: Record<string, any>;
-}
+};
 
 export type TokenResponse = {
   access_token: string;
@@ -83,4 +83,4 @@ export type IdpInitiatedLoginClaims = {
   login_hint: string;
   relay_state?: string;
   claims: Record<string, any>;
-}
+};
