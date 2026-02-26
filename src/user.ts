@@ -11,13 +11,13 @@
  *
  * @see {@link https://docs.scalekit.com/apis/#tag/users | User API Documentation}
  */
-import type { MessageShape } from "@bufbuild/protobuf";
-import { create } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import type { Client } from "@connectrpc/connect";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { UserService } from "./pkg/grpc/scalekit/v1/users/users_pb";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { create } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import type { Client } from '@connectrpc/connect';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { UserService } from './pkg/grpc/scalekit/v1/users/users_pb';
 import {
   CreateUserAndMembershipRequest,
   CreateUserAndMembershipResponse,
@@ -51,11 +51,11 @@ import {
   ResendInviteRequest,
   ResendInviteResponse,
   ResendInviteRequestSchema,
-} from "./pkg/grpc/scalekit/v1/users/users_pb";
+} from './pkg/grpc/scalekit/v1/users/users_pb';
 import {
   CreateUserRequest,
   UpdateUserRequest as UpdateUserRequestType,
-} from "./types/user";
+} from './types/user';
 
 export default class UserClient {
   private client: Client<typeof UserService>;
@@ -129,10 +129,10 @@ export default class UserClient {
     options: CreateUserRequest
   ): Promise<CreateUserAndMembershipResponse> {
     if (!organizationId) {
-      throw new Error("organizationId is required");
+      throw new Error('organizationId is required');
     }
     if (!options.email) {
-      throw new Error("email is required");
+      throw new Error('email is required');
     }
 
     const user = create(CreateUserSchema, {
@@ -158,7 +158,7 @@ export default class UserClient {
     );
 
     if (!response.user) {
-      throw new Error("Failed to create user");
+      throw new Error('Failed to create user');
     }
 
     return response;
@@ -227,7 +227,7 @@ export default class UserClient {
   async getUser(userId: string): Promise<GetUserResponse> {
     return this.coreClient.connectExec(this.client.getUser, {
       identities: {
-        case: "id",
+        case: 'id',
         value: userId,
       },
     });
@@ -401,7 +401,7 @@ export default class UserClient {
 
     return this.coreClient.connectExec(this.client.updateUser, {
       identities: {
-        case: "id",
+        case: 'id',
         value: userId,
       },
       user: updateUser,
@@ -451,7 +451,7 @@ export default class UserClient {
   async deleteUser(userId: string): Promise<MessageShape<typeof EmptySchema>> {
     return this.coreClient.connectExec(this.client.deleteUser, {
       identities: {
-        case: "id",
+        case: 'id',
         value: userId,
       },
     });
@@ -540,7 +540,7 @@ export default class UserClient {
     const request = create(CreateMembershipRequestSchema, {
       organizationId,
       identities: {
-        case: "id",
+        case: 'id',
         value: userId,
       },
       membership,
@@ -599,7 +599,7 @@ export default class UserClient {
     return this.coreClient.connectExec(this.client.deleteMembership, {
       organizationId,
       identities: {
-        case: "id",
+        case: 'id',
         value: userId,
       },
     });
@@ -694,7 +694,7 @@ export default class UserClient {
     return this.coreClient.connectExec(this.client.updateMembership, {
       organizationId,
       identities: {
-        case: "id",
+        case: 'id',
         value: userId,
       },
       membership,
@@ -813,10 +813,10 @@ export default class UserClient {
     userId: string
   ): Promise<ResendInviteResponse> {
     if (!organizationId) {
-      throw new Error("organizationId is required");
+      throw new Error('organizationId is required');
     }
     if (!userId) {
-      throw new Error("userId is required");
+      throw new Error('userId is required');
     }
 
     const request = create(ResendInviteRequestSchema, {

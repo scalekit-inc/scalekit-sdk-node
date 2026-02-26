@@ -1,10 +1,10 @@
-import type { MessageShape } from "@bufbuild/protobuf";
-import { create } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import type { Client } from "@connectrpc/connect";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { OrganizationService } from "./pkg/grpc/scalekit/v1/organizations/organizations_pb";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { create } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import type { Client } from '@connectrpc/connect';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { OrganizationService } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
 import {
   CreateOrganizationResponse,
   GetOrganizationResponse,
@@ -14,11 +14,11 @@ import {
   UpdateOrganization,
   UpdateOrganizationResponse,
   UpdateOrganizationSchema,
-} from "./pkg/grpc/scalekit/v1/organizations/organizations_pb";
+} from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
 import {
   OrganizationSettings,
   OrganizationUserManagementSettingsInput,
-} from "./types/organization";
+} from './types/organization';
 
 /**
  * Client for managing organizations (tenants) in your Scalekit application.
@@ -190,7 +190,7 @@ export default class OrganizationClient {
    */
   async getOrganization(id: string): Promise<GetOrganizationResponse> {
     return this.coreClient.connectExec(this.client.getOrganization, {
-      identities: { case: "id", value: id },
+      identities: { case: 'id', value: id },
     });
   }
 
@@ -239,7 +239,7 @@ export default class OrganizationClient {
     externalId: string
   ): Promise<GetOrganizationResponse> {
     return this.coreClient.connectExec(this.client.getOrganization, {
-      identities: { case: "externalId", value: externalId },
+      identities: { case: 'externalId', value: externalId },
     });
   }
 
@@ -295,8 +295,13 @@ export default class OrganizationClient {
     organization: Partial<UpdateOrganization>
   ): Promise<UpdateOrganizationResponse> {
     return this.coreClient.connectExec(this.client.updateOrganization, {
-      identities: { case: "id", value: id },
-      organization: create(UpdateOrganizationSchema, organization as Parameters<typeof create<typeof UpdateOrganizationSchema>>[1]),
+      identities: { case: 'id', value: id },
+      organization: create(
+        UpdateOrganizationSchema,
+        organization as Parameters<
+          typeof create<typeof UpdateOrganizationSchema>
+        >[1]
+      ),
     });
   }
 
@@ -358,8 +363,13 @@ export default class OrganizationClient {
     organization: Partial<UpdateOrganization>
   ): Promise<UpdateOrganizationResponse> {
     return this.coreClient.connectExec(this.client.updateOrganization, {
-      identities: { case: "externalId", value: externalId },
-      organization: create(UpdateOrganizationSchema, organization as Parameters<typeof create<typeof UpdateOrganizationSchema>>[1]),
+      identities: { case: 'externalId', value: externalId },
+      organization: create(
+        UpdateOrganizationSchema,
+        organization as Parameters<
+          typeof create<typeof UpdateOrganizationSchema>
+        >[1]
+      ),
     });
   }
 
@@ -398,9 +408,11 @@ export default class OrganizationClient {
    * @see {@link https://docs.scalekit.com/apis/#tag/organizations | Delete Organization API}
    * @see {@link getOrganization} - Check if organization exists before deletion
    */
-  async deleteOrganization(organizationId: string): Promise<MessageShape<typeof EmptySchema>> {
+  async deleteOrganization(
+    organizationId: string
+  ): Promise<MessageShape<typeof EmptySchema>> {
     return this.coreClient.connectExec(this.client.deleteOrganization, {
-      identities: { case: "id", value: organizationId },
+      identities: { case: 'id', value: organizationId },
     });
   }
 
@@ -447,7 +459,7 @@ export default class OrganizationClient {
       }
     );
     if (!response.link) {
-      throw new Error("Error generating portal link");
+      throw new Error('Error generating portal link');
     }
 
     return response.link;

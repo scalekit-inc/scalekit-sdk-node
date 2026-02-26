@@ -28,7 +28,7 @@ export type Identity = {
   providerName: string;
   social: boolean;
   providerRawAttributes: string;
-}
+};
 
 export type IdTokenClaimIdentity = {
   connection_id: string;
@@ -37,7 +37,7 @@ export type IdTokenClaimIdentity = {
   provider_name: string;
   social: boolean;
   provider_raw_attributes: string;
-}
+};
 
 export type IdTokenClaim = {
   sub: string;
@@ -75,7 +75,7 @@ export type TokenResponse = {
   id_token: string;
   expires_in: number;
   refresh_token: string;
-}
+};
 
 export type IdpInitiatedLoginClaims = {
   connection_id: string;

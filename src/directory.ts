@@ -1,8 +1,8 @@
-import { timestampFromDate } from "@bufbuild/protobuf/wkt";
-import type { Client } from "@connectrpc/connect";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { DirectoryService } from "./pkg/grpc/scalekit/v1/directories/directories_pb";
+import { timestampFromDate } from '@bufbuild/protobuf/wkt';
+import type { Client } from '@connectrpc/connect';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { DirectoryService } from './pkg/grpc/scalekit/v1/directories/directories_pb';
 import {
   GetDirectoryResponse,
   Directory,
@@ -10,7 +10,7 @@ import {
   ListDirectoryGroupsResponse,
   ListDirectoryUsersResponse,
   ToggleDirectoryResponse,
-} from "./pkg/grpc/scalekit/v1/directories/directories_pb";
+} from './pkg/grpc/scalekit/v1/directories/directories_pb';
 
 /**
  * Client for managing SCIM directory synchronization.
@@ -189,7 +189,7 @@ export default class DirectoryClient {
   ): Promise<Directory> {
     const directories = await this.listDirectories(organizationId);
     if (!directories || directories.directories.length === 0) {
-      return Promise.reject("directory does not exist for organization");
+      return Promise.reject('directory does not exist for organization');
     }
 
     return directories.directories[0];

@@ -1,16 +1,16 @@
-import type { JsonObject } from "@bufbuild/protobuf";
-import { create } from "@bufbuild/protobuf";
-import type { MessageShape } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import CoreClient from "./core";
-import type { Client } from "@connectrpc/connect";
-import GrpcConnect from "./connect";
+import type { JsonObject } from '@bufbuild/protobuf';
+import { create } from '@bufbuild/protobuf';
+import type { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import CoreClient from './core';
+import type { Client } from '@connectrpc/connect';
+import GrpcConnect from './connect';
 import {
   AuthService,
   UpdateLoginUserDetailsRequestSchema,
   UserSchema,
   type User,
-} from "./pkg/grpc/scalekit/v1/auth/auth_pb";
+} from './pkg/grpc/scalekit/v1/auth/auth_pb';
 
 /** User input for updateLoginUserDetails; customAttributes is a plain object (proto Struct → JsonObject in v2). */
 type UserInput = Partial<User> & {
@@ -71,19 +71,22 @@ export default class AuthClient {
     loginRequestId: string,
     user: UserInput
   ): Promise<MessageShape<typeof EmptySchema>> {
-    if (!connectionId || typeof connectionId !== "string") {
-      throw new Error("connectionId must be a non-empty string");
+    if (!connectionId || typeof connectionId !== 'string') {
+      throw new Error('connectionId must be a non-empty string');
     }
 
-    if (!loginRequestId || typeof loginRequestId !== "string") {
-      throw new Error("loginRequestId must be a non-empty string");
+    if (!loginRequestId || typeof loginRequestId !== 'string') {
+      throw new Error('loginRequestId must be a non-empty string');
     }
 
-    if (!user || typeof user !== "object") {
-      throw new Error("user must be a valid object");
+    if (!user || typeof user !== 'object') {
+      throw new Error('user must be a valid object');
     }
 
-    const userMessage = create(UserSchema, user as Parameters<typeof create<typeof UserSchema>>[1]);
+    const userMessage = create(
+      UserSchema,
+      user as Parameters<typeof create<typeof UserSchema>>[1]
+    );
 
     const request = create(UpdateLoginUserDetailsRequestSchema, {
       connectionId,

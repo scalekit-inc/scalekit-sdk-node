@@ -1,7 +1,11 @@
 import ScalekitClient from '../src/scalekit';
 import { CreateUserRequest, UpdateUserRequest } from '../src/types/user';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { TestDataGenerator, TestOrganizationManager, TestUserManager } from './utils/test-data';
+import {
+  TestDataGenerator,
+  TestOrganizationManager,
+  TestUserManager,
+} from './utils/test-data';
 
 describe('Users', () => {
   let client: ScalekitClient;
@@ -12,13 +16,16 @@ describe('Users', () => {
   beforeEach(async () => {
     // Use global client
     client = global.client;
-    
+
     // Create test organization for each test
     testOrg = await TestOrganizationManager.createTestOrganization(client);
-    
+
     // Create a shared user for testing
     sharedUserData = TestDataGenerator.generateUserData();
-    const createResponse = await client.user.createUserAndMembership(testOrg, sharedUserData);
+    const createResponse = await client.user.createUserAndMembership(
+      testOrg,
+      sharedUserData
+    );
     userId = createResponse.user?.id || null;
     expect(userId).toBeDefined();
   });
@@ -29,7 +36,7 @@ describe('Users', () => {
       await TestUserManager.cleanupTestUser(client, testOrg, userId);
       userId = null;
     }
-    
+
     // Clean up test organization
     await TestOrganizationManager.cleanupTestOrganization(client, testOrg);
   });
@@ -37,7 +44,10 @@ describe('Users', () => {
   describe('listOrganizationUsers', () => {
     it('should list users by organization', async () => {
       // List users in the organization
-      const usersList = await client.user.listOrganizationUsers(testOrg, TestDataGenerator.generatePaginationParams());
+      const usersList = await client.user.listOrganizationUsers(
+        testOrg,
+        TestDataGenerator.generatePaginationParams()
+      );
 
       expect(usersList).toBeDefined();
       expect(usersList.users).toBeDefined();
@@ -52,7 +62,10 @@ describe('Users', () => {
     });
 
     it('should handle pagination', async () => {
-      const firstPage = await client.user.listOrganizationUsers(testOrg, TestDataGenerator.generatePaginationParams(5));
+      const firstPage = await client.user.listOrganizationUsers(
+        testOrg,
+        TestDataGenerator.generatePaginationParams(5)
+      );
 
       expect(firstPage).toBeDefined();
       expect(firstPage.users.length).toBeLessThanOrEqual(5);
@@ -60,7 +73,7 @@ describe('Users', () => {
       if (firstPage.nextPageToken) {
         const secondPage = await client.user.listOrganizationUsers(testOrg, {
           pageSize: 5,
-          pageToken: firstPage.nextPageToken
+          pageToken: firstPage.nextPageToken,
         });
 
         expect(secondPage).toBeDefined();
@@ -73,7 +86,7 @@ describe('Users', () => {
     it('should get user by ID', async () => {
       // Retrieve the user by ID
       const user = await client.user.getUser(userId!);
-      
+
       expect(user).toBeDefined();
       expect(user.user).toBeDefined();
       expect(user.user?.id).toBe(userId);
@@ -88,14 +101,17 @@ describe('Users', () => {
       let newUserId: string | null = null;
 
       try {
-        const response = await client.user.createUserAndMembership(testOrg, userData);
-        
+        const response = await client.user.createUserAndMembership(
+          testOrg,
+          userData
+        );
+
         expect(response).toBeDefined();
         expect(response.user).toBeDefined();
         expect(response.user?.id).toBeDefined();
         expect(response.user?.email).toBe(userData.email);
         expect(response.user?.metadata?.source).toBe('test');
-        
+
         newUserId = response.user?.id || null;
       } finally {
         // Clean up the new user created in this test
@@ -114,7 +130,9 @@ describe('Users', () => {
     });
 
     it('should throw error when organizationId is missing', async () => {
-      const userData = TestDataGenerator.generateUserData({ email: 'test@example.com' });
+      const userData = TestDataGenerator.generateUserData({
+        email: 'test@example.com',
+      });
 
       await expect(
         client.user.createUserAndMembership('', userData)
@@ -128,7 +146,7 @@ describe('Users', () => {
       const updateData = TestDataGenerator.generateUserUpdateData();
 
       const updatedUser = await client.user.updateUser(userId!, updateData);
-      
+
       expect(updatedUser).toBeDefined();
       expect(updatedUser.user).toBeDefined();
       expect(updatedUser.user?.id).toBe(userId);
@@ -141,7 +159,7 @@ describe('Users', () => {
     it('should resend invite to user', async () => {
       // Resend invite to the shared user
       const resendResponse = await client.user.resendInvite(testOrg, userId!);
-      
+
       // Verify the response structure
       expect(resendResponse).toBeDefined();
       expect(resendResponse.invite).toBeDefined();
@@ -154,15 +172,15 @@ describe('Users', () => {
     });
 
     it('should throw error when organizationId is missing', async () => {
-      await expect(
-        client.user.resendInvite('', userId!)
-      ).rejects.toThrow('organizationId is required');
+      await expect(client.user.resendInvite('', userId!)).rejects.toThrow(
+        'organizationId is required'
+      );
     });
 
     it('should throw error when userId is missing', async () => {
-      await expect(
-        client.user.resendInvite(testOrg, '')
-      ).rejects.toThrow('userId is required');
+      await expect(client.user.resendInvite(testOrg, '')).rejects.toThrow(
+        'userId is required'
+      );
     });
   });
-}); 
+});
