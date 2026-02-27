@@ -1,5 +1,5 @@
 # Usage:
-#   make setup     # Create/update .venv and install dependencies
+#   make setup     # Create/update and install dependencies
 #   make generate  # Regenerate SDK code from proto sources
 #   make lint      # Run static checks
 #   make test      # Run unit tests
@@ -33,3 +33,9 @@ test:
 verify-generate:
 	$(MAKE) generate
 	git diff --exit-code
+	`@untracked`="$$(git ls-files --others --exclude-standard)"; \
+	if [ -n "$$untracked" ]; then \
+		echo "Untracked files detected after generation:"; \
+		echo "$$untracked"; \
+		exit 1; \
+	fi
