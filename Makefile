@@ -33,7 +33,7 @@ test:
 verify-generate:
 	$(MAKE) generate
 	git diff --exit-code
-	`@untracked`="$$(git ls-files --others --exclude-standard)"; \
+	@untracked="$$(git ls-files --others --exclude-standard)"; \
 	if [ -n "$$untracked" ]; then \
 		echo "Untracked files detected after generation:"; \
 		echo "$$untracked"; \
