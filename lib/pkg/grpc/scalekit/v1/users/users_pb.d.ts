@@ -1041,6 +1041,20 @@ export type Permission = Message<"scalekit.v1.users.Permission"> & {
  */
 export declare const PermissionSchema: GenMessage<Permission>;
 /**
+ * @generated from message scalekit.v1.users.GetSupportHashResponse
+ */
+export type GetSupportHashResponse = Message<"scalekit.v1.users.GetSupportHashResponse"> & {
+    /**
+     * @generated from field: string support_hash = 1;
+     */
+    supportHash: string;
+};
+/**
+ * Describes the message scalekit.v1.users.GetSupportHashResponse.
+ * Use `create(GetSupportHashResponseSchema)` to create a new message.
+ */
+export declare const GetSupportHashResponseSchema: GenMessage<GetSupportHashResponse>;
+/**
  * @generated from message scalekit.v1.users.ListUserPermissionsResponse
  */
 export type ListUserPermissionsResponse = Message<"scalekit.v1.users.ListUserPermissionsResponse"> & {
@@ -1075,6 +1089,14 @@ export declare const UserService: GenService<{
         methodKind: "unary";
         input: typeof GetCurrentUserRequestSchema;
         output: typeof GetCurrentUserResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.users.UserService.GetSupportHash
+     */
+    getSupportHash: {
+        methodKind: "unary";
+        input: typeof EmptySchema;
+        output: typeof GetSupportHashResponseSchema;
     };
     /**
      * @generated from rpc scalekit.v1.users.UserService.ListUsers
