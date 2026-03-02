@@ -48,6 +48,7 @@ describe('Roles', () => {
       expect(typeof client.role.listRoles).toBe('function');
       expect(typeof client.role.updateRole).toBe('function');
       expect(typeof client.role.deleteRole).toBe('function');
+      expect(typeof client.role.deleteRoleBase).toBe('function');
       expect(typeof client.role.getRoleUsersCount).toBe('function');
     });
 
@@ -177,6 +178,30 @@ describe('Roles', () => {
 
         expect(response).toBeDefined();
         expect(Number(response.count)).toBeGreaterThanOrEqual(0);
+      });
+    });
+  });
+
+    describe('deleteRoleBase', () => {
+      it('should delete env role base relationship', async () => {
+        // Create a base role
+        const baseRoleData = TestDataGenerator.generateRoleData();
+        const baseResp = await client.role.createRole(baseRoleData);
+        const baseRoleName = baseResp.role?.name!;
+
+        // Create a child role extending the base role
+        const childRoleData = TestDataGenerator.generateRoleData({
+          extends: baseRoleName,
+        });
+        const childResp = await client.role.createRole(childRoleData);
+        testRoleName = childResp.role?.name || null;
+
+        const response = await client.role.deleteRoleBase(testRoleName!);
+
+        expect(response).toBeDefined();
+
+        // Cleanup base role
+        await client.role.deleteRole(baseRoleName);
       });
     });
   });
