@@ -1,8 +1,14 @@
+import { create, MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
 import { ConnectionService } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 import {
+  CreateConnection,
+  CreateConnectionRequestSchema,
+  CreateConnectionResponse,
+  DeleteConnectionRequestSchema,
   GetConnectionResponse,
   ToggleConnectionResponse,
   ListConnectionsResponse,
@@ -263,5 +269,47 @@ export default class ConnectionClient {
       id,
       organizationId,
     });
+  }
+
+  /**
+   * Creates a new SSO connection for an organization.
+   *
+   * @param {string} organizationId - The organization ID (format: "org_...")
+   * @param {CreateConnection} connection - The connection configuration to create
+   *
+   * @returns {Promise<CreateConnectionResponse>} Response containing the created connection
+   *
+   * @throws {Error} If the organization is not found or connection configuration is invalid
+   */
+  async createConnection(
+    organizationId: string,
+    connection: CreateConnection
+  ): Promise<CreateConnectionResponse> {
+    const request = create(CreateConnectionRequestSchema, {
+      organizationId,
+      connection,
+    });
+    return this.coreClient.connectExec(this.client.createConnection, request);
+  }
+
+  /**
+   * Deletes an SSO connection for an organization.
+   *
+   * @param {string} organizationId - The organization ID (format: "org_...")
+   * @param {string} id - The connection ID to delete (format: "conn_...")
+   *
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+   *
+   * @throws {Error} If the organization or connection is not found
+   */
+  async deleteConnection(
+    organizationId: string,
+    id: string
+  ): Promise<MessageShape<typeof EmptySchema>> {
+    const request = create(DeleteConnectionRequestSchema, {
+      organizationId,
+      id,
+    });
+    return this.coreClient.connectExec(this.client.deleteConnection, request);
   }
 }

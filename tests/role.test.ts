@@ -182,27 +182,26 @@ describe('Roles', () => {
     });
   });
 
-    describe('deleteRoleBase', () => {
-      it('should delete env role base relationship', async () => {
-        // Create a base role
-        const baseRoleData = TestDataGenerator.generateRoleData();
-        const baseResp = await client.role.createRole(baseRoleData);
-        const baseRoleName = baseResp.role?.name!;
+  describe('deleteRoleBase', () => {
+    it('should delete env role base relationship', async () => {
+      // Create a base role
+      const baseRoleData = TestDataGenerator.generateRoleData();
+      const baseResp = await client.role.createRole(baseRoleData);
+      const baseRoleName = baseResp.role?.name!;
 
-        // Create a child role extending the base role
-        const childRoleData = TestDataGenerator.generateRoleData({
-          extends: baseRoleName,
-        });
-        const childResp = await client.role.createRole(childRoleData);
-        testRoleName = childResp.role?.name || null;
-
-        const response = await client.role.deleteRoleBase(testRoleName!);
-
-        expect(response).toBeDefined();
-
-        // Cleanup base role
-        await client.role.deleteRole(baseRoleName);
+      // Create a child role extending the base role
+      const childRoleData = TestDataGenerator.generateRoleData({
+        extends: baseRoleName,
       });
+      const childResp = await client.role.createRole(childRoleData);
+      testRoleName = childResp.role?.name || null;
+
+      const response = await client.role.deleteRoleBase(testRoleName!);
+
+      expect(response).toBeDefined();
+
+      // Cleanup base role
+      await client.role.deleteRole(baseRoleName);
     });
   });
 
