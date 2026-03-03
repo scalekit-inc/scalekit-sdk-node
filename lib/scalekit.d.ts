@@ -380,6 +380,21 @@ export default class ScalekitClient {
      */
     private verifyTimestamp;
     /**
+     * Generates an M2M access token using the client credentials grant for the given clientId and clientSecret.
+     *
+     * @param {string} clientId - The client ID to authenticate with
+     * @param {string} clientSecret - The client secret to authenticate with
+     * @returns {Promise<string>} The access token string
+     */
+    generateClientToken(clientId: string, clientSecret: string): Promise<string>;
+    /**
+     * Generates an M2M access token using the stored client credentials (clientId and clientSecret
+     * supplied to the ScalekitClient constructor).
+     *
+     * @returns {Promise<string>} The access token string
+     */
+    getClientAccessToken(): Promise<string>;
+    /**
      * Compute the signature
      *
      * @param {Buffer} secretBytes The secret bytes

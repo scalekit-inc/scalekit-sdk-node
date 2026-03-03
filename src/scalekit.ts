@@ -667,6 +667,40 @@ export default class ScalekitClient {
   }
 
   /**
+   * Generates an M2M access token using the client credentials grant for the given clientId and clientSecret.
+   *
+   * @param {string} clientId - The client ID to authenticate with
+   * @param {string} clientSecret - The client secret to authenticate with
+   * @returns {Promise<string>} The access token string
+   */
+  async generateClientToken(
+    clientId: string,
+    clientSecret: string
+  ): Promise<string> {
+    const res = await this.coreClient.authenticate(
+      QueryString.stringify({
+        grant_type: GrantType.ClientCredentials,
+        client_id: clientId,
+        client_secret: clientSecret,
+      })
+    );
+    return res.data.access_token;
+  }
+
+  /**
+   * Generates an M2M access token using the stored client credentials (clientId and clientSecret
+   * supplied to the ScalekitClient constructor).
+   *
+   * @returns {Promise<string>} The access token string
+   */
+  async getClientAccessToken(): Promise<string> {
+    return this.generateClientToken(
+      this.coreClient.clientId,
+      this.coreClient.clientSecret
+    );
+  }
+
+  /**
    * Compute the signature
    *
    * @param {Buffer} secretBytes The secret bytes
