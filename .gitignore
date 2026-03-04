@@ -137,3 +137,5 @@ specs/
 .pnp.*
 /.history
 DOCUMENTATION_IMPROVEMENTS.md
+
+.idea/*
