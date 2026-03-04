@@ -136,6 +136,25 @@ export type GetAuthCustomizationsRequest = Message<"scalekit.v1.auth.GetAuthCust
  */
 export declare const GetAuthCustomizationsRequestSchema: GenMessage<GetAuthCustomizationsRequest>;
 /**
+ * PortalSettings contains feature flags and settings derived from the workspace's billing subscription
+ *
+ * @generated from message scalekit.v1.auth.PortalSettings
+ */
+export type PortalSettings = Message<"scalekit.v1.auth.PortalSettings"> & {
+    /**
+     * custom_branding indicates whether the workspace has the Customization billing item enabled,
+     * allowing custom portal branding (logos, colors, etc.)
+     *
+     * @generated from field: bool custom_branding = 1;
+     */
+    customBranding: boolean;
+};
+/**
+ * Describes the message scalekit.v1.auth.PortalSettings.
+ * Use `create(PortalSettingsSchema)` to create a new message.
+ */
+export declare const PortalSettingsSchema: GenMessage<PortalSettings>;
+/**
  * @generated from message scalekit.v1.auth.GetAuthCustomizationsResponse
  */
 export type GetAuthCustomizationsResponse = Message<"scalekit.v1.auth.GetAuthCustomizationsResponse"> & {
@@ -143,6 +162,12 @@ export type GetAuthCustomizationsResponse = Message<"scalekit.v1.auth.GetAuthCus
      * @generated from field: google.protobuf.Struct customization_settings = 2;
      */
     customizationSettings?: JsonObject;
+    /**
+     * settings contains feature flags derived from the workspace's billing subscription
+     *
+     * @generated from field: scalekit.v1.auth.PortalSettings settings = 3;
+     */
+    settings?: PortalSettings;
 };
 /**
  * Describes the message scalekit.v1.auth.GetAuthCustomizationsResponse.
@@ -414,6 +439,10 @@ export type User = Message<"scalekit.v1.auth.User"> & {
      * @generated from field: google.protobuf.Struct custom_attributes = 14;
      */
     customAttributes?: JsonObject;
+    /**
+     * @generated from field: optional string organization_external_id = 15;
+     */
+    organizationExternalId?: string;
 };
 /**
  * Describes the message scalekit.v1.auth.User.

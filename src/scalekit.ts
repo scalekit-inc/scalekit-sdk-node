@@ -15,6 +15,7 @@ import SessionClient from './session';
 import RoleClient from './role';
 import PermissionClient from './permission';
 import WebAuthnClient from './webauthn';
+import TokenClient from './token';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import {
   AuthenticationOptions,
@@ -79,6 +80,7 @@ export default class ScalekitClient {
   readonly permission: PermissionClient;
   readonly auth: AuthClient;
   readonly webauthn: WebAuthnClient;
+  readonly token: TokenClient;
   constructor(envUrl: string, clientId: string, clientSecret: string) {
     this.coreClient = new CoreClient(envUrl, clientId, clientSecret);
     this.grpcConnect = new GrpcConnect(this.coreClient);
@@ -100,6 +102,7 @@ export default class ScalekitClient {
     this.permission = new PermissionClient(this.grpcConnect, this.coreClient);
     this.auth = new AuthClient(this.grpcConnect, this.coreClient);
     this.webauthn = new WebAuthnClient(this.grpcConnect, this.coreClient);
+    this.token = new TokenClient(this.grpcConnect, this.coreClient);
   }
 
   /**
