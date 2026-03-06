@@ -1,10 +1,10 @@
-import { Axios, AxiosResponse } from "axios";
-import { JWK } from "jose";
-import { TokenResponse } from "./types/auth";
+import { Axios, AxiosResponse } from 'axios';
+import { JWK } from 'jose';
+import { TokenResponse } from './types/auth';
 export declare const headers: {
-    "user-agent": string;
-    "x-sdk-version": string;
-    "x-api-version": string;
+    'user-agent': string;
+    'x-sdk-version': string;
+    'x-api-version': string;
     authorization: string;
 };
 export default class CoreClient {

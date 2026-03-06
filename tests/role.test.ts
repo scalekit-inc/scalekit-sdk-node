@@ -187,17 +187,21 @@ describe('Roles', () => {
       // Create a base role
       const baseRoleData = TestDataGenerator.generateRoleData();
       const baseResp = await client.role.createRole(baseRoleData);
-      const baseRoleName = baseResp.role?.name!;
+      const baseRoleName = baseResp.role?.name;
+      if (!baseRoleName)
+        throw new Error('createRole did not return a role name');
 
       // Create a child role extending the base role
       const childRoleData = TestDataGenerator.generateRoleData({
         extends: baseRoleName,
       });
       const childResp = await client.role.createRole(childRoleData);
-      testRoleName = childResp.role?.name || null;
+      const childName = childResp.role?.name;
+      if (!childName)
+        throw new Error('createRole did not return a role name for child');
+      testRoleName = childName;
 
-      const response = await client.role.deleteRoleBase(testRoleName!);
-
+      const response = await client.role.deleteRoleBase(childName);
       expect(response).toBeDefined();
 
       // Cleanup base role

@@ -1,8 +1,8 @@
-import type { MessageShape } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { CreatePermissionResponse, GetPermissionResponse, UpdatePermissionResponse, ListPermissionsResponse, ListRolePermissionsResponse, AddPermissionsToRoleResponse, ListEffectiveRolePermissionsResponse, CreatePermission } from "./pkg/grpc/scalekit/v1/roles/roles_pb";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { CreatePermissionResponse, GetPermissionResponse, UpdatePermissionResponse, ListPermissionsResponse, ListRolePermissionsResponse, AddPermissionsToRoleResponse, ListEffectiveRolePermissionsResponse, CreatePermission } from './pkg/grpc/scalekit/v1/roles/roles_pb';
 /**
  * Client for managing permissions and role-permission assignments.
  *

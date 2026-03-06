@@ -1,9 +1,9 @@
-import type { MessageShape } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import type { Timestamp } from "@bufbuild/protobuf/wkt";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { CreateTokenResponse, ValidateTokenResponse, ListTokensResponse, Token } from "./pkg/grpc/scalekit/v1/tokens/tokens_pb";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import type { Timestamp } from '@bufbuild/protobuf/wkt';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { CreateTokenResponse, ValidateTokenResponse, ListTokensResponse, Token } from './pkg/grpc/scalekit/v1/tokens/tokens_pb';
 /**
  * Options for creating an API token.
  */
@@ -184,4 +184,4 @@ export default class TokenClient {
      */
     listTokens(organizationId: string, options?: ListTokensOptions): Promise<ListTokensResponse>;
 }
-export { Token, CreateTokenResponse, ValidateTokenResponse, ListTokensResponse };
+export { Token, CreateTokenResponse, ValidateTokenResponse, ListTokensResponse, };

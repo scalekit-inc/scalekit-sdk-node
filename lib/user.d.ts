@@ -11,12 +11,12 @@
  *
  * @see {@link https://docs.scalekit.com/apis/#tag/users | User API Documentation}
  */
-import type { MessageShape } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse } from "./pkg/grpc/scalekit/v1/users/users_pb";
-import { CreateUserRequest, UpdateUserRequest as UpdateUserRequestType } from "./types/user";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
+import { CreateUserRequest, UpdateUserRequest as UpdateUserRequestType } from './types/user';
 export default class UserClient {
     private readonly grpcConnect;
     private readonly coreClient;
@@ -566,9 +566,6 @@ export default class UserClient {
      * } while (pageToken);
      *
      * console.log('All organization members:', allMembers.length);
-     *
-     *
-     * console.log('Organization admins:', admins.length);
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/users | List Organization Users API}
      * @see {@link listUsers} - List all users across the environment

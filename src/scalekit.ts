@@ -684,6 +684,9 @@ export default class ScalekitClient {
         client_secret: clientSecret,
       })
     );
+    if (!res.data.access_token) {
+      throw new Error('Missing access_token in authentication response');
+    }
     return res.data.access_token;
   }
 
@@ -693,7 +696,7 @@ export default class ScalekitClient {
    *
    * @returns {Promise<string>} The access token string
    */
-  async getClientAccessToken(): Promise<string> {
+  getClientAccessToken(): Promise<string> {
     return this.generateClientToken(
       this.coreClient.clientId,
       this.coreClient.clientSecret

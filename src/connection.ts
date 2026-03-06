@@ -281,7 +281,7 @@ export default class ConnectionClient {
    *
    * @throws {Error} If the organization is not found or connection configuration is invalid
    */
-  async createConnection(
+  createConnection(
     organizationId: string,
     connection: CreateConnection
   ): Promise<CreateConnectionResponse> {
@@ -302,7 +302,7 @@ export default class ConnectionClient {
    *
    * @throws {Error} If the organization or connection is not found
    */
-  async deleteConnection(
+  deleteConnection(
     organizationId: string,
     id: string
   ): Promise<MessageShape<typeof EmptySchema>> {

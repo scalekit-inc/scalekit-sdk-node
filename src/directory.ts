@@ -444,7 +444,7 @@ export default class DirectoryClient {
    *
    * @throws {Error} If the organization is not found or directory configuration is invalid
    */
-  async createDirectory(
+  createDirectory(
     organizationId: string,
     directory: CreateDirectory
   ): Promise<CreateDirectoryResponse> {
@@ -465,7 +465,7 @@ export default class DirectoryClient {
    *
    * @throws {Error} If the organization or directory is not found
    */
-  async deleteDirectory(
+  deleteDirectory(
     organizationId: string,
     directoryId: string
   ): Promise<MessageShape<typeof EmptySchema>> {

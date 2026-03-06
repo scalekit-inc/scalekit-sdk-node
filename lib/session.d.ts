@@ -1,6 +1,6 @@
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { SessionDetails, UserSessionDetails, RevokeSessionResponse, RevokeAllUserSessionsResponse } from "./pkg/grpc/scalekit/v1/sessions/sessions_pb";
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { SessionDetails, UserSessionDetails, RevokeSessionResponse, RevokeAllUserSessionsResponse } from './pkg/grpc/scalekit/v1/sessions/sessions_pb';
 export default class SessionClient {
     private readonly grpcConnect;
     private readonly coreClient;
