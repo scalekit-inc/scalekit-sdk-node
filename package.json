@@ -62,5 +62,8 @@
   },
   "engines": {
     "node": ">=18.14.1"
+  },
+  "overrides": {
+    "minimatch": "3.1.5"
   }
 }
