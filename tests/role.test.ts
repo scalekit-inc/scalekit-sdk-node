@@ -191,25 +191,27 @@ describe('Roles', () => {
       if (!baseRoleName)
         throw new Error('createRole did not return a role name');
 
-      // Create a child role extending the base role
-      const childRoleData = TestDataGenerator.generateRoleData({
-        extends: baseRoleName,
-      });
-      const childResp = await client.role.createRole(childRoleData);
-      const childName = childResp.role?.name;
-      if (!childName)
-        throw new Error('createRole did not return a role name for child');
-      testRoleName = childName;
+      try {
+        // Create a child role extending the base role
+        const childRoleData = TestDataGenerator.generateRoleData({
+          extends: baseRoleName,
+        });
+        const childResp = await client.role.createRole(childRoleData);
+        const childName = childResp.role?.name;
+        if (!childName)
+          throw new Error('createRole did not return a role name for child');
+        testRoleName = childName;
 
-      const response = await client.role.deleteRoleBase(childName);
-      expect(response).toBeDefined();
+        const response = await client.role.deleteRoleBase(childName);
+        expect(response).toBeDefined();
 
-      // Verify the inheritance relationship is actually gone
-      const updatedRole = await client.role.getRole(childName);
-      expect(updatedRole.role?.extends).toBeUndefined();
-
-      // Cleanup base role
-      await client.role.deleteRole(baseRoleName);
+        // Verify the inheritance relationship is actually gone
+        const updatedRole = await client.role.getRole(childName);
+        expect(updatedRole.role?.extends).toBeUndefined();
+      } finally {
+        // Always clean up the base role, even if assertions fail
+        await client.role.deleteRole(baseRoleName).catch(() => undefined);
+      }
     });
   });
 
@@ -390,24 +392,31 @@ describe('Roles', () => {
           testOrg,
           baseRoleData
         );
-        const baseRoleName = baseResp.role?.name!;
+        const baseRoleName = baseResp.role?.name;
+        if (!baseRoleName)
+          throw new Error('createOrganizationRole did not return a role name');
 
-        // Create extended org role which extends base
-        const extendedRoleData = TestDataGenerator.generateOrganizationRoleData(
-          { extends: baseRoleName }
-        );
-        const extResp = await client.role.createOrganizationRole(
-          testOrg,
-          extendedRoleData
-        );
-        testOrgRoleName = extResp.role?.name || null;
+        try {
+          // Create extended org role which extends base
+          const extendedRoleData = TestDataGenerator.generateOrganizationRoleData(
+            { extends: baseRoleName }
+          );
+          const extResp = await client.role.createOrganizationRole(
+            testOrg,
+            extendedRoleData
+          );
+          testOrgRoleName = extResp.role?.name || null;
 
-        const response = await client.role.deleteOrganizationRoleBase(
-          testOrg,
-          testOrgRoleName!
-        );
+          const response = await client.role.deleteOrganizationRoleBase(
+            testOrg,
+            testOrgRoleName!
+          );
 
-        expect(response).toBeDefined();
+          expect(response).toBeDefined();
+        } finally {
+          // Always clean up the base role, even if assertions fail
+          await client.role.deleteOrganizationRole(testOrg, baseRoleName).catch(() => undefined);
+        }
       });
     });
   });
