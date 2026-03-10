@@ -204,6 +204,10 @@ describe('Roles', () => {
       const response = await client.role.deleteRoleBase(childName);
       expect(response).toBeDefined();
 
+      // Verify the inheritance relationship is actually gone
+      const updatedRole = await client.role.getRole(childName);
+      expect(updatedRole.role?.extends).toBeUndefined();
+
       // Cleanup base role
       await client.role.deleteRole(baseRoleName);
     });

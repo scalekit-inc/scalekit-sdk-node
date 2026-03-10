@@ -442,7 +442,7 @@ export default class DirectoryClient {
    *
    * @returns {Promise<CreateDirectoryResponse>} Response containing the created directory
    *
-   * @throws {Error} If the organization is not found or directory configuration is invalid
+   * @throws {ScalekitServerException} If the organization is not found or directory configuration is invalid
    */
   createDirectory(
     organizationId: string,
@@ -463,7 +463,7 @@ export default class DirectoryClient {
    *
    * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
    *
-   * @throws {Error} If the organization or directory is not found
+   * @throws {ScalekitServerException} If the organization or directory is not found
    */
   deleteDirectory(
     organizationId: string,

@@ -100,17 +100,9 @@ describe('ScalekitClient', () => {
 
   describe('generateClientToken', () => {
     it('should return an access token string for given credentials', async () => {
-      if (
-        !process.env.SCALEKIT_CLIENT_ID ||
-        !process.env.SCALEKIT_CLIENT_SECRET
-      ) {
-        throw new Error(
-          'SCALEKIT_CLIENT_ID and SCALEKIT_CLIENT_SECRET must be set'
-        );
-      }
       const token = await client.generateClientToken(
-        process.env.SCALEKIT_CLIENT_ID,
-        process.env.SCALEKIT_CLIENT_SECRET
+        process.env.SCALEKIT_CLIENT_ID!,
+        process.env.SCALEKIT_CLIENT_SECRET!
       );
       expect(typeof token).toBe('string');
       expect(token.length).toBeGreaterThan(0);
