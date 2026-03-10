@@ -29,7 +29,10 @@ import {
 import {
   WebhookVerificationError,
   ScalekitValidateTokenFailureException,
+  ScalekitException,
+  ScalekitServerException,
 } from './errors/base-exception';
+import { AxiosError } from 'axios';
 
 const authorizeEndpoint = 'oauth/authorize';
 const logoutEndpoint = 'oidc/logout';
@@ -677,17 +680,30 @@ export default class ScalekitClient {
     clientId: string,
     clientSecret: string
   ): Promise<string> {
-    const res = await this.coreClient.authenticate(
-      QueryString.stringify({
-        grant_type: GrantType.ClientCredentials,
-        client_id: clientId,
-        client_secret: clientSecret,
-      })
-    );
-    if (!res.data.access_token) {
-      throw new Error('Missing access_token in authentication response');
+    try {
+      const res = await this.coreClient.authenticate(
+        QueryString.stringify({
+          grant_type: GrantType.ClientCredentials,
+          client_id: clientId,
+          client_secret: clientSecret,
+        })
+      );
+      if (!res.data.access_token) {
+        throw new ScalekitException('Missing access_token in authentication response');
+      }
+      return res.data.access_token;
+    } catch (error) {
+      if (error instanceof ScalekitException) {
+        throw error;
+      }
+      if (error instanceof AxiosError) {
+        if (error.response) {
+          throw ScalekitServerException.promote(error.response);
+        }
+        throw new ScalekitException(error);
+      }
+      throw new ScalekitException(error);
     }
-    return res.data.access_token;
   }
 
   /**
