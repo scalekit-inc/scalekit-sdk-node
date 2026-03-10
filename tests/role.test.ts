@@ -398,9 +398,10 @@ describe('Roles', () => {
 
         try {
           // Create extended org role which extends base
-          const extendedRoleData = TestDataGenerator.generateOrganizationRoleData(
-            { extends: baseRoleName }
-          );
+          const extendedRoleData =
+            TestDataGenerator.generateOrganizationRoleData({
+              extends: baseRoleName,
+            });
           const extResp = await client.role.createOrganizationRole(
             testOrg,
             extendedRoleData
@@ -415,7 +416,9 @@ describe('Roles', () => {
           expect(response).toBeDefined();
         } finally {
           // Always clean up the base role, even if assertions fail
-          await client.role.deleteOrganizationRole(testOrg, baseRoleName).catch(() => undefined);
+          await client.role
+            .deleteOrganizationRole(testOrg, baseRoleName)
+            .catch(() => undefined);
         }
       });
     });

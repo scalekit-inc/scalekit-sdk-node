@@ -137,6 +137,8 @@ export default class RoleClient {
      *
      * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
      *
+     * @throws {ScalekitServerException} If the role is not found
+     *
      * @example
      * await scalekitClient.role.deleteRoleBase('custom_role');
      *

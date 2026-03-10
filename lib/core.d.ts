@@ -1,4 +1,12 @@
 import { Axios, AxiosResponse } from 'axios';
+declare module 'axios' {
+    interface InternalAxiosRequestConfig {
+        skipAuth?: boolean;
+    }
+    interface AxiosRequestConfig {
+        skipAuth?: boolean;
+    }
+}
 import { JWK } from 'jose';
 import { TokenResponse } from './types/auth';
 export declare const headers: {

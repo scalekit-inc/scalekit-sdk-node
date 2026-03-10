@@ -1,5 +1,11 @@
 import { Code, ConnectError } from '@connectrpc/connect';
-import axios, { Axios, AxiosError, AxiosResponse, HttpStatusCode, InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  Axios,
+  AxiosError,
+  AxiosResponse,
+  HttpStatusCode,
+  InternalAxiosRequestConfig,
+} from 'axios';
 
 declare module 'axios' {
   interface InternalAxiosRequestConfig {
