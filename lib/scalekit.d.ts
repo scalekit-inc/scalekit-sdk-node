@@ -385,8 +385,8 @@ export default class ScalekitClient {
      * @param {string} clientId - The client ID to authenticate with
      * @param {string} clientSecret - The client secret to authenticate with
      * @returns {Promise<string>} The access token string
-     * @throws {ScalekitServerException} If the credentials are invalid or the request fails
-     * @throws {ScalekitException} If the authentication response is missing an access token
+     * @throws {ScalekitServerException} If the server returns an error response (e.g. invalid credentials)
+     * @throws {ScalekitException} If a network, DNS, or timeout failure occurs, or if the access token is missing from the response
      */
     generateClientToken(clientId: string, clientSecret: string): Promise<string>;
     /**
