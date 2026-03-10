@@ -223,7 +223,7 @@ export default class ConnectionClient {
      *
      * @returns {Promise<CreateConnectionResponse>} Response containing the created connection
      *
-     * @throws {Error} If the organization is not found or connection configuration is invalid
+     * @throws {ScalekitServerException} If the organization is not found or connection configuration is invalid
      */
     createConnection(organizationId: string, connection: CreateConnection): Promise<CreateConnectionResponse>;
     /**
@@ -234,7 +234,7 @@ export default class ConnectionClient {
      *
      * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
      *
-     * @throws {Error} If the organization or connection is not found
+     * @throws {ScalekitServerException} If the organization or connection is not found
      */
     deleteConnection(organizationId: string, id: string): Promise<MessageShape<typeof EmptySchema>>;
 }

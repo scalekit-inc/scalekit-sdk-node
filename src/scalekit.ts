@@ -691,7 +691,9 @@ export default class ScalekitClient {
         })
       );
       if (!res.data.access_token) {
-        throw new ScalekitException('Missing access_token in authentication response');
+        throw new ScalekitException(
+          'Missing access_token in authentication response'
+        );
       }
       return res.data.access_token;
     } catch (error) {
