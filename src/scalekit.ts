@@ -29,7 +29,10 @@ import {
 import {
   WebhookVerificationError,
   ScalekitValidateTokenFailureException,
+  ScalekitException,
+  ScalekitServerException,
 } from './errors/base-exception';
+import { AxiosError } from 'axios';
 
 const authorizeEndpoint = 'oauth/authorize';
 const logoutEndpoint = 'oidc/logout';
@@ -664,6 +667,58 @@ export default class ScalekitClient {
     }
 
     return new Date(timestamp * 1000);
+  }
+
+  /**
+   * Generates an M2M access token using the client credentials grant for the given clientId and clientSecret.
+   *
+   * @param {string} clientId - The client ID to authenticate with
+   * @param {string} clientSecret - The client secret to authenticate with
+   * @returns {Promise<string>} The access token string
+   * @throws {ScalekitServerException} If the credentials are invalid or the request fails
+   * @throws {ScalekitException} If the authentication response is missing an access token
+   */
+  async generateClientToken(
+    clientId: string,
+    clientSecret: string
+  ): Promise<string> {
+    try {
+      const res = await this.coreClient.authenticate(
+        QueryString.stringify({
+          grant_type: GrantType.ClientCredentials,
+          client_id: clientId,
+          client_secret: clientSecret,
+        })
+      );
+      if (!res.data.access_token) {
+        throw new ScalekitException('Missing access_token in authentication response');
+      }
+      return res.data.access_token;
+    } catch (error) {
+      if (error instanceof ScalekitException) {
+        throw error;
+      }
+      if (error instanceof AxiosError) {
+        if (error.response) {
+          throw ScalekitServerException.promote(error.response);
+        }
+        throw new ScalekitException(error);
+      }
+      throw new ScalekitException(error);
+    }
+  }
+
+  /**
+   * Generates an M2M access token using the stored client credentials (clientId and clientSecret
+   * supplied to the ScalekitClient constructor).
+   *
+   * @returns {Promise<string>} The access token string
+   */
+  getClientAccessToken(): Promise<string> {
+    return this.generateClientToken(
+      this.coreClient.clientId,
+      this.coreClient.clientSecret
+    );
   }
 
   /**

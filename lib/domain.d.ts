@@ -1,8 +1,8 @@
-import type { MessageShape } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { CreateDomainResponse, GetDomainResponse, ListDomainResponse, DomainType } from "./pkg/grpc/scalekit/v1/domains/domains_pb";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { CreateDomainResponse, GetDomainResponse, ListDomainResponse, DomainType } from './pkg/grpc/scalekit/v1/domains/domains_pb';
 /**
  * Client for managing domains for organizations.
  *

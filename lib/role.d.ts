@@ -1,8 +1,8 @@
-import type { MessageShape } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { CreateRoleResponse, UpdateRoleResponse, GetRoleResponse, ListRolesResponse, CreateOrganizationRoleResponse, UpdateOrganizationRoleResponse, GetOrganizationRoleResponse, ListOrganizationRolesResponse, GetRoleUsersCountResponse, GetOrganizationRoleUsersCountResponse, UpdateDefaultOrganizationRolesResponse, CreateRole, UpdateRole, CreateOrganizationRole } from "./pkg/grpc/scalekit/v1/roles/roles_pb";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { CreateRoleResponse, UpdateRoleResponse, GetRoleResponse, ListRolesResponse, CreateOrganizationRoleResponse, UpdateOrganizationRoleResponse, GetOrganizationRoleResponse, ListOrganizationRolesResponse, GetRoleUsersCountResponse, GetOrganizationRoleUsersCountResponse, UpdateDefaultOrganizationRolesResponse, CreateRole, UpdateRole, CreateOrganizationRole } from './pkg/grpc/scalekit/v1/roles/roles_pb';
 /**
  * Client for managing roles at both environment and organization levels.
  *
@@ -128,6 +128,21 @@ export default class RoleClient {
      * @see {@link https://docs.scalekit.com/apis/#tag/roles | Delete Role API}
      */
     deleteRole(roleName: string, reassignRoleName?: string): Promise<MessageShape<typeof EmptySchema>>;
+    /**
+     * Removes an environment role's inheritance relationship, eliminating inherited permissions from its base role.
+     *
+     * The role retains only its directly assigned permissions after removal. This action cannot be undone.
+     *
+     * @param {string} roleName - Role to remove inheritance from
+     *
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+     *
+     * @example
+     * await scalekitClient.role.deleteRoleBase('custom_role');
+     *
+     * @see {@link https://docs.scalekit.com/apis/#tag/roles | Delete Role Base API}
+     */
+    deleteRoleBase(roleName: string): Promise<MessageShape<typeof EmptySchema>>;
     /**
      * Gets the number of users assigned to an environment role.
      *

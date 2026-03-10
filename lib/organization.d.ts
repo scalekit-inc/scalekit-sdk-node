@@ -1,9 +1,9 @@
-import type { MessageShape } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, UpdateOrganization, UpdateOrganizationResponse } from "./pkg/grpc/scalekit/v1/organizations/organizations_pb";
-import { OrganizationSettings, OrganizationUserManagementSettingsInput } from "./types/organization";
+import type { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
+import { OrganizationSettings, OrganizationUserManagementSettingsInput } from './types/organization';
 /**
  * Client for managing organizations (tenants) in your Scalekit application.
  *

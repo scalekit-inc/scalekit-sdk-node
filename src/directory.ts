@@ -1,9 +1,14 @@
-import { timestampFromDate } from '@bufbuild/protobuf/wkt';
+import { create, MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema, timestampFromDate } from '@bufbuild/protobuf/wkt';
 import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
 import { DirectoryService } from './pkg/grpc/scalekit/v1/directories/directories_pb';
 import {
+  CreateDirectory,
+  CreateDirectoryRequestSchema,
+  CreateDirectoryResponse,
+  DeleteDirectoryRequestSchema,
   GetDirectoryResponse,
   Directory,
   ListDirectoriesResponse,
@@ -427,5 +432,47 @@ export default class DirectoryClient {
       organizationId,
       id: directoryId,
     });
+  }
+
+  /**
+   * Creates a new SCIM directory for an organization.
+   *
+   * @param {string} organizationId - The organization ID (format: "org_...")
+   * @param {CreateDirectory} directory - The directory configuration to create
+   *
+   * @returns {Promise<CreateDirectoryResponse>} Response containing the created directory
+   *
+   * @throws {ScalekitServerException} If the organization is not found or directory configuration is invalid
+   */
+  createDirectory(
+    organizationId: string,
+    directory: CreateDirectory
+  ): Promise<CreateDirectoryResponse> {
+    const request = create(CreateDirectoryRequestSchema, {
+      organizationId,
+      directory,
+    });
+    return this.coreClient.connectExec(this.client.createDirectory, request);
+  }
+
+  /**
+   * Deletes a SCIM directory for an organization.
+   *
+   * @param {string} organizationId - The organization ID (format: "org_...")
+   * @param {string} directoryId - The directory ID to delete (format: "dir_...")
+   *
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+   *
+   * @throws {ScalekitServerException} If the organization or directory is not found
+   */
+  deleteDirectory(
+    organizationId: string,
+    directoryId: string
+  ): Promise<MessageShape<typeof EmptySchema>> {
+    const request = create(DeleteDirectoryRequestSchema, {
+      organizationId,
+      id: directoryId,
+    });
+    return this.coreClient.connectExec(this.client.deleteDirectory, request);
   }
 }

@@ -1,9 +1,9 @@
-import type { JsonObject } from "@bufbuild/protobuf";
-import type { MessageShape } from "@bufbuild/protobuf";
-import { EmptySchema } from "@bufbuild/protobuf/wkt";
-import CoreClient from "./core";
-import GrpcConnect from "./connect";
-import { type User } from "./pkg/grpc/scalekit/v1/auth/auth_pb";
+import type { JsonObject } from '@bufbuild/protobuf';
+import type { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import CoreClient from './core';
+import GrpcConnect from './connect';
+import { type User } from './pkg/grpc/scalekit/v1/auth/auth_pb';
 /** User input for updateLoginUserDetails; customAttributes is a plain object (proto Struct → JsonObject in v2). */
 type UserInput = Partial<User> & {
     customAttributes?: JsonObject;

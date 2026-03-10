@@ -33,6 +33,7 @@ import {
   UpdateDefaultOrganizationRolesRequest,
   UpdateDefaultOrganizationRolesResponse,
   DeleteOrganizationRoleBaseRequest,
+  DeleteRoleBaseRequestSchema,
   CreateRole,
   UpdateRole,
   CreateOrganizationRole,
@@ -195,6 +196,29 @@ export default class RoleClient {
     });
 
     return this.coreClient.connectExec(this.client.deleteRole, request);
+  }
+
+  /**
+   * Removes an environment role's inheritance relationship, eliminating inherited permissions from its base role.
+   *
+   * The role retains only its directly assigned permissions after removal. This action cannot be undone.
+   *
+   * @param {string} roleName - Role to remove inheritance from
+   *
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+   *
+   * @throws {ScalekitServerException} If the role is not found
+   *
+   * @example
+   * await scalekitClient.role.deleteRoleBase('custom_role');
+   *
+   * @see {@link https://docs.scalekit.com/apis/#tag/roles | Delete Role Base API}
+   */
+  async deleteRoleBase(
+    roleName: string
+  ): Promise<MessageShape<typeof EmptySchema>> {
+    const request = create(DeleteRoleBaseRequestSchema, { roleName });
+    return this.coreClient.connectExec(this.client.deleteRoleBase, request);
   }
 
   /**

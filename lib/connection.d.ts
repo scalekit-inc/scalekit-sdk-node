@@ -1,6 +1,8 @@
-import GrpcConnect from "./connect";
-import CoreClient from "./core";
-import { GetConnectionResponse, ToggleConnectionResponse, ListConnectionsResponse } from "./pkg/grpc/scalekit/v1/connections/connections_pb";
+import { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { CreateConnection, CreateConnectionResponse, GetConnectionResponse, ToggleConnectionResponse, ListConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 /**
  * Client for managing enterprise SSO connections for organizations.
  *
@@ -213,4 +215,26 @@ export default class ConnectionClient {
      * @see {@link listConnections} - List all connections
      */
     disableConnection(organizationId: string, id: string): Promise<ToggleConnectionResponse>;
+    /**
+     * Creates a new SSO connection for an organization.
+     *
+     * @param {string} organizationId - The organization ID (format: "org_...")
+     * @param {CreateConnection} connection - The connection configuration to create
+     *
+     * @returns {Promise<CreateConnectionResponse>} Response containing the created connection
+     *
+     * @throws {Error} If the organization is not found or connection configuration is invalid
+     */
+    createConnection(organizationId: string, connection: CreateConnection): Promise<CreateConnectionResponse>;
+    /**
+     * Deletes an SSO connection for an organization.
+     *
+     * @param {string} organizationId - The organization ID (format: "org_...")
+     * @param {string} id - The connection ID to delete (format: "conn_...")
+     *
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+     *
+     * @throws {Error} If the organization or connection is not found
+     */
+    deleteConnection(organizationId: string, id: string): Promise<MessageShape<typeof EmptySchema>>;
 }

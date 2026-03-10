@@ -98,6 +98,29 @@ describe('ScalekitClient', () => {
     });
   });
 
+  describe('generateClientToken', () => {
+    it('should return an access token string for given credentials', async () => {
+      const clientId = process.env.SCALEKIT_CLIENT_ID;
+      const clientSecret = process.env.SCALEKIT_CLIENT_SECRET;
+      if (!clientId || !clientSecret) {
+        throw new Error(
+          'SCALEKIT_CLIENT_ID and SCALEKIT_CLIENT_SECRET must be set for this test'
+        );
+      }
+      const token = await client.generateClientToken(clientId, clientSecret);
+      expect(typeof token).toBe('string');
+      expect(token.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('getClientAccessToken', () => {
+    it('should return an access token string using stored credentials', async () => {
+      const token = await client.getClientAccessToken();
+      expect(typeof token).toBe('string');
+      expect(token.length).toBeGreaterThan(0);
+    });
+  });
+
   describe('validateAccessToken', () => {
     it('should validate access token', async () => {
       // Mock token for testing - expected to fail

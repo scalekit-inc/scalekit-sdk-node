@@ -748,9 +748,6 @@ export default class UserClient {
    *
    * console.log('All organization members:', allMembers.length);
    *
-   *
-   * console.log('Organization admins:', admins.length);
-   *
    * @see {@link https://docs.scalekit.com/apis/#tag/users | List Organization Users API}
    * @see {@link listUsers} - List all users across the environment
    * @see {@link getUser} - Get details of a specific user
