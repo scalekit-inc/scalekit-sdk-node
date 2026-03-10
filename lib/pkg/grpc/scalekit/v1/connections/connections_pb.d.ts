@@ -1303,6 +1303,10 @@ export declare class OAuthConnectionConfig extends Message<OAuthConnectionConfig
      * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 18;
      */
     syncUserProfileOnLogin?: boolean;
+    /**
+     * @generated from field: google.protobuf.StringValue token_access_type = 19;
+     */
+    tokenAccessType?: string;
     constructor(data?: PartialMessage<OAuthConnectionConfig>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.connections.OAuthConnectionConfig";

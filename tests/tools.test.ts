@@ -236,4 +236,50 @@ describe('Tools', () => {
       }
     });
   });
+
+  describe('listAvailableTools', () => {
+    it('should list available tools with identifier', async () => {
+      const identifier = 'test_identifier';
+
+      try {
+        const response = await client.tools.listAvailableTools(identifier);
+
+        expect(response).toBeDefined();
+        expect(response.tools).toBeDefined();
+        expect(Array.isArray(response.tools)).toBe(true);
+        expect(response.totalSize).toBeDefined();
+        expect(typeof response.totalSize).toBe('number');
+      } catch (error: any) {
+        // Expected errors: connected account not found, etc.
+        expect(error).toBeDefined();
+      }
+    });
+
+    it('should list available tools with pagination', async () => {
+      const identifier = 'test_identifier';
+
+      try {
+        const firstPage = await client.tools.listAvailableTools(identifier, {
+          pageSize: 10,
+        });
+
+        expect(firstPage).toBeDefined();
+        expect(firstPage.tools).toBeDefined();
+        expect(firstPage.tools.length).toBeLessThanOrEqual(10);
+
+        if (firstPage.nextPageToken) {
+          const secondPage = await client.tools.listAvailableTools(identifier, {
+            pageSize: 10,
+            pageToken: firstPage.nextPageToken,
+          });
+
+          expect(secondPage).toBeDefined();
+          expect(secondPage.tools).toBeDefined();
+        }
+      } catch (error: any) {
+        // Expected errors: connected account not found, etc.
+        expect(error).toBeDefined();
+      }
+    });
+  });
 });

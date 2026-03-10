@@ -4,6 +4,8 @@ import GrpcConnect from "./connect";
 import CoreClient from "./core";
 import { ToolService } from "./pkg/grpc/scalekit/v1/tools/tools_connect";
 import {
+  ListAvailableToolsRequest,
+  ListAvailableToolsResponse,
   ExecuteToolRequest,
   ExecuteToolResponse,
   Filter,
@@ -69,26 +71,58 @@ export default class ToolsClient {
    *
    * @param identifier Connected account identifier to scope the tools list (for example,
    *                   a workspace identifier or email).
-   * @param options Optional filter and pagination parameters
-   * @param options.filter Filter configuration for scoped tools (providers, tool names, connection names).
+   * @param options Filter and pagination parameters
+   * @param options.filter Filter configuration for scoped tools (providers, tool names, connection names). Required.
    * @param options.pageSize Maximum number of tools to return per page.
    * @param options.pageToken Token from a previous `listScopedTools` response for pagination.
    */
   async listScopedTools(
     identifier: string,
-    options?: {
-      filter?: PartialMessage<ScopedToolFilter>;
+    options: {
+      filter: PartialMessage<ScopedToolFilter>;
       pageSize?: number;
       pageToken?: string;
     }
   ): Promise<ListScopedToolsResponse> {
     const request: PartialMessage<ListScopedToolsRequest> = {
       identifier,
+      filter: options.filter as ScopedToolFilter,
     };
 
-    if (options?.filter) {
-      request.filter = options.filter as ScopedToolFilter;
+    if (options.pageSize !== undefined) {
+      request.pageSize = options.pageSize;
     }
+    if (options.pageToken) {
+      request.pageToken = options.pageToken;
+    }
+
+    return this.coreClient.connectExec(this.client.listScopedTools, request);
+  }
+
+  /**
+   * Lists tools that are available for a specific connected account identifier.
+   *
+   * This is similar to `listScopedTools` but returns the tools that can be
+   * made available for a given identifier, rather than the tools that are
+   * already scoped to it.
+   *
+   * @param identifier Connected account identifier to scope the available tools list (for example,
+   *                   a workspace identifier or email).
+   * @param options Optional pagination parameters
+   * @param options.pageSize Maximum number of tools to return per page.
+   * @param options.pageToken Token from a previous `listAvailableTools` response for pagination.
+   */
+  async listAvailableTools(
+    identifier: string,
+    options?: {
+      pageSize?: number;
+      pageToken?: string;
+    }
+  ): Promise<ListAvailableToolsResponse> {
+    const request: PartialMessage<ListAvailableToolsRequest> = {
+      identifier,
+    };
+
     if (options?.pageSize !== undefined) {
       request.pageSize = options.pageSize;
     }
@@ -96,7 +130,10 @@ export default class ToolsClient {
       request.pageToken = options.pageToken;
     }
 
-    return this.coreClient.connectExec(this.client.listScopedTools, request);
+    return this.coreClient.connectExec(
+      this.client.listAvailableTools,
+      request
+    );
   }
 
   /**

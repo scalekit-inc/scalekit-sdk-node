@@ -1,4 +1,4 @@
-import { AssignUserRolesRequest, AssignUserRolesResponse, CreateMembershipRequest, CreateMembershipResponse, CreateUserAndMembershipRequest, CreateUserAndMembershipResponse, DeleteMembershipRequest, DeleteUserRequest, GetCurrentUserRequest, GetCurrentUserResponse, GetUserRequest, GetUserResponse, ListOrganizationUsersRequest, ListOrganizationUsersResponse, ListUserPermissionsRequest, ListUserPermissionsResponse, ListUserRolesRequest, ListUserRolesResponse, ListUsersRequest, ListUsersResponse, RemoveUserRoleRequest, ResendInviteRequest, ResendInviteResponse, SearchOrganizationUsersRequest, SearchOrganizationUsersResponse, SearchUsersRequest, SearchUsersResponse, UpdateMembershipRequest, UpdateMembershipResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
+import { AssignUserRolesRequest, AssignUserRolesResponse, CreateMembershipRequest, CreateMembershipResponse, CreateUserAndMembershipRequest, CreateUserAndMembershipResponse, DeleteMembershipRequest, DeleteUserRequest, GetCurrentUserRequest, GetCurrentUserResponse, GetSupportHashResponse, GetUserRequest, GetUserResponse, ListOrganizationUsersRequest, ListOrganizationUsersResponse, ListUserPermissionsRequest, ListUserPermissionsResponse, ListUserRolesRequest, ListUserRolesResponse, ListUsersRequest, ListUsersResponse, RemoveUserRoleRequest, ResendInviteRequest, ResendInviteResponse, SearchOrganizationUsersRequest, SearchOrganizationUsersResponse, SearchUsersRequest, SearchUsersResponse, UpdateMembershipRequest, UpdateMembershipResponse, UpdateUserRequest, UpdateUserResponse } from "./users_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.users.UserService
@@ -24,6 +24,15 @@ export declare const UserService: {
             readonly name: "GetCurrentUser";
             readonly I: typeof GetCurrentUserRequest;
             readonly O: typeof GetCurrentUserResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.users.UserService.GetSupportHash
+         */
+        readonly getSupportHash: {
+            readonly name: "GetSupportHash";
+            readonly I: typeof Empty;
+            readonly O: typeof GetSupportHashResponse;
             readonly kind: MethodKind.Unary;
         };
         /**

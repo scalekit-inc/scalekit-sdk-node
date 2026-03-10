@@ -429,3 +429,57 @@ export declare class ScopedToolFilter extends Message<ScopedToolFilter> {
     static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ScopedToolFilter;
     static equals(a: ScopedToolFilter | PlainMessage<ScopedToolFilter> | undefined, b: ScopedToolFilter | PlainMessage<ScopedToolFilter> | undefined): boolean;
 }
+/**
+ * @generated from message scalekit.v1.tools.ListAvailableToolsRequest
+ */
+export declare class ListAvailableToolsRequest extends Message<ListAvailableToolsRequest> {
+    /**
+     * @generated from field: string identifier = 1;
+     */
+    identifier: string;
+    /**
+     * @generated from field: uint32 page_size = 2;
+     */
+    pageSize: number;
+    /**
+     * @generated from field: string page_token = 3;
+     */
+    pageToken: string;
+    constructor(data?: PartialMessage<ListAvailableToolsRequest>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.tools.ListAvailableToolsRequest";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAvailableToolsRequest;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAvailableToolsRequest;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAvailableToolsRequest;
+    static equals(a: ListAvailableToolsRequest | PlainMessage<ListAvailableToolsRequest> | undefined, b: ListAvailableToolsRequest | PlainMessage<ListAvailableToolsRequest> | undefined): boolean;
+}
+/**
+ * @generated from message scalekit.v1.tools.ListAvailableToolsResponse
+ */
+export declare class ListAvailableToolsResponse extends Message<ListAvailableToolsResponse> {
+    /**
+     * @generated from field: string next_page_token = 1;
+     */
+    nextPageToken: string;
+    /**
+     * @generated from field: uint32 total_size = 2;
+     */
+    totalSize: number;
+    /**
+     * @generated from field: string prev_page_token = 3;
+     */
+    prevPageToken: string;
+    /**
+     * @generated from field: repeated scalekit.v1.tools.Tool tools = 4;
+     */
+    tools: Tool[];
+    constructor(data?: PartialMessage<ListAvailableToolsResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.tools.ListAvailableToolsResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): ListAvailableToolsResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): ListAvailableToolsResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): ListAvailableToolsResponse;
+    static equals(a: ListAvailableToolsResponse | PlainMessage<ListAvailableToolsResponse> | undefined, b: ListAvailableToolsResponse | PlainMessage<ListAvailableToolsResponse> | undefined): boolean;
+}

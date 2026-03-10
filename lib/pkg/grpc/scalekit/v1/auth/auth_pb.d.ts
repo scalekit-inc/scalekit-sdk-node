@@ -255,6 +255,28 @@ export declare class GetAuthCustomizationsRequest extends Message<GetAuthCustomi
     static equals(a: GetAuthCustomizationsRequest | PlainMessage<GetAuthCustomizationsRequest> | undefined, b: GetAuthCustomizationsRequest | PlainMessage<GetAuthCustomizationsRequest> | undefined): boolean;
 }
 /**
+ * PortalSettings contains feature flags and settings derived from the workspace's billing subscription
+ *
+ * @generated from message scalekit.v1.auth.PortalSettings
+ */
+export declare class PortalSettings extends Message<PortalSettings> {
+    /**
+     * custom_branding indicates whether the workspace has the Customization billing item enabled,
+     * allowing custom portal branding (logos, colors, etc.)
+     *
+     * @generated from field: bool custom_branding = 1;
+     */
+    customBranding: boolean;
+    constructor(data?: PartialMessage<PortalSettings>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.auth.PortalSettings";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): PortalSettings;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): PortalSettings;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): PortalSettings;
+    static equals(a: PortalSettings | PlainMessage<PortalSettings> | undefined, b: PortalSettings | PlainMessage<PortalSettings> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.auth.GetAuthCustomizationsResponse
  */
 export declare class GetAuthCustomizationsResponse extends Message<GetAuthCustomizationsResponse> {
@@ -262,6 +284,12 @@ export declare class GetAuthCustomizationsResponse extends Message<GetAuthCustom
      * @generated from field: google.protobuf.Struct customization_settings = 2;
      */
     customizationSettings?: Struct;
+    /**
+     * settings contains feature flags derived from the workspace's billing subscription
+     *
+     * @generated from field: scalekit.v1.auth.PortalSettings settings = 3;
+     */
+    settings?: PortalSettings;
     constructor(data?: PartialMessage<GetAuthCustomizationsResponse>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.auth.GetAuthCustomizationsResponse";
@@ -567,6 +595,10 @@ export declare class User extends Message<User> {
      * @generated from field: google.protobuf.Struct custom_attributes = 14;
      */
     customAttributes?: Struct;
+    /**
+     * @generated from field: optional string organization_external_id = 15;
+     */
+    organizationExternalId?: string;
     constructor(data?: PartialMessage<User>);
     static readonly runtime: typeof proto3;
     static readonly typeName = "scalekit.v1.auth.User";

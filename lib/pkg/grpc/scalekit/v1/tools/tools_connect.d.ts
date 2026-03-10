@@ -1,4 +1,4 @@
-import { CreateToolRequest, CreateToolResponse, DeleteToolRequest, ExecuteToolRequest, ExecuteToolResponse, ListScopedToolsRequest, ListScopedToolsResponse, ListToolsRequest, ListToolsResponse, SetToolDefaultRequest, SetToolDefaultResponse, UpdateToolRequest, UpdateToolResponse } from "./tools_pb.js";
+import { CreateToolRequest, CreateToolResponse, DeleteToolRequest, ExecuteToolRequest, ExecuteToolResponse, ListAvailableToolsRequest, ListAvailableToolsResponse, ListScopedToolsRequest, ListScopedToolsResponse, ListToolsRequest, ListToolsResponse, SetToolDefaultRequest, SetToolDefaultResponse, UpdateToolRequest, UpdateToolResponse } from "./tools_pb.js";
 import { Empty, MethodKind } from "@bufbuild/protobuf";
 /**
  * @generated from service scalekit.v1.tools.ToolService
@@ -31,6 +31,15 @@ export declare const ToolService: {
             readonly name: "ListScopedTools";
             readonly I: typeof ListScopedToolsRequest;
             readonly O: typeof ListScopedToolsResponse;
+            readonly kind: MethodKind.Unary;
+        };
+        /**
+         * @generated from rpc scalekit.v1.tools.ToolService.ListAvailableTools
+         */
+        readonly listAvailableTools: {
+            readonly name: "ListAvailableTools";
+            readonly I: typeof ListAvailableToolsRequest;
+            readonly O: typeof ListAvailableToolsResponse;
             readonly kind: MethodKind.Unary;
         };
         /**

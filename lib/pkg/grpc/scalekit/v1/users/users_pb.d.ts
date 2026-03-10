@@ -1157,6 +1157,23 @@ export declare class Permission extends Message<Permission> {
     static equals(a: Permission | PlainMessage<Permission> | undefined, b: Permission | PlainMessage<Permission> | undefined): boolean;
 }
 /**
+ * @generated from message scalekit.v1.users.GetSupportHashResponse
+ */
+export declare class GetSupportHashResponse extends Message<GetSupportHashResponse> {
+    /**
+     * @generated from field: string support_hash = 1;
+     */
+    supportHash: string;
+    constructor(data?: PartialMessage<GetSupportHashResponse>);
+    static readonly runtime: typeof proto3;
+    static readonly typeName = "scalekit.v1.users.GetSupportHashResponse";
+    static readonly fields: FieldList;
+    static fromBinary(bytes: Uint8Array, options?: Partial<BinaryReadOptions>): GetSupportHashResponse;
+    static fromJson(jsonValue: JsonValue, options?: Partial<JsonReadOptions>): GetSupportHashResponse;
+    static fromJsonString(jsonString: string, options?: Partial<JsonReadOptions>): GetSupportHashResponse;
+    static equals(a: GetSupportHashResponse | PlainMessage<GetSupportHashResponse> | undefined, b: GetSupportHashResponse | PlainMessage<GetSupportHashResponse> | undefined): boolean;
+}
+/**
  * @generated from message scalekit.v1.users.ListUserPermissionsResponse
  */
 export declare class ListUserPermissionsResponse extends Message<ListUserPermissionsResponse> {

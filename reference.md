@@ -5342,6 +5342,77 @@ const nextPage = await scalekitClient.tools.listScopedTools('user@example.com', 
 </dl>
 </details>
 
+<details><summary><code>client.tools.<a href="/src/tools.ts">listAvailableTools</a>(identifier, options?) -> Promise&lt;ListAvailableToolsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists tools that are available for a specific connected account identifier. Use this to discover which tools can be made available for a given identifier (for example, an email or workspace ID), with optional pagination.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+// List available tools for an identifier
+const response = await scalekitClient.tools.listAvailableTools('user@example.com');
+
+// List available tools with pagination
+const nextPage = await scalekitClient.tools.listAvailableTools('user@example.com', {
+  pageSize: 10,
+  pageToken: response.nextPageToken,
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**identifier:** `string` - Connected account identifier (e.g., email or workspace ID) to scope the available tools.
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options?:** `object` - Optional pagination parameters.
+- `pageSize?: number` - Maximum number of tools per page.
+- `pageToken?: string` - Token from a previous response for pagination.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.tools.<a href="/src/tools.ts">executeTool</a>(params) -> Promise&lt;ExecuteToolResponse&gt;</code></summary>
 <dl>
 <dd>
