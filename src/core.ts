@@ -1,5 +1,14 @@
 import { Code, ConnectError } from '@connectrpc/connect';
-import axios, { Axios, AxiosError, AxiosResponse, HttpStatusCode } from 'axios';
+import axios, { Axios, AxiosError, AxiosResponse, HttpStatusCode, InternalAxiosRequestConfig } from 'axios';
+
+declare module 'axios' {
+  interface InternalAxiosRequestConfig {
+    skipAuth?: boolean;
+  }
+  interface AxiosRequestConfig {
+    skipAuth?: boolean;
+  }
+}
 import { JWK } from 'jose';
 import os from 'os';
 import QueryString from 'qs';
@@ -39,7 +48,7 @@ export default class CoreClient {
       config.headers[headers['user-agent']] = this.userAgent;
       config.headers[headers['x-sdk-version']] = this.sdkVersion;
       config.headers[headers['x-api-version']] = this.apiVersion;
-      if (this.accessToken) {
+      if (this.accessToken && !config.skipAuth) {
         config.headers[headers.authorization] = `Bearer ${this.accessToken}`;
       }
 
@@ -70,6 +79,7 @@ export default class CoreClient {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
+      skipAuth: true,
     });
   }
 
