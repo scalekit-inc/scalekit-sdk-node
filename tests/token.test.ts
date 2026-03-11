@@ -175,6 +175,62 @@ describe('Tokens', () => {
     });
   });
 
+  describe('updateToken', () => {
+    it('should update description of an existing token', async () => {
+      const createResponse = await client.token.createToken(testOrg, {
+        description: 'Token before update',
+      });
+      testTokenId = createResponse.tokenId;
+
+      const response = await client.token.updateToken(testTokenId, {
+        description: 'Token after update',
+      });
+
+      expect(response).toBeDefined();
+      expect(response.tokenInfo).toBeDefined();
+      expect(response.tokenInfo?.description).toBe('Token after update');
+    });
+
+    it('should merge custom claims on update', async () => {
+      const createResponse = await client.token.createToken(testOrg, {
+        customClaims: { env: 'staging', scope: 'read' },
+        description: 'Token for claims update',
+      });
+      testTokenId = createResponse.tokenId;
+
+      const response = await client.token.updateToken(testTokenId, {
+        customClaims: { env: 'production', team: 'infra' },
+      });
+
+      expect(response).toBeDefined();
+      expect(response.tokenInfo).toBeDefined();
+      expect(response.tokenInfo?.customClaims['env']).toBe('production');
+      expect(response.tokenInfo?.customClaims['team']).toBe('infra');
+      expect(response.tokenInfo?.customClaims['scope']).toBe('read');
+    });
+
+    it('should remove a claim when value is empty string', async () => {
+      const createResponse = await client.token.createToken(testOrg, {
+        customClaims: { env: 'staging', scope: 'read' },
+        description: 'Token for claim removal',
+      });
+      testTokenId = createResponse.tokenId;
+
+      const response = await client.token.updateToken(testTokenId, {
+        customClaims: { scope: '' },
+      });
+
+      expect(response).toBeDefined();
+      expect(response.tokenInfo).toBeDefined();
+      expect(response.tokenInfo?.customClaims['scope']).toBeUndefined();
+      expect(response.tokenInfo?.customClaims['env']).toBe('staging');
+    });
+
+    it('should throw when token is empty', async () => {
+      await expect(client.token.updateToken('')).rejects.toThrow('token is required');
+    });
+  });
+
   describe('invalidateToken', () => {
     it('should invalidate a token and validate should throw', async () => {
       const createResponse = await client.token.createToken(testOrg, {
