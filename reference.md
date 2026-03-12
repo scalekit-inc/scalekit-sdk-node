@@ -5191,6 +5191,313 @@ await scalekitClient.auth.updateLoginUserDetails(
 </dl>
 </details>
 
+## Actions
+
+<details><summary><code>client.actions.<a href="/src/actions.ts">executeTool</a>(params) -> Promise&lt;ExecuteToolResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Executes a tool on behalf of a connected account using the high-level actions wrapper. This is a thin wrapper around `client.tools.executeTool` and is the primary entrypoint for agent-style tool execution in the Node SDK.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+// Execute a tool with a connected account ID
+const executeResponse = await scalekitClient.actions.executeTool({
+  toolName: 'gmail_send_email',
+  toolInput: {
+    to: 'user@example.com',
+    subject: 'Hello',
+    body: 'Hello from Scalekit Actions',
+  },
+  connectedAccountId: 'ca_123',
+});
+
+// Execute a tool by resolving the connected account via identifier + connector
+const executeResponse2 = await scalekitClient.actions.executeTool({
+  toolName: 'gmail_send_email',
+  toolInput: {
+    to: 'user@example.com',
+    subject: 'Test',
+    body: 'Body',
+  },
+  identifier: 'user@example.com',
+  connector: 'google_workspace',
+  organizationId: 'org_123',
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `toolName: string` - Name of the tool to execute
+- `toolInput: Record<string, unknown>` - JSON payload passed as the tool's input parameters
+- `identifier?: string` - Connected account identifier (e.g., email, workspace ID)
+- `connectedAccountId?: string` - Direct ID of the connected account (`ca_...`)
+- `connector?: string` - Connector/provider name when using identifier-based lookup
+- `organizationId?: string` - Organization scope for identifier-based lookup
+- `userId?: string` - User scope for identifier-based lookup
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="/src/actions.ts">getAuthorizationLink</a>(params) -> Promise&lt;GetMagicLinkForConnectedAccountResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generates a time-limited magic link to authorize or re-authorize a third-party account for a given connector and identifier, via the high-level actions wrapper.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const magicLinkResponse = await scalekitClient.actions.getAuthorizationLink({
+  connectionName: 'notion',
+  identifier: 'workspace_123',
+  organizationId: 'org_123',
+});
+
+// Redirect the user to magicLinkResponse.link before it expires
+console.log(magicLinkResponse.link, magicLinkResponse.expiry);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `connectionName?: string` - Connector identifier (e.g., `notion`, `google_workspace`)
+- `identifier?: string` - Connected account identifier (e.g., workspace ID, email)
+- `connectedAccountId?: string` - Optional connected account ID (`ca_...`)
+- `organizationId?: string` - Optional organization scope
+- `userId?: string` - Optional user scope
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="/src/actions.ts">getOrCreateConnectedAccount</a>(params) -> Promise&lt;CreateConnectedAccountResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves an existing connected account for a connector + identifier or creates one if it does not exist. This mirrors the Python `ActionClient.get_or_create_connected_account` behavior.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import {
+  AuthorizationDetails,
+  OauthToken,
+} from '@scalekit-sdk/node';
+
+const oauthToken = new OauthToken({
+  accessToken: 'test_access_token',
+  refreshToken: 'test_refresh_token',
+  scopes: ['read', 'write'],
+});
+
+const authorizationDetails = new AuthorizationDetails({
+  details: {
+    case: 'oauthToken',
+    value: oauthToken,
+  },
+});
+
+const connectedAccountResponse = await scalekitClient.actions.getOrCreateConnectedAccount({
+  connectionName: 'gmail',
+  identifier: 'user@example.com',
+  authorizationDetails,
+  organizationId: 'org_123',
+});
+
+console.log(connectedAccountResponse.connectedAccount?.id);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `connectionName: string` - Connector identifier (e.g., `gmail`, `notion`)
+- `identifier: string` - Connected account identifier (e.g., email, workspace ID)
+- `authorizationDetails?: AuthorizationDetails` - Optional auth details used when creating a new account
+- `organizationId?: string` - Optional organization scope
+- `userId?: string` - Optional user scope
+- `apiConfig?: Record<string, unknown>` - Optional API configuration used when creating a new account
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="/src/actions.ts">request</a>(params) -> Promise&lt;AxiosResponse&lt;any&gt;&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Makes a proxied REST API call through Scalekit on behalf of a connected account. This mirrors the Python `ActionClient.request` helper and is useful for direct HTTP calls to third-party APIs.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const response = await scalekitClient.actions.request({
+  connectionName: 'microsoft_graph',
+  identifier: 'user@example.com',
+  path: '/v1.0/me/messages',
+  method: 'GET',
+  queryParams: { '$top': 10 },
+});
+
+console.log(response.status, response.data);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `connectionName: string` - Connector identifier to route the proxied call
+- `identifier: string` - Connected account identifier whose credentials are used
+- `path: string` - Target API path (e.g., `/v1.0/me/messages`)
+- `method?: string` - HTTP method (`GET`, `POST`, `PUT`, etc., default: `GET`)
+- `queryParams?: Record<string, unknown>` - URL query parameters
+- `body?: unknown` - JSON body payload
+- `formData?: Record<string, unknown>` - Form-encoded payload (alternative to `body`)
+- `headers?: Record<string, string>` - Additional HTTP headers to send
+- `timeoutMs?: number` - Optional request timeout in milliseconds
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Tools
 
 <details><summary><code>client.tools.<a href="/src/tools.ts">listTools</a>(options?) -> Promise&lt;ListToolsResponse&gt;</code></summary>

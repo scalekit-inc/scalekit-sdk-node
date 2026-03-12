@@ -17,6 +17,7 @@ import SessionClient from './session';
 import RoleClient from './role';
 import PermissionClient from './permission';
 import WebAuthnClient from './webauthn';
+import ActionsClient from './actions';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, GrantType, LogoutUrlOptions, RefreshTokenResponse ,TokenValidationOptions } from './types/scalekit';
 import { WebhookVerificationError, ScalekitValidateTokenFailureException } from './errors/base-exception';
@@ -64,6 +65,7 @@ export default class ScalekitClient {
   readonly domain: DomainClient;
   readonly tools: ToolsClient;
   readonly connectedAccounts: ConnectedAccountsClient;
+  readonly actions: ActionsClient;
   readonly directory: DirectoryClient;
   readonly passwordless: PasswordlessClient;
   readonly user: UserClient;
@@ -95,6 +97,11 @@ export default class ScalekitClient {
     this.tools = new ToolsClient(this.grpcConnect, this.coreClient);
     this.connectedAccounts = new ConnectedAccountsClient(
       this.grpcConnect,
+      this.coreClient
+    );
+    this.actions = new ActionsClient(
+      this.tools,
+      this.connectedAccounts,
       this.coreClient
     );
     this.directory = new DirectoryClient(this.grpcConnect, this.coreClient);
