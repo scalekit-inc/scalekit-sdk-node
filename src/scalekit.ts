@@ -16,6 +16,7 @@ import RoleClient from './role';
 import PermissionClient from './permission';
 import WebAuthnClient from './webauthn';
 import TokenClient from './token';
+import M2MClient from './m2mclient';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import {
   AuthenticationOptions,
@@ -84,6 +85,7 @@ export default class ScalekitClient {
   readonly auth: AuthClient;
   readonly webauthn: WebAuthnClient;
   readonly token: TokenClient;
+  readonly m2m: M2MClient;
   constructor(envUrl: string, clientId: string, clientSecret: string) {
     this.coreClient = new CoreClient(envUrl, clientId, clientSecret);
     this.grpcConnect = new GrpcConnect(this.coreClient);
@@ -106,6 +108,7 @@ export default class ScalekitClient {
     this.auth = new AuthClient(this.grpcConnect, this.coreClient);
     this.webauthn = new WebAuthnClient(this.grpcConnect, this.coreClient);
     this.token = new TokenClient(this.grpcConnect, this.coreClient);
+    this.m2m = new M2MClient(this.grpcConnect, this.coreClient);
   }
 
   /**
