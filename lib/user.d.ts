@@ -15,7 +15,7 @@ import type { MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
+import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse, ListUserRolesResponse, ListUserPermissionsResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
 import { CreateUserRequest, UpdateUserRequest as UpdateUserRequestType } from './types/user';
 export default class UserClient {
     private readonly grpcConnect;
@@ -615,4 +615,26 @@ export default class UserClient {
      * @see {@link getUser} - Check user's invitation status
      */
     resendInvite(organizationId: string, userId: string): Promise<ResendInviteResponse>;
+    /**
+     * Lists all roles assigned to a user within a specific organization.
+     *
+     * @param {string} organizationId - The organization ID to query roles for (format: "org_...")
+     * @param {string} userId - The user ID whose roles to list (format: "usr_...")
+     * @returns {Promise<ListUserRolesResponse>} Response containing the user's roles
+     * @throws {ScalekitServerException} When the request fails
+     * @throws {Error} When organizationId is missing
+     * @throws {Error} When userId is missing
+     */
+    listUserRoles(organizationId: string, userId: string): Promise<ListUserRolesResponse>;
+    /**
+     * Lists all effective permissions for a user within a specific organization.
+     *
+     * @param {string} organizationId - The organization ID to query permissions for (format: "org_...")
+     * @param {string} userId - The user ID whose permissions to list (format: "usr_...")
+     * @returns {Promise<ListUserPermissionsResponse>} Response containing the user's permissions
+     * @throws {ScalekitServerException} When the request fails
+     * @throws {Error} When organizationId is missing
+     * @throws {Error} When userId is missing
+     */
+    listUserPermissions(organizationId: string, userId: string): Promise<ListUserPermissionsResponse>;
 }
