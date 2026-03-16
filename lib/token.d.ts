@@ -193,7 +193,7 @@ export default class TokenClient {
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/tokens | List Tokens API}
      */
-    updateToken(token: string, options?: UpdateTokenOptions): Promise<UpdateTokenResponse>;
     listTokens(organizationId: string, options?: ListTokensOptions): Promise<ListTokensResponse>;
+    updateToken(token: string, options?: UpdateTokenOptions): Promise<UpdateTokenResponse>;
 }
 export { Token, CreateTokenResponse, ValidateTokenResponse, ListTokensResponse, UpdateTokenResponse, };
