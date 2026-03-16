@@ -2,7 +2,7 @@ import type { MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateRoleResponse, UpdateRoleResponse, GetRoleResponse, ListRolesResponse, CreateOrganizationRoleResponse, UpdateOrganizationRoleResponse, GetOrganizationRoleResponse, ListOrganizationRolesResponse, GetRoleUsersCountResponse, GetOrganizationRoleUsersCountResponse, UpdateDefaultOrganizationRolesResponse, CreateRole, UpdateRole, CreateOrganizationRole } from './pkg/grpc/scalekit/v1/roles/roles_pb';
+import { CreateRoleResponse, UpdateRoleResponse, GetRoleResponse, ListRolesResponse, CreateOrganizationRoleResponse, UpdateOrganizationRoleResponse, GetOrganizationRoleResponse, ListOrganizationRolesResponse, GetRoleUsersCountResponse, GetOrganizationRoleUsersCountResponse, UpdateDefaultOrganizationRolesResponse, UpdateDefaultRolesResponse, ListDependentRolesResponse, CreateRole, UpdateRole, CreateOrganizationRole } from './pkg/grpc/scalekit/v1/roles/roles_pb';
 /**
  * Client for managing roles at both environment and organization levels.
  *
@@ -282,6 +282,52 @@ export default class RoleClient {
      * @see {@link https://docs.scalekit.com/apis/#tag/roles | Get Organization Role User Count API}
      */
     getOrganizationRoleUsersCount(orgId: string, roleName: string): Promise<GetOrganizationRoleUsersCountResponse>;
+    /**
+     * Sets the default creator and/or member roles for the environment.
+     *
+     * These roles are automatically assigned to users when they are created or added as members
+     * at the environment level. Both parameters are optional — only the provided fields are updated.
+     *
+     * @param {object} options - Update options
+     * @param {string} [options.defaultCreatorRole] - Role assigned to users who create resources
+     * @param {string} [options.defaultMemberRole] - Role assigned to new environment members
+     *
+     * @returns {Promise<UpdateDefaultRolesResponse>} Updated default roles configuration
+     *
+     * @throws {ScalekitServerException} If the specified role names do not exist
+     *
+     * @example
+     * await scalekitClient.role.updateDefaultRoles({
+     *   defaultCreatorRole: 'owner',
+     *   defaultMemberRole: 'member',
+     * });
+     *
+     * @see {@link https://docs.scalekit.com/apis/#tag/roles | Update Default Roles API}
+     */
+    updateDefaultRoles(options: {
+        defaultCreatorRole?: string;
+        defaultMemberRole?: string;
+    }): Promise<UpdateDefaultRolesResponse>;
+    /**
+     * Lists all roles that extend (depend on) the specified role.
+     *
+     * Dependent roles are roles that use the given role as their base role and inherit its permissions.
+     * Use this to understand the impact of modifying or deleting a role.
+     *
+     * @param {string} roleName - Role to find dependents for
+     *
+     * @returns {Promise<ListDependentRolesResponse>} Array of roles that depend on the given role
+     *
+     * @throws {Error} If roleName is empty
+     * @throws {ScalekitServerException} If the role is not found
+     *
+     * @example
+     * const response = await scalekitClient.role.listDependentRoles('base_role');
+     * response.roles.forEach(r => console.log(`${r.name} depends on base_role`));
+     *
+     * @see {@link https://docs.scalekit.com/apis/#tag/roles | List Dependent Roles API}
+     */
+    listDependentRoles(roleName: string): Promise<ListDependentRolesResponse>;
     /**
      * Sets the default role automatically assigned to new organization members.
      * This is the role that is by default assigned to every new user added to this organization.
