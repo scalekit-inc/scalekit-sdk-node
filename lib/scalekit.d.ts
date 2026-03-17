@@ -11,6 +11,7 @@ import SessionClient from './session';
 import RoleClient from './role';
 import PermissionClient from './permission';
 import WebAuthnClient from './webauthn';
+import ActionsClient from './actions';
 import { IdpInitiatedLoginClaims } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse, TokenValidationOptions } from './types/scalekit';
 /**
@@ -51,6 +52,7 @@ export default class ScalekitClient {
     readonly domain: DomainClient;
     readonly tools: ToolsClient;
     readonly connectedAccounts: ConnectedAccountsClient;
+    readonly actions: ActionsClient;
     readonly directory: DirectoryClient;
     readonly passwordless: PasswordlessClient;
     readonly user: UserClient;
