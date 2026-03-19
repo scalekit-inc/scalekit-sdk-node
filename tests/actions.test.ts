@@ -22,7 +22,7 @@ describe('Actions', () => {
   const GMAIL_CONNECTION_NAME = 'GMAIL-test';
   const GMAIL_IDENTIFIER = 'default';
   const GMAIL_TOOL_NAME = 'gmail_fetch_mails';
-  const USER_PROFILE_PATH = '/v1/users/me/profile';
+  const USER_PROFILE_PATH = '/gmail/v1/users/me/profile';
   const FRESHDESK_CONNECTION_NAME = 'freshdesk';
 
   beforeEach(async () => {
