@@ -40,12 +40,17 @@ export default class CoreClient {
     getJwks(): Promise<void>;
     private sleep;
     /**
-     * Execute a function with error handling and retry logic
+     * Execute a function with error handling and retry logic.
+     *
      * @param fn Function to execute
      * @param data Data to pass to the function
-     * @param retryLeft Number of retries left
-     * @param attempt Current attempt number (0-indexed, used for backoff calculation)
+     * @param options Optional execution options
+     * @param options.retryOn429 When true, retry with exponential backoff on HTTP 429 / ResourceExhausted.
+     *   Defaults to false — callers must explicitly opt in to avoid replaying non-idempotent operations.
      * @returns {Promise<TResponse>} Returns the response
      */
-    connectExec<TRequest, TResponse>(fn: (request: TRequest) => Promise<TResponse>, data: TRequest, retryLeft?: number, attempt?: number): Promise<TResponse>;
+    connectExec<TRequest, TResponse>(fn: (request: TRequest) => Promise<TResponse>, data: TRequest, options?: {
+        retryOn429?: boolean;
+    }): Promise<TResponse>;
+    private _connectExec;
 }

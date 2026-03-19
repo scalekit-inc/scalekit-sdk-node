@@ -108,39 +108,61 @@ export default class CoreClient {
   }
 
   /**
-   * Execute a function with error handling and retry logic
+   * Execute a function with error handling and retry logic.
+   *
    * @param fn Function to execute
    * @param data Data to pass to the function
-   * @param retryLeft Number of retries left
-   * @param attempt Current attempt number (0-indexed, used for backoff calculation)
+   * @param options Optional execution options
+   * @param options.retryOn429 When true, retry with exponential backoff on HTTP 429 / ResourceExhausted.
+   *   Defaults to false — callers must explicitly opt in to avoid replaying non-idempotent operations.
    * @returns {Promise<TResponse>} Returns the response
    */
   async connectExec<TRequest, TResponse>(
     fn: (request: TRequest) => Promise<TResponse>,
     data: TRequest,
-    retryLeft: number = 3,
-    attempt: number = 0
+    options?: { retryOn429?: boolean }
+  ): Promise<TResponse> {
+    return this._connectExec(fn, data, 3, 0, options?.retryOn429 ?? false);
+  }
+
+  private async _connectExec<TRequest, TResponse>(
+    fn: (request: TRequest) => Promise<TResponse>,
+    data: TRequest,
+    retryLeft: number,
+    attempt: number,
+    retryOn429: boolean
   ): Promise<TResponse> {
     try {
-      const res = await fn(data);
-      return res;
+      return await fn(data);
     } catch (error) {
       // Handle gRPC Connect errors
       if (error instanceof ConnectError) {
         if (retryLeft > 0) {
           if (error.code === Code.Unauthenticated) {
             await this.authenticateClient();
-            return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
+            return this._connectExec(
+              fn,
+              data,
+              retryLeft - 1,
+              attempt + 1,
+              retryOn429
+            );
           }
           // The Connect transport maps HTTP 429 to Code.Unavailable with a 429 body,
           // and gRPC-native rate limits come as Code.ResourceExhausted.
           const is429 =
             error.code === Code.ResourceExhausted ||
             (error.code === Code.Unavailable && error.message.includes('429'));
-          if (is429) {
+          if (is429 && retryOn429) {
             const backoffMs = Math.min(1000 * 2 ** attempt, 30000);
             await this.sleep(backoffMs);
-            return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
+            return this._connectExec(
+              fn,
+              data,
+              retryLeft - 1,
+              attempt + 1,
+              retryOn429
+            );
           }
         }
         throw ScalekitServerException.promote(error);
@@ -151,12 +173,24 @@ export default class CoreClient {
           if (retryLeft > 0) {
             if (error.response.status === 401) {
               await this.authenticateClient();
-              return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
+              return this._connectExec(
+                fn,
+                data,
+                retryLeft - 1,
+                attempt + 1,
+                retryOn429
+              );
             }
-            if (error.response.status === 429) {
+            if (error.response.status === 429 && retryOn429) {
               const backoffMs = Math.min(1000 * 2 ** attempt, 30000);
               await this.sleep(backoffMs);
-              return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
+              return this._connectExec(
+                fn,
+                data,
+                retryLeft - 1,
+                attempt + 1,
+                retryOn429
+              );
             }
           }
           throw ScalekitServerException.promote(error.response);
