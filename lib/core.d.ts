@@ -44,13 +44,8 @@ export default class CoreClient {
      *
      * @param fn Function to execute
      * @param data Data to pass to the function
-     * @param options Optional execution options
-     * @param options.retryOn429 When true, retry with exponential backoff on HTTP 429 / ResourceExhausted.
-     *   Defaults to false — callers must explicitly opt in to avoid replaying non-idempotent operations.
      * @returns {Promise<TResponse>} Returns the response
      */
-    connectExec<TRequest, TResponse>(fn: (request: TRequest) => Promise<TResponse>, data: TRequest, options?: {
-        retryOn429?: boolean;
-    }): Promise<TResponse>;
+    connectExec<TRequest, TResponse>(fn: (request: TRequest) => Promise<TResponse>, data: TRequest): Promise<TResponse>;
     private _connectExec;
 }
