@@ -143,7 +143,8 @@ export default class CoreClient {
             error.code === Code.ResourceExhausted ||
             (error.code === Code.Unavailable && error.message.includes('429'));
           if (is429) {
-            const backoffMs = Math.min(1000 * 2 ** attempt, 30000);
+            const baseBackoff = Math.min(1000 * 2 ** attempt, 30000);
+            const backoffMs = baseBackoff * (0.5 + Math.random() * 0.5);
             await this.sleep(backoffMs);
             return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
           }
@@ -159,7 +160,8 @@ export default class CoreClient {
               return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
             }
             if (error.response.status === 429) {
-              const backoffMs = Math.min(1000 * 2 ** attempt, 30000);
+              const baseBackoff = Math.min(1000 * 2 ** attempt, 30000);
+              const backoffMs = baseBackoff * (0.5 + Math.random() * 0.5);
               await this.sleep(backoffMs);
               return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
             }
