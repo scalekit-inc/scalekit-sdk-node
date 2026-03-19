@@ -128,18 +128,21 @@ export default class ConnectedAccountsClient {
     apiConfig?: Record<string, unknown>;
   }): Promise<CreateConnectedAccountResponse> {
     const {
-      connector,
-      identifier,
+      connector: rawConnector,
+      identifier: rawIdentifier,
       authorizationDetails,
       organizationId,
       userId,
       apiConfig,
     } = params;
 
-    if (!connector?.trim()) {
+    const connector = rawConnector?.trim();
+    const identifier = rawIdentifier?.trim();
+
+    if (!connector) {
       throw new Error('connector is required');
     }
-    if (!identifier?.trim()) {
+    if (!identifier) {
       throw new Error('identifier is required');
     }
 
@@ -184,12 +187,12 @@ export default class ConnectedAccountsClient {
   /**
    * Updates an existing connected account.
    *
-   * You can target the account either by `connectedAccountId` or by the combination
-   * of `organizationId`/`userId`, `connector`, and `identifier`.
+   * You can target the account either by `connectedAccountId` alone, or by the
+   * combination of `connector` and `identifier`.
    */
   async updateConnectedAccount(params: {
-    connector: string;
-    identifier: string;
+    connector?: string;
+    identifier?: string;
     connectedAccount: UpdateConnectedAccount;
     organizationId?: string;
     userId?: string;
@@ -204,11 +207,17 @@ export default class ConnectedAccountsClient {
       connectedAccountId,
     } = params;
 
+    if (!connectedAccountId && !(connector?.trim() && identifier?.trim())) {
+      throw new Error(
+        'either connectedAccountId or connector + identifier is required'
+      );
+    }
+
     return this.coreClient.connectExec(
       this.client.updateConnectedAccount,
       create(UpdateConnectedAccountRequestSchema, {
-        connector,
-        identifier,
+        ...(connector?.trim() && { connector: connector.trim() }),
+        ...(identifier?.trim() && { identifier: identifier.trim() }),
         connectedAccount,
         ...(organizationId && { organizationId }),
         ...(userId && { userId }),
@@ -220,12 +229,12 @@ export default class ConnectedAccountsClient {
   /**
    * Deletes a connected account and revokes its credentials.
    *
-   * You can target the account either by `connectedAccountId` or by the combination
-   * of `organizationId`/`userId`, `connector`, and `identifier`.
+   * You can target the account either by `connectedAccountId` alone, or by the
+   * combination of `connector` and `identifier`.
    */
   async deleteConnectedAccount(params: {
-    connector: string;
-    identifier: string;
+    connector?: string;
+    identifier?: string;
     organizationId?: string;
     userId?: string;
     connectedAccountId?: string;
@@ -238,11 +247,17 @@ export default class ConnectedAccountsClient {
       connectedAccountId,
     } = params;
 
+    if (!connectedAccountId && !(connector?.trim() && identifier?.trim())) {
+      throw new Error(
+        'either connectedAccountId or connector + identifier is required'
+      );
+    }
+
     return this.coreClient.connectExec(
       this.client.deleteConnectedAccount,
       create(DeleteConnectedAccountRequestSchema, {
-        connector,
-        identifier,
+        ...(connector?.trim() && { connector: connector.trim() }),
+        ...(identifier?.trim() && { identifier: identifier.trim() }),
         ...(organizationId && { organizationId }),
         ...(userId && { userId }),
         ...(connectedAccountId && { id: connectedAccountId }),
@@ -254,8 +269,8 @@ export default class ConnectedAccountsClient {
    * Generates a time-limited magic link for connecting or re-authorizing a third-party account.
    */
   async getMagicLinkForConnectedAccount(params: {
-    connector: string;
-    identifier: string;
+    connector?: string;
+    identifier?: string;
     organizationId?: string;
     userId?: string;
     connectedAccountId?: string;
@@ -271,8 +286,8 @@ export default class ConnectedAccountsClient {
     return this.coreClient.connectExec(
       this.client.getMagicLinkForConnectedAccount,
       create(GetMagicLinkForConnectedAccountRequestSchema, {
-        connector,
-        identifier,
+        ...(connector && { connector }),
+        ...(identifier && { identifier }),
         ...(organizationId && { organizationId }),
         ...(userId && { userId }),
         ...(connectedAccountId && { id: connectedAccountId }),
@@ -287,8 +302,8 @@ export default class ConnectedAccountsClient {
    * to this in your application.
    */
   async getConnectedAccountByIdentifier(params: {
-    connector: string;
-    identifier: string;
+    connector?: string;
+    identifier?: string;
     organizationId?: string;
     userId?: string;
     connectedAccountId?: string;
@@ -304,8 +319,8 @@ export default class ConnectedAccountsClient {
     return this.coreClient.connectExec(
       this.client.getConnectedAccountAuth,
       create(GetConnectedAccountByIdentifierRequestSchema, {
-        connector,
-        identifier,
+        ...(connector && { connector }),
+        ...(identifier && { identifier }),
         ...(organizationId && { organizationId }),
         ...(userId && { userId }),
         ...(connectedAccountId && { id: connectedAccountId }),

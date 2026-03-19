@@ -69,12 +69,12 @@ export default class ConnectedAccountsClient {
     /**
      * Updates an existing connected account.
      *
-     * You can target the account either by `connectedAccountId` or by the combination
-     * of `organizationId`/`userId`, `connector`, and `identifier`.
+     * You can target the account either by `connectedAccountId` alone, or by the
+     * combination of `connector` and `identifier`.
      */
     updateConnectedAccount(params: {
-        connector: string;
-        identifier: string;
+        connector?: string;
+        identifier?: string;
         connectedAccount: UpdateConnectedAccount;
         organizationId?: string;
         userId?: string;
@@ -83,12 +83,12 @@ export default class ConnectedAccountsClient {
     /**
      * Deletes a connected account and revokes its credentials.
      *
-     * You can target the account either by `connectedAccountId` or by the combination
-     * of `organizationId`/`userId`, `connector`, and `identifier`.
+     * You can target the account either by `connectedAccountId` alone, or by the
+     * combination of `connector` and `identifier`.
      */
     deleteConnectedAccount(params: {
-        connector: string;
-        identifier: string;
+        connector?: string;
+        identifier?: string;
         organizationId?: string;
         userId?: string;
         connectedAccountId?: string;
@@ -97,8 +97,8 @@ export default class ConnectedAccountsClient {
      * Generates a time-limited magic link for connecting or re-authorizing a third-party account.
      */
     getMagicLinkForConnectedAccount(params: {
-        connector: string;
-        identifier: string;
+        connector?: string;
+        identifier?: string;
         organizationId?: string;
         userId?: string;
         connectedAccountId?: string;
@@ -110,8 +110,8 @@ export default class ConnectedAccountsClient {
      * to this in your application.
      */
     getConnectedAccountByIdentifier(params: {
-        connector: string;
-        identifier: string;
+        connector?: string;
+        identifier?: string;
         organizationId?: string;
         userId?: string;
         connectedAccountId?: string;

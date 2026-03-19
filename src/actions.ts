@@ -88,8 +88,8 @@ export default class ActionsClient {
     } = params;
 
     return this.connectedAccounts.getMagicLinkForConnectedAccount({
-      connector: connectionName ?? '',
-      identifier: identifier ?? '',
+      connector: connectionName,
+      identifier,
       organizationId,
       userId,
       connectedAccountId,
@@ -123,10 +123,11 @@ export default class ActionsClient {
 
   /**
    * Delete a connected account.
+   * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
    */
   async deleteConnectedAccount(params: {
-    connectionName: string;
-    identifier: string;
+    connectionName?: string;
+    identifier?: string;
     connectedAccountId?: string;
     organizationId?: string;
     userId?: string;
@@ -139,21 +140,35 @@ export default class ActionsClient {
       userId,
     } = params;
 
+    const trimmedConnectionName = connectionName?.trim();
+    const trimmedIdentifier = identifier?.trim();
+    const trimmedConnectedAccountId = connectedAccountId?.trim();
+
+    if (
+      !trimmedConnectedAccountId &&
+      !(trimmedConnectionName && trimmedIdentifier)
+    ) {
+      throw new Error(
+        'either connectedAccountId or connectionName + identifier is required'
+      );
+    }
+
     return this.connectedAccounts.deleteConnectedAccount({
-      connector: connectionName,
-      identifier,
+      connector: trimmedConnectionName,
+      identifier: trimmedIdentifier,
       organizationId,
       userId,
-      connectedAccountId,
+      connectedAccountId: trimmedConnectedAccountId,
     });
   }
 
   /**
    * Get connected account authorization details.
+   * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
    */
   async getConnectedAccount(params: {
-    connectionName: string;
-    identifier: string;
+    connectionName?: string;
+    identifier?: string;
     connectedAccountId?: string;
     organizationId?: string;
     userId?: string;
@@ -166,12 +181,25 @@ export default class ActionsClient {
       userId,
     } = params;
 
+    const trimmedConnectionName = connectionName?.trim();
+    const trimmedIdentifier = identifier?.trim();
+    const trimmedConnectedAccountId = connectedAccountId?.trim();
+
+    if (
+      !trimmedConnectedAccountId &&
+      !(trimmedConnectionName && trimmedIdentifier)
+    ) {
+      throw new Error(
+        'either connectedAccountId or connectionName + identifier is required'
+      );
+    }
+
     return this.connectedAccounts.getConnectedAccountByIdentifier({
-      connector: connectionName,
-      identifier,
+      connector: trimmedConnectionName,
+      identifier: trimmedIdentifier,
       organizationId,
       userId,
-      connectedAccountId,
+      connectedAccountId: trimmedConnectedAccountId,
     });
   }
 
@@ -241,9 +269,16 @@ export default class ActionsClient {
       apiConfig,
     } = params;
 
+    if (!connectionName?.trim()) {
+      throw new Error('connectionName is required');
+    }
+    if (!identifier?.trim()) {
+      throw new Error('identifier is required');
+    }
+
     return this.connectedAccounts.getOrCreateConnectedAccount({
-      connector: connectionName,
-      identifier,
+      connector: connectionName.trim(),
+      identifier: identifier.trim(),
       authorizationDetails,
       organizationId,
       userId,
@@ -253,10 +288,11 @@ export default class ActionsClient {
 
   /**
    * Update an existing connected account.
+   * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
    */
   async updateConnectedAccount(params: {
-    connectionName: string;
-    identifier: string;
+    connectionName?: string;
+    identifier?: string;
     authorizationDetails?: UpdateConnectedAccount['authorizationDetails'];
     organizationId?: string;
     userId?: string;
@@ -273,18 +309,31 @@ export default class ActionsClient {
       apiConfig,
     } = params;
 
+    const trimmedConnectionName = connectionName?.trim();
+    const trimmedIdentifier = identifier?.trim();
+    const trimmedConnectedAccountId = connectedAccountId?.trim();
+
+    if (
+      !trimmedConnectedAccountId &&
+      !(trimmedConnectionName && trimmedIdentifier)
+    ) {
+      throw new Error(
+        'either connectedAccountId or connectionName + identifier is required'
+      );
+    }
+
     const connectedAccount = create(UpdateConnectedAccountSchema, {
       ...(authorizationDetails && { authorizationDetails }),
       ...(apiConfig != null && { apiConfig }),
     });
 
     return this.connectedAccounts.updateConnectedAccount({
-      connector: connectionName,
-      identifier,
+      connector: trimmedConnectionName,
+      identifier: trimmedIdentifier,
       connectedAccount,
       organizationId,
       userId,
-      connectedAccountId,
+      connectedAccountId: trimmedConnectedAccountId,
     });
   }
 
@@ -324,14 +373,15 @@ export default class ActionsClient {
       throw new Error('path is required');
     }
 
-    const url = `${this.coreClient.envUrl.replace(/\/$/, '')}/proxy${path}`;
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+    const url = `${this.coreClient.envUrl.replace(/\/$/, '')}/proxy${normalizedPath}`;
     const timeout = timeoutMs ?? 30_000;
 
     const proxyHeaders: Record<string, string> = {
+      ...(headers ?? {}),
       connection_name: connectionName,
       Connection_name: connectionName,
       identifier,
-      ...(headers ?? {}),
     };
 
     return this.coreClient.connectExec(

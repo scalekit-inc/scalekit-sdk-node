@@ -54,20 +54,22 @@ export default class ActionsClient {
     }): Promise<ListConnectedAccountsResponse>;
     /**
      * Delete a connected account.
+     * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
      */
     deleteConnectedAccount(params: {
-        connectionName: string;
-        identifier: string;
+        connectionName?: string;
+        identifier?: string;
         connectedAccountId?: string;
         organizationId?: string;
         userId?: string;
     }): Promise<DeleteConnectedAccountResponse>;
     /**
      * Get connected account authorization details.
+     * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
      */
     getConnectedAccount(params: {
-        connectionName: string;
-        identifier: string;
+        connectionName?: string;
+        identifier?: string;
         connectedAccountId?: string;
         organizationId?: string;
         userId?: string;
@@ -99,10 +101,11 @@ export default class ActionsClient {
     }): Promise<CreateConnectedAccountResponse>;
     /**
      * Update an existing connected account.
+     * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
      */
     updateConnectedAccount(params: {
-        connectionName: string;
-        identifier: string;
+        connectionName?: string;
+        identifier?: string;
         authorizationDetails?: UpdateConnectedAccount['authorizationDetails'];
         organizationId?: string;
         userId?: string;
