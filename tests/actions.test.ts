@@ -148,7 +148,7 @@ describe('Actions', () => {
           connectionName: '' as any,
           identifier: 'user_123',
         } as any)
-      ).rejects.toThrow('connector is required');
+      ).rejects.toThrow('connectionName is required');
 
       await expect(
         client.actions.getOrCreateConnectedAccount({
