@@ -887,6 +887,14 @@ export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnec
      * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 18;
      */
     syncUserProfileOnLogin?: boolean;
+    /**
+     * @generated from field: google.protobuf.StringValue token_access_type = 19;
+     */
+    tokenAccessType?: string;
+    /**
+     * @generated from field: google.protobuf.StringValue tenant_id = 20;
+     */
+    tenantId?: string;
 };
 /**
  * Describes the message scalekit.v1.connections.OAuthConnectionConfig.
@@ -1655,6 +1663,60 @@ export type ListAppConnectionsResponse = Message<"scalekit.v1.connections.ListAp
  */
 export declare const ListAppConnectionsResponseSchema: GenMessage<ListAppConnectionsResponse>;
 /**
+ * @generated from message scalekit.v1.connections.GetConnectionContextRequest
+ */
+export type GetConnectionContextRequest = Message<"scalekit.v1.connections.GetConnectionContextRequest"> & {
+    /**
+     * @generated from field: string connection_id = 1;
+     */
+    connectionId: string;
+    /**
+     * @generated from field: string organization_id = 2;
+     */
+    organizationId: string;
+};
+/**
+ * Describes the message scalekit.v1.connections.GetConnectionContextRequest.
+ * Use `create(GetConnectionContextRequestSchema)` to create a new message.
+ */
+export declare const GetConnectionContextRequestSchema: GenMessage<GetConnectionContextRequest>;
+/**
+ * @generated from message scalekit.v1.connections.GetConnectionContextResponse
+ */
+export type GetConnectionContextResponse = Message<"scalekit.v1.connections.GetConnectionContextResponse"> & {
+    /**
+     * @generated from field: google.protobuf.Struct context = 1;
+     */
+    context?: JsonObject;
+};
+/**
+ * Describes the message scalekit.v1.connections.GetConnectionContextResponse.
+ * Use `create(GetConnectionContextResponseSchema)` to create a new message.
+ */
+export declare const GetConnectionContextResponseSchema: GenMessage<GetConnectionContextResponse>;
+/**
+ * @generated from message scalekit.v1.connections.UpdateConnectionContextRequest
+ */
+export type UpdateConnectionContextRequest = Message<"scalekit.v1.connections.UpdateConnectionContextRequest"> & {
+    /**
+     * @generated from field: string connection_id = 1;
+     */
+    connectionId: string;
+    /**
+     * @generated from field: string organization_id = 2;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: google.protobuf.Struct context = 3;
+     */
+    context?: JsonObject;
+};
+/**
+ * Describes the message scalekit.v1.connections.UpdateConnectionContextRequest.
+ * Use `create(UpdateConnectionContextRequestSchema)` to create a new message.
+ */
+export declare const UpdateConnectionContextRequestSchema: GenMessage<UpdateConnectionContextRequest>;
+/**
  * @generated from enum scalekit.v1.connections.CodeChallengeType
  */
 export declare enum CodeChallengeType {
@@ -2179,5 +2241,21 @@ export declare const ConnectionService: GenService<{
         methodKind: "unary";
         input: typeof ListAppConnectionsRequestSchema;
         output: typeof ListAppConnectionsResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.GetConnectionContext
+     */
+    getConnectionContext: {
+        methodKind: "unary";
+        input: typeof GetConnectionContextRequestSchema;
+        output: typeof GetConnectionContextResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.UpdateConnectionContext
+     */
+    updateConnectionContext: {
+        methodKind: "unary";
+        input: typeof UpdateConnectionContextRequestSchema;
+        output: typeof EmptySchema;
     };
 }>;

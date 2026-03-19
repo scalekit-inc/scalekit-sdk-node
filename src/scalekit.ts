@@ -16,6 +16,9 @@ import RoleClient from './role';
 import PermissionClient from './permission';
 import WebAuthnClient from './webauthn';
 import TokenClient from './token';
+import ToolsClient from './tools';
+import ConnectedAccountsClient from './connected-accounts';
+import ActionsClient from './actions';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import {
   AuthenticationOptions,
@@ -84,6 +87,9 @@ export default class ScalekitClient {
   readonly auth: AuthClient;
   readonly webauthn: WebAuthnClient;
   readonly token: TokenClient;
+  readonly tools: ToolsClient;
+  readonly connectedAccounts: ConnectedAccountsClient;
+  readonly actions: ActionsClient;
   constructor(envUrl: string, clientId: string, clientSecret: string) {
     this.coreClient = new CoreClient(envUrl, clientId, clientSecret);
     this.grpcConnect = new GrpcConnect(this.coreClient);
@@ -106,6 +112,16 @@ export default class ScalekitClient {
     this.auth = new AuthClient(this.grpcConnect, this.coreClient);
     this.webauthn = new WebAuthnClient(this.grpcConnect, this.coreClient);
     this.token = new TokenClient(this.grpcConnect, this.coreClient);
+    this.tools = new ToolsClient(this.grpcConnect, this.coreClient);
+    this.connectedAccounts = new ConnectedAccountsClient(
+      this.grpcConnect,
+      this.coreClient
+    );
+    this.actions = new ActionsClient(
+      this.tools,
+      this.connectedAccounts,
+      this.coreClient
+    );
   }
 
   /**
