@@ -128,12 +128,16 @@ export default class CoreClient {
       // Handle gRPC Connect errors
       if (error instanceof ConnectError) {
         if (retryLeft > 0) {
-          const serverException = new ScalekitServerException(error);
-          if (serverException.httpStatus === 401) {
+          if (error.code === Code.Unauthenticated) {
             await this.authenticateClient();
             return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
           }
-          if (serverException.httpStatus === 429) {
+          // The Connect transport maps HTTP 429 to Code.Unavailable with a 429 body,
+          // and gRPC-native rate limits come as Code.ResourceExhausted.
+          const is429 =
+            error.code === Code.ResourceExhausted ||
+            (error.code === Code.Unavailable && error.message.includes('429'));
+          if (is429) {
             const backoffMs = Math.min(1000 * 2 ** attempt, 30000);
             await this.sleep(backoffMs);
             return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
@@ -145,12 +149,11 @@ export default class CoreClient {
       if (error instanceof AxiosError) {
         if (error.response) {
           if (retryLeft > 0) {
-            const serverException = new ScalekitServerException(error.response);
-            if (serverException.httpStatus === 401) {
+            if (error.response.status === 401) {
               await this.authenticateClient();
               return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
             }
-            if (serverException.httpStatus === 429) {
+            if (error.response.status === 429) {
               const backoffMs = Math.min(1000 * 2 ** attempt, 30000);
               await this.sleep(backoffMs);
               return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
