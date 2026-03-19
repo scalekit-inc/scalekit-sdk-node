@@ -103,17 +103,23 @@ export default class CoreClient {
     this.keys = keys;
   }
 
+  private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
   /**
    * Execute a function with error handling and retry logic
    * @param fn Function to execute
    * @param data Data to pass to the function
    * @param retryLeft Number of retries left
+   * @param attempt Current attempt number (0-indexed, used for backoff calculation)
    * @returns {Promise<TResponse>} Returns the response
    */
   async connectExec<TRequest, TResponse>(
     fn: (request: TRequest) => Promise<TResponse>,
     data: TRequest,
-    retryLeft: number = 1
+    retryLeft: number = 3,
+    attempt: number = 0
   ): Promise<TResponse> {
     try {
       const res = await fn(data);
@@ -125,7 +131,12 @@ export default class CoreClient {
           const serverException = new ScalekitServerException(error);
           if (serverException.httpStatus === 401) {
             await this.authenticateClient();
-            return this.connectExec(fn, data, retryLeft - 1);
+            return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
+          }
+          if (serverException.httpStatus === 429) {
+            const backoffMs = Math.min(1000 * 2 ** attempt, 30000);
+            await this.sleep(backoffMs);
+            return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
           }
         }
         throw ScalekitServerException.promote(error);
@@ -137,7 +148,12 @@ export default class CoreClient {
             const serverException = new ScalekitServerException(error.response);
             if (serverException.httpStatus === 401) {
               await this.authenticateClient();
-              return this.connectExec(fn, data, retryLeft - 1);
+              return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
+            }
+            if (serverException.httpStatus === 429) {
+              const backoffMs = Math.min(1000 * 2 ** attempt, 30000);
+              await this.sleep(backoffMs);
+              return this.connectExec(fn, data, retryLeft - 1, attempt + 1);
             }
           }
           throw ScalekitServerException.promote(error.response);

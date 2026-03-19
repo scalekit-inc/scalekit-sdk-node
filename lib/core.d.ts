@@ -38,12 +38,14 @@ export default class CoreClient {
      * @returns {Promise<void>} Returns nothing
      */
     getJwks(): Promise<void>;
+    private sleep;
     /**
      * Execute a function with error handling and retry logic
      * @param fn Function to execute
      * @param data Data to pass to the function
      * @param retryLeft Number of retries left
+     * @param attempt Current attempt number (0-indexed, used for backoff calculation)
      * @returns {Promise<TResponse>} Returns the response
      */
-    connectExec<TRequest, TResponse>(fn: (request: TRequest) => Promise<TResponse>, data: TRequest, retryLeft?: number): Promise<TResponse>;
+    connectExec<TRequest, TResponse>(fn: (request: TRequest) => Promise<TResponse>, data: TRequest, retryLeft?: number, attempt?: number): Promise<TResponse>;
 }
