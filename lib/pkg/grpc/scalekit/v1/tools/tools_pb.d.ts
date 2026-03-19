@@ -399,10 +399,6 @@ export type ListAvailableToolsRequest = Message<"scalekit.v1.tools.ListAvailable
      * @generated from field: string page_token = 3;
      */
     pageToken: string;
-    /**
-     * @generated from field: google.protobuf.BoolValue summary = 4;
-     */
-    summary?: boolean;
 };
 /**
  * Describes the message scalekit.v1.tools.ListAvailableToolsRequest.
@@ -426,11 +422,7 @@ export type ListAvailableToolsResponse = Message<"scalekit.v1.tools.ListAvailabl
      */
     prevPageToken: string;
     /**
-     * @generated from field: repeated string tool_names = 4;
-     */
-    toolNames: string[];
-    /**
-     * @generated from field: repeated scalekit.v1.tools.Tool tools = 5;
+     * @generated from field: repeated scalekit.v1.tools.Tool tools = 4;
      */
     tools: Tool[];
 };

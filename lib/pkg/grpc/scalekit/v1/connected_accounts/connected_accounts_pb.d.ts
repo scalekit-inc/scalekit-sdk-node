@@ -407,7 +407,7 @@ export type ConnectedAccount = Message<"scalekit.v1.connected_accounts.Connected
  */
 export declare const ConnectedAccountSchema: GenMessage<ConnectedAccount>;
 /**
- * Payload for creating a new connected account - only authorization details required
+ * Payload for creating a new connected account - authorization details are optional
  *
  * @generated from message scalekit.v1.connected_accounts.CreateConnectedAccount
  */
