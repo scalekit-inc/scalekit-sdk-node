@@ -19,6 +19,9 @@ export default class ActionsClient {
      *
      * Thin wrapper around ToolsClient.executeTool, reserved for future
      * pre/post modifier support.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     * @throws {ScalekitException} If toolName is missing or an unexpected error occurs.
      */
     executeTool(params: {
         toolName: string;
@@ -31,6 +34,8 @@ export default class ActionsClient {
     }): Promise<ExecuteToolResponse>;
     /**
      * Get an authorization magic link for a connected account.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
      */
     getAuthorizationLink(params: {
         connectionName?: string;
@@ -41,6 +46,8 @@ export default class ActionsClient {
     }): Promise<GetMagicLinkForConnectedAccountResponse>;
     /**
      * List connected accounts with optional filters.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
      */
     listConnectedAccounts(params?: {
         connectionName?: string;
@@ -55,6 +62,9 @@ export default class ActionsClient {
     /**
      * Delete a connected account.
      * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     * @throws {ScalekitException} If required parameters are missing.
      */
     deleteConnectedAccount(params: {
         connectionName?: string;
@@ -66,6 +76,9 @@ export default class ActionsClient {
     /**
      * Get connected account authorization details.
      * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     * @throws {ScalekitException} If required parameters are missing.
      */
     getConnectedAccount(params: {
         connectionName?: string;
@@ -79,6 +92,9 @@ export default class ActionsClient {
      *
      * This helper accepts a high-level payload and builds the
      * underlying CreateConnectedAccount message.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     * @throws {ScalekitException} If connectionName or identifier is missing.
      */
     createConnectedAccount(params: {
         connectionName: string;
@@ -90,6 +106,9 @@ export default class ActionsClient {
     }): Promise<CreateConnectedAccountResponse>;
     /**
      * Get an existing connected account or create a new one if it doesn't exist.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     * @throws {ScalekitException} If connectionName or identifier is missing.
      */
     getOrCreateConnectedAccount(params: {
         connectionName: string;
@@ -102,6 +121,9 @@ export default class ActionsClient {
     /**
      * Update an existing connected account.
      * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     * @throws {ScalekitException} If required parameters are missing.
      */
     updateConnectedAccount(params: {
         connectionName?: string;
@@ -114,6 +136,9 @@ export default class ActionsClient {
     }): Promise<UpdateConnectedAccountResponse>;
     /**
      * Make a proxied REST API call on behalf of a connected account.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     * @throws {ScalekitException} If required parameters are missing or an unexpected error occurs.
      */
     request(params: {
         connectionName: string;

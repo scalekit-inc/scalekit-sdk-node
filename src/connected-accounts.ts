@@ -2,7 +2,7 @@ import { create, type MessageInitShape } from '@bufbuild/protobuf';
 import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { ScalekitNotFoundException } from './errors';
+import { ScalekitException, ScalekitNotFoundException } from './errors';
 import {
   AuthorizationDetails,
   AuthorizationDetailsSchema,
@@ -50,6 +50,7 @@ export default class ConnectedAccountsClient {
    * Lists connected accounts with optional filters and pagination.
    *
    * @param options Optional filtering and pagination parameters
+   * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async listConnectedAccounts(options?: {
     organizationId?: string;
@@ -68,9 +69,13 @@ export default class ConnectedAccountsClient {
           organizationId: options.organizationId,
         }),
         ...(options?.userId && { userId: options.userId }),
-        ...(options?.connector && { connector: options.connector }),
-        ...(options?.identifier && { identifier: options.identifier }),
-        ...(options?.provider && { provider: options.provider }),
+        ...(options?.connector?.trim() && {
+          connector: options.connector.trim(),
+        }),
+        ...(options?.identifier?.trim() && {
+          identifier: options.identifier.trim(),
+        }),
+        ...(options?.provider?.trim() && { provider: options.provider.trim() }),
         ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
         ...(options?.pageToken && { pageToken: options.pageToken }),
         ...(options?.query && { query: options.query }),
@@ -82,6 +87,7 @@ export default class ConnectedAccountsClient {
    * Creates a new connected account.
    *
    * @param params Connected account creation parameters
+   * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async createConnectedAccount(params: {
     connector: string;
@@ -118,6 +124,8 @@ export default class ConnectedAccountsClient {
    * @param params.organizationId Optional organization ID
    * @param params.userId Optional user ID
    * @param params.apiConfig Optional API config for the create path
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If connector or identifier is missing.
    */
   async getOrCreateConnectedAccount(params: {
     connector: string;
@@ -189,6 +197,9 @@ export default class ConnectedAccountsClient {
    *
    * You can target the account either by `connectedAccountId` alone, or by the
    * combination of `connector` and `identifier`.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If required parameters are missing.
    */
   async updateConnectedAccount(params: {
     connector?: string;
@@ -231,6 +242,9 @@ export default class ConnectedAccountsClient {
    *
    * You can target the account either by `connectedAccountId` alone, or by the
    * combination of `connector` and `identifier`.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If required parameters are missing.
    */
   async deleteConnectedAccount(params: {
     connector?: string;
@@ -267,6 +281,8 @@ export default class ConnectedAccountsClient {
 
   /**
    * Generates a time-limited magic link for connecting or re-authorizing a third-party account.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async getMagicLinkForConnectedAccount(params: {
     connector?: string;
@@ -300,6 +316,9 @@ export default class ConnectedAccountsClient {
    *
    * This method returns sensitive credential information, so ensure you protect access
    * to this in your application.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitNotFoundException} If no matching connected account is found.
    */
   async getConnectedAccountByIdentifier(params: {
     connector?: string;

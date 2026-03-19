@@ -1,6 +1,7 @@
 import { create } from '@bufbuild/protobuf';
-import { AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import CoreClient from './core';
+import { ScalekitException, ScalekitServerException } from './errors';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import {
@@ -34,6 +35,9 @@ export default class ActionsClient {
    *
    * Thin wrapper around ToolsClient.executeTool, reserved for future
    * pre/post modifier support.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If toolName is missing or an unexpected error occurs.
    */
   async executeTool(params: {
     toolName: string;
@@ -71,6 +75,8 @@ export default class ActionsClient {
 
   /**
    * Get an authorization magic link for a connected account.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async getAuthorizationLink(params: {
     connectionName?: string;
@@ -98,6 +104,8 @@ export default class ActionsClient {
 
   /**
    * List connected accounts with optional filters.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async listConnectedAccounts(params?: {
     connectionName?: string;
@@ -124,6 +132,9 @@ export default class ActionsClient {
   /**
    * Delete a connected account.
    * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If required parameters are missing.
    */
   async deleteConnectedAccount(params: {
     connectionName?: string;
@@ -165,6 +176,9 @@ export default class ActionsClient {
   /**
    * Get connected account authorization details.
    * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If required parameters are missing.
    */
   async getConnectedAccount(params: {
     connectionName?: string;
@@ -208,6 +222,9 @@ export default class ActionsClient {
    *
    * This helper accepts a high-level payload and builds the
    * underlying CreateConnectedAccount message.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If connectionName or identifier is missing.
    */
   async createConnectedAccount(params: {
     connectionName: string;
@@ -251,6 +268,9 @@ export default class ActionsClient {
 
   /**
    * Get an existing connected account or create a new one if it doesn't exist.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If connectionName or identifier is missing.
    */
   async getOrCreateConnectedAccount(params: {
     connectionName: string;
@@ -289,6 +309,9 @@ export default class ActionsClient {
   /**
    * Update an existing connected account.
    * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If required parameters are missing.
    */
   async updateConnectedAccount(params: {
     connectionName?: string;
@@ -339,6 +362,9 @@ export default class ActionsClient {
 
   /**
    * Make a proxied REST API call on behalf of a connected account.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If required parameters are missing or an unexpected error occurs.
    */
   async request(params: {
     connectionName: string;
@@ -380,20 +406,26 @@ export default class ActionsClient {
     const proxyHeaders: Record<string, string> = {
       ...(headers ?? {}),
       connection_name: connectionName,
-      Connection_name: connectionName,
       identifier,
     };
 
-    return this.coreClient.connectExec(
-      (config) => this.coreClient.axios.request(config),
-      {
+    try {
+      return await this.coreClient.axios.request({
         url,
         method: method.toUpperCase(),
         params: queryParams,
         data: body ?? formData,
         headers: proxyHeaders,
         timeout,
+      });
+    } catch (error) {
+      if (error instanceof ScalekitException) throw error;
+      if (error instanceof AxiosError) {
+        if (error.response)
+          throw ScalekitServerException.promote(error.response);
+        throw new ScalekitException(error);
       }
-    );
+      throw new ScalekitException(error);
+    }
   }
 }

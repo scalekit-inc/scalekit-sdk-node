@@ -21,6 +21,7 @@ export default class ConnectedAccountsClient {
      * Lists connected accounts with optional filters and pagination.
      *
      * @param options Optional filtering and pagination parameters
+     * @throws {ScalekitServerException} If a network or server error occurs.
      */
     listConnectedAccounts(options?: {
         organizationId?: string;
@@ -36,6 +37,7 @@ export default class ConnectedAccountsClient {
      * Creates a new connected account.
      *
      * @param params Connected account creation parameters
+     * @throws {ScalekitServerException} If a network or server error occurs.
      */
     createConnectedAccount(params: {
         connector: string;
@@ -57,6 +59,8 @@ export default class ConnectedAccountsClient {
      * @param params.organizationId Optional organization ID
      * @param params.userId Optional user ID
      * @param params.apiConfig Optional API config for the create path
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     * @throws {ScalekitException} If connector or identifier is missing.
      */
     getOrCreateConnectedAccount(params: {
         connector: string;
@@ -71,6 +75,9 @@ export default class ConnectedAccountsClient {
      *
      * You can target the account either by `connectedAccountId` alone, or by the
      * combination of `connector` and `identifier`.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     * @throws {ScalekitException} If required parameters are missing.
      */
     updateConnectedAccount(params: {
         connector?: string;
@@ -85,6 +92,9 @@ export default class ConnectedAccountsClient {
      *
      * You can target the account either by `connectedAccountId` alone, or by the
      * combination of `connector` and `identifier`.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     * @throws {ScalekitException} If required parameters are missing.
      */
     deleteConnectedAccount(params: {
         connector?: string;
@@ -95,6 +105,8 @@ export default class ConnectedAccountsClient {
     }): Promise<DeleteConnectedAccountResponse>;
     /**
      * Generates a time-limited magic link for connecting or re-authorizing a third-party account.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
      */
     getMagicLinkForConnectedAccount(params: {
         connector?: string;
@@ -108,6 +120,9 @@ export default class ConnectedAccountsClient {
      *
      * This method returns sensitive credential information, so ensure you protect access
      * to this in your application.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     * @throws {ScalekitNotFoundException} If no matching connected account is found.
      */
     getConnectedAccountByIdentifier(params: {
         connector?: string;

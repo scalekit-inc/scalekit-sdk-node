@@ -1,6 +1,7 @@
 import ScalekitClient from '../src/scalekit';
 import { create } from '@bufbuild/protobuf';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { ScalekitServerException } from '../src/errors';
 import { TestOrganizationManager } from './utils/test-data';
 import {
   AuthorizationDetailsSchema,
@@ -153,9 +154,8 @@ describe('Connected Accounts', () => {
           testConnector = connector;
           testIdentifier = identifier;
         }
-      } catch (error: any) {
-        expect(error).toBeDefined();
-        expect(error.message || error.toString()).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -190,8 +190,8 @@ describe('Connected Accounts', () => {
           testConnector = connector;
           testIdentifier = identifier;
         }
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
   });
@@ -230,7 +230,7 @@ describe('Connected Accounts', () => {
         expect(response.connectedAccount?.identifier).toBe(identifier);
         expect(response.connectedAccount?.connector).toBe(connector);
       } catch (error: unknown) {
-        expect(error).toBeDefined();
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
   });
@@ -263,8 +263,8 @@ describe('Connected Accounts', () => {
 
         expect(response).toBeDefined();
         expect(response.connectedAccount).toBeDefined();
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -292,8 +292,8 @@ describe('Connected Accounts', () => {
         });
 
         expect(response).toBeDefined();
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
   });
@@ -308,8 +308,8 @@ describe('Connected Accounts', () => {
         });
 
         expect(response).toBeDefined();
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -322,8 +322,8 @@ describe('Connected Accounts', () => {
         });
 
         expect(response).toBeDefined();
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
   });
@@ -342,8 +342,8 @@ describe('Connected Accounts', () => {
         expect(response.link).toBeDefined();
         expect(typeof response.link).toBe('string');
         expect(response.expiry).toBeDefined();
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -360,8 +360,8 @@ describe('Connected Accounts', () => {
         if (response.link) {
           expect(typeof response.link).toBe('string');
         }
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -375,8 +375,8 @@ describe('Connected Accounts', () => {
           });
 
         expect(response).toBeDefined();
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
   });
@@ -395,8 +395,8 @@ describe('Connected Accounts', () => {
         expect(response.connectedAccount).toBeDefined();
         expect(response.connectedAccount?.id).toBeDefined();
         expect(response.connectedAccount?.authorizationDetails).toBeDefined();
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -413,8 +413,8 @@ describe('Connected Accounts', () => {
         if (response.connectedAccount) {
           expect(response.connectedAccount.id).toBeDefined();
         }
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -428,8 +428,8 @@ describe('Connected Accounts', () => {
           });
 
         expect(response).toBeDefined();
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
   });

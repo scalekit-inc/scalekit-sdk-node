@@ -1,5 +1,6 @@
 import ScalekitClient from '../src/scalekit';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { ScalekitServerException } from '../src/errors';
 import { TestOrganizationManager } from './utils/test-data';
 
 describe('Tools', () => {
@@ -99,8 +100,8 @@ describe('Tools', () => {
         expect(Array.isArray(response.tools)).toBe(true);
         expect(response.totalSize).toBeDefined();
         expect(typeof response.totalSize).toBe('number');
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -118,8 +119,8 @@ describe('Tools', () => {
         expect(response).toBeDefined();
         expect(response.tools).toBeDefined();
         expect(Array.isArray(response.tools)).toBe(true);
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -150,8 +151,8 @@ describe('Tools', () => {
           expect(secondPage).toBeDefined();
           expect(secondPage.tools).toBeDefined();
         }
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
   });
@@ -163,9 +164,8 @@ describe('Tools', () => {
           toolName: 'test_tool',
           params: { test: 'value' },
         });
-      } catch (error: any) {
-        expect(error).toBeDefined();
-        expect(error.message || error.toString()).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -176,8 +176,8 @@ describe('Tools', () => {
           connectedAccountId: 'ca_test123',
           params: { test: 'value' },
         });
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -190,8 +190,8 @@ describe('Tools', () => {
           organizationId: testOrg,
           params: { test: 'value' },
         });
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -208,8 +208,8 @@ describe('Tools', () => {
             attachments: [],
           },
         });
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
   });
@@ -226,8 +226,8 @@ describe('Tools', () => {
         expect(Array.isArray(response.tools)).toBe(true);
         expect(response.totalSize).toBeDefined();
         expect(typeof response.totalSize).toBe('number');
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -252,8 +252,8 @@ describe('Tools', () => {
           expect(secondPage).toBeDefined();
           expect(secondPage.tools).toBeDefined();
         }
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
   });

@@ -1,6 +1,7 @@
 import ScalekitClient from '../src/scalekit';
 import { create } from '@bufbuild/protobuf';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { ScalekitServerException } from '../src/errors';
 import { TestDataGenerator, TestOrganizationManager } from './utils/test-data';
 import {
   AuthorizationDetailsSchema,
@@ -53,9 +54,8 @@ describe('Actions', () => {
           toolName: 'test_tool',
           toolInput: { key: 'value' },
         });
-      } catch (error: any) {
-        expect(error).toBeDefined();
-        expect(error.message || error.toString()).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 
@@ -86,8 +86,8 @@ describe('Actions', () => {
         });
 
         expect(response).toBeDefined();
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
   });
@@ -110,8 +110,8 @@ describe('Actions', () => {
         });
 
         expect(response).toBeDefined();
-      } catch (error: any) {
-        expect(error).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
 

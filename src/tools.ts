@@ -48,6 +48,7 @@ export default class ToolsClient {
    *                       Use `query` to do a text search across tool metadata (names, descriptions, identifiers).
    * @param options.pageSize Maximum number of tools to return per page.
    * @param options.pageToken Token from a previous `listTools` response for pagination.
+   * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async listTools(options?: {
     filter?: MessageInitShape<typeof FilterSchema>;
@@ -75,6 +76,7 @@ export default class ToolsClient {
    * @param options.filter Filter configuration for scoped tools (providers, tool names, connection names). Required.
    * @param options.pageSize Maximum number of tools to return per page.
    * @param options.pageToken Token from a previous `listScopedTools` response for pagination.
+   * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async listScopedTools(
     identifier: string,
@@ -107,6 +109,7 @@ export default class ToolsClient {
    * @param options Optional pagination parameters
    * @param options.pageSize Maximum number of tools to return per page.
    * @param options.pageToken Token from a previous `listAvailableTools` response for pagination.
+   * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async listAvailableTools(
     identifier: string,
@@ -140,6 +143,7 @@ export default class ToolsClient {
    * @param params.connector Optional connector/provider name when using identifier-based lookup.
    * @param params.organizationId Optional organization ID to scope the connected account lookup.
    * @param params.userId Optional user ID to scope the connected account lookup.
+   * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async executeTool(params: {
     toolName: string;
