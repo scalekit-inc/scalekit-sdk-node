@@ -1,5 +1,5 @@
 {
-  "version": "2.4.0",
+  "version": "2.5.0",
   "name": "@scalekit-sdk/node",
   "description": "Official Scalekit Node SDK",
   "main": "lib/index.js",
@@ -20,7 +20,7 @@
     "build": "rm -rf lib && tsc",
     "lint": "tsc --noEmit",
     "prettier": "prettier --check .",
-    "test": "jest",
+    "test": "jest --runInBand",
     "test:watch": "jest --watch"
   },
   "keywords": [

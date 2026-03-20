@@ -290,7 +290,9 @@ export default class TokenClient {
     return this.coreClient.connectExec(this.client.updateToken, {
       token,
       ...(options?.customClaims && { customClaims: options.customClaims }),
-      ...(options?.description !== undefined && { description: options.description }),
+      ...(options?.description !== undefined && {
+        description: options.description,
+      }),
     });
   }
 
