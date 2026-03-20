@@ -32,6 +32,10 @@ import {
   GetOrganizationRoleUsersCountResponse,
   UpdateDefaultOrganizationRolesRequest,
   UpdateDefaultOrganizationRolesResponse,
+  UpdateDefaultRolesRequest,
+  UpdateDefaultRolesResponse,
+  ListDependentRolesRequest,
+  ListDependentRolesResponse,
   DeleteOrganizationRoleBaseRequest,
   DeleteRoleBaseRequestSchema,
   CreateRole,
@@ -429,6 +433,70 @@ export default class RoleClient {
         roleName,
       }
     );
+  }
+
+  /**
+   * Sets the default creator and/or member roles for the environment.
+   *
+   * These roles are automatically assigned to users when they are created or added as members
+   * at the environment level. Both parameters are optional — only the provided fields are updated.
+   *
+   * @param {object} options - Update options
+   * @param {string} [options.defaultCreatorRole] - Role assigned to users who create resources
+   * @param {string} [options.defaultMemberRole] - Role assigned to new environment members
+   *
+   * @returns {Promise<UpdateDefaultRolesResponse>} Updated default roles configuration
+   *
+   * @throws {ScalekitServerException} If the specified role names do not exist
+   *
+   * @example
+   * await scalekitClient.role.updateDefaultRoles({
+   *   defaultCreatorRole: 'owner',
+   *   defaultMemberRole: 'member',
+   * });
+   *
+   * @see {@link https://docs.scalekit.com/apis/#tag/roles | Update Default Roles API}
+   */
+  async updateDefaultRoles(options: {
+    defaultCreatorRole?: string;
+    defaultMemberRole?: string;
+  }): Promise<UpdateDefaultRolesResponse> {
+    return this.coreClient.connectExec(this.client.updateDefaultRoles, {
+      ...(options.defaultCreatorRole && {
+        defaultCreatorRole: options.defaultCreatorRole,
+      }),
+      ...(options.defaultMemberRole && {
+        defaultMemberRole: options.defaultMemberRole,
+      }),
+    });
+  }
+
+  /**
+   * Lists all roles that extend (depend on) the specified role.
+   *
+   * Dependent roles are roles that use the given role as their base role and inherit its permissions.
+   * Use this to understand the impact of modifying or deleting a role.
+   *
+   * @param {string} roleName - Role to find dependents for
+   *
+   * @returns {Promise<ListDependentRolesResponse>} Array of roles that depend on the given role
+   *
+   * @throws {Error} If roleName is empty
+   * @throws {ScalekitServerException} If the role is not found
+   *
+   * @example
+   * const response = await scalekitClient.role.listDependentRoles('base_role');
+   * response.roles.forEach(r => console.log(`${r.name} depends on base_role`));
+   *
+   * @see {@link https://docs.scalekit.com/apis/#tag/roles | List Dependent Roles API}
+   */
+  async listDependentRoles(
+    roleName: string
+  ): Promise<ListDependentRolesResponse> {
+    if (!roleName) throw new Error('roleName is required');
+    return this.coreClient.connectExec(this.client.listDependentRoles, {
+      roleName,
+    });
   }
 
   /**
