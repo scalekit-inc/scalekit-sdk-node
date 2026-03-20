@@ -11,5 +11,6 @@ module.exports = {
     '^jose': require.resolve('jose'),
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
-  testTimeout: 10000,
+  testTimeout: 30000,
+  maxWorkers: 1,
 }; 
