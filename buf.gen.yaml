@@ -19,5 +19,6 @@ types:
     - scalekit.v1.auth
     - scalekit.v1.auth.webauthn
     - scalekit.v1.tokens
+    - scalekit.v1.clients
     - scalekit.v1.tools
     - scalekit.v1.connected_accounts
