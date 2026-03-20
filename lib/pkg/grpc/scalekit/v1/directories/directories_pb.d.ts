@@ -904,6 +904,60 @@ export type TriggerDirectorySyncRequest = Message<"scalekit.v1.directories.Trigg
  */
 export declare const TriggerDirectorySyncRequestSchema: GenMessage<TriggerDirectorySyncRequest>;
 /**
+ * @generated from message scalekit.v1.directories.GetDirectoryContextRequest
+ */
+export type GetDirectoryContextRequest = Message<"scalekit.v1.directories.GetDirectoryContextRequest"> & {
+    /**
+     * @generated from field: string directory_id = 1;
+     */
+    directoryId: string;
+    /**
+     * @generated from field: string organization_id = 2;
+     */
+    organizationId: string;
+};
+/**
+ * Describes the message scalekit.v1.directories.GetDirectoryContextRequest.
+ * Use `create(GetDirectoryContextRequestSchema)` to create a new message.
+ */
+export declare const GetDirectoryContextRequestSchema: GenMessage<GetDirectoryContextRequest>;
+/**
+ * @generated from message scalekit.v1.directories.GetDirectoryContextResponse
+ */
+export type GetDirectoryContextResponse = Message<"scalekit.v1.directories.GetDirectoryContextResponse"> & {
+    /**
+     * @generated from field: google.protobuf.Struct context = 1;
+     */
+    context?: JsonObject;
+};
+/**
+ * Describes the message scalekit.v1.directories.GetDirectoryContextResponse.
+ * Use `create(GetDirectoryContextResponseSchema)` to create a new message.
+ */
+export declare const GetDirectoryContextResponseSchema: GenMessage<GetDirectoryContextResponse>;
+/**
+ * @generated from message scalekit.v1.directories.UpdateDirectoryContextRequest
+ */
+export type UpdateDirectoryContextRequest = Message<"scalekit.v1.directories.UpdateDirectoryContextRequest"> & {
+    /**
+     * @generated from field: string directory_id = 1;
+     */
+    directoryId: string;
+    /**
+     * @generated from field: string organization_id = 2;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: google.protobuf.Struct context = 3;
+     */
+    context?: JsonObject;
+};
+/**
+ * Describes the message scalekit.v1.directories.UpdateDirectoryContextRequest.
+ * Use `create(UpdateDirectoryContextRequestSchema)` to create a new message.
+ */
+export declare const UpdateDirectoryContextRequestSchema: GenMessage<UpdateDirectoryContextRequest>;
+/**
  * @generated from enum scalekit.v1.directories.DirectoryType
  */
 export declare enum DirectoryType {
@@ -1141,6 +1195,22 @@ export declare const DirectoryService: GenService<{
     triggerDirectorySync: {
         methodKind: "unary";
         input: typeof TriggerDirectorySyncRequestSchema;
+        output: typeof EmptySchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.directories.DirectoryService.GetDirectoryContext
+     */
+    getDirectoryContext: {
+        methodKind: "unary";
+        input: typeof GetDirectoryContextRequestSchema;
+        output: typeof GetDirectoryContextResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.directories.DirectoryService.UpdateDirectoryContext
+     */
+    updateDirectoryContext: {
+        methodKind: "unary";
+        input: typeof UpdateDirectoryContextRequestSchema;
         output: typeof EmptySchema;
     };
 }>;

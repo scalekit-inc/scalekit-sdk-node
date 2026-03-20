@@ -227,7 +227,9 @@ describe('Tokens', () => {
     });
 
     it('should throw when token is empty', async () => {
-      await expect(client.token.updateToken('')).rejects.toThrow('token is required');
+      await expect(client.token.updateToken('')).rejects.toThrow(
+        'token is required'
+      );
     });
   });
 

@@ -124,11 +124,7 @@ describe('M2M Client (OrganizationClients)', () => {
 
         // Cleanup secret
         await client.m2m
-          .deleteOrganizationClientSecret(
-            testOrg,
-            clientId,
-            secretId as string
-          )
+          .deleteOrganizationClientSecret(testOrg, clientId, secretId as string)
           .catch(() => {});
       } finally {
         await client.m2m
@@ -161,7 +157,11 @@ describe('M2M Client (OrganizationClients)', () => {
         expect(secretResp.plainSecret).toBeTruthy();
 
         await expect(
-          client.m2m.deleteOrganizationClientSecret(testOrg, clientId, secretId as string)
+          client.m2m.deleteOrganizationClientSecret(
+            testOrg,
+            clientId,
+            secretId as string
+          )
         ).resolves.not.toThrow();
       } finally {
         await client.m2m

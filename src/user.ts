@@ -912,6 +912,9 @@ export default class UserClient {
       organizationId,
       userId,
     });
-    return this.coreClient.connectExec(this.client.listUserPermissions, request);
+    return this.coreClient.connectExec(
+      this.client.listUserPermissions,
+      request
+    );
   }
 }

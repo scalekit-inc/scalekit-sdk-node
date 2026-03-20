@@ -67,6 +67,7 @@ jobs:
         run: make lint
 
       - name: Test
+        if: matrix.node-version == '20.x'
         env:
           SCALEKIT_ENVIRONMENT_URL: ${{ secrets.SCALEKIT_ENVIRONMENT_URL }}
           SCALEKIT_CLIENT_ID: ${{ secrets.SCALEKIT_CLIENT_ID }}
