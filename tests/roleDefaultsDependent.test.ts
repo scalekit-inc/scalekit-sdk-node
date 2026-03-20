@@ -37,7 +37,9 @@ describe('Role Defaults and Dependent Roles', () => {
 
     it('should throw when roleName is invalid', async () => {
       await expect(
-        client.role.updateDefaultRoles({ defaultMemberRole: '__invalid_role_name__' })
+        client.role.updateDefaultRoles({
+          defaultMemberRole: '__invalid_role_name__',
+        })
       ).rejects.toBeDefined();
     });
   });

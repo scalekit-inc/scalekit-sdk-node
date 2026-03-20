@@ -11,6 +11,9 @@ import PermissionClient from './permission';
 import WebAuthnClient from './webauthn';
 import TokenClient from './token';
 import M2MClient from './m2mclient';
+import ToolsClient from './tools';
+import ConnectedAccountsClient from './connected-accounts';
+import ActionsClient from './actions';
 import { IdpInitiatedLoginClaims } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse, TokenValidationOptions } from './types/scalekit';
 /**
@@ -59,6 +62,9 @@ export default class ScalekitClient {
     readonly webauthn: WebAuthnClient;
     readonly token: TokenClient;
     readonly m2m: M2MClient;
+    readonly tools: ToolsClient;
+    readonly connectedAccounts: ConnectedAccountsClient;
+    readonly actions: ActionsClient;
     constructor(envUrl: string, clientId: string, clientSecret: string);
     /**
      * Utility method to generate the OAuth 2.0 authorization URL to initiate the SSO authentication flow.

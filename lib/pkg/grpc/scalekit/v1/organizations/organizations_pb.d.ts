@@ -854,6 +854,14 @@ export declare const OrganizationService: GenService<{
         output: typeof GetOrganizationResponseSchema;
     };
     /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.GetOrganizationByExternalId
+     */
+    getOrganizationByExternalId: {
+        methodKind: "unary";
+        input: typeof GetOrganizationRequestSchema;
+        output: typeof GetOrganizationResponseSchema;
+    };
+    /**
      * @generated from rpc scalekit.v1.organizations.OrganizationService.ListOrganization
      */
     listOrganization: {

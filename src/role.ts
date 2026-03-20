@@ -462,8 +462,12 @@ export default class RoleClient {
     defaultMemberRole?: string;
   }): Promise<UpdateDefaultRolesResponse> {
     return this.coreClient.connectExec(this.client.updateDefaultRoles, {
-      ...(options.defaultCreatorRole && { defaultCreatorRole: options.defaultCreatorRole }),
-      ...(options.defaultMemberRole && { defaultMemberRole: options.defaultMemberRole }),
+      ...(options.defaultCreatorRole && {
+        defaultCreatorRole: options.defaultCreatorRole,
+      }),
+      ...(options.defaultMemberRole && {
+        defaultMemberRole: options.defaultMemberRole,
+      }),
     });
   }
 
@@ -486,9 +490,13 @@ export default class RoleClient {
    *
    * @see {@link https://docs.scalekit.com/apis/#tag/roles | List Dependent Roles API}
    */
-  async listDependentRoles(roleName: string): Promise<ListDependentRolesResponse> {
+  async listDependentRoles(
+    roleName: string
+  ): Promise<ListDependentRolesResponse> {
     if (!roleName) throw new Error('roleName is required');
-    return this.coreClient.connectExec(this.client.listDependentRoles, { roleName });
+    return this.coreClient.connectExec(this.client.listDependentRoles, {
+      roleName,
+    });
   }
 
   /**

@@ -63,9 +63,9 @@ describe('User Roles and Permissions', () => {
     });
 
     it('should throw when organizationId is empty', async () => {
-      await expect(
-        client.user.listUserPermissions('', userId)
-      ).rejects.toThrow('organizationId is required');
+      await expect(client.user.listUserPermissions('', userId)).rejects.toThrow(
+        'organizationId is required'
+      );
     });
 
     it('should throw when userId is empty', async () => {
