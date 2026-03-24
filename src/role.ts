@@ -457,15 +457,23 @@ export default class RoleClient {
    *
    * @see {@link https://docs.scalekit.com/apis/#tag/roles | Update Default Roles API}
    */
-  async updateDefaultRoles(options: {
-    defaultCreatorRole?: string;
-    defaultMemberRole?: string;
-  }): Promise<UpdateDefaultRolesResponse> {
+  async updateDefaultRoles(
+    options: {
+      defaultCreatorRole?: string;
+      defaultMemberRole?: string;
+    } = {}
+  ): Promise<UpdateDefaultRolesResponse> {
+    if (options.defaultCreatorRole === '') {
+      throw new Error('defaultCreatorRole cannot be empty');
+    }
+    if (options.defaultMemberRole === '') {
+      throw new Error('defaultMemberRole cannot be empty');
+    }
     return this.coreClient.connectExec(this.client.updateDefaultRoles, {
-      ...(options.defaultCreatorRole && {
+      ...(options.defaultCreatorRole !== undefined && {
         defaultCreatorRole: options.defaultCreatorRole,
       }),
-      ...(options.defaultMemberRole && {
+      ...(options.defaultMemberRole !== undefined && {
         defaultMemberRole: options.defaultMemberRole,
       }),
     });

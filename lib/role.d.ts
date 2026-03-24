@@ -304,7 +304,7 @@ export default class RoleClient {
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/roles | Update Default Roles API}
      */
-    updateDefaultRoles(options: {
+    updateDefaultRoles(options?: {
         defaultCreatorRole?: string;
         defaultMemberRole?: string;
     }): Promise<UpdateDefaultRolesResponse>;

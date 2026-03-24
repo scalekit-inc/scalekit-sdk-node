@@ -7,13 +7,8 @@ describe('M2M Client (OrganizationClients)', () => {
   let testOrg: string;
 
   beforeAll(async () => {
-    const envUrl = process.env.SCALEKIT_ENVIRONMENT_URL;
-    const clientId = process.env.SCALEKIT_CLIENT_ID;
-    const clientSecret = process.env.SCALEKIT_CLIENT_SECRET;
-    if (!envUrl || !clientId || !clientSecret) {
-      throw new Error(
-        'SCALEKIT_ENVIRONMENT_URL, SCALEKIT_CLIENT_ID, SCALEKIT_CLIENT_SECRET are required'
-      );
+    if (!global.client) {
+      throw new Error('global.client is not configured');
     }
     client = global.client;
     testOrg = await TestOrganizationManager.createTestOrganization(client);

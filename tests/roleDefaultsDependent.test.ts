@@ -26,11 +26,16 @@ describe('Role Defaults and Dependent Roles', () => {
     });
 
     it('should accept defaultMemberRole param', async () => {
-      // We only verify the call returns without throwing; we do not
-      // permanently change the environment's default roles in CI since
-      // we don't know the valid role names ahead of time. Instead, pass
-      // an empty object which leaves current defaults unchanged.
-      const response = await client.role.updateDefaultRoles({});
+      // Fetch the current defaults first so we can round-trip without
+      // permanently mutating the environment's state.
+      const current = await client.role.updateDefaultRoles({});
+      if (!current.defaultMember?.name) {
+        throw new Error('Expected defaultMember to be populated');
+      }
+
+      const response = await client.role.updateDefaultRoles({
+        defaultMemberRole: current.defaultMember.name,
+      });
 
       expect(response).toBeDefined();
     });
