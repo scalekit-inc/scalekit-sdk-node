@@ -118,7 +118,7 @@ describe('M2M Client (OrganizationClients)', () => {
           testOrg,
           clientId
         );
-        const secretId = secretResp.secret?.secretId;
+        const secretId = secretResp.secret?.id;
         expect(secretId).toBeTruthy();
         expect(secretResp.plainSecret).toBeTruthy();
 
@@ -152,7 +152,7 @@ describe('M2M Client (OrganizationClients)', () => {
           testOrg,
           clientId
         );
-        const secretId = secretResp.secret?.secretId;
+        const secretId = secretResp.secret?.id;
         expect(secretId).toBeTruthy();
         expect(secretResp.plainSecret).toBeTruthy();
 
