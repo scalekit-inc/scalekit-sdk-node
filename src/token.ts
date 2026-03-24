@@ -260,6 +260,21 @@ export default class TokenClient {
    *
    * @see {@link https://docs.scalekit.com/apis/#tag/tokens | List Tokens API}
    */
+  async listTokens(
+    organizationId: string,
+    options?: ListTokensOptions
+  ): Promise<ListTokensResponse> {
+    if (!organizationId) {
+      throw new Error('organizationId is required');
+    }
+    return this.coreClient.connectExec(this.client.listTokens, {
+      organizationId,
+      ...(options?.userId && { userId: options.userId }),
+      ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
+      ...(options?.pageToken && { pageToken: options.pageToken }),
+    });
+  }
+
   /**
    * Updates the custom claims and/or description of an existing API token.
    *
@@ -293,21 +308,6 @@ export default class TokenClient {
       ...(options?.description !== undefined && {
         description: options.description,
       }),
-    });
-  }
-
-  async listTokens(
-    organizationId: string,
-    options?: ListTokensOptions
-  ): Promise<ListTokensResponse> {
-    if (!organizationId) {
-      throw new Error('organizationId is required');
-    }
-    return this.coreClient.connectExec(this.client.listTokens, {
-      organizationId,
-      ...(options?.userId && { userId: options.userId }),
-      ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
-      ...(options?.pageToken && { pageToken: options.pageToken }),
     });
   }
 }

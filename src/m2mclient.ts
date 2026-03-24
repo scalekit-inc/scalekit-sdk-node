@@ -1,4 +1,5 @@
 import type { MessageShape } from '@bufbuild/protobuf';
+import { create } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
@@ -7,6 +8,7 @@ import {
   ClientService,
   OrganizationClient,
   CustomClaim,
+  CustomClaimSchema,
   CreateOrganizationClientResponse,
   GetOrganizationClientResponse,
   UpdateOrganizationClientResponse,
@@ -15,8 +17,8 @@ import {
 } from './pkg/grpc/scalekit/v1/clients/clients_pb';
 
 function toCustomClaims(claims: { [key: string]: string }): CustomClaim[] {
-  return Object.entries(claims).map(
-    ([key, value]) => ({ key, value }) as CustomClaim
+  return Object.entries(claims).map(([key, value]) =>
+    create(CustomClaimSchema, { key, value })
   );
 }
 
