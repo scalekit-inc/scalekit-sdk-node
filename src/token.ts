@@ -278,11 +278,11 @@ export default class TokenClient {
   /**
    * Updates the custom claims and/or description of an existing API token.
    *
-   * Custom claims are merged into the existing set. To remove a claim, set its value to an empty string.
+   * When customClaims is provided, it replaces the entire existing claims map.
    *
    * @param {string} token - The opaque token string or token_id (apit_xxxxx)
    * @param {UpdateTokenOptions} [options] - Fields to update
-   * @param {object} [options.customClaims] - Claims to merge; set value to "" to remove
+   * @param {object} [options.customClaims] - New claims map; replaces all existing claims
    * @param {string} [options.description] - Replacement description; empty string clears it
    *
    * @returns {Promise<UpdateTokenResponse>} Response containing updated token_info
