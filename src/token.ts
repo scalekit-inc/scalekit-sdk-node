@@ -260,42 +260,6 @@ export default class TokenClient {
    *
    * @see {@link https://docs.scalekit.com/apis/#tag/tokens | List Tokens API}
    */
-  /**
-   * Updates the custom claims and/or description of an existing API token.
-   *
-   * Custom claims are merged into the existing set. To remove a claim, set its value to an empty string.
-   *
-   * @param {string} token - The opaque token string or token_id (apit_xxxxx)
-   * @param {UpdateTokenOptions} [options] - Fields to update
-   * @param {object} [options.customClaims] - Claims to merge; set value to "" to remove
-   * @param {string} [options.description] - Replacement description; empty string clears it
-   *
-   * @returns {Promise<UpdateTokenResponse>} Response containing updated token_info
-   *
-   * @throws {ScalekitServerException} If a network or server error occurs
-   *
-   * @example
-   * const response = await scalekitClient.token.updateToken('apit_123456789', {
-   *   customClaims: { env: 'production', scope: 'read' },
-   *   description: 'Updated CI token'
-   * });
-   */
-  async updateToken(
-    token: string,
-    options?: UpdateTokenOptions
-  ): Promise<UpdateTokenResponse> {
-    if (!token) {
-      throw new Error('token is required');
-    }
-    return this.coreClient.connectExec(this.client.updateToken, {
-      token,
-      ...(options?.customClaims && { customClaims: options.customClaims }),
-      ...(options?.description !== undefined && {
-        description: options.description,
-      }),
-    });
-  }
-
   async listTokens(
     organizationId: string,
     options?: ListTokensOptions
