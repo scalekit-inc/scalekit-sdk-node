@@ -191,7 +191,7 @@ describe('Tokens', () => {
       expect(response.tokenInfo?.description).toBe('Token after update');
     });
 
-    it('should merge custom claims on update', async () => {
+    it('should replace custom claims on update', async () => {
       const createResponse = await client.token.createToken(testOrg, {
         customClaims: { env: 'staging', scope: 'read' },
         description: 'Token for claims update',
@@ -206,24 +206,28 @@ describe('Tokens', () => {
       expect(response.tokenInfo).toBeDefined();
       expect(response.tokenInfo?.customClaims['env']).toBe('production');
       expect(response.tokenInfo?.customClaims['team']).toBe('infra');
-      expect(response.tokenInfo?.customClaims['scope']).toBe('read');
+      // customClaims is replaced (not merged) — keys absent from the update are removed
+      expect(response.tokenInfo?.customClaims['scope']).toBeUndefined();
     });
 
-    it('should remove a claim when value is empty string', async () => {
+    it('should preserve existing claims when empty map is provided', async () => {
+      // proto3 does not serialize empty maps (they are the default value),
+      // so passing customClaims: {} is a no-op — existing claims are unchanged.
       const createResponse = await client.token.createToken(testOrg, {
         customClaims: { env: 'staging', scope: 'read' },
-        description: 'Token for claim removal',
+        description: 'Token for claims preserve',
       });
       testTokenId = createResponse.tokenId;
 
       const response = await client.token.updateToken(testTokenId, {
-        customClaims: { scope: '' },
+        customClaims: {},
       });
 
       expect(response).toBeDefined();
       expect(response.tokenInfo).toBeDefined();
-      expect(response.tokenInfo?.customClaims['scope']).toBeUndefined();
+      // Empty map is not transmitted; server keeps the original claims
       expect(response.tokenInfo?.customClaims['env']).toBe('staging');
+      expect(response.tokenInfo?.customClaims['scope']).toBe('read');
     });
 
     it('should throw when token is empty', async () => {

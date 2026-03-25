@@ -215,5 +215,26 @@ export default class TokenClient {
      */
     updateToken(token: string, options?: UpdateTokenOptions): Promise<UpdateTokenResponse>;
     listTokens(organizationId: string, options?: ListTokensOptions): Promise<ListTokensResponse>;
+    /**
+     * Updates the custom claims and/or description of an existing API token.
+     *
+     * When customClaims is provided, it replaces the entire existing claims map.
+     *
+     * @param {string} token - The opaque token string or token_id (apit_xxxxx)
+     * @param {UpdateTokenOptions} [options] - Fields to update
+     * @param {object} [options.customClaims] - New claims map; replaces all existing claims
+     * @param {string} [options.description] - Replacement description; empty string clears it
+     *
+     * @returns {Promise<UpdateTokenResponse>} Response containing updated token_info
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs
+     *
+     * @example
+     * const response = await scalekitClient.token.updateToken('apit_123456789', {
+     *   customClaims: { env: 'production', scope: 'read' },
+     *   description: 'Updated CI token'
+     * });
+     */
+    updateToken(token: string, options?: UpdateTokenOptions): Promise<UpdateTokenResponse>;
 }
 export { Token, CreateTokenResponse, ValidateTokenResponse, ListTokensResponse, UpdateTokenResponse, };
