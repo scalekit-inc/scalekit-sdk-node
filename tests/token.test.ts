@@ -191,7 +191,7 @@ describe('Tokens', () => {
       expect(response.tokenInfo?.description).toBe('Token after update');
     });
 
-    it('should merge custom claims on update', async () => {
+    it('should replace custom claims on update', async () => {
       const createResponse = await client.token.createToken(testOrg, {
         customClaims: { env: 'staging', scope: 'read' },
         description: 'Token for claims update',
@@ -206,24 +206,26 @@ describe('Tokens', () => {
       expect(response.tokenInfo).toBeDefined();
       expect(response.tokenInfo?.customClaims['env']).toBe('production');
       expect(response.tokenInfo?.customClaims['team']).toBe('infra');
-      expect(response.tokenInfo?.customClaims['scope']).toBe('read');
+      // customClaims is replaced (not merged) — keys absent from the update are removed
+      expect(response.tokenInfo?.customClaims['scope']).toBeUndefined();
     });
 
-    it('should remove a claim when value is empty string', async () => {
+    it('should clear all custom claims when empty map is provided', async () => {
       const createResponse = await client.token.createToken(testOrg, {
         customClaims: { env: 'staging', scope: 'read' },
-        description: 'Token for claim removal',
+        description: 'Token for claims clear',
       });
       testTokenId = createResponse.tokenId;
 
       const response = await client.token.updateToken(testTokenId, {
-        customClaims: { scope: '' },
+        customClaims: {},
       });
 
       expect(response).toBeDefined();
       expect(response.tokenInfo).toBeDefined();
-      expect(response.tokenInfo?.customClaims['scope']).toBeUndefined();
-      expect(response.tokenInfo?.customClaims['env']).toBe('staging');
+      expect(Object.keys(response.tokenInfo?.customClaims ?? {}).length).toBe(
+        0
+      );
     });
 
     it('should throw when token is empty', async () => {
