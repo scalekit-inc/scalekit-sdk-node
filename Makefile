@@ -6,7 +6,7 @@
 
 SHELL := /bin/bash
 
-PROTO_REPO_URL := https://github.com/scalekit-inc/scalekit.git
+PROTO_REPO_URL := ssh://git@github.com/scalekit-inc/scalekit.git
 PROTO_REF := v0.1.108.0
 PROTO_SUBDIR := proto
 PROTO_REMOTE_INPUT := $(PROTO_REPO_URL)\#ref=$(PROTO_REF),subdir=$(PROTO_SUBDIR)
