@@ -29,8 +29,8 @@ describe('Role Defaults and Dependent Roles', () => {
       // The server always requires defaultCreatorRole — discover current
       // defaults via listRoles so tests can round-trip without mutating state.
       const rolesResponse = await client.role.listRoles();
-      const creatorRole = rolesResponse.roles?.find(r => r.defaultCreator);
-      const memberRole = rolesResponse.roles?.find(r => r.defaultMember);
+      const creatorRole = rolesResponse.roles?.find((r) => r.defaultCreator);
+      const memberRole = rolesResponse.roles?.find((r) => r.defaultMember);
       if (!creatorRole?.name) {
         throw new Error('No default creator role found in environment');
       }
