@@ -57,7 +57,8 @@ describe('M2M Client (OrganizationClients)', () => {
       const created = await client.m2m.createOrganizationClient(testOrg, {
         name: 'Get Test Client',
       });
-      if (!created.client) throw new Error('Expected client in response');
+      if (!created.client?.clientId)
+        throw new Error('Expected created client with clientId');
       const clientId = created.client.clientId;
       try {
         const fetched = await client.m2m.getOrganizationClient(
@@ -85,7 +86,8 @@ describe('M2M Client (OrganizationClients)', () => {
       const created = await client.m2m.createOrganizationClient(testOrg, {
         name: 'Original Name',
       });
-      if (!created.client) throw new Error('Expected client in response');
+      if (!created.client?.clientId)
+        throw new Error('Expected created client with clientId');
       const clientId = created.client.clientId;
       try {
         const updated = await client.m2m.updateOrganizationClient(
@@ -111,20 +113,24 @@ describe('M2M Client (OrganizationClients)', () => {
       const created = await client.m2m.createOrganizationClient(testOrg, {
         name: 'Secret Test Client',
       });
-      if (!created.client) throw new Error('Expected client in response');
+      if (!created.client?.clientId)
+        throw new Error('Expected created client with clientId');
       const clientId = created.client.clientId;
       try {
         const secretResp = await client.m2m.createOrganizationClientSecret(
           testOrg,
           clientId
         );
-        const secretId = secretResp.secret?.id;
-        expect(secretId).toBeTruthy();
+        expect(secretResp.secret?.id).toBeTruthy();
         expect(secretResp.plainSecret).toBeTruthy();
 
         // Cleanup secret
         await client.m2m
-          .deleteOrganizationClientSecret(testOrg, clientId, secretId as string)
+          .deleteOrganizationClientSecret(
+            testOrg,
+            clientId,
+            secretResp.secret?.id as string
+          )
           .catch(() => {});
       } finally {
         await client.m2m
@@ -145,7 +151,8 @@ describe('M2M Client (OrganizationClients)', () => {
       const created = await client.m2m.createOrganizationClient(testOrg, {
         name: 'Delete Secret Client',
       });
-      if (!created.client) throw new Error('Expected client in response');
+      if (!created.client?.clientId)
+        throw new Error('Expected created client with clientId');
       const clientId = created.client.clientId;
       try {
         const secretResp = await client.m2m.createOrganizationClientSecret(
@@ -153,15 +160,10 @@ describe('M2M Client (OrganizationClients)', () => {
           clientId
         );
         const secretId = secretResp.secret?.id;
-        expect(secretId).toBeTruthy();
-        expect(secretResp.plainSecret).toBeTruthy();
+        if (!secretId) throw new Error('Expected secret.id to be defined');
 
         await expect(
-          client.m2m.deleteOrganizationClientSecret(
-            testOrg,
-            clientId,
-            secretId as string
-          )
+          client.m2m.deleteOrganizationClientSecret(testOrg, clientId, secretId)
         ).resolves.not.toThrow();
       } finally {
         await client.m2m
@@ -182,7 +184,8 @@ describe('M2M Client (OrganizationClients)', () => {
       const created = await client.m2m.createOrganizationClient(testOrg, {
         name: 'List Test Client',
       });
-      if (!created.client) throw new Error('Expected client in response');
+      if (!created.client?.clientId)
+        throw new Error('Expected created client with clientId');
       const clientId = created.client.clientId;
       try {
         const list = await client.m2m.listOrganizationClients(testOrg, {
@@ -211,7 +214,8 @@ describe('M2M Client (OrganizationClients)', () => {
       const created = await client.m2m.createOrganizationClient(testOrg, {
         name: 'To Delete Client',
       });
-      if (!created.client) throw new Error('Expected client in response');
+      if (!created.client?.clientId)
+        throw new Error('Expected created client with clientId');
       const clientId = created.client.clientId;
 
       await expect(

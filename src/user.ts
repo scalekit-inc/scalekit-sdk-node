@@ -860,15 +860,17 @@ export default class UserClient {
     organizationId: string,
     userId: string
   ): Promise<ListUserRolesResponse> {
-    if (!organizationId?.trim()) {
+    const orgId = organizationId?.trim();
+    const uId = userId?.trim();
+    if (!orgId) {
       throw new Error('organizationId is required');
     }
-    if (!userId?.trim()) {
+    if (!uId) {
       throw new Error('userId is required');
     }
     const request = create(ListUserRolesRequestSchema, {
-      organizationId,
-      userId,
+      organizationId: orgId,
+      userId: uId,
     });
     return this.coreClient.connectExec(this.client.listUserRoles, request);
   }
@@ -902,15 +904,17 @@ export default class UserClient {
     organizationId: string,
     userId: string
   ): Promise<ListUserPermissionsResponse> {
-    if (!organizationId?.trim()) {
+    const orgId = organizationId?.trim();
+    const uId = userId?.trim();
+    if (!orgId) {
       throw new Error('organizationId is required');
     }
-    if (!userId?.trim()) {
+    if (!uId) {
       throw new Error('userId is required');
     }
     const request = create(ListUserPermissionsRequestSchema, {
-      organizationId,
-      userId,
+      organizationId: orgId,
+      userId: uId,
     });
     return this.coreClient.connectExec(
       this.client.listUserPermissions,
