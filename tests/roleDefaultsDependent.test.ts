@@ -41,6 +41,7 @@ describe('Role Defaults and Dependent Roles', () => {
     it('should accept defaultCreatorRole param and return a response', async () => {
       const response = await client.role.updateDefaultRoles({
         defaultCreatorRole: creatorRoleName,
+        defaultMemberRole: memberRoleName,
       });
 
       expect(response).toBeDefined();
@@ -57,10 +58,11 @@ describe('Role Defaults and Dependent Roles', () => {
       expect(response.defaultMember?.name).toBe(memberRoleName);
     });
 
-    it('should throw when defaultCreatorRole is invalid', async () => {
+    it('should throw when role names are invalid', async () => {
       await expect(
         client.role.updateDefaultRoles({
           defaultCreatorRole: '__invalid_role_name__',
+          defaultMemberRole: '__invalid_role_name__',
         })
       ).rejects.toBeDefined();
     });
