@@ -14,6 +14,9 @@ describe('Role Defaults and Dependent Roles', () => {
         'SCALEKIT_ENVIRONMENT_URL, SCALEKIT_CLIENT_ID, SCALEKIT_CLIENT_SECRET are required'
       );
     }
+    if (!global.client) {
+      throw new Error('global.client is not initialized');
+    }
 
     client = global.client;
   });
