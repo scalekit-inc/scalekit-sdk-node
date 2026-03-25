@@ -1,33 +1,28 @@
 import ScalekitClient from '../src/scalekit';
-import { describe, it, expect, beforeAll } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
+import {
+  TestOrganizationManager,
+  TestUserManager,
+} from './utils/test-data';
 
 describe('User Roles and Permissions', () => {
   let client: ScalekitClient;
   let organizationId: string;
   let userId: string;
 
-  beforeAll(() => {
-    const envUrl = process.env.SCALEKIT_ENVIRONMENT_URL;
-    const clientId = process.env.SCALEKIT_CLIENT_ID;
-    const clientSecret = process.env.SCALEKIT_CLIENT_SECRET;
-    const testOrgId = process.env.TEST_ORGANIZATION_ID;
-    const testUserId = process.env.TEST_USER_ID;
-
-    if (!envUrl || !clientId || !clientSecret) {
-      throw new Error(
-        'SCALEKIT_ENVIRONMENT_URL, SCALEKIT_CLIENT_ID, SCALEKIT_CLIENT_SECRET are required'
-      );
-    }
-    if (!testOrgId) {
-      throw new Error('TEST_ORGANIZATION_ID is required');
-    }
-    if (!testUserId) {
-      throw new Error('TEST_USER_ID is required');
-    }
-
+  beforeAll(async () => {
+    if (!global.client) throw new Error('global.client is not configured');
     client = global.client;
-    organizationId = testOrgId;
-    userId = testUserId;
+    organizationId = await TestOrganizationManager.createTestOrganization(client);
+    const testUser = await TestUserManager.createTestUser(client, organizationId, {
+      sendInvitationEmail: false,
+    });
+    userId = testUser.userId;
+  });
+
+  afterAll(async () => {
+    await TestUserManager.cleanupTestUser(client, organizationId, userId);
+    await TestOrganizationManager.cleanupTestOrganization(client, organizationId);
   });
 
   describe('listUserRoles', () => {
