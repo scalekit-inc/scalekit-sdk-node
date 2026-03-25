@@ -175,6 +175,66 @@ describe('Tokens', () => {
     });
   });
 
+  describe('updateToken', () => {
+    it('should update description of an existing token', async () => {
+      const createResponse = await client.token.createToken(testOrg, {
+        description: 'Token before update',
+      });
+      testTokenId = createResponse.tokenId;
+
+      const response = await client.token.updateToken(testTokenId, {
+        description: 'Token after update',
+      });
+
+      expect(response).toBeDefined();
+      expect(response.tokenInfo).toBeDefined();
+      expect(response.tokenInfo?.description).toBe('Token after update');
+    });
+
+    it('should replace custom claims on update', async () => {
+      const createResponse = await client.token.createToken(testOrg, {
+        customClaims: { env: 'staging', scope: 'read' },
+        description: 'Token for claims update',
+      });
+      testTokenId = createResponse.tokenId;
+
+      const response = await client.token.updateToken(testTokenId, {
+        customClaims: { env: 'production', team: 'infra' },
+      });
+
+      expect(response).toBeDefined();
+      expect(response.tokenInfo).toBeDefined();
+      expect(response.tokenInfo?.customClaims['env']).toBe('production');
+      expect(response.tokenInfo?.customClaims['team']).toBe('infra');
+      // customClaims is replaced (not merged) — keys absent from the update are removed
+      expect(response.tokenInfo?.customClaims['scope']).toBeUndefined();
+    });
+
+    it('should clear all custom claims when empty map is provided', async () => {
+      const createResponse = await client.token.createToken(testOrg, {
+        customClaims: { env: 'staging', scope: 'read' },
+        description: 'Token for claims clear',
+      });
+      testTokenId = createResponse.tokenId;
+
+      const response = await client.token.updateToken(testTokenId, {
+        customClaims: {},
+      });
+
+      expect(response).toBeDefined();
+      expect(response.tokenInfo).toBeDefined();
+      expect(Object.keys(response.tokenInfo?.customClaims ?? {}).length).toBe(
+        0
+      );
+    });
+
+    it('should throw when token is empty', async () => {
+      await expect(client.token.updateToken('')).rejects.toThrow(
+        'token is required'
+      );
+    });
+  });
+
   describe('invalidateToken', () => {
     it('should invalidate a token and validate should throw', async () => {
       const createResponse = await client.token.createToken(testOrg, {

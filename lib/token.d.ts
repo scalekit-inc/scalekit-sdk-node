@@ -3,7 +3,7 @@ import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateTokenResponse, ValidateTokenResponse, ListTokensResponse, Token } from './pkg/grpc/scalekit/v1/tokens/tokens_pb';
+import { CreateTokenResponse, ValidateTokenResponse, ListTokensResponse, UpdateTokenResponse, Token } from './pkg/grpc/scalekit/v1/tokens/tokens_pb';
 /**
  * Options for creating an API token.
  */
@@ -17,6 +17,17 @@ export interface CreateTokenOptions {
     /** Optional expiry timestamp */
     expiry?: Timestamp;
     /** Optional human-readable label (max 255 chars) */
+    description?: string;
+}
+/**
+ * Options for updating an API token.
+ */
+export interface UpdateTokenOptions {
+    /** Custom claims to merge into the token (set value to empty string to remove a claim) */
+    customClaims?: {
+        [key: string]: string;
+    };
+    /** Optional description replacement (empty string clears) */
     description?: string;
 }
 /**
@@ -183,5 +194,26 @@ export default class TokenClient {
      * @see {@link https://docs.scalekit.com/apis/#tag/tokens | List Tokens API}
      */
     listTokens(organizationId: string, options?: ListTokensOptions): Promise<ListTokensResponse>;
+    /**
+     * Updates the custom claims and/or description of an existing API token.
+     *
+     * When customClaims is provided, it replaces the entire existing claims map.
+     *
+     * @param {string} token - The opaque token string or token_id (apit_xxxxx)
+     * @param {UpdateTokenOptions} [options] - Fields to update
+     * @param {object} [options.customClaims] - New claims map; replaces all existing claims
+     * @param {string} [options.description] - Replacement description; empty string clears it
+     *
+     * @returns {Promise<UpdateTokenResponse>} Response containing updated token_info
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs
+     *
+     * @example
+     * const response = await scalekitClient.token.updateToken('apit_123456789', {
+     *   customClaims: { env: 'production', scope: 'read' },
+     *   description: 'Updated CI token'
+     * });
+     */
+    updateToken(token: string, options?: UpdateTokenOptions): Promise<UpdateTokenResponse>;
 }
-export { Token, CreateTokenResponse, ValidateTokenResponse, ListTokensResponse, };
+export { Token, CreateTokenResponse, ValidateTokenResponse, ListTokensResponse, UpdateTokenResponse, };
