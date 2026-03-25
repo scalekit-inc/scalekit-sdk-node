@@ -108,7 +108,7 @@ describe('M2M Client (OrganizationClients)', () => {
     });
   });
 
-  describe('createOrganizationClientSecret', () => {
+  describe('addOrganizationClientSecret', () => {
     it('should create a new secret and return the plain value once', async () => {
       const created = await client.m2m.createOrganizationClient(testOrg, {
         name: 'Secret Test Client',
@@ -117,7 +117,7 @@ describe('M2M Client (OrganizationClients)', () => {
         throw new Error('Expected created client with clientId');
       const clientId = created.client.clientId;
       try {
-        const secretResp = await client.m2m.createOrganizationClientSecret(
+        const secretResp = await client.m2m.addOrganizationClientSecret(
           testOrg,
           clientId
         );
@@ -141,12 +141,12 @@ describe('M2M Client (OrganizationClients)', () => {
 
     it('should throw when clientId is empty', async () => {
       await expect(
-        client.m2m.createOrganizationClientSecret(testOrg, '')
+        client.m2m.addOrganizationClientSecret(testOrg, '')
       ).rejects.toThrow('clientId is required');
     });
   });
 
-  describe('deleteOrganizationClientSecret', () => {
+  describe('removeOrganizationClientSecret', () => {
     it('should delete a secret from an M2M client', async () => {
       const created = await client.m2m.createOrganizationClient(testOrg, {
         name: 'Delete Secret Client',
@@ -155,7 +155,7 @@ describe('M2M Client (OrganizationClients)', () => {
         throw new Error('Expected created client with clientId');
       const clientId = created.client.clientId;
       try {
-        const secretResp = await client.m2m.createOrganizationClientSecret(
+        const secretResp = await client.m2m.addOrganizationClientSecret(
           testOrg,
           clientId
         );
@@ -163,7 +163,7 @@ describe('M2M Client (OrganizationClients)', () => {
         if (!secretId) throw new Error('Expected secret.id to be defined');
 
         await expect(
-          client.m2m.deleteOrganizationClientSecret(testOrg, clientId, secretId)
+          client.m2m.removeOrganizationClientSecret(testOrg, clientId, secretId)
         ).resolves.not.toThrow();
       } finally {
         await client.m2m
@@ -174,7 +174,7 @@ describe('M2M Client (OrganizationClients)', () => {
 
     it('should throw when secretId is empty', async () => {
       await expect(
-        client.m2m.deleteOrganizationClientSecret(testOrg, 'skc_dummy', '')
+        client.m2m.removeOrganizationClientSecret(testOrg, 'skc_dummy', '')
       ).rejects.toThrow('secretId is required');
     });
   });
