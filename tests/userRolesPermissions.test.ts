@@ -1,9 +1,6 @@
 import ScalekitClient from '../src/scalekit';
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
-import {
-  TestOrganizationManager,
-  TestUserManager,
-} from './utils/test-data';
+import { TestOrganizationManager, TestUserManager } from './utils/test-data';
 
 describe('User Roles and Permissions', () => {
   let client: ScalekitClient;
@@ -13,16 +10,24 @@ describe('User Roles and Permissions', () => {
   beforeAll(async () => {
     if (!global.client) throw new Error('global.client is not configured');
     client = global.client;
-    organizationId = await TestOrganizationManager.createTestOrganization(client);
-    const testUser = await TestUserManager.createTestUser(client, organizationId, {
-      sendInvitationEmail: false,
-    });
+    organizationId =
+      await TestOrganizationManager.createTestOrganization(client);
+    const testUser = await TestUserManager.createTestUser(
+      client,
+      organizationId,
+      {
+        sendInvitationEmail: false,
+      }
+    );
     userId = testUser.userId;
   });
 
   afterAll(async () => {
     await TestUserManager.cleanupTestUser(client, organizationId, userId);
-    await TestOrganizationManager.cleanupTestOrganization(client, organizationId);
+    await TestOrganizationManager.cleanupTestOrganization(
+      client,
+      organizationId
+    );
   });
 
   describe('listUserRoles', () => {
