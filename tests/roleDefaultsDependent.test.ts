@@ -22,31 +22,45 @@ describe('Role Defaults and Dependent Roles', () => {
   });
 
   describe('updateDefaultRoles', () => {
-    it('should accept optional params and return a response', async () => {
-      const response = await client.role.updateDefaultRoles({});
+    let creatorRoleName: string;
+    let memberRoleName: string;
 
-      expect(response).toBeDefined();
+    beforeAll(async () => {
+      // The server always requires defaultCreatorRole — discover current
+      // defaults via listRoles so tests can round-trip without mutating state.
+      const rolesResponse = await client.role.listRoles();
+      const creatorRole = rolesResponse.roles?.find(r => r.defaultCreator);
+      const memberRole = rolesResponse.roles?.find(r => r.defaultMember);
+      if (!creatorRole?.name) {
+        throw new Error('No default creator role found in environment');
+      }
+      creatorRoleName = creatorRole.name;
+      memberRoleName = memberRole?.name ?? creatorRole.name;
     });
 
-    it('should accept defaultMemberRole param', async () => {
-      // Fetch the current defaults first so we can round-trip without
-      // permanently mutating the environment's state.
-      const current = await client.role.updateDefaultRoles({});
-      if (!current.defaultMember?.name) {
-        throw new Error('Expected defaultMember to be populated');
-      }
-
+    it('should accept defaultCreatorRole param and return a response', async () => {
       const response = await client.role.updateDefaultRoles({
-        defaultMemberRole: current.defaultMember.name,
+        defaultCreatorRole: creatorRoleName,
       });
 
       expect(response).toBeDefined();
+      expect(response.defaultCreator?.name).toBe(creatorRoleName);
     });
 
-    it('should throw when roleName is invalid', async () => {
+    it('should accept defaultMemberRole param', async () => {
+      const response = await client.role.updateDefaultRoles({
+        defaultCreatorRole: creatorRoleName,
+        defaultMemberRole: memberRoleName,
+      });
+
+      expect(response).toBeDefined();
+      expect(response.defaultMember?.name).toBe(memberRoleName);
+    });
+
+    it('should throw when defaultCreatorRole is invalid', async () => {
       await expect(
         client.role.updateDefaultRoles({
-          defaultMemberRole: '__invalid_role_name__',
+          defaultCreatorRole: '__invalid_role_name__',
         })
       ).rejects.toBeDefined();
     });
