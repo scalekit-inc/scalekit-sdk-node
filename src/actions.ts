@@ -15,6 +15,7 @@ import {
   UpdateConnectedAccount,
   UpdateConnectedAccountResponse,
   UpdateConnectedAccountSchema,
+  VerifyConnectedAccountUserResponse,
 } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 
@@ -84,6 +85,8 @@ export default class ActionsClient {
     connectedAccountId?: string;
     organizationId?: string;
     userId?: string;
+    state?: string;
+    userVerifyUrl?: string;
   }): Promise<GetMagicLinkForConnectedAccountResponse> {
     const {
       connectionName,
@@ -91,6 +94,8 @@ export default class ActionsClient {
       connectedAccountId,
       organizationId,
       userId,
+      state,
+      userVerifyUrl,
     } = params;
 
     return this.connectedAccounts.getMagicLinkForConnectedAccount({
@@ -99,7 +104,25 @@ export default class ActionsClient {
       organizationId,
       userId,
       connectedAccountId,
+      state,
+      userVerifyUrl,
     });
+  }
+
+  /**
+   * Verify the connected account user after OAuth callback.
+   *
+   * Called by the B2B app server with the `authRequestId` from the user verify
+   * redirect URL and the current user's identifier. Activates the connected account
+   * once the asserted identifier is confirmed.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   */
+  async verifyConnectedAccountUser(params: {
+    authRequestId: string;
+    identifier: string;
+  }): Promise<VerifyConnectedAccountUserResponse> {
+    return this.connectedAccounts.verifyConnectedAccountUser(params);
   }
 
   /**
