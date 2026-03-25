@@ -176,7 +176,7 @@ export default class M2MClient {
   }
 
   /**
-   * Creates a new secret for an M2M client.
+   * Adds a new secret to an M2M client.
    *
    * The plain secret value is returned only at creation time and cannot be retrieved again.
    *
@@ -184,7 +184,7 @@ export default class M2MClient {
    * @param clientId - The client ID to add a secret to
    * @returns CreateOrganizationClientSecretResponse with secretId and plain secret
    */
-  async createOrganizationClientSecret(
+  async addOrganizationClientSecret(
     organizationId: string,
     clientId: string
   ): Promise<CreateOrganizationClientSecretResponse> {
@@ -197,14 +197,14 @@ export default class M2MClient {
   }
 
   /**
-   * Permanently deletes a secret from an M2M client.
+   * Permanently removes a secret from an M2M client.
    *
    * @param organizationId - The organization ID
    * @param clientId - The client ID
-   * @param secretId - The secret ID to delete
+   * @param secretId - The secret ID to remove
    * @returns Empty response on success
    */
-  async deleteOrganizationClientSecret(
+  async removeOrganizationClientSecret(
     organizationId: string,
     clientId: string,
     secretId: string
