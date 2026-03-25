@@ -210,10 +210,12 @@ describe('Tokens', () => {
       expect(response.tokenInfo?.customClaims['scope']).toBeUndefined();
     });
 
-    it('should clear all custom claims when empty map is provided', async () => {
+    it('should preserve existing claims when empty map is provided', async () => {
+      // proto3 does not serialize empty maps (they are the default value),
+      // so passing customClaims: {} is a no-op — existing claims are unchanged.
       const createResponse = await client.token.createToken(testOrg, {
         customClaims: { env: 'staging', scope: 'read' },
-        description: 'Token for claims clear',
+        description: 'Token for claims preserve',
       });
       testTokenId = createResponse.tokenId;
 
@@ -223,9 +225,9 @@ describe('Tokens', () => {
 
       expect(response).toBeDefined();
       expect(response.tokenInfo).toBeDefined();
-      expect(Object.keys(response.tokenInfo?.customClaims ?? {}).length).toBe(
-        0
-      );
+      // Empty map is not transmitted; server keeps the original claims
+      expect(response.tokenInfo?.customClaims['env']).toBe('staging');
+      expect(response.tokenInfo?.customClaims['scope']).toBe('read');
     });
 
     it('should throw when token is empty', async () => {

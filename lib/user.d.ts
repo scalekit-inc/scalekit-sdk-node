@@ -15,7 +15,7 @@ import type { MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
+import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse, ListUserRolesResponse, ListUserPermissionsResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
 import { CreateUserRequest, UpdateUserRequest as UpdateUserRequestType } from './types/user';
 export default class UserClient {
     private readonly grpcConnect;
@@ -615,4 +615,57 @@ export default class UserClient {
      * @see {@link getUser} - Check user's invitation status
      */
     resendInvite(organizationId: string, userId: string): Promise<ResendInviteResponse>;
+    /**
+     * Lists all roles assigned to a user within a specific organization.
+     *
+     * Use this method to retrieve the complete set of roles that have been granted to a user
+     * in a given organization. This is useful for authorization checks, displaying user
+     * permissions in a management UI, or auditing access control assignments.
+     *
+     * @param {string} organizationId - The organization ID to query roles for (format: "org_...")
+     * @param {string} userId - The user ID whose roles to list (format: "usr_...")
+     *
+     * @returns {Promise<ListUserRolesResponse>} Response containing:
+     *   - roles: Array of Role objects assigned to the user in the organization
+     *
+     * @throws {ScalekitServerException} When the request fails (e.g. org or user not found)
+     * @throws {Error} When organizationId is missing
+     * @throws {Error} When userId is missing
+     *
+     * @example
+     * // List roles for a user in an organization
+     * const response = await scalekitClient.user.listUserRoles('org_123456', 'usr_789012');
+     * console.log('Roles:', response.roles.map(r => r.name));
+     *
+     * @see {@link https://docs.scalekit.com/apis/#tag/users | User Roles API}
+     * @see {@link listUserPermissions} - List effective permissions for the user
+     * @see {@link updateMembership} - Update the roles assigned to a user
+     */
+    listUserRoles(organizationId: string, userId: string): Promise<ListUserRolesResponse>;
+    /**
+     * Lists all effective permissions for a user within a specific organization.
+     *
+     * Use this method to retrieve the complete set of permissions that a user has been
+     * granted in a given organization, including those derived from their assigned roles.
+     * This is useful for fine-grained authorization checks and auditing access.
+     *
+     * @param {string} organizationId - The organization ID to query permissions for (format: "org_...")
+     * @param {string} userId - The user ID whose permissions to list (format: "usr_...")
+     *
+     * @returns {Promise<ListUserPermissionsResponse>} Response containing:
+     *   - permissions: Array of Permission objects effective for the user in the organization
+     *
+     * @throws {ScalekitServerException} When the request fails (e.g. org or user not found)
+     * @throws {Error} When organizationId is missing
+     * @throws {Error} When userId is missing
+     *
+     * @example
+     * // List permissions for a user in an organization
+     * const response = await scalekitClient.user.listUserPermissions('org_123456', 'usr_789012');
+     * console.log('Permissions:', response.permissions.map(p => p.name));
+     *
+     * @see {@link https://docs.scalekit.com/apis/#tag/users | User Permissions API}
+     * @see {@link listUserRoles} - List roles assigned to the user
+     */
+    listUserPermissions(organizationId: string, userId: string): Promise<ListUserPermissionsResponse>;
 }
