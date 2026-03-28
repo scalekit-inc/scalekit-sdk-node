@@ -13,6 +13,13 @@
 - [Passwordless](#passwordless)
 - [Auth](#auth)
 - [WebAuthn](#webauthn)
+- [API Tokens](#api-tokens)
+- [M2M](#m2m)
+- [Tools](#tools)
+- [Connected Accounts](#connected-accounts)
+- [Actions](#actions)
+- [Error Handling](#error-handling)
+- [Type Definitions](#type-definitions)
 - [Error Handling](#error-handling)
 - [Type Definitions](#type-definitions)
 
@@ -5642,6 +5649,983 @@ await scalekitClient.auth.updateLoginUserDetails(
 
 </dd>
 </dl>
+</details>
+
+## API Tokens
+
+Access via `scalekitClient.token`.
+
+<details>
+<summary><code>token.createToken(organizationId, options?) -> Promise&lt;CreateTokenResponse&gt;</code></summary>
+
+#### 📝 Description
+Creates a new API token for an organization. The plain-text token value is returned only at creation time.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.token.createToken('org_12345');
+console.log('Token:', response.token);
+console.log('Token ID:', response.tokenId);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| organizationId | `string` | Yes | The organization ID to scope to token |
+| options | `CreateTokenOptions` | No | Optional configuration |
+| options.userId | `string` | No | User ID to scope token to |
+| options.customClaims | `Record<string, string>` | No | Custom claims key-value pairs |
+| options.expiry | `Timestamp` | No | Expiry timestamp |
+| options.description | `string` | No | Human-readable label |
+
+**Returns**: `Promise<CreateTokenResponse>` - Response containing token, tokenId, and tokenInfo.
+
+**Source**: [src/token.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/token.ts)
+
+</details>
+
+<details>
+<summary><code>token.validateToken(token) -> Promise&lt;ValidateTokenResponse&gt;</code></summary>
+
+#### 📝 Description
+Validates an API token and returns associated context.
+
+#### 🔌 Usage
+```typescript
+try {
+  const response = await scalekitClient.token.validateToken('opaque_token_string');
+  console.log('Organization:', response.tokenInfo?.organizationId);
+} catch (error) {
+  console.error('Invalid token:', error);
+}
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| token | `string` | Yes | The opaque token string or token_id |
+
+**Returns**: `Promise<ValidateTokenResponse>` - Response containing tokenInfo.
+
+**Throws**: `ScalekitValidateTokenFailureException` if token is invalid.
+
+**Source**: [src/token.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/token.ts)
+
+</details>
+
+<details>
+<summary><code>token.invalidateToken(token) -> Promise&lt;MessageShape&lt;typeof EmptySchema&gt;&gt;</code></summary>
+
+#### 📝 Description
+Invalidates (soft deletes) an API token.
+
+#### 🔌 Usage
+```typescript
+await scalekitClient.token.invalidateToken('apit_123456789');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| token | `string` | Yes | The opaque token string or token_id |
+
+**Returns**: `Promise<MessageShape<typeof EmptySchema>>` - Empty response on success.
+
+**Source**: [src/token.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/token.ts)
+
+</details>
+
+<details>
+<summary><code>token.listTokens(organizationId, options?) -> Promise&lt;ListTokensResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists API tokens for an organization with pagination.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.token.listTokens('org_12345', {
+  pageSize: 20
+});
+console.log('Tokens:', response.tokens);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| organizationId | `string` | Yes | The organization ID to list tokens for |
+| options | `ListTokensOptions` | No | Optional configuration |
+| options.userId | `string` | No | User ID to filter tokens |
+| options.pageSize | `number` | No | Page size (default 10, max 30) |
+| options.pageToken | `string` | No | Pagination cursor |
+
+**Returns**: `Promise<ListTokensResponse>` - Response containing tokens array, totalCount, and pagination cursors.
+
+**Source**: [src/token.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/token.ts)
+
+</details>
+
+<details>
+<summary><code>token.updateToken(token, options?) -> Promise&lt;UpdateTokenResponse&gt;</code></summary>
+
+#### 📝 Description
+Updates custom claims and/or description of an existing API token.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.token.updateToken('apit_123456789', {
+  customClaims: { env: 'production' },
+  description: 'Updated CI token'
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| token | `string` | Yes | The opaque token string or token_id |
+| options | `UpdateTokenOptions` | No | Fields to update |
+| options.customClaims | `Record<string, string>` | No | New claims map (replaces all) |
+| options.description | `string` | No | Replacement description |
+
+**Returns**: `Promise<UpdateTokenResponse>` - Response containing updated token_info.
+
+**Source**: [src/token.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/token.ts)
+
+</details>
+
+## M2M
+
+Access via `scalekitClient.m2m`.
+
+<details>
+<summary><code>m2m.createOrganizationClient(organizationId, options?) -> Promise&lt;CreateOrganizationClientResponse&gt;</code></summary>
+
+#### 📝 Description
+Creates a new M2M API client for an organization. Returns a clientId and a plain secret (only available at creation time).
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.m2m.createOrganizationClient('org_12345', {
+  name: 'CI/CD Client',
+  customClaims: { env: 'production' }
+});
+console.log('Client ID:', response.clientId);
+console.log('Secret:', response.secret);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| organizationId | `string` | Yes | The organization to create client for |
+| options | `CreateOrganizationClientOptions` | No | Optional client properties |
+| options.name | `string` | No | Human-readable name |
+| options.description | `string` | No | Description |
+| options.customClaims | `Record<string, string>` | No | Custom claims for access tokens |
+| options.audience | `string[]` | No | Audience values |
+| options.scopes | `string[]` | No | Scopes to grant |
+
+**Returns**: `Promise<CreateOrganizationClientResponse>` - Response with clientId, secret, and metadata.
+
+**Source**: [src/m2mclient.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/m2mclient.ts)
+
+</details>
+
+<details>
+<summary><code>m2m.getOrganizationClient(organizationId, clientId) -> Promise&lt;GetOrganizationClientResponse&gt;</code></summary>
+
+#### 📝 Description
+Retrieves details of a specific M2M client for an organization.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.m2m.getOrganizationClient('org_12345', 'skc_abc123');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| organizationId | `string` | Yes | The organization ID |
+| clientId | `string` | Yes | The client ID (format: skc_xxxxx) |
+
+**Returns**: `Promise<GetOrganizationClientResponse>` - Response with client metadata.
+
+**Source**: [src/m2mclient.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/m2mclient.ts)
+
+</details>
+
+<details>
+<summary><code>m2m.updateOrganizationClient(organizationId, clientId, options?) -> Promise&lt;UpdateOrganizationClientResponse&gt;</code></summary>
+
+#### 📝 Description
+Updates configuration of an existing M2M client.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.m2m.updateOrganizationClient('org_12345', 'skc_abc123', {
+  name: 'Updated Name'
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| organizationId | `string` | Yes | The organization ID |
+| clientId | `string` | Yes | The client ID to update |
+| options | `UpdateOrganizationClientOptions` | No | Fields to update |
+| options.name | `string` | No | Updated name |
+| options.description | `string` | No | Updated description |
+| options.customClaims | `Record<string, string>` | No | Custom claims to set |
+| options.audience | `string[]` | No | Updated audience values |
+| options.scopes | `string[]` | No | Updated scopes |
+
+**Returns**: `Promise<UpdateOrganizationClientResponse>` - Response with updated metadata.
+
+**Source**: [src/m2mclient.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/m2mclient.ts)
+
+</details>
+
+<details>
+<summary><code>m2m.deleteOrganizationClient(organizationId, clientId) -> Promise&lt;MessageShape&lt;typeof EmptySchema&gt;&gt;</code></summary>
+
+#### 📝 Description
+Permanently deletes an M2M client from an organization.
+
+#### 🔌 Usage
+```typescript
+await scalekitClient.m2m.deleteOrganizationClient('org_12345', 'skc_abc123');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| organizationId | `string` | Yes | The organization ID |
+| clientId | `string` | Yes | The client ID to delete |
+
+**Returns**: `Promise<MessageShape<typeof EmptySchema>>` - Empty response on success.
+
+**Source**: [src/m2mclient.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/m2mclient.ts)
+
+</details>
+
+<details>
+<summary><code>m2m.createOrganizationClientSecret(organizationId, clientId) -> Promise&lt;CreateOrganizationClientSecretResponse&gt;</code></summary>
+
+#### 📝 Description
+Creates a new secret for an M2M client. The plain secret value is returned only at creation time.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.m2m.createOrganizationClientSecret('org_12345', 'skc_abc123');
+console.log('Secret ID:', response.secretId);
+console.log('Secret:', response.secret);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| organizationId | `string` | Yes | The organization ID |
+| clientId | `string` | Yes | The client ID to add a secret to |
+
+**Returns**: `Promise<CreateOrganizationClientSecretResponse>` - Response with secretId and plain secret.
+
+**Source**: [src/m2mclient.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/m2mclient.ts)
+
+</details>
+
+<details>
+<summary><code>m2m.deleteOrganizationClientSecret(organizationId, clientId, secretId) -> Promise&lt;MessageShape&lt;typeof EmptySchema&gt;&gt;</code></summary>
+
+#### 📝 Description
+Permanently deletes a secret from an M2M client.
+
+#### 🔌 Usage
+```typescript
+await scalekitClient.m2m.deleteOrganizationClientSecret('org_12345', 'skc_abc123', 'secret_xyz');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| organizationId | `string` | Yes | The organization ID |
+| clientId | `string` | Yes | The client ID |
+| secretId | `string` | Yes | The secret ID to delete |
+
+**Returns**: `Promise<MessageShape<typeof EmptySchema>>` - Empty response on success.
+
+**Source**: [src/m2mclient.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/m2mclient.ts)
+
+</details>
+
+<details>
+<summary><code>m2m.listOrganizationClients(organizationId, options?) -> Promise&lt;ListOrganizationClientsResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists all M2M clients for an organization with pagination.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.m2m.listOrganizationClients('org_12345', {
+  pageSize: 20
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| organizationId | `string` | Yes | The organization ID |
+| options | `ListOrganizationClientsOptions` | No | Optional pagination options |
+| options.pageSize | `number` | No | Page size (10-100) |
+| options.pageToken | `string` | No | Pagination cursor |
+
+**Returns**: `Promise<ListOrganizationClientsResponse>` - Response with clients array and pagination cursors.
+
+**Source**: [src/m2mclient.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/m2mclient.ts)
+
+</details>
+
+## Tools
+
+Access via `scalekitClient.tools`.
+
+<details>
+<summary><code>tools.listTools(options?) -> Promise&lt;ListToolsResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists tools available in your workspace with optional filtering and pagination.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.tools.listTools({
+  filter: { provider: 'slack' },
+  pageSize: 20
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| options | `object` | No | Optional filter and pagination |
+| options.filter | `MessageInitShape<typeof FilterSchema>` | No | Filter configuration |
+| options.pageSize | `number` | No | Maximum tools per page |
+| options.pageToken | `string` | No | Pagination cursor |
+
+**Returns**: `Promise<ListToolsResponse>` - Response with tools array and pagination.
+
+**Source**: [src/tools.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts)
+
+</details>
+
+<details>
+<summary><code>tools.listScopedTools(identifier, options) -> Promise&lt;ListScopedToolsResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists tools that are scoped to a specific connected account identifier.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.tools.listScopedTools('user@example.com', {
+  filter: { provider: 'slack' }
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| identifier | `string` | Yes | Connected account identifier |
+| options | `object` | Yes | Filter and pagination parameters |
+| options.filter | `MessageInitShape<typeof ScopedToolFilterSchema>` | Yes | Filter configuration |
+| options.pageSize | `number` | No | Maximum tools per page |
+| options.pageToken | `string` | No | Pagination cursor |
+
+**Returns**: `Promise<ListScopedToolsResponse>` - Response with scoped tools.
+
+**Source**: [src/tools.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts)
+
+</details>
+
+<details>
+<summary><code>tools.listAvailableTools(identifier, options?) -> Promise&lt;ListAvailableToolsResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists tools that are available for a specific connected account identifier.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.tools.listAvailableTools('user@example.com', {
+  pageSize: 20
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| identifier | `string` | Yes | Connected account identifier |
+| options | `object` | No | Optional pagination |
+| options.pageSize | `number` | No | Maximum tools per page |
+| options.pageToken | `string` | No | Pagination cursor |
+
+**Returns**: `Promise<ListAvailableToolsResponse>` - Response with available tools.
+
+**Source**: [src/tools.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts)
+
+</details>
+
+<details>
+<summary><code>tools.executeTool(params) -> Promise&lt;ExecuteToolResponse&gt;</code></summary>
+
+#### 📝 Description
+Executes a tool using credentials from a connected account.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.tools.executeTool({
+  toolName: 'slack.postMessage',
+  connectedAccountId: 'ca_abc123',
+  params: { channel: '#general', text: 'Hello' }
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Execution configuration |
+| params.toolName | `string` | Yes | Name of tool to execute |
+| params.identifier | `string` | No | Connected account identifier |
+| params.params | `Record<string, unknown>` | No | JSON parameters for tool |
+| params.connectedAccountId | `string` | No | Direct connected account ID |
+| params.connector | `string` | No | Connector/provider name |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+
+**Returns**: `Promise<ExecuteToolResponse>` - Tool execution response.
+
+**Source**: [src/tools.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts)
+
+</details>
+
+## Connected Accounts
+
+Access via `scalekitClient.connectedAccounts`.
+
+<details>
+<summary><code>connectedAccounts.listConnectedAccounts(options?) -> Promise&lt;ListConnectedAccountsResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists connected accounts with optional filters and pagination.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.connectedAccounts.listConnectedAccounts({
+  organizationId: 'org_12345',
+  connector: 'slack',
+  pageSize: 20
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| options | `object` | No | Optional filtering and pagination |
+| options.organizationId | `string` | No | Organization ID |
+| options.userId | `string` | No | User ID |
+| options.connector | `string` | No | Connector identifier |
+| options.identifier | `string` | No | Connected account identifier |
+| options.provider | `string` | No | Provider name |
+| options.pageSize | `number` | No | Page size |
+| options.pageToken | `string` | No | Pagination cursor |
+| options.query | `string` | No | Search query |
+
+**Returns**: `Promise<ListConnectedAccountsResponse>` - Response with connected accounts.
+
+**Source**: [src/connected-accounts.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connected-accounts.ts)
+
+</details>
+
+<details>
+<summary><code>connectedAccounts.createConnectedAccount(params) -> Promise&lt;CreateConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Creates a new connected account.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.connectedAccounts.createConnectedAccount({
+  connector: 'slack',
+  identifier: 'user@example.com',
+  connectedAccount: {
+    authorizationDetails: { details: { case: 'oauthToken', value: { token: 'xoxb-...' } } }
+  },
+  organizationId: 'org_12345'
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Connection parameters |
+| params.connector | `string` | Yes | Connector identifier |
+| params.identifier | `string` | Yes | Connected account identifier |
+| params.connectedAccount | `CreateConnectedAccount` | Yes | Account configuration |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+
+**Returns**: `Promise<CreateConnectedAccountResponse>` - Response with created account.
+
+**Source**: [src/connected-accounts.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connected-accounts.ts)
+
+</details>
+
+<details>
+<summary><code>connectedAccounts.getOrCreateConnectedAccount(params) -> Promise&lt;CreateConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Gets an existing connected account or creates one if none exists.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.connectedAccounts.getOrCreateConnectedAccount({
+  connector: 'slack',
+  identifier: 'user@example.com',
+  organizationId: 'org_12345'
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Get-or-create parameters |
+| params.connector | `string` | Yes | Connector identifier |
+| params.identifier | `string` | Yes | Connected account identifier |
+| params.authorizationDetails | `MessageInitShape<typeof AuthorizationDetailsSchema>` | No | Auth details for create |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.apiConfig | `Record<string, unknown>` | No | API config for create |
+
+**Returns**: `Promise<CreateConnectedAccountResponse>` - Response with account.
+
+**Source**: [src/connected-accounts.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connected-accounts.ts)
+
+</details>
+
+<details>
+<summary><code>connectedAccounts.updateConnectedAccount(params) -> Promise&lt;UpdateConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Updates an existing connected account. Use either connectedAccountId or connector + identifier.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.connectedAccounts.updateConnectedAccount({
+  connector: 'slack',
+  identifier: 'user@example.com',
+  connectedAccount: { authorizationDetails: { details: { case: 'oauthToken', value: { token: 'new-token' } } } }
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Update parameters |
+| params.connector | `string` | No | Connector identifier |
+| params.identifier | `string` | No | Connected account identifier |
+| params.connectedAccount | `UpdateConnectedAccount` | Yes | Account updates |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.connectedAccountId | `string` | No | Direct connected account ID |
+
+**Returns**: `Promise<UpdateConnectedAccountResponse>` - Response with updated account.
+
+**Source**: [src/connected-accounts.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connected-accounts.ts)
+
+</details>
+
+<details>
+<summary><code>connectedAccounts.deleteConnectedAccount(params) -> Promise&lt;DeleteConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Deletes a connected account and revokes its credentials. Use either connectedAccountId or connector + identifier.
+
+#### 🔌 Usage
+```typescript
+await scalekitClient.connectedAccounts.deleteConnectedAccount({
+  connector: 'slack',
+  identifier: 'user@example.com'
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Delete parameters |
+| params.connector | `string` | No | Connector identifier |
+| params.identifier | `string` | No | Connected account identifier |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.connectedAccountId | `string` | No | Direct connected account ID |
+
+**Returns**: `Promise<DeleteConnectedAccountResponse>` - Response on success.
+
+**Source**: [src/connected-accounts.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connected-accounts.ts)
+
+</details>
+
+<details>
+<summary><code>connectedAccounts.getMagicLinkForConnectedAccount(params) -> Promise&lt;GetMagicLinkForConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Generates a time-limited magic link for connecting or re-authorizing a third-party account.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.connectedAccounts.getMagicLinkForConnectedAccount({
+  connector: 'slack',
+  identifier: 'user@example.com'
+});
+console.log('Magic Link:', response.magicLink);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Magic link parameters |
+| params.connector | `string` | No | Connector identifier |
+| params.identifier | `string` | No | Connected account identifier |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.connectedAccountId | `string` | No | Direct connected account ID |
+
+**Returns**: `Promise<GetMagicLinkForConnectedAccountResponse>` - Response with magic link.
+
+**Source**: [src/connected-accounts.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connected-accounts.ts)
+
+</details>
+
+<details>
+<summary><code>connectedAccounts.getConnectedAccountByIdentifier(params) -> Promise&lt;GetConnectedAccountByIdentifierResponse&gt;</code></summary>
+
+#### 📝 Description
+Retrieves complete authentication details for a connected account.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.connectedAccounts.getConnectedAccountByIdentifier({
+  connector: 'slack',
+  identifier: 'user@example.com'
+});
+console.log('Auth Details:', response.connectedAccount);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Get parameters |
+| params.connector | `string` | No | Connector identifier |
+| params.identifier | `string` | No | Connected account identifier |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.connectedAccountId | `string` | No | Direct connected account ID |
+
+**Returns**: `Promise<GetConnectedAccountByIdentifierResponse>` - Response with auth details.
+
+**Source**: [src/connected-accounts.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connected-accounts.ts)
+
+</details>
+
+## Actions
+
+Access via `scalekitClient.actions`.
+
+<details>
+<summary><code>actions.executeTool(params) -> Promise&lt;ExecuteToolResponse&gt;</code></summary>
+
+#### 📝 Description
+Execute a tool on behalf of a connected account.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.executeTool({
+  toolName: 'slack.postMessage',
+  toolInput: { channel: '#general', text: 'Hello' },
+  connectedAccountId: 'ca_abc123'
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Execution parameters |
+| params.toolName | `string` | Yes | Name of tool to execute |
+| params.toolInput | `Record<string, unknown>` | Yes | Tool input parameters |
+| params.identifier | `string` | No | Connected account identifier |
+| params.connectedAccountId | `string` | No | Direct connected account ID |
+| params.connector | `string` | No | Connector name |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+
+**Returns**: `Promise<ExecuteToolResponse>` - Tool execution response.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.getAuthorizationLink(params) -> Promise&lt;GetMagicLinkForConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Get an authorization magic link for a connected account.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.getAuthorizationLink({
+  connectionName: 'slack',
+  identifier: 'user@example.com'
+});
+console.log('Auth Link:', response.magicLink);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Authorization link parameters |
+| params.connectionName | `string` | No | Connection name |
+| params.identifier | `string` | No | Connected account identifier |
+| params.connectedAccountId | `string` | No | Direct connected account ID |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+
+**Returns**: `Promise<GetMagicLinkForConnectedAccountResponse>` - Response with magic link.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.listConnectedAccounts(params?) -> Promise&lt;ListConnectedAccountsResponse&gt;</code></summary>
+
+#### 📝 Description
+List connected accounts with optional filters.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.listConnectedAccounts({
+  connectionName: 'slack',
+  organizationId: 'org_12345'
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | No | Optional filter parameters |
+| params.connectionName | `string` | No | Connection name |
+| params.identifier | `string` | No | Connected account identifier |
+| params.provider | `string` | No | Provider name |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.pageSize | `number` | No | Page size |
+| params.pageToken | `string` | No | Pagination cursor |
+| params.query | `string` | No | Search query |
+
+**Returns**: `Promise<ListConnectedAccountsResponse>` - Response with accounts.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.deleteConnectedAccount(params) -> Promise&lt;DeleteConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Delete a connected account. Requires either connectedAccountId or both connectionName + identifier.
+
+#### 🔌 Usage
+```typescript
+await scalekitClient.actions.deleteConnectedAccount({
+  connectionName: 'slack',
+  identifier: 'user@example.com'
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Delete parameters |
+| params.connectionName | `string` | No | Connection name |
+| params.identifier | `string` | No | Connected account identifier |
+| params.connectedAccountId | `string` | No | Direct connected account ID |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+
+**Returns**: `Promise<DeleteConnectedAccountResponse>` - Response on success.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.getConnectedAccount(params) -> Promise&lt;GetConnectedAccountByIdentifierResponse&gt;</code></summary>
+
+#### 📝 Description
+Get connected account authorization details. Requires either connectedAccountId or both connectionName + identifier.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.getConnectedAccount({
+  connectionName: 'slack',
+  identifier: 'user@example.com'
+});
+console.log('Account:', response.connectedAccount);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Get parameters |
+| params.connectionName | `string` | No | Connection name |
+| params.identifier | `string` | No | Connected account identifier |
+| params.connectedAccountId | `string` | No | Direct connected account ID |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+
+**Returns**: `Promise<GetConnectedAccountByIdentifierResponse>` - Response with account details.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.createConnectedAccount(params) -> Promise&lt;CreateConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Create a new connected account.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.createConnectedAccount({
+  connectionName: 'slack',
+  identifier: 'user@example.com',
+  authorizationDetails: { details: { case: 'oauthToken', value: { token: 'xoxb-...' } } },
+  organizationId: 'org_12345'
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Create parameters |
+| params.connectionName | `string` | Yes | Connection name |
+| params.identifier | `string` | Yes | Connected account identifier |
+| params.authorizationDetails | `CreateConnectedAccount['authorizationDetails']` | Yes | Auth details |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.apiConfig | `Record<string, unknown>` | No | API config |
+
+**Returns**: `Promise<CreateConnectedAccountResponse>` - Response with created account.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.getOrCreateConnectedAccount(params) -> Promise&lt;CreateConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Get an existing connected account or create a new one if it doesn't exist.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.getOrCreateConnectedAccount({
+  connectionName: 'slack',
+  identifier: 'user@example.com',
+  organizationId: 'org_12345'
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Get-or-create parameters |
+| params.connectionName | `string` | Yes | Connection name |
+| params.identifier | `string` | Yes | Connected account identifier |
+| params.authorizationDetails | `CreateConnectedAccount['authorizationDetails']` | No | Auth details |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.apiConfig | `Record<string, unknown>` | No | API config |
+
+**Returns**: `Promise<CreateConnectedAccountResponse>` - Response with account.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.updateConnectedAccount(params) -> Promise&lt;UpdateConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Update an existing connected account. Requires either connectedAccountId or both connectionName + identifier.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.updateConnectedAccount({
+  connectionName: 'slack',
+  identifier: 'user@example.com',
+  authorizationDetails: { details: { case: 'oauthToken', value: { token: 'new-token' } } }
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Update parameters |
+| params.connectionName | `string` | No | Connection name |
+| params.identifier | `string` | No | Connected account identifier |
+| params.authorizationDetails | `UpdateConnectedAccount['authorizationDetails']` | No | Auth details |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.connectedAccountId | `string` | No | Direct connected account ID |
+| params.apiConfig | `UpdateConnectedAccount['apiConfig']` | No | API config |
+
+**Returns**: `Promise<UpdateConnectedAccountResponse>` - Response with updated account.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.request(params) -> Promise&lt;AxiosResponse&lt;any&gt;&gt;</code></summary>
+
+#### 📝 Description
+Make a proxied REST API call on behalf of a connected account.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.request({
+  connectionName: 'slack',
+  identifier: 'user@example.com',
+  path: '/api/conversations.list',
+  method: 'POST',
+  body: { limit: 10 }
+});
+console.log('Response:', response.data);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `object` | Yes | Request parameters |
+| params.connectionName | `string` | Yes | Connection name |
+| params.identifier | `string` | Yes | Connected account identifier |
+| params.path | `string` | Yes | API path |
+| params.method | `string` | No | HTTP method (default: GET) |
+| params.queryParams | `Record<string, unknown>` | No | Query parameters |
+| params.body | `unknown` | No | Request body |
+| params.formData | `Record<string, unknown>` | No | Form data |
+| params.headers | `Record<string, string>` | No | Custom headers |
+| params.timeoutMs | `number` | No | Timeout in milliseconds (default: 30000) |
+
+**Returns**: `Promise<AxiosResponse<any>>` - Axios response.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
 </details>
 
 ____
