@@ -92,7 +92,7 @@ export default class M2MClient {
      */
     deleteOrganizationClient(organizationId: string, clientId: string): Promise<MessageShape<typeof EmptySchema>>;
     /**
-     * Creates a new secret for an M2M client.
+     * Adds a new secret to an M2M client.
      *
      * The plain secret value is returned only at creation time and cannot be retrieved again.
      *
@@ -100,16 +100,16 @@ export default class M2MClient {
      * @param clientId - The client ID to add a secret to
      * @returns CreateOrganizationClientSecretResponse with secretId and plain secret
      */
-    createOrganizationClientSecret(organizationId: string, clientId: string): Promise<CreateOrganizationClientSecretResponse>;
+    addOrganizationClientSecret(organizationId: string, clientId: string): Promise<CreateOrganizationClientSecretResponse>;
     /**
-     * Permanently deletes a secret from an M2M client.
+     * Permanently removes a secret from an M2M client.
      *
      * @param organizationId - The organization ID
      * @param clientId - The client ID
-     * @param secretId - The secret ID to delete
+     * @param secretId - The secret ID to remove
      * @returns Empty response on success
      */
-    deleteOrganizationClientSecret(organizationId: string, clientId: string, secretId: string): Promise<MessageShape<typeof EmptySchema>>;
+    removeOrganizationClientSecret(organizationId: string, clientId: string, secretId: string): Promise<MessageShape<typeof EmptySchema>>;
     /**
      * Lists all M2M clients for an organization with pagination.
      *
