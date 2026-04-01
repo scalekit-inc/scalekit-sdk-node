@@ -90,6 +90,53 @@ describe('Actions', () => {
         expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
+
+    it('should include state and userVerifyUrl in magic link request', async () => {
+      const identifier = `link-test-${TestDataGenerator.generateUniqueId()}`;
+
+      const authorizationDetails = create(AuthorizationDetailsSchema, {
+        details: {
+          case: 'oauthToken',
+          value: create(OauthTokenSchema, { accessToken: 'test_access_token' }),
+        },
+      });
+
+      await client.actions.createConnectedAccount({
+        connectionName: 'gmail',
+        identifier,
+        authorizationDetails,
+      });
+
+      const response = await client.actions.getAuthorizationLink({
+        connectionName: 'gmail',
+        identifier,
+        state: 'csrf-token-abc123',
+        userVerifyUrl: 'https://yourapp.com/auth/callback',
+      });
+
+      expect(response).toBeDefined();
+      expect(typeof response.link).toBe('string');
+      expect(response.link.length).toBeGreaterThan(0);
+
+      await client.actions.deleteConnectedAccount({
+        connectionName: 'gmail',
+        identifier,
+      });
+    });
+  });
+
+  describe('verifyConnectedAccountUser', () => {
+    it('should throw not found error for a non-existent authRequestId', async () => {
+      const error = await client.actions
+        .verifyConnectedAccountUser({
+          authRequestId: '00000000-0000-0000-0000-000000000000',
+          identifier: 'user_123',
+        })
+        .catch((e) => e);
+
+      expect(error).toBeInstanceOf(ScalekitServerException);
+      expect(error.message).toMatch(/auth request not found or no longer valid/i);
+    });
   });
 
   describe('createConnectedAccount', () => {
