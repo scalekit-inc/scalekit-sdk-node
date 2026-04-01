@@ -127,7 +127,7 @@ app.listen(3000, () => {
 |-----------|------------|-------------|
 | **Express.js** | [scalekit-express-example](https://github.com/scalekit-developers/scalekit-express-example) | Basic Express.js server implementation |
 | **Next.js** | [scalekit-nextjs-demo](https://github.com/scalekit-developers/scalekit-nextjs-demo) | Modern React/Next.js application |
-    **Auth.js** | [scalekit-authjs-example](https://github.com/scalekit-developers/scalekit-authjs-example) | Next.js with Auth.js (next-auth v5) |
+| **Auth.js** | [scalekit-authjs-example](https://github.com/scalekit-developers/scalekit-authjs-example) | Next.js with Auth.js (next-auth v5) |
 ---
 ### Helpful links
 #### Quickstart Guides
