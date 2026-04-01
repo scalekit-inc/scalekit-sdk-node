@@ -21,7 +21,7 @@ Authentication, authorization, and tool-calling for human-in-the-loop and autono
 
 ---
 
-This is the official Node.js SDK for [Scalekit](https://scalekit.com), — the auth stack for agents. Build secure AI products faster with authentication for humans (SSO, passwordless, full-stack auth) and agents (Mcp/APIs, delegated actions), all unified on one platform.
+This is the official Node.js SDK for [Scalekit](https://scalekit.com), — the auth stack for agents. Build secure AI products faster with authentication for humans (SSO, passwordless, full-stack auth) and agents (MCP/APIs, delegated actions), all unified on one platform.
 This Node.js SDK enables both traditional B2B authentication and cutting-edge agentic workflows.
 #### Agent-First Features
 - **Agent Identity** — Agents as first-class actors with human ownership and org context
@@ -42,7 +42,7 @@ This Node.js SDK enables both traditional B2B authentication and cutting-edge ag
 #### Prerequisites
 - **Node.js** ≥ 18.14.1
 - [Scalekit account](https://scalekit.com) with `env_url`, `client_id`, and `client_secret`
-#### installation
+#### Installation
 ```sh
 npm install @scalekit-sdk/node
 # or
@@ -131,7 +131,7 @@ app.listen(3000, () => {
 ---
 ### Helpful links
 #### Quickstart Guides
-- [SSO Integration](https://docs.scalekit.com/sso/quickstart/) — implement enterprise Single Sign-on
+- [SSO Integration](https://docs.scalekit.com/sso/quickstart/) — implement enterprise Single Sign-On
 - [Full Stack Auth](https://docs.scalekit.com/fsa/quickstart/) — complete authentication solution
 - [Passwordless Auth](https://docs.scalekit.com/passwordless/quickstart/) — modern authentication flows
 - [Social Logins](https://docs.scalekit.com/social-logins/quickstart/) — popular social identity providers
@@ -140,7 +140,7 @@ app.listen(3000, () => {
 - [API Reference](https://docs.scalekit.com/apis) — complete API documentation
 - [Developer Kit](https://docs.scalekit.com/dev-kit/) — tools and utilities
 - [API authentication guide](https://docs.scalekit.com/guides/authenticate-scalekit-api/) — secure API access
-#### Additional resources
+#### Additional Resources
 - [Setup Guide](https://docs.scalekit.com/guides/setup-scalekit/) — initial platform configuration
 - [Code examples](https://docs.scalekit.com/directory/code-examples/) — ready-to-use code snippets
 - [Admin Portal Guide](https://docs.scalekit.com/directory/guides/admin-portal/) — administrative interface
