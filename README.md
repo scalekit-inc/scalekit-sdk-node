@@ -25,18 +25,18 @@ This is the official Node.js SDK for [Scalekit](https://scalekit.com), — the a
 This Node.js SDK enables both traditional B2B authentication and cutting-edge agentic workflows.
 #### Agent-First Features
 - **Agent Identity** — Agents as first-class actors with human ownership and org context
-- **Mcp-Native OAuth 2.1** — Purpose-built for Model Context Protocol with Dcr/pkce support
+- **MCP-Native OAuth 2.1** — Purpose-built for Model Context Protocol with DCR/PKCE support
 - **Ephemeral Credentials** — Time-bound, task-based authorization (minutes, not days)
 - **Token Vault** — per-user, per-tool token storage with rotation and progressive consent
 - **Human-in-the-Loop** — step-up authentication when risk crosses thresholds
 - **Immutable Audit** — track which user initiated, which agent acted, what resource was accessed
 #### Human Authentication
 - **Enterprise SSO** — support for SAML and OIDC protocols
-- **scim Provisioning** — automated user provisioning and deprovisioning
-- **passwordless Authentication** — magic links, OTP, and modern auth flows
-- **multi-tenant Architecture** — organization-level authentication policies
-- **social Logins** — support for popular social identity providers
-- **full-Stack Auth** — complete IdP-of-record solution for B2B SaaS
+- **SCIM Provisioning** — automated user provisioning and deprovisioning
+- **Passwordless Authentication** — magic links, OTP, and modern auth flows
+- **Multi-tenant Architecture** — organization-level authentication policies
+- **Social Logins** — support for popular social identity providers
+- **Full-Stack Auth** — complete IdP-of-record solution for B2B SaaS
 ---
 ### Getting started
 #### Prerequisites
@@ -141,7 +141,7 @@ app.listen(3000, () => {
 - [Developer Kit](https://docs.scalekit.com/dev-kit/) — tools and utilities
 - [API authentication guide](https://docs.scalekit.com/guides/authenticate-scalekit-api/) — secure API access
 #### Additional resources
-- [setup Guide](https://docs.scalekit.com/guides/setup-scalekit/) — initial platform configuration
+- [Setup Guide](https://docs.scalekit.com/guides/setup-scalekit/) — initial platform configuration
 - [Code examples](https://docs.scalekit.com/directory/code-examples/) — ready-to-use code snippets
 - [Admin Portal Guide](https://docs.scalekit.com/directory/guides/admin-portal/) — administrative interface
 - [Launch Checklist](https://docs.scalekit.com/directory/guides/launch-checklist/) — Pre-production checklist
