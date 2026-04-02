@@ -45,6 +45,7 @@ describe('Actions', () => {
     expect(typeof client.actions.updateConnectedAccount).toBe('function');
     expect(typeof client.actions.deleteConnectedAccount).toBe('function');
     expect(typeof client.actions.getConnectedAccount).toBe('function');
+    expect(typeof client.actions.verifyConnectedAccountUser).toBe('function');
   });
 
   describe('executeTool', () => {
@@ -129,6 +130,82 @@ describe('Actions', () => {
         }
       }
     });
+
+    it('should include only state without userVerifyUrl', async () => {
+      const identifier = `link-state-${TestDataGenerator.generateUniqueId()}`;
+
+      const authorizationDetails = create(AuthorizationDetailsSchema, {
+        details: {
+          case: 'oauthToken',
+          value: create(OauthTokenSchema, { accessToken: 'test_access_token' }),
+        },
+      });
+
+      let created = false;
+      try {
+        await client.actions.createConnectedAccount({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier,
+          authorizationDetails,
+        });
+        created = true;
+
+        const response = await client.actions.getAuthorizationLink({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier,
+          state: 'only-state-param',
+        });
+
+        expect(response).toBeDefined();
+        expect(typeof response.link).toBe('string');
+        expect(response.link.length).toBeGreaterThan(0);
+      } finally {
+        if (created) {
+          await client.actions.deleteConnectedAccount({
+            connectionName: GMAIL_CONNECTION_NAME,
+            identifier,
+          });
+        }
+      }
+    });
+
+    it('should include only userVerifyUrl without state', async () => {
+      const identifier = `link-url-${TestDataGenerator.generateUniqueId()}`;
+
+      const authorizationDetails = create(AuthorizationDetailsSchema, {
+        details: {
+          case: 'oauthToken',
+          value: create(OauthTokenSchema, { accessToken: 'test_access_token' }),
+        },
+      });
+
+      let created = false;
+      try {
+        await client.actions.createConnectedAccount({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier,
+          authorizationDetails,
+        });
+        created = true;
+
+        const response = await client.actions.getAuthorizationLink({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier,
+          userVerifyUrl: 'https://yourapp.com/auth/callback',
+        });
+
+        expect(response).toBeDefined();
+        expect(typeof response.link).toBe('string');
+        expect(response.link.length).toBeGreaterThan(0);
+      } finally {
+        if (created) {
+          await client.actions.deleteConnectedAccount({
+            connectionName: GMAIL_CONNECTION_NAME,
+            identifier,
+          });
+        }
+      }
+    });
   });
 
   describe('verifyConnectedAccountUser', () => {
@@ -144,6 +221,42 @@ describe('Actions', () => {
       expect(error.message).toMatch(
         /auth request not found or no longer valid/i
       );
+    });
+
+    it('should throw error when authRequestId is empty', async () => {
+      await expect(
+        client.actions.verifyConnectedAccountUser({
+          authRequestId: '',
+          identifier: 'user_123',
+        })
+      ).rejects.toThrow('authRequestId is required');
+    });
+
+    it('should throw error when identifier is empty', async () => {
+      await expect(
+        client.actions.verifyConnectedAccountUser({
+          authRequestId: '00000000-0000-0000-0000-000000000000',
+          identifier: '',
+        })
+      ).rejects.toThrow('identifier is required');
+    });
+
+    it('should throw error when authRequestId is whitespace-only', async () => {
+      await expect(
+        client.actions.verifyConnectedAccountUser({
+          authRequestId: '   ',
+          identifier: 'user_123',
+        })
+      ).rejects.toThrow('authRequestId is required');
+    });
+
+    it('should throw error when identifier is whitespace-only', async () => {
+      await expect(
+        client.actions.verifyConnectedAccountUser({
+          authRequestId: '00000000-0000-0000-0000-000000000000',
+          identifier: '   ',
+        })
+      ).rejects.toThrow('identifier is required');
     });
   });
 
