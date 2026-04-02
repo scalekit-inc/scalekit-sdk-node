@@ -2,7 +2,7 @@ import { AxiosResponse } from 'axios';
 import CoreClient from './core';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
-import { CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+import { CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * This class is intended to be accessed via `ScalekitClient.actions`.
@@ -43,7 +43,22 @@ export default class ActionsClient {
         connectedAccountId?: string;
         organizationId?: string;
         userId?: string;
+        state?: string;
+        userVerifyUrl?: string;
     }): Promise<GetMagicLinkForConnectedAccountResponse>;
+    /**
+     * Verify the connected account user after OAuth callback.
+     *
+     * Called by the B2B app server with the `authRequestId` from the user verify
+     * redirect URL and the current user's identifier. Activates the connected account
+     * once the asserted identifier is confirmed.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    verifyConnectedAccountUser(params: {
+        authRequestId: string;
+        identifier: string;
+    }): Promise<VerifyConnectedAccountUserResponse>;
     /**
      * List connected accounts with optional filters.
      *

@@ -24,6 +24,8 @@ import {
   UpdateConnectedAccount,
   UpdateConnectedAccountRequestSchema,
   UpdateConnectedAccountResponse,
+  VerifyConnectedAccountUserRequestSchema,
+  VerifyConnectedAccountUserResponse,
 } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 
 /**
@@ -290,6 +292,8 @@ export default class ConnectedAccountsClient {
     organizationId?: string;
     userId?: string;
     connectedAccountId?: string;
+    state?: string;
+    userVerifyUrl?: string;
   }): Promise<GetMagicLinkForConnectedAccountResponse> {
     const {
       connector,
@@ -297,6 +301,8 @@ export default class ConnectedAccountsClient {
       organizationId,
       userId,
       connectedAccountId,
+      state,
+      userVerifyUrl,
     } = params;
 
     return this.coreClient.connectExec(
@@ -307,6 +313,40 @@ export default class ConnectedAccountsClient {
         ...(organizationId && { organizationId }),
         ...(userId && { userId }),
         ...(connectedAccountId && { id: connectedAccountId }),
+        ...(state && { state }),
+        ...(userVerifyUrl && { userVerifyUrl }),
+      })
+    );
+  }
+
+  /**
+   * Verifies the connected account user after OAuth callback.
+   *
+   * Called by the B2B app server with the `auth_request_id` from the user verify
+   * redirect URL and the current user's identifier. Validates that the asserted
+   * identifier matches the one stored on the auth request and activates the account.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   */
+  async verifyConnectedAccountUser(params: {
+    authRequestId: string;
+    identifier: string;
+  }): Promise<VerifyConnectedAccountUserResponse> {
+    const authRequestId = params.authRequestId?.trim();
+    const identifier = params.identifier?.trim();
+
+    if (!authRequestId) {
+      throw new Error('authRequestId is required');
+    }
+    if (!identifier) {
+      throw new Error('identifier is required');
+    }
+
+    return this.coreClient.connectExec(
+      this.client.verifyConnectedAccountUser,
+      create(VerifyConnectedAccountUserRequestSchema, {
+        authRequestId,
+        identifier,
       })
     );
   }

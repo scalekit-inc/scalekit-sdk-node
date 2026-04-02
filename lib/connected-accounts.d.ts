@@ -1,7 +1,7 @@
 import { type MessageInitShape } from '@bufbuild/protobuf';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { AuthorizationDetailsSchema, CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+import { AuthorizationDetailsSchema, CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 /**
  * Client for managing connected accounts for third-party integrations.
  *
@@ -114,7 +114,22 @@ export default class ConnectedAccountsClient {
         organizationId?: string;
         userId?: string;
         connectedAccountId?: string;
+        state?: string;
+        userVerifyUrl?: string;
     }): Promise<GetMagicLinkForConnectedAccountResponse>;
+    /**
+     * Verifies the connected account user after OAuth callback.
+     *
+     * Called by the B2B app server with the `auth_request_id` from the user verify
+     * redirect URL and the current user's identifier. Validates that the asserted
+     * identifier matches the one stored on the auth request and activates the account.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    verifyConnectedAccountUser(params: {
+        authRequestId: string;
+        identifier: string;
+    }): Promise<VerifyConnectedAccountUserResponse>;
     /**
      * Retrieves complete authentication details for a connected account.
      *

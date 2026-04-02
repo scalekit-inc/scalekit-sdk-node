@@ -181,10 +181,17 @@ export type ResourceInfo = Message<"scalekit.v1.errdetails.ResourceInfo"> & {
  */
 export declare const ResourceInfoSchema: GenMessage<ResourceInfo>;
 /**
+ * HelpInfo provides documentation links attached to an error response.
+ * When present in ErrorInfo, clients should surface these links to help
+ * developers resolve the error. For example, a missing required field error
+ * may include a link to the relevant guide.
+ *
  * @generated from message scalekit.v1.errdetails.HelpInfo
  */
 export type HelpInfo = Message<"scalekit.v1.errdetails.HelpInfo"> & {
     /**
+     * One or more links relevant to resolving the error.
+     *
      * @generated from field: repeated scalekit.v1.errdetails.HelpInfo.Link links = 1;
      */
     links: HelpInfo_Link[];
@@ -195,14 +202,20 @@ export type HelpInfo = Message<"scalekit.v1.errdetails.HelpInfo"> & {
  */
 export declare const HelpInfoSchema: GenMessage<HelpInfo>;
 /**
+ * A documentation or reference link.
+ *
  * @generated from message scalekit.v1.errdetails.HelpInfo.Link
  */
 export type HelpInfo_Link = Message<"scalekit.v1.errdetails.HelpInfo.Link"> & {
     /**
+     * Human-readable label for the link (e.g. "User verification flow").
+     *
      * @generated from field: string description = 1;
      */
     description: string;
     /**
+     * Absolute URL to the documentation page (e.g. "https://docs.scalekit.com/...").
+     *
      * @generated from field: string url = 2;
      */
     url: string;
