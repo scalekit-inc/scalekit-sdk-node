@@ -135,7 +135,9 @@ describe('Actions', () => {
         .catch((e) => e);
 
       expect(error).toBeInstanceOf(ScalekitServerException);
-      expect(error.message).toMatch(/auth request not found or no longer valid/i);
+      expect(error.message).toMatch(
+        /auth request not found or no longer valid/i
+      );
     });
   });
 
