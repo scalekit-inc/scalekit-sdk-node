@@ -280,6 +280,14 @@ export type GetMagicLinkForConnectedAccountRequest = Message<"scalekit.v1.connec
      * @generated from field: optional string id = 5;
      */
     id?: string;
+    /**
+     * @generated from field: optional string state = 7;
+     */
+    state?: string;
+    /**
+     * @generated from field: optional string user_verify_url = 8;
+     */
+    userVerifyUrl?: string;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.GetMagicLinkForConnectedAccountRequest.
@@ -304,6 +312,38 @@ export type GetMagicLinkForConnectedAccountResponse = Message<"scalekit.v1.conne
  * Use `create(GetMagicLinkForConnectedAccountResponseSchema)` to create a new message.
  */
 export declare const GetMagicLinkForConnectedAccountResponseSchema: GenMessage<GetMagicLinkForConnectedAccountResponse>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.VerifyConnectedAccountUserRequest
+ */
+export type VerifyConnectedAccountUserRequest = Message<"scalekit.v1.connected_accounts.VerifyConnectedAccountUserRequest"> & {
+    /**
+     * @generated from field: string auth_request_id = 1;
+     */
+    authRequestId: string;
+    /**
+     * @generated from field: string identifier = 2;
+     */
+    identifier: string;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.VerifyConnectedAccountUserRequest.
+ * Use `create(VerifyConnectedAccountUserRequestSchema)` to create a new message.
+ */
+export declare const VerifyConnectedAccountUserRequestSchema: GenMessage<VerifyConnectedAccountUserRequest>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.VerifyConnectedAccountUserResponse
+ */
+export type VerifyConnectedAccountUserResponse = Message<"scalekit.v1.connected_accounts.VerifyConnectedAccountUserResponse"> & {
+    /**
+     * @generated from field: string post_user_verify_redirect_url = 1;
+     */
+    postUserVerifyRedirectUrl: string;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.VerifyConnectedAccountUserResponse.
+ * Use `create(VerifyConnectedAccountUserResponseSchema)` to create a new message.
+ */
+export declare const VerifyConnectedAccountUserResponseSchema: GenMessage<VerifyConnectedAccountUserResponse>;
 /**
  * @generated from message scalekit.v1.connected_accounts.GetConnectedAccountByIdentifierRequest
  */
@@ -602,11 +642,17 @@ export declare enum ConnectorStatus {
      */
     EXPIRED = 2,
     /**
-     * Account awaiting user authorization
+     * Account awaiting user authorization (re-auth initiated)
      *
      * @generated from enum value: PENDING_AUTH = 3;
      */
-    PENDING_AUTH = 3
+    PENDING_AUTH = 3,
+    /**
+     * OAuth complete; awaiting user identity verification before activation
+     *
+     * @generated from enum value: PENDING_VERIFICATION = 4;
+     */
+    PENDING_VERIFICATION = 4
 }
 /**
  * Describes the enum scalekit.v1.connected_accounts.ConnectorStatus.
@@ -738,5 +784,15 @@ export declare const ConnectedAccountService: GenService<{
         methodKind: "unary";
         input: typeof GetConnectedAccountByIdentifierRequestSchema;
         output: typeof GetConnectedAccountByIdentifierResponseSchema;
+    };
+    /**
+     * Verify connected account user after OAuth callback
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.VerifyConnectedAccountUser
+     */
+    verifyConnectedAccountUser: {
+        methodKind: "unary";
+        input: typeof VerifyConnectedAccountUserRequestSchema;
+        output: typeof VerifyConnectedAccountUserResponseSchema;
     };
 }>;
