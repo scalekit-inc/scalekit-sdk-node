@@ -126,7 +126,7 @@ describe('M2M Client (OrganizationClients)', () => {
 
         // Cleanup secret
         await client.m2m
-          .removeOrganizationClientSecret(
+          .deleteOrganizationClientSecret(
             testOrg,
             clientId,
             secretResp.secret?.id as string
