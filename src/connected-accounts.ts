@@ -332,7 +332,15 @@ export default class ConnectedAccountsClient {
     authRequestId: string;
     identifier: string;
   }): Promise<VerifyConnectedAccountUserResponse> {
-    const { authRequestId, identifier } = params;
+    const authRequestId = params.authRequestId?.trim();
+    const identifier = params.identifier?.trim();
+
+    if (!authRequestId) {
+      throw new Error('authRequestId is required');
+    }
+    if (!identifier) {
+      throw new Error('identifier is required');
+    }
 
     return this.coreClient.connectExec(
       this.client.verifyConnectedAccountUser,

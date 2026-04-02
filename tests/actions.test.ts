@@ -101,27 +101,33 @@ describe('Actions', () => {
         },
       });
 
-      await client.actions.createConnectedAccount({
-        connectionName: 'gmail',
-        identifier,
-        authorizationDetails,
-      });
+      let created = false;
+      try {
+        await client.actions.createConnectedAccount({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier,
+          authorizationDetails,
+        });
+        created = true;
 
-      const response = await client.actions.getAuthorizationLink({
-        connectionName: 'gmail',
-        identifier,
-        state: 'csrf-token-abc123',
-        userVerifyUrl: 'https://yourapp.com/auth/callback',
-      });
+        const response = await client.actions.getAuthorizationLink({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier,
+          state: 'csrf-token-abc123',
+          userVerifyUrl: 'https://yourapp.com/auth/callback',
+        });
 
-      expect(response).toBeDefined();
-      expect(typeof response.link).toBe('string');
-      expect(response.link.length).toBeGreaterThan(0);
-
-      await client.actions.deleteConnectedAccount({
-        connectionName: 'gmail',
-        identifier,
-      });
+        expect(response).toBeDefined();
+        expect(typeof response.link).toBe('string');
+        expect(response.link.length).toBeGreaterThan(0);
+      } finally {
+        if (created) {
+          await client.actions.deleteConnectedAccount({
+            connectionName: GMAIL_CONNECTION_NAME,
+            identifier,
+          });
+        }
+      }
     });
   });
 
