@@ -66,6 +66,17 @@ jobs:
       - name: Lint
         run: make lint
 
+      - name: Verify built files are up to date
+        run: |
+          npm run build
+          git diff --exit-code lib/
+          untracked="$(git ls-files --others --exclude-standard lib/)"
+          if [ -n "$untracked" ]; then
+            echo "Untracked built files detected:"
+            echo "$untracked"
+            exit 1
+          fi
+
       - name: Test
         if: matrix.node-version == '20.x'
         env:
