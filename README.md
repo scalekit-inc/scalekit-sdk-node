@@ -15,7 +15,7 @@ Authentication, authorization, and tool-calling for human-in-the-loop and autono
 
 [![Type definitions](https://img.shields.io/npm/types/@scalekit-sdk/node.svg)](https://www.npmjs.com/package/@scalekit-sdk/node)
 
-**[📖 Documentation](https://docs.scalekit.com)** · **[🐛 Report an Issue](https://github.com/scalekit-inc/scalekit-sdk-node/issues)** · **[💬 Join our Slack](https://join.slack.com/t/scalekit-community/shared_invite/zt-3gsxwr4hc-0tvhwT2b_qgVSIZQBQCWRw)** · **[🤖 AgentKit (SDK)](./AGENTKIT.md)**
+**[📖 Documentation](https://docs.scalekit.com)** · **[🐛 Report an Issue](https://github.com/scalekit-inc/scalekit-sdk-node/issues)** · **[💬 Join our Slack](https://join.slack.com/t/scalekit-community/shared_invite/zt-3gsxwr4hc-0tvhwT2b_qgVSIZQBQCWRw)**
 
 </div>
 
