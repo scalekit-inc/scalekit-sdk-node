@@ -8,12 +8,53 @@ For the full SDK (organizations, SSO **connections**, users, sessions, WebAuthn,
 
 ## Table of contents
 
+- [Initialize the client](#initialize-the-client)
+- [AgentKit namespaces](#agentkit-namespaces)
+- [`client.auth` vs login flows](#clientauth-vs-login-flows)
 - [Auth](#auth)
 - [Tools](#tools)
 - [Connected Accounts](#connected-accounts)
 - [Actions](#actions)
 
+## Initialize the client
+
+Create a single [`ScalekitClient`](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts) with your environment URL, client ID, and client secret from **Scalekit Dashboard → Developers → API credentials**. All sections below use the same instance.
+
+```typescript
+import { ScalekitClient } from '@scalekit-sdk/node';
+
+const scalekitClient = new ScalekitClient(
+  process.env.SCALEKIT_ENV_URL!,
+  process.env.SCALEKIT_CLIENT_ID!,
+  process.env.SCALEKIT_CLIENT_SECRET!,
+);
+```
+
+Requires **Node.js ≥ 18**. Install: `npm install @scalekit-sdk/node`. Use environment variables or a secret manager in production; do not commit secrets.
+
+## AgentKit namespaces
+
+These properties on `scalekitClient` are the AgentKit-related entry points:
+
+| Namespace | Role |
+|-----------|------|
+| `tools` | List and execute tools against connected accounts. |
+| `connectedAccounts` | List, create, update, delete connected accounts; magic links; verification. |
+| `actions` | Facade that composes `tools` and `connectedAccounts` with ergonomic names (`connectionName`, etc.). There is no separate `connect` export in Node — use `actions`. |
+| `auth` | **Only** for [Bring-your-own-auth / Auth-for-MCP](#clientauth-vs-login-flows) — not your default login API. |
+
+For **interactive user SSO** (authorization URL, code exchange), use methods on **`ScalekitClient` itself** — e.g. `getAuthorizationUrl`, `authenticateWithCode` — documented under **Getting Started** and **ScalekitClient** in [`REFERENCE.md`](REFERENCE.md).
+
+## `client.auth` vs login flows
+
+- **`scalekitClient.getAuthorizationUrl` / `authenticateWithCode`** (on the **top-level client**, not under `.auth`) are the usual OAuth 2.0 helpers. Use those for standard web or app login.
+- **`scalekitClient.auth.updateLoginUserDetails`** is separate: it tells Scalekit who the user is during an **Auth-for-MCP / Bring-your-own-auth** flow, using `connectionId` and `loginRequestId` from that flow. If you are not implementing that mode, you usually **do not** call `client.auth`.
+
+For typical Agent Connect usage (tools + connected accounts + `actions`), you can ignore `client.auth` unless you explicitly use BYOA with MCP.
+
 ## Auth
+
+Bring-your-own-auth (BYOA) helper — see [`client.auth` vs login flows](#clientauth-vs-login-flows). For normal OAuth login, use `ScalekitClient` methods in [`REFERENCE.md`](REFERENCE.md) (e.g. `getAuthorizationUrl`).
 
 <details><summary><code>client.auth.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/auth.ts">updateLoginUserDetails</a>(connectionId, loginRequestId, user) -> Promise&lt;Empty&gt;</code></summary>
 <dl>
