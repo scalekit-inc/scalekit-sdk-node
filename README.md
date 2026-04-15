@@ -21,22 +21,22 @@ Authentication, authorization, and tool-calling for human-in-the-loop and autono
 
 ---
 
-This is the official Node.js SDK for [Scalekit](https://scalekit.com), — the auth stack for agents. Build secure AI products faster with authentication for humans (SSO, passwordless, full-stack auth) and agents (Mcp/APIs, delegated actions), all unified on one platform.
+This is the official Node.js SDK for [Scalekit](https://scalekit.com), — the auth stack for agents. Build secure AI products faster with authentication for humans (SSO, passwordless, full-stack auth) and agents (MCP/APIs, delegated actions), all unified on one platform.
 This Node.js SDK enables both traditional B2B authentication and cutting-edge agentic workflows.
 #### Agent-First Features
 - **Agent Identity** — Agents as first-class actors with human ownership and org context
-- **Mcp-Native OAuth 2.1** — Purpose-built for Model Context Protocol with Dcr/pkce support
+- **MCP-Native OAuth 2.1** — Purpose-built for Model Context Protocol with DCR/PKCE support
 - **Ephemeral Credentials** — Time-bound, task-based authorization (minutes, not days)
-- **Token Vault** — per-user, per-tool token storage with rotation and progressive consent
-- **Human-in-the-Loop** — step-up authentication when risk crosses thresholds
-- **Immutable Audit** — track which user initiated, which agent acted, what resource was accessed
+- **Token Vault** — Per-User, Per-Tool token storage with rotation and progressive consent
+- **Human-in-the-Loop** — Step-up authentication when risk crosses thresholds
+- **Immutable Audit** — Track which user initiated, which agent acted, what resource was accessed
 #### Human Authentication
-- **Enterprise SSO** — support for SAML and OIDC protocols
-- **scim Provisioning** — automated user provisioning and deprovisioning
-- **passwordless Authentication** — magic links, OTP, and modern auth flows
-- **multi-tenant Architecture** — organization-level authentication policies
-- **social Logins** — support for popular social identity providers
-- **full-Stack Auth** — complete IdP-of-record solution for B2B SaaS
+- **Enterprise SSO** — Support for SAML and OIDC protocols
+- **SCIM Provisioning** — Automated user provisioning and deprovisioning
+- **Passwordless Authentication** — Magic links, OTP, and modern auth flows
+- **Multi-Tenant Architecture** — Organization-level authentication policies
+- **Social Logins** — Support for popular social identity providers
+- **Full-Stack Auth** — Complete IdP-of-record solution for B2B SaaS
 ---
 ### Getting started
 #### Prerequisites
