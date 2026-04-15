@@ -1,6 +1,6 @@
 # AgentKit API reference (Node.js)
 
-This document lists **AgentKit-related** Scalekit SDK methods: Bring-your-own-auth for MCP, tools, connected accounts, and the `actions` facade.
+This document lists **AgentKit** Scalekit SDK surfaces: tools, connected accounts, and the `actions` facade.
 
 For the full SDK (organizations, SSO **connections**, users, sessions, WebAuthn, etc.), see [`REFERENCE.md`](REFERENCE.md).
 
@@ -10,8 +10,6 @@ For the full SDK (organizations, SSO **connections**, users, sessions, WebAuthn,
 
 - [Initialize the client](#initialize-the-client)
 - [AgentKit namespaces](#agentkit-namespaces)
-- [`client.auth` vs login flows](#clientauth-vs-login-flows)
-- [Auth](#auth)
 - [Tools](#tools)
 - [Connected Accounts](#connected-accounts)
 - [Actions](#actions)
@@ -41,101 +39,8 @@ These properties on `scalekitClient` are the AgentKit-related entry points:
 | `tools` | List and execute tools against connected accounts. |
 | `connectedAccounts` | List, create, update, delete connected accounts; magic links; verification. |
 | `actions` | Facade that composes `tools` and `connectedAccounts` with ergonomic names (`connectionName`, etc.). There is no separate `connect` export in Node — use `actions`. |
-| `auth` | **Only** for [Bring-your-own-auth / Auth-for-MCP](#clientauth-vs-login-flows) — not your default login API. |
 
-For **interactive user SSO** (authorization URL, code exchange), use methods on **`ScalekitClient` itself** — e.g. `getAuthorizationUrl`, `authenticateWithCode` — documented under **Getting Started** and **ScalekitClient** in [`REFERENCE.md`](REFERENCE.md).
-
-## `client.auth` vs login flows
-
-- **`scalekitClient.getAuthorizationUrl` / `authenticateWithCode`** (on the **top-level client**, not under `.auth`) are the usual OAuth 2.0 helpers. Use those for standard web or app login.
-- **`scalekitClient.auth.updateLoginUserDetails`** is separate: it tells Scalekit who the user is during an **Auth-for-MCP / Bring-your-own-auth** flow, using `connectionId` and `loginRequestId` from that flow. If you are not implementing that mode, you usually **do not** call `client.auth`.
-
-For typical Agent Connect usage (tools + connected accounts + `actions`), you can ignore `client.auth` unless you explicitly use BYOA with MCP.
-
-## Auth
-
-Bring-your-own-auth (BYOA) helper — see [`client.auth` vs login flows](#clientauth-vs-login-flows). For normal OAuth login, use `ScalekitClient` methods in [`REFERENCE.md`](REFERENCE.md) (e.g. `getAuthorizationUrl`).
-
-<details><summary><code>client.auth.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/auth.ts">updateLoginUserDetails</a>(connectionId, loginRequestId, user) -> Promise&lt;Empty&gt;</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Updates user details for an ongoing authentication request.
-
-If you are using Auth for MCP solution of Scalekit in "Bring your own Auth" mode, this method helps updating Scalekit with the currently logged in user details for the ongoing authentication request.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```typescript
-await scalekitClient.auth.updateLoginUserDetails(
-  'conn_abc123',
-  'login_xyz789',
-  {
-    email: 'john.doe@company.com',
-    sub: 'unique_user_id_456',
-  }
-);
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**connectionId:** `string` - The SSO connection ID being used for authentication
-
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**loginRequestId:** `string` - The unique login request identifier from the auth flow
-
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**user:** `UserInput` - User details to update
-- `email?: string` - User's email address
-- `sub?: string` - Unique user identifier (subject)
-
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
+OAuth login (`getAuthorizationUrl`, `authenticateWithCode`, …) and MCP **Bring-your-own-auth** (`client.auth.updateLoginUserDetails`) are documented under **Getting Started**, **ScalekitClient**, and **Auth** in [`REFERENCE.md`](REFERENCE.md), not in this AgentKit guide.
 
 ## Tools
 
