@@ -1,6 +1,6 @@
 # AgentKit API reference (Node.js)
 
-This document lists **AgentKit-related** Scalekit SDK methods: Bring-your-own-auth for MCP, tools, connected accounts, M2M clients, and the `actions` facade.
+This document lists **AgentKit-related** Scalekit SDK methods: Bring-your-own-auth for MCP, tools, connected accounts, and the `actions` facade.
 
 For the full SDK (organizations, SSO **connections**, users, sessions, WebAuthn, etc.), see [`REFERENCE.md`](REFERENCE.md).
 
@@ -11,7 +11,6 @@ For the full SDK (organizations, SSO **connections**, users, sessions, WebAuthn,
 - [Auth](#auth)
 - [Tools](#tools)
 - [Connected Accounts](#connected-accounts)
-- [M2M](#m2m)
 - [Actions](#actions)
 
 ## Auth
@@ -178,27 +177,6 @@ await scalekitClient.tools.executeTool({
 - `getConnectedAccountByIdentifier(params)` — returns auth details for an account (sensitive).
 
 Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source file for parameter shapes.
-
-</dd></dl>
-</details>
-
-
-## M2M
-
-`client.m2m` — [`src/m2mclient.ts`](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/m2mclient.ts).
-
-<details><summary>Methods</summary>
-<dl><dd>
-
-- `createOrganizationClient(organizationId, options?)`
-- `getOrganizationClient(organizationId, clientId)`
-- `updateOrganizationClient(organizationId, clientId, options?)`
-- `deleteOrganizationClient(organizationId, clientId)`
-- `addOrganizationClientSecret(organizationId, clientId)`
-- `removeOrganizationClientSecret(organizationId, clientId, secretId)`
-- `listOrganizationClients(organizationId, options?)`
-
-OAuth **client credentials** for organization-scoped automation. See [M2M overview](https://docs.scalekit.com/m2m/overview).
 
 </dd></dl>
 </details>
