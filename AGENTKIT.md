@@ -10,7 +10,7 @@ import { ScalekitClient } from '@scalekit-sdk/node';
 const scalekitClient = new ScalekitClient(
   process.env.SCALEKIT_ENV_URL!,
   process.env.SCALEKIT_CLIENT_ID!,
-  process.env.SCALEKIT_CLIENT_SECRET!,
+  process.env.SCALEKIT_CLIENT_SECRET!
 );
 ```
 
@@ -20,11 +20,11 @@ Requires **Node.js ≥ 18**. Install: `npm install @scalekit-sdk/node`. Use envi
 
 These properties on `scalekitClient` are the AgentKit-related entry points:
 
-| Namespace | Role |
-|-----------|------|
-| `tools` | List and execute tools against connected accounts. |
-| `connectedAccounts` | List, create, update, delete connected accounts; magic links; verification. |
-| `actions` | Facade that composes `tools` and `connectedAccounts` with ergonomic names (`connectionName`, etc.). There is no separate `connect` export in Node — use `actions`. |
+| Namespace           | Role                                                                                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `tools`             | List and execute tools against connected accounts.                                                                                                                 |
+| `connectedAccounts` | List, create, update, delete connected accounts; magic links; verification.                                                                                        |
+| `actions`           | Facade that composes `tools` and `connectedAccounts` with ergonomic names (`connectionName`, etc.). There is no separate `connect` export in Node — use `actions`. |
 
 OAuth login (`getAuthorizationUrl`, `authenticateWithCode`, …) and MCP **Bring-your-own-auth** (`client.auth.updateLoginUserDetails`) are documented under **Getting Started**, **ScalekitClient**, and **Auth** in [`REFERENCE.md`](REFERENCE.md), not in this AgentKit guide.
 
@@ -91,7 +91,6 @@ await scalekitClient.tools.executeTool({
 </dd></dl>
 </details>
 
-
 ## Connected Accounts
 
 `client.connectedAccounts` — [`src/connected-accounts.ts`](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connected-accounts.ts).
@@ -113,7 +112,6 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 </dd></dl>
 </details>
 
-
 ## Actions
 
 `client.actions` — [`src/actions.ts`](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts). Composes `tools` and `connectedAccounts` with ergonomic parameter names (`connectionName` ↔ `connector`).
@@ -132,4 +130,3 @@ There is no separate `connect` export on Node; use `actions` for the facade.
 
 </dd></dl>
 </details>
-
