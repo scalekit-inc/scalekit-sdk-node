@@ -1,10 +1,4 @@
-# AgentKit API reference (Node.js)
-
-This document lists **AgentKit** Scalekit SDK surfaces: tools, connected accounts, and the `actions` facade.
-
-For the full SDK (organizations, SSO **connections**, users, sessions, WebAuthn, etc.), see [`REFERENCE.md`](REFERENCE.md).
-
-**Note:** `client.connection` (enterprise SSO IdP **connections**) is not part of AgentKit; it remains documented only in `REFERENCE.md`.
+# AgentKit
 
 ## Initialize the client
 
