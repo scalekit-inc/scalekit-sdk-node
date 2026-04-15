@@ -6,14 +6,6 @@ For the full SDK (organizations, SSO **connections**, users, sessions, WebAuthn,
 
 **Note:** `client.connection` (enterprise SSO IdP **connections**) is not part of AgentKit; it remains documented only in `REFERENCE.md`.
 
-## Table of contents
-
-- [Initialize the client](#initialize-the-client)
-- [AgentKit namespaces](#agentkit-namespaces)
-- [Tools](#tools)
-- [Connected Accounts](#connected-accounts)
-- [Actions](#actions)
-
 ## Initialize the client
 
 Create a single [`ScalekitClient`](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts) with your environment URL, client ID, and client secret from **Scalekit Dashboard → Developers → API credentials**. All sections below use the same instance.
