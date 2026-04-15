@@ -35,11 +35,11 @@ OAuth login (`getAuthorizationUrl`, `authenticateWithCode`, …) and MCP **Bring
 <details><summary><code>client.tools.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts">listTools</a>(options?) -> Promise&lt;ListToolsResponse&gt;</code></summary>
 <dl><dd>
 
-#### 📝 Description
+### 📝 Description
 
 Lists tools in the workspace with optional filter and pagination (`filter`, `pageSize`, `pageToken`).
 
-#### 🔌 Usage
+### 🔌 Usage
 
 ```typescript
 const res = await scalekitClient.tools.listTools({
@@ -54,7 +54,7 @@ const res = await scalekitClient.tools.listTools({
 <details><summary><code>client.tools.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts">listScopedTools</a>(identifier, options) -> Promise&lt;ListScopedToolsResponse&gt;</code></summary>
 <dl><dd>
 
-#### 📝 Description
+### 📝 Description
 
 Lists tools scoped to a connected-account identifier. `options.filter` is required.
 
@@ -64,7 +64,7 @@ Lists tools scoped to a connected-account identifier. `options.filter` is requir
 <details><summary><code>client.tools.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts">listAvailableTools</a>(identifier, options?) -> Promise&lt;ListAvailableToolsResponse&gt;</code></summary>
 <dl><dd>
 
-#### 📝 Description
+### 📝 Description
 
 Lists tools that can be made available for an identifier (distinct from scoped tools already bound).
 
@@ -74,11 +74,11 @@ Lists tools that can be made available for an identifier (distinct from scoped t
 <details><summary><code>client.tools.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts">executeTool</a>(params) -> Promise&lt;ExecuteToolResponse&gt;</code></summary>
 <dl><dd>
 
-#### 📝 Description
+### 📝 Description
 
 Executes a tool. Pass `toolName`, optional `params` (JSON), and either `connectedAccountId` or `identifier` with optional `connector`, `organizationId`, `userId`.
 
-#### 🔌 Usage
+### 🔌 Usage
 
 ```typescript
 await scalekitClient.tools.executeTool({
