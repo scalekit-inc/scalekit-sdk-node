@@ -44,8 +44,11 @@ export default class ToolsClient {
    * Lists tools available in your workspace with optional filtering and pagination.
    *
    * @param options Optional filter and pagination parameters
-   * @param options.filter Filter configuration. Supports `provider`, `identifier`, `toolName`, `summary`, and `query` fields.
+   * @param options.filter Filter configuration. Supports `provider`, `identifier`, `toolName`, `summary`, `query`,
+   *                       `connector`, `organizationId`, `userId`, and `connectedAccountId` fields.
    *                       Use `query` to do a text search across tool metadata (names, descriptions, identifiers).
+   *                       Use `connector` together with `identifier` to resolve a specific connected account and include its custom MCP tools.
+   *                       Use `connectedAccountId` as a direct alternative to the `identifier` + `connector` combination.
    * @param options.pageSize Maximum number of tools to return per page.
    * @param options.pageToken Token from a previous `listTools` response for pagination.
    * @throws {ScalekitServerException} If a network or server error occurs.
