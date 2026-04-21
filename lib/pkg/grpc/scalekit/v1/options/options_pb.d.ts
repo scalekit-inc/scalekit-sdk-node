@@ -149,7 +149,11 @@ export declare enum AuthenticationType {
      *
      * @generated from enum value: CUSTOMER_PORTAL_SESSION_CLIENT = 52;
      */
-    CUSTOMER_PORTAL_SESSION_CLIENT = 52
+    CUSTOMER_PORTAL_SESSION_CLIENT = 52,
+    /**
+     * @generated from enum value: SESSION_USER = 24;
+     */
+    SESSION_USER = 24
 }
 /**
  * Describes the enum scalekit.v1.options.AuthenticationType.

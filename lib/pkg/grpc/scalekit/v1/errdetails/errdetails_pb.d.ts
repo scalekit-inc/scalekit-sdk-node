@@ -1,4 +1,5 @@
-import type { GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
+import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import type { EmptySchema } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 /**
  * Describes the file scalekit/v1/errdetails/errdetails.proto.
@@ -265,3 +266,16 @@ export type ToolErrorInfo = Message<"scalekit.v1.errdetails.ToolErrorInfo"> & {
  * Use `create(ToolErrorInfoSchema)` to create a new message.
  */
 export declare const ToolErrorInfoSchema: GenMessage<ToolErrorInfo>;
+/**
+ * @generated from service scalekit.v1.errdetails.Dummy
+ */
+export declare const Dummy: GenService<{
+    /**
+     * @generated from rpc scalekit.v1.errdetails.Dummy.DummyService
+     */
+    dummyService: {
+        methodKind: "unary";
+        input: typeof EmptySchema;
+        output: typeof ErrorInfoSchema;
+    };
+}>;

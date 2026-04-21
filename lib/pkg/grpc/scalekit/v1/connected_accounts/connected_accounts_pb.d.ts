@@ -705,7 +705,19 @@ export declare enum ConnectorType {
      *
      * @generated from enum value: BASIC = 6;
      */
-    BASIC = 6
+    BASIC = 6,
+    /**
+     * OAuth 2.0 client credentials (machine-to-machine)
+     *
+     * @generated from enum value: OAUTH_M2M = 7;
+     */
+    OAUTH_M2M = 7,
+    /**
+     * Trello token-based OAuth1-style browser authorization
+     *
+     * @generated from enum value: TRELLO_OAUTH1 = 8;
+     */
+    TRELLO_OAUTH1 = 8
 }
 /**
  * Describes the enum scalekit.v1.connected_accounts.ConnectorType.

@@ -1511,14 +1511,6 @@ export declare const UpdateClientRequestSchema: GenMessage<UpdateClientRequest>;
  */
 export type UpdateClient = Message<"scalekit.v1.clients.UpdateClient"> & {
     /**
-     * @generated from field: repeated string redirect_uris = 2;
-     */
-    redirectUris: string[];
-    /**
-     * @generated from field: optional string default_redirect_uri = 3;
-     */
-    defaultRedirectUri?: string;
-    /**
      * @generated from field: repeated string back_channel_logout_uris = 4;
      */
     backChannelLogoutUris: string[];
@@ -1744,14 +1736,6 @@ export type Client = Message<"scalekit.v1.clients.Client"> & {
      * @generated from field: google.protobuf.Timestamp update_time = 4;
      */
     updateTime?: Timestamp;
-    /**
-     * @generated from field: repeated string redirect_uris = 5;
-     */
-    redirectUris: string[];
-    /**
-     * @generated from field: string default_redirect_uri = 6;
-     */
-    defaultRedirectUri: string;
     /**
      * @generated from field: repeated scalekit.v1.clients.ClientSecret secrets = 7;
      */

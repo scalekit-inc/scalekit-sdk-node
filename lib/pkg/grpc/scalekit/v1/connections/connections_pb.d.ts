@@ -895,6 +895,14 @@ export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnec
      * @generated from field: google.protobuf.StringValue tenant_id = 20;
      */
     tenantId?: string;
+    /**
+     * @generated from field: google.protobuf.BoolValue is_cimd = 21;
+     */
+    isCimd?: boolean;
+    /**
+     * @generated from field: google.protobuf.StringValue app_name = 22;
+     */
+    appName?: string;
 };
 /**
  * Describes the message scalekit.v1.connections.OAuthConnectionConfig.
@@ -1986,7 +1994,15 @@ export declare enum ConnectionType {
     /**
      * @generated from enum value: WEBAUTHN = 9;
      */
-    WEBAUTHN = 9
+    WEBAUTHN = 9,
+    /**
+     * @generated from enum value: OAUTH_M2M = 10;
+     */
+    OAUTH_M2M = 10,
+    /**
+     * @generated from enum value: TRELLO_OAUTH1 = 11;
+     */
+    TRELLO_OAUTH1 = 11
 }
 /**
  * Describes the enum scalekit.v1.connections.ConnectionType.

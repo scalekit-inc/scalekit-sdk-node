@@ -23,6 +23,7 @@ check-protoc-gen-es-version:
 generate:
 	$(MAKE) check-protoc-gen-es-version
 	npm run generate --src="$(PROTO_REMOTE_INPUT)"
+	npm run build
 
 lint:
 	npm run lint
