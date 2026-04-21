@@ -82,6 +82,37 @@ describe('Tools', () => {
       expect(response.tools).toBeDefined();
       expect(Array.isArray(response.tools)).toBe(true);
     });
+
+    it('should list tools with identifier and connector filter', async () => {
+      const response = await client.tools.listTools({
+        filter: {
+          identifier: 'akshay.parihar',
+          connector: 'apifymcp',
+          summary: true,
+        },
+        pageSize: 100,
+      });
+
+      expect(response).toBeDefined();
+      expect(response.toolNames).toBeDefined();
+      expect(Array.isArray(response.toolNames)).toBe(true);
+      expect(response.toolNames).toContain('c-apifymcp_fetch-apify-docs');
+    });
+
+    it('should list tools with connected account id filter', async () => {
+      const response = await client.tools.listTools({
+        filter: {
+          connectedAccountId: 'ca_121981761461683970',
+          summary: true,
+        },
+        pageSize: 100,
+      });
+
+      expect(response).toBeDefined();
+      expect(response.toolNames).toBeDefined();
+      expect(Array.isArray(response.toolNames)).toBe(true);
+      expect(response.toolNames).toContain('c-apifymcp_fetch-apify-docs');
+    });
   });
 
   describe('listScopedTools', () => {
@@ -122,6 +153,23 @@ describe('Tools', () => {
       } catch (error: unknown) {
         expect(error).toBeInstanceOf(ScalekitServerException);
       }
+    });
+
+    it('should list scoped tools with connection names filter', async () => {
+      const response = await client.tools.listScopedTools('akshay.parihar', {
+        filter: {
+          connectionNames: ['apifymcp'],
+        },
+        pageSize: 100,
+      });
+
+      expect(response).toBeDefined();
+      expect(response.tools).toBeDefined();
+      expect(Array.isArray(response.tools)).toBe(true);
+      const toolNames = response.tools.map(
+        (st) => (st.tool?.definition as { name?: string } | undefined)?.name
+      );
+      expect(toolNames).toContain('c-apifymcp_fetch-apify-docs');
     });
 
     it('should list scoped tools with pagination', async () => {
