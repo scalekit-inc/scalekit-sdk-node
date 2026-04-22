@@ -334,6 +334,10 @@ export type ListAuthorizedDomainRequest = Message<"scalekit.v1.domains.ListAutho
      * @generated from field: string origin = 1;
      */
     origin: string;
+    /**
+     * @generated from field: string link_id = 2;
+     */
+    linkId: string;
 };
 /**
  * Describes the message scalekit.v1.domains.ListAuthorizedDomainRequest.

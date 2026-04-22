@@ -58,6 +58,10 @@ export type CreateOrganization = Message<"scalekit.v1.organizations.CreateOrgani
     metadata: {
         [key: string]: string;
     };
+    /**
+     * @generated from field: optional string slug = 9;
+     */
+    slug?: string;
 };
 /**
  * Describes the message scalekit.v1.organizations.CreateOrganization.
@@ -118,6 +122,10 @@ export type Organization = Message<"scalekit.v1.organizations.Organization"> & {
      * @generated from field: scalekit.v1.organizations.OrganizationSettings settings = 8;
      */
     settings?: OrganizationSettings;
+    /**
+     * @generated from field: optional string slug = 9;
+     */
+    slug?: string;
 };
 /**
  * Describes the message scalekit.v1.organizations.Organization.
@@ -181,6 +189,10 @@ export type UpdateOrganization = Message<"scalekit.v1.organizations.UpdateOrgani
     metadata: {
         [key: string]: string;
     };
+    /**
+     * @generated from field: optional string slug = 9;
+     */
+    slug?: string;
 };
 /**
  * Describes the message scalekit.v1.organizations.UpdateOrganization.

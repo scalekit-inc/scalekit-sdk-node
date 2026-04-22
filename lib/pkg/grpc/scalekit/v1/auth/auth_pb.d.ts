@@ -443,6 +443,10 @@ export type User = Message<"scalekit.v1.auth.User"> & {
      * @generated from field: optional string organization_external_id = 15;
      */
     organizationExternalId?: string;
+    /**
+     * @generated from field: repeated string roles = 16;
+     */
+    roles: string[];
 };
 /**
  * Describes the message scalekit.v1.auth.User.
@@ -461,6 +465,12 @@ export type GetAuthStateResponse = Message<"scalekit.v1.auth.GetAuthStateRespons
      * @generated from field: scalekit.v1.auth.UserDetails user = 2;
      */
     user?: UserDetails;
+    /**
+     * Login hint from the original /authorize request, typically an email address used to pre-fill the login UI.
+     *
+     * @generated from field: string login_hint = 3;
+     */
+    loginHint: string;
 };
 /**
  * Describes the message scalekit.v1.auth.GetAuthStateResponse.

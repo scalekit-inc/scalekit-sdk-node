@@ -139,6 +139,26 @@ export type Filter = Message<"scalekit.v1.tools.Filter"> & {
      * @generated from field: optional string query = 5;
      */
     query?: string;
+    /**
+     * Fields 6-9 mirror GetConnectedAccountByIdentifierRequest, enabling ListTools to
+     * resolve a specific connected account and include its custom MCP tools alongside
+     * global tools. When connector or connected_account_id is set, a CA lookup is performed.
+     *
+     * @generated from field: optional string connector = 6;
+     */
+    connector?: string;
+    /**
+     * @generated from field: optional string organization_id = 7;
+     */
+    organizationId?: string;
+    /**
+     * @generated from field: optional string user_id = 8;
+     */
+    userId?: string;
+    /**
+     * @generated from field: optional string connected_account_id = 9;
+     */
+    connectedAccountId?: string;
 };
 /**
  * Describes the message scalekit.v1.tools.Filter.
