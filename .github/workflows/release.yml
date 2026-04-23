@@ -36,8 +36,9 @@ jobs:
 
       - name: Validate version is not already published on npm
         run: |
+          PKG_NAME=$(node -p "require('./package.json').name")
           PKG_VERSION=$(node -p "require('./package.json').version")
-          if npm view "@scalekit-sdk/node@$PKG_VERSION" version 2>/dev/null; then
+          if npm view "$PKG_NAME@$PKG_VERSION" version 2>/dev/null; then
             echo "Version $PKG_VERSION is already published on npm. Bump the version before releasing."
             exit 1
           fi
@@ -50,13 +51,18 @@ jobs:
 
       - name: Verify no uncommitted build artifacts
         run: |
-          git diff --exit-code lib/
-          untracked="$(git ls-files --others --exclude-standard lib/)"
+          git diff --exit-code
+          untracked="$(git ls-files --others --exclude-standard)"
           if [ -n "$untracked" ]; then
-            echo "Untracked built files detected — commit the build output before releasing:"
+            echo "Untracked build artifacts detected — commit all generated output before releasing:"
             echo "$untracked"
             exit 1
           fi
 
       - name: Publish to npm
-        run: npm publish --tag latest --access public --provenance
+        run: |
+          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            npm publish --tag next --access public --provenance
+          else
+            npm publish --tag latest --access public --provenance
+          fi
