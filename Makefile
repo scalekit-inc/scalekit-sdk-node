@@ -11,8 +11,9 @@ PROTO_REF := v0.1.114.0
 PROTO_SUBDIR := proto
 PROTO_REMOTE_INPUT := $(PROTO_REPO_URL)\#ref=$(PROTO_REF),subdir=$(PROTO_SUBDIR)
 PROTOC_GEN_ES_VERSION := 2.11.0
+LOCAL_PROTO_DIR ?= ../scalekit/proto
 
-.PHONY: setup check-protoc-gen-es-version generate lint test verify-generate
+.PHONY: setup check-protoc-gen-es-version generate generate-local lint test verify-generate
 
 setup:
 	npm ci
@@ -23,6 +24,12 @@ check-protoc-gen-es-version:
 generate:
 	$(MAKE) check-protoc-gen-es-version
 	npm run generate --src="$(PROTO_REMOTE_INPUT)"
+	npm run build
+
+generate-local:
+	npm ci
+	$(MAKE) check-protoc-gen-es-version
+	npx buf generate ../scalekit
 	npm run build
 
 lint:

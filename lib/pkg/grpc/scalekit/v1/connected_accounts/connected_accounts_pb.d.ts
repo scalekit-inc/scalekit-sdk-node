@@ -618,6 +618,62 @@ export type StaticAuth = Message<"scalekit.v1.connected_accounts.StaticAuth"> & 
  */
 export declare const StaticAuthSchema: GenMessage<StaticAuth>;
 /**
+ * @generated from message scalekit.v1.connected_accounts.GetConnectedAccountRequest
+ */
+export type GetConnectedAccountRequest = Message<"scalekit.v1.connected_accounts.GetConnectedAccountRequest"> & {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.GetConnectedAccountRequest.
+ * Use `create(GetConnectedAccountRequestSchema)` to create a new message.
+ */
+export declare const GetConnectedAccountRequestSchema: GenMessage<GetConnectedAccountRequest>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.GetConnectedAccountResponse
+ */
+export type GetConnectedAccountResponse = Message<"scalekit.v1.connected_accounts.GetConnectedAccountResponse"> & {
+    /**
+     * @generated from field: scalekit.v1.connected_accounts.ConnectedAccount connected_account = 1;
+     */
+    connectedAccount?: ConnectedAccount;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.GetConnectedAccountResponse.
+ * Use `create(GetConnectedAccountResponseSchema)` to create a new message.
+ */
+export declare const GetConnectedAccountResponseSchema: GenMessage<GetConnectedAccountResponse>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.DisconnectConnectedAccountRequest
+ */
+export type DisconnectConnectedAccountRequest = Message<"scalekit.v1.connected_accounts.DisconnectConnectedAccountRequest"> & {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.DisconnectConnectedAccountRequest.
+ * Use `create(DisconnectConnectedAccountRequestSchema)` to create a new message.
+ */
+export declare const DisconnectConnectedAccountRequestSchema: GenMessage<DisconnectConnectedAccountRequest>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.DisconnectConnectedAccountResponse
+ */
+export type DisconnectConnectedAccountResponse = Message<"scalekit.v1.connected_accounts.DisconnectConnectedAccountResponse"> & {
+    /**
+     * @generated from field: scalekit.v1.connected_accounts.ConnectedAccount connected_account = 1;
+     */
+    connectedAccount?: ConnectedAccount;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.DisconnectConnectedAccountResponse.
+ * Use `create(DisconnectConnectedAccountResponseSchema)` to create a new message.
+ */
+export declare const DisconnectConnectedAccountResponseSchema: GenMessage<DisconnectConnectedAccountResponse>;
+/**
  * Status of a connected account indicating its current state
  *
  * @generated from enum scalekit.v1.connected_accounts.ConnectorStatus
@@ -652,7 +708,13 @@ export declare enum ConnectorStatus {
      *
      * @generated from enum value: PENDING_VERIFICATION = 4;
      */
-    PENDING_VERIFICATION = 4
+    PENDING_VERIFICATION = 4,
+    /**
+     * Account has been manually disconnected
+     *
+     * @generated from enum value: DISCONNECTED = 5;
+     */
+    DISCONNECTED = 5
 }
 /**
  * Describes the enum scalekit.v1.connected_accounts.ConnectorStatus.
@@ -788,11 +850,41 @@ export declare const ConnectedAccountService: GenService<{
         output: typeof GetMagicLinkForConnectedAccountResponseSchema;
     };
     /**
+     * Get Connected Account by ID
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.GetConnectedAccount
+     */
+    getConnectedAccount: {
+        methodKind: "unary";
+        input: typeof GetConnectedAccountRequestSchema;
+        output: typeof GetConnectedAccountResponseSchema;
+    };
+    /**
+     * Disconnect a Connected Account
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.DisconnectConnectedAccount
+     */
+    disconnectConnectedAccount: {
+        methodKind: "unary";
+        input: typeof DisconnectConnectedAccountRequestSchema;
+        output: typeof DisconnectConnectedAccountResponseSchema;
+    };
+    /**
      * Get Connected Account Authentication Details
      *
      * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.GetConnectedAccountAuth
      */
     getConnectedAccountAuth: {
+        methodKind: "unary";
+        input: typeof GetConnectedAccountByIdentifierRequestSchema;
+        output: typeof GetConnectedAccountByIdentifierResponseSchema;
+    };
+    /**
+     * Get Connected Account Details (without auth credentials)
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.GetConnectedAccountDetails
+     */
+    getConnectedAccountDetails: {
         methodKind: "unary";
         input: typeof GetConnectedAccountByIdentifierRequestSchema;
         output: typeof GetConnectedAccountByIdentifierResponseSchema;
