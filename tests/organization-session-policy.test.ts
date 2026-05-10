@@ -1,6 +1,7 @@
 import ScalekitClient from '../src/scalekit';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { TestDataGenerator, TestOrganizationManager } from './utils/test-data';
+import { SessionPolicyType } from '../src/pkg/grpc/scalekit/v1/organizations/organizations_pb';
 
 describe('Organization Session Policy', () => {
   let client: ScalekitClient;
@@ -21,7 +22,7 @@ describe('Organization Session Policy', () => {
         await client.organization.getOrganizationSessionPolicy(testOrg);
 
       expect(policy).toBeDefined();
-      expect(policy.policySource).toBe('APPLICATION');
+      expect(policy.policySource).toBe(SessionPolicyType.APPLICATION);
     });
   });
 
@@ -37,11 +38,11 @@ describe('Organization Session Policy', () => {
       );
 
       expect(policy).toBeDefined();
-      expect(policy.policySource).toBe('CUSTOM');
+      expect(policy.policySource).toBe(SessionPolicyType.CUSTOM);
 
       const fetched =
         await client.organization.getOrganizationSessionPolicy(testOrg);
-      expect(fetched.policySource).toBe('CUSTOM');
+      expect(fetched.policySource).toBe(SessionPolicyType.CUSTOM);
       expect(fetched.absoluteSessionTimeout).toBe(360);
     });
 
@@ -59,7 +60,7 @@ describe('Organization Session Policy', () => {
       );
 
       expect(policy).toBeDefined();
-      expect(policy.policySource).toBe('CUSTOM');
+      expect(policy.policySource).toBe(SessionPolicyType.CUSTOM);
 
       const fetched =
         await client.organization.getOrganizationSessionPolicy(testOrg);
@@ -79,7 +80,7 @@ describe('Organization Session Policy', () => {
       );
 
       expect(policy).toBeDefined();
-      expect(policy.policySource).toBe('CUSTOM');
+      expect(policy.policySource).toBe(SessionPolicyType.CUSTOM);
 
       const fetched =
         await client.organization.getOrganizationSessionPolicy(testOrg);
@@ -99,7 +100,7 @@ describe('Organization Session Policy', () => {
         });
 
       expect(reverted).toBeDefined();
-      expect(reverted.policySource).toBe('APPLICATION');
+      expect(reverted.policySource).toBe(SessionPolicyType.APPLICATION);
     });
   });
 });
