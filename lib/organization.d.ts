@@ -455,7 +455,7 @@ export default class OrganizationClient {
      *
      * @example
      * const policy = await scalekit.organization.getOrganizationSessionPolicy('org_12345');
-     * if (policy.policySource === SessionPolicySource.CUSTOM) {
+     * if (policy.policySource === SessionPolicyType.CUSTOM) {
      *   console.log('Absolute timeout (minutes):', policy.absoluteSessionTimeout);
      * }
      */

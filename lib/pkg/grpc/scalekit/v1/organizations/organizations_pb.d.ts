@@ -532,11 +532,9 @@ export declare const UpdateOrganizationSettingsRequestSchema: GenMessage<UpdateO
  */
 export type OrganizationSessionPolicySettings = Message<"scalekit.v1.organizations.OrganizationSessionPolicySettings"> & {
     /**
-     * "environment" (default) = inherit application-level policy; "custom" = org-specific values active.
-     *
-     * @generated from field: scalekit.v1.organizations.SessionPolicySource policy_source = 1;
+     * @generated from field: scalekit.v1.organizations.SessionPolicyType policy_source = 1;
      */
-    policySource: SessionPolicySource;
+    policySource: SessionPolicyType;
     /**
      * Timeout value interpreted with absolute_session_timeout_unit on write; always returned in minutes on read.
      *
@@ -608,9 +606,29 @@ export type UpdateOrganizationSessionPolicyRequest = Message<"scalekit.v1.organi
      */
     organizationId: string;
     /**
-     * @generated from field: scalekit.v1.organizations.OrganizationSessionPolicySettings policy = 2;
+     * @generated from field: scalekit.v1.organizations.SessionPolicyType policy_source = 2;
      */
-    policy?: OrganizationSessionPolicySettings;
+    policySource: SessionPolicyType;
+    /**
+     * @generated from field: google.protobuf.Int32Value absolute_session_timeout = 3;
+     */
+    absoluteSessionTimeout?: number;
+    /**
+     * @generated from field: optional scalekit.v1.commons.TimeUnit absolute_session_timeout_unit = 4;
+     */
+    absoluteSessionTimeoutUnit?: TimeUnit;
+    /**
+     * @generated from field: google.protobuf.BoolValue idle_session_timeout_enabled = 5;
+     */
+    idleSessionTimeoutEnabled?: boolean;
+    /**
+     * @generated from field: google.protobuf.Int32Value idle_session_timeout = 6;
+     */
+    idleSessionTimeout?: number;
+    /**
+     * @generated from field: optional scalekit.v1.commons.TimeUnit idle_session_timeout_unit = 7;
+     */
+    idleSessionTimeoutUnit?: TimeUnit;
 };
 /**
  * Describes the message scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest.
@@ -631,6 +649,60 @@ export type UpdateOrganizationSessionPolicyResponse = Message<"scalekit.v1.organ
  * Use `create(UpdateOrganizationSessionPolicyResponseSchema)` to create a new message.
  */
 export declare const UpdateOrganizationSessionPolicyResponseSchema: GenMessage<UpdateOrganizationSessionPolicyResponse>;
+/**
+ * @generated from message scalekit.v1.organizations.GetApplicationSessionPolicyRequest
+ */
+export type GetApplicationSessionPolicyRequest = Message<"scalekit.v1.organizations.GetApplicationSessionPolicyRequest"> & {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+};
+/**
+ * Describes the message scalekit.v1.organizations.GetApplicationSessionPolicyRequest.
+ * Use `create(GetApplicationSessionPolicyRequestSchema)` to create a new message.
+ */
+export declare const GetApplicationSessionPolicyRequestSchema: GenMessage<GetApplicationSessionPolicyRequest>;
+/**
+ * @generated from message scalekit.v1.organizations.ApplicationSessionPolicySettings
+ */
+export type ApplicationSessionPolicySettings = Message<"scalekit.v1.organizations.ApplicationSessionPolicySettings"> & {
+    /**
+     * @generated from field: int32 absolute_session_timeout = 1;
+     */
+    absoluteSessionTimeout: number;
+    /**
+     * @generated from field: bool idle_session_timeout_enabled = 2;
+     */
+    idleSessionTimeoutEnabled: boolean;
+    /**
+     * @generated from field: int32 idle_session_timeout = 3;
+     */
+    idleSessionTimeout: number;
+    /**
+     * @generated from field: int32 access_token_expiry = 4;
+     */
+    accessTokenExpiry: number;
+};
+/**
+ * Describes the message scalekit.v1.organizations.ApplicationSessionPolicySettings.
+ * Use `create(ApplicationSessionPolicySettingsSchema)` to create a new message.
+ */
+export declare const ApplicationSessionPolicySettingsSchema: GenMessage<ApplicationSessionPolicySettings>;
+/**
+ * @generated from message scalekit.v1.organizations.GetApplicationSessionPolicyResponse
+ */
+export type GetApplicationSessionPolicyResponse = Message<"scalekit.v1.organizations.GetApplicationSessionPolicyResponse"> & {
+    /**
+     * @generated from field: scalekit.v1.organizations.ApplicationSessionPolicySettings application_policy = 1;
+     */
+    applicationPolicy?: ApplicationSessionPolicySettings;
+};
+/**
+ * Describes the message scalekit.v1.organizations.GetApplicationSessionPolicyResponse.
+ * Use `create(GetApplicationSessionPolicyResponseSchema)` to create a new message.
+ */
+export declare const GetApplicationSessionPolicyResponseSchema: GenMessage<GetApplicationSessionPolicyResponse>;
 /**
  * @generated from message scalekit.v1.organizations.OrganizationUserManagementSettings
  */
@@ -659,13 +731,13 @@ export type OrganizationSessionSettings = Message<"scalekit.v1.organizations.Org
     idleSessionTimeout?: number;
     /**
      * Whether idle session timeout is enabled for this organization.
-     * Effective idle timeout is enabled if either the environment or the organization (when policy_source='custom') has it enabled.
+     * Effective idle timeout is enabled if either the environment or any organization with SESSION_POLICY_CUSTOM has it enabled.
      *
      * @generated from field: google.protobuf.BoolValue idle_session_timeout_enabled = 5;
      */
     idleSessionTimeoutEnabled?: boolean;
     /**
-     * "environment" (default) = inherit application-level policy; "custom" = org-specific values are active.
+     * APPLICATION (default) = inherit application-level policy; CUSTOM = org-specific values are active.
      *
      * @generated from field: string policy_source = 6;
      */
@@ -803,13 +875,13 @@ export declare enum Feature {
  */
 export declare const FeatureSchema: GenEnum<Feature>;
 /**
- * @generated from enum scalekit.v1.organizations.SessionPolicySource
+ * @generated from enum scalekit.v1.organizations.SessionPolicyType
  */
-export declare enum SessionPolicySource {
+export declare enum SessionPolicyType {
     /**
-     * @generated from enum value: SESSION_POLICY_UNSPECIFIED = 0;
+     * @generated from enum value: SESSION_POLICY_TYPE_UNSPECIFIED = 0;
      */
-    SESSION_POLICY_UNSPECIFIED = 0,
+    SESSION_POLICY_TYPE_UNSPECIFIED = 0,
     /**
      * @generated from enum value: APPLICATION = 1;
      */
@@ -820,9 +892,9 @@ export declare enum SessionPolicySource {
     CUSTOM = 2
 }
 /**
- * Describes the enum scalekit.v1.organizations.SessionPolicySource.
+ * Describes the enum scalekit.v1.organizations.SessionPolicyType.
  */
-export declare const SessionPolicySourceSchema: GenEnum<SessionPolicySource>;
+export declare const SessionPolicyTypeSchema: GenEnum<SessionPolicyType>;
 /**
  * @generated from service scalekit.v1.organizations.OrganizationService
  */
@@ -962,5 +1034,13 @@ export declare const OrganizationService: GenService<{
         methodKind: "unary";
         input: typeof GetOrganizationUserManagementSettingsRequestSchema;
         output: typeof GetOrganizationUserManagementSettingsResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.GetApplicationSessionPolicy
+     */
+    getApplicationSessionPolicy: {
+        methodKind: "unary";
+        input: typeof GetApplicationSessionPolicyRequestSchema;
+        output: typeof GetApplicationSessionPolicyResponseSchema;
     };
 }>;

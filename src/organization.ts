@@ -12,7 +12,7 @@ import {
   ListOrganizationsResponse,
   OrganizationSessionPolicySettings,
   OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage,
-  SessionPolicySource,
+  SessionPolicyType,
   UpdateOrganization,
   UpdateOrganizationResponse,
   UpdateOrganizationSchema,
@@ -598,7 +598,7 @@ export default class OrganizationClient {
    *
    * @example
    * const policy = await scalekit.organization.getOrganizationSessionPolicy('org_12345');
-   * if (policy.policySource === SessionPolicySource.CUSTOM) {
+   * if (policy.policySource === SessionPolicyType.CUSTOM) {
    *   console.log('Absolute timeout (minutes):', policy.absoluteSessionTimeout);
    * }
    */
@@ -647,8 +647,8 @@ export default class OrganizationClient {
   ): Promise<OrganizationSessionPolicySettings> {
     const policySource =
       policy.policySource === 'CUSTOM'
-        ? SessionPolicySource.CUSTOM
-        : SessionPolicySource.APPLICATION;
+        ? SessionPolicyType.CUSTOM
+        : SessionPolicyType.APPLICATION;
 
     const timeUnitMap: Record<string, TimeUnit> = {
       MINUTES: TimeUnit.MINUTES,
@@ -660,25 +660,23 @@ export default class OrganizationClient {
       this.client.updateOrganizationSessionPolicy,
       {
         organizationId,
-        policy: {
-          policySource,
-          ...(policy.absoluteSessionTimeout !== undefined && {
-            absoluteSessionTimeout: policy.absoluteSessionTimeout,
-          }),
-          ...(policy.absoluteSessionTimeoutUnit && {
-            absoluteSessionTimeoutUnit:
-              timeUnitMap[policy.absoluteSessionTimeoutUnit],
-          }),
-          ...(policy.idleSessionTimeoutEnabled !== undefined && {
-            idleSessionTimeoutEnabled: policy.idleSessionTimeoutEnabled,
-          }),
-          ...(policy.idleSessionTimeout !== undefined && {
-            idleSessionTimeout: policy.idleSessionTimeout,
-          }),
-          ...(policy.idleSessionTimeoutUnit && {
-            idleSessionTimeoutUnit: timeUnitMap[policy.idleSessionTimeoutUnit],
-          }),
-        },
+        policySource,
+        ...(policy.absoluteSessionTimeout !== undefined && {
+          absoluteSessionTimeout: policy.absoluteSessionTimeout,
+        }),
+        ...(policy.absoluteSessionTimeoutUnit && {
+          absoluteSessionTimeoutUnit:
+            timeUnitMap[policy.absoluteSessionTimeoutUnit],
+        }),
+        ...(policy.idleSessionTimeoutEnabled !== undefined && {
+          idleSessionTimeoutEnabled: policy.idleSessionTimeoutEnabled,
+        }),
+        ...(policy.idleSessionTimeout !== undefined && {
+          idleSessionTimeout: policy.idleSessionTimeout,
+        }),
+        ...(policy.idleSessionTimeoutUnit && {
+          idleSessionTimeoutUnit: timeUnitMap[policy.idleSessionTimeoutUnit],
+        }),
       }
     );
     return response.policy!;
