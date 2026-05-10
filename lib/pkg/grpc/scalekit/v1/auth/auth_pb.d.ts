@@ -137,7 +137,6 @@ export type GetAuthCustomizationsRequest = Message<"scalekit.v1.auth.GetAuthCust
 export declare const GetAuthCustomizationsRequestSchema: GenMessage<GetAuthCustomizationsRequest>;
 /**
  * PortalSettings contains feature flags and settings derived from the workspace's billing subscription
- * and feature rollout configuration.
  *
  * @generated from message scalekit.v1.auth.PortalSettings
  */
@@ -149,15 +148,6 @@ export type PortalSettings = Message<"scalekit.v1.auth.PortalSettings"> & {
      * @generated from field: bool custom_branding = 1;
      */
     customBranding: boolean;
-    /**
-     * new_self_serve_sso_scim indicates whether the new self-serve SSO/SCIM flow
-     * should be shown in the hosted pages. This is rollout-driven (feature flag),
-     * enabled for development environments or new workspaces (workspace_created_at >= cutoff),
-     * not billing-derived.
-     *
-     * @generated from field: optional bool new_self_serve_sso_scim = 2;
-     */
-    newSelfServeSsoScim?: boolean;
 };
 /**
  * Describes the message scalekit.v1.auth.PortalSettings.
@@ -457,10 +447,6 @@ export type User = Message<"scalekit.v1.auth.User"> & {
      * @generated from field: repeated string roles = 16;
      */
     roles: string[];
-    /**
-     * @generated from field: optional string organization_external_name = 17;
-     */
-    organizationExternalName?: string;
 };
 /**
  * Describes the message scalekit.v1.auth.User.

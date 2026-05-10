@@ -903,34 +903,12 @@ export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnec
      * @generated from field: google.protobuf.StringValue app_name = 22;
      */
     appName?: string;
-    /**
-     * @generated from field: optional scalekit.v1.connections.OptionalScopes optional_scopes = 23;
-     */
-    optionalScopes?: OptionalScopes;
 };
 /**
  * Describes the message scalekit.v1.connections.OAuthConnectionConfig.
  * Use `create(OAuthConnectionConfigSchema)` to create a new message.
  */
 export declare const OAuthConnectionConfigSchema: GenMessage<OAuthConnectionConfig>;
-/**
- * @generated from message scalekit.v1.connections.OptionalScopes
- */
-export type OptionalScopes = Message<"scalekit.v1.connections.OptionalScopes"> & {
-    /**
-     * @generated from field: repeated string scopes = 1;
-     */
-    scopes: string[];
-    /**
-     * @generated from field: string field_name = 2;
-     */
-    fieldName: string;
-};
-/**
- * Describes the message scalekit.v1.connections.OptionalScopes.
- * Use `create(OptionalScopesSchema)` to create a new message.
- */
-export declare const OptionalScopesSchema: GenMessage<OptionalScopes>;
 /**
  * @generated from message scalekit.v1.connections.PasswordLessConfig
  */

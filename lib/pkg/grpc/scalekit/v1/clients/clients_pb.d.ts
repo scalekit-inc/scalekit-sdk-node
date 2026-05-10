@@ -2032,34 +2032,12 @@ export type GetConsentDetailsResponse = Message<"scalekit.v1.clients.GetConsentD
      * @generated from field: scalekit.v1.clients.Application application = 5;
      */
     application?: Application;
-    /**
-     * @generated from field: scalekit.v1.clients.ConsentOrganization organization = 6;
-     */
-    organization?: ConsentOrganization;
 };
 /**
  * Describes the message scalekit.v1.clients.GetConsentDetailsResponse.
  * Use `create(GetConsentDetailsResponseSchema)` to create a new message.
  */
 export declare const GetConsentDetailsResponseSchema: GenMessage<GetConsentDetailsResponse>;
-/**
- * @generated from message scalekit.v1.clients.ConsentOrganization
- */
-export type ConsentOrganization = Message<"scalekit.v1.clients.ConsentOrganization"> & {
-    /**
-     * @generated from field: optional string organization_name = 1;
-     */
-    organizationName?: string;
-    /**
-     * @generated from field: string organization_meta_name = 2;
-     */
-    organizationMetaName: string;
-};
-/**
- * Describes the message scalekit.v1.clients.ConsentOrganization.
- * Use `create(ConsentOrganizationSchema)` to create a new message.
- */
-export declare const ConsentOrganizationSchema: GenMessage<ConsentOrganization>;
 /**
  * @generated from message scalekit.v1.clients.ConsentClient
  */
