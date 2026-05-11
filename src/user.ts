@@ -26,6 +26,8 @@ import {
   GetUserResponse,
   ListUsersRequest,
   ListUsersResponse,
+  SearchUsersRequest,
+  SearchUsersResponse,
   UpdateUserRequest,
   UpdateUserResponse,
   User,
@@ -312,6 +314,54 @@ export default class UserClient {
     pageToken?: string;
   }): Promise<ListUsersResponse> {
     return this.coreClient.connectExec(this.client.listUsers, {
+      pageSize: options?.pageSize,
+      pageToken: options?.pageToken,
+    });
+  }
+
+  /**
+   * Searches users across your Scalekit environment using a query string.
+   *
+   * This method returns users that match the provided query, with optional pagination.
+   * Useful for building user search interfaces, lookup tools, and admin dashboards
+   * that need to find users by name, email, or other indexed attributes.
+   *
+   * @param {string} query - The search query string used to match users
+   * @param {object} [options] - Optional pagination parameters
+   * @param {number} [options.pageSize] - Number of users to return per page (valid range: 10-100, default: 10)
+   * @param {string} [options.pageToken] - Token for retrieving the next page of results.
+   *                                       Obtained from the previous response's nextPageToken.
+   *
+   * @returns {Promise<SearchUsersResponse>} Response containing:
+   *   - users: Array of user objects matching the query
+   *   - nextPageToken: Token for fetching the next page (empty if no more pages)
+   *   - prevPageToken: Token for fetching the previous page
+   *   - totalSize: Total number of users matching the query
+   *
+   * @example
+   * // Search users by query
+   * const response = await scalekitClient.user.searchUsers('john@example.com');
+   *
+   * console.log('Matched users:', response.users.length);
+   *
+   * @example
+   * // Search users with pagination
+   * const response = await scalekitClient.user.searchUsers('acme', {
+   *   pageSize: 25,
+   * });
+   *
+   * @see {@link https://docs.scalekit.com/apis/#tag/users | Search Users API}
+   * @see {@link listUsers} - List all users across the environment
+   */
+  async searchUsers(
+    query: string,
+    options?: {
+      pageSize?: number;
+      pageToken?: string;
+    },
+  ): Promise<SearchUsersResponse> {
+    return this.coreClient.connectExec(this.client.searchUsers, {
+      query,
       pageSize: options?.pageSize,
       pageToken: options?.pageToken,
     });
