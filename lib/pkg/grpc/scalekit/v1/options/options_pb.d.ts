@@ -153,7 +153,45 @@ export declare enum AuthenticationType {
     /**
      * @generated from enum value: SESSION_USER = 24;
      */
-    SESSION_USER = 24
+    SESSION_USER = 24,
+    /**
+     * @generated from enum value: ACTIONS_PORTAL = 128;
+     */
+    ACTIONS_PORTAL = 128,
+    /**
+     * workspace_id,organization_id is in claims and UI in audience
+     *
+     * @generated from enum value: WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL = 240;
+     */
+    WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL = 240,
+    /**
+     * workspace_id,organization_id is in claims, UI in audience and client Id is in subject
+     *
+     * @generated from enum value: WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL_CLIENT = 244;
+     */
+    WORKSPACE_SESSION_CUSTOMER_PORTAL_ACTIONS_PORTAL_CLIENT = 244,
+    /**
+     * workspace_id is in claims and UI in audience
+     *
+     * @generated from enum value: WORKSPACE_ACTIONS_PORTAL = 192;
+     */
+    WORKSPACE_ACTIONS_PORTAL = 192,
+    /**
+     * workspace_id is in claims, UI in audience and client Id is in subject
+     *
+     * @generated from enum value: WORKSPACE_ACTIONS_PORTAL_CLIENT = 196;
+     */
+    WORKSPACE_ACTIONS_PORTAL_CLIENT = 196,
+    /**
+     * @generated from enum value: WORKSPACE_ACTIONS_PORTAL_CUSTOMER_PORTAL_CLIENT = 228;
+     */
+    WORKSPACE_ACTIONS_PORTAL_CUSTOMER_PORTAL_CLIENT = 228,
+    /**
+     * workspace_id,organization_id is in claims and UI in audience
+     *
+     * @generated from enum value: WORKSPACE_CUSTOMER_PORTAL_ACTIONS_PORTAL = 224;
+     */
+    WORKSPACE_CUSTOMER_PORTAL_ACTIONS_PORTAL = 224
 }
 /**
  * Describes the enum scalekit.v1.options.AuthenticationType.
