@@ -445,9 +445,9 @@ export default class OrganizationClient {
     /**
      * Retrieves the session policy for an organization.
      *
-     * Returns `policySource: 'APPLICATION'` when the organization inherits the application-level
-     * defaults. Returns `policySource: 'CUSTOM'` with the configured timeout values when a custom
-     * policy is active.
+     * Returns `policySource: SessionPolicyType.APPLICATION` when the organization inherits the
+     * application-level defaults. Returns `policySource: SessionPolicyType.CUSTOM` with the
+     * configured timeout values when a custom policy is active.
      *
      * @param {string} organizationId - The Scalekit organization identifier (format: "org_...")
      *
