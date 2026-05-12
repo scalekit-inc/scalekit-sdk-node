@@ -15,11 +15,19 @@ export type SessionPolicySource = 'APPLICATION' | 'CUSTOM';
 
 export type TimeUnit = 'MINUTES' | 'HOURS' | 'DAYS';
 
-export type OrganizationSessionPolicyInput = {
-  policySource: SessionPolicySource;
-  absoluteSessionTimeout?: number;
-  absoluteSessionTimeoutUnit?: TimeUnit;
+type ApplicationSessionPolicyInput = {
+  policySource: 'APPLICATION';
+};
+
+type CustomSessionPolicyInput = {
+  policySource: 'CUSTOM';
+  absoluteSessionTimeout: number;
+  absoluteSessionTimeoutUnit: TimeUnit;
   idleSessionTimeoutEnabled?: boolean;
   idleSessionTimeout?: number;
   idleSessionTimeoutUnit?: TimeUnit;
 };
+
+export type OrganizationSessionPolicyInput =
+  | ApplicationSessionPolicyInput
+  | CustomSessionPolicyInput;

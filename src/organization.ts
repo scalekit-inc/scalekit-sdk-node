@@ -609,7 +609,12 @@ export default class OrganizationClient {
       this.client.getOrganizationSessionPolicy,
       { organizationId }
     );
-    return response.policy!;
+    if (!response.policy) {
+      throw new Error(
+        `Organization session policy not found for organization: ${organizationId}`
+      );
+    }
+    return response.policy;
   }
 
   /**
@@ -645,12 +650,14 @@ export default class OrganizationClient {
     organizationId: string,
     policy: OrganizationSessionPolicyInput
   ): Promise<OrganizationSessionPolicySettings> {
-    const policySource =
-      policy.policySource === 'CUSTOM'
-        ? SessionPolicyType.CUSTOM
-        : SessionPolicyType.APPLICATION;
+    const policySourceMap: Record<'APPLICATION' | 'CUSTOM', SessionPolicyType> =
+      {
+        APPLICATION: SessionPolicyType.APPLICATION,
+        CUSTOM: SessionPolicyType.CUSTOM,
+      };
+    const policySource = policySourceMap[policy.policySource];
 
-    const timeUnitMap: Record<string, TimeUnit> = {
+    const timeUnitMap: Record<'MINUTES' | 'HOURS' | 'DAYS', TimeUnit> = {
       MINUTES: TimeUnit.MINUTES,
       HOURS: TimeUnit.HOURS,
       DAYS: TimeUnit.DAYS,
@@ -661,24 +668,27 @@ export default class OrganizationClient {
       {
         organizationId,
         policySource,
-        ...(policy.absoluteSessionTimeout !== undefined && {
+        ...(policy.policySource === 'CUSTOM' && {
           absoluteSessionTimeout: policy.absoluteSessionTimeout,
-        }),
-        ...(policy.absoluteSessionTimeoutUnit && {
           absoluteSessionTimeoutUnit:
             timeUnitMap[policy.absoluteSessionTimeoutUnit],
-        }),
-        ...(policy.idleSessionTimeoutEnabled !== undefined && {
-          idleSessionTimeoutEnabled: policy.idleSessionTimeoutEnabled,
-        }),
-        ...(policy.idleSessionTimeout !== undefined && {
-          idleSessionTimeout: policy.idleSessionTimeout,
-        }),
-        ...(policy.idleSessionTimeoutUnit && {
-          idleSessionTimeoutUnit: timeUnitMap[policy.idleSessionTimeoutUnit],
+          ...(policy.idleSessionTimeoutEnabled !== undefined && {
+            idleSessionTimeoutEnabled: policy.idleSessionTimeoutEnabled,
+          }),
+          ...(policy.idleSessionTimeout !== undefined && {
+            idleSessionTimeout: policy.idleSessionTimeout,
+          }),
+          ...(policy.idleSessionTimeoutUnit && {
+            idleSessionTimeoutUnit: timeUnitMap[policy.idleSessionTimeoutUnit],
+          }),
         }),
       }
     );
-    return response.policy!;
+    if (!response.policy) {
+      throw new Error(
+        'Updated organization session policy not found in response'
+      );
+    }
+    return response.policy;
   }
 }
