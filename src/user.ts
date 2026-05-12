@@ -19,6 +19,8 @@ import GrpcConnect from './connect';
 import CoreClient from './core';
 import { UserService } from './pkg/grpc/scalekit/v1/users/users_pb';
 import {
+  AssignUserRolesResponse,
+  AssignUserRolesRequestSchema,
   CreateUserAndMembershipRequest,
   CreateUserAndMembershipResponse,
   DeleteUserRequest,
@@ -48,9 +50,12 @@ import {
   UpdateMembership,
   CreateMembershipSchema,
   UpdateMembershipSchema,
+  RemoveUserRoleRequestSchema,
   ResendInviteRequest,
   ResendInviteResponse,
   ResendInviteRequestSchema,
+  SearchUsersResponse,
+  SearchOrganizationUsersResponse,
   ListUserRolesRequest,
   ListUserRolesResponse,
   ListUserRolesRequestSchema,
@@ -920,5 +925,94 @@ export default class UserClient {
       this.client.listUserPermissions,
       request
     );
+  }
+
+  /**
+   * Searches for users matching a query string across the environment.
+   *
+   * @param {string} query - Search query string
+   * @param {number} [pageSize] - Number of results per page
+   * @param {string} [pageToken] - Pagination token for the next page
+   *
+   * @returns {Promise<SearchUsersResponse>} Response containing matching users
+   */
+  async searchUsers(
+    query: string,
+    pageSize?: number,
+    pageToken?: string
+  ): Promise<SearchUsersResponse> {
+    return this.coreClient.connectExec(this.client.searchUsers, {
+      query,
+      pageSize,
+      pageToken,
+    });
+  }
+
+  /**
+   * Searches for users matching a query string within a specific organization.
+   *
+   * @param {string} organizationId - The organization ID to search within
+   * @param {string} query - Search query string
+   * @param {number} [pageSize] - Number of results per page
+   * @param {string} [pageToken] - Pagination token for the next page
+   *
+   * @returns {Promise<SearchOrganizationUsersResponse>} Response containing matching users
+   */
+  async searchOrganizationUsers(
+    organizationId: string,
+    query: string,
+    pageSize?: number,
+    pageToken?: string
+  ): Promise<SearchOrganizationUsersResponse> {
+    return this.coreClient.connectExec(this.client.searchOrganizationUsers, {
+      organizationId,
+      query,
+      pageSize,
+      pageToken,
+    });
+  }
+
+  /**
+   * Assigns roles to a user within a specific organization.
+   *
+   * @param {string} organizationId - The organization ID
+   * @param {string} userId - The user ID to assign roles to
+   * @param {string[]} roles - Array of role names to assign
+   *
+   * @returns {Promise<AssignUserRolesResponse>} Response containing the updated roles
+   */
+  async assignUserRoles(
+    organizationId: string,
+    userId: string,
+    roles: string[]
+  ): Promise<AssignUserRolesResponse> {
+    const request = create(AssignUserRolesRequestSchema, {
+      organizationId,
+      userId,
+      roles: roles.map((roleName) => ({ roleName })),
+    });
+    return this.coreClient.connectExec(this.client.assignUserRoles, request);
+  }
+
+  /**
+   * Removes a specific role from a user within an organization.
+   *
+   * @param {string} organizationId - The organization ID
+   * @param {string} userId - The user ID to remove the role from
+   * @param {string} roleName - The name of the role to remove
+   *
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+   */
+  async removeUserRole(
+    organizationId: string,
+    userId: string,
+    roleName: string
+  ): Promise<MessageShape<typeof EmptySchema>> {
+    const request = create(RemoveUserRoleRequestSchema, {
+      organizationId,
+      userId,
+      roleName,
+    });
+    return this.coreClient.connectExec(this.client.removeUserRole, request);
   }
 }

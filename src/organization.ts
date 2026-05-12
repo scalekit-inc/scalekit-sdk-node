@@ -8,12 +8,18 @@ import { OrganizationService } from './pkg/grpc/scalekit/v1/organizations/organi
 import {
   CreateOrganizationResponse,
   GetOrganizationResponse,
+  GetOrganizationSessionPolicyResponse,
+  GetApplicationSessionPolicyResponse,
+  GetOrganizationUserManagementSettingsResponse,
   Link,
   ListOrganizationsResponse,
   OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage,
+  SearchOrganizationsResponse,
+  SessionPolicyType,
   UpdateOrganization,
   UpdateOrganizationResponse,
   UpdateOrganizationSchema,
+  UpdateOrganizationSessionPolicyResponse,
 } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
 import {
   OrganizationSettings,
@@ -579,5 +585,123 @@ export default class OrganizationClient {
     );
 
     return response.settings;
+  }
+
+  /**
+   * Searches for organizations matching a query string.
+   *
+   * @param {string} query - Search query string
+   * @param {number} [pageSize] - Number of results per page
+   * @param {string} [pageToken] - Pagination token for the next page
+   *
+   * @returns {Promise<SearchOrganizationsResponse>} Response containing matching organizations
+   */
+  async searchOrganization(
+    query: string,
+    pageSize?: number,
+    pageToken?: string
+  ): Promise<SearchOrganizationsResponse> {
+    return this.coreClient.connectExec(this.client.searchOrganization, {
+      query,
+      pageSize,
+      pageToken,
+    });
+  }
+
+  /**
+   * Retrieves the user management settings for a specific organization.
+   *
+   * @param {string} organizationId - The Scalekit organization identifier
+   *
+   * @returns {Promise<GetOrganizationUserManagementSettingsResponse>} Response containing user management settings
+   */
+  async getOrganizationUserManagementSetting(
+    organizationId: string
+  ): Promise<GetOrganizationUserManagementSettingsResponse> {
+    return this.coreClient.connectExec(
+      this.client.getOrganizationUserManagementSetting,
+      { organizationId }
+    );
+  }
+
+  /**
+   * Updates the session policy for a specific organization.
+   *
+   * @param {string} organizationId - The Scalekit organization identifier
+   * @param {SessionPolicyType} policySource - The session policy type to apply
+   * @param {object} [options] - Optional session policy settings
+   * @param {number} [options.absoluteSessionTimeout] - Absolute session timeout value
+   * @param {number} [options.absoluteSessionTimeoutUnit] - Time unit for absolute session timeout
+   * @param {boolean} [options.idleSessionTimeoutEnabled] - Whether idle session timeout is enabled
+   * @param {number} [options.idleSessionTimeout] - Idle session timeout value
+   * @param {number} [options.idleSessionTimeoutUnit] - Time unit for idle session timeout
+   *
+   * @returns {Promise<UpdateOrganizationSessionPolicyResponse>} Response containing updated session policy
+   */
+  async updateOrganizationSessionPolicy(
+    organizationId: string,
+    policySource: SessionPolicyType,
+    options?: {
+      absoluteSessionTimeout?: number;
+      absoluteSessionTimeoutUnit?: number;
+      idleSessionTimeoutEnabled?: boolean;
+      idleSessionTimeout?: number;
+      idleSessionTimeoutUnit?: number;
+    }
+  ): Promise<UpdateOrganizationSessionPolicyResponse> {
+    return this.coreClient.connectExec(
+      this.client.updateOrganizationSessionPolicy,
+      {
+        organizationId,
+        policySource,
+        ...(options?.absoluteSessionTimeout !== undefined && {
+          absoluteSessionTimeout: options.absoluteSessionTimeout,
+        }),
+        ...(options?.absoluteSessionTimeoutUnit !== undefined && {
+          absoluteSessionTimeoutUnit: options.absoluteSessionTimeoutUnit,
+        }),
+        ...(options?.idleSessionTimeoutEnabled !== undefined && {
+          idleSessionTimeoutEnabled: options.idleSessionTimeoutEnabled,
+        }),
+        ...(options?.idleSessionTimeout !== undefined && {
+          idleSessionTimeout: options.idleSessionTimeout,
+        }),
+        ...(options?.idleSessionTimeoutUnit !== undefined && {
+          idleSessionTimeoutUnit: options.idleSessionTimeoutUnit,
+        }),
+      }
+    );
+  }
+
+  /**
+   * Retrieves the session policy for a specific organization.
+   *
+   * @param {string} organizationId - The Scalekit organization identifier
+   *
+   * @returns {Promise<GetOrganizationSessionPolicyResponse>} Response containing the organization's session policy
+   */
+  async getOrganizationSessionPolicy(
+    organizationId: string
+  ): Promise<GetOrganizationSessionPolicyResponse> {
+    return this.coreClient.connectExec(
+      this.client.getOrganizationSessionPolicy,
+      { organizationId }
+    );
+  }
+
+  /**
+   * Retrieves the application-level default session policy.
+   *
+   * @param {string} organizationId - The Scalekit organization identifier
+   *
+   * @returns {Promise<GetApplicationSessionPolicyResponse>} Response containing the application-level session policy
+   */
+  async getApplicationSessionPolicy(
+    organizationId: string
+  ): Promise<GetApplicationSessionPolicyResponse> {
+    return this.coreClient.connectExec(
+      this.client.getApplicationSessionPolicy,
+      { organizationId }
+    );
   }
 }
