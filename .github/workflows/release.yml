@@ -59,6 +59,9 @@ jobs:
             exit 1
           fi
 
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@11.5.1
+
       - name: Publish to npm
         run: |
           if [ "${{ github.event.release.prerelease }}" = "true" ]; then
