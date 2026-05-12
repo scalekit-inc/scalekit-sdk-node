@@ -2,8 +2,8 @@ import type { MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
-import { OrganizationSettings, OrganizationUserManagementSettingsInput } from './types/organization';
+import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, OrganizationSessionPolicySettings, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
+import { OrganizationSessionPolicyInput, OrganizationSettings, OrganizationUserManagementSettingsInput } from './types/organization';
 /**
  * Client for managing organizations (tenants) in your Scalekit application.
  *
@@ -442,4 +442,52 @@ export default class OrganizationClient {
      * @see {@link updateOrganizationSettings} - Update other organization settings
      */
     upsertUserManagementSettings(organizationId: string, settings: OrganizationUserManagementSettingsInput): Promise<OrganizationUserManagementSettingsMessage | undefined>;
+    /**
+     * Retrieves the session policy for an organization.
+     *
+     * Returns `policySource: SessionPolicyType.APPLICATION` when the organization inherits the
+     * application-level defaults. Returns `policySource: SessionPolicyType.CUSTOM` with the
+     * configured timeout values when a custom policy is active.
+     *
+     * @param {string} organizationId - The Scalekit organization identifier (format: "org_...")
+     *
+     * @returns {Promise<OrganizationSessionPolicySettings>} The current session policy.
+     *
+     * @example
+     * const policy = await scalekit.organization.getOrganizationSessionPolicy('org_12345');
+     * if (policy.policySource === SessionPolicyType.CUSTOM) {
+     *   console.log('Absolute timeout (minutes):', policy.absoluteSessionTimeout);
+     * }
+     */
+    getOrganizationSessionPolicy(organizationId: string): Promise<OrganizationSessionPolicySettings>;
+    /**
+     * Sets a custom session policy for an organization or reverts it to application defaults.
+     *
+     * Send `policySource: 'APPLICATION'` to revert to application-level settings. Send
+     * `policySource: 'CUSTOM'` with timeout values to activate a custom policy. The system
+     * applies the stricter of application and organization values at session creation time.
+     *
+     * @param {string} organizationId - The Scalekit organization identifier (format: "org_...")
+     * @param {OrganizationSessionPolicyInput} policy - The policy to apply.
+     *
+     * @returns {Promise<OrganizationSessionPolicySettings>} The updated session policy.
+     *
+     * @example
+     * // Set a custom policy
+     * await scalekit.organization.updateOrganizationSessionPolicy('org_12345', {
+     *   policySource: 'CUSTOM',
+     *   absoluteSessionTimeout: 360,
+     *   absoluteSessionTimeoutUnit: 'MINUTES',
+     *   idleSessionTimeoutEnabled: true,
+     *   idleSessionTimeout: 84,
+     *   idleSessionTimeoutUnit: 'MINUTES',
+     * });
+     *
+     * @example
+     * // Revert to application defaults
+     * await scalekit.organization.updateOrganizationSessionPolicy('org_12345', {
+     *   policySource: 'APPLICATION',
+     * });
+     */
+    updateOrganizationSessionPolicy(organizationId: string, policy: OrganizationSessionPolicyInput): Promise<OrganizationSessionPolicySettings>;
 }

@@ -10,12 +10,16 @@ import {
   GetOrganizationResponse,
   Link,
   ListOrganizationsResponse,
+  OrganizationSessionPolicySettings,
   OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage,
+  SessionPolicyType,
   UpdateOrganization,
   UpdateOrganizationResponse,
   UpdateOrganizationSchema,
 } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
+import { TimeUnit } from './pkg/grpc/scalekit/v1/commons/commons_pb';
 import {
+  OrganizationSessionPolicyInput,
   OrganizationSettings,
   OrganizationUserManagementSettingsInput,
 } from './types/organization';
@@ -579,5 +583,112 @@ export default class OrganizationClient {
     );
 
     return response.settings;
+  }
+
+  /**
+   * Retrieves the session policy for an organization.
+   *
+   * Returns `policySource: SessionPolicyType.APPLICATION` when the organization inherits the
+   * application-level defaults. Returns `policySource: SessionPolicyType.CUSTOM` with the
+   * configured timeout values when a custom policy is active.
+   *
+   * @param {string} organizationId - The Scalekit organization identifier (format: "org_...")
+   *
+   * @returns {Promise<OrganizationSessionPolicySettings>} The current session policy.
+   *
+   * @example
+   * const policy = await scalekit.organization.getOrganizationSessionPolicy('org_12345');
+   * if (policy.policySource === SessionPolicyType.CUSTOM) {
+   *   console.log('Absolute timeout (minutes):', policy.absoluteSessionTimeout);
+   * }
+   */
+  async getOrganizationSessionPolicy(
+    organizationId: string
+  ): Promise<OrganizationSessionPolicySettings> {
+    const response = await this.coreClient.connectExec(
+      this.client.getOrganizationSessionPolicy,
+      { organizationId }
+    );
+    if (!response.policy) {
+      throw new Error(
+        `Organization session policy not found for organization: ${organizationId}`
+      );
+    }
+    return response.policy;
+  }
+
+  /**
+   * Sets a custom session policy for an organization or reverts it to application defaults.
+   *
+   * Send `policySource: 'APPLICATION'` to revert to application-level settings. Send
+   * `policySource: 'CUSTOM'` with timeout values to activate a custom policy. The system
+   * applies the stricter of application and organization values at session creation time.
+   *
+   * @param {string} organizationId - The Scalekit organization identifier (format: "org_...")
+   * @param {OrganizationSessionPolicyInput} policy - The policy to apply.
+   *
+   * @returns {Promise<OrganizationSessionPolicySettings>} The updated session policy.
+   *
+   * @example
+   * // Set a custom policy
+   * await scalekit.organization.updateOrganizationSessionPolicy('org_12345', {
+   *   policySource: 'CUSTOM',
+   *   absoluteSessionTimeout: 360,
+   *   absoluteSessionTimeoutUnit: 'MINUTES',
+   *   idleSessionTimeoutEnabled: true,
+   *   idleSessionTimeout: 84,
+   *   idleSessionTimeoutUnit: 'MINUTES',
+   * });
+   *
+   * @example
+   * // Revert to application defaults
+   * await scalekit.organization.updateOrganizationSessionPolicy('org_12345', {
+   *   policySource: 'APPLICATION',
+   * });
+   */
+  async updateOrganizationSessionPolicy(
+    organizationId: string,
+    policy: OrganizationSessionPolicyInput
+  ): Promise<OrganizationSessionPolicySettings> {
+    const policySourceMap: Record<'APPLICATION' | 'CUSTOM', SessionPolicyType> =
+      {
+        APPLICATION: SessionPolicyType.APPLICATION,
+        CUSTOM: SessionPolicyType.CUSTOM,
+      };
+    const policySource = policySourceMap[policy.policySource];
+
+    const timeUnitMap: Record<'MINUTES' | 'HOURS' | 'DAYS', TimeUnit> = {
+      MINUTES: TimeUnit.MINUTES,
+      HOURS: TimeUnit.HOURS,
+      DAYS: TimeUnit.DAYS,
+    };
+
+    const response = await this.coreClient.connectExec(
+      this.client.updateOrganizationSessionPolicy,
+      {
+        organizationId,
+        policySource,
+        ...(policy.policySource === 'CUSTOM' && {
+          absoluteSessionTimeout: policy.absoluteSessionTimeout,
+          absoluteSessionTimeoutUnit:
+            timeUnitMap[policy.absoluteSessionTimeoutUnit],
+          ...(policy.idleSessionTimeoutEnabled !== undefined && {
+            idleSessionTimeoutEnabled: policy.idleSessionTimeoutEnabled,
+          }),
+          ...(policy.idleSessionTimeout !== undefined && {
+            idleSessionTimeout: policy.idleSessionTimeout,
+          }),
+          ...(policy.idleSessionTimeoutUnit && {
+            idleSessionTimeoutUnit: timeUnitMap[policy.idleSessionTimeoutUnit],
+          }),
+        }),
+      }
+    );
+    if (!response.policy) {
+      throw new Error(
+        'Updated organization session policy not found in response'
+      );
+    }
+    return response.policy;
   }
 }
