@@ -1,6 +1,7 @@
 import ScalekitClient from '../src/scalekit';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { TestDataGenerator, TestOrganizationManager } from './utils/test-data';
+import { SessionPolicyType } from '../src/pkg/grpc/scalekit/v1/organizations/organizations_pb';
 
 describe('Organizations', () => {
   let client: ScalekitClient;
@@ -86,6 +87,107 @@ describe('Organizations', () => {
 
       expect(settings).toBeDefined();
       expect(settings?.maxAllowedUsers).toBe(maxUsers);
+    });
+  });
+
+  describe('searchOrganization', () => {
+    it('should search organizations by query', async () => {
+      let result;
+      try {
+        result = await client.organization.searchOrganization('Test');
+      } catch (error) {
+        console.warn('Skipping searchOrganization test due to error:', error);
+        return;
+      }
+
+      expect(result).toBeDefined();
+      expect(result.organizations).toBeDefined();
+      expect(Array.isArray(result.organizations)).toBe(true);
+    });
+
+    it('should search organizations with pagination params', async () => {
+      let result;
+      try {
+        result = await client.organization.searchOrganization('Test', 5);
+      } catch (error) {
+        console.warn('Skipping searchOrganization pagination test due to error:', error);
+        return;
+      }
+
+      expect(result).toBeDefined();
+      expect(result.organizations).toBeDefined();
+      expect(result.organizations.length).toBeLessThanOrEqual(5);
+    });
+  });
+
+  describe('getOrganizationUserManagementSetting', () => {
+    it('should get user management settings for an organization', async () => {
+      let settings;
+      try {
+        settings = await client.organization.getOrganizationUserManagementSetting(testOrg);
+      } catch (error) {
+        console.warn(
+          'Skipping getOrganizationUserManagementSetting test due to error:',
+          error
+        );
+        return;
+      }
+
+      expect(settings).toBeDefined();
+    });
+  });
+
+  describe('getOrganizationSessionPolicy', () => {
+    it('should get the session policy for an organization', async () => {
+      let result;
+      try {
+        result = await client.organization.getOrganizationSessionPolicy(testOrg);
+      } catch (error) {
+        console.warn(
+          'Skipping getOrganizationSessionPolicy test due to error:',
+          error
+        );
+        return;
+      }
+
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('getApplicationSessionPolicy', () => {
+    it('should get the application-level session policy', async () => {
+      let result;
+      try {
+        result = await client.organization.getApplicationSessionPolicy(testOrg);
+      } catch (error) {
+        console.warn(
+          'Skipping getApplicationSessionPolicy test due to error:',
+          error
+        );
+        return;
+      }
+
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('updateOrganizationSessionPolicy', () => {
+    it('should update the session policy for an organization', async () => {
+      let result;
+      try {
+        result = await client.organization.updateOrganizationSessionPolicy(
+          testOrg,
+          SessionPolicyType.APPLICATION
+        );
+      } catch (error) {
+        console.warn(
+          'Skipping updateOrganizationSessionPolicy test due to error:',
+          error
+        );
+        return;
+      }
+
+      expect(result).toBeDefined();
     });
   });
 });

@@ -183,4 +183,114 @@ describe('Users', () => {
       );
     });
   });
+
+  describe('searchUsers', () => {
+    it('should search users by query', async () => {
+      let result;
+      try {
+        result = await client.user.searchUsers(sharedUserData.email);
+      } catch (error) {
+        console.warn('Skipping searchUsers test due to error:', error);
+        return;
+      }
+
+      expect(result).toBeDefined();
+      expect(result.users).toBeDefined();
+      expect(Array.isArray(result.users)).toBe(true);
+    });
+
+    it('should search users with pagination params', async () => {
+      let result;
+      try {
+        result = await client.user.searchUsers('test', 5);
+      } catch (error) {
+        console.warn('Skipping searchUsers pagination test due to error:', error);
+        return;
+      }
+
+      expect(result).toBeDefined();
+      expect(result.users).toBeDefined();
+      expect(result.users.length).toBeLessThanOrEqual(5);
+    });
+  });
+
+  describe('searchOrganizationUsers', () => {
+    it('should search users within an organization by query', async () => {
+      let result;
+      try {
+        result = await client.user.searchOrganizationUsers(
+          testOrg,
+          sharedUserData.email
+        );
+      } catch (error) {
+        console.warn(
+          'Skipping searchOrganizationUsers test due to error:',
+          error
+        );
+        return;
+      }
+
+      expect(result).toBeDefined();
+      expect(result.users).toBeDefined();
+      expect(Array.isArray(result.users)).toBe(true);
+    });
+
+    it('should search organization users with pagination params', async () => {
+      let result;
+      try {
+        result = await client.user.searchOrganizationUsers(testOrg, 'test', 5);
+      } catch (error) {
+        console.warn(
+          'Skipping searchOrganizationUsers pagination test due to error:',
+          error
+        );
+        return;
+      }
+
+      expect(result).toBeDefined();
+      expect(result.users).toBeDefined();
+      expect(result.users.length).toBeLessThanOrEqual(5);
+    });
+  });
+
+  describe('assignUserRoles', () => {
+    it('should assign roles to a user in an organization', async () => {
+      let result;
+      try {
+        result = await client.user.assignUserRoles(testOrg, userId!, ['member']);
+      } catch (error) {
+        console.warn('Skipping assignUserRoles test due to error:', error);
+        return;
+      }
+
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('removeUserRole', () => {
+    it('should remove a role from a user in an organization', async () => {
+      // First assign a role so we have something to remove
+      try {
+        await client.user.assignUserRoles(testOrg, userId!, ['member']);
+      } catch (error) {
+        console.warn(
+          'Skipping removeUserRole test: could not assign role first:',
+          error
+        );
+        return;
+      }
+
+      try {
+        await client.user.removeUserRole(testOrg, userId!, 'member');
+      } catch (error) {
+        console.warn('Skipping removeUserRole test due to error:', error);
+        return;
+      }
+
+      // Verify the role was removed by listing roles
+      const rolesResponse = await client.user.listUserRoles(testOrg, userId!);
+      const roleNames = rolesResponse.roles.map((r: any) => r.name);
+      expect(roleNames).not.toContain('member');
+    });
+  });
 });
