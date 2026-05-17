@@ -75,9 +75,11 @@ describe('Organizations', () => {
         logoUrl: LOGO_URL,
       });
 
-      expect(org.organization?.logoUrl).toBe(LOGO_URL);
-
-      await client.organization.deleteOrganization(org.organization!.id!);
+      try {
+        expect(org.organization?.logoUrl).toBe(LOGO_URL);
+      } finally {
+        await client.organization.deleteOrganization(org.organization!.id!);
+      }
     });
 
     it('should update organization to set logoUrl', async () => {

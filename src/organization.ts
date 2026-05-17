@@ -88,6 +88,19 @@ export default class OrganizationClient {
     name: string,
     options?: { externalId?: string; logoUrl?: string }
   ): Promise<CreateOrganizationResponse> {
+    if (options?.logoUrl !== undefined && options.logoUrl !== '') {
+      if (options.logoUrl.length > 2048) {
+        throw new Error('logoUrl must be 2048 characters or fewer');
+      }
+      try {
+        const u = new URL(options.logoUrl);
+        if (u.protocol !== 'https:' || u.hostname.length === 0) {
+          throw new Error();
+        }
+      } catch {
+        throw new Error('logoUrl must be a valid HTTPS URL');
+      }
+    }
     return this.coreClient.connectExec(this.client.createOrganization, {
       organization: {
         displayName: name,
