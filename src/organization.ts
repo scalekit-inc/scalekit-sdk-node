@@ -57,11 +57,14 @@ export default class OrganizationClient {
    * @param {object} [options] - Optional configuration
    * @param {string} [options.externalId] - Your system's unique identifier for this organization.
    *                                        Useful for mapping to your internal database.
+   * @param {string} [options.logoUrl] - HTTPS URL of the organization's logo image.
+   *                                     Must start with https://. Maximum 2048 characters.
    *
    * @returns {Promise<CreateOrganizationResponse>} The created organization with:
    *   - id: Scalekit's unique organization identifier
    *   - displayName: The organization's name
    *   - externalId: Unique Identifier of this organization as identified in your system. (if provided)
+   *   - logoUrl: HTTPS URL of the organization's logo image. (if provided)
    *   - createTime: When the organization was created
    *   - updateTime: When the organization was last updated
    *
@@ -71,12 +74,11 @@ export default class OrganizationClient {
    * console.log('Organization ID:', org.organization.id);
    *
    * @example
-   * // Create organization with external ID mapping
+   * // Create organization with external ID and logo
    * const org = await scalekitClient.organization.createOrganization(
    *   'Acme Corporation',
-   *   { externalId: 'customer_12345' }
+   *   { externalId: 'customer_12345', logoUrl: 'https://cdn.example.com/acme-logo.png' }
    * );
-   * // Now you can look up this organization using either Scalekit ID or your external ID
    *
    * @see {@link https://docs.scalekit.com/apis/#tag/organizations | Create Organization API}
    * @see {@link getOrganization} - Retrieve organization by Scalekit ID
@@ -84,13 +86,16 @@ export default class OrganizationClient {
    */
   async createOrganization(
     name: string,
-    options?: { externalId?: string }
+    options?: { externalId?: string; logoUrl?: string }
   ): Promise<CreateOrganizationResponse> {
     return this.coreClient.connectExec(this.client.createOrganization, {
       organization: {
         displayName: name,
         ...(options?.externalId && {
           externalId: options.externalId,
+        }),
+        ...(options?.logoUrl && {
+          logoUrl: options.logoUrl,
         }),
       },
     });

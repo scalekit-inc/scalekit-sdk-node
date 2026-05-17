@@ -289,6 +289,10 @@ export type Organization = Message<"scalekit.v1.auth.Organization"> & {
      * @generated from field: optional google.protobuf.Timestamp invitation_expires_at = 7;
      */
     invitationExpiresAt?: Timestamp;
+    /**
+     * @generated from field: optional string logo_url = 8;
+     */
+    logoUrl?: string;
 };
 /**
  * Describes the message scalekit.v1.auth.Organization.
