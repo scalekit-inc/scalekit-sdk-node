@@ -67,6 +67,53 @@ describe('Organizations', () => {
     });
   });
 
+  describe('logoUrl', () => {
+    const LOGO_URL = 'https://cdn.example.com/acme-logo.png';
+
+    it('should create organization with logoUrl', async () => {
+      const org = await client.organization.createOrganization('Logo Test Org', {
+        logoUrl: LOGO_URL,
+      });
+
+      expect(org.organization?.logoUrl).toBe(LOGO_URL);
+
+      await client.organization.deleteOrganization(org.organization!.id!);
+    });
+
+    it('should update organization to set logoUrl', async () => {
+      const updated = await client.organization.updateOrganization(testOrg, {
+        logoUrl: LOGO_URL,
+      });
+
+      expect(updated.organization?.logoUrl).toBe(LOGO_URL);
+    });
+
+    it('should update organization to clear logoUrl', async () => {
+      // first set it
+      await client.organization.updateOrganization(testOrg, { logoUrl: LOGO_URL });
+
+      // then clear it
+      const cleared = await client.organization.updateOrganization(testOrg, {
+        logoUrl: '',
+      });
+
+      expect(cleared.organization?.logoUrl ?? '').toBe('');
+    });
+
+    it('should preserve logoUrl after updateOrganizationSettings', async () => {
+      // set logo_url
+      await client.organization.updateOrganization(testOrg, { logoUrl: LOGO_URL });
+
+      // update features — must not wipe logoUrl
+      await client.organization.updateOrganizationSettings(testOrg, {
+        features: [{ name: 'sso', enabled: true }],
+      });
+
+      const fetched = await client.organization.getOrganization(testOrg);
+      expect(fetched.organization?.logoUrl).toBe(LOGO_URL);
+    });
+  });
+
   describe('upsertUserManagementSettings', () => {
     it('should upsert max allowed users', async () => {
       const maxUsers = 50;
