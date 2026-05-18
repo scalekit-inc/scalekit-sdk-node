@@ -2,7 +2,7 @@ import type { MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
+import { CreateOrganizationResponse, GetOrganizationResponse, GetOrganizationSessionPolicyResponse, GetApplicationSessionPolicyResponse, GetOrganizationUserManagementSettingsResponse, Link, ListOrganizationsResponse, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, SearchOrganizationsResponse, SessionPolicyType, UpdateOrganization, UpdateOrganizationResponse, UpdateOrganizationSessionPolicyResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
 import { OrganizationSettings, OrganizationUserManagementSettingsInput } from './types/organization';
 /**
  * Client for managing organizations (tenants) in your Scalekit application.
@@ -442,4 +442,59 @@ export default class OrganizationClient {
      * @see {@link updateOrganizationSettings} - Update other organization settings
      */
     upsertUserManagementSettings(organizationId: string, settings: OrganizationUserManagementSettingsInput): Promise<OrganizationUserManagementSettingsMessage | undefined>;
+    /**
+     * Searches for organizations matching a query string.
+     *
+     * @param {string} query - Search query string
+     * @param {number} [pageSize] - Number of results per page
+     * @param {string} [pageToken] - Pagination token for the next page
+     *
+     * @returns {Promise<SearchOrganizationsResponse>} Response containing matching organizations
+     */
+    searchOrganization(query: string, pageSize?: number, pageToken?: string): Promise<SearchOrganizationsResponse>;
+    /**
+     * Retrieves the user management settings for a specific organization.
+     *
+     * @param {string} organizationId - The Scalekit organization identifier
+     *
+     * @returns {Promise<GetOrganizationUserManagementSettingsResponse>} Response containing user management settings
+     */
+    getOrganizationUserManagementSetting(organizationId: string): Promise<GetOrganizationUserManagementSettingsResponse>;
+    /**
+     * Updates the session policy for a specific organization.
+     *
+     * @param {string} organizationId - The Scalekit organization identifier
+     * @param {SessionPolicyType} policySource - The session policy type to apply
+     * @param {object} [options] - Optional session policy settings
+     * @param {number} [options.absoluteSessionTimeout] - Absolute session timeout value
+     * @param {number} [options.absoluteSessionTimeoutUnit] - Time unit for absolute session timeout
+     * @param {boolean} [options.idleSessionTimeoutEnabled] - Whether idle session timeout is enabled
+     * @param {number} [options.idleSessionTimeout] - Idle session timeout value
+     * @param {number} [options.idleSessionTimeoutUnit] - Time unit for idle session timeout
+     *
+     * @returns {Promise<UpdateOrganizationSessionPolicyResponse>} Response containing updated session policy
+     */
+    updateOrganizationSessionPolicy(organizationId: string, policySource: SessionPolicyType, options?: {
+        absoluteSessionTimeout?: number;
+        absoluteSessionTimeoutUnit?: number;
+        idleSessionTimeoutEnabled?: boolean;
+        idleSessionTimeout?: number;
+        idleSessionTimeoutUnit?: number;
+    }): Promise<UpdateOrganizationSessionPolicyResponse>;
+    /**
+     * Retrieves the session policy for a specific organization.
+     *
+     * @param {string} organizationId - The Scalekit organization identifier
+     *
+     * @returns {Promise<GetOrganizationSessionPolicyResponse>} Response containing the organization's session policy
+     */
+    getOrganizationSessionPolicy(organizationId: string): Promise<GetOrganizationSessionPolicyResponse>;
+    /**
+     * Retrieves the application-level default session policy.
+     *
+     * @param {string} organizationId - The Scalekit organization identifier
+     *
+     * @returns {Promise<GetApplicationSessionPolicyResponse>} Response containing the application-level session policy
+     */
+    getApplicationSessionPolicy(organizationId: string): Promise<GetApplicationSessionPolicyResponse>;
 }

@@ -363,3 +363,28 @@ export declare enum IdentityProviderType {
  * Describes the enum scalekit.v1.commons.IdentityProviderType.
  */
 export declare const IdentityProviderTypeSchema: GenEnum<IdentityProviderType>;
+/**
+ * @generated from enum scalekit.v1.commons.TimeUnit
+ */
+export declare enum TimeUnit {
+    /**
+     * @generated from enum value: SESSION_TIME_UNIT_UNSPECIFIED = 0;
+     */
+    SESSION_TIME_UNIT_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: MINUTES = 1;
+     */
+    MINUTES = 1,
+    /**
+     * @generated from enum value: HOURS = 2;
+     */
+    HOURS = 2,
+    /**
+     * @generated from enum value: DAYS = 3;
+     */
+    DAYS = 3
+}
+/**
+ * Describes the enum scalekit.v1.commons.TimeUnit.
+ */
+export declare const TimeUnitSchema: GenEnum<TimeUnit>;
