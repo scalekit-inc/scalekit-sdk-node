@@ -149,9 +149,6 @@ export default class CoreClient {
             await this.sleep(backoffMs);
             return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
           }
-          if (error.code === Code.DeadlineExceeded) {
-            return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
-          }
         }
         throw ScalekitServerException.promote(error);
       }
