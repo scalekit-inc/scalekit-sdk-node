@@ -80,13 +80,16 @@ export default class OrganizationClient {
    */
   async createOrganization(
     name: string,
-    options?: { externalId?: string }
+    options?: { externalId?: string; slug?: string }
   ): Promise<CreateOrganizationResponse> {
     return this.coreClient.connectExec(this.client.createOrganization, {
       organization: {
         displayName: name,
         ...(options?.externalId && {
           externalId: options.externalId,
+        }),
+        ...(options?.slug && {
+          slug: options.slug,
         }),
       },
     });

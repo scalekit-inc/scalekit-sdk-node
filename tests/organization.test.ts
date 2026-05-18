@@ -67,6 +67,28 @@ describe('Organizations', () => {
     });
   });
 
+  describe('createOrganization with slug', () => {
+    it('should create organization with slug and return it', async () => {
+      const slug = `test-slug-${Date.now()}`;
+      const response = await client.organization.createOrganization(
+        'Slug Test Org',
+        { slug }
+      );
+      expect(response.organization?.slug).toBe(slug);
+      await client.organization.deleteOrganization(response.organization!.id!);
+    });
+  });
+
+  describe('updateOrganization with slug', () => {
+    it('should update organization slug', async () => {
+      const slug = `upd-slug-${Date.now()}`;
+      const updated = await client.organization.updateOrganization(testOrg, {
+        slug,
+      });
+      expect(updated.organization?.slug).toBe(slug);
+    });
+  });
+
   describe('upsertUserManagementSettings', () => {
     it('should upsert max allowed users', async () => {
       const maxUsers = 50;
