@@ -62,6 +62,10 @@ export type CreateOrganization = Message<"scalekit.v1.organizations.CreateOrgani
      * @generated from field: optional string slug = 9;
      */
     slug?: string;
+    /**
+     * @generated from field: optional string logo_url = 10;
+     */
+    logoUrl?: string;
 };
 /**
  * Describes the message scalekit.v1.organizations.CreateOrganization.
@@ -126,6 +130,10 @@ export type Organization = Message<"scalekit.v1.organizations.Organization"> & {
      * @generated from field: optional string slug = 9;
      */
     slug?: string;
+    /**
+     * @generated from field: optional string logo_url = 10;
+     */
+    logoUrl?: string;
 };
 /**
  * Describes the message scalekit.v1.organizations.Organization.
@@ -193,6 +201,10 @@ export type UpdateOrganization = Message<"scalekit.v1.organizations.UpdateOrgani
      * @generated from field: optional string slug = 9;
      */
     slug?: string;
+    /**
+     * @generated from field: optional string logo_url = 10;
+     */
+    logoUrl?: string;
 };
 /**
  * Describes the message scalekit.v1.organizations.UpdateOrganization.
@@ -683,6 +695,14 @@ export type ApplicationSessionPolicySettings = Message<"scalekit.v1.organization
      * @generated from field: int32 access_token_expiry = 4;
      */
     accessTokenExpiry: number;
+    /**
+     * @generated from field: optional scalekit.v1.commons.TimeUnit absolute_session_timeout_unit = 5;
+     */
+    absoluteSessionTimeoutUnit?: TimeUnit;
+    /**
+     * @generated from field: optional scalekit.v1.commons.TimeUnit idle_session_timeout_unit = 6;
+     */
+    idleSessionTimeoutUnit?: TimeUnit;
 };
 /**
  * Describes the message scalekit.v1.organizations.ApplicationSessionPolicySettings.

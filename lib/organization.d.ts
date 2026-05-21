@@ -33,6 +33,10 @@ export default class OrganizationClient {
      * @param {object} [options] - Optional configuration
      * @param {string} [options.externalId] - Your system's unique identifier for this organization.
      *                                        Useful for mapping to your internal database.
+     * @param {string} [options.logoUrl] - Publicly accessible URL of the organization's logo.
+     *                                     Used for organization logo branding on hosted pages.
+     * @param {string} [options.slug] - DNS-safe slug for the organization (e.g., "acme" or "app.acmecorp.com").
+     *                                  Used to expand {{slug}} in template redirect URIs.
      *
      * @returns {Promise<CreateOrganizationResponse>} The created organization with:
      *   - id: Scalekit's unique organization identifier
@@ -60,6 +64,8 @@ export default class OrganizationClient {
      */
     createOrganization(name: string, options?: {
         externalId?: string;
+        logoUrl?: string;
+        slug?: string;
     }): Promise<CreateOrganizationResponse>;
     /**
      * Retrieves a paginated list of all organizations in your Scalekit environment.

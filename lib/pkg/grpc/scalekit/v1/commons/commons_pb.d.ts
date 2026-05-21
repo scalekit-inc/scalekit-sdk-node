@@ -234,6 +234,34 @@ export type ExternalIdentity = Message<"scalekit.v1.commons.ExternalIdentity"> &
  */
 export declare const ExternalIdentitySchema: GenMessage<ExternalIdentity>;
 /**
+ * @generated from message scalekit.v1.commons.OrganizationCustomizations
+ */
+export type OrganizationCustomizations = Message<"scalekit.v1.commons.OrganizationCustomizations"> & {
+    /**
+     * organization_logo_branding indicates whether org logo branding is active for this environment.
+     *
+     * @generated from field: bool organization_logo_branding = 1;
+     */
+    organizationLogoBranding: boolean;
+    /**
+     * display_name is the organization's display name.
+     *
+     * @generated from field: string display_name = 2;
+     */
+    displayName: string;
+    /**
+     * logo_url is the organization's logo URL. Carried for future use.
+     *
+     * @generated from field: optional string logo_url = 3;
+     */
+    logoUrl?: string;
+};
+/**
+ * Describes the message scalekit.v1.commons.OrganizationCustomizations.
+ * Use `create(OrganizationCustomizationsSchema)` to create a new message.
+ */
+export declare const OrganizationCustomizationsSchema: GenMessage<OrganizationCustomizations>;
+/**
  * @generated from enum scalekit.v1.commons.RegionCode
  */
 export declare enum RegionCode {

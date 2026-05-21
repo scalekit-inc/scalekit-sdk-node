@@ -247,6 +247,12 @@ export type Connection = Message<"scalekit.v1.connections.Connection"> & {
         value: WebAuthConfiguration;
         case: "webauthnConfig";
     } | {
+        /**
+         * @generated from field: scalekit.v1.connections.GoogleDWDConfig google_dwd_config = 28;
+         */
+        value: GoogleDWDConfig;
+        case: "googleDwdConfig";
+    } | {
         case: undefined;
         value?: undefined;
     };
@@ -391,6 +397,12 @@ export type UpdateConnection = Message<"scalekit.v1.connections.UpdateConnection
          */
         value: WebAuthConfiguration;
         case: "webauthnConfig";
+    } | {
+        /**
+         * @generated from field: scalekit.v1.connections.GoogleDWDConfig google_dwd_config = 25;
+         */
+        value: GoogleDWDConfig;
+        case: "googleDwdConfig";
     } | {
         case: undefined;
         value?: undefined;
@@ -931,6 +943,28 @@ export type OptionalScopes = Message<"scalekit.v1.connections.OptionalScopes"> &
  * Use `create(OptionalScopesSchema)` to create a new message.
  */
 export declare const OptionalScopesSchema: GenMessage<OptionalScopes>;
+/**
+ * @generated from message scalekit.v1.connections.GoogleDWDConfig
+ */
+export type GoogleDWDConfig = Message<"scalekit.v1.connections.GoogleDWDConfig"> & {
+    /**
+     * @generated from field: google.protobuf.StringValue service_account_json = 1;
+     */
+    serviceAccountJson?: string;
+    /**
+     * @generated from field: repeated string scopes = 2;
+     */
+    scopes: string[];
+    /**
+     * @generated from field: google.protobuf.StringValue token_uri = 3;
+     */
+    tokenUri?: string;
+};
+/**
+ * Describes the message scalekit.v1.connections.GoogleDWDConfig.
+ * Use `create(GoogleDWDConfigSchema)` to create a new message.
+ */
+export declare const GoogleDWDConfigSchema: GenMessage<GoogleDWDConfig>;
 /**
  * @generated from message scalekit.v1.connections.PasswordLessConfig
  */
@@ -2024,7 +2058,11 @@ export declare enum ConnectionType {
     /**
      * @generated from enum value: TRELLO_OAUTH1 = 11;
      */
-    TRELLO_OAUTH1 = 11
+    TRELLO_OAUTH1 = 11,
+    /**
+     * @generated from enum value: GOOGLE_DWD = 12;
+     */
+    GOOGLE_DWD = 12
 }
 /**
  * Describes the enum scalekit.v1.connections.ConnectionType.
