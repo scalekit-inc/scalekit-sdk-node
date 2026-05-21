@@ -2,9 +2,7 @@ import ScalekitClient from '../src/scalekit';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { TestOrganizationManager } from './utils/test-data';
 
-// A real, publicly reachable HTTPS image URL required by the backend SSRF validator
-const TEST_LOGO_URL =
-  'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png';
+const TEST_LOGO_URL = 'https://logo.debounce.com/microsoft.com';
 
 describe('Organization Slug and Logo', () => {
   let client: ScalekitClient;
