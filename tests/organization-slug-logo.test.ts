@@ -29,7 +29,7 @@ describe('Organization Slug and Logo', () => {
   });
 
   it('should create organization with slug', async () => {
-    const slug = 'app.acmecorp.com';
+    const slug = 'auth.megasoft.com';
     const result = await client.organization.createOrganization(
       'Acme Corporation Slug Test',
       { slug }
@@ -55,8 +55,8 @@ describe('Organization Slug and Logo', () => {
     });
 
     it('should update organization slug and metadata', async () => {
-      const slug = 'app.acmecorp.com';
-      const metadata = { custom_domain: 'app.acmecorp.com' };
+      const slug = 'auth.megasoft.com';
+      const metadata = { custom_domain: 'auth.megasoft.com' };
       const result = await client.organization.updateOrganization(testOrg, {
         slug,
         metadata,
