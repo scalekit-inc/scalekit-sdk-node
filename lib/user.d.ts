@@ -15,7 +15,7 @@ import type { MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse, ListUserRolesResponse, ListUserPermissionsResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
+import { AssignUserRolesResponse, CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse, SearchUsersResponse, SearchOrganizationUsersResponse, ListUserRolesResponse, ListUserPermissionsResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
 import { CreateUserRequest, UpdateUserRequest as UpdateUserRequestType } from './types/user';
 export default class UserClient {
     private readonly grpcConnect;
@@ -668,4 +668,105 @@ export default class UserClient {
      * @see {@link listUserRoles} - List roles assigned to the user
      */
     listUserPermissions(organizationId: string, userId: string): Promise<ListUserPermissionsResponse>;
+    /**
+     * Searches for users matching a query string across the environment.
+     *
+     * @param {string} query - Search query string
+     * @param {number} [pageSize] - Number of results per page
+     * @param {string} [pageToken] - Pagination token for the next page
+     *
+     * @returns {Promise<SearchUsersResponse>} Response containing matching users
+     */
+    searchUsers(query: string, pageSize?: number, pageToken?: string): Promise<SearchUsersResponse>;
+    /**
+     * Searches for users matching a query string within a specific organization.
+     *
+     * @param {string} organizationId - The organization ID to search within
+     * @param {string} query - Search query string
+     * @param {number} [pageSize] - Number of results per page
+     * @param {string} [pageToken] - Pagination token for the next page
+     *
+     * @returns {Promise<SearchOrganizationUsersResponse>} Response containing matching users
+     */
+    searchOrganizationUsers(organizationId: string, query: string, pageSize?: number, pageToken?: string): Promise<SearchOrganizationUsersResponse>;
+    /**
+     * Assigns roles to a user within a specific organization.
+     *
+     * @param {string} organizationId - The organization ID
+     * @param {string} userId - The user ID to assign roles to
+     * @param {string[]} roles - Array of role names to assign
+     *
+     * @returns {Promise<AssignUserRolesResponse>} Response containing the updated roles
+     */
+    assignUserRoles(organizationId: string, userId: string, roles: string[]): Promise<AssignUserRolesResponse>;
+    /**
+     * Removes a specific role from a user within an organization.
+     *
+     * @param {string} organizationId - The organization ID
+     * @param {string} userId - The user ID to remove the role from
+     * @param {string} roleName - The name of the role to remove
+     *
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+     */
+    removeUserRole(organizationId: string, userId: string, roleName: string): Promise<MessageShape<typeof EmptySchema>>;
+    /**
+     * Retrieves a user by their external ID.
+     *
+     * @param {string} externalId - The external identifier for the user
+     * @returns {Promise<GetUserResponse>} Response containing the user details
+     */
+    getUserByExternalId(externalId: string): Promise<GetUserResponse>;
+    /**
+     * Updates a user identified by their external ID.
+     *
+     * @param {string} externalId - The external identifier for the user
+     * @param {UpdateUserRequestType} options - Fields to update
+     * @returns {Promise<UpdateUserResponse>} Response containing the updated user
+     */
+    updateUserByExternalId(externalId: string, options: Omit<UpdateUserRequestType, 'externalId'>): Promise<UpdateUserResponse>;
+    /**
+     * Permanently deletes a user identified by their external ID.
+     *
+     * @param {string} externalId - The external identifier for the user
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+     */
+    deleteUserByExternalId(externalId: string): Promise<MessageShape<typeof EmptySchema>>;
+    /**
+     * Adds a user identified by external ID as a member of an organization.
+     *
+     * @param {string} organizationId - The organization ID to add the user to
+     * @param {string} externalId - The external identifier for the user
+     * @param {object} [options={}] - Optional membership configuration
+     * @param {string[]} [options.roles] - Array of role names to assign
+     * @param {Record<string, string>} [options.metadata] - Custom metadata for this membership
+     * @param {boolean} [options.sendInvitationEmail] - Whether to send invitation email
+     * @returns {Promise<CreateMembershipResponse>} Response containing the updated user
+     */
+    createMembershipByExternalId(organizationId: string, externalId: string, options?: {
+        roles?: string[];
+        metadata?: Record<string, string>;
+        sendInvitationEmail?: boolean;
+    }): Promise<CreateMembershipResponse>;
+    /**
+     * Removes the membership of a user identified by external ID from an organization.
+     *
+     * @param {string} organizationId - The organization ID to remove the user from
+     * @param {string} externalId - The external identifier for the user
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+     */
+    deleteMembershipByExternalId(organizationId: string, externalId: string): Promise<MessageShape<typeof EmptySchema>>;
+    /**
+     * Updates the membership of a user identified by external ID within an organization.
+     *
+     * @param {string} organizationId - The organization ID where the membership exists
+     * @param {string} externalId - The external identifier for the user
+     * @param {object} [options={}] - Fields to update
+     * @param {string[]} [options.roles] - Array of role names to assign (replaces existing)
+     * @param {Record<string, string>} [options.metadata] - Custom metadata for this membership
+     * @returns {Promise<UpdateMembershipResponse>} Response containing the updated user
+     */
+    updateMembershipByExternalId(organizationId: string, externalId: string, options?: {
+        roles?: string[];
+        metadata?: Record<string, string>;
+    }): Promise<UpdateMembershipResponse>;
 }

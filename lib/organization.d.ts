@@ -2,8 +2,8 @@ import type { MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateOrganizationResponse, GetOrganizationResponse, Link, ListOrganizationsResponse, OrganizationSessionPolicySettings, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
-import { OrganizationSessionPolicyInput, OrganizationSettings, OrganizationUserManagementSettingsInput } from './types/organization';
+import { CreateOrganizationResponse, GetOrganizationResponse, GetOrganizationUserManagementSettingsResponse, Link, ListOrganizationsResponse, OrganizationSessionPolicySettings, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, SearchOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
+import { OrganizationSettings, OrganizationSessionPolicyInput, OrganizationUserManagementSettingsInput } from './types/organization';
 /**
  * Client for managing organizations (tenants) in your Scalekit application.
  *
@@ -449,23 +449,23 @@ export default class OrganizationClient {
      */
     upsertUserManagementSettings(organizationId: string, settings: OrganizationUserManagementSettingsInput): Promise<OrganizationUserManagementSettingsMessage | undefined>;
     /**
-     * Retrieves the session policy for an organization.
+     * Searches for organizations matching a query string.
      *
-     * Returns `policySource: SessionPolicyType.APPLICATION` when the organization inherits the
-     * application-level defaults. Returns `policySource: SessionPolicyType.CUSTOM` with the
-     * configured timeout values when a custom policy is active.
+     * @param {string} query - Search query string
+     * @param {number} [pageSize] - Number of results per page
+     * @param {string} [pageToken] - Pagination token for the next page
      *
-     * @param {string} organizationId - The Scalekit organization identifier (format: "org_...")
-     *
-     * @returns {Promise<OrganizationSessionPolicySettings>} The current session policy.
-     *
-     * @example
-     * const policy = await scalekit.organization.getOrganizationSessionPolicy('org_12345');
-     * if (policy.policySource === SessionPolicyType.CUSTOM) {
-     *   console.log('Absolute timeout (minutes):', policy.absoluteSessionTimeout);
-     * }
+     * @returns {Promise<SearchOrganizationsResponse>} Response containing matching organizations
      */
-    getOrganizationSessionPolicy(organizationId: string): Promise<OrganizationSessionPolicySettings>;
+    searchOrganization(query: string, pageSize?: number, pageToken?: string): Promise<SearchOrganizationsResponse>;
+    /**
+     * Retrieves the user management settings for a specific organization.
+     *
+     * @param {string} organizationId - The Scalekit organization identifier
+     *
+     * @returns {Promise<GetOrganizationUserManagementSettingsResponse>} Response containing user management settings
+     */
+    getOrganizationUserManagementSetting(organizationId: string): Promise<GetOrganizationUserManagementSettingsResponse>;
     /**
      * Sets a custom session policy for an organization or reverts it to application defaults.
      *
@@ -496,4 +496,18 @@ export default class OrganizationClient {
      * });
      */
     updateOrganizationSessionPolicy(organizationId: string, policy: OrganizationSessionPolicyInput): Promise<OrganizationSessionPolicySettings>;
+    /**
+     * Retrieves the session policy for a specific organization.
+     *
+     * @param {string} organizationId - The Scalekit organization identifier
+     *
+     * @returns {Promise<OrganizationSessionPolicySettings>} The organization's session policy settings
+     *
+     * @example
+     * const policy = await scalekit.organization.getOrganizationSessionPolicy('org_12345');
+     * if (policy.policySource === SessionPolicyType.CUSTOM) {
+     *   console.log('Absolute timeout (minutes):', policy.absoluteSessionTimeout);
+     * }
+     */
+    getOrganizationSessionPolicy(organizationId: string): Promise<OrganizationSessionPolicySettings>;
 }

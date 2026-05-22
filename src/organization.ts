@@ -8,19 +8,21 @@ import { OrganizationService } from './pkg/grpc/scalekit/v1/organizations/organi
 import {
   CreateOrganizationResponse,
   GetOrganizationResponse,
+  GetOrganizationUserManagementSettingsResponse,
   Link,
   ListOrganizationsResponse,
   OrganizationSessionPolicySettings,
   OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage,
+  SearchOrganizationsResponse,
   SessionPolicyType,
   UpdateOrganization,
   UpdateOrganizationResponse,
   UpdateOrganizationSchema,
 } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
-import { TimeUnit } from './pkg/grpc/scalekit/v1/commons/commons_pb';
+import { TimeUnit as ProtoTimeUnit } from './pkg/grpc/scalekit/v1/commons/commons_pb';
 import {
-  OrganizationSessionPolicyInput,
   OrganizationSettings,
+  OrganizationSessionPolicyInput,
   OrganizationUserManagementSettingsInput,
 } from './types/organization';
 
@@ -596,35 +598,43 @@ export default class OrganizationClient {
   }
 
   /**
-   * Retrieves the session policy for an organization.
+   * Searches for organizations matching a query string.
    *
-   * Returns `policySource: SessionPolicyType.APPLICATION` when the organization inherits the
-   * application-level defaults. Returns `policySource: SessionPolicyType.CUSTOM` with the
-   * configured timeout values when a custom policy is active.
+   * @param {string} query - Search query string
+   * @param {number} [pageSize] - Number of results per page
+   * @param {string} [pageToken] - Pagination token for the next page
    *
-   * @param {string} organizationId - The Scalekit organization identifier (format: "org_...")
-   *
-   * @returns {Promise<OrganizationSessionPolicySettings>} The current session policy.
-   *
-   * @example
-   * const policy = await scalekit.organization.getOrganizationSessionPolicy('org_12345');
-   * if (policy.policySource === SessionPolicyType.CUSTOM) {
-   *   console.log('Absolute timeout (minutes):', policy.absoluteSessionTimeout);
-   * }
+   * @returns {Promise<SearchOrganizationsResponse>} Response containing matching organizations
    */
-  async getOrganizationSessionPolicy(
+  async searchOrganization(
+    query: string,
+    pageSize?: number,
+    pageToken?: string
+  ): Promise<SearchOrganizationsResponse> {
+    if (!query?.trim()) {
+      throw new Error('query is required');
+    }
+    return this.coreClient.connectExec(this.client.searchOrganization, {
+      query,
+      pageSize,
+      pageToken,
+    });
+  }
+
+  /**
+   * Retrieves the user management settings for a specific organization.
+   *
+   * @param {string} organizationId - The Scalekit organization identifier
+   *
+   * @returns {Promise<GetOrganizationUserManagementSettingsResponse>} Response containing user management settings
+   */
+  async getOrganizationUserManagementSetting(
     organizationId: string
-  ): Promise<OrganizationSessionPolicySettings> {
-    const response = await this.coreClient.connectExec(
-      this.client.getOrganizationSessionPolicy,
+  ): Promise<GetOrganizationUserManagementSettingsResponse> {
+    return this.coreClient.connectExec(
+      this.client.getOrganizationUserManagementSetting,
       { organizationId }
     );
-    if (!response.policy) {
-      throw new Error(
-        `Organization session policy not found for organization: ${organizationId}`
-      );
-    }
-    return response.policy;
   }
 
   /**
@@ -667,10 +677,10 @@ export default class OrganizationClient {
       };
     const policySource = policySourceMap[policy.policySource];
 
-    const timeUnitMap: Record<'MINUTES' | 'HOURS' | 'DAYS', TimeUnit> = {
-      MINUTES: TimeUnit.MINUTES,
-      HOURS: TimeUnit.HOURS,
-      DAYS: TimeUnit.DAYS,
+    const timeUnitMap: Record<'MINUTES' | 'HOURS' | 'DAYS', ProtoTimeUnit> = {
+      MINUTES: ProtoTimeUnit.MINUTES,
+      HOURS: ProtoTimeUnit.HOURS,
+      DAYS: ProtoTimeUnit.DAYS,
     };
 
     const response = await this.coreClient.connectExec(
@@ -688,15 +698,44 @@ export default class OrganizationClient {
           ...(policy.idleSessionTimeout !== undefined && {
             idleSessionTimeout: policy.idleSessionTimeout,
           }),
-          ...(policy.idleSessionTimeoutUnit && {
+          ...(policy.idleSessionTimeoutUnit !== undefined && {
             idleSessionTimeoutUnit: timeUnitMap[policy.idleSessionTimeoutUnit],
           }),
         }),
       }
     );
+
     if (!response.policy) {
       throw new Error(
-        'Updated organization session policy not found in response'
+        `Failed to update session policy for organization: ${organizationId}`
+      );
+    }
+    return response.policy;
+  }
+
+  /**
+   * Retrieves the session policy for a specific organization.
+   *
+   * @param {string} organizationId - The Scalekit organization identifier
+   *
+   * @returns {Promise<OrganizationSessionPolicySettings>} The organization's session policy settings
+   *
+   * @example
+   * const policy = await scalekit.organization.getOrganizationSessionPolicy('org_12345');
+   * if (policy.policySource === SessionPolicyType.CUSTOM) {
+   *   console.log('Absolute timeout (minutes):', policy.absoluteSessionTimeout);
+   * }
+   */
+  async getOrganizationSessionPolicy(
+    organizationId: string
+  ): Promise<OrganizationSessionPolicySettings> {
+    const response = await this.coreClient.connectExec(
+      this.client.getOrganizationSessionPolicy,
+      { organizationId }
+    );
+    if (!response.policy) {
+      throw new Error(
+        `Organization session policy not found for organization: ${organizationId}`
       );
     }
     return response.policy;

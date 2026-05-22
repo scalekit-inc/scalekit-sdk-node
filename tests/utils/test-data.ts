@@ -63,6 +63,7 @@ export class TestDataGenerator {
       metadata: {
         source: 'test',
       },
+      sendInvitationEmail: false,
       ...overrides,
     };
   }

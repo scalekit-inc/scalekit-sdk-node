@@ -19,42 +19,29 @@ import GrpcConnect from './connect';
 import CoreClient from './core';
 import { UserService } from './pkg/grpc/scalekit/v1/users/users_pb';
 import {
-  CreateUserAndMembershipRequest,
+  AssignUserRolesResponse,
+  AssignUserRolesRequestSchema,
   CreateUserAndMembershipResponse,
-  DeleteUserRequest,
-  GetUserRequest,
   GetUserResponse,
-  ListUsersRequest,
   ListUsersResponse,
-  UpdateUserRequest,
   UpdateUserResponse,
-  User,
-  UpdateUser,
-  CreateUser,
-  CreateUserProfile,
   CreateUserSchema,
   CreateUserProfileSchema,
   UpdateUserSchema,
   CreateUserAndMembershipRequestSchema,
-  CreateMembershipRequest,
   CreateMembershipResponse,
   CreateMembershipRequestSchema,
-  DeleteMembershipRequest,
-  UpdateMembershipRequest,
   UpdateMembershipResponse,
-  ListOrganizationUsersRequest,
   ListOrganizationUsersResponse,
-  CreateMembership,
-  UpdateMembership,
   CreateMembershipSchema,
   UpdateMembershipSchema,
-  ResendInviteRequest,
+  RemoveUserRoleRequestSchema,
   ResendInviteResponse,
   ResendInviteRequestSchema,
-  ListUserRolesRequest,
+  SearchUsersResponse,
+  SearchOrganizationUsersResponse,
   ListUserRolesResponse,
   ListUserRolesRequestSchema,
-  ListUserPermissionsRequest,
   ListUserPermissionsResponse,
   ListUserPermissionsRequestSchema,
 } from './pkg/grpc/scalekit/v1/users/users_pb';
@@ -143,6 +130,7 @@ export default class UserClient {
 
     const user = create(CreateUserSchema, {
       email: options.email,
+      externalId: options.externalId,
       userProfile: options.userProfile
         ? create(CreateUserProfileSchema, {
             firstName: options.userProfile.firstName,
@@ -396,6 +384,7 @@ export default class UserClient {
     options: UpdateUserRequestType
   ): Promise<UpdateUserResponse> {
     const updateUser = create(UpdateUserSchema, {
+      externalId: options.externalId,
       userProfile: options.userProfile
         ? {
             firstName: options.userProfile.firstName,
@@ -920,5 +909,256 @@ export default class UserClient {
       this.client.listUserPermissions,
       request
     );
+  }
+
+  /**
+   * Searches for users matching a query string across the environment.
+   *
+   * @param {string} query - Search query string
+   * @param {number} [pageSize] - Number of results per page
+   * @param {string} [pageToken] - Pagination token for the next page
+   *
+   * @returns {Promise<SearchUsersResponse>} Response containing matching users
+   */
+  async searchUsers(
+    query: string,
+    pageSize?: number,
+    pageToken?: string
+  ): Promise<SearchUsersResponse> {
+    if (!query?.trim()) {
+      throw new Error('query is required');
+    }
+    return this.coreClient.connectExec(this.client.searchUsers, {
+      query,
+      pageSize,
+      pageToken,
+    });
+  }
+
+  /**
+   * Searches for users matching a query string within a specific organization.
+   *
+   * @param {string} organizationId - The organization ID to search within
+   * @param {string} query - Search query string
+   * @param {number} [pageSize] - Number of results per page
+   * @param {string} [pageToken] - Pagination token for the next page
+   *
+   * @returns {Promise<SearchOrganizationUsersResponse>} Response containing matching users
+   */
+  async searchOrganizationUsers(
+    organizationId: string,
+    query: string,
+    pageSize?: number,
+    pageToken?: string
+  ): Promise<SearchOrganizationUsersResponse> {
+    if (!organizationId?.trim()) {
+      throw new Error('organizationId is required');
+    }
+    if (!query?.trim()) {
+      throw new Error('query is required');
+    }
+    return this.coreClient.connectExec(this.client.searchOrganizationUsers, {
+      organizationId,
+      query,
+      pageSize,
+      pageToken,
+    });
+  }
+
+  /**
+   * Assigns roles to a user within a specific organization.
+   *
+   * @param {string} organizationId - The organization ID
+   * @param {string} userId - The user ID to assign roles to
+   * @param {string[]} roles - Array of role names to assign
+   *
+   * @returns {Promise<AssignUserRolesResponse>} Response containing the updated roles
+   */
+  async assignUserRoles(
+    organizationId: string,
+    userId: string,
+    roles: string[]
+  ): Promise<AssignUserRolesResponse> {
+    const request = create(AssignUserRolesRequestSchema, {
+      organizationId,
+      userId,
+      roles: roles.map((roleName) => ({ roleName })),
+    });
+    return this.coreClient.connectExec(this.client.assignUserRoles, request);
+  }
+
+  /**
+   * Removes a specific role from a user within an organization.
+   *
+   * @param {string} organizationId - The organization ID
+   * @param {string} userId - The user ID to remove the role from
+   * @param {string} roleName - The name of the role to remove
+   *
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+   */
+  async removeUserRole(
+    organizationId: string,
+    userId: string,
+    roleName: string
+  ): Promise<MessageShape<typeof EmptySchema>> {
+    const request = create(RemoveUserRoleRequestSchema, {
+      organizationId,
+      userId,
+      roleName,
+    });
+    return this.coreClient.connectExec(this.client.removeUserRole, request);
+  }
+
+  /**
+   * Retrieves a user by their external ID.
+   *
+   * @param {string} externalId - The external identifier for the user
+   * @returns {Promise<GetUserResponse>} Response containing the user details
+   */
+  async getUserByExternalId(externalId: string): Promise<GetUserResponse> {
+    return this.coreClient.connectExec(this.client.getUser, {
+      identities: {
+        case: 'externalId',
+        value: externalId,
+      },
+    });
+  }
+
+  /**
+   * Updates a user identified by their external ID.
+   *
+   * @param {string} externalId - The external identifier for the user
+   * @param {UpdateUserRequestType} options - Fields to update
+   * @returns {Promise<UpdateUserResponse>} Response containing the updated user
+   */
+  async updateUserByExternalId(
+    externalId: string,
+    options: Omit<UpdateUserRequestType, 'externalId'>
+  ): Promise<UpdateUserResponse> {
+    const updateUser = create(UpdateUserSchema, {
+      userProfile: options.userProfile
+        ? {
+            firstName: options.userProfile.firstName,
+            lastName: options.userProfile.lastName,
+          }
+        : undefined,
+      metadata: options.metadata,
+    });
+
+    return this.coreClient.connectExec(this.client.updateUser, {
+      identities: {
+        case: 'externalId',
+        value: externalId,
+      },
+      user: updateUser,
+    });
+  }
+
+  /**
+   * Permanently deletes a user identified by their external ID.
+   *
+   * @param {string} externalId - The external identifier for the user
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+   */
+  async deleteUserByExternalId(
+    externalId: string
+  ): Promise<MessageShape<typeof EmptySchema>> {
+    return this.coreClient.connectExec(this.client.deleteUser, {
+      identities: {
+        case: 'externalId',
+        value: externalId,
+      },
+    });
+  }
+
+  /**
+   * Adds a user identified by external ID as a member of an organization.
+   *
+   * @param {string} organizationId - The organization ID to add the user to
+   * @param {string} externalId - The external identifier for the user
+   * @param {object} [options={}] - Optional membership configuration
+   * @param {string[]} [options.roles] - Array of role names to assign
+   * @param {Record<string, string>} [options.metadata] - Custom metadata for this membership
+   * @param {boolean} [options.sendInvitationEmail] - Whether to send invitation email
+   * @returns {Promise<CreateMembershipResponse>} Response containing the updated user
+   */
+  async createMembershipByExternalId(
+    organizationId: string,
+    externalId: string,
+    options: {
+      roles?: string[];
+      metadata?: Record<string, string>;
+      sendInvitationEmail?: boolean;
+    } = {}
+  ): Promise<CreateMembershipResponse> {
+    const membership = create(CreateMembershipSchema, {
+      roles: options.roles?.map((role) => ({ name: role })) || [],
+      metadata: options.metadata || {},
+    });
+
+    const request = create(CreateMembershipRequestSchema, {
+      organizationId,
+      identities: {
+        case: 'externalId',
+        value: externalId,
+      },
+      membership,
+      sendInvitationEmail: options.sendInvitationEmail,
+    });
+
+    return this.coreClient.connectExec(this.client.createMembership, request);
+  }
+
+  /**
+   * Removes the membership of a user identified by external ID from an organization.
+   *
+   * @param {string} organizationId - The organization ID to remove the user from
+   * @param {string} externalId - The external identifier for the user
+   * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+   */
+  async deleteMembershipByExternalId(
+    organizationId: string,
+    externalId: string
+  ): Promise<MessageShape<typeof EmptySchema>> {
+    return this.coreClient.connectExec(this.client.deleteMembership, {
+      organizationId,
+      identities: {
+        case: 'externalId',
+        value: externalId,
+      },
+    });
+  }
+
+  /**
+   * Updates the membership of a user identified by external ID within an organization.
+   *
+   * @param {string} organizationId - The organization ID where the membership exists
+   * @param {string} externalId - The external identifier for the user
+   * @param {object} [options={}] - Fields to update
+   * @param {string[]} [options.roles] - Array of role names to assign (replaces existing)
+   * @param {Record<string, string>} [options.metadata] - Custom metadata for this membership
+   * @returns {Promise<UpdateMembershipResponse>} Response containing the updated user
+   */
+  async updateMembershipByExternalId(
+    organizationId: string,
+    externalId: string,
+    options: {
+      roles?: string[];
+      metadata?: Record<string, string>;
+    } = {}
+  ): Promise<UpdateMembershipResponse> {
+    const membership = create(UpdateMembershipSchema, {
+      roles: options.roles?.map((role) => ({ name: role })) || [],
+      metadata: options.metadata || {},
+    });
+
+    return this.coreClient.connectExec(this.client.updateMembership, {
+      organizationId,
+      identities: {
+        case: 'externalId',
+        value: externalId,
+      },
+      membership,
+    });
   }
 }
