@@ -8,7 +8,6 @@ import { OrganizationService } from './pkg/grpc/scalekit/v1/organizations/organi
 import {
   CreateOrganizationResponse,
   GetOrganizationResponse,
-  GetApplicationSessionPolicyResponse,
   GetOrganizationUserManagementSettingsResponse,
   Link,
   ListOrganizationsResponse,
@@ -612,6 +611,9 @@ export default class OrganizationClient {
     pageSize?: number,
     pageToken?: string
   ): Promise<SearchOrganizationsResponse> {
+    if (!query?.trim()) {
+      throw new Error('query is required');
+    }
     return this.coreClient.connectExec(this.client.searchOrganization, {
       query,
       pageSize,
@@ -737,21 +739,5 @@ export default class OrganizationClient {
       );
     }
     return response.policy;
-  }
-
-  /**
-   * Retrieves the application-level default session policy.
-   *
-   * @param {string} organizationId - The Scalekit organization identifier
-   *
-   * @returns {Promise<GetApplicationSessionPolicyResponse>} Response containing the application-level session policy
-   */
-  async getApplicationSessionPolicy(
-    organizationId: string
-  ): Promise<GetApplicationSessionPolicyResponse> {
-    return this.coreClient.connectExec(
-      this.client.getApplicationSessionPolicy,
-      { organizationId }
-    );
   }
 }

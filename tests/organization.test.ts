@@ -158,22 +158,6 @@ describe('Organizations', () => {
     });
   });
 
-  describe('getApplicationSessionPolicy', () => {
-    it('should return the application-level default session policy', async () => {
-      const result =
-        await client.organization.getApplicationSessionPolicy(testOrg);
-
-      expect(result).toBeDefined();
-      expect(result.applicationPolicy).toBeDefined();
-      expect(typeof result.applicationPolicy?.absoluteSessionTimeout).toBe(
-        'number'
-      );
-      expect(typeof result.applicationPolicy?.idleSessionTimeoutEnabled).toBe(
-        'boolean'
-      );
-    });
-  });
-
   describe('getOrganizationSessionPolicy', () => {
     it('should return a policy response with policySource', async () => {
       const policy =
@@ -207,6 +191,7 @@ describe('Organizations', () => {
         { externalId: orgExternalId }
       );
       orgId = response.organization?.id || '';
+      expect(orgId).toBeTruthy();
     });
 
     afterEach(async () => {

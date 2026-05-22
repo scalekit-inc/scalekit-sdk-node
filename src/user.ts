@@ -925,6 +925,9 @@ export default class UserClient {
     pageSize?: number,
     pageToken?: string
   ): Promise<SearchUsersResponse> {
+    if (!query?.trim()) {
+      throw new Error('query is required');
+    }
     return this.coreClient.connectExec(this.client.searchUsers, {
       query,
       pageSize,
@@ -948,6 +951,12 @@ export default class UserClient {
     pageSize?: number,
     pageToken?: string
   ): Promise<SearchOrganizationUsersResponse> {
+    if (!organizationId?.trim()) {
+      throw new Error('organizationId is required');
+    }
+    if (!query?.trim()) {
+      throw new Error('query is required');
+    }
     return this.coreClient.connectExec(this.client.searchOrganizationUsers, {
       organizationId,
       query,

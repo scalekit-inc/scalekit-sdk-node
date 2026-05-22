@@ -161,18 +161,17 @@ describe('Users', () => {
       const inviteUserData = TestDataGenerator.generateUserData({
         sendInvitationEmail: true,
       });
-      let inviteUserId: string | null = null;
-      try {
-        const created = await client.user.createUserAndMembership(
-          testOrg,
-          inviteUserData
-        );
-        inviteUserId = created.user?.id || null;
-        expect(inviteUserId).toBeDefined();
+      const created = await client.user.createUserAndMembership(
+        testOrg,
+        inviteUserData
+      );
+      const inviteUserId = created.user?.id!;
+      expect(inviteUserId).toBeDefined();
 
+      try {
         const resendResponse = await client.user.resendInvite(
           testOrg,
-          inviteUserId!
+          inviteUserId
         );
 
         expect(resendResponse).toBeDefined();
@@ -183,23 +182,8 @@ describe('Users', () => {
         expect(resendResponse.invite?.createdAt).toBeDefined();
         expect(resendResponse.invite?.expiresAt).toBeDefined();
         expect(resendResponse.invite?.resentCount).toBe(1);
-      } catch (error: any) {
-        // Some environments don't have a login URL configured, which blocks invite emails.
-        const msg = error?.message ?? '';
-        if (
-          msg.includes('invite not found') ||
-          msg.includes('Initiate-login URL could not be resolved')
-        ) {
-          console.warn(
-            'Skipping resendInvite happy path: environment not configured for invite emails'
-          );
-          return;
-        }
-        throw error;
       } finally {
-        if (inviteUserId) {
-          await TestUserManager.cleanupTestUser(client, testOrg, inviteUserId);
-        }
+        await TestUserManager.cleanupTestUser(client, testOrg, inviteUserId);
       }
     });
 
@@ -494,8 +478,6 @@ describe('Users', () => {
         const members = await client.user.listOrganizationUsers(secondOrg, {});
         const found = members.users.find((u) => u.id === externalUserId);
         expect(found).toBeDefined();
-
-        await client.user.deleteMembership(secondOrg, externalUserId!);
       });
     });
 

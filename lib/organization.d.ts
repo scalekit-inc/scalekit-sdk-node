@@ -2,7 +2,7 @@ import type { MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateOrganizationResponse, GetOrganizationResponse, GetApplicationSessionPolicyResponse, GetOrganizationUserManagementSettingsResponse, Link, ListOrganizationsResponse, OrganizationSessionPolicySettings, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, SearchOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
+import { CreateOrganizationResponse, GetOrganizationResponse, GetOrganizationUserManagementSettingsResponse, Link, ListOrganizationsResponse, OrganizationSessionPolicySettings, OrganizationUserManagementSettings as OrganizationUserManagementSettingsMessage, SearchOrganizationsResponse, UpdateOrganization, UpdateOrganizationResponse } from './pkg/grpc/scalekit/v1/organizations/organizations_pb';
 import { OrganizationSettings, OrganizationSessionPolicyInput, OrganizationUserManagementSettingsInput } from './types/organization';
 /**
  * Client for managing organizations (tenants) in your Scalekit application.
@@ -510,12 +510,4 @@ export default class OrganizationClient {
      * }
      */
     getOrganizationSessionPolicy(organizationId: string): Promise<OrganizationSessionPolicySettings>;
-    /**
-     * Retrieves the application-level default session policy.
-     *
-     * @param {string} organizationId - The Scalekit organization identifier
-     *
-     * @returns {Promise<GetApplicationSessionPolicyResponse>} Response containing the application-level session policy
-     */
-    getApplicationSessionPolicy(organizationId: string): Promise<GetApplicationSessionPolicyResponse>;
 }
