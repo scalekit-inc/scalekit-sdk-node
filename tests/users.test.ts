@@ -418,20 +418,11 @@ describe('Users', () => {
       });
 
       it('should create a membership using external ID', async () => {
-        let response;
-        try {
-          response = await client.user.createMembershipByExternalId(
-            secondOrg,
-            userExternalId,
-            { sendInvitationEmail: false }
-          );
-        } catch (error: any) {
-          // Backend fix (PR #2174) not yet deployed — skip gracefully
-          if (error?.message?.includes('invalid user id')) {
-            return;
-          }
-          throw error;
-        }
+        const response = await client.user.createMembershipByExternalId(
+          secondOrg,
+          userExternalId,
+          { sendInvitationEmail: false }
+        );
 
         expect(response).toBeDefined();
         expect(response.user).toBeDefined();
@@ -460,37 +451,20 @@ describe('Users', () => {
       });
 
       it('should delete a membership using external ID', async () => {
-        try {
-          await client.user.deleteMembershipByExternalId(
-            secondOrg,
-            userExternalId
-          );
-        } catch (error: any) {
-          // Backend fix (PR #2174) not yet deployed — skip gracefully
-          if (error?.message?.includes('invalid user id')) {
-            return;
-          }
-          throw error;
-        }
+        await client.user.deleteMembershipByExternalId(
+          secondOrg,
+          userExternalId
+        );
       });
     });
 
     describe('updateMembershipByExternalId', () => {
       it('should update membership roles using external ID', async () => {
-        let response;
-        try {
-          response = await client.user.updateMembershipByExternalId(
-            testOrg,
-            userExternalId,
-            { roles: ['member'] }
-          );
-        } catch (error: any) {
-          // Backend fix (PR #2174) not yet deployed — skip gracefully
-          if (error?.message?.includes('invalid user id')) {
-            return;
-          }
-          throw error;
-        }
+        const response = await client.user.updateMembershipByExternalId(
+          testOrg,
+          userExternalId,
+          { roles: ['member'] }
+        );
 
         expect(response).toBeDefined();
         expect(response.user).toBeDefined();
