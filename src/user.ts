@@ -21,48 +21,27 @@ import { UserService } from './pkg/grpc/scalekit/v1/users/users_pb';
 import {
   AssignUserRolesResponse,
   AssignUserRolesRequestSchema,
-  CreateUserAndMembershipRequest,
   CreateUserAndMembershipResponse,
-  DeleteUserRequest,
-  DeleteUserRequestSchema,
-  GetUserRequest,
   GetUserResponse,
-  ListUsersRequest,
   ListUsersResponse,
-  UpdateUserRequest,
   UpdateUserResponse,
-  User,
-  UpdateUser,
-  CreateUser,
-  CreateUserProfile,
   CreateUserSchema,
   CreateUserProfileSchema,
   UpdateUserSchema,
   CreateUserAndMembershipRequestSchema,
-  CreateMembershipRequest,
   CreateMembershipResponse,
   CreateMembershipRequestSchema,
-  DeleteMembershipRequest,
-  DeleteMembershipRequestSchema,
-  UpdateMembershipRequest,
-  UpdateMembershipRequestSchema,
   UpdateMembershipResponse,
-  ListOrganizationUsersRequest,
   ListOrganizationUsersResponse,
-  CreateMembership,
-  UpdateMembership,
   CreateMembershipSchema,
   UpdateMembershipSchema,
   RemoveUserRoleRequestSchema,
-  ResendInviteRequest,
   ResendInviteResponse,
   ResendInviteRequestSchema,
   SearchUsersResponse,
   SearchOrganizationUsersResponse,
-  ListUserRolesRequest,
   ListUserRolesResponse,
   ListUserRolesRequestSchema,
-  ListUserPermissionsRequest,
   ListUserPermissionsResponse,
   ListUserPermissionsRequestSchema,
 } from './pkg/grpc/scalekit/v1/users/users_pb';
@@ -1045,10 +1024,9 @@ export default class UserClient {
    */
   async updateUserByExternalId(
     externalId: string,
-    options: UpdateUserRequestType
+    options: Omit<UpdateUserRequestType, 'externalId'>
   ): Promise<UpdateUserResponse> {
     const updateUser = create(UpdateUserSchema, {
-      externalId: options.externalId,
       userProfile: options.userProfile
         ? {
             firstName: options.userProfile.firstName,

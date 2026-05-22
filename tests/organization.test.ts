@@ -176,103 +176,102 @@ describe('Organizations', () => {
 
   describe('getOrganizationSessionPolicy', () => {
     it('should return a policy response with policySource', async () => {
-      const result =
+      const policy =
         await client.organization.getOrganizationSessionPolicy(testOrg);
 
-      expect(result).toBeDefined();
-      expect(result.policy).toBeDefined();
-      expect(result.policy?.policySource).toBeDefined();
+      expect(policy).toBeDefined();
+      expect(policy.policySource).toBeDefined();
       expect([
         SessionPolicyType.APPLICATION,
         SessionPolicyType.CUSTOM,
-      ]).toContain(result.policy?.policySource);
+      ]).toContain(policy.policySource);
     });
 
     it('should default to APPLICATION policy for a new organization', async () => {
-      const result =
+      const policy =
         await client.organization.getOrganizationSessionPolicy(testOrg);
 
-      expect(result.policy?.policySource).toBe(SessionPolicyType.APPLICATION);
+      expect(policy.policySource).toBe(SessionPolicyType.APPLICATION);
     });
   });
 
   describe('updateOrganizationSessionPolicy', () => {
     it('should set a CUSTOM session policy with absolute timeout', async () => {
-      const result = await client.organization.updateOrganizationSessionPolicy(
+      const policy = await client.organization.updateOrganizationSessionPolicy(
         testOrg,
-        SessionPolicyType.CUSTOM,
-        { absoluteSessionTimeout: 120, absoluteSessionTimeoutUnit: 1 }
+        {
+          policySource: 'CUSTOM',
+          absoluteSessionTimeout: 120,
+          absoluteSessionTimeoutUnit: 'MINUTES',
+        }
       );
 
-      expect(result).toBeDefined();
-      expect(result.policy).toBeDefined();
-      expect(result.policy?.policySource).toBe(SessionPolicyType.CUSTOM);
+      expect(policy).toBeDefined();
+      expect(policy.policySource).toBe(SessionPolicyType.CUSTOM);
     });
 
     it('should persist the custom policy (verify via getOrganizationSessionPolicy)', async () => {
-      await client.organization.updateOrganizationSessionPolicy(
-        testOrg,
-        SessionPolicyType.CUSTOM,
-        { absoluteSessionTimeout: 240, absoluteSessionTimeoutUnit: 1 }
-      );
+      await client.organization.updateOrganizationSessionPolicy(testOrg, {
+        policySource: 'CUSTOM',
+        absoluteSessionTimeout: 240,
+        absoluteSessionTimeoutUnit: 'MINUTES',
+      });
 
       const fetched =
         await client.organization.getOrganizationSessionPolicy(testOrg);
 
-      expect(fetched.policy?.policySource).toBe(SessionPolicyType.CUSTOM);
+      expect(fetched.policySource).toBe(SessionPolicyType.CUSTOM);
     });
 
     it('should set CUSTOM policy with idle timeout enabled', async () => {
-      const result = await client.organization.updateOrganizationSessionPolicy(
+      const policy = await client.organization.updateOrganizationSessionPolicy(
         testOrg,
-        SessionPolicyType.CUSTOM,
         {
+          policySource: 'CUSTOM',
           absoluteSessionTimeout: 480,
-          absoluteSessionTimeoutUnit: 1,
+          absoluteSessionTimeoutUnit: 'MINUTES',
           idleSessionTimeoutEnabled: true,
           idleSessionTimeout: 60,
-          idleSessionTimeoutUnit: 1,
+          idleSessionTimeoutUnit: 'MINUTES',
         }
       );
 
-      expect(result).toBeDefined();
-      expect(result.policy?.policySource).toBe(SessionPolicyType.CUSTOM);
+      expect(policy).toBeDefined();
+      expect(policy.policySource).toBe(SessionPolicyType.CUSTOM);
     });
 
     it('should revert to APPLICATION policy', async () => {
-      await client.organization.updateOrganizationSessionPolicy(
-        testOrg,
-        SessionPolicyType.CUSTOM,
-        { absoluteSessionTimeout: 120, absoluteSessionTimeoutUnit: 1 }
-      );
+      await client.organization.updateOrganizationSessionPolicy(testOrg, {
+        policySource: 'CUSTOM',
+        absoluteSessionTimeout: 120,
+        absoluteSessionTimeoutUnit: 'MINUTES',
+      });
 
       const reverted =
-        await client.organization.updateOrganizationSessionPolicy(
-          testOrg,
-          SessionPolicyType.APPLICATION
-        );
+        await client.organization.updateOrganizationSessionPolicy(testOrg, {
+          policySource: 'APPLICATION',
+        });
 
       expect(reverted).toBeDefined();
-      expect(reverted.policy?.policySource).toBe(SessionPolicyType.APPLICATION);
+      expect(reverted.policySource).toBe(SessionPolicyType.APPLICATION);
     });
 
     it('full cycle: CUSTOM → verify → APPLICATION → verify', async () => {
-      await client.organization.updateOrganizationSessionPolicy(
-        testOrg,
-        SessionPolicyType.CUSTOM,
-        { absoluteSessionTimeout: 300, absoluteSessionTimeoutUnit: 1 }
-      );
+      await client.organization.updateOrganizationSessionPolicy(testOrg, {
+        policySource: 'CUSTOM',
+        absoluteSessionTimeout: 300,
+        absoluteSessionTimeoutUnit: 'MINUTES',
+      });
       const custom =
         await client.organization.getOrganizationSessionPolicy(testOrg);
-      expect(custom.policy?.policySource).toBe(SessionPolicyType.CUSTOM);
+      expect(custom.policySource).toBe(SessionPolicyType.CUSTOM);
 
-      await client.organization.updateOrganizationSessionPolicy(
-        testOrg,
-        SessionPolicyType.APPLICATION
-      );
+      await client.organization.updateOrganizationSessionPolicy(testOrg, {
+        policySource: 'APPLICATION',
+      });
       const app =
         await client.organization.getOrganizationSessionPolicy(testOrg);
-      expect(app.policy?.policySource).toBe(SessionPolicyType.APPLICATION);
+      expect(app.policySource).toBe(SessionPolicyType.APPLICATION);
     });
   });
 });

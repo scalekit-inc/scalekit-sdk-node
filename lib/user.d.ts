@@ -723,7 +723,7 @@ export default class UserClient {
      * @param {UpdateUserRequestType} options - Fields to update
      * @returns {Promise<UpdateUserResponse>} Response containing the updated user
      */
-    updateUserByExternalId(externalId: string, options: UpdateUserRequestType): Promise<UpdateUserResponse>;
+    updateUserByExternalId(externalId: string, options: Omit<UpdateUserRequestType, 'externalId'>): Promise<UpdateUserResponse>;
     /**
      * Permanently deletes a user identified by their external ID.
      *
