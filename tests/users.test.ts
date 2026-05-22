@@ -385,6 +385,37 @@ describe('Users', () => {
       }
     });
 
+    describe('createUserAndMembership with externalId', () => {
+      it('should create user with externalId and return it in the response', async () => {
+        const newExternalId = `ext_create_${TestDataGenerator.generateUniqueId()}`;
+        const userData = TestDataGenerator.generateUserData({
+          externalId: newExternalId,
+        });
+        let newUserId: string | null = null;
+
+        try {
+          const response = await client.user.createUserAndMembership(
+            testOrg,
+            userData
+          );
+
+          expect(response).toBeDefined();
+          expect(response.user).toBeDefined();
+          expect(response.user?.externalId).toBe(newExternalId);
+          newUserId = response.user?.id || null;
+
+          // Verify user is retrievable by externalId
+          const fetched = await client.user.getUserByExternalId(newExternalId);
+          expect(fetched.user?.id).toBe(newUserId);
+          expect(fetched.user?.externalId).toBe(newExternalId);
+        } finally {
+          if (newUserId) {
+            await TestUserManager.cleanupTestUser(client, testOrg, newUserId);
+          }
+        }
+      });
+    });
+
     describe('getUserByExternalId', () => {
       it('should retrieve a user by external ID', async () => {
         const response = await client.user.getUserByExternalId(userExternalId);
@@ -392,6 +423,7 @@ describe('Users', () => {
         expect(response).toBeDefined();
         expect(response.user).toBeDefined();
         expect(response.user?.id).toBe(externalUserId);
+        expect(response.user?.externalId).toBe(userExternalId);
       });
     });
 
@@ -408,6 +440,11 @@ describe('Users', () => {
         expect(response.user?.id).toBe(externalUserId);
         expect(response.user?.userProfile?.firstName).toBe('Updated');
         expect(response.user?.userProfile?.lastName).toBe('Name');
+
+        // Verify the update persisted via get
+        const fetched = await client.user.getUserByExternalId(userExternalId);
+        expect(fetched.user?.userProfile?.firstName).toBe('Updated');
+        expect(fetched.user?.userProfile?.lastName).toBe('Name');
       });
     });
 
@@ -416,6 +453,11 @@ describe('Users', () => {
         await expect(
           client.user.deleteUserByExternalId(userExternalId)
         ).resolves.toBeDefined();
+
+        // Verify the user is no longer retrievable by externalId
+        await expect(
+          client.user.getUserByExternalId(userExternalId)
+        ).rejects.toThrow();
 
         // Prevent double-delete in afterEach
         externalUserId = null;
@@ -438,26 +480,20 @@ describe('Users', () => {
       });
 
       it('should create a membership using external ID', async () => {
-        let response;
-        try {
-          response = await client.user.createMembershipByExternalId(
-            secondOrg,
-            userExternalId,
-            { sendInvitationEmail: false }
-          );
-        } catch (error: any) {
-          if (error?.message?.includes('invalid user id')) {
-            console.warn(
-              'Skipping createMembershipByExternalId: backend does not support externalId lookup for memberships in this environment'
-            );
-            return;
-          }
-          throw error;
-        }
+        const response = await client.user.createMembershipByExternalId(
+          secondOrg,
+          userExternalId,
+          { sendInvitationEmail: false }
+        );
 
         expect(response).toBeDefined();
         expect(response.user).toBeDefined();
         expect(response.user?.id).toBe(externalUserId);
+
+        // Verify the user appears as a member in the second org
+        const members = await client.user.listOrganizationUsers(secondOrg, {});
+        const found = members.users.find((u) => u.id === externalUserId);
+        expect(found).toBeDefined();
 
         await client.user.deleteMembership(secondOrg, externalUserId!);
       });
@@ -482,45 +518,37 @@ describe('Users', () => {
       });
 
       it('should delete a membership using external ID', async () => {
-        try {
-          await client.user.deleteMembershipByExternalId(
-            secondOrg,
-            userExternalId
-          );
-        } catch (error: any) {
-          if (error?.message?.includes('invalid user id')) {
-            console.warn(
-              'Skipping deleteMembershipByExternalId: backend does not support externalId lookup for memberships in this environment'
-            );
-            return;
-          }
-          throw error;
-        }
+        await client.user.deleteMembershipByExternalId(
+          secondOrg,
+          userExternalId
+        );
+
+        // Verify the user is no longer a member of the second org
+        const members = await client.user.listOrganizationUsers(secondOrg, {});
+        const found = members.users.find((u) => u.id === externalUserId);
+        expect(found).toBeUndefined();
       });
     });
 
     describe('updateMembershipByExternalId', () => {
       it('should update membership roles using external ID', async () => {
-        let response;
-        try {
-          response = await client.user.updateMembershipByExternalId(
-            testOrg,
-            userExternalId,
-            { roles: ['member'] }
-          );
-        } catch (error: any) {
-          if (error?.message?.includes('invalid user id')) {
-            console.warn(
-              'Skipping updateMembershipByExternalId: backend does not support externalId lookup for memberships in this environment'
-            );
-            return;
-          }
-          throw error;
-        }
+        const response = await client.user.updateMembershipByExternalId(
+          testOrg,
+          userExternalId,
+          { roles: ['member'] }
+        );
 
         expect(response).toBeDefined();
         expect(response.user).toBeDefined();
         expect(response.user?.id).toBe(externalUserId);
+
+        // Verify the role was actually assigned via listUserRoles
+        const rolesResponse = await client.user.listUserRoles(
+          testOrg,
+          externalUserId!
+        );
+        const roleNames = rolesResponse.roles.map((r) => r.name);
+        expect(roleNames).toContain('member');
       });
     });
   });

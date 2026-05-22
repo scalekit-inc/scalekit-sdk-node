@@ -195,6 +195,66 @@ describe('Organizations', () => {
     });
   });
 
+  describe('external_id methods', () => {
+    let orgExternalId: string;
+    let orgId: string;
+
+    beforeEach(async () => {
+      const orgData = TestDataGenerator.generateOrganizationData();
+      orgExternalId = orgData.externalId;
+      const response = await client.organization.createOrganization(
+        orgData.name,
+        { externalId: orgExternalId }
+      );
+      orgId = response.organization?.id || '';
+    });
+
+    afterEach(async () => {
+      if (orgId) {
+        await TestOrganizationManager.cleanupTestOrganization(client, orgId);
+      }
+    });
+
+    describe('createOrganization with externalId', () => {
+      it('should return externalId in the create response', async () => {
+        const response = await client.organization.getOrganization(orgId);
+        expect(response.organization?.externalId).toBe(orgExternalId);
+      });
+    });
+
+    describe('getOrganizationByExternalId', () => {
+      it('should retrieve an organization by its external ID', async () => {
+        const response =
+          await client.organization.getOrganizationByExternalId(orgExternalId);
+
+        expect(response).toBeDefined();
+        expect(response.organization).toBeDefined();
+        expect(response.organization?.id).toBe(orgId);
+        expect(response.organization?.externalId).toBe(orgExternalId);
+      });
+    });
+
+    describe('updateOrganizationByExternalId', () => {
+      it('should update an organization identified by external ID', async () => {
+        const newDisplayName = `Updated Org ${TestDataGenerator.generateUniqueId()}`;
+        const response =
+          await client.organization.updateOrganizationByExternalId(
+            orgExternalId,
+            { displayName: newDisplayName }
+          );
+
+        expect(response).toBeDefined();
+        expect(response.organization).toBeDefined();
+        expect(response.organization?.displayName).toBe(newDisplayName);
+
+        // Verify the update persisted via get
+        const fetched =
+          await client.organization.getOrganizationByExternalId(orgExternalId);
+        expect(fetched.organization?.displayName).toBe(newDisplayName);
+      });
+    });
+  });
+
   describe('updateOrganizationSessionPolicy', () => {
     it('should set a CUSTOM session policy with absolute timeout', async () => {
       const policy = await client.organization.updateOrganizationSessionPolicy(
