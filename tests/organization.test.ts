@@ -91,103 +91,187 @@ describe('Organizations', () => {
   });
 
   describe('searchOrganization', () => {
-    it('should search organizations by query', async () => {
-      let result;
-      try {
-        result = await client.organization.searchOrganization('Test');
-      } catch (error) {
-        console.warn('Skipping searchOrganization test due to error:', error);
-        return;
-      }
+    it('should return valid response structure', async () => {
+      const result = await client.organization.searchOrganization('org');
 
       expect(result).toBeDefined();
-      expect(result.organizations).toBeDefined();
       expect(Array.isArray(result.organizations)).toBe(true);
+      expect(typeof result.totalSize).toBe('number');
+      expect(typeof result.nextPageToken).toBe('string');
     });
 
-    it('should search organizations with pagination params', async () => {
-      let result;
-      try {
-        result = await client.organization.searchOrganization('Test', 5);
-      } catch (error) {
-        console.warn('Skipping searchOrganization pagination test due to error:', error);
-        return;
-      }
+    it('should respect pageSize limit', async () => {
+      const result = await client.organization.searchOrganization('org', 2);
 
       expect(result).toBeDefined();
-      expect(result.organizations).toBeDefined();
-      expect(result.organizations.length).toBeLessThanOrEqual(5);
+      expect(result.organizations.length).toBeLessThanOrEqual(2);
+    });
+
+    it('should return empty results for a highly specific non-matching query', async () => {
+      const nonce = `zzznomatch${Date.now()}`;
+      const result = await client.organization.searchOrganization(nonce, 10);
+
+      expect(result).toBeDefined();
+      expect(Array.isArray(result.organizations)).toBe(true);
+      expect(result.organizations.length).toBe(0);
+    });
+
+    it('should paginate when nextPageToken is present', async () => {
+      const firstPage = await client.organization.searchOrganization('org', 1);
+
+      expect(firstPage).toBeDefined();
+      expect(firstPage.organizations.length).toBeLessThanOrEqual(1);
+
+      if (firstPage.nextPageToken) {
+        const secondPage = await client.organization.searchOrganization(
+          'org',
+          1,
+          firstPage.nextPageToken
+        );
+
+        expect(secondPage).toBeDefined();
+        expect(Array.isArray(secondPage.organizations)).toBe(true);
+      }
     });
   });
 
   describe('getOrganizationUserManagementSetting', () => {
-    it('should get user management settings for an organization', async () => {
-      let settings;
-      try {
-        settings = await client.organization.getOrganizationUserManagementSetting(testOrg);
-      } catch (error) {
-        console.warn(
-          'Skipping getOrganizationUserManagementSetting test due to error:',
-          error
-        );
-        return;
-      }
-
-      expect(settings).toBeDefined();
-    });
-  });
-
-  describe('getOrganizationSessionPolicy', () => {
-    it('should get the session policy for an organization', async () => {
-      let result;
-      try {
-        result = await client.organization.getOrganizationSessionPolicy(testOrg);
-      } catch (error) {
-        console.warn(
-          'Skipping getOrganizationSessionPolicy test due to error:',
-          error
-        );
-        return;
-      }
+    it('should return a valid response for an existing organization', async () => {
+      const result =
+        await client.organization.getOrganizationUserManagementSetting(testOrg);
 
       expect(result).toBeDefined();
+    });
+
+    it('should reflect maxAllowedUsers after upserting settings', async () => {
+      const maxUsers = 25;
+      await client.organization.upsertUserManagementSettings(testOrg, {
+        maxAllowedUsers: maxUsers,
+      });
+
+      const result =
+        await client.organization.getOrganizationUserManagementSetting(testOrg);
+
+      expect(result).toBeDefined();
+      expect(result.settings).toBeDefined();
+      expect(result.settings?.maxAllowedUsers).toBe(maxUsers);
     });
   });
 
   describe('getApplicationSessionPolicy', () => {
-    it('should get the application-level session policy', async () => {
-      let result;
-      try {
-        result = await client.organization.getApplicationSessionPolicy(testOrg);
-      } catch (error) {
-        console.warn(
-          'Skipping getApplicationSessionPolicy test due to error:',
-          error
-        );
-        return;
-      }
+    it('should return the application-level default session policy', async () => {
+      const result =
+        await client.organization.getApplicationSessionPolicy(testOrg);
 
       expect(result).toBeDefined();
+      expect(result.applicationPolicy).toBeDefined();
+      expect(typeof result.applicationPolicy?.absoluteSessionTimeout).toBe(
+        'number'
+      );
+      expect(
+        typeof result.applicationPolicy?.idleSessionTimeoutEnabled
+      ).toBe('boolean');
+    });
+  });
+
+  describe('getOrganizationSessionPolicy', () => {
+    it('should return a policy response with policySource', async () => {
+      const result =
+        await client.organization.getOrganizationSessionPolicy(testOrg);
+
+      expect(result).toBeDefined();
+      expect(result.policy).toBeDefined();
+      expect(result.policy?.policySource).toBeDefined();
+      expect(
+        [SessionPolicyType.APPLICATION, SessionPolicyType.CUSTOM]
+      ).toContain(result.policy?.policySource);
+    });
+
+    it('should default to APPLICATION policy for a new organization', async () => {
+      const result =
+        await client.organization.getOrganizationSessionPolicy(testOrg);
+
+      expect(result.policy?.policySource).toBe(SessionPolicyType.APPLICATION);
     });
   });
 
   describe('updateOrganizationSessionPolicy', () => {
-    it('should update the session policy for an organization', async () => {
-      let result;
-      try {
-        result = await client.organization.updateOrganizationSessionPolicy(
+    it('should set a CUSTOM session policy with absolute timeout', async () => {
+      const result = await client.organization.updateOrganizationSessionPolicy(
+        testOrg,
+        SessionPolicyType.CUSTOM,
+        { absoluteSessionTimeout: 120, absoluteSessionTimeoutUnit: 1 }
+      );
+
+      expect(result).toBeDefined();
+      expect(result.policy).toBeDefined();
+      expect(result.policy?.policySource).toBe(SessionPolicyType.CUSTOM);
+    });
+
+    it('should persist the custom policy (verify via getOrganizationSessionPolicy)', async () => {
+      await client.organization.updateOrganizationSessionPolicy(
+        testOrg,
+        SessionPolicyType.CUSTOM,
+        { absoluteSessionTimeout: 240, absoluteSessionTimeoutUnit: 1 }
+      );
+
+      const fetched =
+        await client.organization.getOrganizationSessionPolicy(testOrg);
+
+      expect(fetched.policy?.policySource).toBe(SessionPolicyType.CUSTOM);
+    });
+
+    it('should set CUSTOM policy with idle timeout enabled', async () => {
+      const result = await client.organization.updateOrganizationSessionPolicy(
+        testOrg,
+        SessionPolicyType.CUSTOM,
+        {
+          absoluteSessionTimeout: 480,
+          absoluteSessionTimeoutUnit: 1,
+          idleSessionTimeoutEnabled: true,
+          idleSessionTimeout: 60,
+          idleSessionTimeoutUnit: 1,
+        }
+      );
+
+      expect(result).toBeDefined();
+      expect(result.policy?.policySource).toBe(SessionPolicyType.CUSTOM);
+    });
+
+    it('should revert to APPLICATION policy', async () => {
+      await client.organization.updateOrganizationSessionPolicy(
+        testOrg,
+        SessionPolicyType.CUSTOM,
+        { absoluteSessionTimeout: 120, absoluteSessionTimeoutUnit: 1 }
+      );
+
+      const reverted =
+        await client.organization.updateOrganizationSessionPolicy(
           testOrg,
           SessionPolicyType.APPLICATION
         );
-      } catch (error) {
-        console.warn(
-          'Skipping updateOrganizationSessionPolicy test due to error:',
-          error
-        );
-        return;
-      }
 
-      expect(result).toBeDefined();
+      expect(reverted).toBeDefined();
+      expect(reverted.policy?.policySource).toBe(SessionPolicyType.APPLICATION);
+    });
+
+    it('full cycle: CUSTOM → verify → APPLICATION → verify', async () => {
+      await client.organization.updateOrganizationSessionPolicy(
+        testOrg,
+        SessionPolicyType.CUSTOM,
+        { absoluteSessionTimeout: 300, absoluteSessionTimeoutUnit: 1 }
+      );
+      const custom =
+        await client.organization.getOrganizationSessionPolicy(testOrg);
+      expect(custom.policy?.policySource).toBe(SessionPolicyType.CUSTOM);
+
+      await client.organization.updateOrganizationSessionPolicy(
+        testOrg,
+        SessionPolicyType.APPLICATION
+      );
+      const app =
+        await client.organization.getOrganizationSessionPolicy(testOrg);
+      expect(app.policy?.policySource).toBe(SessionPolicyType.APPLICATION);
     });
   });
 });
