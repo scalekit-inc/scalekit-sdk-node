@@ -418,22 +418,11 @@ describe('Users', () => {
       });
 
       it('should create a membership using external ID', async () => {
-        let response;
-        try {
-          response = await client.user.createMembershipByExternalId(
-            secondOrg,
-            userExternalId,
-            { sendInvitationEmail: false }
-          );
-        } catch (error: any) {
-          if (error?.message?.includes('invalid user id')) {
-            console.warn(
-              'Skipping createMembershipByExternalId: backend does not yet support external_id for membership operations'
-            );
-            return;
-          }
-          throw error;
-        }
+        const response = await client.user.createMembershipByExternalId(
+          secondOrg,
+          userExternalId,
+          { sendInvitationEmail: false }
+        );
 
         expect(response).toBeDefined();
         expect(response.user).toBeDefined();
@@ -463,40 +452,19 @@ describe('Users', () => {
       });
 
       it('should delete a membership using external ID', async () => {
-        try {
-          await expect(
-            client.user.deleteMembershipByExternalId(secondOrg, userExternalId)
-          ).resolves.toBeDefined();
-        } catch (error: any) {
-          if (error?.message?.includes('invalid user id')) {
-            console.warn(
-              'Skipping deleteMembershipByExternalId: backend does not yet support external_id for membership operations'
-            );
-            return;
-          }
-          throw error;
-        }
+        await expect(
+          client.user.deleteMembershipByExternalId(secondOrg, userExternalId)
+        ).resolves.toBeDefined();
       });
     });
 
     describe('updateMembershipByExternalId', () => {
       it('should update membership roles using external ID', async () => {
-        let response;
-        try {
-          response = await client.user.updateMembershipByExternalId(
-            testOrg,
-            userExternalId,
-            { roles: ['member'] }
-          );
-        } catch (error: any) {
-          if (error?.message?.includes('invalid user id')) {
-            console.warn(
-              'Skipping updateMembershipByExternalId: backend does not yet support external_id for membership operations'
-            );
-            return;
-          }
-          throw error;
-        }
+        const response = await client.user.updateMembershipByExternalId(
+          testOrg,
+          userExternalId,
+          { roles: ['member'] }
+        );
 
         expect(response).toBeDefined();
         expect(response.user).toBeDefined();
