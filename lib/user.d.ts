@@ -709,4 +709,64 @@ export default class UserClient {
      * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
      */
     removeUserRole(organizationId: string, userId: string, roleName: string): Promise<MessageShape<typeof EmptySchema>>;
+    /**
+     * Retrieves a user by their external ID.
+     *
+     * @param {string} externalId - The external identifier for the user
+     * @returns {Promise<GetUserResponse>} Response containing the user details
+     */
+    getUserByExternalId(externalId: string): Promise<GetUserResponse>;
+    /**
+     * Updates a user identified by their external ID.
+     *
+     * @param {string} externalId - The external identifier for the user
+     * @param {UpdateUserRequestType} options - Fields to update
+     * @returns {Promise<UpdateUserResponse>} Response containing the updated user
+     */
+    updateUserByExternalId(externalId: string, options: UpdateUserRequestType): Promise<UpdateUserResponse>;
+    /**
+     * Permanently deletes a user identified by their external ID.
+     *
+     * @param {string} externalId - The external identifier for the user
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+     */
+    deleteUserByExternalId(externalId: string): Promise<MessageShape<typeof EmptySchema>>;
+    /**
+     * Adds a user identified by external ID as a member of an organization.
+     *
+     * @param {string} organizationId - The organization ID to add the user to
+     * @param {string} externalId - The external identifier for the user
+     * @param {object} [options={}] - Optional membership configuration
+     * @param {string[]} [options.roles] - Array of role names to assign
+     * @param {Record<string, string>} [options.metadata] - Custom metadata for this membership
+     * @param {boolean} [options.sendInvitationEmail] - Whether to send invitation email
+     * @returns {Promise<CreateMembershipResponse>} Response containing the updated user
+     */
+    createMembershipByExternalId(organizationId: string, externalId: string, options?: {
+        roles?: string[];
+        metadata?: Record<string, string>;
+        sendInvitationEmail?: boolean;
+    }): Promise<CreateMembershipResponse>;
+    /**
+     * Removes the membership of a user identified by external ID from an organization.
+     *
+     * @param {string} organizationId - The organization ID to remove the user from
+     * @param {string} externalId - The external identifier for the user
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+     */
+    deleteMembershipByExternalId(organizationId: string, externalId: string): Promise<MessageShape<typeof EmptySchema>>;
+    /**
+     * Updates the membership of a user identified by external ID within an organization.
+     *
+     * @param {string} organizationId - The organization ID where the membership exists
+     * @param {string} externalId - The external identifier for the user
+     * @param {object} [options={}] - Fields to update
+     * @param {string[]} [options.roles] - Array of role names to assign (replaces existing)
+     * @param {Record<string, string>} [options.metadata] - Custom metadata for this membership
+     * @returns {Promise<UpdateMembershipResponse>} Response containing the updated user
+     */
+    updateMembershipByExternalId(organizationId: string, externalId: string, options?: {
+        roles?: string[];
+        metadata?: Record<string, string>;
+    }): Promise<UpdateMembershipResponse>;
 }

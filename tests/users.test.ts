@@ -282,10 +282,7 @@ describe('Users', () => {
 
     it('should return empty results for a non-matching query', async () => {
       const nonce = `zzznomatch_${Date.now()}@example.invalid`;
-      const result = await client.user.searchOrganizationUsers(
-        testOrg,
-        nonce
-      );
+      const result = await client.user.searchOrganizationUsers(testOrg, nonce);
 
       expect(result).toBeDefined();
       expect(result.users.length).toBe(0);
@@ -409,7 +406,8 @@ describe('Users', () => {
       let secondOrg: string;
 
       beforeEach(async () => {
-        secondOrg = await TestOrganizationManager.createTestOrganization(client);
+        secondOrg =
+          await TestOrganizationManager.createTestOrganization(client);
       });
 
       afterEach(async () => {
@@ -439,7 +437,8 @@ describe('Users', () => {
       let secondOrg: string;
 
       beforeEach(async () => {
-        secondOrg = await TestOrganizationManager.createTestOrganization(client);
+        secondOrg =
+          await TestOrganizationManager.createTestOrganization(client);
         await client.user.createMembership(secondOrg, externalUserId!, {
           sendInvitationEmail: false,
         });

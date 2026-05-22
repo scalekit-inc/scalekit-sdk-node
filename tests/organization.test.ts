@@ -168,9 +168,9 @@ describe('Organizations', () => {
       expect(typeof result.applicationPolicy?.absoluteSessionTimeout).toBe(
         'number'
       );
-      expect(
-        typeof result.applicationPolicy?.idleSessionTimeoutEnabled
-      ).toBe('boolean');
+      expect(typeof result.applicationPolicy?.idleSessionTimeoutEnabled).toBe(
+        'boolean'
+      );
     });
   });
 
@@ -182,9 +182,10 @@ describe('Organizations', () => {
       expect(result).toBeDefined();
       expect(result.policy).toBeDefined();
       expect(result.policy?.policySource).toBeDefined();
-      expect(
-        [SessionPolicyType.APPLICATION, SessionPolicyType.CUSTOM]
-      ).toContain(result.policy?.policySource);
+      expect([
+        SessionPolicyType.APPLICATION,
+        SessionPolicyType.CUSTOM,
+      ]).toContain(result.policy?.policySource);
     });
 
     it('should default to APPLICATION policy for a new organization', async () => {
