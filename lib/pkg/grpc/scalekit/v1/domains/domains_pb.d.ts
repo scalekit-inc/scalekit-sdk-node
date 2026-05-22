@@ -1,5 +1,5 @@
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import type { BoolValueSchema, EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
+import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 /**
  * Describes the file scalekit/v1/domains/domains.proto.
@@ -305,6 +305,20 @@ export type VerifyDomainRequest = Message<"scalekit.v1.domains.VerifyDomainReque
  */
 export declare const VerifyDomainRequestSchema: GenMessage<VerifyDomainRequest>;
 /**
+ * @generated from message scalekit.v1.domains.VerifyDomainResponse
+ */
+export type VerifyDomainResponse = Message<"scalekit.v1.domains.VerifyDomainResponse"> & {
+    /**
+     * @generated from field: bool verified = 1;
+     */
+    verified: boolean;
+};
+/**
+ * Describes the message scalekit.v1.domains.VerifyDomainResponse.
+ * Use `create(VerifyDomainResponseSchema)` to create a new message.
+ */
+export declare const VerifyDomainResponseSchema: GenMessage<VerifyDomainResponse>;
+/**
  * @generated from message scalekit.v1.domains.ListDomainResponse
  */
 export type ListDomainResponse = Message<"scalekit.v1.domains.ListDomainResponse"> & {
@@ -402,12 +416,41 @@ export type Domain = Message<"scalekit.v1.domains.Domain"> & {
      * @generated from field: scalekit.v1.domains.DomainType domain_type = 12;
      */
     domainType: DomainType;
+    /**
+     * @generated from field: scalekit.v1.domains.VerificationMethod verification_method = 13;
+     */
+    verificationMethod: VerificationMethod;
 };
 /**
  * Describes the message scalekit.v1.domains.Domain.
  * Use `create(DomainSchema)` to create a new message.
  */
 export declare const DomainSchema: GenMessage<Domain>;
+/**
+ * @generated from enum scalekit.v1.domains.VerificationMethod
+ */
+export declare enum VerificationMethod {
+    /**
+     * @generated from enum value: VERIFICATION_METHOD_UNSPECIFIED = 0;
+     */
+    VERIFICATION_METHOD_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: ADMIN = 1;
+     */
+    ADMIN = 1,
+    /**
+     * @generated from enum value: DNS = 2;
+     */
+    DNS = 2,
+    /**
+     * @generated from enum value: NOT_APPLICABLE = 3;
+     */
+    NOT_APPLICABLE = 3
+}
+/**
+ * Describes the enum scalekit.v1.domains.VerificationMethod.
+ */
+export declare const VerificationMethodSchema: GenEnum<VerificationMethod>;
 /**
  * @generated from enum scalekit.v1.domains.VerificationStatus
  */
@@ -484,7 +527,7 @@ export declare const DomainService: GenService<{
     verifyDomain: {
         methodKind: "unary";
         input: typeof VerifyDomainRequestSchema;
-        output: typeof BoolValueSchema;
+        output: typeof VerifyDomainResponseSchema;
     };
     /**
      * @generated from rpc scalekit.v1.domains.DomainService.GetDomain
