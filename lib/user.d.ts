@@ -15,7 +15,7 @@ import type { MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse, ListUserRolesResponse, ListUserPermissionsResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
+import { AssignUserRolesResponse, CreateUserAndMembershipResponse, GetUserResponse, ListUsersResponse, UpdateUserResponse, CreateMembershipResponse, UpdateMembershipResponse, ListOrganizationUsersResponse, ResendInviteResponse, SearchUsersResponse, SearchOrganizationUsersResponse, ListUserRolesResponse, ListUserPermissionsResponse } from './pkg/grpc/scalekit/v1/users/users_pb';
 import { CreateUserRequest, UpdateUserRequest as UpdateUserRequestType } from './types/user';
 export default class UserClient {
     private readonly grpcConnect;
@@ -668,4 +668,45 @@ export default class UserClient {
      * @see {@link listUserRoles} - List roles assigned to the user
      */
     listUserPermissions(organizationId: string, userId: string): Promise<ListUserPermissionsResponse>;
+    /**
+     * Searches for users matching a query string across the environment.
+     *
+     * @param {string} query - Search query string
+     * @param {number} [pageSize] - Number of results per page
+     * @param {string} [pageToken] - Pagination token for the next page
+     *
+     * @returns {Promise<SearchUsersResponse>} Response containing matching users
+     */
+    searchUsers(query: string, pageSize?: number, pageToken?: string): Promise<SearchUsersResponse>;
+    /**
+     * Searches for users matching a query string within a specific organization.
+     *
+     * @param {string} organizationId - The organization ID to search within
+     * @param {string} query - Search query string
+     * @param {number} [pageSize] - Number of results per page
+     * @param {string} [pageToken] - Pagination token for the next page
+     *
+     * @returns {Promise<SearchOrganizationUsersResponse>} Response containing matching users
+     */
+    searchOrganizationUsers(organizationId: string, query: string, pageSize?: number, pageToken?: string): Promise<SearchOrganizationUsersResponse>;
+    /**
+     * Assigns roles to a user within a specific organization.
+     *
+     * @param {string} organizationId - The organization ID
+     * @param {string} userId - The user ID to assign roles to
+     * @param {string[]} roles - Array of role names to assign
+     *
+     * @returns {Promise<AssignUserRolesResponse>} Response containing the updated roles
+     */
+    assignUserRoles(organizationId: string, userId: string, roles: string[]): Promise<AssignUserRolesResponse>;
+    /**
+     * Removes a specific role from a user within an organization.
+     *
+     * @param {string} organizationId - The organization ID
+     * @param {string} userId - The user ID to remove the role from
+     * @param {string} roleName - The name of the role to remove
+     *
+     * @returns {Promise<MessageShape<typeof EmptySchema>>} Empty response on success
+     */
+    removeUserRole(organizationId: string, userId: string, roleName: string): Promise<MessageShape<typeof EmptySchema>>;
 }
