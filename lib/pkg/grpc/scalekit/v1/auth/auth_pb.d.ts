@@ -1,5 +1,6 @@
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
+import type { OrganizationCustomizations } from "../commons/commons_pb";
 import type { ConnectionType, PasswordlessType } from "../connections/connections_pb";
 import type { JsonObject, Message } from "@bufbuild/protobuf";
 /**
@@ -178,6 +179,12 @@ export type GetAuthCustomizationsResponse = Message<"scalekit.v1.auth.GetAuthCus
      * @generated from field: scalekit.v1.auth.PortalSettings settings = 3;
      */
     settings?: PortalSettings;
+    /**
+     * organization_customizations is set when the auth request is scoped to a specific organization.
+     *
+     * @generated from field: optional scalekit.v1.commons.OrganizationCustomizations organization_customizations = 4;
+     */
+    organizationCustomizations?: OrganizationCustomizations;
 };
 /**
  * Describes the message scalekit.v1.auth.GetAuthCustomizationsResponse.
@@ -289,6 +296,10 @@ export type Organization = Message<"scalekit.v1.auth.Organization"> & {
      * @generated from field: optional google.protobuf.Timestamp invitation_expires_at = 7;
      */
     invitationExpiresAt?: Timestamp;
+    /**
+     * @generated from field: optional string logo_url = 8;
+     */
+    logoUrl?: string;
 };
 /**
  * Describes the message scalekit.v1.auth.Organization.

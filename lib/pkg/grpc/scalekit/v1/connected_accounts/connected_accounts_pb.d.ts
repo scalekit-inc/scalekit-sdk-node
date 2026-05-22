@@ -564,6 +564,14 @@ export type AuthorizationDetails = Message<"scalekit.v1.connected_accounts.Autho
         value: StaticAuth;
         case: "staticAuth";
     } | {
+        /**
+         * Google Domain-Wide Delegation credentials
+         *
+         * @generated from field: scalekit.v1.connected_accounts.GoogleDWDAuth google_dwd = 3;
+         */
+        value: GoogleDWDAuth;
+        case: "googleDwd";
+    } | {
         case: undefined;
         value?: undefined;
     };
@@ -573,6 +581,35 @@ export type AuthorizationDetails = Message<"scalekit.v1.connected_accounts.Autho
  * Use `create(AuthorizationDetailsSchema)` to create a new message.
  */
 export declare const AuthorizationDetailsSchema: GenMessage<AuthorizationDetails>;
+/**
+ * Google Domain-Wide Delegation authentication — used for GOOGLE_DWD connections.
+ * Send only subject in requests; access_token, scopes, and token_expires_at are response-only.
+ *
+ * @generated from message scalekit.v1.connected_accounts.GoogleDWDAuth
+ */
+export type GoogleDWDAuth = Message<"scalekit.v1.connected_accounts.GoogleDWDAuth"> & {
+    /**
+     * @generated from field: string subject = 1;
+     */
+    subject: string;
+    /**
+     * @generated from field: string access_token = 2;
+     */
+    accessToken: string;
+    /**
+     * @generated from field: repeated string scopes = 3;
+     */
+    scopes: string[];
+    /**
+     * @generated from field: google.protobuf.Timestamp token_expires_at = 4;
+     */
+    tokenExpiresAt?: Timestamp;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.GoogleDWDAuth.
+ * Use `create(GoogleDWDAuthSchema)` to create a new message.
+ */
+export declare const GoogleDWDAuthSchema: GenMessage<GoogleDWDAuth>;
 /**
  * OAuth 2.0 access and refresh tokens with scopes
  *
@@ -779,7 +816,13 @@ export declare enum ConnectorType {
      *
      * @generated from enum value: TRELLO_OAUTH1 = 8;
      */
-    TRELLO_OAUTH1 = 8
+    TRELLO_OAUTH1 = 8,
+    /**
+     * Google Domain-Wide Delegation
+     *
+     * @generated from enum value: GOOGLE_DWD = 9;
+     */
+    GOOGLE_DWD = 9
 }
 /**
  * Describes the enum scalekit.v1.connected_accounts.ConnectorType.
