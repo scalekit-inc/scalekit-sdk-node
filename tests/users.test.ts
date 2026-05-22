@@ -342,4 +342,135 @@ describe('Users', () => {
       expect(roles).not.toContain('member');
     });
   });
+
+  describe('external_id methods', () => {
+    let externalUserId: string | null = null;
+    let userExternalId: string;
+
+    beforeEach(async () => {
+      // Create a user with a unique externalId for external_id tests
+      userExternalId = `ext_${TestDataGenerator.generateUniqueId()}`;
+      const userData = TestDataGenerator.generateUserData({
+        externalId: userExternalId,
+      });
+      const response = await client.user.createUserAndMembership(
+        testOrg,
+        userData
+      );
+      externalUserId = response.user?.id || null;
+      expect(externalUserId).toBeDefined();
+    });
+
+    afterEach(async () => {
+      if (externalUserId) {
+        await TestUserManager.cleanupTestUser(client, testOrg, externalUserId);
+        externalUserId = null;
+      }
+    });
+
+    describe('getUserByExternalId', () => {
+      it('should retrieve a user by external ID', async () => {
+        const response = await client.user.getUserByExternalId(userExternalId);
+
+        expect(response).toBeDefined();
+        expect(response.user).toBeDefined();
+        expect(response.user?.id).toBe(externalUserId);
+      });
+    });
+
+    describe('updateUserByExternalId', () => {
+      it('should update a user identified by external ID', async () => {
+        const updateData = TestDataGenerator.generateUserUpdateData();
+        const response = await client.user.updateUserByExternalId(
+          userExternalId,
+          updateData
+        );
+
+        expect(response).toBeDefined();
+        expect(response.user).toBeDefined();
+        expect(response.user?.id).toBe(externalUserId);
+        expect(response.user?.userProfile?.firstName).toBe('Updated');
+        expect(response.user?.userProfile?.lastName).toBe('Name');
+      });
+    });
+
+    describe('deleteUserByExternalId', () => {
+      it('should delete a user identified by external ID', async () => {
+        await expect(
+          client.user.deleteUserByExternalId(userExternalId)
+        ).resolves.toBeDefined();
+
+        // Prevent double-delete in afterEach
+        externalUserId = null;
+      });
+    });
+
+    describe('createMembershipByExternalId', () => {
+      let secondOrg: string;
+
+      beforeEach(async () => {
+        secondOrg = await TestOrganizationManager.createTestOrganization(client);
+      });
+
+      afterEach(async () => {
+        await TestOrganizationManager.cleanupTestOrganization(
+          client,
+          secondOrg
+        );
+      });
+
+      it('should create a membership using external ID', async () => {
+        const response = await client.user.createMembershipByExternalId(
+          secondOrg,
+          userExternalId,
+          { sendInvitationEmail: false }
+        );
+
+        expect(response).toBeDefined();
+        expect(response.user).toBeDefined();
+        expect(response.user?.id).toBe(externalUserId);
+
+        // Clean up membership in second org
+        await client.user.deleteMembership(secondOrg, externalUserId!);
+      });
+    });
+
+    describe('deleteMembershipByExternalId', () => {
+      let secondOrg: string;
+
+      beforeEach(async () => {
+        secondOrg = await TestOrganizationManager.createTestOrganization(client);
+        await client.user.createMembership(secondOrg, externalUserId!, {
+          sendInvitationEmail: false,
+        });
+      });
+
+      afterEach(async () => {
+        await TestOrganizationManager.cleanupTestOrganization(
+          client,
+          secondOrg
+        );
+      });
+
+      it('should delete a membership using external ID', async () => {
+        await expect(
+          client.user.deleteMembershipByExternalId(secondOrg, userExternalId)
+        ).resolves.toBeDefined();
+      });
+    });
+
+    describe('updateMembershipByExternalId', () => {
+      it('should update membership roles using external ID', async () => {
+        const response = await client.user.updateMembershipByExternalId(
+          testOrg,
+          userExternalId,
+          { roles: ['member'] }
+        );
+
+        expect(response).toBeDefined();
+        expect(response.user).toBeDefined();
+        expect(response.user?.id).toBe(externalUserId);
+      });
+    });
+  });
 });
