@@ -318,5 +318,82 @@ describe('Organizations', () => {
         await client.organization.getOrganizationSessionPolicy(testOrg);
       expect(app.policySource).toBe(SessionPolicyType.APPLICATION);
     });
+
+    it('should set CUSTOM policy with absoluteSessionTimeoutUnit as HOURS', async () => {
+      const policy = await client.organization.updateOrganizationSessionPolicy(
+        testOrg,
+        {
+          policySource: 'CUSTOM',
+          absoluteSessionTimeout: 8,
+          absoluteSessionTimeoutUnit: 'HOURS',
+        }
+      );
+
+      expect(policy).toBeDefined();
+      expect(policy.policySource).toBe(SessionPolicyType.CUSTOM);
+    });
+
+    it('should set CUSTOM policy with absoluteSessionTimeoutUnit as DAYS', async () => {
+      const policy = await client.organization.updateOrganizationSessionPolicy(
+        testOrg,
+        {
+          policySource: 'CUSTOM',
+          absoluteSessionTimeout: 1,
+          absoluteSessionTimeoutUnit: 'DAYS',
+        }
+      );
+
+      expect(policy).toBeDefined();
+      expect(policy.policySource).toBe(SessionPolicyType.CUSTOM);
+    });
+
+    it('should set CUSTOM policy with idle timeout disabled', async () => {
+      const policy = await client.organization.updateOrganizationSessionPolicy(
+        testOrg,
+        {
+          policySource: 'CUSTOM',
+          absoluteSessionTimeout: 480,
+          absoluteSessionTimeoutUnit: 'MINUTES',
+          idleSessionTimeoutEnabled: false,
+        }
+      );
+
+      expect(policy).toBeDefined();
+      expect(policy.policySource).toBe(SessionPolicyType.CUSTOM);
+    });
+
+    it('should set CUSTOM policy with idle timeout using HOURS unit', async () => {
+      const policy = await client.organization.updateOrganizationSessionPolicy(
+        testOrg,
+        {
+          policySource: 'CUSTOM',
+          absoluteSessionTimeout: 8,
+          absoluteSessionTimeoutUnit: 'HOURS',
+          idleSessionTimeoutEnabled: true,
+          idleSessionTimeout: 2,
+          idleSessionTimeoutUnit: 'HOURS',
+        }
+      );
+
+      expect(policy).toBeDefined();
+      expect(policy.policySource).toBe(SessionPolicyType.CUSTOM);
+    });
+
+    it('should set CUSTOM policy with idle timeout using DAYS unit', async () => {
+      const policy = await client.organization.updateOrganizationSessionPolicy(
+        testOrg,
+        {
+          policySource: 'CUSTOM',
+          absoluteSessionTimeout: 7,
+          absoluteSessionTimeoutUnit: 'DAYS',
+          idleSessionTimeoutEnabled: true,
+          idleSessionTimeout: 1,
+          idleSessionTimeoutUnit: 'DAYS',
+        }
+      );
+
+      expect(policy).toBeDefined();
+      expect(policy.policySource).toBe(SessionPolicyType.CUSTOM);
+    });
   });
 });
