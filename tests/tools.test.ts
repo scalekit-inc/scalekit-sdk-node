@@ -215,6 +215,35 @@ describe('Tools', () => {
         expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
+
+    it('should return more tools with default page size than explicit smaller page size', async () => {
+      const identifier = 'your_identifier';
+
+      try {
+        const smallPage = await client.tools.listScopedTools(identifier, {
+          filter: {
+            connectionNames: ['apifymcp'],
+          },
+          pageSize: 10,
+        });
+
+        const defaultPage = await client.tools.listScopedTools(identifier, {
+          filter: {
+            connectionNames: ['apifymcp'],
+          },
+        });
+
+        expect(defaultPage).toBeDefined();
+        expect(defaultPage.tools).toBeDefined();
+
+        // the default page size is 100 in the implementation, so this should return more or equal number of tools than the small page size of 10
+        expect(defaultPage.tools.length).toBeGreaterThanOrEqual(
+          smallPage.tools.length
+        );
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
+      }
+    });
   });
 
   describe('executeTool', () => {
