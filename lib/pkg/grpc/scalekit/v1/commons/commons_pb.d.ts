@@ -16,7 +16,7 @@ export type OrganizationMembership = Message<"scalekit.v1.commons.OrganizationMe
     /**
      * @generated from field: google.protobuf.Timestamp join_time = 2;
      */
-    joinTime?: Timestamp;
+    joinTime?: Timestamp | undefined;
     /**
      * @generated from field: scalekit.v1.commons.MembershipStatus membership_status = 3;
      */
@@ -28,7 +28,7 @@ export type OrganizationMembership = Message<"scalekit.v1.commons.OrganizationMe
     /**
      * @generated from field: optional string name = 5;
      */
-    name?: string;
+    name?: string | undefined;
     /**
      * @generated from field: map<string, string> metadata = 7;
      */
@@ -38,27 +38,27 @@ export type OrganizationMembership = Message<"scalekit.v1.commons.OrganizationMe
     /**
      * @generated from field: optional string display_name = 9;
      */
-    displayName?: string;
+    displayName?: string | undefined;
     /**
      * @generated from field: optional string inviter_email = 10;
      */
-    inviterEmail?: string;
+    inviterEmail?: string | undefined;
     /**
      * @generated from field: optional google.protobuf.Timestamp created_at = 11;
      */
-    createdAt?: Timestamp;
+    createdAt?: Timestamp | undefined;
     /**
      * @generated from field: optional google.protobuf.Timestamp accepted_at = 12;
      */
-    acceptedAt?: Timestamp;
+    acceptedAt?: Timestamp | undefined;
     /**
      * @generated from field: optional google.protobuf.Timestamp expires_at = 13;
      */
-    expiresAt?: Timestamp;
+    expiresAt?: Timestamp | undefined;
     /**
      * @generated from field: optional string provisioning_method = 14;
      */
-    provisioningMethod?: string;
+    provisioningMethod?: string | undefined;
     /**
      * @generated from field: repeated string permissions = 15;
      */
@@ -214,19 +214,19 @@ export type ExternalIdentity = Message<"scalekit.v1.commons.ExternalIdentity"> &
      *
      * @generated from field: google.protobuf.Timestamp last_login_time = 6;
      */
-    lastLoginTime?: Timestamp;
+    lastLoginTime?: Timestamp | undefined;
     /**
      * Creation of this external identity with the IdP for the user.
      *
      * @generated from field: google.protobuf.Timestamp created_time = 7;
      */
-    createdTime?: Timestamp;
+    createdTime?: Timestamp | undefined;
     /**
      * Last time when sync of data happened for this user from external IdP.
      *
      * @generated from field: google.protobuf.Timestamp last_synced_time = 8;
      */
-    lastSyncedTime?: Timestamp;
+    lastSyncedTime?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.commons.ExternalIdentity.
@@ -254,7 +254,7 @@ export type OrganizationCustomizations = Message<"scalekit.v1.commons.Organizati
      *
      * @generated from field: optional string logo_url = 3;
      */
-    logoUrl?: string;
+    logoUrl?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.commons.OrganizationCustomizations.

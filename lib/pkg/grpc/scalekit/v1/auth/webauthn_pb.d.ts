@@ -21,7 +21,7 @@ export type BeginRegistrationResponse = Message<"scalekit.v1.auth.webauthn.Begin
     /**
      * @generated from field: google.protobuf.Struct options = 1;
      */
-    options?: JsonObject;
+    options?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.webauthn.BeginRegistrationResponse.
@@ -59,7 +59,7 @@ export type FinishRegistrationRequest = Message<"scalekit.v1.auth.webauthn.Finis
     /**
      * @generated from field: google.protobuf.Struct client_extension_results = 7;
      */
-    clientExtensionResults?: JsonObject;
+    clientExtensionResults?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.webauthn.FinishRegistrationRequest.
@@ -87,7 +87,7 @@ export type BeginAuthenticationRequest = Message<"scalekit.v1.auth.webauthn.Begi
     /**
      * @generated from field: optional string email = 1;
      */
-    email?: string;
+    email?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.webauthn.BeginAuthenticationRequest.
@@ -105,7 +105,7 @@ export type BeginAuthenticationResponse = Message<"scalekit.v1.auth.webauthn.Beg
     /**
      * @generated from field: google.protobuf.Struct options = 2;
      */
-    options?: JsonObject;
+    options?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.webauthn.BeginAuthenticationResponse.
@@ -127,7 +127,7 @@ export type FinishAuthenticationRequest = Message<"scalekit.v1.auth.webauthn.Fin
     /**
      * @generated from field: google.protobuf.Struct client_extension_results = 3;
      */
-    clientExtensionResults?: JsonObject;
+    clientExtensionResults?: JsonObject | undefined;
     /**
      * @generated from field: string type = 4;
      */
@@ -135,7 +135,7 @@ export type FinishAuthenticationRequest = Message<"scalekit.v1.auth.webauthn.Fin
     /**
      * @generated from field: scalekit.v1.auth.webauthn.AuthenticatorAssertionResponse response = 5;
      */
-    response?: AuthenticatorAssertionResponse;
+    response?: AuthenticatorAssertionResponse | undefined;
     /**
      * @generated from field: string authenticator_attachment = 6;
      */
@@ -257,7 +257,7 @@ export type ListCredentialsResponse = Message<"scalekit.v1.auth.webauthn.ListCre
     /**
      * @generated from field: scalekit.v1.auth.webauthn.AllAcceptedCredentialsOptions all_accepted_credentials_options = 2;
      */
-    allAcceptedCredentialsOptions?: AllAcceptedCredentialsOptions;
+    allAcceptedCredentialsOptions?: AllAcceptedCredentialsOptions | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.webauthn.ListCredentialsResponse.
@@ -289,7 +289,7 @@ export type DeleteCredentialResponse = Message<"scalekit.v1.auth.webauthn.Delete
     /**
      * @generated from field: scalekit.v1.auth.webauthn.UnknownCredentialOptions unknown_credential_options = 2;
      */
-    unknownCredentialOptions?: UnknownCredentialOptions;
+    unknownCredentialOptions?: UnknownCredentialOptions | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.webauthn.DeleteCredentialResponse.
@@ -361,7 +361,7 @@ export type UpdateCredentialResponse = Message<"scalekit.v1.auth.webauthn.Update
     /**
      * @generated from field: scalekit.v1.auth.webauthn.WebAuthnCredential credential = 1;
      */
-    credential?: WebAuthnCredential;
+    credential?: WebAuthnCredential | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.webauthn.UpdateCredentialResponse.
@@ -391,7 +391,7 @@ export type WebAuthnCredential = Message<"scalekit.v1.auth.webauthn.WebAuthnCred
     /**
      * @generated from field: scalekit.v1.auth.webauthn.WebAuthnCredential.Authenticator authenticator = 5;
      */
-    authenticator?: WebAuthnCredential_Authenticator;
+    authenticator?: WebAuthnCredential_Authenticator | undefined;
     /**
      * @generated from field: repeated string transports = 6;
      */
@@ -399,27 +399,27 @@ export type WebAuthnCredential = Message<"scalekit.v1.auth.webauthn.WebAuthnCred
     /**
      * @generated from field: scalekit.v1.auth.webauthn.WebAuthnCredential.AuthenticatorFlags authenticator_flags = 7;
      */
-    authenticatorFlags?: WebAuthnCredential_AuthenticatorFlags;
+    authenticatorFlags?: WebAuthnCredential_AuthenticatorFlags | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp created_at = 8;
      */
-    createdAt?: Timestamp;
+    createdAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp updated_at = 9;
      */
-    updatedAt?: Timestamp;
+    updatedAt?: Timestamp | undefined;
     /**
      * @generated from field: scalekit.v1.auth.webauthn.WebAuthnCredential.UserAgent user_agent = 10;
      */
-    userAgent?: WebAuthnCredential_UserAgent;
+    userAgent?: WebAuthnCredential_UserAgent | undefined;
     /**
      * @generated from field: scalekit.v1.auth.webauthn.WebAuthnCredential.ClientInfo client_info = 11;
      */
-    clientInfo?: WebAuthnCredential_ClientInfo;
+    clientInfo?: WebAuthnCredential_ClientInfo | undefined;
     /**
      * @generated from field: optional string display_name = 12;
      */
-    displayName?: string;
+    displayName?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.webauthn.WebAuthnCredential.

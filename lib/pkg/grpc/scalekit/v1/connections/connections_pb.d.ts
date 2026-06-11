@@ -35,7 +35,7 @@ export type AssignDomainsToConnectionResponse = Message<"scalekit.v1.connections
     /**
      * @generated from field: scalekit.v1.connections.Connection connection = 1;
      */
-    connection?: Connection;
+    connection?: Connection | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.AssignDomainsToConnectionResponse.
@@ -80,7 +80,7 @@ export type Provider = Message<"scalekit.v1.connections.Provider"> & {
     /**
      * @generated from field: optional string description = 3;
      */
-    description?: string;
+    description?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.Provider.
@@ -94,11 +94,11 @@ export type CreateEnvironmentConnectionRequest = Message<"scalekit.v1.connection
     /**
      * @generated from field: scalekit.v1.connections.CreateConnection connection = 1;
      */
-    connection?: CreateConnection;
+    connection?: CreateConnection | undefined;
     /**
      * @generated from field: optional scalekit.v1.connections.Flags flags = 2;
      */
-    flags?: Flags;
+    flags?: Flags | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.CreateEnvironmentConnectionRequest.
@@ -116,7 +116,7 @@ export type CreateConnectionRequest = Message<"scalekit.v1.connections.CreateCon
     /**
      * @generated from field: scalekit.v1.connections.CreateConnection connection = 3;
      */
-    connection?: CreateConnection;
+    connection?: CreateConnection | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.CreateConnectionRequest.
@@ -142,7 +142,7 @@ export type CreateConnection = Message<"scalekit.v1.connections.CreateConnection
     /**
      * @generated from field: optional string key_id = 4;
      */
-    keyId?: string;
+    keyId?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.CreateConnection.
@@ -180,7 +180,7 @@ export type Connection = Message<"scalekit.v1.connections.Connection"> & {
     /**
      * @generated from field: optional string organization_id = 7;
      */
-    organizationId?: string;
+    organizationId?: string | undefined;
     /**
      * @generated from field: string ui_button_title = 8;
      */
@@ -202,11 +202,11 @@ export type Connection = Message<"scalekit.v1.connections.Connection"> & {
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 16;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp update_time = 17;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * @generated from oneof scalekit.v1.connections.Connection.settings
      */
@@ -259,7 +259,7 @@ export type Connection = Message<"scalekit.v1.connections.Connection"> & {
     /**
      * @generated from field: optional string key_id = 25;
      */
-    keyId?: string;
+    keyId?: string | undefined;
     /**
      * @generated from field: string provider_key = 23;
      */
@@ -281,7 +281,7 @@ export type CreateConnectionResponse = Message<"scalekit.v1.connections.CreateCo
     /**
      * @generated from field: scalekit.v1.connections.Connection connection = 1;
      */
-    connection?: Connection;
+    connection?: Connection | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.CreateConnectionResponse.
@@ -299,7 +299,7 @@ export type UpdateEnvironmentConnectionRequest = Message<"scalekit.v1.connection
     /**
      * @generated from field: scalekit.v1.connections.UpdateConnection connection = 3;
      */
-    connection?: UpdateConnection;
+    connection?: UpdateConnection | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.UpdateEnvironmentConnectionRequest.
@@ -321,7 +321,7 @@ export type UpdateConnectionRequest = Message<"scalekit.v1.connections.UpdateCon
     /**
      * @generated from field: scalekit.v1.connections.UpdateConnection connection = 4;
      */
-    connection?: UpdateConnection;
+    connection?: UpdateConnection | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.UpdateConnectionRequest.
@@ -343,11 +343,11 @@ export type UpdateConnection = Message<"scalekit.v1.connections.UpdateConnection
     /**
      * @generated from field: google.protobuf.BoolValue debug_enabled = 6;
      */
-    debugEnabled?: boolean;
+    debugEnabled?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue ui_button_title = 8;
      */
-    uiButtonTitle?: string;
+    uiButtonTitle?: string | undefined;
     /**
      * @generated from field: scalekit.v1.connections.ConfigurationType configuration_type = 11;
      */
@@ -410,7 +410,7 @@ export type UpdateConnection = Message<"scalekit.v1.connections.UpdateConnection
     /**
      * @generated from field: optional string key_id = 22;
      */
-    keyId?: string;
+    keyId?: string | undefined;
     /**
      * @generated from field: string provider_key = 21;
      */
@@ -428,7 +428,7 @@ export type UpdateConnectionResponse = Message<"scalekit.v1.connections.UpdateCo
     /**
      * @generated from field: scalekit.v1.connections.Connection connection = 1;
      */
-    connection?: Connection;
+    connection?: Connection | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.UpdateConnectionResponse.
@@ -506,7 +506,7 @@ export type GetConnectionResponse = Message<"scalekit.v1.connections.GetConnecti
     /**
      * @generated from field: scalekit.v1.connections.Connection connection = 1;
      */
-    connection?: Connection;
+    connection?: Connection | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.GetConnectionResponse.
@@ -520,15 +520,15 @@ export type ListConnectionsRequest = Message<"scalekit.v1.connections.ListConnec
     /**
      * @generated from field: optional string organization_id = 1;
      */
-    organizationId?: string;
+    organizationId?: string | undefined;
     /**
      * @generated from field: optional string domain = 3;
      */
-    domain?: string;
+    domain?: string | undefined;
     /**
      * @generated from field: optional string include = 4;
      */
-    include?: string;
+    include?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.ListConnectionsRequest.
@@ -600,7 +600,7 @@ export type ListConnection = Message<"scalekit.v1.connections.ListConnection"> &
     /**
      * @generated from field: google.protobuf.Timestamp created_at = 12;
      */
-    createdAt?: Timestamp;
+    createdAt?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.ListConnection.
@@ -658,23 +658,23 @@ export type SearchOrganizationConnectionsRequest = Message<"scalekit.v1.connecti
     /**
      * @generated from field: optional string query = 1;
      */
-    query?: string;
+    query?: string | undefined;
     /**
      * @generated from field: optional string provider = 2;
      */
-    provider?: string;
+    provider?: string | undefined;
     /**
      * @generated from field: optional scalekit.v1.connections.ConnectionStatus status = 3;
      */
-    status?: ConnectionStatus;
+    status?: ConnectionStatus | undefined;
     /**
      * @generated from field: optional scalekit.v1.connections.ConnectionType connection_type = 4;
      */
-    connectionType?: ConnectionType;
+    connectionType?: ConnectionType | undefined;
     /**
      * @generated from field: optional bool enabled = 7;
      */
-    enabled?: boolean;
+    enabled?: boolean | undefined;
     /**
      * @generated from field: uint32 page_size = 5;
      */
@@ -758,7 +758,7 @@ export type ToggleConnectionResponse = Message<"scalekit.v1.connections.ToggleCo
     /**
      * @generated from field: optional string error_message = 2;
      */
-    errorMessage?: string;
+    errorMessage?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.ToggleConnectionResponse.
@@ -772,35 +772,35 @@ export type OIDCConnectionConfig = Message<"scalekit.v1.connections.OIDCConnecti
     /**
      * @generated from field: google.protobuf.StringValue issuer = 1;
      */
-    issuer?: string;
+    issuer?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue discovery_endpoint = 2;
      */
-    discoveryEndpoint?: string;
+    discoveryEndpoint?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue authorize_uri = 3;
      */
-    authorizeUri?: string;
+    authorizeUri?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue token_uri = 4;
      */
-    tokenUri?: string;
+    tokenUri?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue user_info_uri = 5;
      */
-    userInfoUri?: string;
+    userInfoUri?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue jwks_uri = 6;
      */
-    jwksUri?: string;
+    jwksUri?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue client_id = 8;
      */
-    clientId?: string;
+    clientId?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue client_secret = 9;
      */
-    clientSecret?: string;
+    clientSecret?: string | undefined;
     /**
      * @generated from field: repeated scalekit.v1.connections.OIDCScope scopes = 10;
      */
@@ -816,27 +816,27 @@ export type OIDCConnectionConfig = Message<"scalekit.v1.connections.OIDCConnecti
     /**
      * @generated from field: google.protobuf.BoolValue pkce_enabled = 13;
      */
-    pkceEnabled?: boolean;
+    pkceEnabled?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue idp_logout_required = 14;
      */
-    idpLogoutRequired?: boolean;
+    idpLogoutRequired?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue post_logout_redirect_uri = 15;
      */
-    postLogoutRedirectUri?: string;
+    postLogoutRedirectUri?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue backchannel_logout_redirect_uri = 16;
      */
-    backchannelLogoutRedirectUri?: string;
+    backchannelLogoutRedirectUri?: string | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 17;
      */
-    syncUserProfileOnLogin?: boolean;
+    syncUserProfileOnLogin?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 18;
      */
-    jitProvisioningWithSsoEnabled?: boolean;
+    jitProvisioningWithSsoEnabled?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.OIDCConnectionConfig.
@@ -850,23 +850,23 @@ export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnec
     /**
      * @generated from field: google.protobuf.StringValue authorize_uri = 3;
      */
-    authorizeUri?: string;
+    authorizeUri?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue token_uri = 4;
      */
-    tokenUri?: string;
+    tokenUri?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue user_info_uri = 5;
      */
-    userInfoUri?: string;
+    userInfoUri?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue client_id = 8;
      */
-    clientId?: string;
+    clientId?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue client_secret = 9;
      */
-    clientSecret?: string;
+    clientSecret?: string | undefined;
     /**
      * @generated from field: repeated string scopes = 10;
      */
@@ -878,47 +878,47 @@ export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnec
     /**
      * @generated from field: google.protobuf.BoolValue pkce_enabled = 13;
      */
-    pkceEnabled?: boolean;
+    pkceEnabled?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue prompt = 14;
      */
-    prompt?: string;
+    prompt?: string | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue use_platform_creds = 15;
      */
-    usePlatformCreds?: boolean;
+    usePlatformCreds?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue access_type = 16;
      */
-    accessType?: string;
+    accessType?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue custom_scope_name = 17;
      */
-    customScopeName?: string;
+    customScopeName?: string | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 18;
      */
-    syncUserProfileOnLogin?: boolean;
+    syncUserProfileOnLogin?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue token_access_type = 19;
      */
-    tokenAccessType?: string;
+    tokenAccessType?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue tenant_id = 20;
      */
-    tenantId?: string;
+    tenantId?: string | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue is_cimd = 21;
      */
-    isCimd?: boolean;
+    isCimd?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue app_name = 22;
      */
-    appName?: string;
+    appName?: string | undefined;
     /**
      * @generated from field: optional scalekit.v1.connections.OptionalScopes optional_scopes = 23;
      */
-    optionalScopes?: OptionalScopes;
+    optionalScopes?: OptionalScopes | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.OAuthConnectionConfig.
@@ -950,7 +950,7 @@ export type GoogleDWDConfig = Message<"scalekit.v1.connections.GoogleDWDConfig">
     /**
      * @generated from field: google.protobuf.StringValue service_account_json = 1;
      */
-    serviceAccountJson?: string;
+    serviceAccountJson?: string | undefined;
     /**
      * @generated from field: repeated string scopes = 2;
      */
@@ -958,7 +958,7 @@ export type GoogleDWDConfig = Message<"scalekit.v1.connections.GoogleDWDConfig">
     /**
      * @generated from field: google.protobuf.StringValue token_uri = 3;
      */
-    tokenUri?: string;
+    tokenUri?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.GoogleDWDConfig.
@@ -976,27 +976,27 @@ export type PasswordLessConfig = Message<"scalekit.v1.connections.PasswordLessCo
     /**
      * @generated from field: optional google.protobuf.UInt32Value frequency = 2;
      */
-    frequency?: number;
+    frequency?: number | undefined;
     /**
      * @generated from field: optional google.protobuf.UInt32Value validity = 3;
      */
-    validity?: number;
+    validity?: number | undefined;
     /**
      * @generated from field: optional google.protobuf.BoolValue enforce_same_browser_origin = 4;
      */
-    enforceSameBrowserOrigin?: boolean;
+    enforceSameBrowserOrigin?: boolean | undefined;
     /**
      * @generated from field: optional google.protobuf.UInt32Value code_challenge_length = 5;
      */
-    codeChallengeLength?: number;
+    codeChallengeLength?: number | undefined;
     /**
      * @generated from field: optional scalekit.v1.connections.CodeChallengeType code_challenge_type = 6;
      */
-    codeChallengeType?: CodeChallengeType;
+    codeChallengeType?: CodeChallengeType | undefined;
     /**
      * @generated from field: optional google.protobuf.BoolValue regenerate_passwordless_credentials_on_resend = 7;
      */
-    regeneratePasswordlessCredentialsOnResend?: boolean;
+    regeneratePasswordlessCredentialsOnResend?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.PasswordLessConfig.
@@ -1010,7 +1010,7 @@ export type StaticAuthConfig = Message<"scalekit.v1.connections.StaticAuthConfig
     /**
      * @generated from field: google.protobuf.Struct static_config = 1;
      */
-    staticConfig?: JsonObject;
+    staticConfig?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.StaticAuthConfig.
@@ -1026,23 +1026,23 @@ export type WebAuthConfiguration = Message<"scalekit.v1.connections.WebAuthConfi
     /**
      * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Rp rp = 1;
      */
-    rp?: WebAuthConfiguration_Rp;
+    rp?: WebAuthConfiguration_Rp | undefined;
     /**
      * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Attestation attestation = 2;
      */
-    attestation?: WebAuthConfiguration_Attestation;
+    attestation?: WebAuthConfiguration_Attestation | undefined;
     /**
      * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Authenticators authenticators = 3;
      */
-    authenticators?: WebAuthConfiguration_Authenticators;
+    authenticators?: WebAuthConfiguration_Authenticators | undefined;
     /**
      * @generated from field: scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection authenticator_selection = 4;
      */
-    authenticatorSelection?: WebAuthConfiguration_AuthenticatorSelection;
+    authenticatorSelection?: WebAuthConfiguration_AuthenticatorSelection | undefined;
     /**
      * @generated from field: scalekit.v1.connections.WebAuthConfiguration.Timeout timeout = 5;
      */
-    timeout?: WebAuthConfiguration_Timeout;
+    timeout?: WebAuthConfiguration_Timeout | undefined;
     /**
      * @generated from field: bool enable_auto_registration = 6;
      */
@@ -1098,7 +1098,7 @@ export type WebAuthConfiguration_Attestation = Message<"scalekit.v1.connections.
      *
      * @generated from field: google.protobuf.StringValue conveyance_preference = 1;
      */
-    conveyancePreference?: string;
+    conveyancePreference?: string | undefined;
     /**
      * Enterprise-approved IDs (optional allowlist when enterprise attestation is used)
      *
@@ -1118,23 +1118,23 @@ export type WebAuthConfiguration_Authenticators = Message<"scalekit.v1.connectio
     /**
      * @generated from field: google.protobuf.BoolValue validate_entry = 1;
      */
-    validateEntry?: boolean;
+    validateEntry?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue validate_entry_permit_zero_aaguid = 2;
      */
-    validateEntryPermitZeroAaguid?: boolean;
+    validateEntryPermitZeroAaguid?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue validate_anchors = 3;
      */
-    validateAnchors?: boolean;
+    validateAnchors?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue validate_status = 4;
      */
-    validateStatus?: boolean;
+    validateStatus?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue validate_attestation_type = 5;
      */
-    validateAttestationType?: boolean;
+    validateAttestationType?: boolean | undefined;
     /**
      * @generated from field: repeated string desired_authenticator_status = 6;
      */
@@ -1158,11 +1158,11 @@ export type WebAuthConfiguration_AuthenticatorSelection = Message<"scalekit.v1.c
      *
      * @generated from field: google.protobuf.StringValue user_verification = 1;
      */
-    userVerification?: string;
+    userVerification?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue authenticator_attachment = 2;
      */
-    authenticatorAttachment?: string;
+    authenticatorAttachment?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.WebAuthConfiguration.AuthenticatorSelection.
@@ -1176,19 +1176,19 @@ export type WebAuthConfiguration_Timeout = Message<"scalekit.v1.connections.WebA
     /**
      * @generated from field: google.protobuf.Duration registration = 1;
      */
-    registration?: Duration;
+    registration?: Duration | undefined;
     /**
      * @generated from field: google.protobuf.Duration registration_uvd = 2;
      */
-    registrationUvd?: Duration;
+    registrationUvd?: Duration | undefined;
     /**
      * @generated from field: google.protobuf.Duration login = 3;
      */
-    login?: Duration;
+    login?: Duration | undefined;
     /**
      * @generated from field: google.protobuf.Duration login_uvd = 4;
      */
-    loginUvd?: Duration;
+    loginUvd?: Duration | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.WebAuthConfiguration.Timeout.
@@ -1202,27 +1202,27 @@ export type SAMLConnectionConfigRequest = Message<"scalekit.v1.connections.SAMLC
     /**
      * @generated from field: google.protobuf.StringValue idp_metadata_url = 1;
      */
-    idpMetadataUrl?: string;
+    idpMetadataUrl?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue idp_entity_id = 2;
      */
-    idpEntityId?: string;
+    idpEntityId?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue idp_sso_url = 3;
      */
-    idpSsoUrl?: string;
+    idpSsoUrl?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue idp_certificate = 4;
      */
-    idpCertificate?: string;
+    idpCertificate?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue idp_slo_url = 5;
      */
-    idpSloUrl?: string;
+    idpSloUrl?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue ui_button_title = 6;
      */
-    uiButtonTitle?: string;
+    uiButtonTitle?: string | undefined;
     /**
      * @generated from field: scalekit.v1.connections.NameIdFormat idp_name_id_format = 7;
      */
@@ -1242,47 +1242,47 @@ export type SAMLConnectionConfigRequest = Message<"scalekit.v1.connections.SAMLC
     /**
      * @generated from field: google.protobuf.BoolValue force_authn = 14;
      */
-    forceAuthn?: boolean;
+    forceAuthn?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue default_redirect_uri = 15;
      */
-    defaultRedirectUri?: string;
+    defaultRedirectUri?: string | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue assertion_encrypted = 16;
      */
-    assertionEncrypted?: boolean;
+    assertionEncrypted?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue want_request_signed = 17;
      */
-    wantRequestSigned?: boolean;
+    wantRequestSigned?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue certificate_id = 18;
      */
-    certificateId?: string;
+    certificateId?: string | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue idp_slo_required = 19;
      */
-    idpSloRequired?: boolean;
+    idpSloRequired?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue sp_entity_id = 20;
      */
-    spEntityId?: string;
+    spEntityId?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue sp_assertion_url = 21;
      */
-    spAssertionUrl?: string;
+    spAssertionUrl?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue sp_slo_url = 22;
      */
-    spSloUrl?: string;
+    spSloUrl?: string | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 23;
      */
-    syncUserProfileOnLogin?: boolean;
+    syncUserProfileOnLogin?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 24;
      */
-    jitProvisioningWithSsoEnabled?: boolean;
+    jitProvisioningWithSsoEnabled?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.SAMLConnectionConfigRequest.
@@ -1308,15 +1308,15 @@ export type SAMLConnectionConfigResponse = Message<"scalekit.v1.connections.SAML
     /**
      * @generated from field: google.protobuf.StringValue idp_metadata_url = 4;
      */
-    idpMetadataUrl?: string;
+    idpMetadataUrl?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue idp_entity_id = 5;
      */
-    idpEntityId?: string;
+    idpEntityId?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue idp_sso_url = 6;
      */
-    idpSsoUrl?: string;
+    idpSsoUrl?: string | undefined;
     /**
      * @generated from field: repeated scalekit.v1.connections.IDPCertificate idp_certificates = 7;
      */
@@ -1324,11 +1324,11 @@ export type SAMLConnectionConfigResponse = Message<"scalekit.v1.connections.SAML
     /**
      * @generated from field: google.protobuf.StringValue idp_slo_url = 8;
      */
-    idpSloUrl?: string;
+    idpSloUrl?: string | undefined;
     /**
      * @generated from field: google.protobuf.StringValue ui_button_title = 9;
      */
-    uiButtonTitle?: string;
+    uiButtonTitle?: string | undefined;
     /**
      * @generated from field: scalekit.v1.connections.NameIdFormat idp_name_id_format = 10;
      */
@@ -1348,43 +1348,43 @@ export type SAMLConnectionConfigResponse = Message<"scalekit.v1.connections.SAML
     /**
      * @generated from field: google.protobuf.BoolValue allow_idp_initiated_login = 14;
      */
-    allowIdpInitiatedLogin?: boolean;
+    allowIdpInitiatedLogin?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue force_authn = 15;
      */
-    forceAuthn?: boolean;
+    forceAuthn?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue default_redirect_uri = 16;
      */
-    defaultRedirectUri?: string;
+    defaultRedirectUri?: string | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue assertion_encrypted = 17;
      */
-    assertionEncrypted?: boolean;
+    assertionEncrypted?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue want_request_signed = 18;
      */
-    wantRequestSigned?: boolean;
+    wantRequestSigned?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue certificate_id = 19;
      */
-    certificateId?: string;
+    certificateId?: string | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue idp_slo_required = 20;
      */
-    idpSloRequired?: boolean;
+    idpSloRequired?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.StringValue sp_slo_url = 21;
      */
-    spSloUrl?: string;
+    spSloUrl?: string | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue sync_user_profile_on_login = 22;
      */
-    syncUserProfileOnLogin?: boolean;
+    syncUserProfileOnLogin?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue jit_provisioning_with_sso_enabled = 23;
      */
-    jitProvisioningWithSsoEnabled?: boolean;
+    jitProvisioningWithSsoEnabled?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.SAMLConnectionConfigResponse.
@@ -1402,11 +1402,11 @@ export type IDPCertificate = Message<"scalekit.v1.connections.IDPCertificate"> &
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 2;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp expiry_time = 3;
      */
-    expiryTime?: Timestamp;
+    expiryTime?: Timestamp | undefined;
     /**
      * @generated from field: string id = 4;
      */
@@ -1428,7 +1428,7 @@ export type GetOIDCMetadataRequest = Message<"scalekit.v1.connections.GetOIDCMet
     /**
      * @generated from field: scalekit.v1.connections.OIDCMetadataRequest metadata = 1;
      */
-    metadata?: OIDCMetadataRequest;
+    metadata?: OIDCMetadataRequest | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.GetOIDCMetadataRequest.
@@ -1486,7 +1486,7 @@ export type GetSAMLMetadataRequest = Message<"scalekit.v1.connections.GetSAMLMet
     /**
      * @generated from field: scalekit.v1.connections.SAMLMetadataRequest metadata = 1;
      */
-    metadata?: SAMLMetadataRequest;
+    metadata?: SAMLMetadataRequest | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.GetSAMLMetadataRequest.
@@ -1552,7 +1552,7 @@ export type GetSAMLCertificateDetailsRequest = Message<"scalekit.v1.connections.
     /**
      * @generated from field: scalekit.v1.connections.SAMLCertificateRequest certificate = 1;
      */
-    certificate?: SAMLCertificateRequest;
+    certificate?: SAMLCertificateRequest | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.GetSAMLCertificateDetailsRequest.
@@ -1632,19 +1632,19 @@ export type GetConnectionTestResultResponse = Message<"scalekit.v1.connections.G
     /**
      * @generated from field: optional string user_info = 2;
      */
-    userInfo?: string;
+    userInfo?: string | undefined;
     /**
      * @generated from field: optional string error = 3;
      */
-    error?: string;
+    error?: string | undefined;
     /**
      * @generated from field: optional string error_description = 4;
      */
-    errorDescription?: string;
+    errorDescription?: string | undefined;
     /**
      * @generated from field: optional string error_details = 5;
      */
-    errorDetails?: string;
+    errorDetails?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.GetConnectionTestResultResponse.
@@ -1693,7 +1693,7 @@ export type ListAppConnectionsRequest = Message<"scalekit.v1.connections.ListApp
     /**
      * @generated from field: optional string provider = 3;
      */
-    provider?: string;
+    provider?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.ListAppConnectionsRequest.
@@ -1751,7 +1751,7 @@ export type GetConnectionContextResponse = Message<"scalekit.v1.connections.GetC
     /**
      * @generated from field: google.protobuf.Struct context = 1;
      */
-    context?: JsonObject;
+    context?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.GetConnectionContextResponse.
@@ -1773,7 +1773,7 @@ export type UpdateConnectionContextRequest = Message<"scalekit.v1.connections.Up
     /**
      * @generated from field: google.protobuf.Struct context = 3;
      */
-    context?: JsonObject;
+    context?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.UpdateConnectionContextRequest.
@@ -2062,7 +2062,11 @@ export declare enum ConnectionType {
     /**
      * @generated from enum value: GOOGLE_DWD = 12;
      */
-    GOOGLE_DWD = 12
+    GOOGLE_DWD = 12,
+    /**
+     * @generated from enum value: TRUSTED_IDP = 13;
+     */
+    TRUSTED_IDP = 13
 }
 /**
  * Describes the enum scalekit.v1.connections.ConnectionType.

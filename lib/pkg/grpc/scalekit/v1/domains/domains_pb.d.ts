@@ -31,11 +31,11 @@ export type CreateDomainRequest = Message<"scalekit.v1.domains.CreateDomainReque
     /**
      * @generated from field: optional string connection_id = 3;
      */
-    connectionId?: string;
+    connectionId?: string | undefined;
     /**
      * @generated from field: scalekit.v1.domains.CreateDomain domain = 4;
      */
-    domain?: CreateDomain;
+    domain?: CreateDomain | undefined;
 };
 /**
  * Describes the message scalekit.v1.domains.CreateDomainRequest.
@@ -49,7 +49,7 @@ export type CreateDomainResponse = Message<"scalekit.v1.domains.CreateDomainResp
     /**
      * @generated from field: scalekit.v1.domains.Domain domain = 1;
      */
-    domain?: Domain;
+    domain?: Domain | undefined;
 };
 /**
  * Describes the message scalekit.v1.domains.CreateDomainResponse.
@@ -100,7 +100,7 @@ export type UpdateDomainRequest = Message<"scalekit.v1.domains.UpdateDomainReque
     /**
      * @generated from field: optional string connection_id = 3;
      */
-    connectionId?: string;
+    connectionId?: string | undefined;
     /**
      * @generated from field: string id = 4;
      */
@@ -108,7 +108,7 @@ export type UpdateDomainRequest = Message<"scalekit.v1.domains.UpdateDomainReque
     /**
      * @generated from field: scalekit.v1.domains.UpdateDomain domain = 5;
      */
-    domain?: UpdateDomain;
+    domain?: UpdateDomain | undefined;
 };
 /**
  * Describes the message scalekit.v1.domains.UpdateDomainRequest.
@@ -131,7 +131,7 @@ export type UpdateDomainResponse = Message<"scalekit.v1.domains.UpdateDomainResp
     /**
      * @generated from field: scalekit.v1.domains.Domain domain = 1;
      */
-    domain?: Domain;
+    domain?: Domain | undefined;
 };
 /**
  * Describes the message scalekit.v1.domains.UpdateDomainResponse.
@@ -178,7 +178,7 @@ export type GetDomainResponse = Message<"scalekit.v1.domains.GetDomainResponse">
     /**
      * @generated from field: scalekit.v1.domains.Domain domain = 1;
      */
-    domain?: Domain;
+    domain?: Domain | undefined;
 };
 /**
  * Describes the message scalekit.v1.domains.GetDomainResponse.
@@ -215,7 +215,7 @@ export type DeleteDomainRequest = Message<"scalekit.v1.domains.DeleteDomainReque
     /**
      * @generated from field: optional string connection_id = 4;
      */
-    connectionId?: string;
+    connectionId?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.domains.DeleteDomainRequest.
@@ -248,19 +248,19 @@ export type ListDomainRequest = Message<"scalekit.v1.domains.ListDomainRequest">
     /**
      * @generated from field: optional string connection_id = 3;
      */
-    connectionId?: string;
+    connectionId?: string | undefined;
     /**
      * @generated from field: optional string include = 4;
      */
-    include?: string;
+    include?: string | undefined;
     /**
      * @generated from field: google.protobuf.Int32Value page_size = 5;
      */
-    pageSize?: number;
+    pageSize?: number | undefined;
     /**
      * @generated from field: google.protobuf.Int32Value page_number = 6;
      */
-    pageNumber?: number;
+    pageNumber?: number | undefined;
     /**
      * @generated from field: scalekit.v1.domains.DomainType domain_type = 7;
      */
@@ -407,11 +407,11 @@ export type Domain = Message<"scalekit.v1.domains.Domain"> & {
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 9;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp update_time = 10;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * @generated from field: scalekit.v1.domains.DomainType domain_type = 12;
      */

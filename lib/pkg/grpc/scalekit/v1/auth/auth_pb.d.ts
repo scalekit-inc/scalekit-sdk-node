@@ -58,23 +58,23 @@ export type AuthMethod = Message<"scalekit.v1.auth.AuthMethod"> & {
     /**
      * @generated from field: optional scalekit.v1.connections.PasswordlessType passwordless_type = 5;
      */
-    passwordlessType?: PasswordlessType;
+    passwordlessType?: PasswordlessType | undefined;
     /**
      * @generated from field: optional uint32 code_challenge_length = 6;
      */
-    codeChallengeLength?: number;
+    codeChallengeLength?: number | undefined;
     /**
      * @generated from field: optional bool enable_webauthn_auto_registration = 7;
      */
-    enableWebauthnAutoRegistration?: boolean;
+    enableWebauthnAutoRegistration?: boolean | undefined;
     /**
      * @generated from field: optional bool show_passkey_button = 8;
      */
-    showPasskeyButton?: boolean;
+    showPasskeyButton?: boolean | undefined;
     /**
      * @generated from field: optional bool enable_webauthn_conditional_login = 9;
      */
-    enableWebauthnConditionalLogin?: boolean;
+    enableWebauthnConditionalLogin?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.AuthMethod.
@@ -88,7 +88,7 @@ export type DiscoveryAuthMethodRequest = Message<"scalekit.v1.auth.DiscoveryAuth
     /**
      * @generated from field: scalekit.v1.auth.DiscoveryRequest discovery_request = 2;
      */
-    discoveryRequest?: DiscoveryRequest;
+    discoveryRequest?: DiscoveryRequest | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.DiscoveryAuthMethodRequest.
@@ -120,7 +120,7 @@ export type DiscoveryAuthMethodResponse = Message<"scalekit.v1.auth.DiscoveryAut
     /**
      * @generated from field: scalekit.v1.auth.AuthMethod auth_method = 1;
      */
-    authMethod?: AuthMethod;
+    authMethod?: AuthMethod | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.DiscoveryAuthMethodResponse.
@@ -158,7 +158,7 @@ export type PortalSettings = Message<"scalekit.v1.auth.PortalSettings"> & {
      *
      * @generated from field: optional bool new_self_serve_sso_scim = 2;
      */
-    newSelfServeSsoScim?: boolean;
+    newSelfServeSsoScim?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.PortalSettings.
@@ -172,19 +172,19 @@ export type GetAuthCustomizationsResponse = Message<"scalekit.v1.auth.GetAuthCus
     /**
      * @generated from field: google.protobuf.Struct customization_settings = 2;
      */
-    customizationSettings?: JsonObject;
+    customizationSettings?: JsonObject | undefined;
     /**
      * settings contains feature flags derived from the workspace's billing subscription
      *
      * @generated from field: scalekit.v1.auth.PortalSettings settings = 3;
      */
-    settings?: PortalSettings;
+    settings?: PortalSettings | undefined;
     /**
      * organization_customizations is set when the auth request is scoped to a specific organization.
      *
      * @generated from field: optional scalekit.v1.commons.OrganizationCustomizations organization_customizations = 4;
      */
-    organizationCustomizations?: OrganizationCustomizations;
+    organizationCustomizations?: OrganizationCustomizations | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.GetAuthCustomizationsResponse.
@@ -198,7 +198,7 @@ export type GetAuthFeaturesResponse = Message<"scalekit.v1.auth.GetAuthFeaturesR
     /**
      * @generated from field: google.protobuf.Struct features = 1;
      */
-    features?: JsonObject;
+    features?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.GetAuthFeaturesResponse.
@@ -212,7 +212,7 @@ export type VerifyPasswordLessOtpRequest = Message<"scalekit.v1.auth.VerifyPassw
     /**
      * @generated from field: scalekit.v1.auth.OTPRequest otp_req = 2;
      */
-    otpReq?: OTPRequest;
+    otpReq?: OTPRequest | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.VerifyPasswordLessOtpRequest.
@@ -253,7 +253,7 @@ export type ListUserOrganizationsResponse = Message<"scalekit.v1.auth.ListUserOr
     /**
      * @generated from field: scalekit.v1.auth.UserDetails user = 2;
      */
-    user?: UserDetails;
+    user?: UserDetails | undefined;
     /**
      * @generated from field: scalekit.v1.auth.Intent intent = 3;
      */
@@ -283,23 +283,23 @@ export type Organization = Message<"scalekit.v1.auth.Organization"> & {
     /**
      * @generated from field: optional string invitation_inviter_email = 4;
      */
-    invitationInviterEmail?: string;
+    invitationInviterEmail?: string | undefined;
     /**
      * @generated from field: optional google.protobuf.Timestamp invitation_accepted_at = 5;
      */
-    invitationAcceptedAt?: Timestamp;
+    invitationAcceptedAt?: Timestamp | undefined;
     /**
      * @generated from field: optional google.protobuf.Timestamp invitation_created_at = 6;
      */
-    invitationCreatedAt?: Timestamp;
+    invitationCreatedAt?: Timestamp | undefined;
     /**
      * @generated from field: optional google.protobuf.Timestamp invitation_expires_at = 7;
      */
-    invitationExpiresAt?: Timestamp;
+    invitationExpiresAt?: Timestamp | undefined;
     /**
      * @generated from field: optional string logo_url = 8;
      */
-    logoUrl?: string;
+    logoUrl?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.Organization.
@@ -393,7 +393,7 @@ export type UpdateLoginUserDetailsRequest = Message<"scalekit.v1.auth.UpdateLogi
     /**
      * @generated from field: scalekit.v1.auth.User user = 3;
      */
-    user?: User;
+    user?: User | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.UpdateLoginUserDetailsRequest.
@@ -459,11 +459,11 @@ export type User = Message<"scalekit.v1.auth.User"> & {
     /**
      * @generated from field: google.protobuf.Struct custom_attributes = 14;
      */
-    customAttributes?: JsonObject;
+    customAttributes?: JsonObject | undefined;
     /**
      * @generated from field: optional string organization_external_id = 15;
      */
-    organizationExternalId?: string;
+    organizationExternalId?: string | undefined;
     /**
      * @generated from field: repeated string roles = 16;
      */
@@ -471,7 +471,7 @@ export type User = Message<"scalekit.v1.auth.User"> & {
     /**
      * @generated from field: optional string organization_external_name = 17;
      */
-    organizationExternalName?: string;
+    organizationExternalName?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.User.
@@ -489,7 +489,7 @@ export type GetAuthStateResponse = Message<"scalekit.v1.auth.GetAuthStateRespons
     /**
      * @generated from field: scalekit.v1.auth.UserDetails user = 2;
      */
-    user?: UserDetails;
+    user?: UserDetails | undefined;
     /**
      * Login hint from the original /authorize request, typically an email address used to pre-fill the login UI.
      *

@@ -15,19 +15,19 @@ export type SendPasswordlessRequest = Message<"scalekit.v1.auth.passwordless.Sen
     /**
      * @generated from field: optional scalekit.v1.auth.passwordless.TemplateType template = 2;
      */
-    template?: TemplateType;
+    template?: TemplateType | undefined;
     /**
      * @generated from field: optional string magiclink_auth_uri = 3;
      */
-    magiclinkAuthUri?: string;
+    magiclinkAuthUri?: string | undefined;
     /**
      * @generated from field: optional string state = 4;
      */
-    state?: string;
+    state?: string | undefined;
     /**
      * @generated from field: optional uint32 expires_in = 5;
      */
-    expiresIn?: number;
+    expiresIn?: number | undefined;
     /**
      * @generated from field: map<string, string> template_variables = 6;
      */
@@ -92,7 +92,7 @@ export type VerifyPasswordLessRequest = Message<"scalekit.v1.auth.passwordless.V
     /**
      * @generated from field: optional string auth_request_id = 3;
      */
-    authRequestId?: string;
+    authRequestId?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.passwordless.VerifyPasswordLessRequest.
@@ -124,11 +124,11 @@ export type VerifyPasswordLessResponse = Message<"scalekit.v1.auth.passwordless.
     /**
      * @generated from field: optional string state = 2;
      */
-    state?: string;
+    state?: string | undefined;
     /**
      * @generated from field: optional scalekit.v1.auth.passwordless.TemplateType template = 3;
      */
-    template?: TemplateType;
+    template?: TemplateType | undefined;
     /**
      * @generated from field: scalekit.v1.auth.passwordless.PasswordlessType passwordless_type = 4;
      */

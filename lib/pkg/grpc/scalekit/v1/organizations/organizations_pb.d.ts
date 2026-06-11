@@ -15,7 +15,7 @@ export type CreateOrganizationRequest = Message<"scalekit.v1.organizations.Creat
      *
      * @generated from field: scalekit.v1.organizations.CreateOrganization organization = 1;
      */
-    organization?: CreateOrganization;
+    organization?: CreateOrganization | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.CreateOrganizationRequest.
@@ -29,7 +29,7 @@ export type CreateOrganizationResponse = Message<"scalekit.v1.organizations.Crea
     /**
      * @generated from field: scalekit.v1.organizations.Organization organization = 1;
      */
-    organization?: Organization;
+    organization?: Organization | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.CreateOrganizationResponse.
@@ -51,7 +51,7 @@ export type CreateOrganization = Message<"scalekit.v1.organizations.CreateOrgani
     /**
      * @generated from field: optional string external_id = 6;
      */
-    externalId?: string;
+    externalId?: string | undefined;
     /**
      * @generated from field: map<string, string> metadata = 7;
      */
@@ -61,11 +61,11 @@ export type CreateOrganization = Message<"scalekit.v1.organizations.CreateOrgani
     /**
      * @generated from field: optional string slug = 9;
      */
-    slug?: string;
+    slug?: string | undefined;
     /**
      * @generated from field: optional string logo_url = 10;
      */
-    logoUrl?: string;
+    logoUrl?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.CreateOrganization.
@@ -87,13 +87,13 @@ export type Organization = Message<"scalekit.v1.organizations.Organization"> & {
      *
      * @generated from field: google.protobuf.Timestamp create_time = 2;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * Updated time
      *
      * @generated from field: google.protobuf.Timestamp update_time = 3;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * Name of the org to be used in display
      *
@@ -111,7 +111,7 @@ export type Organization = Message<"scalekit.v1.organizations.Organization"> & {
      *
      * @generated from field: optional string external_id = 6;
      */
-    externalId?: string;
+    externalId?: string | undefined;
     /**
      * Key value pairs extension attributes.
      *
@@ -125,15 +125,15 @@ export type Organization = Message<"scalekit.v1.organizations.Organization"> & {
      *
      * @generated from field: scalekit.v1.organizations.OrganizationSettings settings = 8;
      */
-    settings?: OrganizationSettings;
+    settings?: OrganizationSettings | undefined;
     /**
      * @generated from field: optional string slug = 9;
      */
-    slug?: string;
+    slug?: string | undefined;
     /**
      * @generated from field: optional string logo_url = 10;
      */
-    logoUrl?: string;
+    logoUrl?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.Organization.
@@ -166,11 +166,11 @@ export type UpdateOrganizationRequest = Message<"scalekit.v1.organizations.Updat
     /**
      * @generated from field: scalekit.v1.organizations.UpdateOrganization organization = 3;
      */
-    organization?: UpdateOrganization;
+    organization?: UpdateOrganization | undefined;
     /**
      * @generated from field: google.protobuf.FieldMask update_mask = 99;
      */
-    updateMask?: FieldMask;
+    updateMask?: FieldMask | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.UpdateOrganizationRequest.
@@ -186,11 +186,11 @@ export type UpdateOrganization = Message<"scalekit.v1.organizations.UpdateOrgani
     /**
      * @generated from field: optional string display_name = 4;
      */
-    displayName?: string;
+    displayName?: string | undefined;
     /**
      * @generated from field: optional string external_id = 6;
      */
-    externalId?: string;
+    externalId?: string | undefined;
     /**
      * @generated from field: map<string, string> metadata = 7;
      */
@@ -200,11 +200,11 @@ export type UpdateOrganization = Message<"scalekit.v1.organizations.UpdateOrgani
     /**
      * @generated from field: optional string slug = 9;
      */
-    slug?: string;
+    slug?: string | undefined;
     /**
      * @generated from field: optional string logo_url = 10;
      */
-    logoUrl?: string;
+    logoUrl?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.UpdateOrganization.
@@ -218,7 +218,7 @@ export type UpdateOrganizationResponse = Message<"scalekit.v1.organizations.Upda
     /**
      * @generated from field: scalekit.v1.organizations.Organization organization = 1;
      */
-    organization?: Organization;
+    organization?: Organization | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.UpdateOrganizationResponse.
@@ -261,7 +261,7 @@ export type GetOrganizationResponse = Message<"scalekit.v1.organizations.GetOrga
     /**
      * @generated from field: scalekit.v1.organizations.Organization organization = 1;
      */
-    organization?: Organization;
+    organization?: Organization | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.GetOrganizationResponse.
@@ -283,7 +283,7 @@ export type ListOrganizationsRequest = Message<"scalekit.v1.organizations.ListOr
     /**
      * @generated from field: optional string external_id = 3;
      */
-    externalId?: string;
+    externalId?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.ListOrganizationsRequest.
@@ -407,14 +407,14 @@ export type GeneratePortalLinkRequest = Message<"scalekit.v1.organizations.Gener
      * @generated from field: optional bool sso = 2 [deprecated = true];
      * @deprecated
      */
-    sso?: boolean;
+    sso?: boolean | undefined;
     /**
      * Deprecated: Use features
      *
      * @generated from field: optional bool directory_sync = 3 [deprecated = true];
      * @deprecated
      */
-    directorySync?: boolean;
+    directorySync?: boolean | undefined;
     /**
      * @generated from field: repeated scalekit.v1.organizations.Feature features = 4;
      */
@@ -486,7 +486,7 @@ export type Link = Message<"scalekit.v1.organizations.Link"> & {
     /**
      * @generated from field: google.protobuf.Timestamp expire_time = 3;
      */
-    expireTime?: Timestamp;
+    expireTime?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.Link.
@@ -500,7 +500,7 @@ export type GeneratePortalLinkResponse = Message<"scalekit.v1.organizations.Gene
     /**
      * @generated from field: scalekit.v1.organizations.Link link = 1;
      */
-    link?: Link;
+    link?: Link | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.GeneratePortalLinkResponse.
@@ -532,7 +532,7 @@ export type UpdateOrganizationSettingsRequest = Message<"scalekit.v1.organizatio
     /**
      * @generated from field: scalekit.v1.organizations.OrganizationSettings settings = 2;
      */
-    settings?: OrganizationSettings;
+    settings?: OrganizationSettings | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.UpdateOrganizationSettingsRequest.
@@ -552,29 +552,29 @@ export type OrganizationSessionPolicySettings = Message<"scalekit.v1.organizatio
      *
      * @generated from field: google.protobuf.Int32Value absolute_session_timeout = 2;
      */
-    absoluteSessionTimeout?: number;
+    absoluteSessionTimeout?: number | undefined;
     /**
      * Unit for absolute_session_timeout: "minutes", "hours", or "days". Responses always use "minutes".
      *
      * @generated from field: optional scalekit.v1.commons.TimeUnit absolute_session_timeout_unit = 3;
      */
-    absoluteSessionTimeoutUnit?: TimeUnit;
+    absoluteSessionTimeoutUnit?: TimeUnit | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue idle_session_timeout_enabled = 4;
      */
-    idleSessionTimeoutEnabled?: boolean;
+    idleSessionTimeoutEnabled?: boolean | undefined;
     /**
      * Timeout value interpreted with idle_session_timeout_unit on write; always returned in minutes on read.
      *
      * @generated from field: google.protobuf.Int32Value idle_session_timeout = 5;
      */
-    idleSessionTimeout?: number;
+    idleSessionTimeout?: number | undefined;
     /**
      * Unit for idle_session_timeout: "minutes", "hours", or "days". Responses always use "minutes".
      *
      * @generated from field: optional scalekit.v1.commons.TimeUnit idle_session_timeout_unit = 6;
      */
-    idleSessionTimeoutUnit?: TimeUnit;
+    idleSessionTimeoutUnit?: TimeUnit | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.OrganizationSessionPolicySettings.
@@ -602,7 +602,7 @@ export type GetOrganizationSessionPolicyResponse = Message<"scalekit.v1.organiza
     /**
      * @generated from field: scalekit.v1.organizations.OrganizationSessionPolicySettings policy = 1;
      */
-    policy?: OrganizationSessionPolicySettings;
+    policy?: OrganizationSessionPolicySettings | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.GetOrganizationSessionPolicyResponse.
@@ -624,23 +624,23 @@ export type UpdateOrganizationSessionPolicyRequest = Message<"scalekit.v1.organi
     /**
      * @generated from field: google.protobuf.Int32Value absolute_session_timeout = 3;
      */
-    absoluteSessionTimeout?: number;
+    absoluteSessionTimeout?: number | undefined;
     /**
      * @generated from field: optional scalekit.v1.commons.TimeUnit absolute_session_timeout_unit = 4;
      */
-    absoluteSessionTimeoutUnit?: TimeUnit;
+    absoluteSessionTimeoutUnit?: TimeUnit | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue idle_session_timeout_enabled = 5;
      */
-    idleSessionTimeoutEnabled?: boolean;
+    idleSessionTimeoutEnabled?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.Int32Value idle_session_timeout = 6;
      */
-    idleSessionTimeout?: number;
+    idleSessionTimeout?: number | undefined;
     /**
      * @generated from field: optional scalekit.v1.commons.TimeUnit idle_session_timeout_unit = 7;
      */
-    idleSessionTimeoutUnit?: TimeUnit;
+    idleSessionTimeoutUnit?: TimeUnit | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.UpdateOrganizationSessionPolicyRequest.
@@ -654,7 +654,7 @@ export type UpdateOrganizationSessionPolicyResponse = Message<"scalekit.v1.organ
     /**
      * @generated from field: scalekit.v1.organizations.OrganizationSessionPolicySettings policy = 1;
      */
-    policy?: OrganizationSessionPolicySettings;
+    policy?: OrganizationSessionPolicySettings | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.UpdateOrganizationSessionPolicyResponse.
@@ -698,11 +698,11 @@ export type ApplicationSessionPolicySettings = Message<"scalekit.v1.organization
     /**
      * @generated from field: optional scalekit.v1.commons.TimeUnit absolute_session_timeout_unit = 5;
      */
-    absoluteSessionTimeoutUnit?: TimeUnit;
+    absoluteSessionTimeoutUnit?: TimeUnit | undefined;
     /**
      * @generated from field: optional scalekit.v1.commons.TimeUnit idle_session_timeout_unit = 6;
      */
-    idleSessionTimeoutUnit?: TimeUnit;
+    idleSessionTimeoutUnit?: TimeUnit | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.ApplicationSessionPolicySettings.
@@ -716,7 +716,7 @@ export type GetApplicationSessionPolicyResponse = Message<"scalekit.v1.organizat
     /**
      * @generated from field: scalekit.v1.organizations.ApplicationSessionPolicySettings application_policy = 1;
      */
-    applicationPolicy?: ApplicationSessionPolicySettings;
+    applicationPolicy?: ApplicationSessionPolicySettings | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.GetApplicationSessionPolicyResponse.
@@ -730,7 +730,7 @@ export type OrganizationUserManagementSettings = Message<"scalekit.v1.organizati
     /**
      * @generated from field: google.protobuf.Int32Value max_allowed_users = 1;
      */
-    maxAllowedUsers?: number;
+    maxAllowedUsers?: number | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.OrganizationUserManagementSettings.
@@ -744,18 +744,18 @@ export type OrganizationSessionSettings = Message<"scalekit.v1.organizations.Org
     /**
      * @generated from field: google.protobuf.Int32Value absolute_session_timeout = 1;
      */
-    absoluteSessionTimeout?: number;
+    absoluteSessionTimeout?: number | undefined;
     /**
      * @generated from field: google.protobuf.Int32Value idle_session_timeout = 3;
      */
-    idleSessionTimeout?: number;
+    idleSessionTimeout?: number | undefined;
     /**
      * Whether idle session timeout is enabled for this organization.
      * Effective idle timeout is enabled if either the environment or any organization with SESSION_POLICY_CUSTOM has it enabled.
      *
      * @generated from field: google.protobuf.BoolValue idle_session_timeout_enabled = 5;
      */
-    idleSessionTimeoutEnabled?: boolean;
+    idleSessionTimeoutEnabled?: boolean | undefined;
     /**
      * APPLICATION (default) = inherit application-level policy; CUSTOM = org-specific values are active.
      *
@@ -811,7 +811,7 @@ export type UpsertUserManagementSettingsRequest = Message<"scalekit.v1.organizat
     /**
      * @generated from field: scalekit.v1.organizations.OrganizationUserManagementSettings settings = 2;
      */
-    settings?: OrganizationUserManagementSettings;
+    settings?: OrganizationUserManagementSettings | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.UpsertUserManagementSettingsRequest.
@@ -825,7 +825,7 @@ export type UpsertUserManagementSettingsResponse = Message<"scalekit.v1.organiza
     /**
      * @generated from field: scalekit.v1.organizations.OrganizationUserManagementSettings settings = 1;
      */
-    settings?: OrganizationUserManagementSettings;
+    settings?: OrganizationUserManagementSettings | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.UpsertUserManagementSettingsResponse.
@@ -853,7 +853,7 @@ export type GetOrganizationUserManagementSettingsResponse = Message<"scalekit.v1
     /**
      * @generated from field: scalekit.v1.organizations.OrganizationUserManagementSettings settings = 1;
      */
-    settings?: OrganizationUserManagementSettings;
+    settings?: OrganizationUserManagementSettings | undefined;
 };
 /**
  * Describes the message scalekit.v1.organizations.GetOrganizationUserManagementSettingsResponse.
