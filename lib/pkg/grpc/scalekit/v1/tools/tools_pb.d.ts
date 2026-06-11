@@ -12,7 +12,7 @@ export type CreateToolRequest = Message<"scalekit.v1.tools.CreateToolRequest"> &
     /**
      * @generated from field: scalekit.v1.tools.Tool tool = 1;
      */
-    tool?: Tool;
+    tool?: Tool | undefined;
 };
 /**
  * Describes the message scalekit.v1.tools.CreateToolRequest.
@@ -26,7 +26,7 @@ export type CreateToolResponse = Message<"scalekit.v1.tools.CreateToolResponse">
     /**
      * @generated from field: scalekit.v1.tools.Tool tool = 1;
      */
-    tool?: Tool;
+    tool?: Tool | undefined;
 };
 /**
  * Describes the message scalekit.v1.tools.CreateToolResponse.
@@ -48,11 +48,11 @@ export type Tool = Message<"scalekit.v1.tools.Tool"> & {
     /**
      * @generated from field: google.protobuf.Struct definition = 3;
      */
-    definition?: JsonObject;
+    definition?: JsonObject | undefined;
     /**
      * @generated from field: google.protobuf.Struct metadata = 4;
      */
-    metadata?: JsonObject;
+    metadata?: JsonObject | undefined;
     /**
      * @generated from field: repeated string tags = 5;
      */
@@ -60,11 +60,11 @@ export type Tool = Message<"scalekit.v1.tools.Tool"> & {
     /**
      * @generated from field: google.protobuf.BoolValue is_default = 6;
      */
-    isDefault?: boolean;
+    isDefault?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp updated_at = 7;
      */
-    updatedAt?: Timestamp;
+    updatedAt?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.tools.Tool.
@@ -78,7 +78,7 @@ export type ScopedTool = Message<"scalekit.v1.tools.ScopedTool"> & {
     /**
      * @generated from field: scalekit.v1.tools.Tool tool = 1;
      */
-    tool?: Tool;
+    tool?: Tool | undefined;
     /**
      * @generated from field: string identifier = 2;
      */
@@ -100,7 +100,7 @@ export type ListToolsRequest = Message<"scalekit.v1.tools.ListToolsRequest"> & {
     /**
      * @generated from field: scalekit.v1.tools.Filter filter = 1;
      */
-    filter?: Filter;
+    filter?: Filter | undefined;
     /**
      * @generated from field: uint32 page_size = 2;
      */
@@ -122,7 +122,7 @@ export type Filter = Message<"scalekit.v1.tools.Filter"> & {
     /**
      * @generated from field: google.protobuf.BoolValue summary = 1;
      */
-    summary?: boolean;
+    summary?: boolean | undefined;
     /**
      * @generated from field: string provider = 2;
      */
@@ -138,7 +138,7 @@ export type Filter = Message<"scalekit.v1.tools.Filter"> & {
     /**
      * @generated from field: optional string query = 5;
      */
-    query?: string;
+    query?: string | undefined;
     /**
      * Fields 6-9 mirror GetConnectedAccountByIdentifierRequest, enabling ListTools to
      * resolve a specific connected account and include its custom MCP tools alongside
@@ -146,19 +146,19 @@ export type Filter = Message<"scalekit.v1.tools.Filter"> & {
      *
      * @generated from field: optional string connector = 6;
      */
-    connector?: string;
+    connector?: string | undefined;
     /**
      * @generated from field: optional string organization_id = 7;
      */
-    organizationId?: string;
+    organizationId?: string | undefined;
     /**
      * @generated from field: optional string user_id = 8;
      */
-    userId?: string;
+    userId?: string | undefined;
     /**
      * @generated from field: optional string connected_account_id = 9;
      */
-    connectedAccountId?: string;
+    connectedAccountId?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.tools.Filter.
@@ -206,31 +206,31 @@ export type ExecuteToolRequest = Message<"scalekit.v1.tools.ExecuteToolRequest">
     /**
      * @generated from field: optional string identifier = 2;
      */
-    identifier?: string;
+    identifier?: string | undefined;
     /**
      * @generated from field: google.protobuf.Struct params = 3;
      */
-    params?: JsonObject;
+    params?: JsonObject | undefined;
     /**
      * @generated from field: optional string connected_account_id = 4;
      */
-    connectedAccountId?: string;
+    connectedAccountId?: string | undefined;
     /**
      * @generated from field: optional string connector = 5;
      */
-    connector?: string;
+    connector?: string | undefined;
     /**
      * @generated from field: optional string organization_id = 6;
      */
-    organizationId?: string;
+    organizationId?: string | undefined;
     /**
      * @generated from field: optional string user_id = 7;
      */
-    userId?: string;
+    userId?: string | undefined;
     /**
      * @generated from field: optional string agent_run_id = 8;
      */
-    agentRunId?: string;
+    agentRunId?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.tools.ExecuteToolRequest.
@@ -244,7 +244,7 @@ export type ExecuteToolResponse = Message<"scalekit.v1.tools.ExecuteToolResponse
     /**
      * @generated from field: google.protobuf.Struct data = 1;
      */
-    data?: JsonObject;
+    data?: JsonObject | undefined;
     /**
      * @generated from field: string execution_id = 2;
      */
@@ -284,7 +284,7 @@ export type SetToolDefaultResponse = Message<"scalekit.v1.tools.SetToolDefaultRe
     /**
      * @generated from field: scalekit.v1.tools.Tool tool = 1;
      */
-    tool?: Tool;
+    tool?: Tool | undefined;
 };
 /**
  * Describes the message scalekit.v1.tools.SetToolDefaultResponse.
@@ -298,7 +298,7 @@ export type UpdateToolRequest = Message<"scalekit.v1.tools.UpdateToolRequest"> &
     /**
      * @generated from field: scalekit.v1.tools.Tool tool = 1;
      */
-    tool?: Tool;
+    tool?: Tool | undefined;
 };
 /**
  * Describes the message scalekit.v1.tools.UpdateToolRequest.
@@ -312,7 +312,7 @@ export type UpdateToolResponse = Message<"scalekit.v1.tools.UpdateToolResponse">
     /**
      * @generated from field: scalekit.v1.tools.Tool tool = 1;
      */
-    tool?: Tool;
+    tool?: Tool | undefined;
 };
 /**
  * Describes the message scalekit.v1.tools.UpdateToolResponse.
@@ -344,7 +344,7 @@ export type ListScopedToolsRequest = Message<"scalekit.v1.tools.ListScopedToolsR
     /**
      * @generated from field: scalekit.v1.tools.ScopedToolFilter filter = 2;
      */
-    filter?: ScopedToolFilter;
+    filter?: ScopedToolFilter | undefined;
     /**
      * @generated from field: uint32 page_size = 3;
      */

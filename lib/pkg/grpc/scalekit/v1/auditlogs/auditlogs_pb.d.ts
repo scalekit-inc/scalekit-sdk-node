@@ -28,11 +28,11 @@ export type ListAuthLogRequest = Message<"scalekit.v1.auditlogs.ListAuthLogReque
     /**
      * @generated from field: google.protobuf.Timestamp start_time = 5;
      */
-    startTime?: Timestamp;
+    startTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp end_time = 6;
      */
-    endTime?: Timestamp;
+    endTime?: Timestamp | undefined;
     /**
      * @generated from field: string resource_id = 7;
      */
@@ -116,7 +116,7 @@ export type AuthLogRequest = Message<"scalekit.v1.auditlogs.AuthLogRequest"> & {
     /**
      * @generated from field: google.protobuf.Timestamp timestamp = 9;
      */
-    timestamp?: Timestamp;
+    timestamp?: Timestamp | undefined;
     /**
      * @generated from field: repeated scalekit.v1.auditlogs.ConnectionDetails connection_details = 10;
      */

@@ -36,7 +36,7 @@ export type Role = Message<"scalekit.v1.roles.Role"> & {
     /**
      * @generated from field: optional string extends = 8;
      */
-    extends?: string;
+    extends?: string | undefined;
     /**
      * @generated from field: repeated scalekit.v1.roles.RolePermission permissions = 9;
      */
@@ -70,11 +70,11 @@ export type CreateRole = Message<"scalekit.v1.roles.CreateRole"> & {
     /**
      * @generated from field: optional string description = 4;
      */
-    description?: string;
+    description?: string | undefined;
     /**
      * @generated from field: optional string extends = 8;
      */
-    extends?: string;
+    extends?: string | undefined;
     /**
      * @generated from field: repeated string permissions = 9;
      */
@@ -100,11 +100,11 @@ export type CreateOrganizationRole = Message<"scalekit.v1.roles.CreateOrganizati
     /**
      * @generated from field: optional string description = 4;
      */
-    description?: string;
+    description?: string | undefined;
     /**
      * @generated from field: optional string extends = 8;
      */
-    extends?: string;
+    extends?: string | undefined;
     /**
      * @generated from field: repeated string permissions = 9;
      */
@@ -122,7 +122,7 @@ export type CreateRoleRequest = Message<"scalekit.v1.roles.CreateRoleRequest"> &
     /**
      * @generated from field: scalekit.v1.roles.CreateRole role = 2;
      */
-    role?: CreateRole;
+    role?: CreateRole | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.CreateRoleRequest.
@@ -136,7 +136,7 @@ export type CreateRoleResponse = Message<"scalekit.v1.roles.CreateRoleResponse">
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
-    role?: Role;
+    role?: Role | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.CreateRoleResponse.
@@ -154,7 +154,7 @@ export type GetRoleRequest = Message<"scalekit.v1.roles.GetRoleRequest"> & {
     /**
      * @generated from field: optional string include = 3;
      */
-    include?: string;
+    include?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.GetRoleRequest.
@@ -168,7 +168,7 @@ export type GetRoleResponse = Message<"scalekit.v1.roles.GetRoleResponse"> & {
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
-    role?: Role;
+    role?: Role | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.GetRoleResponse.
@@ -182,7 +182,7 @@ export type ListRolesRequest = Message<"scalekit.v1.roles.ListRolesRequest"> & {
     /**
      * @generated from field: optional string include = 2;
      */
-    include?: string;
+    include?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.ListRolesRequest.
@@ -210,15 +210,15 @@ export type UpdateRole = Message<"scalekit.v1.roles.UpdateRole"> & {
     /**
      * @generated from field: optional string display_name = 1;
      */
-    displayName?: string;
+    displayName?: string | undefined;
     /**
      * @generated from field: optional string description = 2;
      */
-    description?: string;
+    description?: string | undefined;
     /**
      * @generated from field: optional string extends = 6;
      */
-    extends?: string;
+    extends?: string | undefined;
     /**
      * @generated from field: repeated string permissions = 7;
      */
@@ -240,7 +240,7 @@ export type UpdateRoleRequest = Message<"scalekit.v1.roles.UpdateRoleRequest"> &
     /**
      * @generated from field: scalekit.v1.roles.UpdateRole role = 3;
      */
-    role?: UpdateRole;
+    role?: UpdateRole | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.UpdateRoleRequest.
@@ -254,7 +254,7 @@ export type UpdateRoleResponse = Message<"scalekit.v1.roles.UpdateRoleResponse">
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
-    role?: Role;
+    role?: Role | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.UpdateRoleResponse.
@@ -273,11 +273,11 @@ export type DeleteRoleRequest = Message<"scalekit.v1.roles.DeleteRoleRequest"> &
      * @generated from field: optional string reassign_role_id = 3 [deprecated = true];
      * @deprecated
      */
-    reassignRoleId?: string;
+    reassignRoleId?: string | undefined;
     /**
      * @generated from field: optional string reassign_role_name = 4;
      */
-    reassignRoleName?: string;
+    reassignRoleName?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.DeleteRoleRequest.
@@ -295,7 +295,7 @@ export type CreateOrganizationRoleRequest = Message<"scalekit.v1.roles.CreateOrg
     /**
      * @generated from field: scalekit.v1.roles.CreateOrganizationRole role = 2;
      */
-    role?: CreateOrganizationRole;
+    role?: CreateOrganizationRole | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.CreateOrganizationRoleRequest.
@@ -309,7 +309,7 @@ export type CreateOrganizationRoleResponse = Message<"scalekit.v1.roles.CreateOr
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
-    role?: Role;
+    role?: Role | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.CreateOrganizationRoleResponse.
@@ -331,7 +331,7 @@ export type GetOrganizationRoleRequest = Message<"scalekit.v1.roles.GetOrganizat
     /**
      * @generated from field: optional string include = 3;
      */
-    include?: string;
+    include?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.GetOrganizationRoleRequest.
@@ -345,7 +345,7 @@ export type GetOrganizationRoleResponse = Message<"scalekit.v1.roles.GetOrganiza
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
-    role?: Role;
+    role?: Role | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.GetOrganizationRoleResponse.
@@ -363,7 +363,7 @@ export type ListOrganizationRolesRequest = Message<"scalekit.v1.roles.ListOrgani
     /**
      * @generated from field: optional string include = 2;
      */
-    include?: string;
+    include?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.ListOrganizationRolesRequest.
@@ -399,7 +399,7 @@ export type UpdateOrganizationRoleRequest = Message<"scalekit.v1.roles.UpdateOrg
     /**
      * @generated from field: scalekit.v1.roles.UpdateRole role = 3;
      */
-    role?: UpdateRole;
+    role?: UpdateRole | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.UpdateOrganizationRoleRequest.
@@ -413,7 +413,7 @@ export type UpdateOrganizationRoleResponse = Message<"scalekit.v1.roles.UpdateOr
     /**
      * @generated from field: scalekit.v1.roles.Role role = 1;
      */
-    role?: Role;
+    role?: Role | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.UpdateOrganizationRoleResponse.
@@ -435,7 +435,7 @@ export type DeleteOrganizationRoleRequest = Message<"scalekit.v1.roles.DeleteOrg
     /**
      * @generated from field: optional string reassign_role_name = 3;
      */
-    reassignRoleName?: string;
+    reassignRoleName?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.DeleteOrganizationRoleRequest.
@@ -510,20 +510,20 @@ export type UpdateDefaultRolesRequest = Message<"scalekit.v1.roles.UpdateDefault
      * @generated from field: scalekit.v1.roles.UpdateDefaultRole default_creator = 2 [deprecated = true];
      * @deprecated
      */
-    defaultCreator?: UpdateDefaultRole;
+    defaultCreator?: UpdateDefaultRole | undefined;
     /**
      * @generated from field: scalekit.v1.roles.UpdateDefaultRole default_member = 3 [deprecated = true];
      * @deprecated
      */
-    defaultMember?: UpdateDefaultRole;
+    defaultMember?: UpdateDefaultRole | undefined;
     /**
      * @generated from field: optional string default_creator_role = 4;
      */
-    defaultCreatorRole?: string;
+    defaultCreatorRole?: string | undefined;
     /**
      * @generated from field: optional string default_member_role = 5;
      */
-    defaultMemberRole?: string;
+    defaultMemberRole?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.UpdateDefaultRolesRequest.
@@ -555,11 +555,11 @@ export type UpdateDefaultRolesResponse = Message<"scalekit.v1.roles.UpdateDefaul
     /**
      * @generated from field: scalekit.v1.roles.Role default_creator = 1;
      */
-    defaultCreator?: Role;
+    defaultCreator?: Role | undefined;
     /**
      * @generated from field: scalekit.v1.roles.Role default_member = 2;
      */
-    defaultMember?: Role;
+    defaultMember?: Role | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.UpdateDefaultRolesResponse.
@@ -573,7 +573,7 @@ export type UpdateDefaultOrganizationRolesResponse = Message<"scalekit.v1.roles.
     /**
      * @generated from field: scalekit.v1.roles.Role default_member = 2;
      */
-    defaultMember?: Role;
+    defaultMember?: Role | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.UpdateDefaultOrganizationRolesResponse.
@@ -591,7 +591,7 @@ export type UpdateDefaultRole = Message<"scalekit.v1.roles.UpdateDefaultRole"> &
     /**
      * @generated from field: optional string name = 2;
      */
-    name?: string;
+    name?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.UpdateDefaultRole.
@@ -619,11 +619,11 @@ export type Permission = Message<"scalekit.v1.roles.Permission"> & {
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 4;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp update_time = 5;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * @generated from field: bool is_scalekit_permission = 6;
      */
@@ -655,11 +655,11 @@ export type RolePermission = Message<"scalekit.v1.roles.RolePermission"> & {
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 4;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp update_time = 5;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * @generated from field: string role_name = 6;
      */
@@ -697,7 +697,7 @@ export type CreatePermissionRequest = Message<"scalekit.v1.roles.CreatePermissio
     /**
      * @generated from field: scalekit.v1.roles.CreatePermission permission = 1;
      */
-    permission?: CreatePermission;
+    permission?: CreatePermission | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.CreatePermissionRequest.
@@ -711,7 +711,7 @@ export type CreatePermissionResponse = Message<"scalekit.v1.roles.CreatePermissi
     /**
      * @generated from field: scalekit.v1.roles.Permission permission = 1;
      */
-    permission?: Permission;
+    permission?: Permission | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.CreatePermissionResponse.
@@ -739,7 +739,7 @@ export type GetPermissionResponse = Message<"scalekit.v1.roles.GetPermissionResp
     /**
      * @generated from field: scalekit.v1.roles.Permission permission = 1;
      */
-    permission?: Permission;
+    permission?: Permission | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.GetPermissionResponse.
@@ -757,7 +757,7 @@ export type UpdatePermissionRequest = Message<"scalekit.v1.roles.UpdatePermissio
     /**
      * @generated from field: scalekit.v1.roles.CreatePermission permission = 3;
      */
-    permission?: CreatePermission;
+    permission?: CreatePermission | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.UpdatePermissionRequest.
@@ -771,7 +771,7 @@ export type UpdatePermissionResponse = Message<"scalekit.v1.roles.UpdatePermissi
     /**
      * @generated from field: scalekit.v1.roles.Permission permission = 1;
      */
-    permission?: Permission;
+    permission?: Permission | undefined;
 };
 /**
  * Describes the message scalekit.v1.roles.UpdatePermissionResponse.
@@ -785,11 +785,11 @@ export type ListPermissionsRequest = Message<"scalekit.v1.roles.ListPermissionsR
     /**
      * @generated from field: optional string page_token = 1;
      */
-    pageToken?: string;
+    pageToken?: string | undefined;
     /**
      * @generated from field: optional uint32 page_size = 2;
      */
-    pageSize?: number;
+    pageSize?: number | undefined;
     /**
      * @generated from field: scalekit.v1.roles.PermissionType type = 3;
      */

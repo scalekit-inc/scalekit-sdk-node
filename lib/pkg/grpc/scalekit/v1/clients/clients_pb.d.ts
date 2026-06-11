@@ -12,7 +12,7 @@ export type CreateResourceRequest = Message<"scalekit.v1.clients.CreateResourceR
     /**
      * @generated from field: scalekit.v1.clients.CreateResource resource = 1;
      */
-    resource?: CreateResource;
+    resource?: CreateResource | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateResourceRequest.
@@ -143,7 +143,7 @@ export type CreateResourceResponse = Message<"scalekit.v1.clients.CreateResource
     /**
      * @generated from field: scalekit.v1.clients.Resource resource = 1;
      */
-    resource?: Resource;
+    resource?: Resource | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateResourceResponse.
@@ -171,7 +171,7 @@ export type GetResourceResponse = Message<"scalekit.v1.clients.GetResourceRespon
     /**
      * @generated from field: scalekit.v1.clients.Resource resource = 1;
      */
-    resource?: Resource;
+    resource?: Resource | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.GetResourceResponse.
@@ -251,11 +251,11 @@ export type Application = Message<"scalekit.v1.clients.Application"> & {
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 10;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp update_time = 11;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * @generated from field: string provider = 12;
      */
@@ -309,11 +309,11 @@ export type Resource = Message<"scalekit.v1.clients.Resource"> & {
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 10;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp update_time = 11;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * @generated from field: string provider = 12;
      */
@@ -321,7 +321,7 @@ export type Resource = Message<"scalekit.v1.clients.Resource"> & {
     /**
      * @generated from field: google.protobuf.Struct protected_metadata = 13;
      */
-    protectedMetadata?: JsonObject;
+    protectedMetadata?: JsonObject | undefined;
     /**
      * @generated from field: string protected_metadata_uri = 14;
      */
@@ -337,7 +337,7 @@ export type Resource = Message<"scalekit.v1.clients.Resource"> & {
     /**
      * @generated from field: scalekit.v1.clients.ResourceConnection connection_details = 17;
      */
-    connectionDetails?: ResourceConnection;
+    connectionDetails?: ResourceConnection | undefined;
     /**
      * @generated from field: bool disallow_connection_update = 18;
      */
@@ -367,7 +367,7 @@ export type RegisterClientRequest = Message<"scalekit.v1.clients.RegisterClientR
     /**
      * @generated from field: scalekit.v1.clients.RegisterClient client = 2;
      */
-    client?: RegisterClient;
+    client?: RegisterClient | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.RegisterClientRequest.
@@ -439,11 +439,11 @@ export type RegisterClientResponse = Message<"scalekit.v1.clients.RegisterClient
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 5;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp update_time = 6;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * @generated from field: repeated string scopes = 7;
      */
@@ -543,11 +543,11 @@ export type UpdateResourceRequest = Message<"scalekit.v1.clients.UpdateResourceR
     /**
      * @generated from field: scalekit.v1.clients.UpdateResource resource = 2;
      */
-    resource?: UpdateResource;
+    resource?: UpdateResource | undefined;
     /**
      * @generated from field: google.protobuf.FieldMask update_mask = 99;
      */
-    updateMask?: FieldMask;
+    updateMask?: FieldMask | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateResourceRequest.
@@ -581,7 +581,7 @@ export type UpdateResource = Message<"scalekit.v1.clients.UpdateResource"> & {
     /**
      * @generated from field: google.protobuf.BoolValue disable_dynamic_client_registration = 6;
      */
-    disableDynamicClientRegistration?: boolean;
+    disableDynamicClientRegistration?: boolean | undefined;
     /**
      * @generated from field: string logo_uri = 7;
      */
@@ -614,11 +614,11 @@ export type UpdateResource = Message<"scalekit.v1.clients.UpdateResource"> & {
     /**
      * @generated from field: google.protobuf.BoolValue intersect_scopes_user_permission = 14;
      */
-    intersectScopesUserPermission?: boolean;
+    intersectScopesUserPermission?: boolean | undefined;
     /**
      * @generated from field: google.protobuf.BoolValue enable_cimd = 15;
      */
-    enableCimd?: boolean;
+    enableCimd?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateResource.
@@ -632,7 +632,7 @@ export type UpdateResourceResponse = Message<"scalekit.v1.clients.UpdateResource
     /**
      * @generated from field: scalekit.v1.clients.Resource resource = 1;
      */
-    resource?: Resource;
+    resource?: Resource | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateResourceResponse.
@@ -650,7 +650,7 @@ export type CreateResourceClientRequest = Message<"scalekit.v1.clients.CreateRes
     /**
      * @generated from field: scalekit.v1.clients.ResourceClient client = 2;
      */
-    client?: ResourceClient;
+    client?: ResourceClient | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateResourceClientRequest.
@@ -664,7 +664,7 @@ export type CreateResourceClientResponse = Message<"scalekit.v1.clients.CreateRe
     /**
      * @generated from field: scalekit.v1.clients.M2MClient client = 1;
      */
-    client?: M2MClient;
+    client?: M2MClient | undefined;
     /**
      * @generated from field: string plain_secret = 2;
      */
@@ -690,11 +690,11 @@ export type UpdateResourceClientRequest = Message<"scalekit.v1.clients.UpdateRes
     /**
      * @generated from field: scalekit.v1.clients.ResourceClient client = 3;
      */
-    client?: ResourceClient;
+    client?: ResourceClient | undefined;
     /**
      * @generated from field: google.protobuf.FieldMask update_mask = 4;
      */
-    updateMask?: FieldMask;
+    updateMask?: FieldMask | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateResourceClientRequest.
@@ -708,7 +708,7 @@ export type UpdateResourceClientResponse = Message<"scalekit.v1.clients.UpdateRe
     /**
      * @generated from field: scalekit.v1.clients.M2MClient client = 1;
      */
-    client?: M2MClient;
+    client?: M2MClient | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateResourceClientResponse.
@@ -740,7 +740,7 @@ export type GetResourceClientResponse = Message<"scalekit.v1.clients.GetResource
     /**
      * @generated from field: scalekit.v1.clients.M2MClient client = 2;
      */
-    client?: M2MClient;
+    client?: M2MClient | undefined;
     /**
      * @generated from field: repeated scalekit.v1.clients.ConsentedUser consented_users = 3;
      */
@@ -852,7 +852,7 @@ export type ResourceUserConsent = Message<"scalekit.v1.clients.ResourceUserConse
     /**
      * @generated from field: google.protobuf.Timestamp granted_at = 6;
      */
-    grantedAt?: Timestamp;
+    grantedAt?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.ResourceUserConsent.
@@ -933,7 +933,7 @@ export type CreateOrganizationClientRequest = Message<"scalekit.v1.clients.Creat
     /**
      * @generated from field: scalekit.v1.clients.OrganizationClient client = 2;
      */
-    client?: OrganizationClient;
+    client?: OrganizationClient | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateOrganizationClientRequest.
@@ -981,7 +981,7 @@ export type CreateOrganizationClientResponse = Message<"scalekit.v1.clients.Crea
     /**
      * @generated from field: scalekit.v1.clients.M2MClient client = 1;
      */
-    client?: M2MClient;
+    client?: M2MClient | undefined;
     /**
      * @generated from field: string plain_secret = 2;
      */
@@ -1007,7 +1007,7 @@ export type UpdateOrganizationClientRequest = Message<"scalekit.v1.clients.Updat
     /**
      * @generated from field: scalekit.v1.clients.OrganizationClient client = 3;
      */
-    client?: OrganizationClient;
+    client?: OrganizationClient | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateOrganizationClientRequest.
@@ -1021,7 +1021,7 @@ export type UpdateOrganizationClientResponse = Message<"scalekit.v1.clients.Upda
     /**
      * @generated from field: scalekit.v1.clients.M2MClient client = 1;
      */
-    client?: M2MClient;
+    client?: M2MClient | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateOrganizationClientResponse.
@@ -1055,11 +1055,11 @@ export type M2MClient = Message<"scalekit.v1.clients.M2MClient"> & {
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 6;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp update_time = 7;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * @generated from field: repeated string scopes = 8;
      */
@@ -1127,7 +1127,7 @@ export type GetOrganizationClientResponse = Message<"scalekit.v1.clients.GetOrga
     /**
      * @generated from field: scalekit.v1.clients.M2MClient client = 1;
      */
-    client?: M2MClient;
+    client?: M2MClient | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.GetOrganizationClientResponse.
@@ -1181,7 +1181,7 @@ export type CreateOrganizationClientSecretResponse = Message<"scalekit.v1.client
     /**
      * @generated from field: scalekit.v1.clients.ClientSecret secret = 2;
      */
-    secret?: ClientSecret;
+    secret?: ClientSecret | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateOrganizationClientSecretResponse.
@@ -1319,7 +1319,7 @@ export type GetClientResponse = Message<"scalekit.v1.clients.GetClientResponse">
      *
      * @generated from field: scalekit.v1.clients.Client client = 1;
      */
-    client?: Client;
+    client?: Client | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.GetClientResponse.
@@ -1339,7 +1339,7 @@ export type ListClientsRequest = Message<"scalekit.v1.clients.ListClientsRequest
     /**
      * @generated from field: scalekit.v1.clients.ListClientsRequest.Filter filter = 3;
      */
-    filter?: ListClientsRequest_Filter;
+    filter?: ListClientsRequest_Filter | undefined;
     /**
      * @generated from field: string page_token = 4;
      */
@@ -1405,7 +1405,7 @@ export type CreateClientRequest = Message<"scalekit.v1.clients.CreateClientReque
     /**
      * @generated from field: scalekit.v1.clients.CreateClient client = 1;
      */
-    client?: CreateClient;
+    client?: CreateClient | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateClientRequest.
@@ -1435,7 +1435,7 @@ export type CreateClient = Message<"scalekit.v1.clients.CreateClient"> & {
     /**
      * @generated from field: optional string initiate_login_uri = 5;
      */
-    initiateLoginUri?: string;
+    initiateLoginUri?: string | undefined;
     /**
      * @generated from field: repeated string post_login_uris = 6;
      */
@@ -1455,7 +1455,7 @@ export type CreateClient = Message<"scalekit.v1.clients.CreateClient"> & {
     /**
      * @generated from field: google.protobuf.BoolValue disallow_scalekit_api_access = 10;
      */
-    disallowScalekitApiAccess?: boolean;
+    disallowScalekitApiAccess?: boolean | undefined;
     /**
      * @generated from field: repeated string grant_types = 11;
      */
@@ -1463,7 +1463,7 @@ export type CreateClient = Message<"scalekit.v1.clients.CreateClient"> & {
     /**
      * @generated from field: google.protobuf.BoolValue enforce_pkce = 12;
      */
-    enforcePkce?: boolean;
+    enforcePkce?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateClient.
@@ -1477,7 +1477,7 @@ export type CreateClientResponse = Message<"scalekit.v1.clients.CreateClientResp
     /**
      * @generated from field: scalekit.v1.clients.Client client = 1;
      */
-    client?: Client;
+    client?: Client | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateClientResponse.
@@ -1495,11 +1495,11 @@ export type UpdateClientRequest = Message<"scalekit.v1.clients.UpdateClientReque
     /**
      * @generated from field: scalekit.v1.clients.UpdateClient client = 2;
      */
-    client?: UpdateClient;
+    client?: UpdateClient | undefined;
     /**
      * @generated from field: google.protobuf.FieldMask mask = 3;
      */
-    mask?: FieldMask;
+    mask?: FieldMask | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateClientRequest.
@@ -1521,7 +1521,7 @@ export type UpdateClient = Message<"scalekit.v1.clients.UpdateClient"> & {
     /**
      * @generated from field: optional string initiate_login_uri = 6;
      */
-    initiateLoginUri?: string;
+    initiateLoginUri?: string | undefined;
     /**
      * @generated from field: repeated string post_login_uris = 7;
      */
@@ -1545,7 +1545,7 @@ export type UpdateClient = Message<"scalekit.v1.clients.UpdateClient"> & {
     /**
      * @generated from field: google.protobuf.BoolValue disallow_scalekit_api_access = 13;
      */
-    disallowScalekitApiAccess?: boolean;
+    disallowScalekitApiAccess?: boolean | undefined;
     /**
      * @generated from field: repeated string grant_types = 14;
      */
@@ -1553,7 +1553,7 @@ export type UpdateClient = Message<"scalekit.v1.clients.UpdateClient"> & {
     /**
      * @generated from field: google.protobuf.BoolValue enforce_pkce = 15;
      */
-    enforcePkce?: boolean;
+    enforcePkce?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateClient.
@@ -1567,7 +1567,7 @@ export type UpdateClientResponse = Message<"scalekit.v1.clients.UpdateClientResp
     /**
      * @generated from field: scalekit.v1.clients.Client client = 1;
      */
-    client?: Client;
+    client?: Client | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateClientResponse.
@@ -1605,7 +1605,7 @@ export type CreateClientSecretResponse = Message<"scalekit.v1.clients.CreateClie
      *
      * @generated from field: scalekit.v1.clients.ClientSecret secret = 2;
      */
-    secret?: ClientSecret;
+    secret?: ClientSecret | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateClientSecretResponse.
@@ -1633,13 +1633,13 @@ export type UpdateClientSecretRequest = Message<"scalekit.v1.clients.UpdateClien
      *
      * @generated from field: scalekit.v1.clients.UpdateClientSecret secret = 3;
      */
-    secret?: UpdateClientSecret;
+    secret?: UpdateClientSecret | undefined;
     /**
      * Fields to update (system-controlled parameter)
      *
      * @generated from field: google.protobuf.FieldMask mask = 4;
      */
-    mask?: FieldMask;
+    mask?: FieldMask | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateClientSecretRequest.
@@ -1671,7 +1671,7 @@ export type UpdateClientSecretResponse = Message<"scalekit.v1.clients.UpdateClie
      *
      * @generated from field: scalekit.v1.clients.ClientSecret secret = 1;
      */
-    secret?: ClientSecret;
+    secret?: ClientSecret | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateClientSecretResponse.
@@ -1731,11 +1731,11 @@ export type Client = Message<"scalekit.v1.clients.Client"> & {
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 3;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp update_time = 4;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * @generated from field: repeated scalekit.v1.clients.ClientSecret secrets = 7;
      */
@@ -1763,7 +1763,7 @@ export type Client = Message<"scalekit.v1.clients.Client"> & {
     /**
      * @generated from field: optional int64 access_token_expiry = 13;
      */
-    accessTokenExpiry?: bigint;
+    accessTokenExpiry?: bigint | undefined;
     /**
      * @generated from field: repeated string scopes = 14;
      */
@@ -1805,11 +1805,11 @@ export type ClientSecret = Message<"scalekit.v1.clients.ClientSecret"> & {
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 2;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp update_time = 3;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * @generated from field: string secret_suffix = 4;
      */
@@ -1817,7 +1817,7 @@ export type ClientSecret = Message<"scalekit.v1.clients.ClientSecret"> & {
     /**
      * @generated from field: optional string created_by = 5;
      */
-    createdBy?: string;
+    createdBy?: string | undefined;
     /**
      * @generated from field: scalekit.v1.clients.ClientSecretStatus status = 6;
      */
@@ -1825,15 +1825,15 @@ export type ClientSecret = Message<"scalekit.v1.clients.ClientSecret"> & {
     /**
      * @generated from field: google.protobuf.Timestamp expire_time = 7;
      */
-    expireTime?: Timestamp;
+    expireTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp last_used_time = 8;
      */
-    lastUsedTime?: Timestamp;
+    lastUsedTime?: Timestamp | undefined;
     /**
      * @generated from field: optional string plain_secret = 9;
      */
-    plainSecret?: string;
+    plainSecret?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.ClientSecret.
@@ -1891,7 +1891,7 @@ export type CreateScopeRequest = Message<"scalekit.v1.clients.CreateScopeRequest
     /**
      * @generated from field: scalekit.v1.clients.CreateScope scope = 1;
      */
-    scope?: CreateScope;
+    scope?: CreateScope | undefined;
     /**
      * @generated from field: string env_id = 2;
      */
@@ -1909,7 +1909,7 @@ export type CreateScopeResponse = Message<"scalekit.v1.clients.CreateScopeRespon
     /**
      * @generated from field: scalekit.v1.clients.Scope scope = 1;
      */
-    scope?: Scope;
+    scope?: Scope | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateScopeResponse.
@@ -1955,7 +1955,7 @@ export type UpdateScopeRequest = Message<"scalekit.v1.clients.UpdateScopeRequest
     /**
      * @generated from field: scalekit.v1.clients.UpdateScope scope = 2;
      */
-    scope?: UpdateScope;
+    scope?: UpdateScope | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateScopeRequest.
@@ -1973,7 +1973,7 @@ export type UpdateScope = Message<"scalekit.v1.clients.UpdateScope"> & {
     /**
      * @generated from field: google.protobuf.BoolValue enabled = 2;
      */
-    enabled?: boolean;
+    enabled?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateScope.
@@ -1987,7 +1987,7 @@ export type UpdateScopeResponse = Message<"scalekit.v1.clients.UpdateScopeRespon
     /**
      * @generated from field: scalekit.v1.clients.Scope scope = 1;
      */
-    scope?: Scope;
+    scope?: Scope | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateScopeResponse.
@@ -2015,15 +2015,15 @@ export type GetConsentDetailsResponse = Message<"scalekit.v1.clients.GetConsentD
     /**
      * @generated from field: scalekit.v1.clients.Resource resource = 1;
      */
-    resource?: Resource;
+    resource?: Resource | undefined;
     /**
      * @generated from field: scalekit.v1.clients.User user = 2;
      */
-    user?: User;
+    user?: User | undefined;
     /**
      * @generated from field: scalekit.v1.clients.ConsentClient client = 3;
      */
-    client?: ConsentClient;
+    client?: ConsentClient | undefined;
     /**
      * @generated from field: repeated scalekit.v1.clients.ConsentScope scopes = 4;
      */
@@ -2031,11 +2031,11 @@ export type GetConsentDetailsResponse = Message<"scalekit.v1.clients.GetConsentD
     /**
      * @generated from field: scalekit.v1.clients.Application application = 5;
      */
-    application?: Application;
+    application?: Application | undefined;
     /**
      * @generated from field: scalekit.v1.clients.ConsentOrganization organization = 6;
      */
-    organization?: ConsentOrganization;
+    organization?: ConsentOrganization | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.GetConsentDetailsResponse.
@@ -2049,7 +2049,7 @@ export type ConsentOrganization = Message<"scalekit.v1.clients.ConsentOrganizati
     /**
      * @generated from field: optional string organization_name = 1;
      */
-    organizationName?: string;
+    organizationName?: string | undefined;
     /**
      * @generated from field: string organization_meta_name = 2;
      */
@@ -2174,7 +2174,7 @@ export type EnsureResourceConnectionResponse = Message<"scalekit.v1.clients.Ensu
     /**
      * @generated from field: scalekit.v1.clients.ResourceConnection connection = 1;
      */
-    connection?: ResourceConnection;
+    connection?: ResourceConnection | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.EnsureResourceConnectionResponse.
@@ -2204,7 +2204,7 @@ export type ResourceConnection = Message<"scalekit.v1.clients.ResourceConnection
     /**
      * @generated from field: google.protobuf.Struct settings = 5;
      */
-    settings?: JsonObject;
+    settings?: JsonObject | undefined;
     /**
      * @generated from field: string provider = 6;
      */

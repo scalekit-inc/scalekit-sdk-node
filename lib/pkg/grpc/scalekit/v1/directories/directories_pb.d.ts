@@ -30,7 +30,7 @@ export type GetDirectoryResponse = Message<"scalekit.v1.directories.GetDirectory
     /**
      * @generated from field: scalekit.v1.directories.Directory directory = 1;
      */
-    directory?: Directory;
+    directory?: Directory | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.GetDirectoryResponse.
@@ -48,7 +48,7 @@ export type CreateDirectoryRequest = Message<"scalekit.v1.directories.CreateDire
     /**
      * @generated from field: scalekit.v1.directories.CreateDirectory directory = 2;
      */
-    directory?: CreateDirectory;
+    directory?: CreateDirectory | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.CreateDirectoryRequest.
@@ -80,7 +80,7 @@ export type CreateDirectoryResponse = Message<"scalekit.v1.directories.CreateDir
     /**
      * @generated from field: scalekit.v1.directories.Directory directory = 1;
      */
-    directory?: Directory;
+    directory?: Directory | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.CreateDirectoryResponse.
@@ -102,7 +102,7 @@ export type UpdateDirectoryRequest = Message<"scalekit.v1.directories.UpdateDire
     /**
      * @generated from field: scalekit.v1.directories.UpdateDirectory directory = 3;
      */
-    directory?: UpdateDirectory;
+    directory?: UpdateDirectory | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.UpdateDirectoryRequest.
@@ -154,7 +154,7 @@ export type UpdateDirectoryResponse = Message<"scalekit.v1.directories.UpdateDir
     /**
      * @generated from field: scalekit.v1.directories.Directory directory = 1;
      */
-    directory?: Directory;
+    directory?: Directory | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.UpdateDirectoryResponse.
@@ -234,15 +234,15 @@ export type ListDirectoryUsersRequest = Message<"scalekit.v1.directories.ListDir
     /**
      * @generated from field: optional bool include_detail = 5;
      */
-    includeDetail?: boolean;
+    includeDetail?: boolean | undefined;
     /**
      * @generated from field: optional string directory_group_id = 6;
      */
-    directoryGroupId?: string;
+    directoryGroupId?: string | undefined;
     /**
      * @generated from field: optional google.protobuf.Timestamp updated_after = 7;
      */
-    updatedAfter?: Timestamp;
+    updatedAfter?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.ListDirectoryUsersRequest.
@@ -298,15 +298,15 @@ export type ListDirectoryGroupsRequest = Message<"scalekit.v1.directories.ListDi
     /**
      * @generated from field: optional google.protobuf.Timestamp updated_after = 5;
      */
-    updatedAfter?: Timestamp;
+    updatedAfter?: Timestamp | undefined;
     /**
      * @generated from field: optional bool include_detail = 6;
      */
-    includeDetail?: boolean;
+    includeDetail?: boolean | undefined;
     /**
      * @generated from field: optional bool include_external_groups = 7;
      */
-    includeExternalGroups?: boolean;
+    includeExternalGroups?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.ListDirectoryGroupsRequest.
@@ -388,7 +388,7 @@ export type Directory = Message<"scalekit.v1.directories.Directory"> & {
     /**
      * @generated from field: google.protobuf.Timestamp last_synced_at = 7;
      */
-    lastSyncedAt?: Timestamp;
+    lastSyncedAt?: Timestamp | undefined;
     /**
      * @generated from field: string directory_endpoint = 8;
      */
@@ -408,15 +408,15 @@ export type Directory = Message<"scalekit.v1.directories.Directory"> & {
     /**
      * @generated from field: scalekit.v1.directories.Stats stats = 12;
      */
-    stats?: Stats;
+    stats?: Stats | undefined;
     /**
      * @generated from field: scalekit.v1.directories.RoleAssignments role_assignments = 13;
      */
-    roleAssignments?: RoleAssignments;
+    roleAssignments?: RoleAssignments | undefined;
     /**
      * @generated from field: scalekit.v1.directories.AttributeMappings attribute_mappings = 14;
      */
-    attributeMappings?: AttributeMappings;
+    attributeMappings?: AttributeMappings | undefined;
     /**
      * @generated from field: string status = 15;
      */
@@ -464,7 +464,7 @@ export type ToggleDirectoryResponse = Message<"scalekit.v1.directories.ToggleDir
     /**
      * @generated from field: optional string error_message = 2;
      */
-    errorMessage?: string;
+    errorMessage?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.ToggleDirectoryResponse.
@@ -520,7 +520,7 @@ export type DirectoryUser = Message<"scalekit.v1.directories.DirectoryUser"> & {
     /**
      * @generated from field: google.protobuf.Timestamp updated_at = 6;
      */
-    updatedAt?: Timestamp;
+    updatedAt?: Timestamp | undefined;
     /**
      * @generated from field: repeated string emails = 16;
      */
@@ -532,7 +532,7 @@ export type DirectoryUser = Message<"scalekit.v1.directories.DirectoryUser"> & {
     /**
      * @generated from field: google.protobuf.Struct user_detail = 18;
      */
-    userDetail?: JsonObject;
+    userDetail?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.DirectoryUser.
@@ -580,11 +580,11 @@ export type DirectoryGroup = Message<"scalekit.v1.directories.DirectoryGroup"> &
     /**
      * @generated from field: google.protobuf.Timestamp updated_at = 4;
      */
-    updatedAt?: Timestamp;
+    updatedAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Struct group_detail = 5;
      */
-    groupDetail?: JsonObject;
+    groupDetail?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.DirectoryGroup.
@@ -620,7 +620,7 @@ export type CreateDirectorySecretResponse = Message<"scalekit.v1.directories.Cre
     /**
      * @generated from field: scalekit.v1.directories.Secret secret = 2;
      */
-    secret?: Secret;
+    secret?: Secret | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.CreateDirectorySecretResponse.
@@ -656,7 +656,7 @@ export type RegenerateDirectorySecretResponse = Message<"scalekit.v1.directories
     /**
      * @generated from field: scalekit.v1.directories.Secret secret = 2;
      */
-    secret?: Secret;
+    secret?: Secret | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.RegenerateDirectorySecretResponse.
@@ -674,7 +674,7 @@ export type Secret = Message<"scalekit.v1.directories.Secret"> & {
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 2;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: string secret_suffix = 4;
      */
@@ -686,11 +686,11 @@ export type Secret = Message<"scalekit.v1.directories.Secret"> & {
     /**
      * @generated from field: google.protobuf.Timestamp expire_time = 6;
      */
-    expireTime?: Timestamp;
+    expireTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp last_used_time = 7;
      */
-    lastUsedTime?: Timestamp;
+    lastUsedTime?: Timestamp | undefined;
     /**
      * @generated from field: string directory_id = 9;
      */
@@ -716,11 +716,11 @@ export type Stats = Message<"scalekit.v1.directories.Stats"> & {
     /**
      * @generated from field: google.protobuf.Timestamp group_updated_at = 3;
      */
-    groupUpdatedAt?: Timestamp;
+    groupUpdatedAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp user_updated_at = 4;
      */
-    userUpdatedAt?: Timestamp;
+    userUpdatedAt?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.Stats.
@@ -742,7 +742,7 @@ export type AssignRolesRequest = Message<"scalekit.v1.directories.AssignRolesReq
     /**
      * @generated from field: scalekit.v1.directories.RoleAssignments role_assignments = 3;
      */
-    roleAssignments?: RoleAssignments;
+    roleAssignments?: RoleAssignments | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.AssignRolesRequest.
@@ -770,7 +770,7 @@ export type AssignRolesResponse = Message<"scalekit.v1.directories.AssignRolesRe
     /**
      * @generated from field: scalekit.v1.directories.RoleAssignments role_assignments = 1;
      */
-    roleAssignments?: RoleAssignments;
+    roleAssignments?: RoleAssignments | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.AssignRolesResponse.
@@ -814,7 +814,7 @@ export type UpdateAttributesRequest = Message<"scalekit.v1.directories.UpdateAtt
     /**
      * @generated from field: scalekit.v1.directories.AttributeMappings attribute_mapping = 3;
      */
-    attributeMapping?: AttributeMappings;
+    attributeMapping?: AttributeMappings | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.UpdateAttributesRequest.
@@ -860,7 +860,7 @@ export type UpdateAttributesResponse = Message<"scalekit.v1.directories.UpdateAt
     /**
      * @generated from field: scalekit.v1.directories.AttributeMappings attribute_mappings = 1;
      */
-    attributeMappings?: AttributeMappings;
+    attributeMappings?: AttributeMappings | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.UpdateAttributesResponse.
@@ -928,7 +928,7 @@ export type GetDirectoryContextResponse = Message<"scalekit.v1.directories.GetDi
     /**
      * @generated from field: google.protobuf.Struct context = 1;
      */
-    context?: JsonObject;
+    context?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.GetDirectoryContextResponse.
@@ -950,7 +950,7 @@ export type UpdateDirectoryContextRequest = Message<"scalekit.v1.directories.Upd
     /**
      * @generated from field: google.protobuf.Struct context = 3;
      */
-    context?: JsonObject;
+    context?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.directories.UpdateDirectoryContextRequest.

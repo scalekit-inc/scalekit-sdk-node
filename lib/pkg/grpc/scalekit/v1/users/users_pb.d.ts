@@ -21,11 +21,11 @@ export type User = Message<"scalekit.v1.users.User"> & {
     /**
      * @generated from field: google.protobuf.Timestamp create_time = 3;
      */
-    createTime?: Timestamp;
+    createTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp update_time = 4;
      */
-    updateTime?: Timestamp;
+    updateTime?: Timestamp | undefined;
     /**
      * @generated from field: string email = 5;
      */
@@ -33,7 +33,7 @@ export type User = Message<"scalekit.v1.users.User"> & {
     /**
      * @generated from field: optional string external_id = 6;
      */
-    externalId?: string;
+    externalId?: string | undefined;
     /**
      * @generated from field: repeated scalekit.v1.commons.OrganizationMembership memberships = 7;
      */
@@ -41,7 +41,7 @@ export type User = Message<"scalekit.v1.users.User"> & {
     /**
      * @generated from field: scalekit.v1.commons.UserProfile user_profile = 8;
      */
-    userProfile?: UserProfile;
+    userProfile?: UserProfile | undefined;
     /**
      * @generated from field: map<string, string> metadata = 9;
      */
@@ -51,7 +51,7 @@ export type User = Message<"scalekit.v1.users.User"> & {
     /**
      * @generated from field: google.protobuf.Timestamp last_login_time = 10;
      */
-    lastLoginTime?: Timestamp;
+    lastLoginTime?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.User.
@@ -69,11 +69,11 @@ export type CreateUserAndMembershipRequest = Message<"scalekit.v1.users.CreateUs
     /**
      * @generated from field: scalekit.v1.users.CreateUser user = 2;
      */
-    user?: CreateUser;
+    user?: CreateUser | undefined;
     /**
      * @generated from field: optional bool send_invitation_email = 3;
      */
-    sendInvitationEmail?: boolean;
+    sendInvitationEmail?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.CreateUserAndMembershipRequest.
@@ -87,7 +87,7 @@ export type CreateUserAndMembershipResponse = Message<"scalekit.v1.users.CreateU
     /**
      * @generated from field: scalekit.v1.users.User user = 1;
      */
-    user?: User;
+    user?: User | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.CreateUserAndMembershipResponse.
@@ -101,11 +101,11 @@ export type UpdateUser = Message<"scalekit.v1.users.UpdateUser"> & {
     /**
      * @generated from field: optional string external_id = 6;
      */
-    externalId?: string;
+    externalId?: string | undefined;
     /**
      * @generated from field: scalekit.v1.users.UpdateUserProfile user_profile = 8;
      */
-    userProfile?: UpdateUserProfile;
+    userProfile?: UpdateUserProfile | undefined;
     /**
      * @generated from field: map<string, string> metadata = 9;
      */
@@ -144,7 +144,7 @@ export type UpdateUserRequest = Message<"scalekit.v1.users.UpdateUserRequest"> &
     /**
      * @generated from field: scalekit.v1.users.UpdateUser user = 3;
      */
-    user?: UpdateUser;
+    user?: UpdateUser | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.UpdateUserRequest.
@@ -158,7 +158,7 @@ export type UpdateUserResponse = Message<"scalekit.v1.users.UpdateUserResponse">
     /**
      * @generated from field: scalekit.v1.users.User user = 1;
      */
-    user?: User;
+    user?: User | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.UpdateUserResponse.
@@ -201,7 +201,7 @@ export type GetUserResponse = Message<"scalekit.v1.users.GetUserResponse"> & {
     /**
      * @generated from field: scalekit.v1.users.User user = 1;
      */
-    user?: User;
+    user?: User | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.GetUserResponse.
@@ -215,7 +215,7 @@ export type GetCurrentUserResponse = Message<"scalekit.v1.users.GetCurrentUserRe
     /**
      * @generated from field: scalekit.v1.users.User user = 1;
      */
-    user?: User;
+    user?: User | undefined;
     /**
      * @generated from field: string current_session_id = 2;
      */
@@ -315,7 +315,7 @@ export type DeleteMembershipRequest = Message<"scalekit.v1.users.DeleteMembershi
     /**
      * @generated from field: optional bool cascade = 5;
      */
-    cascade?: boolean;
+    cascade?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.DeleteMembershipRequest.
@@ -333,7 +333,7 @@ export type CreateMembershipRequest = Message<"scalekit.v1.users.CreateMembershi
     /**
      * @generated from field: scalekit.v1.users.CreateMembership membership = 2;
      */
-    membership?: CreateMembership;
+    membership?: CreateMembership | undefined;
     /**
      * @generated from oneof scalekit.v1.users.CreateMembershipRequest.identities
      */
@@ -356,7 +356,7 @@ export type CreateMembershipRequest = Message<"scalekit.v1.users.CreateMembershi
     /**
      * @generated from field: optional bool send_invitation_email = 5;
      */
-    sendInvitationEmail?: boolean;
+    sendInvitationEmail?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.CreateMembershipRequest.
@@ -370,7 +370,7 @@ export type CreateMembershipResponse = Message<"scalekit.v1.users.CreateMembersh
     /**
      * @generated from field: scalekit.v1.users.User user = 1;
      */
-    user?: User;
+    user?: User | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.CreateMembershipResponse.
@@ -528,7 +528,7 @@ export type UpdateMembershipRequest = Message<"scalekit.v1.users.UpdateMembershi
     /**
      * @generated from field: scalekit.v1.users.UpdateMembership membership = 5;
      */
-    membership?: UpdateMembership;
+    membership?: UpdateMembership | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.UpdateMembershipRequest.
@@ -572,7 +572,7 @@ export type CreateMembership = Message<"scalekit.v1.users.CreateMembership"> & {
     /**
      * @generated from field: optional string inviter_email = 8;
      */
-    inviterEmail?: string;
+    inviterEmail?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.CreateMembership.
@@ -586,7 +586,7 @@ export type UpdateMembershipResponse = Message<"scalekit.v1.users.UpdateMembersh
     /**
      * @generated from field: scalekit.v1.users.User user = 1;
      */
-    user?: User;
+    user?: User | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.UpdateMembershipResponse.
@@ -656,15 +656,15 @@ export type CreateUser = Message<"scalekit.v1.users.CreateUser"> & {
     /**
      * @generated from field: optional string external_id = 6;
      */
-    externalId?: string;
+    externalId?: string | undefined;
     /**
      * @generated from field: scalekit.v1.users.CreateMembership membership = 7;
      */
-    membership?: CreateMembership;
+    membership?: CreateMembership | undefined;
     /**
      * @generated from field: scalekit.v1.users.CreateUserProfile user_profile = 8;
      */
-    userProfile?: CreateUserProfile;
+    userProfile?: CreateUserProfile | undefined;
     /**
      * @generated from field: map<string, string> metadata = 9;
      */
@@ -720,11 +720,11 @@ export type CreateUserProfile = Message<"scalekit.v1.users.CreateUserProfile"> &
     /**
      * @generated from field: optional string picture = 11;
      */
-    picture?: string;
+    picture?: string | undefined;
     /**
      * @generated from field: optional string gender = 12;
      */
-    gender?: string;
+    gender?: string | undefined;
     /**
      * @generated from field: repeated string groups = 13;
      */
@@ -752,23 +752,23 @@ export type UpdateUserProfile = Message<"scalekit.v1.users.UpdateUserProfile"> &
     /**
      * @generated from field: optional string given_name = 2;
      */
-    givenName?: string;
+    givenName?: string | undefined;
     /**
      * @generated from field: optional string family_name = 3;
      */
-    familyName?: string;
+    familyName?: string | undefined;
     /**
      * @generated from field: optional string name = 4;
      */
-    name?: string;
+    name?: string | undefined;
     /**
      * @generated from field: optional string locale = 5;
      */
-    locale?: string;
+    locale?: string | undefined;
     /**
      * @generated from field: optional string phone_number = 7;
      */
-    phoneNumber?: string;
+    phoneNumber?: string | undefined;
     /**
      * @generated from field: map<string, string> metadata = 8;
      */
@@ -785,24 +785,24 @@ export type UpdateUserProfile = Message<"scalekit.v1.users.UpdateUserProfile"> &
      * @generated from field: optional string first_name = 21 [deprecated = true];
      * @deprecated
      */
-    firstName?: string;
+    firstName?: string | undefined;
     /**
      * @generated from field: optional string last_name = 22 [deprecated = true];
      * @deprecated
      */
-    lastName?: string;
+    lastName?: string | undefined;
     /**
      * @generated from field: optional string preferred_username = 10;
      */
-    preferredUsername?: string;
+    preferredUsername?: string | undefined;
     /**
      * @generated from field: optional string picture = 11;
      */
-    picture?: string;
+    picture?: string | undefined;
     /**
      * @generated from field: optional string gender = 12;
      */
-    gender?: string;
+    gender?: string | undefined;
     /**
      * @generated from field: repeated string groups = 13;
      */
@@ -828,7 +828,7 @@ export type Invite = Message<"scalekit.v1.users.Invite"> & {
     /**
      * @generated from field: optional string inviter_email = 3;
      */
-    inviterEmail?: string;
+    inviterEmail?: string | undefined;
     /**
      * @generated from field: string status = 4;
      */
@@ -836,15 +836,15 @@ export type Invite = Message<"scalekit.v1.users.Invite"> & {
     /**
      * @generated from field: google.protobuf.Timestamp created_at = 5;
      */
-    createdAt?: Timestamp;
+    createdAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp expires_at = 6;
      */
-    expiresAt?: Timestamp;
+    expiresAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp resent_at = 7;
      */
-    resentAt?: Timestamp;
+    resentAt?: Timestamp | undefined;
     /**
      * @generated from field: int32 resent_count = 8;
      */
@@ -880,7 +880,7 @@ export type ResendInviteResponse = Message<"scalekit.v1.users.ResendInviteRespon
     /**
      * @generated from field: scalekit.v1.users.Invite invite = 1;
      */
-    invite?: Invite;
+    invite?: Invite | undefined;
 };
 /**
  * Describes the message scalekit.v1.users.ResendInviteResponse.

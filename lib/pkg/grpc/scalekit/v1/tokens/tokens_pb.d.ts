@@ -12,7 +12,7 @@ export type CreateTokenRequest = Message<"scalekit.v1.tokens.CreateTokenRequest"
     /**
      * @generated from field: scalekit.v1.tokens.CreateToken token = 1;
      */
-    token?: CreateToken;
+    token?: CreateToken | undefined;
 };
 /**
  * Describes the message scalekit.v1.tokens.CreateTokenRequest.
@@ -40,7 +40,7 @@ export type CreateToken = Message<"scalekit.v1.tokens.CreateToken"> & {
     /**
      * @generated from field: google.protobuf.Timestamp expiry = 4;
      */
-    expiry?: Timestamp;
+    expiry?: Timestamp | undefined;
     /**
      * @generated from field: string description = 5;
      */
@@ -66,7 +66,7 @@ export type CreateTokenResponse = Message<"scalekit.v1.tokens.CreateTokenRespons
     /**
      * @generated from field: scalekit.v1.tokens.Token token_info = 3;
      */
-    tokenInfo?: Token;
+    tokenInfo?: Token | undefined;
 };
 /**
  * Describes the message scalekit.v1.tokens.CreateTokenResponse.
@@ -94,7 +94,7 @@ export type ValidateTokenResponse = Message<"scalekit.v1.tokens.ValidateTokenRes
     /**
      * @generated from field: scalekit.v1.tokens.Token token_info = 1;
      */
-    tokenInfo?: Token;
+    tokenInfo?: Token | undefined;
 };
 /**
  * Describes the message scalekit.v1.tokens.ValidateTokenResponse.
@@ -126,7 +126,7 @@ export type ListTokensRequest = Message<"scalekit.v1.tokens.ListTokensRequest"> 
     /**
      * @generated from field: optional string user_id = 2;
      */
-    userId?: string;
+    userId?: string | undefined;
     /**
      * @generated from field: int32 page_size = 3;
      */
@@ -184,7 +184,7 @@ export type UpdateTokenRequest = Message<"scalekit.v1.tokens.UpdateTokenRequest"
     /**
      * @generated from field: optional string description = 2;
      */
-    description?: string;
+    description?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.tokens.UpdateTokenRequest.
@@ -198,7 +198,7 @@ export type UpdateTokenResponse = Message<"scalekit.v1.tokens.UpdateTokenRespons
     /**
      * @generated from field: scalekit.v1.tokens.Token token_info = 1;
      */
-    tokenInfo?: Token;
+    tokenInfo?: Token | undefined;
 };
 /**
  * Describes the message scalekit.v1.tokens.UpdateTokenResponse.
@@ -224,11 +224,11 @@ export type Token = Message<"scalekit.v1.tokens.Token"> & {
     /**
      * @generated from field: optional string user_id = 4;
      */
-    userId?: string;
+    userId?: string | undefined;
     /**
      * @generated from field: optional string user_external_id = 5;
      */
-    userExternalId?: string;
+    userExternalId?: string | undefined;
     /**
      * @generated from field: map<string, string> custom_claims = 6;
      */
@@ -238,15 +238,15 @@ export type Token = Message<"scalekit.v1.tokens.Token"> & {
     /**
      * @generated from field: optional google.protobuf.Timestamp expiry = 7;
      */
-    expiry?: Timestamp;
+    expiry?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp created_at = 8;
      */
-    createdAt?: Timestamp;
+    createdAt?: Timestamp | undefined;
     /**
      * @generated from field: optional string description = 9;
      */
-    description?: string;
+    description?: string | undefined;
     /**
      * @generated from field: string token_suffix = 10;
      */
@@ -254,7 +254,7 @@ export type Token = Message<"scalekit.v1.tokens.Token"> & {
     /**
      * @generated from field: optional string email = 11;
      */
-    email?: string;
+    email?: string | undefined;
     /**
      * @generated from field: repeated string roles = 12;
      */
@@ -322,11 +322,11 @@ export type FetchTokenResponse = Message<"scalekit.v1.tokens.FetchTokenResponse"
     /**
      * @generated from field: google.protobuf.Timestamp retrieved_at = 2;
      */
-    retrievedAt?: Timestamp;
+    retrievedAt?: Timestamp | undefined;
     /**
      * @generated from field: scalekit.v1.tokens.Token token_info = 3;
      */
-    tokenInfo?: Token;
+    tokenInfo?: Token | undefined;
 };
 /**
  * Describes the message scalekit.v1.tokens.FetchTokenResponse.

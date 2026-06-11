@@ -38,7 +38,7 @@ export type UserSessionDetailsRequest = Message<"scalekit.v1.sessions.UserSessio
     /**
      * @generated from field: scalekit.v1.sessions.UserSessionFilter filter = 4;
      */
-    filter?: UserSessionFilter;
+    filter?: UserSessionFilter | undefined;
 };
 /**
  * Describes the message scalekit.v1.sessions.UserSessionDetailsRequest.
@@ -56,11 +56,11 @@ export type UserSessionFilter = Message<"scalekit.v1.sessions.UserSessionFilter"
     /**
      * @generated from field: google.protobuf.Timestamp start_time = 2;
      */
-    startTime?: Timestamp;
+    startTime?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp end_time = 3;
      */
-    endTime?: Timestamp;
+    endTime?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.sessions.UserSessionFilter.
@@ -88,7 +88,7 @@ export type RevokeSessionResponse = Message<"scalekit.v1.sessions.RevokeSessionR
     /**
      * @generated from field: scalekit.v1.sessions.RevokedSessionDetails revoked_session = 1;
      */
-    revokedSession?: RevokedSessionDetails;
+    revokedSession?: RevokedSessionDetails | undefined;
 };
 /**
  * Describes the message scalekit.v1.sessions.RevokeSessionResponse.
@@ -176,27 +176,27 @@ export type SessionDetails = Message<"scalekit.v1.sessions.SessionDetails"> & {
     /**
      * @generated from field: google.protobuf.Timestamp created_at = 5;
      */
-    createdAt?: Timestamp;
+    createdAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp updated_at = 6;
      */
-    updatedAt?: Timestamp;
+    updatedAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp idle_expires_at = 7;
      */
-    idleExpiresAt?: Timestamp;
+    idleExpiresAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp absolute_expires_at = 8;
      */
-    absoluteExpiresAt?: Timestamp;
+    absoluteExpiresAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp expired_at = 9;
      */
-    expiredAt?: Timestamp;
+    expiredAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp logout_at = 10;
      */
-    logoutAt?: Timestamp;
+    logoutAt?: Timestamp | undefined;
     /**
      * @generated from field: string status = 11;
      */
@@ -204,11 +204,11 @@ export type SessionDetails = Message<"scalekit.v1.sessions.SessionDetails"> & {
     /**
      * @generated from field: scalekit.v1.sessions.DeviceDetails device = 12;
      */
-    device?: DeviceDetails;
+    device?: DeviceDetails | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp last_active_at = 13;
      */
-    lastActiveAt?: Timestamp;
+    lastActiveAt?: Timestamp | undefined;
     /**
      * @generated from field: repeated scalekit.v1.sessions.AuthenticatedClients authenticated_clients = 14;
      */
@@ -254,7 +254,7 @@ export type DeviceDetails = Message<"scalekit.v1.sessions.DeviceDetails"> & {
     /**
      * @generated from field: scalekit.v1.sessions.Location location = 20;
      */
-    location?: Location;
+    location?: Location | undefined;
 };
 /**
  * Describes the message scalekit.v1.sessions.DeviceDetails.
@@ -276,27 +276,27 @@ export type RevokedSessionDetails = Message<"scalekit.v1.sessions.RevokedSession
     /**
      * @generated from field: google.protobuf.Timestamp created_at = 5;
      */
-    createdAt?: Timestamp;
+    createdAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp updated_at = 6;
      */
-    updatedAt?: Timestamp;
+    updatedAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp idle_expires_at = 7;
      */
-    idleExpiresAt?: Timestamp;
+    idleExpiresAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp absolute_expires_at = 8;
      */
-    absoluteExpiresAt?: Timestamp;
+    absoluteExpiresAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp expired_at = 9;
      */
-    expiredAt?: Timestamp;
+    expiredAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp logout_at = 10;
      */
-    logoutAt?: Timestamp;
+    logoutAt?: Timestamp | undefined;
     /**
      * @generated from field: string status = 11;
      */
@@ -304,7 +304,7 @@ export type RevokedSessionDetails = Message<"scalekit.v1.sessions.RevokedSession
     /**
      * @generated from field: google.protobuf.Timestamp last_active_at = 12;
      */
-    lastActiveAt?: Timestamp;
+    lastActiveAt?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.sessions.RevokedSessionDetails.

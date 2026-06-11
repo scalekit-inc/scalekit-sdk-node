@@ -12,19 +12,19 @@ export type ListConnectedAccountsRequest = Message<"scalekit.v1.connected_accoun
     /**
      * @generated from field: optional string organization_id = 1;
      */
-    organizationId?: string;
+    organizationId?: string | undefined;
     /**
      * @generated from field: optional string user_id = 2;
      */
-    userId?: string;
+    userId?: string | undefined;
     /**
      * @generated from field: optional string connector = 3;
      */
-    connector?: string;
+    connector?: string | undefined;
     /**
      * @generated from field: optional string identifier = 4;
      */
-    identifier?: string;
+    identifier?: string | undefined;
     /**
      * @generated from field: string provider = 5;
      */
@@ -132,23 +132,23 @@ export type CreateConnectedAccountRequest = Message<"scalekit.v1.connected_accou
     /**
      * @generated from field: optional string organization_id = 1;
      */
-    organizationId?: string;
+    organizationId?: string | undefined;
     /**
      * @generated from field: optional string user_id = 2;
      */
-    userId?: string;
+    userId?: string | undefined;
     /**
      * @generated from field: optional string connector = 3;
      */
-    connector?: string;
+    connector?: string | undefined;
     /**
      * @generated from field: optional string identifier = 4;
      */
-    identifier?: string;
+    identifier?: string | undefined;
     /**
      * @generated from field: scalekit.v1.connected_accounts.CreateConnectedAccount connected_account = 5;
      */
-    connectedAccount?: CreateConnectedAccount;
+    connectedAccount?: CreateConnectedAccount | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.CreateConnectedAccountRequest.
@@ -162,7 +162,7 @@ export type CreateConnectedAccountResponse = Message<"scalekit.v1.connected_acco
     /**
      * @generated from field: scalekit.v1.connected_accounts.ConnectedAccount connected_account = 1;
      */
-    connectedAccount?: ConnectedAccount;
+    connectedAccount?: ConnectedAccount | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.CreateConnectedAccountResponse.
@@ -176,27 +176,27 @@ export type UpdateConnectedAccountRequest = Message<"scalekit.v1.connected_accou
     /**
      * @generated from field: optional string organization_id = 1;
      */
-    organizationId?: string;
+    organizationId?: string | undefined;
     /**
      * @generated from field: optional string user_id = 2;
      */
-    userId?: string;
+    userId?: string | undefined;
     /**
      * @generated from field: optional string connector = 3;
      */
-    connector?: string;
+    connector?: string | undefined;
     /**
      * @generated from field: optional string identifier = 4;
      */
-    identifier?: string;
+    identifier?: string | undefined;
     /**
      * @generated from field: optional string id = 6;
      */
-    id?: string;
+    id?: string | undefined;
     /**
      * @generated from field: scalekit.v1.connected_accounts.UpdateConnectedAccount connected_account = 5;
      */
-    connectedAccount?: UpdateConnectedAccount;
+    connectedAccount?: UpdateConnectedAccount | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.UpdateConnectedAccountRequest.
@@ -210,7 +210,7 @@ export type UpdateConnectedAccountResponse = Message<"scalekit.v1.connected_acco
     /**
      * @generated from field: scalekit.v1.connected_accounts.ConnectedAccount connected_account = 1;
      */
-    connectedAccount?: ConnectedAccount;
+    connectedAccount?: ConnectedAccount | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.UpdateConnectedAccountResponse.
@@ -224,23 +224,23 @@ export type DeleteConnectedAccountRequest = Message<"scalekit.v1.connected_accou
     /**
      * @generated from field: optional string organization_id = 1;
      */
-    organizationId?: string;
+    organizationId?: string | undefined;
     /**
      * @generated from field: optional string user_id = 2;
      */
-    userId?: string;
+    userId?: string | undefined;
     /**
      * @generated from field: optional string connector = 3;
      */
-    connector?: string;
+    connector?: string | undefined;
     /**
      * @generated from field: optional string identifier = 4;
      */
-    identifier?: string;
+    identifier?: string | undefined;
     /**
      * @generated from field: optional string id = 5;
      */
-    id?: string;
+    id?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.DeleteConnectedAccountRequest.
@@ -263,31 +263,31 @@ export type GetMagicLinkForConnectedAccountRequest = Message<"scalekit.v1.connec
     /**
      * @generated from field: optional string organization_id = 1;
      */
-    organizationId?: string;
+    organizationId?: string | undefined;
     /**
      * @generated from field: optional string user_id = 2;
      */
-    userId?: string;
+    userId?: string | undefined;
     /**
      * @generated from field: optional string connector = 3;
      */
-    connector?: string;
+    connector?: string | undefined;
     /**
      * @generated from field: optional string identifier = 4;
      */
-    identifier?: string;
+    identifier?: string | undefined;
     /**
      * @generated from field: optional string id = 5;
      */
-    id?: string;
+    id?: string | undefined;
     /**
      * @generated from field: optional string state = 7;
      */
-    state?: string;
+    state?: string | undefined;
     /**
      * @generated from field: optional string user_verify_url = 8;
      */
-    userVerifyUrl?: string;
+    userVerifyUrl?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.GetMagicLinkForConnectedAccountRequest.
@@ -305,7 +305,7 @@ export type GetMagicLinkForConnectedAccountResponse = Message<"scalekit.v1.conne
     /**
      * @generated from field: google.protobuf.Timestamp expiry = 2;
      */
-    expiry?: Timestamp;
+    expiry?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.GetMagicLinkForConnectedAccountResponse.
@@ -351,23 +351,23 @@ export type GetConnectedAccountByIdentifierRequest = Message<"scalekit.v1.connec
     /**
      * @generated from field: optional string organization_id = 1;
      */
-    organizationId?: string;
+    organizationId?: string | undefined;
     /**
      * @generated from field: optional string user_id = 2;
      */
-    userId?: string;
+    userId?: string | undefined;
     /**
      * @generated from field: optional string connector = 3;
      */
-    connector?: string;
+    connector?: string | undefined;
     /**
      * @generated from field: optional string identifier = 4;
      */
-    identifier?: string;
+    identifier?: string | undefined;
     /**
      * @generated from field: optional string id = 5;
      */
-    id?: string;
+    id?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.GetConnectedAccountByIdentifierRequest.
@@ -381,7 +381,7 @@ export type GetConnectedAccountByIdentifierResponse = Message<"scalekit.v1.conne
     /**
      * @generated from field: scalekit.v1.connected_accounts.ConnectedAccount connected_account = 1;
      */
-    connectedAccount?: ConnectedAccount;
+    connectedAccount?: ConnectedAccount | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.GetConnectedAccountByIdentifierResponse.
@@ -411,15 +411,15 @@ export type ConnectedAccount = Message<"scalekit.v1.connected_accounts.Connected
     /**
      * @generated from field: scalekit.v1.connected_accounts.AuthorizationDetails authorization_details = 5;
      */
-    authorizationDetails?: AuthorizationDetails;
+    authorizationDetails?: AuthorizationDetails | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp token_expires_at = 6;
      */
-    tokenExpiresAt?: Timestamp;
+    tokenExpiresAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp updated_at = 7;
      */
-    updatedAt?: Timestamp;
+    updatedAt?: Timestamp | undefined;
     /**
      * @generated from field: string connector = 8;
      */
@@ -427,7 +427,7 @@ export type ConnectedAccount = Message<"scalekit.v1.connected_accounts.Connected
     /**
      * @generated from field: google.protobuf.Timestamp last_used_at = 9;
      */
-    lastUsedAt?: Timestamp;
+    lastUsedAt?: Timestamp | undefined;
     /**
      * @generated from field: string id = 10;
      */
@@ -439,7 +439,7 @@ export type ConnectedAccount = Message<"scalekit.v1.connected_accounts.Connected
     /**
      * @generated from field: google.protobuf.Struct api_config = 12;
      */
-    apiConfig?: JsonObject;
+    apiConfig?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.ConnectedAccount.
@@ -455,11 +455,11 @@ export type CreateConnectedAccount = Message<"scalekit.v1.connected_accounts.Cre
     /**
      * @generated from field: scalekit.v1.connected_accounts.AuthorizationDetails authorization_details = 5;
      */
-    authorizationDetails?: AuthorizationDetails;
+    authorizationDetails?: AuthorizationDetails | undefined;
     /**
      * @generated from field: google.protobuf.Struct api_config = 11;
      */
-    apiConfig?: JsonObject;
+    apiConfig?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.CreateConnectedAccount.
@@ -475,11 +475,11 @@ export type UpdateConnectedAccount = Message<"scalekit.v1.connected_accounts.Upd
     /**
      * @generated from field: scalekit.v1.connected_accounts.AuthorizationDetails authorization_details = 5;
      */
-    authorizationDetails?: AuthorizationDetails;
+    authorizationDetails?: AuthorizationDetails | undefined;
     /**
      * @generated from field: google.protobuf.Struct api_config = 10;
      */
-    apiConfig?: JsonObject;
+    apiConfig?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.UpdateConnectedAccount.
@@ -511,11 +511,11 @@ export type ConnectedAccountForList = Message<"scalekit.v1.connected_accounts.Co
     /**
      * @generated from field: google.protobuf.Timestamp token_expires_at = 6;
      */
-    tokenExpiresAt?: Timestamp;
+    tokenExpiresAt?: Timestamp | undefined;
     /**
      * @generated from field: google.protobuf.Timestamp updated_at = 7;
      */
-    updatedAt?: Timestamp;
+    updatedAt?: Timestamp | undefined;
     /**
      * @generated from field: string connector = 8;
      */
@@ -523,7 +523,7 @@ export type ConnectedAccountForList = Message<"scalekit.v1.connected_accounts.Co
     /**
      * @generated from field: google.protobuf.Timestamp last_used_at = 9;
      */
-    lastUsedAt?: Timestamp;
+    lastUsedAt?: Timestamp | undefined;
     /**
      * @generated from field: string id = 10;
      */
@@ -603,7 +603,7 @@ export type GoogleDWDAuth = Message<"scalekit.v1.connected_accounts.GoogleDWDAut
     /**
      * @generated from field: google.protobuf.Timestamp token_expires_at = 4;
      */
-    tokenExpiresAt?: Timestamp;
+    tokenExpiresAt?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.GoogleDWDAuth.
@@ -647,7 +647,7 @@ export type StaticAuth = Message<"scalekit.v1.connected_accounts.StaticAuth"> & 
     /**
      * @generated from field: google.protobuf.Struct details = 1;
      */
-    details?: JsonObject;
+    details?: JsonObject | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.StaticAuth.
@@ -675,7 +675,7 @@ export type GetConnectedAccountResponse = Message<"scalekit.v1.connected_account
     /**
      * @generated from field: scalekit.v1.connected_accounts.ConnectedAccount connected_account = 1;
      */
-    connectedAccount?: ConnectedAccount;
+    connectedAccount?: ConnectedAccount | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.GetConnectedAccountResponse.
@@ -703,7 +703,7 @@ export type DisconnectConnectedAccountResponse = Message<"scalekit.v1.connected_
     /**
      * @generated from field: scalekit.v1.connected_accounts.ConnectedAccount connected_account = 1;
      */
-    connectedAccount?: ConnectedAccount;
+    connectedAccount?: ConnectedAccount | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.DisconnectConnectedAccountResponse.

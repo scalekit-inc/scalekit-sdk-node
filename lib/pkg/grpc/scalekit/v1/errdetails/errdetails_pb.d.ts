@@ -16,31 +16,31 @@ export type ErrorInfo = Message<"scalekit.v1.errdetails.ErrorInfo"> & {
     /**
      * @generated from field: optional scalekit.v1.errdetails.DebugInfo debug_info = 2;
      */
-    debugInfo?: DebugInfo;
+    debugInfo?: DebugInfo | undefined;
     /**
      * @generated from field: optional scalekit.v1.errdetails.HelpInfo help_info = 3;
      */
-    helpInfo?: HelpInfo;
+    helpInfo?: HelpInfo | undefined;
     /**
      * @generated from field: optional scalekit.v1.errdetails.LocalizedMessageInfo localized_message_info = 4;
      */
-    localizedMessageInfo?: LocalizedMessageInfo;
+    localizedMessageInfo?: LocalizedMessageInfo | undefined;
     /**
      * @generated from field: optional scalekit.v1.errdetails.ResourceInfo resource_info = 5;
      */
-    resourceInfo?: ResourceInfo;
+    resourceInfo?: ResourceInfo | undefined;
     /**
      * @generated from field: optional scalekit.v1.errdetails.RequestInfo request_info = 6;
      */
-    requestInfo?: RequestInfo;
+    requestInfo?: RequestInfo | undefined;
     /**
      * @generated from field: optional scalekit.v1.errdetails.ValidationErrorInfo validation_error_info = 8;
      */
-    validationErrorInfo?: ValidationErrorInfo;
+    validationErrorInfo?: ValidationErrorInfo | undefined;
     /**
      * @generated from field: optional scalekit.v1.errdetails.ToolErrorInfo tool_error_info = 9;
      */
-    toolErrorInfo?: ToolErrorInfo;
+    toolErrorInfo?: ToolErrorInfo | undefined;
 };
 /**
  * Describes the message scalekit.v1.errdetails.ErrorInfo.
