@@ -313,7 +313,7 @@ export type Connection = Message<"scalekit.v1.connections.Connection"> & {
      */
     value: GoogleDWDConfig;
     case: "googleDwdConfig";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: optional string key_id = 25;
@@ -483,7 +483,7 @@ export type UpdateConnection = Message<"scalekit.v1.connections.UpdateConnection
      */
     value: GoogleDWDConfig;
     case: "googleDwdConfig";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: optional string key_id = 22;

@@ -710,7 +710,7 @@ export type AuthorizationDetails = Message<"scalekit.v1.connected_accounts.Autho
      */
     value: GoogleDWDAuth;
     case: "googleDwd";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 };
 
 /**

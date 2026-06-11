@@ -756,7 +756,7 @@ export type UpdateResource = Message<"scalekit.v1.clients.UpdateResource"> & {
      */
     value: ResourceCustomConnectionSettings;
     case: "customConnectionSettings";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: google.protobuf.BoolValue intersect_scopes_user_permission = 14;

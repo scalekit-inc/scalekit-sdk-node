@@ -110,7 +110,7 @@ export type VerifyPasswordLessRequest = Message<"scalekit.v1.auth.passwordless.V
      */
     value: string;
     case: "linkToken";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: optional string auth_request_id = 3;

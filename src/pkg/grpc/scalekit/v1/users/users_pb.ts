@@ -174,7 +174,7 @@ export type UpdateUserRequest = Message<"scalekit.v1.users.UpdateUserRequest"> &
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: scalekit.v1.users.UpdateUser user = 3;
@@ -225,7 +225,7 @@ export type GetUserRequest = Message<"scalekit.v1.users.GetUserRequest"> & {
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 };
 
 /**
@@ -372,7 +372,7 @@ export type DeleteMembershipRequest = Message<"scalekit.v1.users.DeleteMembershi
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: optional bool cascade = 5;
@@ -416,7 +416,7 @@ export type CreateMembershipRequest = Message<"scalekit.v1.users.CreateMembershi
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: optional bool send_invitation_email = 5;
@@ -580,7 +580,7 @@ export type DeleteUserRequest = Message<"scalekit.v1.users.DeleteUserRequest"> &
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 };
 
 /**
@@ -614,7 +614,7 @@ export type UpdateMembershipRequest = Message<"scalekit.v1.users.UpdateMembershi
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: scalekit.v1.users.UpdateMembership membership = 5;

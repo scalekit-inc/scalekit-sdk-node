@@ -197,7 +197,7 @@ export type UpdateOrganizationRequest = Message<"scalekit.v1.organizations.Updat
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: scalekit.v1.organizations.UpdateOrganization organization = 3;
@@ -292,7 +292,7 @@ export type GetOrganizationRequest = Message<"scalekit.v1.organizations.GetOrgan
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 };
 
 /**
@@ -456,7 +456,7 @@ export type DeleteOrganizationRequest = Message<"scalekit.v1.organizations.Delet
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 };
 
 /**

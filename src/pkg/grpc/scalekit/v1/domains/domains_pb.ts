@@ -38,7 +38,7 @@ export type CreateDomainRequest = Message<"scalekit.v1.domains.CreateDomainReque
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: optional string connection_id = 3;
@@ -116,7 +116,7 @@ export type UpdateDomainRequest = Message<"scalekit.v1.domains.UpdateDomainReque
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: optional string connection_id = 3;
@@ -190,7 +190,7 @@ export type GetDomainRequest = Message<"scalekit.v1.domains.GetDomainRequest"> &
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: string id = 3;
@@ -246,7 +246,7 @@ export type DeleteDomainRequest = Message<"scalekit.v1.domains.DeleteDomainReque
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: optional string connection_id = 4;
@@ -280,7 +280,7 @@ export type ListDomainRequest = Message<"scalekit.v1.domains.ListDomainRequest">
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: optional string connection_id = 3;
@@ -334,7 +334,7 @@ export type VerifyDomainRequest = Message<"scalekit.v1.domains.VerifyDomainReque
      */
     value: string;
     case: "externalId";
-  } | { case: undefined; value?: undefined } | undefined;
+  } | { case: undefined; value?: undefined };
 
   /**
    * @generated from field: string id = 4;
