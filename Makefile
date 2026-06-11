@@ -12,7 +12,7 @@ PROTO_REF := v0.1.123.1
 PROTO_SUBDIR := proto
 PROTO_REMOTE_INPUT := $(PROTO_REPO_URL)\#ref=$(PROTO_REF),subdir=$(PROTO_SUBDIR)
 LOCAL_PROTO_DIR ?= ../scalekit/proto
-PROTOC_GEN_ES_VERSION := 2.12.0
+PROTOC_GEN_ES_VERSION := 2.11.0
 .PHONY: setup check-protoc-gen-es-version generate generate-local lint test verify-generate
 
 setup:
