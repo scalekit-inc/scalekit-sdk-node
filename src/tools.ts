@@ -94,7 +94,7 @@ export default class ToolsClient {
       create(ListScopedToolsRequestSchema, {
         identifier,
         filter: create(ScopedToolFilterSchema, options.filter),
-        ...(options.pageSize !== undefined && { pageSize: options.pageSize }),
+        pageSize: options.pageSize ?? 100,
         ...(options.pageToken && { pageToken: options.pageToken }),
       })
     );

@@ -215,6 +215,40 @@ describe('Tools', () => {
         expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
+
+    it('should return more tools with default page size than explicit smaller page size', async () => {
+      const identifier = 'akshay.parihar';
+
+      try {
+        const smallPage = await client.tools.listScopedTools(identifier, {
+          filter: {
+            connectionNames: ['apifymcp'],
+          },
+          pageSize: 10,
+        });
+
+        const defaultPage = await client.tools.listScopedTools(identifier, {
+          filter: {
+            connectionNames: ['apifymcp'],
+          },
+        });
+
+        expect(defaultPage).toBeDefined();
+        expect(defaultPage.tools).toBeDefined();
+        expect(smallPage).toBeDefined();
+        expect(smallPage.tools).toBeDefined();
+
+        // If there are more than 10 tools, the default (100) should return more than the small page (10)
+        // If there are 10 or fewer tools, both should return the same count
+        if (smallPage.nextPageToken) {
+          expect(defaultPage.tools.length).toBeGreaterThan(smallPage.tools.length);
+        } else {
+          expect(defaultPage.tools.length).toBeGreaterThanOrEqual(smallPage.tools.length);
+        }
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
+      }
+    });
   });
 
   describe('executeTool', () => {
