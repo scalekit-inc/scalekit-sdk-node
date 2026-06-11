@@ -2062,11 +2062,7 @@ export declare enum ConnectionType {
     /**
      * @generated from enum value: GOOGLE_DWD = 12;
      */
-    GOOGLE_DWD = 12,
-    /**
-     * @generated from enum value: TRUSTED_IDP = 13;
-     */
-    TRUSTED_IDP = 13
+    GOOGLE_DWD = 12
 }
 /**
  * Describes the enum scalekit.v1.connections.ConnectionType.

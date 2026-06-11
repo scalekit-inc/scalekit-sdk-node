@@ -41,10 +41,6 @@ export type ListConnectedAccountsRequest = Message<"scalekit.v1.connected_accoun
      * @generated from field: string query = 8;
      */
     query: string;
-    /**
-     * @generated from field: repeated string connection_names = 9;
-     */
-    connectionNames: string[];
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.ListConnectedAccountsRequest.
@@ -576,14 +572,6 @@ export type AuthorizationDetails = Message<"scalekit.v1.connected_accounts.Autho
         value: GoogleDWDAuth;
         case: "googleDwd";
     } | {
-        /**
-         * Trusted IDP federated credentials (e.g. AWS STS temporary credentials)
-         *
-         * @generated from field: scalekit.v1.connected_accounts.TrustedIDPAuth trusted_idp = 4;
-         */
-        value: TrustedIDPAuth;
-        case: "trustedIdp";
-    } | {
         case: undefined;
         value?: undefined;
     };
@@ -622,41 +610,6 @@ export type GoogleDWDAuth = Message<"scalekit.v1.connected_accounts.GoogleDWDAut
  * Use `create(GoogleDWDAuthSchema)` to create a new message.
  */
 export declare const GoogleDWDAuthSchema: GenMessage<GoogleDWDAuth>;
-/**
- * Trusted IDP federated authentication — used for TRUSTED_IDP connections (e.g. AWS Redshift).
- * Send only db_user in requests; cached temporary credentials are managed server-side and
- * returned only on output paths. secret_access_key and session_token are never exposed in
- * public API responses.
- *
- * @generated from message scalekit.v1.connected_accounts.TrustedIDPAuth
- */
-export type TrustedIDPAuth = Message<"scalekit.v1.connected_accounts.TrustedIDPAuth"> & {
-    /**
-     * @generated from field: string db_user = 1;
-     */
-    dbUser: string;
-    /**
-     * @generated from field: string access_key_id = 2;
-     */
-    accessKeyId: string;
-    /**
-     * @generated from field: string secret_access_key = 3;
-     */
-    secretAccessKey: string;
-    /**
-     * @generated from field: string session_token = 4;
-     */
-    sessionToken: string;
-    /**
-     * @generated from field: google.protobuf.Timestamp expiry = 5;
-     */
-    expiry?: Timestamp | undefined;
-};
-/**
- * Describes the message scalekit.v1.connected_accounts.TrustedIDPAuth.
- * Use `create(TrustedIDPAuthSchema)` to create a new message.
- */
-export declare const TrustedIDPAuthSchema: GenMessage<TrustedIDPAuth>;
 /**
  * OAuth 2.0 access and refresh tokens with scopes
  *
@@ -757,29 +710,6 @@ export type DisconnectConnectedAccountResponse = Message<"scalekit.v1.connected_
  * Use `create(DisconnectConnectedAccountResponseSchema)` to create a new message.
  */
 export declare const DisconnectConnectedAccountResponseSchema: GenMessage<DisconnectConnectedAccountResponse>;
-/**
- * @generated from message scalekit.v1.connected_accounts.GetRedirectUrlRequest
- */
-export type GetRedirectUrlRequest = Message<"scalekit.v1.connected_accounts.GetRedirectUrlRequest"> & {};
-/**
- * Describes the message scalekit.v1.connected_accounts.GetRedirectUrlRequest.
- * Use `create(GetRedirectUrlRequestSchema)` to create a new message.
- */
-export declare const GetRedirectUrlRequestSchema: GenMessage<GetRedirectUrlRequest>;
-/**
- * @generated from message scalekit.v1.connected_accounts.GetRedirectUrlResponse
- */
-export type GetRedirectUrlResponse = Message<"scalekit.v1.connected_accounts.GetRedirectUrlResponse"> & {
-    /**
-     * @generated from field: string redirect_url = 1;
-     */
-    redirectUrl: string;
-};
-/**
- * Describes the message scalekit.v1.connected_accounts.GetRedirectUrlResponse.
- * Use `create(GetRedirectUrlResponseSchema)` to create a new message.
- */
-export declare const GetRedirectUrlResponseSchema: GenMessage<GetRedirectUrlResponse>;
 /**
  * Status of a connected account indicating its current state
  *
@@ -892,13 +822,7 @@ export declare enum ConnectorType {
      *
      * @generated from enum value: GOOGLE_DWD = 9;
      */
-    GOOGLE_DWD = 9,
-    /**
-     * Trusted Identity Provider federation (e.g. AWS STS AssumeRoleWithWebIdentity)
-     *
-     * @generated from enum value: TRUSTED_IDP = 10;
-     */
-    TRUSTED_IDP = 10
+    GOOGLE_DWD = 9
 }
 /**
  * Describes the enum scalekit.v1.connected_accounts.ConnectorType.
@@ -987,16 +911,6 @@ export declare const ConnectedAccountService: GenService<{
         methodKind: "unary";
         input: typeof DisconnectConnectedAccountRequestSchema;
         output: typeof DisconnectConnectedAccountResponseSchema;
-    };
-    /**
-     * Get Redirect URL for Connected Account Portal
-     *
-     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.GetRedirectUrl
-     */
-    getRedirectUrl: {
-        methodKind: "unary";
-        input: typeof GetRedirectUrlRequestSchema;
-        output: typeof GetRedirectUrlResponseSchema;
     };
     /**
      * Get Connected Account Authentication Details
