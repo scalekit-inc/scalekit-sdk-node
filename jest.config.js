@@ -6,11 +6,12 @@ module.exports = {
   setupFilesAfterEnv: ['./tests/setup.ts'],
   transform: {
     '^.+\\.ts?$': 'ts-jest',
+    '^.+\\.js$': ['ts-jest', { diagnostics: false, tsconfig: { allowJs: true } }],
   },
+  transformIgnorePatterns: ['/node_modules/(?!(jose)/)'],
   moduleNameMapper: {
-    '^jose': require.resolve('jose'),
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   testTimeout: 30000,
   maxWorkers: 1,
-}; 
+};
