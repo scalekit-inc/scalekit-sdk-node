@@ -8,6 +8,7 @@
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
     "outDir": "lib",
+    "rootDir": "src",
     "strict": true,
     "sourceMap": true,
     "skipLibCheck": true,
