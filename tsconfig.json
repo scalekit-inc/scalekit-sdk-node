@@ -13,7 +13,9 @@
     "skipLibCheck": true,
     "esModuleInterop": true,
     "typeRoots": ["src/types", "node_modules/@types"],
-    "moduleResolution": "Node"
+    "types": ["node"],
+    "moduleResolution": "Node",
+    "ignoreDeprecations": "6.0"
   },
   "include": ["src"]
 }
