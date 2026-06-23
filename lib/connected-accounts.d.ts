@@ -70,6 +70,15 @@ export default class ConnectedAccountsClient {
         userId?: string;
         apiConfig?: Record<string, unknown>;
     }): Promise<CreateConnectedAccountResponse>;
+    /** Alias for {@link getOrCreateConnectedAccount} — preferred name for upsert semantics. */
+    upsertConnectedAccount: (params: {
+        connector: string;
+        identifier: string;
+        authorizationDetails?: MessageInitShape<typeof AuthorizationDetailsSchema>;
+        organizationId?: string;
+        userId?: string;
+        apiConfig?: Record<string, unknown>;
+    }) => Promise<CreateConnectedAccountResponse>;
     /**
      * Updates an existing connected account.
      *

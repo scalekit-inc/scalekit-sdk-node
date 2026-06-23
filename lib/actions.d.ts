@@ -133,6 +133,15 @@ export default class ActionsClient {
         userId?: string;
         apiConfig?: Record<string, unknown>;
     }): Promise<CreateConnectedAccountResponse>;
+    /** Alias for {@link getOrCreateConnectedAccount} — preferred name for upsert semantics. */
+    upsertConnectedAccount: (params: {
+        connectionName: string;
+        identifier: string;
+        authorizationDetails?: CreateConnectedAccount["authorizationDetails"];
+        organizationId?: string;
+        userId?: string;
+        apiConfig?: Record<string, unknown>;
+    }) => Promise<CreateConnectedAccountResponse>;
     /**
      * Update an existing connected account.
      * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
