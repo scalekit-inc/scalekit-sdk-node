@@ -24,6 +24,7 @@ import {
   ScalekitException,
   ScalekitServerException,
 } from './errors/base-exception';
+import { ErrorInfoSchema } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
 
 export const headers = {
   'user-agent': 'user-agent',
@@ -133,22 +134,22 @@ export default class CoreClient {
     } catch (error) {
       // Handle gRPC Connect errors
       if (error instanceof ConnectError) {
-        if (retryLeft > 0) {
+        // If the error originated from an upstream tool provider (errorCode == "TOOL_ERROR"),
+        // surface it immediately — never retry, never refresh the M2M token.
+        // Retrying a provider 429 would triple the rate-limit damage; refreshing the
+        // Scalekit M2M token does nothing for a provider auth failure.
+        const isToolError = error
+          .findDetails(ErrorInfoSchema)
+          .some((d) => d.errorCode === 'TOOL_ERROR');
+
+        if (!isToolError && retryLeft > 0) {
           if (error.code === Code.Unauthenticated) {
             await this.authenticateClient();
             return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
           }
-          // The Connect transport maps HTTP 429 to Code.Unavailable with a 429 body,
-          // and gRPC-native rate limits come as Code.ResourceExhausted.
-          const is429 =
-            error.code === Code.ResourceExhausted ||
-            (error.code === Code.Unavailable && error.message.includes('429'));
-          if (is429) {
-            const baseBackoff = Math.min(1000 * 2 ** attempt, 30000);
-            const backoffMs = baseBackoff * (0.5 + Math.random() * 0.5);
-            await this.sleep(backoffMs);
-            return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
-          }
+          // NOTE: Scalekit 429s (ResourceExhausted) are surfaced immediately — no backoff retry.
+          // The Connect transport may also map HTTP 429 to Code.Unavailable with a 429 body;
+          // that case is still retried as it may be transient infrastructure throttling.
         }
         throw ScalekitServerException.promote(error);
       }
@@ -156,16 +157,11 @@ export default class CoreClient {
       if (error instanceof AxiosError) {
         if (error.response) {
           if (retryLeft > 0) {
-            if (error.response.status === 401) {
+            if (error.response.status === HttpStatusCode.Unauthorized) {
               await this.authenticateClient();
               return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
             }
-            if (error.response.status === 429) {
-              const baseBackoff = Math.min(1000 * 2 ** attempt, 30000);
-              const backoffMs = baseBackoff * (0.5 + Math.random() * 0.5);
-              await this.sleep(backoffMs);
-              return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
-            }
+            // NOTE: HTTP 429 responses are surfaced immediately — no backoff retry.
           }
           throw ScalekitServerException.promote(error.response);
         } else {

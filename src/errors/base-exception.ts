@@ -269,6 +269,28 @@ export class ScalekitServerException extends ScalekitException {
         ? error.code
         : HTTP_TO_GRPC[error.status] || Code.Unknown;
 
+    // Check if this is a tool/provider error (errorCode == "TOOL_ERROR").
+    // Tool errors must bypass the normal retry path and surface immediately
+    // with a specific exception type that exposes provider-level error details.
+    const isToolError =
+      error instanceof ConnectError &&
+      error
+        .findDetails(ErrorInfoSchema)
+        .some((d) => d.errorCode === 'TOOL_ERROR');
+
+    if (isToolError) {
+      switch (grpcStatus) {
+        case Code.Unauthenticated:
+          return new specific.ScalekitToolUnauthorizedException(error);
+        case Code.PermissionDenied:
+          return new specific.ScalekitToolForbiddenException(error);
+        case Code.ResourceExhausted:
+          return new specific.ScalekitToolRateLimitException(error);
+        default:
+          return new specific.ScalekitToolException(error);
+      }
+    }
+
     switch (grpcStatus) {
       case Code.InvalidArgument:
       case Code.FailedPrecondition:
