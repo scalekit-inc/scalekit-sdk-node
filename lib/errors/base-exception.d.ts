@@ -28,5 +28,5 @@ export declare class ScalekitServerException extends ScalekitException {
     get message(): string;
     get errDetails(): any;
     get unpackedDetails(): ErrorInfo[];
-    static promote(error: AxiosResponse | ConnectError): ScalekitServerException;
+    static promote(error: AxiosResponse | ConnectError, isToolError?: boolean): ScalekitServerException;
 }

@@ -260,7 +260,10 @@ export class ScalekitServerException extends ScalekitException {
     return this._unpackedDetails;
   }
 
-  static promote(error: AxiosResponse | ConnectError): ScalekitServerException {
+  static promote(
+    error: AxiosResponse | ConnectError,
+    isToolError?: boolean
+  ): ScalekitServerException {
     // Use dynamic import to avoid circular dependency
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const specific = require('./specific-exceptions');
@@ -269,16 +272,16 @@ export class ScalekitServerException extends ScalekitException {
         ? error.code
         : HTTP_TO_GRPC[error.status] || Code.Unknown;
 
-    // Check if this is a tool/provider error (errorCode == "TOOL_ERROR").
-    // Tool errors must bypass the normal retry path and surface immediately
-    // with a specific exception type that exposes provider-level error details.
-    const isToolError =
-      error instanceof ConnectError &&
-      error
-        .findDetails(ErrorInfoSchema)
-        .some((d) => d.errorCode === 'TOOL_ERROR');
+    // isToolError may be pre-computed by the caller (_connectExec already calls findDetails).
+    // Fall back to parsing here only when called standalone (e.g. Axios path, tests).
+    const toolError =
+      isToolError ??
+      (error instanceof ConnectError &&
+        error
+          .findDetails(ErrorInfoSchema)
+          .some((d) => d.errorCode === 'TOOL_ERROR'));
 
-    if (isToolError) {
+    if (toolError) {
       switch (grpcStatus) {
         case Code.Unauthenticated:
           return new specific.ScalekitToolUnauthorizedException(error);

@@ -147,11 +147,17 @@ export default class CoreClient {
             await this.authenticateClient();
             return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
           }
-          // NOTE: Scalekit 429s (ResourceExhausted) are surfaced immediately — no backoff retry.
-          // The Connect transport may also map HTTP 429 to Code.Unavailable with a 429 body;
-          // that case is still retried as it may be transient infrastructure throttling.
+          // Retry transient infrastructure errors (Unavailable) with backoff.
+          // This covers the Connect transport mapping HTTP 429 → Code.Unavailable.
+          // Scalekit ResourceExhausted (429) is NOT retried — surfaces immediately.
+          if (error.code === Code.Unavailable) {
+            const baseBackoff = Math.min(1000 * 2 ** attempt, 30000);
+            const backoffMs = baseBackoff * (0.5 + Math.random() * 0.5);
+            await this.sleep(backoffMs);
+            return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
+          }
         }
-        throw ScalekitServerException.promote(error);
+        throw ScalekitServerException.promote(error, isToolError);
       }
       // Handle HTTP/Axios errors
       if (error instanceof AxiosError) {
