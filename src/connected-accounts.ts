@@ -23,6 +23,7 @@ import {
   OauthTokenSchema,
   UpdateConnectedAccount,
   UpdateConnectedAccountRequestSchema,
+  UpdateConnectedAccountSchema,
   UpdateConnectedAccountResponse,
   VerifyConnectedAccountUserRequestSchema,
   VerifyConnectedAccountUserResponse,
@@ -163,6 +164,25 @@ export default class ConnectedAccountsClient {
         organizationId,
         userId,
       });
+
+      if (authorizationDetails) {
+        const updateResponse = await this.updateConnectedAccount({
+          connector,
+          identifier,
+          connectedAccount: create(UpdateConnectedAccountSchema, {
+            authorizationDetails: create(AuthorizationDetailsSchema, authorizationDetails),
+            ...(apiConfig != null && {
+              apiConfig: apiConfig as unknown as UpdateConnectedAccount['apiConfig'],
+            }),
+          }),
+          organizationId,
+          userId,
+        });
+        return create(CreateConnectedAccountResponseSchema, {
+          connectedAccount: updateResponse.connectedAccount,
+        });
+      }
+
       return create(CreateConnectedAccountResponseSchema, {
         connectedAccount: getResponse.connectedAccount,
       });
@@ -385,5 +405,19 @@ export default class ConnectedAccountsClient {
         ...(connectedAccountId && { id: connectedAccountId }),
       })
     );
+  }
+
+  /**
+   * Alias for getOrCreateConnectedAccount — identical behavior, preferred name.
+   */
+  async upsertConnectedAccount(params: {
+    connector: string;
+    identifier: string;
+    authorizationDetails?: MessageInitShape<typeof AuthorizationDetailsSchema>;
+    organizationId?: string;
+    userId?: string;
+    apiConfig?: Record<string, unknown>;
+  }): Promise<CreateConnectedAccountResponse> {
+    return this.getOrCreateConnectedAccount(params);
   }
 }

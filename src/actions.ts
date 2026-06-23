@@ -330,6 +330,20 @@ export default class ActionsClient {
   }
 
   /**
+   * Alias for getOrCreateConnectedAccount — identical behavior, preferred name.
+   */
+  async upsertConnectedAccount(params: {
+    connectionName: string;
+    identifier: string;
+    authorizationDetails?: CreateConnectedAccount['authorizationDetails'];
+    organizationId?: string;
+    userId?: string;
+    apiConfig?: Record<string, unknown>;
+  }): Promise<CreateConnectedAccountResponse> {
+    return this.getOrCreateConnectedAccount(params);
+  }
+
+  /**
    * Update an existing connected account.
    * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
    *
