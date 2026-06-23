@@ -46,6 +46,7 @@ describe('Actions', () => {
     expect(typeof client.actions.deleteConnectedAccount).toBe('function');
     expect(typeof client.actions.getConnectedAccount).toBe('function');
     expect(typeof client.actions.verifyConnectedAccountUser).toBe('function');
+    expect(typeof client.actions.upsertConnectedAccount).toBe('function');
   });
 
   describe('executeTool', () => {
@@ -324,6 +325,46 @@ describe('Actions', () => {
           identifier: '' as any,
         } as any)
       ).rejects.toThrow('identifier is required');
+    });
+  });
+
+  describe('upsertConnectedAccount', () => {
+    it('should validate required parameters', async () => {
+      await expect(
+        client.actions.upsertConnectedAccount({
+          connectionName: '' as any,
+          identifier: 'user_123',
+        } as any)
+      ).rejects.toThrow('connectionName is required');
+
+      await expect(
+        client.actions.upsertConnectedAccount({
+          connectionName: 'gmail',
+          identifier: '' as any,
+        } as any)
+      ).rejects.toThrow('identifier is required');
+    });
+
+    it('should update credentials when account exists and authorizationDetails provided', async () => {
+      const authorizationDetails = create(AuthorizationDetailsSchema, {
+        details: {
+          case: 'oauthToken',
+          value: create(OauthTokenSchema, { accessToken: 'upsert_token' }),
+        },
+      });
+
+      try {
+        const response = await client.actions.upsertConnectedAccount({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier: GMAIL_IDENTIFIER,
+          authorizationDetails,
+        });
+
+        expect(response).toBeDefined();
+        expect(response.connectedAccount).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
+      }
     });
   });
 

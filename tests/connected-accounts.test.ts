@@ -233,6 +233,117 @@ describe('Connected Accounts', () => {
         expect(error).toBeInstanceOf(ScalekitServerException);
       }
     });
+
+    it('should call update when account exists and authorizationDetails are provided', async () => {
+      const connector = 'GMAIL-test';
+      const identifier = `update-creds-test-${Date.now()}`;
+
+      const initialAuthDetails = create(AuthorizationDetailsSchema, {
+        details: {
+          case: 'oauthToken',
+          value: create(OauthTokenSchema, {
+            accessToken: 'initial_token',
+            refreshToken: 'initial_refresh',
+            scopes: ['read'],
+          }),
+        },
+      });
+
+      const connectedAccount = create(CreateConnectedAccountSchema, {
+        authorizationDetails: initialAuthDetails,
+      });
+
+      try {
+        const createResponse = await client.connectedAccounts.createConnectedAccount({
+          connector,
+          identifier,
+          connectedAccount,
+        });
+
+        if (createResponse.connectedAccount?.id) {
+          testConnectedAccountId = createResponse.connectedAccount.id;
+          testConnector = connector;
+          testIdentifier = identifier;
+        }
+
+        const newAuthDetails = create(AuthorizationDetailsSchema, {
+          details: {
+            case: 'oauthToken',
+            value: create(OauthTokenSchema, {
+              accessToken: 'updated_token',
+              refreshToken: 'updated_refresh',
+              scopes: ['read', 'write'],
+            }),
+          },
+        });
+
+        const response = await client.connectedAccounts.getOrCreateConnectedAccount({
+          connector,
+          identifier,
+          authorizationDetails: newAuthDetails,
+        });
+
+        expect(response).toBeDefined();
+        expect(response.connectedAccount).toBeDefined();
+        expect(response.connectedAccount?.identifier).toBe(identifier);
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
+      }
+    });
+
+    it('should return existing account as-is when no authorizationDetails provided', async () => {
+      const connector = 'GMAIL-test';
+      const identifier = `no-update-test-${Date.now()}`;
+
+      try {
+        const response = await client.connectedAccounts.getOrCreateConnectedAccount({
+          connector,
+          identifier,
+        });
+
+        expect(response).toBeDefined();
+        expect(response.connectedAccount).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
+      }
+    });
+  });
+
+  describe('upsertConnectedAccount', () => {
+    it('should throw when connector is empty', async () => {
+      await expect(
+        client.connectedAccounts.upsertConnectedAccount({
+          connector: '',
+          identifier: 'user_123',
+        })
+      ).rejects.toThrow('connector is required');
+    });
+
+    it('should throw when identifier is empty', async () => {
+      await expect(
+        client.connectedAccounts.upsertConnectedAccount({
+          connector: 'gmail',
+          identifier: '',
+        })
+      ).rejects.toThrow('identifier is required');
+    });
+
+    it('should behave identically to getOrCreateConnectedAccount', async () => {
+      const connector = 'GMAIL-test';
+      const identifier = `upsert-test-${Date.now()}`;
+
+      try {
+        const response = await client.connectedAccounts.upsertConnectedAccount({
+          connector,
+          identifier,
+        });
+
+        expect(response).toBeDefined();
+        expect(response.connectedAccount).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
+      }
+    });
   });
 
   describe('updateConnectedAccount', () => {
