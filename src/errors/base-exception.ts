@@ -260,7 +260,10 @@ export class ScalekitServerException extends ScalekitException {
     return this._unpackedDetails;
   }
 
-  static promote(error: AxiosResponse | ConnectError): ScalekitServerException {
+  static promote(
+    error: AxiosResponse | ConnectError,
+    isToolError?: boolean
+  ): ScalekitServerException {
     // Use dynamic import to avoid circular dependency
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const specific = require('./specific-exceptions');
@@ -268,6 +271,28 @@ export class ScalekitServerException extends ScalekitException {
       error instanceof ConnectError
         ? error.code
         : HTTP_TO_GRPC[error.status] || Code.Unknown;
+
+    // isToolError may be pre-computed by the caller (_connectExec already calls findDetails).
+    // Fall back to parsing here only when called standalone (e.g. Axios path, tests).
+    const toolError =
+      isToolError ??
+      (error instanceof ConnectError &&
+        error
+          .findDetails(ErrorInfoSchema)
+          .some((d) => d.errorCode === 'TOOL_ERROR'));
+
+    if (toolError) {
+      switch (grpcStatus) {
+        case Code.Unauthenticated:
+          return new specific.ScalekitToolUnauthorizedException(error);
+        case Code.PermissionDenied:
+          return new specific.ScalekitToolForbiddenException(error);
+        case Code.ResourceExhausted:
+          return new specific.ScalekitToolRateLimitException(error);
+        default:
+          return new specific.ScalekitToolException(error);
+      }
+    }
 
     switch (grpcStatus) {
       case Code.InvalidArgument:

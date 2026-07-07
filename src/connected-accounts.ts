@@ -24,6 +24,7 @@ import {
   UpdateConnectedAccount,
   UpdateConnectedAccountRequestSchema,
   UpdateConnectedAccountResponse,
+  UpdateConnectedAccountSchema,
   VerifyConnectedAccountUserRequestSchema,
   VerifyConnectedAccountUserResponse,
 } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
@@ -163,6 +164,30 @@ export default class ConnectedAccountsClient {
         organizationId,
         userId,
       });
+
+      // True upsert: if credentials were supplied, apply them regardless of
+      // the account's current status (PENDING_AUTH, EXPIRED, DISCONNECTED, ACTIVE).
+      if (authorizationDetails) {
+        const updateResponse = await this.updateConnectedAccount({
+          connector,
+          identifier,
+          connectedAccount: create(UpdateConnectedAccountSchema, {
+            authorizationDetails: create(
+              AuthorizationDetailsSchema,
+              authorizationDetails
+            ),
+            ...(apiConfig != null && {
+              apiConfig: apiConfig as UpdateConnectedAccount['apiConfig'],
+            }),
+          }),
+          organizationId,
+          userId,
+        });
+        return create(CreateConnectedAccountResponseSchema, {
+          connectedAccount: updateResponse.connectedAccount,
+        });
+      }
+
       return create(CreateConnectedAccountResponseSchema, {
         connectedAccount: getResponse.connectedAccount,
       });
@@ -193,6 +218,9 @@ export default class ConnectedAccountsClient {
       userId,
     });
   }
+
+  /** Alias for {@link getOrCreateConnectedAccount} — preferred name for upsert semantics. */
+  upsertConnectedAccount = this.getOrCreateConnectedAccount.bind(this);
 
   /**
    * Updates an existing connected account.

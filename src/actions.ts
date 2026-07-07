@@ -329,6 +329,9 @@ export default class ActionsClient {
     });
   }
 
+  /** Alias for {@link getOrCreateConnectedAccount} — preferred name for upsert semantics. */
+  upsertConnectedAccount = this.getOrCreateConnectedAccount.bind(this);
+
   /**
    * Update an existing connected account.
    * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
