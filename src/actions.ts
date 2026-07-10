@@ -5,7 +5,73 @@ import { ScalekitException, ScalekitServerException } from './errors';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
-import { ListAppConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
+import {
+  ConnectionStatus,
+  ConnectionType,
+  ListConnection,
+} from './pkg/grpc/scalekit/v1/connections/connections_pb';
+
+/**
+ * A protobuf Timestamp as returned by the API, passed through unchanged.
+ * `seconds` is an int64 and therefore a `bigint` in JS.
+ */
+export interface AppConnectionTimestamp {
+  seconds: bigint;
+  nanos: number;
+}
+
+/**
+ * Normalized, consumer-friendly view of an app connection returned by
+ * {@link ActionsClient.listAppConnections}. Internal proto fields
+ * (`provider` enum, `organizationId`, `uiButtonTitle`, `organizationName`,
+ * `domains`, `$typeName`) are omitted, and enum fields are decoded to their
+ * string names.
+ */
+export interface AppConnection {
+  /** Unique connection identifier (format: "conn_..."). */
+  id: string;
+  /** Connection type, decoded from the ConnectionType enum (e.g. "OAUTH", "SAML"). */
+  type: string;
+  /** Connection status, decoded from the ConnectionStatus enum (e.g. "COMPLETED", "DRAFT"). */
+  status: string;
+  /** Whether the connection is enabled. */
+  enabled: boolean;
+  /** Provider key for the connection (e.g. "SALESFORCE", "GMAIL"). */
+  provider: string;
+  /** Human-readable connection name / key identifier (e.g. "salesforce-ubB7gpKc"). */
+  connectionName: string;
+  /** Creation timestamp, passed through as a protobuf Timestamp. */
+  createdAt?: AppConnectionTimestamp;
+}
+
+/** Normalized response returned by {@link ActionsClient.listAppConnections}. */
+export interface ListAppConnectionsResult {
+  connections: AppConnection[];
+  nextPageToken: string;
+  prevPageToken: string;
+  totalSize: number;
+}
+
+/**
+ * Map a raw {@link ListConnection} proto message to the normalized
+ * {@link AppConnection} shape exposed by the actions namespace.
+ */
+function mapAppConnection(connection: ListConnection): AppConnection {
+  return {
+    id: connection.id,
+    type: ConnectionType[connection.type] ?? String(connection.type),
+    status: ConnectionStatus[connection.status] ?? String(connection.status),
+    enabled: connection.enabled,
+    provider: connection.providerKey,
+    connectionName: connection.keyId,
+    createdAt: connection.createdAt
+      ? {
+          seconds: connection.createdAt.seconds,
+          nanos: connection.createdAt.nanos,
+        }
+      : undefined,
+  };
+}
 import {
   CreateConnectedAccount,
   CreateConnectedAccountResponse,
@@ -158,14 +224,16 @@ export default class ActionsClient {
   /**
    * List app-level connections with optional pagination and provider filtering.
    *
-   * Delegates to {@link ConnectionClient.listAppConnections}. These are the
-   * connections defined at the application level (e.g. tool/provider integrations),
-   * not the SSO connections scoped to a specific organization.
+   * Delegates to {@link ConnectionClient.listAppConnections} and returns a
+   * normalized {@link ListAppConnectionsResult}: internal proto fields are
+   * dropped and enum fields are decoded to strings. These are the connections
+   * defined at the application level (e.g. tool/provider integrations), not the
+   * SSO connections scoped to a specific organization.
    *
    * @param {object} [params] - Optional pagination and filtering parameters
-   * @param {number} [params.pageSize] - Maximum number of connections to return per page
+   * @param {number} [params.pageSize] - Maximum number of connections to return per page (max 30)
    * @param {string} [params.pageToken] - Token identifying the page of results to return
-   * @param {string} [params.provider] - Filter results to a specific provider (e.g., "gmail", "slack")
+   * @param {string} [params.provider] - Filter by provider key (case-sensitive, e.g. "SALESFORCE", "GMAIL")
    *
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
@@ -173,12 +241,18 @@ export default class ActionsClient {
     pageSize?: number;
     pageToken?: string;
     provider?: string;
-  }): Promise<ListAppConnectionsResponse> {
-    return this.connection.listAppConnections({
+  }): Promise<ListAppConnectionsResult> {
+    const response = await this.connection.listAppConnections({
       pageSize: params?.pageSize,
       pageToken: params?.pageToken,
       provider: params?.provider,
     });
+    return {
+      connections: response.connections.map(mapAppConnection),
+      nextPageToken: response.nextPageToken,
+      prevPageToken: response.prevPageToken,
+      totalSize: response.totalSize,
+    };
   }
 
   /**

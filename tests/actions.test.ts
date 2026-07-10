@@ -57,6 +57,7 @@ describe('Actions', () => {
       expect(Array.isArray(response.connections)).toBe(true);
       expect(typeof response.totalSize).toBe('number');
       expect(typeof response.nextPageToken).toBe('string');
+      expect(typeof response.prevPageToken).toBe('string');
     });
 
     it('should respect the pageSize parameter', async () => {
@@ -65,6 +66,35 @@ describe('Actions', () => {
       expect(response).toBeDefined();
       expect(Array.isArray(response.connections)).toBe(true);
       expect(response.connections.length).toBeLessThanOrEqual(1);
+    });
+
+    it('should return the normalized (mapped) connection shape', async () => {
+      const response = await client.actions.listAppConnections({ pageSize: 1 });
+
+      // Skip assertions if the environment has no app connections.
+      if (response.connections.length === 0) {
+        return;
+      }
+
+      const connection = response.connections[0];
+
+      // Renamed + decoded fields are present with the expected types.
+      expect(typeof connection.id).toBe('string');
+      expect(typeof connection.type).toBe('string'); // enum decoded to string
+      expect(typeof connection.status).toBe('string'); // enum decoded to string
+      expect(typeof connection.enabled).toBe('boolean');
+      expect(typeof connection.provider).toBe('string'); // was providerKey
+      expect(typeof connection.connectionName).toBe('string'); // was keyId
+
+      // Dropped / internal proto fields must not leak through the mapper.
+      const raw = connection as unknown as Record<string, unknown>;
+      expect(raw.providerKey).toBeUndefined();
+      expect(raw.keyId).toBeUndefined();
+      expect(raw.organizationId).toBeUndefined();
+      expect(raw.uiButtonTitle).toBeUndefined();
+      expect(raw.organizationName).toBeUndefined();
+      expect(raw.domains).toBeUndefined();
+      expect(raw.$typeName).toBeUndefined();
     });
   });
 
