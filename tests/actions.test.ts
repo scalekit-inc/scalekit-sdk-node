@@ -46,12 +46,12 @@ describe('Actions', () => {
     expect(typeof client.actions.deleteConnectedAccount).toBe('function');
     expect(typeof client.actions.getConnectedAccount).toBe('function');
     expect(typeof client.actions.verifyConnectedAccountUser).toBe('function');
-    expect(typeof client.actions.listAppConnections).toBe('function');
+    expect(typeof client.actions.listConnections).toBe('function');
   });
 
-  describe('listAppConnections', () => {
+  describe('listConnections', () => {
     it('should list app-level connections via the actions namespace', async () => {
-      const response = await client.actions.listAppConnections();
+      const response = await client.actions.listConnections();
 
       expect(response).toBeDefined();
       expect(Array.isArray(response.connections)).toBe(true);
@@ -61,7 +61,7 @@ describe('Actions', () => {
     });
 
     it('should respect the pageSize parameter', async () => {
-      const response = await client.actions.listAppConnections({ pageSize: 1 });
+      const response = await client.actions.listConnections({ pageSize: 1 });
 
       expect(response).toBeDefined();
       expect(Array.isArray(response.connections)).toBe(true);
@@ -69,7 +69,7 @@ describe('Actions', () => {
     });
 
     it('should return the normalized (mapped) connection shape', async () => {
-      const response = await client.actions.listAppConnections({ pageSize: 1 });
+      const response = await client.actions.listConnections({ pageSize: 1 });
 
       // Skip assertions if the environment has no app connections.
       if (response.connections.length === 0) {

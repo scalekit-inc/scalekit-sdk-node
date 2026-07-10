@@ -237,7 +237,7 @@ export default class ActionsClient {
    *
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
-  async listAppConnections(params?: {
+  async listConnections(params?: {
     pageSize?: number;
     pageToken?: string;
     provider?: string;
