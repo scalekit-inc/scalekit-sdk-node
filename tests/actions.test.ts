@@ -46,6 +46,26 @@ describe('Actions', () => {
     expect(typeof client.actions.deleteConnectedAccount).toBe('function');
     expect(typeof client.actions.getConnectedAccount).toBe('function');
     expect(typeof client.actions.verifyConnectedAccountUser).toBe('function');
+    expect(typeof client.actions.listAppConnections).toBe('function');
+  });
+
+  describe('listAppConnections', () => {
+    it('should list app-level connections via the actions namespace', async () => {
+      const response = await client.actions.listAppConnections();
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.connections)).toBe(true);
+      expect(typeof response.totalSize).toBe('number');
+      expect(typeof response.nextPageToken).toBe('string');
+    });
+
+    it('should respect the pageSize parameter', async () => {
+      const response = await client.actions.listAppConnections({ pageSize: 1 });
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.connections)).toBe(true);
+      expect(response.connections.length).toBeLessThanOrEqual(1);
+    });
   });
 
   describe('executeTool', () => {

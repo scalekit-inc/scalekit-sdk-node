@@ -4,6 +4,8 @@ import CoreClient from './core';
 import { ScalekitException, ScalekitServerException } from './errors';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
+import ConnectionClient from './connection';
+import { ListAppConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 import {
   CreateConnectedAccount,
   CreateConnectedAccountResponse,
@@ -28,7 +30,8 @@ export default class ActionsClient {
   constructor(
     private readonly tools: ToolsClient,
     private readonly connectedAccounts: ConnectedAccountsClient,
-    private readonly coreClient: CoreClient
+    private readonly coreClient: CoreClient,
+    private readonly connection: ConnectionClient
   ) {}
 
   /**
@@ -149,6 +152,32 @@ export default class ActionsClient {
       pageSize: params?.pageSize,
       pageToken: params?.pageToken,
       query: params?.query,
+    });
+  }
+
+  /**
+   * List app-level connections with optional pagination and provider filtering.
+   *
+   * Delegates to {@link ConnectionClient.listAppConnections}. These are the
+   * connections defined at the application level (e.g. tool/provider integrations),
+   * not the SSO connections scoped to a specific organization.
+   *
+   * @param {object} [params] - Optional pagination and filtering parameters
+   * @param {number} [params.pageSize] - Maximum number of connections to return per page
+   * @param {string} [params.pageToken] - Token identifying the page of results to return
+   * @param {string} [params.provider] - Filter results to a specific provider (e.g., "gmail", "slack")
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   */
+  async listAppConnections(params?: {
+    pageSize?: number;
+    pageToken?: string;
+    provider?: string;
+  }): Promise<ListAppConnectionsResponse> {
+    return this.connection.listAppConnections({
+      pageSize: params?.pageSize,
+      pageToken: params?.pageToken,
+      provider: params?.provider,
     });
   }
 

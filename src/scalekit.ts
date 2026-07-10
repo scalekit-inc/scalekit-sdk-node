@@ -123,7 +123,8 @@ export default class ScalekitClient {
     this.actions = new ActionsClient(
       this.tools,
       this.connectedAccounts,
-      this.coreClient
+      this.coreClient,
+      this.connection
     );
   }
 

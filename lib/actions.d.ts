@@ -2,6 +2,8 @@ import { AxiosResponse } from 'axios';
 import CoreClient from './core';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
+import ConnectionClient from './connection';
+import { ListAppConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 import { CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
@@ -13,7 +15,8 @@ export default class ActionsClient {
     private readonly tools;
     private readonly connectedAccounts;
     private readonly coreClient;
-    constructor(tools: ToolsClient, connectedAccounts: ConnectedAccountsClient, coreClient: CoreClient);
+    private readonly connection;
+    constructor(tools: ToolsClient, connectedAccounts: ConnectedAccountsClient, coreClient: CoreClient, connection: ConnectionClient);
     /**
      * Execute a tool on behalf of a connected account.
      *
@@ -74,6 +77,25 @@ export default class ActionsClient {
         pageToken?: string;
         query?: string;
     }): Promise<ListConnectedAccountsResponse>;
+    /**
+     * List app-level connections with optional pagination and provider filtering.
+     *
+     * Delegates to {@link ConnectionClient.listAppConnections}. These are the
+     * connections defined at the application level (e.g. tool/provider integrations),
+     * not the SSO connections scoped to a specific organization.
+     *
+     * @param {object} [params] - Optional pagination and filtering parameters
+     * @param {number} [params.pageSize] - Maximum number of connections to return per page
+     * @param {string} [params.pageToken] - Token identifying the page of results to return
+     * @param {string} [params.provider] - Filter results to a specific provider (e.g., "gmail", "slack")
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    listAppConnections(params?: {
+        pageSize?: number;
+        pageToken?: string;
+        provider?: string;
+    }): Promise<ListAppConnectionsResponse>;
     /**
      * Delete a connected account.
      * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
