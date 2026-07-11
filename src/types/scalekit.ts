@@ -51,8 +51,9 @@ export interface LogoutUrlOptions {
 
 export interface ScalekitOptions {
   /**
-   * gRPC call timeout in milliseconds, applied to control-plane RPCs
-   * (organizations, users, connections, etc).
+   * Control-plane timeout in milliseconds, applied to gRPC RPCs
+   * (organizations, users, connections, etc) and to the SDK's own HTTP calls
+   * (token endpoint, JWKS).
    *
    * Must be set below your infrastructure's backend timeout (e.g. GCP LB default
    * is 30 s) so the SDK deadline fires first and surfaces a clean DeadlineExceeded

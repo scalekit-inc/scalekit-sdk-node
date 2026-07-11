@@ -47,6 +47,44 @@ function makeToolsClient(toolTimeoutMs?: number) {
   };
 }
 
+describe('CoreClient.timeoutMs (control-plane, incl. token/JWKS HTTP path)', () => {
+  it('defaults to 20000ms and is applied to the axios instance', () => {
+    const coreClient = new CoreClient(
+      'https://test.scalekit.dev',
+      'client_id',
+      'client_secret'
+    );
+    expect(coreClient.timeoutMs).toBe(20_000);
+    expect((coreClient.axios as any).defaults.timeout).toBe(20_000);
+  });
+
+  it('honors a custom value passed through ScalekitOptions', () => {
+    const client = new ScalekitClient(
+      'https://test.scalekit.dev',
+      'id',
+      'secret',
+      {
+        timeoutMs: 7_000,
+      }
+    );
+    const coreClient = (client as any).coreClient as CoreClient;
+    expect(coreClient.timeoutMs).toBe(7_000);
+    expect((coreClient.axios as any).defaults.timeout).toBe(7_000);
+  });
+
+  it('toolTimeoutMs does not affect the control-plane timeout', () => {
+    const client = new ScalekitClient(
+      'https://test.scalekit.dev',
+      'id',
+      'secret',
+      {
+        toolTimeoutMs: 45_000,
+      }
+    );
+    expect(((client as any).coreClient as CoreClient).timeoutMs).toBe(20_000);
+  });
+});
+
 describe('CoreClient.toolTimeoutMs', () => {
   it('defaults to 60000ms when not configured', () => {
     const coreClient = new CoreClient(

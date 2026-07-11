@@ -36,6 +36,7 @@ export const headers = {
 const tokenEndpoint = 'oauth/token';
 const jwksEndpoint = 'keys';
 const DEFAULT_TOOL_TIMEOUT_MS = 60_000;
+export const DEFAULT_TIMEOUT_MS = 20_000;
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
@@ -51,9 +52,16 @@ export default class CoreClient {
     readonly envUrl: string,
     readonly clientId: string,
     readonly clientSecret: string,
-    readonly toolTimeoutMs: number = DEFAULT_TOOL_TIMEOUT_MS
+    readonly toolTimeoutMs: number = DEFAULT_TOOL_TIMEOUT_MS,
+    readonly timeoutMs: number = DEFAULT_TIMEOUT_MS
   ) {
-    this.axios = axios.create({ baseURL: envUrl });
+    // The instance-level timeout bounds every HTTP call made through this
+    // client — including the token endpoint and JWKS fetches, which otherwise
+    // hang forever on a silently dropped connection (the same failure mode
+    // the gRPC transport deadline guards against). Calls that need a longer
+    // budget (the actions proxy) set a per-request timeout, which overrides
+    // this default.
+    this.axios = axios.create({ baseURL: envUrl, timeout: this.timeoutMs });
     this.axios.interceptors.request.use((config) => {
       config.headers[headers['user-agent']] = this.userAgent;
       config.headers[headers['x-sdk-version']] = this.sdkVersion;

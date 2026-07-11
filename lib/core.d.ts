@@ -16,18 +16,20 @@ export declare const headers: {
     'x-api-version': string;
     authorization: string;
 };
+export declare const DEFAULT_TIMEOUT_MS = 20000;
 export default class CoreClient {
     readonly envUrl: string;
     readonly clientId: string;
     readonly clientSecret: string;
     readonly toolTimeoutMs: number;
+    readonly timeoutMs: number;
     keys: JWK[];
     accessToken: string | null;
     axios: Axios;
     sdkVersion: string;
     apiVersion: string;
     userAgent: string;
-    constructor(envUrl: string, clientId: string, clientSecret: string, toolTimeoutMs?: number);
+    constructor(envUrl: string, clientId: string, clientSecret: string, toolTimeoutMs?: number, timeoutMs?: number);
     private authenticateClient;
     /**
      * Authenticate with the code

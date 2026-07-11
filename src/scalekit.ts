@@ -58,7 +58,7 @@ const WEBHOOK_SIGNATURE_VERSION = 'v1';
  * @param {string} clientId - Your Scalekit client ID from the Scalekit Dashboard
  * @param {string} clientSecret - Your Scalekit client secret from the Scalekit Dashboard
  * @param {ScalekitOptions} [options] - Optional SDK configuration
- * @param {number} [options.timeoutMs=20000] - gRPC call deadline in ms for control-plane RPCs (organizations, users, connections, etc). Set below your infrastructure backend timeout (e.g. GCP LB = 30 s) so the SDK surfaces a clean error. Defaults to 20000.
+ * @param {number} [options.timeoutMs=20000] - Timeout in ms for control-plane calls: gRPC RPCs (organizations, users, connections, etc) and the SDK's own HTTP calls (token endpoint, JWKS). Set below your infrastructure backend timeout (e.g. GCP LB = 30 s) so the SDK surfaces a clean error. Defaults to 20000.
  * @param {number} [options.toolTimeoutMs=60000] - gRPC call deadline in ms for tool-execution RPCs (`tools.*`, `actions.*`), which proxy to third-party provider APIs and can legitimately run longer. Defaults to 60000.
  *
  * @example
@@ -106,9 +106,10 @@ export default class ScalekitClient {
       envUrl,
       clientId,
       clientSecret,
-      options?.toolTimeoutMs
+      options?.toolTimeoutMs,
+      options?.timeoutMs
     );
-    this.grpcConnect = new GrpcConnect(this.coreClient, options?.timeoutMs);
+    this.grpcConnect = new GrpcConnect(this.coreClient);
 
     this.organization = new OrganizationClient(
       this.grpcConnect,

@@ -3,13 +3,11 @@ import { type Client, type Transport, createClient } from '@connectrpc/connect';
 import { createGrpcTransport } from '@connectrpc/connect-node';
 import CoreClient, { headers } from './core';
 
-const DEFAULT_TIMEOUT_MS = 20_000;
-
 export default class GrpcConnect {
   private transport: Transport;
   constructor(
     private readonly coreClient: CoreClient,
-    timeoutMs: number = DEFAULT_TIMEOUT_MS
+    timeoutMs: number = coreClient.timeoutMs
   ) {
     this.transport = createGrpcTransport({
       baseUrl: this.coreClient.envUrl,
