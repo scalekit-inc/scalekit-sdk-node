@@ -54,6 +54,8 @@ export interface ScalekitOptions {
      * The deadline applies per attempt: automatic retries (Unauthenticated,
      * Unavailable) each get a fresh deadline, so total wall time under retry
      * can exceed this value.
+     *
+     * Must be a positive finite number; the constructor throws otherwise.
      */
     timeoutMs?: number;
     /**
@@ -65,6 +67,8 @@ export interface ScalekitOptions {
      * These calls proxy to third-party provider APIs (e.g. Google Calendar, Slack)
      * and can legitimately run longer than typical control-plane calls, so they use
      * their own, longer deadline instead of `timeoutMs`. Defaults to 60000 (60 s).
+     *
+     * Must be a positive finite number; the constructor throws otherwise.
      */
     toolTimeoutMs?: number;
 }

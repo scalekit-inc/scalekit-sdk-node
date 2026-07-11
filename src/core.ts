@@ -38,6 +38,20 @@ const tokenEndpoint = 'oauth/token';
 const jwksEndpoint = 'keys';
 const DEFAULT_TOOL_TIMEOUT_MS = 60_000;
 export const DEFAULT_TIMEOUT_MS = 20_000;
+
+// A non-positive timeout is never what the caller wants: connect-es treats a
+// per-call timeoutMs <= 0 as "no deadline" (reintroducing indefinite hangs)
+// but a transport defaultTimeoutMs of 0 as an immediately-expired deadline,
+// and axios treats 0 as "no timeout". Reject invalid values up front instead
+// of letting the same input pick a different semantic per path.
+function assertValidTimeout(name: string, value: number): void {
+  if (!Number.isFinite(value) || value <= 0) {
+    throw new Error(
+      `${name} must be a positive finite number of milliseconds, got ${value}`
+    );
+  }
+}
+
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
@@ -56,6 +70,8 @@ export default class CoreClient {
     readonly toolTimeoutMs: number = DEFAULT_TOOL_TIMEOUT_MS,
     readonly timeoutMs: number = DEFAULT_TIMEOUT_MS
   ) {
+    assertValidTimeout('toolTimeoutMs', toolTimeoutMs);
+    assertValidTimeout('timeoutMs', timeoutMs);
     // The instance-level timeout bounds every HTTP call made through this
     // client — including the token endpoint and JWKS fetches, which otherwise
     // hang forever on a silently dropped connection (the same failure mode

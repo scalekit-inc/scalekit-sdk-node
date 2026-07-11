@@ -86,6 +86,42 @@ describe('CoreClient.timeoutMs (control-plane, incl. token/JWKS HTTP path)', () 
   });
 });
 
+describe('timeout validation', () => {
+  it.each([0, -1, NaN, Infinity])('rejects timeoutMs = %p', (value) => {
+    expect(
+      () =>
+        new CoreClient(
+          'https://test.scalekit.dev',
+          'client_id',
+          'client_secret',
+          undefined,
+          value
+        )
+    ).toThrow(/timeoutMs must be a positive finite number/);
+  });
+
+  it.each([0, -1, NaN, Infinity])('rejects toolTimeoutMs = %p', (value) => {
+    expect(
+      () =>
+        new CoreClient(
+          'https://test.scalekit.dev',
+          'client_id',
+          'client_secret',
+          value
+        )
+    ).toThrow(/toolTimeoutMs must be a positive finite number/);
+  });
+
+  it('rejects invalid values passed through ScalekitOptions', () => {
+    expect(
+      () =>
+        new ScalekitClient('https://test.scalekit.dev', 'id', 'secret', {
+          timeoutMs: 0,
+        })
+    ).toThrow(/timeoutMs must be a positive finite number/);
+  });
+});
+
 describe('CoreClient.toolTimeoutMs', () => {
   it('defaults to 60000ms when not configured', () => {
     const coreClient = new CoreClient(
