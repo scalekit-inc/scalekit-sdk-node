@@ -1,4 +1,4 @@
-import { Code, ConnectError } from '@connectrpc/connect';
+import { Code, ConnectError, type CallOptions } from '@connectrpc/connect';
 import axios, {
   Axios,
   AxiosError,
@@ -35,6 +35,7 @@ export const headers = {
 
 const tokenEndpoint = 'oauth/token';
 const jwksEndpoint = 'keys';
+const DEFAULT_TOOL_TIMEOUT_MS = 60_000;
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
@@ -49,7 +50,8 @@ export default class CoreClient {
   constructor(
     readonly envUrl: string,
     readonly clientId: string,
-    readonly clientSecret: string
+    readonly clientSecret: string,
+    readonly toolTimeoutMs: number = DEFAULT_TOOL_TIMEOUT_MS
   ) {
     this.axios = axios.create({ baseURL: envUrl });
     this.axios.interceptors.request.use((config) => {
@@ -114,23 +116,27 @@ export default class CoreClient {
    *
    * @param fn Function to execute
    * @param data Data to pass to the function
+   * @param options Optional per-call gRPC options (e.g. `timeoutMs`), forwarded to `fn` as-is.
+   *                Omit to use the transport's default deadline.
    * @returns {Promise<TResponse>} Returns the response
    */
   async connectExec<TRequest, TResponse>(
-    fn: (request: TRequest) => Promise<TResponse>,
-    data: TRequest
+    fn: (request: TRequest, options?: CallOptions) => Promise<TResponse>,
+    data: TRequest,
+    options?: CallOptions
   ): Promise<TResponse> {
-    return this._connectExec(fn, data, 3, 0);
+    return this._connectExec(fn, data, 3, 0, options);
   }
 
   private async _connectExec<TRequest, TResponse>(
-    fn: (request: TRequest) => Promise<TResponse>,
+    fn: (request: TRequest, options?: CallOptions) => Promise<TResponse>,
     data: TRequest,
     retryLeft: number,
-    attempt: number
+    attempt: number,
+    options?: CallOptions
   ): Promise<TResponse> {
     try {
-      return await fn(data);
+      return await fn(data, options);
     } catch (error) {
       // Handle gRPC Connect errors
       if (error instanceof ConnectError) {
@@ -145,7 +151,13 @@ export default class CoreClient {
         if (!isToolError && retryLeft > 0) {
           if (error.code === Code.Unauthenticated) {
             await this.authenticateClient();
-            return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
+            return this._connectExec(
+              fn,
+              data,
+              retryLeft - 1,
+              attempt + 1,
+              options
+            );
           }
           // Retry transient infrastructure errors (Unavailable) with backoff.
           // This covers the Connect transport mapping HTTP 429 → Code.Unavailable.
@@ -154,7 +166,13 @@ export default class CoreClient {
             const baseBackoff = Math.min(1000 * 2 ** attempt, 30000);
             const backoffMs = baseBackoff * (0.5 + Math.random() * 0.5);
             await this.sleep(backoffMs);
-            return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
+            return this._connectExec(
+              fn,
+              data,
+              retryLeft - 1,
+              attempt + 1,
+              options
+            );
           }
         }
         throw ScalekitServerException.promote(error, isToolError);
@@ -165,7 +183,13 @@ export default class CoreClient {
           if (retryLeft > 0) {
             if (error.response.status === HttpStatusCode.Unauthorized) {
               await this.authenticateClient();
-              return this._connectExec(fn, data, retryLeft - 1, attempt + 1);
+              return this._connectExec(
+                fn,
+                data,
+                retryLeft - 1,
+                attempt + 1,
+                options
+              );
             }
             // NOTE: HTTP 429 responses are surfaced immediately — no backoff retry.
           }

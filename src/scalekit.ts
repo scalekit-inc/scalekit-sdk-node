@@ -28,6 +28,7 @@ import {
   GrantType,
   LogoutUrlOptions,
   RefreshTokenResponse,
+  ScalekitOptions,
   TokenValidationOptions,
 } from './types/scalekit';
 import {
@@ -56,6 +57,9 @@ const WEBHOOK_SIGNATURE_VERSION = 'v1';
  * @param {string} envUrl - The Scalekit environment URL (e.g., "https://yourorg.scalekit.com" or your configured custom domain like "https://auth.yourapp.ai")
  * @param {string} clientId - Your Scalekit client ID from the Scalekit Dashboard
  * @param {string} clientSecret - Your Scalekit client secret from the Scalekit Dashboard
+ * @param {ScalekitOptions} [options] - Optional SDK configuration
+ * @param {number} [options.timeoutMs=20000] - gRPC call deadline in ms for control-plane RPCs (organizations, users, connections, etc). Set below your infrastructure backend timeout (e.g. GCP LB = 30 s) so the SDK surfaces a clean error. Defaults to 20000.
+ * @param {number} [options.toolTimeoutMs=60000] - gRPC call deadline in ms for tool-execution RPCs (`tools.*`, `actions.*`), which proxy to third-party provider APIs and can legitimately run longer. Defaults to 60000.
  *
  * @example
  * // Initialize the Scalekit client
@@ -92,9 +96,19 @@ export default class ScalekitClient {
   readonly tools: ToolsClient;
   readonly connectedAccounts: ConnectedAccountsClient;
   readonly actions: ActionsClient;
-  constructor(envUrl: string, clientId: string, clientSecret: string) {
-    this.coreClient = new CoreClient(envUrl, clientId, clientSecret);
-    this.grpcConnect = new GrpcConnect(this.coreClient);
+  constructor(
+    envUrl: string,
+    clientId: string,
+    clientSecret: string,
+    options?: ScalekitOptions
+  ) {
+    this.coreClient = new CoreClient(
+      envUrl,
+      clientId,
+      clientSecret,
+      options?.toolTimeoutMs
+    );
+    this.grpcConnect = new GrpcConnect(this.coreClient, options?.timeoutMs);
 
     this.organization = new OrganizationClient(
       this.grpcConnect,

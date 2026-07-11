@@ -41,3 +41,23 @@ export interface LogoutUrlOptions {
     postLogoutRedirectUri?: string;
     state?: string;
 }
+export interface ScalekitOptions {
+    /**
+     * gRPC call timeout in milliseconds, applied to control-plane RPCs
+     * (organizations, users, connections, etc).
+     *
+     * Must be set below your infrastructure's backend timeout (e.g. GCP LB default
+     * is 30 s) so the SDK deadline fires first and surfaces a clean DeadlineExceeded
+     * error rather than a raw TCP abort. Defaults to 20000 (20 s).
+     */
+    timeoutMs?: number;
+    /**
+     * gRPC call timeout in milliseconds for tool-execution RPCs
+     * (`tools.*`, `actions.*`).
+     *
+     * These calls proxy to third-party provider APIs (e.g. Google Calendar, Slack)
+     * and can legitimately run longer than typical control-plane calls, so they use
+     * their own, longer deadline instead of `timeoutMs`. Defaults to 60000 (60 s).
+     */
+    toolTimeoutMs?: number;
+}

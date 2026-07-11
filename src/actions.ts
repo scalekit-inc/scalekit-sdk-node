@@ -389,6 +389,10 @@ export default class ActionsClient {
   /**
    * Make a proxied REST API call on behalf of a connected account.
    *
+   * @param params.timeoutMs Per-call request timeout in ms. Defaults to `toolTimeoutMs`
+   *                         from the `ScalekitClient` constructor options (60000 by
+   *                         default), since this proxies to a third-party API and can
+   *                         legitimately run longer than a typical control-plane call.
    * @throws {ScalekitServerException} If a network or server error occurs.
    * @throws {ScalekitException} If required parameters are missing or an unexpected error occurs.
    */
@@ -427,7 +431,7 @@ export default class ActionsClient {
 
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
     const url = `${this.coreClient.envUrl.replace(/\/$/, '')}/proxy${normalizedPath}`;
-    const timeout = timeoutMs ?? 30_000;
+    const timeout = timeoutMs ?? this.coreClient.toolTimeoutMs;
 
     const proxyHeaders: Record<string, string> = {
       ...(headers ?? {}),

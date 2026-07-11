@@ -161,6 +161,10 @@ export default class ActionsClient {
     /**
      * Make a proxied REST API call on behalf of a connected account.
      *
+     * @param params.timeoutMs Per-call request timeout in ms. Defaults to `toolTimeoutMs`
+     *                         from the `ScalekitClient` constructor options (60000 by
+     *                         default), since this proxies to a third-party API and can
+     *                         legitimately run longer than a typical control-plane call.
      * @throws {ScalekitServerException} If a network or server error occurs.
      * @throws {ScalekitException} If required parameters are missing or an unexpected error occurs.
      */

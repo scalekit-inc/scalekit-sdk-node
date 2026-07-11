@@ -1,3 +1,4 @@
+import { type CallOptions } from '@connectrpc/connect';
 import { Axios, AxiosResponse } from 'axios';
 declare module 'axios' {
     interface InternalAxiosRequestConfig {
@@ -19,13 +20,14 @@ export default class CoreClient {
     readonly envUrl: string;
     readonly clientId: string;
     readonly clientSecret: string;
+    readonly toolTimeoutMs: number;
     keys: JWK[];
     accessToken: string | null;
     axios: Axios;
     sdkVersion: string;
     apiVersion: string;
     userAgent: string;
-    constructor(envUrl: string, clientId: string, clientSecret: string);
+    constructor(envUrl: string, clientId: string, clientSecret: string, toolTimeoutMs?: number);
     private authenticateClient;
     /**
      * Authenticate with the code
@@ -44,8 +46,10 @@ export default class CoreClient {
      *
      * @param fn Function to execute
      * @param data Data to pass to the function
+     * @param options Optional per-call gRPC options (e.g. `timeoutMs`), forwarded to `fn` as-is.
+     *                Omit to use the transport's default deadline.
      * @returns {Promise<TResponse>} Returns the response
      */
-    connectExec<TRequest, TResponse>(fn: (request: TRequest) => Promise<TResponse>, data: TRequest): Promise<TResponse>;
+    connectExec<TRequest, TResponse>(fn: (request: TRequest, options?: CallOptions) => Promise<TResponse>, data: TRequest, options?: CallOptions): Promise<TResponse>;
     private _connectExec;
 }
