@@ -58,12 +58,18 @@ export interface ScalekitOptions {
    * Must be set below your infrastructure's backend timeout (e.g. GCP LB default
    * is 30 s) so the SDK deadline fires first and surfaces a clean DeadlineExceeded
    * error rather than a raw TCP abort. Defaults to 20000 (20 s).
+   *
+   * The deadline applies per attempt: automatic retries (Unauthenticated,
+   * Unavailable) each get a fresh deadline, so total wall time under retry
+   * can exceed this value.
    */
   timeoutMs?: number;
 
   /**
-   * gRPC call timeout in milliseconds for tool-execution RPCs
-   * (`tools.*`, `actions.*`).
+   * Call timeout in milliseconds for tool-execution calls:
+   * `tools.*`, `actions.executeTool`, and `actions.request`.
+   * (The connected-account methods under `actions.*` are control-plane
+   * operations and use `timeoutMs`.)
    *
    * These calls proxy to third-party provider APIs (e.g. Google Calendar, Slack)
    * and can legitimately run longer than typical control-plane calls, so they use

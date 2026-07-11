@@ -31,7 +31,7 @@ import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions,
  * @param {string} clientSecret - Your Scalekit client secret from the Scalekit Dashboard
  * @param {ScalekitOptions} [options] - Optional SDK configuration
  * @param {number} [options.timeoutMs=20000] - Timeout in ms for control-plane calls: gRPC RPCs (organizations, users, connections, etc) and the SDK's own HTTP calls (token endpoint, JWKS). Set below your infrastructure backend timeout (e.g. GCP LB = 30 s) so the SDK surfaces a clean error. Defaults to 20000.
- * @param {number} [options.toolTimeoutMs=60000] - gRPC call deadline in ms for tool-execution RPCs (`tools.*`, `actions.*`), which proxy to third-party provider APIs and can legitimately run longer. Defaults to 60000.
+ * @param {number} [options.toolTimeoutMs=60000] - Timeout in ms for tool-execution calls (`tools.*`, `actions.executeTool`, `actions.request`), which proxy to third-party provider APIs and can legitimately run longer. Connected-account methods under `actions.*` are control-plane operations and use `timeoutMs`. Defaults to 60000.
  *
  * @example
  * // Initialize the Scalekit client
