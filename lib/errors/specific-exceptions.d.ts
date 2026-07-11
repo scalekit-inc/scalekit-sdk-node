@@ -1,5 +1,5 @@
 import { ConnectError } from '@connectrpc/connect';
-import { AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { ScalekitServerException } from './base-exception';
 /**
  * Interface implemented by all tool exceptions.
@@ -52,6 +52,13 @@ export declare class ScalekitServiceUnavailableException extends ScalekitServerE
 }
 export declare class ScalekitGatewayTimeoutException extends ScalekitServerException {
     constructor(error: AxiosResponse | ConnectError);
+    static isAxiosTimeout(error: AxiosError): boolean;
+    /**
+     * An axios timeout carries no response, so it can't go through `promote`.
+     * Wrap it as a DeadlineExceeded ConnectError so HTTP timeouts surface as
+     * the same exception type as gRPC deadline expiry.
+     */
+    static fromAxiosTimeout(error: AxiosError): ScalekitGatewayTimeoutException;
 }
 export declare class ScalekitCancelledException extends ScalekitServerException {
     constructor(error: AxiosResponse | ConnectError);

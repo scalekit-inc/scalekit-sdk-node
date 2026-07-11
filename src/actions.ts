@@ -1,7 +1,11 @@
 import { create } from '@bufbuild/protobuf';
 import { AxiosError, AxiosResponse } from 'axios';
 import CoreClient from './core';
-import { ScalekitException, ScalekitServerException } from './errors';
+import {
+  ScalekitException,
+  ScalekitGatewayTimeoutException,
+  ScalekitServerException,
+} from './errors';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import {
@@ -393,6 +397,7 @@ export default class ActionsClient {
    *                         from the `ScalekitClient` constructor options (60000 by
    *                         default), since this proxies to a third-party API and can
    *                         legitimately run longer than a typical control-plane call.
+   * @throws {ScalekitGatewayTimeoutException} If the request exceeds the timeout.
    * @throws {ScalekitServerException} If a network or server error occurs.
    * @throws {ScalekitException} If required parameters are missing or an unexpected error occurs.
    */
@@ -453,6 +458,11 @@ export default class ActionsClient {
       if (error instanceof AxiosError) {
         if (error.response)
           throw ScalekitServerException.promote(error.response);
+        // Same exception type as a gRPC deadline expiry, so callers handle
+        // both timeout paths uniformly.
+        if (ScalekitGatewayTimeoutException.isAxiosTimeout(error)) {
+          throw ScalekitGatewayTimeoutException.fromAxiosTimeout(error);
+        }
         throw new ScalekitException(error);
       }
       throw new ScalekitException(error);

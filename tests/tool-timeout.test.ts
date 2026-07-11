@@ -12,6 +12,7 @@ import ToolsClient from '../src/tools';
 import ActionsClient from '../src/actions';
 import ConnectedAccountsClient from '../src/connected-accounts';
 import ScalekitClient from '../src/scalekit';
+import { ScalekitGatewayTimeoutException } from '../src/errors';
 
 function makeFakeToolServiceClient() {
   return {
@@ -279,4 +280,76 @@ describe('ActionsClient.request proxy timeout', () => {
       expect.objectContaining({ timeout: 5_000 })
     );
   });
+});
+
+describe('axios timeouts surface as ScalekitGatewayTimeoutException', () => {
+  function axiosTimeoutError() {
+    return new (require('axios').AxiosError)(
+      'timeout of 20000ms exceeded',
+      'ECONNABORTED'
+    );
+  }
+
+  it('connectExec maps a timed-out HTTP call without retrying', async () => {
+    const client = new CoreClient(
+      'https://test.scalekit.dev',
+      'client_id',
+      'client_secret'
+    );
+    const fn = jest.fn(async (_req: void, _options?: unknown) => {
+      throw axiosTimeoutError();
+    });
+
+    await expect(client.connectExec(fn, undefined as any)).rejects.toThrow(
+      ScalekitGatewayTimeoutException
+    );
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('actions.request maps a timed-out proxy call', async () => {
+    const { actions, requestSpy } = makeActionsClientForTimeout();
+    requestSpy.mockRejectedValue(axiosTimeoutError());
+
+    await expect(
+      actions.request({
+        connectionName: 'slack',
+        identifier: 'user@example.com',
+        path: '/chat.postMessage',
+      })
+    ).rejects.toThrow(ScalekitGatewayTimeoutException);
+  });
+
+  it('a non-timeout axios error without response stays a generic ScalekitException', async () => {
+    const client = new CoreClient(
+      'https://test.scalekit.dev',
+      'client_id',
+      'client_secret'
+    );
+    const fn = jest.fn(async (_req: void, _options?: unknown) => {
+      throw new (require('axios').AxiosError)('socket hang up', 'ECONNRESET');
+    });
+
+    await expect(
+      client.connectExec(fn, undefined as any)
+    ).rejects.not.toBeInstanceOf(ScalekitGatewayTimeoutException);
+  });
+
+  function makeActionsClientForTimeout() {
+    const coreClient = new CoreClient(
+      'https://test.scalekit.dev',
+      'client_id',
+      'client_secret'
+    );
+    const grpcConnect = {
+      createClient: () => makeFakeToolServiceClient(),
+    } as any;
+    const tools = new ToolsClient(grpcConnect, coreClient);
+    const connectedAccounts = new ConnectedAccountsClient(
+      grpcConnect,
+      coreClient
+    );
+    const actions = new ActionsClient(tools, connectedAccounts, coreClient);
+    const requestSpy = jest.spyOn(coreClient.axios, 'request');
+    return { actions, requestSpy };
+  }
 });

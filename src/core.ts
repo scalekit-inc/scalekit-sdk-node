@@ -24,6 +24,7 @@ import {
   ScalekitException,
   ScalekitServerException,
 } from './errors/base-exception';
+import { ScalekitGatewayTimeoutException } from './errors/specific-exceptions';
 import { ErrorInfoSchema } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
 
 export const headers = {
@@ -203,6 +204,11 @@ export default class CoreClient {
           }
           throw ScalekitServerException.promote(error.response);
         } else {
+          // A timed-out request has no response; surface it as the same
+          // exception type a gRPC deadline expiry produces.
+          if (ScalekitGatewayTimeoutException.isAxiosTimeout(error)) {
+            throw ScalekitGatewayTimeoutException.fromAxiosTimeout(error);
+          }
           throw new ScalekitException(error);
         }
       }

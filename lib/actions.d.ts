@@ -165,6 +165,7 @@ export default class ActionsClient {
      *                         from the `ScalekitClient` constructor options (60000 by
      *                         default), since this proxies to a third-party API and can
      *                         legitimately run longer than a typical control-plane call.
+     * @throws {ScalekitGatewayTimeoutException} If the request exceeds the timeout.
      * @throws {ScalekitServerException} If a network or server error occurs.
      * @throws {ScalekitException} If required parameters are missing or an unexpected error occurs.
      */
