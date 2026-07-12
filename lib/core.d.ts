@@ -17,6 +17,7 @@ export declare const headers: {
     authorization: string;
 };
 export declare const DEFAULT_TIMEOUT_MS = 20000;
+export declare function assertValidTimeout(name: string, value: number): void;
 export default class CoreClient {
     readonly envUrl: string;
     readonly clientId: string;

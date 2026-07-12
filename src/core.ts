@@ -44,7 +44,7 @@ export const DEFAULT_TIMEOUT_MS = 20_000;
 // but a transport defaultTimeoutMs of 0 as an immediately-expired deadline,
 // and axios treats 0 as "no timeout". Reject invalid values up front instead
 // of letting the same input pick a different semantic per path.
-function assertValidTimeout(name: string, value: number): void {
+export function assertValidTimeout(name: string, value: number): void {
   if (!Number.isFinite(value) || value <= 0) {
     throw new Error(
       `${name} must be a positive finite number of milliseconds, got ${value}`

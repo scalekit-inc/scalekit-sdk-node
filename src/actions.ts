@@ -1,6 +1,6 @@
 import { create } from '@bufbuild/protobuf';
 import { AxiosError, AxiosResponse } from 'axios';
-import CoreClient from './core';
+import CoreClient, { assertValidTimeout } from './core';
 import {
   ScalekitException,
   ScalekitGatewayTimeoutException,
@@ -436,6 +436,9 @@ export default class ActionsClient {
 
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
     const url = `${this.coreClient.envUrl.replace(/\/$/, '')}/proxy${normalizedPath}`;
+    if (timeoutMs !== undefined) {
+      assertValidTimeout('timeoutMs', timeoutMs);
+    }
     const timeout = timeoutMs ?? this.coreClient.toolTimeoutMs;
 
     const proxyHeaders: Record<string, string> = {

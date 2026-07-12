@@ -302,6 +302,23 @@ describe('ActionsClient.request proxy timeout', () => {
     expect(coreClient.toolTimeoutMs).toBe(45_000);
   });
 
+  it.each([0, -1, NaN, Infinity])(
+    'rejects an invalid per-call timeoutMs override (%p)',
+    async (value) => {
+      const { actions, requestSpy } = makeActionsClient();
+
+      await expect(
+        actions.request({
+          connectionName: 'slack',
+          identifier: 'user@example.com',
+          path: '/chat.postMessage',
+          timeoutMs: value,
+        })
+      ).rejects.toThrow(/timeoutMs must be a positive finite number/);
+      expect(requestSpy).not.toHaveBeenCalled();
+    }
+  );
+
   it('honors a per-call timeoutMs override', async () => {
     const { actions, requestSpy } = makeActionsClient();
 
