@@ -28,6 +28,7 @@ import {
   GrantType,
   LogoutUrlOptions,
   RefreshTokenResponse,
+  ScalekitOptions,
   TokenValidationOptions,
 } from './types/scalekit';
 import {
@@ -56,6 +57,9 @@ const WEBHOOK_SIGNATURE_VERSION = 'v1';
  * @param {string} envUrl - The Scalekit environment URL (e.g., "https://yourorg.scalekit.com" or your configured custom domain like "https://auth.yourapp.ai")
  * @param {string} clientId - Your Scalekit client ID from the Scalekit Dashboard
  * @param {string} clientSecret - Your Scalekit client secret from the Scalekit Dashboard
+ * @param {ScalekitOptions} [options] - Optional SDK configuration
+ * @param {number} [options.timeoutMs=20000] - Timeout in ms for control-plane calls: gRPC RPCs (organizations, users, connections, etc) and the SDK's own HTTP calls (token endpoint, JWKS). Set below your infrastructure backend timeout (e.g. GCP LB = 30 s) so the SDK surfaces a clean error. Defaults to 20000.
+ * @param {number} [options.toolTimeoutMs=60000] - Timeout in ms for tool-execution calls (`tools.*`, `actions.executeTool`, `actions.request`), which proxy to third-party provider APIs and can legitimately run longer. Connected-account methods under `actions.*` are control-plane operations and use `timeoutMs`. Defaults to 60000.
  *
  * @example
  * // Initialize the Scalekit client
@@ -92,8 +96,19 @@ export default class ScalekitClient {
   readonly tools: ToolsClient;
   readonly connectedAccounts: ConnectedAccountsClient;
   readonly actions: ActionsClient;
-  constructor(envUrl: string, clientId: string, clientSecret: string) {
-    this.coreClient = new CoreClient(envUrl, clientId, clientSecret);
+  constructor(
+    envUrl: string,
+    clientId: string,
+    clientSecret: string,
+    options?: ScalekitOptions
+  ) {
+    this.coreClient = new CoreClient(
+      envUrl,
+      clientId,
+      clientSecret,
+      options?.toolTimeoutMs,
+      options?.timeoutMs
+    );
     this.grpcConnect = new GrpcConnect(this.coreClient);
 
     this.organization = new OrganizationClient(

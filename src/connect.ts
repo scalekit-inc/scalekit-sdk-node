@@ -5,9 +5,13 @@ import CoreClient, { headers } from './core';
 
 export default class GrpcConnect {
   private transport: Transport;
-  constructor(private readonly coreClient: CoreClient) {
+  constructor(
+    private readonly coreClient: CoreClient,
+    timeoutMs: number = coreClient.timeoutMs
+  ) {
     this.transport = createGrpcTransport({
       baseUrl: this.coreClient.envUrl,
+      defaultTimeoutMs: timeoutMs,
       interceptors: [
         (next) => {
           return (req) => {

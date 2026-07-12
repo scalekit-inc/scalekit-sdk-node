@@ -1,7 +1,11 @@
 import { create } from '@bufbuild/protobuf';
 import { AxiosError, AxiosResponse } from 'axios';
-import CoreClient from './core';
-import { ScalekitException, ScalekitServerException } from './errors';
+import CoreClient, { assertValidTimeout } from './core';
+import {
+  ScalekitException,
+  ScalekitGatewayTimeoutException,
+  ScalekitServerException,
+} from './errors';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import {
@@ -389,6 +393,11 @@ export default class ActionsClient {
   /**
    * Make a proxied REST API call on behalf of a connected account.
    *
+   * @param params.timeoutMs Per-call request timeout in ms. Defaults to `toolTimeoutMs`
+   *                         from the `ScalekitClient` constructor options (60000 by
+   *                         default), since this proxies to a third-party API and can
+   *                         legitimately run longer than a typical control-plane call.
+   * @throws {ScalekitGatewayTimeoutException} If the request exceeds the timeout.
    * @throws {ScalekitServerException} If a network or server error occurs.
    * @throws {ScalekitException} If required parameters are missing or an unexpected error occurs.
    */
@@ -427,7 +436,10 @@ export default class ActionsClient {
 
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
     const url = `${this.coreClient.envUrl.replace(/\/$/, '')}/proxy${normalizedPath}`;
-    const timeout = timeoutMs ?? 30_000;
+    if (timeoutMs !== undefined) {
+      assertValidTimeout('timeoutMs', timeoutMs);
+    }
+    const timeout = timeoutMs ?? this.coreClient.toolTimeoutMs;
 
     const proxyHeaders: Record<string, string> = {
       ...(headers ?? {}),
@@ -449,6 +461,11 @@ export default class ActionsClient {
       if (error instanceof AxiosError) {
         if (error.response)
           throw ScalekitServerException.promote(error.response);
+        // Same exception type as a gRPC deadline expiry, so callers handle
+        // both timeout paths uniformly.
+        if (ScalekitGatewayTimeoutException.isAxiosTimeout(error)) {
+          throw ScalekitGatewayTimeoutException.fromAxiosTimeout(error);
+        }
         throw new ScalekitException(error);
       }
       throw new ScalekitException(error);
