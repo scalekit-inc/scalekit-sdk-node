@@ -9,6 +9,7 @@ import {
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
+import type { Timestamp } from '@bufbuild/protobuf/wkt';
 import {
   ConnectionStatus,
   ConnectionType,
@@ -16,13 +17,11 @@ import {
 } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 
 /**
- * A protobuf Timestamp as returned by the API, passed through unchanged.
- * `seconds` is an int64 and therefore a `bigint` in JS.
+ * Creation timestamp for an app connection, re-exported as the protobuf
+ * well-known `Timestamp` type. Passed through from the API unchanged
+ * (`seconds` is an int64 and therefore a `bigint` in JS).
  */
-export interface AppConnectionTimestamp {
-  seconds: bigint;
-  nanos: number;
-}
+export type AppConnectionTimestamp = Timestamp;
 
 /**
  * Normalized, consumer-friendly view of an app connection returned by
@@ -68,12 +67,7 @@ function mapAppConnection(connection: ListConnection): AppConnection {
     enabled: connection.enabled,
     provider: connection.providerKey,
     connectionName: connection.keyId,
-    createdAt: connection.createdAt
-      ? {
-          seconds: connection.createdAt.seconds,
-          nanos: connection.createdAt.nanos,
-        }
-      : undefined,
+    createdAt: connection.createdAt,
   };
 }
 import {

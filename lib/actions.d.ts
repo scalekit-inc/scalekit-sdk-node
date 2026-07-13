@@ -3,14 +3,13 @@ import CoreClient from './core';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
+import type { Timestamp } from '@bufbuild/protobuf/wkt';
 /**
- * A protobuf Timestamp as returned by the API, passed through unchanged.
- * `seconds` is an int64 and therefore a `bigint` in JS.
+ * Creation timestamp for an app connection, re-exported as the protobuf
+ * well-known `Timestamp` type. Passed through from the API unchanged
+ * (`seconds` is an int64 and therefore a `bigint` in JS).
  */
-export interface AppConnectionTimestamp {
-    seconds: bigint;
-    nanos: number;
-}
+export type AppConnectionTimestamp = Timestamp;
 /**
  * Normalized, consumer-friendly view of an app connection returned by
  * {@link ActionsClient.listAppConnections}. Internal proto fields
