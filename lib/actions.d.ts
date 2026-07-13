@@ -2,6 +2,45 @@ import { AxiosResponse } from 'axios';
 import CoreClient from './core';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
+import ConnectionClient from './connection';
+/**
+ * A protobuf Timestamp as returned by the API, passed through unchanged.
+ * `seconds` is an int64 and therefore a `bigint` in JS.
+ */
+export interface AppConnectionTimestamp {
+    seconds: bigint;
+    nanos: number;
+}
+/**
+ * Normalized, consumer-friendly view of an app connection returned by
+ * {@link ActionsClient.listAppConnections}. Internal proto fields
+ * (`provider` enum, `organizationId`, `uiButtonTitle`, `organizationName`,
+ * `domains`, `$typeName`) are omitted, and enum fields are decoded to their
+ * string names.
+ */
+export interface AppConnection {
+    /** Unique connection identifier (format: "conn_..."). */
+    id: string;
+    /** Connection type, decoded from the ConnectionType enum (e.g. "OAUTH", "SAML"). */
+    type: string;
+    /** Connection status, decoded from the ConnectionStatus enum (e.g. "COMPLETED", "DRAFT"). */
+    status: string;
+    /** Whether the connection is enabled. */
+    enabled: boolean;
+    /** Provider key for the connection (e.g. "SALESFORCE", "GMAIL"). */
+    provider: string;
+    /** Human-readable connection name / key identifier (e.g. "salesforce-ubB7gpKc"). */
+    connectionName: string;
+    /** Creation timestamp, passed through as a protobuf Timestamp. */
+    createdAt?: AppConnectionTimestamp;
+}
+/** Normalized response returned by {@link ActionsClient.listAppConnections}. */
+export interface ListAppConnectionsResult {
+    connections: AppConnection[];
+    nextPageToken: string;
+    prevPageToken: string;
+    totalSize: number;
+}
 import { CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
@@ -13,7 +52,14 @@ export default class ActionsClient {
     private readonly tools;
     private readonly connectedAccounts;
     private readonly coreClient;
-    constructor(tools: ToolsClient, connectedAccounts: ConnectedAccountsClient, coreClient: CoreClient);
+    private readonly connection;
+    /**
+     * @param {ToolsClient} tools - Client used to execute tools on behalf of connected accounts.
+     * @param {ConnectedAccountsClient} connectedAccounts - Client for connected-account lifecycle operations.
+     * @param {CoreClient} coreClient - Shared core client (auth, HTTP, retries) used for proxied requests.
+     * @param {ConnectionClient} connection - Client used to list app-level connections.
+     */
+    constructor(tools: ToolsClient, connectedAccounts: ConnectedAccountsClient, coreClient: CoreClient, connection: ConnectionClient);
     /**
      * Execute a tool on behalf of a connected account.
      *
@@ -74,6 +120,27 @@ export default class ActionsClient {
         pageToken?: string;
         query?: string;
     }): Promise<ListConnectedAccountsResponse>;
+    /**
+     * List app-level connections with optional pagination and provider filtering.
+     *
+     * Delegates to {@link ConnectionClient.listAppConnections} and returns a
+     * normalized {@link ListAppConnectionsResult}: internal proto fields are
+     * dropped and enum fields are decoded to strings. These are the connections
+     * defined at the application level (e.g. tool/provider integrations), not the
+     * SSO connections scoped to a specific organization.
+     *
+     * @param {object} [params] - Optional pagination and filtering parameters
+     * @param {number} [params.pageSize] - Maximum number of connections to return per page (max 30)
+     * @param {string} [params.pageToken] - Token identifying the page of results to return
+     * @param {string} [params.provider] - Filter by provider key (case-sensitive, e.g. "SALESFORCE", "GMAIL")
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    listConnections(params?: {
+        pageSize?: number;
+        pageToken?: string;
+        provider?: string;
+    }): Promise<ListAppConnectionsResult>;
     /**
      * Delete a connected account.
      * Requires either `connectedAccountId` or both `connectionName` + `identifier`.

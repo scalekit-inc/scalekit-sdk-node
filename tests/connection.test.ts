@@ -47,6 +47,28 @@ describe('Connections', () => {
     });
   });
 
+  describe('listAppConnections', () => {
+    it('should list app-level connections with pagination metadata', async () => {
+      const response = await client.connection.listAppConnections();
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.connections)).toBe(true);
+      expect(typeof response.totalSize).toBe('number');
+      expect(typeof response.nextPageToken).toBe('string');
+      expect(typeof response.prevPageToken).toBe('string');
+    });
+
+    it('should respect the pageSize parameter', async () => {
+      const response = await client.connection.listAppConnections({
+        pageSize: 1,
+      });
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.connections)).toBe(true);
+      expect(response.connections.length).toBeLessThanOrEqual(1);
+    });
+  });
+
   describe('createConnection', () => {
     it('should create a new SSO connection for an organization', async () => {
       const response = await client.connection.createConnection(

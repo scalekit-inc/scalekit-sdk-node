@@ -2,7 +2,7 @@ import { MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateConnection, CreateConnectionResponse, GetConnectionResponse, ToggleConnectionResponse, ListConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
+import { CreateConnection, CreateConnectionResponse, GetConnectionResponse, ToggleConnectionResponse, ListConnectionsResponse, ListAppConnectionsResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 /**
  * Client for managing enterprise SSO connections for organizations.
  *
@@ -162,6 +162,50 @@ export default class ConnectionClient {
      * @see {@link disableConnection} - Disable a connection
      */
     listConnections(organizationId: string): Promise<ListConnectionsResponse>;
+    /**
+     * Lists app-level connections configured for the account (not scoped to an organization).
+     *
+     * Unlike {@link listConnections}, which returns the SSO connections for a specific
+     * organization, this method returns the connections defined at the application level.
+     * Results are paginated and can optionally be filtered by provider.
+     *
+     * @param {object} [params] - Optional pagination and filtering parameters
+     * @param {number} [params.pageSize] - Maximum number of connections to return per page
+     * @param {string} [params.pageToken] - Token identifying the page of results to return
+     * @param {string} [params.provider] - Filter results to a specific provider (e.g., "okta", "google")
+     *
+     * @returns {Promise<ListAppConnectionsResponse>} Response containing:
+     *   - connections: Array of connection objects
+     *   - nextPageToken: Token for retrieving the next page of results (empty if none)
+     *   - prevPageToken: Token for retrieving the previous page of results (empty if none)
+     *   - totalSize: Total number of connections matching the query
+     *
+     * @example
+     * // List all app connections
+     * const response = await scalekitClient.connection.listAppConnections();
+     * console.log(`Found ${response.totalSize} app connections`);
+     *
+     * @example
+     * // Paginate through app connections for a specific provider
+     * let pageToken: string | undefined;
+     * do {
+     *   const response = await scalekitClient.connection.listAppConnections({
+     *     pageSize: 20,
+     *     pageToken,
+     *     provider: 'okta',
+     *   });
+     *   response.connections.forEach(conn => console.log(conn.id));
+     *   pageToken = response.nextPageToken || undefined;
+     * } while (pageToken);
+     *
+     * @see {@link https://docs.scalekit.com/apis/#tag/connections | Connections API}
+     * @see {@link listConnections} - List connections for a specific organization
+     */
+    listAppConnections(params?: {
+        pageSize?: number;
+        pageToken?: string;
+        provider?: string;
+    }): Promise<ListAppConnectionsResponse>;
     /**
      * Enables an SSO connection for an organization.
      *
