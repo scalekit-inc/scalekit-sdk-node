@@ -66,7 +66,8 @@ export default class ToolsClient {
         }),
         ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
         ...(options?.pageToken && { pageToken: options.pageToken }),
-      })
+      }),
+      { timeoutMs: this.coreClient.toolTimeoutMs }
     );
   }
 
@@ -96,7 +97,8 @@ export default class ToolsClient {
         filter: create(ScopedToolFilterSchema, options.filter),
         ...(options.pageSize !== undefined && { pageSize: options.pageSize }),
         ...(options.pageToken && { pageToken: options.pageToken }),
-      })
+      }),
+      { timeoutMs: this.coreClient.toolTimeoutMs }
     );
   }
 
@@ -127,7 +129,8 @@ export default class ToolsClient {
         identifier,
         ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
         ...(options?.pageToken && { pageToken: options.pageToken }),
-      })
+      }),
+      { timeoutMs: this.coreClient.toolTimeoutMs }
     );
   }
 
@@ -167,14 +170,18 @@ export default class ToolsClient {
       userId,
     } = params;
 
-    return this.coreClient.connectExec(this.client.executeTool, {
-      toolName,
-      ...(identifier && { identifier }),
-      ...(toolParams && { params: toolParams as JsonObject }),
-      ...(connectedAccountId && { connectedAccountId }),
-      ...(connector && { connector }),
-      ...(organizationId && { organizationId }),
-      ...(userId && { userId }),
-    });
+    return this.coreClient.connectExec(
+      this.client.executeTool,
+      {
+        toolName,
+        ...(identifier && { identifier }),
+        ...(toolParams && { params: toolParams as JsonObject }),
+        ...(connectedAccountId && { connectedAccountId }),
+        ...(connector && { connector }),
+        ...(organizationId && { organizationId }),
+        ...(userId && { userId }),
+      },
+      { timeoutMs: this.coreClient.toolTimeoutMs }
+    );
   }
 }

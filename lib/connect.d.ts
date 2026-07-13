@@ -4,6 +4,6 @@ import CoreClient from './core';
 export default class GrpcConnect {
     private readonly coreClient;
     private transport;
-    constructor(coreClient: CoreClient);
+    constructor(coreClient: CoreClient, timeoutMs?: number);
     createClient<T extends DescService>(service: T): Client<T>;
 }
