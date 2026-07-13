@@ -97,6 +97,12 @@ import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
  * without changing their behavior.
  */
 export default class ActionsClient {
+  /**
+   * @param {ToolsClient} tools - Client used to execute tools on behalf of connected accounts.
+   * @param {ConnectedAccountsClient} connectedAccounts - Client for connected-account lifecycle operations.
+   * @param {CoreClient} coreClient - Shared core client (auth, HTTP, retries) used for proxied requests.
+   * @param {ConnectionClient} connection - Client used to list app-level connections.
+   */
   constructor(
     private readonly tools: ToolsClient,
     private readonly connectedAccounts: ConnectedAccountsClient,

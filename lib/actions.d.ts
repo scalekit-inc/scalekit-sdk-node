@@ -53,6 +53,12 @@ export default class ActionsClient {
     private readonly connectedAccounts;
     private readonly coreClient;
     private readonly connection;
+    /**
+     * @param {ToolsClient} tools - Client used to execute tools on behalf of connected accounts.
+     * @param {ConnectedAccountsClient} connectedAccounts - Client for connected-account lifecycle operations.
+     * @param {CoreClient} coreClient - Shared core client (auth, HTTP, retries) used for proxied requests.
+     * @param {ConnectionClient} connection - Client used to list app-level connections.
+     */
     constructor(tools: ToolsClient, connectedAccounts: ConnectedAccountsClient, coreClient: CoreClient, connection: ConnectionClient);
     /**
      * Execute a tool on behalf of a connected account.
