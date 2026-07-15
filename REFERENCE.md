@@ -4,6 +4,7 @@
 - [ScalekitClient](#scalekitclient)
 - [Organizations](#organizations)
 - [Connections](#connections)
+- [Actions](#actions)
 - [Domains](#domains)
 - [Directories](#directories)
 - [Users & Memberships](#users--memberships)
@@ -827,6 +828,365 @@ await scalekitClient.connection.disableConnection('conn_123');
 **Returns**: `Promise<MessageShape<typeof EmptySchema>>` - Empty on success.
 
 **Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+</details>
+
+## Actions
+
+<details>
+<summary><strong>Actions</strong> - Agent actions: execute tools, manage connected accounts, and list app connections</summary>
+
+Access via `scalekitClient.actions`. This namespace composes the tools and connected-accounts clients and exposes a consumer-friendly surface for AgentKit workflows. Input params use friendly names (e.g. `connectionName`) that are mapped to the underlying request fields.
+
+<details>
+<summary><code>actions.listConnections(options?) -> Promise&lt;ListAppConnectionsResult&gt;</code></summary>
+
+#### 📝 Description
+Lists app-level connections (tool/provider integrations) with pagination and optional provider filtering. Returns a normalized shape: `providerKey` is exposed as `provider`, `keyId` as `connectionName`, and `type`/`status` are decoded from their protobuf enums to string names (e.g. `"OAUTH"`, `"COMPLETED"`). This is distinct from `connection.listConnections`, which lists SSO connections scoped to an organization.
+
+#### 🔌 Usage
+```typescript
+// List app connections
+const res = await scalekitClient.actions.listConnections({ pageSize: 20 });
+res.connections.forEach((c) =>
+  console.log(c.provider, c.connectionName, c.status)
+);
+
+// Filter by provider key (case-sensitive, e.g. "SALESFORCE", "GMAIL")
+const salesforce = await scalekitClient.actions.listConnections({
+  provider: 'SALESFORCE',
+});
+
+// Paginate through all results
+let pageToken: string | undefined;
+const all = [];
+do {
+  const page = await scalekitClient.actions.listConnections({ pageSize: 30, pageToken });
+  all.push(...page.connections);
+  pageToken = page.nextPageToken || undefined;
+} while (pageToken);
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| options | `{ pageSize?: number; pageToken?: string; provider?: string }` | No | `pageSize` max 30; `provider` filters on the case-sensitive provider key (not the enum name) |
+
+**Returns**: `Promise<ListAppConnectionsResult>` - `{ connections: AppConnection[]; nextPageToken: string; prevPageToken: string; totalSize: number }`, where each `AppConnection` is `{ id, type, status, enabled, provider, connectionName, createdAt? }`.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.executeTool(params) -> Promise&lt;ExecuteToolResponse&gt;</code></summary>
+
+#### 📝 Description
+Executes a tool on behalf of a connected account.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.executeTool({
+  toolName: 'gmail_fetch_mails',
+  toolInput: { max_results: 5 },
+  identifier: 'default',
+  connector: 'GMAIL',
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params.toolName | `string` | Yes | Name of the tool to execute |
+| params.toolInput | `Record<string, unknown>` | Yes | Input payload passed to the tool |
+| params.identifier | `string` | No | Connected-account identifier |
+| params.connectedAccountId | `string` | No | Connected-account ID |
+| params.connector | `string` | No | Connector / connection name |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+
+**Returns**: `Promise<ExecuteToolResponse>` - Execution result including `executionId` and `data`.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.request(params) -> Promise&lt;AxiosResponse&gt;</code></summary>
+
+#### 📝 Description
+Makes a proxied REST API call on behalf of a connected account.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.request({
+  connectionName: 'GMAIL',
+  identifier: 'default',
+  path: '/gmail/v1/users/me/profile',
+  method: 'GET',
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params.connectionName | `string` | Yes | Connector / connection name |
+| params.identifier | `string` | Yes | Connected-account identifier |
+| params.path | `string` | Yes | Provider API path (leading `/` optional) |
+| params.method | `string` | No | HTTP method (defaults to `GET`) |
+| params.queryParams | `Record<string, unknown>` | No | Query string parameters |
+| params.body | `unknown` | No | Request body |
+| params.formData | `Record<string, unknown>` | No | Form-encoded body |
+| params.headers | `Record<string, string>` | No | Additional request headers |
+| params.timeoutMs | `number` | No | Per-call timeout (defaults to 30000) |
+
+**Returns**: `Promise<AxiosResponse>` - The raw proxied HTTP response.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.getAuthorizationLink(params) -> Promise&lt;GetMagicLinkForConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Gets an authorization magic link for a connected account.
+
+#### 🔌 Usage
+```typescript
+const { link } = await scalekitClient.actions.getAuthorizationLink({
+  connectionName: 'GMAIL',
+  identifier: 'default',
+  state: 'csrf-token',
+  userVerifyUrl: 'https://yourapp.com/auth/callback',
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params.connectionName | `string` | No | Connector / connection name |
+| params.identifier | `string` | No | Connected-account identifier |
+| params.connectedAccountId | `string` | No | Connected-account ID |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.state | `string` | No | Opaque state echoed back on callback |
+| params.userVerifyUrl | `string` | No | Redirect URL after authorization |
+
+**Returns**: `Promise<GetMagicLinkForConnectedAccountResponse>` - Contains the authorization `link`.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.verifyConnectedAccountUser(params) -> Promise&lt;VerifyConnectedAccountUserResponse&gt;</code></summary>
+
+#### 📝 Description
+Verifies the connected-account user after the OAuth callback, activating the account once the asserted identifier is confirmed.
+
+#### 🔌 Usage
+```typescript
+await scalekitClient.actions.verifyConnectedAccountUser({
+  authRequestId: 'req_123',
+  identifier: 'user_123',
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params.authRequestId | `string` | Yes | Auth request ID from the user-verify redirect URL |
+| params.identifier | `string` | Yes | The current user's identifier |
+
+**Returns**: `Promise<VerifyConnectedAccountUserResponse>`
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.listConnectedAccounts(options?) -> Promise&lt;ListConnectedAccountsResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists connected accounts with optional filters.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.listConnectedAccounts({
+  connectionName: 'GMAIL',
+  pageSize: 20,
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| options.connectionName | `string` | No | Connector / connection name |
+| options.identifier | `string` | No | Connected-account identifier |
+| options.provider | `string` | No | Provider filter |
+| options.organizationId | `string` | No | Organization ID |
+| options.userId | `string` | No | User ID |
+| options.pageSize | `number` | No | Page size |
+| options.pageToken | `string` | No | Pagination cursor |
+| options.query | `string` | No | Free-text query |
+
+**Returns**: `Promise<ListConnectedAccountsResponse>` - Paginated connected accounts.
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.getConnectedAccount(params) -> Promise&lt;GetConnectedAccountByIdentifierResponse&gt;</code></summary>
+
+#### 📝 Description
+Gets a connected account. Requires either `connectedAccountId` or both `connectionName` + `identifier`.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.getConnectedAccount({
+  connectionName: 'GMAIL',
+  identifier: 'default',
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params.connectionName | `string` | Conditional | Connector name (with `identifier`) |
+| params.identifier | `string` | Conditional | Connected-account identifier (with `connectionName`) |
+| params.connectedAccountId | `string` | Conditional | Connected-account ID (alternative to name + identifier) |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+
+**Returns**: `Promise<GetConnectedAccountByIdentifierResponse>`
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.createConnectedAccount(params) -> Promise&lt;CreateConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Creates a new connected account.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.createConnectedAccount({
+  connectionName: 'GMAIL',
+  identifier: 'user_123',
+  authorizationDetails,
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params.connectionName | `string` | Yes | Connector / connection name |
+| params.identifier | `string` | Yes | Connected-account identifier |
+| params.authorizationDetails | `CreateConnectedAccount['authorizationDetails']` | Yes | Authorization details (e.g. OAuth token, static auth) |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.apiConfig | `Record<string, unknown>` | No | Provider-specific API configuration |
+
+**Returns**: `Promise<CreateConnectedAccountResponse>`
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.getOrCreateConnectedAccount(params) -> Promise&lt;CreateConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Gets an existing connected account or creates one if it doesn't exist. Also available as `actions.upsertConnectedAccount` (alias with upsert semantics).
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.getOrCreateConnectedAccount({
+  connectionName: 'GMAIL',
+  identifier: 'user_123',
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params.connectionName | `string` | Yes | Connector / connection name |
+| params.identifier | `string` | Yes | Connected-account identifier |
+| params.authorizationDetails | `CreateConnectedAccount['authorizationDetails']` | No | Authorization details |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+| params.apiConfig | `Record<string, unknown>` | No | Provider-specific API configuration |
+
+**Returns**: `Promise<CreateConnectedAccountResponse>`
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.updateConnectedAccount(params) -> Promise&lt;UpdateConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Updates an existing connected account. Requires either `connectedAccountId` or both `connectionName` + `identifier`.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.actions.updateConnectedAccount({
+  connectionName: 'GMAIL',
+  identifier: 'user_123',
+  authorizationDetails,
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params.connectionName | `string` | Conditional | Connector name (with `identifier`) |
+| params.identifier | `string` | Conditional | Connected-account identifier (with `connectionName`) |
+| params.connectedAccountId | `string` | Conditional | Connected-account ID (alternative to name + identifier) |
+| params.authorizationDetails | `UpdateConnectedAccount['authorizationDetails']` | No | Updated authorization details |
+| params.apiConfig | `UpdateConnectedAccount['apiConfig']` | No | Updated provider-specific API configuration |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+
+**Returns**: `Promise<UpdateConnectedAccountResponse>`
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
+
+</details>
+
+<details>
+<summary><code>actions.deleteConnectedAccount(params) -> Promise&lt;DeleteConnectedAccountResponse&gt;</code></summary>
+
+#### 📝 Description
+Deletes a connected account. Requires either `connectedAccountId` or both `connectionName` + `identifier`.
+
+#### 🔌 Usage
+```typescript
+await scalekitClient.actions.deleteConnectedAccount({
+  connectionName: 'GMAIL',
+  identifier: 'user_123',
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params.connectionName | `string` | Conditional | Connector name (with `identifier`) |
+| params.identifier | `string` | Conditional | Connected-account identifier (with `connectionName`) |
+| params.connectedAccountId | `string` | Conditional | Connected-account ID (alternative to name + identifier) |
+| params.organizationId | `string` | No | Organization ID |
+| params.userId | `string` | No | User ID |
+
+**Returns**: `Promise<DeleteConnectedAccountResponse>`
+
+**Source**: [src/actions.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts)
 
 </details>
 
