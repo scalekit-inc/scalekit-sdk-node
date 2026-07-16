@@ -268,6 +268,10 @@ export type Connection = Message<"scalekit.v1.connections.Connection"> & {
      * @generated from field: repeated scalekit.v1.domains.Domain domains = 24;
      */
     domains: Domain[];
+    /**
+     * @generated from field: optional string mcp_server_url = 29;
+     */
+    mcpServerUrl?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.Connection.
@@ -601,6 +605,10 @@ export type ListConnection = Message<"scalekit.v1.connections.ListConnection"> &
      * @generated from field: google.protobuf.Timestamp created_at = 12;
      */
     createdAt?: Timestamp | undefined;
+    /**
+     * @generated from field: string mcp_server_url = 13;
+     */
+    mcpServerUrl: string;
 };
 /**
  * Describes the message scalekit.v1.connections.ListConnection.
@@ -919,12 +927,65 @@ export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnec
      * @generated from field: optional scalekit.v1.connections.OptionalScopes optional_scopes = 23;
      */
     optionalScopes?: OptionalScopes | undefined;
+    /**
+     * @generated from field: optional scalekit.v1.connections.OauthExtensions extensions = 24;
+     */
+    extensions?: OauthExtensions | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.OAuthConnectionConfig.
  * Use `create(OAuthConnectionConfigSchema)` to create a new message.
  */
 export declare const OAuthConnectionConfigSchema: GenMessage<OAuthConnectionConfig>;
+/**
+ * OauthExtensions groups OAuth extension-profile configuration for a connection.
+ * Significant profiles (e.g. SMART on FHIR) get a typed sub-message; the long tail
+ * of one-off authorize parameters uses extra_authorize_params.
+ *
+ * @generated from message scalekit.v1.connections.OauthExtensions
+ */
+export type OauthExtensions = Message<"scalekit.v1.connections.OauthExtensions"> & {
+    /**
+     * @generated from field: optional scalekit.v1.connections.SmartConfig smart = 1;
+     */
+    smart?: SmartConfig | undefined;
+    /**
+     * Additional provider-specific query parameters appended verbatim to the
+     * authorization request. Reserved OAuth/OIDC parameters and parameters owned
+     * by typed configuration are rejected. Use this only for parameters that do
+     * not have a dedicated field.
+     *
+     * @generated from field: map<string, string> extra_authorize_params = 2;
+     */
+    extraAuthorizeParams: {
+        [key: string]: string;
+    };
+};
+/**
+ * Describes the message scalekit.v1.connections.OauthExtensions.
+ * Use `create(OauthExtensionsSchema)` to create a new message.
+ */
+export declare const OauthExtensionsSchema: GenMessage<OauthExtensions>;
+/**
+ * SmartConfig holds SMART on FHIR (SMART App Launch) parameters.
+ *
+ * @generated from message scalekit.v1.connections.SmartConfig
+ */
+export type SmartConfig = Message<"scalekit.v1.connections.SmartConfig"> & {
+    /**
+     * @generated from field: string aud = 1;
+     */
+    aud: string;
+    /**
+     * @generated from field: string domain = 2;
+     */
+    domain: string;
+};
+/**
+ * Describes the message scalekit.v1.connections.SmartConfig.
+ * Use `create(SmartConfigSchema)` to create a new message.
+ */
+export declare const SmartConfigSchema: GenMessage<SmartConfig>;
 /**
  * @generated from message scalekit.v1.connections.OptionalScopes
  */
@@ -2062,7 +2123,19 @@ export declare enum ConnectionType {
     /**
      * @generated from enum value: GOOGLE_DWD = 12;
      */
-    GOOGLE_DWD = 12
+    GOOGLE_DWD = 12,
+    /**
+     * @generated from enum value: TRUSTED_IDP = 13;
+     */
+    TRUSTED_IDP = 13,
+    /**
+     * @generated from enum value: SMART_FHIR = 14;
+     */
+    SMART_FHIR = 14,
+    /**
+     * @generated from enum value: NO_AUTH = 15;
+     */
+    NO_AUTH = 15
 }
 /**
  * Describes the enum scalekit.v1.connections.ConnectionType.

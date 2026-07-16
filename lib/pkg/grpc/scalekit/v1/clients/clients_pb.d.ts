@@ -72,6 +72,10 @@ export type CreateResource = Message<"scalekit.v1.clients.CreateResource"> & {
      */
     intersectScopesUserPermission: boolean;
     /**
+     * @generated from field: bool enable_cimd = 13;
+     */
+    enableCimd: boolean;
+    /**
      *
      * string tos_uri = 10 [
      * (buf.validate.field).string = {max_len: 512},
@@ -89,9 +93,9 @@ export type CreateResource = Message<"scalekit.v1.clients.CreateResource"> & {
      * }
      * ];
      *
-     * @generated from field: bool enable_cimd = 13;
+     * @generated from field: bool xaa_enabled = 14;
      */
-    enableCimd: boolean;
+    xaaEnabled: boolean;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateResource.
@@ -350,6 +354,10 @@ export type Resource = Message<"scalekit.v1.clients.Resource"> & {
      * @generated from field: bool enable_cimd = 20;
      */
     enableCimd: boolean;
+    /**
+     * @generated from field: bool xaa_enabled = 21;
+     */
+    xaaEnabled: boolean;
 };
 /**
  * Describes the message scalekit.v1.clients.Resource.
@@ -619,6 +627,10 @@ export type UpdateResource = Message<"scalekit.v1.clients.UpdateResource"> & {
      * @generated from field: google.protobuf.BoolValue enable_cimd = 15;
      */
     enableCimd?: boolean | undefined;
+    /**
+     * @generated from field: google.protobuf.BoolValue xaa_enabled = 16;
+     */
+    xaaEnabled?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateResource.
@@ -825,6 +837,77 @@ export type ListResourceUserConsentsResponse = Message<"scalekit.v1.clients.List
  * Use `create(ListResourceUserConsentsResponseSchema)` to create a new message.
  */
 export declare const ListResourceUserConsentsResponseSchema: GenMessage<ListResourceUserConsentsResponse>;
+/**
+ * Phase 2 — SESSION_USER variant. No resource_id (server resolves the
+ * Gateway resource from the env's gateway_configurations); no search
+ * (filtered to the calling user already). Pagination only.
+ *
+ * @generated from message scalekit.v1.clients.ListCurrentAgentConsentsRequest
+ */
+export type ListCurrentAgentConsentsRequest = Message<"scalekit.v1.clients.ListCurrentAgentConsentsRequest"> & {
+    /**
+     * @generated from field: uint32 page_size = 1;
+     */
+    pageSize: number;
+    /**
+     * @generated from field: string page_token = 2;
+     */
+    pageToken: string;
+};
+/**
+ * Describes the message scalekit.v1.clients.ListCurrentAgentConsentsRequest.
+ * Use `create(ListCurrentAgentConsentsRequestSchema)` to create a new message.
+ */
+export declare const ListCurrentAgentConsentsRequestSchema: GenMessage<ListCurrentAgentConsentsRequest>;
+/**
+ * @generated from message scalekit.v1.clients.ListCurrentAgentConsentsResponse
+ */
+export type ListCurrentAgentConsentsResponse = Message<"scalekit.v1.clients.ListCurrentAgentConsentsResponse"> & {
+    /**
+     * @generated from field: uint32 total_size = 1;
+     */
+    totalSize: number;
+    /**
+     * @generated from field: string next_page_token = 2;
+     */
+    nextPageToken: string;
+    /**
+     * @generated from field: string prev_page_token = 3;
+     */
+    prevPageToken: string;
+    /**
+     * @generated from field: repeated scalekit.v1.clients.ResourceUserConsent consents = 4;
+     */
+    consents: ResourceUserConsent[];
+};
+/**
+ * Describes the message scalekit.v1.clients.ListCurrentAgentConsentsResponse.
+ * Use `create(ListCurrentAgentConsentsResponseSchema)` to create a new message.
+ */
+export declare const ListCurrentAgentConsentsResponseSchema: GenMessage<ListCurrentAgentConsentsResponse>;
+/**
+ * @generated from message scalekit.v1.clients.RevokeCurrentAgentConsentRequest
+ */
+export type RevokeCurrentAgentConsentRequest = Message<"scalekit.v1.clients.RevokeCurrentAgentConsentRequest"> & {
+    /**
+     * @generated from field: string consent_id = 1;
+     */
+    consentId: string;
+};
+/**
+ * Describes the message scalekit.v1.clients.RevokeCurrentAgentConsentRequest.
+ * Use `create(RevokeCurrentAgentConsentRequestSchema)` to create a new message.
+ */
+export declare const RevokeCurrentAgentConsentRequestSchema: GenMessage<RevokeCurrentAgentConsentRequest>;
+/**
+ * @generated from message scalekit.v1.clients.RevokeCurrentAgentConsentResponse
+ */
+export type RevokeCurrentAgentConsentResponse = Message<"scalekit.v1.clients.RevokeCurrentAgentConsentResponse"> & {};
+/**
+ * Describes the message scalekit.v1.clients.RevokeCurrentAgentConsentResponse.
+ * Use `create(RevokeCurrentAgentConsentResponseSchema)` to create a new message.
+ */
+export declare const RevokeCurrentAgentConsentResponseSchema: GenMessage<RevokeCurrentAgentConsentResponse>;
 /**
  * @generated from message scalekit.v1.clients.ResourceUserConsent
  */
@@ -2516,6 +2599,38 @@ export declare const ClientService: GenService<{
         methodKind: "unary";
         input: typeof ListResourceClientsRequestSchema;
         output: typeof ListResourceClientsResponseSchema;
+    };
+    /**
+     * Phase 2 — SESSION_USER-authed counterpart for the /ui end-user
+     * surface. Resolves the Gateway resource from the env's
+     * gateway_configurations.application_id automatically; external_user_id
+     * is forced from the session, so the caller cannot list another user's
+     * consents. Shape mirrors ListResourceUserConsentsResponse so the
+     * frontend's consent-list consumer doesn't need to branch on mode.
+     *
+     * @generated from rpc scalekit.v1.clients.ClientService.ListCurrentAgentConsents
+     */
+    listCurrentAgentConsents: {
+        methodKind: "unary";
+        input: typeof ListCurrentAgentConsentsRequestSchema;
+        output: typeof ListCurrentAgentConsentsResponseSchema;
+    };
+    /**
+     * Phase 2 — SESSION_USER revoke. The caller can only revoke a
+     * consent row whose external_user_id matches the calling user's
+     * session (server-side ownership check). Revocation atomically
+     * deletes the consent row AND marks every ACTIVE refresh token
+     * minted for (env, client_id, external_user_id) as REVOKED so the
+     * agent cannot mint new access tokens. Access tokens already in
+     * the wild continue to work until their bounded JWT TTL — that
+     * window is configurable per MCP server via access_token_expiry.
+     *
+     * @generated from rpc scalekit.v1.clients.ClientService.RevokeCurrentAgentConsent
+     */
+    revokeCurrentAgentConsent: {
+        methodKind: "unary";
+        input: typeof RevokeCurrentAgentConsentRequestSchema;
+        output: typeof RevokeCurrentAgentConsentResponseSchema;
     };
     /**
      * @generated from rpc scalekit.v1.clients.ClientService.ListResourceUserConsents

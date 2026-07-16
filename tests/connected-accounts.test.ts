@@ -1,4 +1,5 @@
 import ScalekitClient from '../src/scalekit';
+import { randomUUID } from 'node:crypto';
 import { create } from '@bufbuild/protobuf';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { ScalekitServerException } from '../src/errors';
@@ -116,6 +117,55 @@ describe('Connected Accounts', () => {
       expect(response).toBeDefined();
       expect(response.connectedAccounts).toBeDefined();
       expect(Array.isArray(response.connectedAccounts)).toBe(true);
+    });
+
+    it('should list connected accounts with connectionNames filter', async () => {
+      const connector = 'gmail';
+      const identifier = randomUUID();
+      let createdId: string | null = null;
+
+      const connectedAccount = create(CreateConnectedAccountSchema, {
+        authorizationDetails: create(AuthorizationDetailsSchema, {
+          details: {
+            case: 'oauthToken',
+            value: create(OauthTokenSchema, {
+              accessToken: 'test_access_token',
+              refreshToken: 'test_refresh_token',
+              scopes: ['read', 'write'],
+            }),
+          },
+        }),
+      });
+
+      try {
+        const createResponse =
+          await client.connectedAccounts.createConnectedAccount({
+            connector,
+            identifier,
+            connectedAccount,
+            organizationId: testOrg,
+          });
+        createdId = createResponse.connectedAccount?.id ?? null;
+
+        const response = await client.connectedAccounts.listConnectedAccounts({
+          connectionNames: ['gmail'],
+        });
+
+        expect(response).toBeDefined();
+        expect(response.connectedAccounts).toBeDefined();
+        expect(Array.isArray(response.connectedAccounts)).toBe(true);
+        expect(response.connectedAccounts.length).toBeGreaterThanOrEqual(1);
+      } finally {
+        try {
+          await client.connectedAccounts.deleteConnectedAccount({
+            connector,
+            identifier,
+            ...(createdId && { connectedAccountId: createdId }),
+          });
+        } catch {
+          // Account may already be deleted or not exist
+        }
+      }
     });
   });
 
