@@ -117,6 +117,19 @@ describe('Connected Accounts', () => {
       expect(response.connectedAccounts).toBeDefined();
       expect(Array.isArray(response.connectedAccounts)).toBe(true);
     });
+
+    it('should list connected accounts with connectionNames filter', async () => {
+      // The test environment always has at least one gmail connected account,
+      // so filtering by connectionNames returns a non-empty result.
+      const response = await client.connectedAccounts.listConnectedAccounts({
+        connectionNames: ['gmail'],
+      });
+
+      expect(response).toBeDefined();
+      expect(response.connectedAccounts).toBeDefined();
+      expect(Array.isArray(response.connectedAccounts)).toBe(true);
+      expect(response.connectedAccounts.length).toBeGreaterThan(0);
+    });
   });
 
   describe('createConnectedAccount', () => {

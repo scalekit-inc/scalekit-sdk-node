@@ -64,6 +64,7 @@ export default class ConnectedAccountsClient {
     pageSize?: number;
     pageToken?: string;
     query?: string;
+    connectionNames?: string[];
   }): Promise<ListConnectedAccountsResponse> {
     return this.coreClient.connectExec(
       this.client.listConnectedAccounts,
@@ -82,6 +83,9 @@ export default class ConnectedAccountsClient {
         ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
         ...(options?.pageToken && { pageToken: options.pageToken }),
         ...(options?.query && { query: options.query }),
+        ...(options?.connectionNames?.length && {
+          connectionNames: options.connectionNames,
+        }),
       })
     );
   }

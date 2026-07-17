@@ -220,6 +220,16 @@ export type GetCurrentUserResponse = Message<"scalekit.v1.users.GetCurrentUserRe
      * @generated from field: string current_session_id = 2;
      */
     currentSessionId: string;
+    /**
+     * Phase 2: true when gateway_configurations.enabled is true for the
+     * env the calling end-user is in. Drives /ui surfaces (the Agents
+     * nav section, end-user activity, etc.) that should only render when
+     * Gateway is actually configured for this env — independent of any
+     * workspace-level feature flag.
+     *
+     * @generated from field: bool gateway_enabled = 3;
+     */
+    gatewayEnabled: boolean;
 };
 /**
  * Describes the message scalekit.v1.users.GetCurrentUserResponse.

@@ -118,6 +118,7 @@ export default class ActionsClient {
         pageSize?: number;
         pageToken?: string;
         query?: string;
+        connectionNames?: string[];
     }): Promise<ListConnectedAccountsResponse>;
     /**
      * List app-level connections with optional pagination and provider filtering.

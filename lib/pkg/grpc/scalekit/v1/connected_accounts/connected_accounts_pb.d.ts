@@ -6,6 +6,121 @@ import type { JsonObject, Message } from "@bufbuild/protobuf";
  */
 export declare const file_scalekit_v1_connected_accounts_connected_accounts: GenFile;
 /**
+ * @generated from message scalekit.v1.connected_accounts.ListMyAppConnectionsRequest
+ */
+export type ListMyAppConnectionsRequest = Message<"scalekit.v1.connected_accounts.ListMyAppConnectionsRequest"> & {};
+/**
+ * Describes the message scalekit.v1.connected_accounts.ListMyAppConnectionsRequest.
+ * Use `create(ListMyAppConnectionsRequestSchema)` to create a new message.
+ */
+export declare const ListMyAppConnectionsRequestSchema: GenMessage<ListMyAppConnectionsRequest>;
+/**
+ * Per-connection row mirroring Gateway's connectionEntry shape.
+ *
+ * @generated from message scalekit.v1.connected_accounts.MyAppConnectionEntry
+ */
+export type MyAppConnectionEntry = Message<"scalekit.v1.connected_accounts.MyAppConnectionEntry"> & {
+    /**
+     * connection_id: con_…
+     *
+     * @generated from field: string connection_id = 1;
+     */
+    connectionId: string;
+    /**
+     * @generated from field: string provider = 2;
+     */
+    provider: string;
+    /**
+     * connection_name: the admin-assigned key_id (e.g. "slack-prod").
+     *
+     * @generated from field: string connection_name = 3;
+     */
+    connectionName: string;
+    /**
+     * @generated from field: bool enabled = 4;
+     */
+    enabled: boolean;
+    /**
+     * user_status: CONNECTED / NOT_CONNECTED / EXPIRED / PENDING_AUTH /
+     * PENDING_VERIFICATION / DISCONNECTED. Matches the strings the
+     * Gateway list_connections meta-tool returns.
+     *
+     * @generated from field: string user_status = 5;
+     */
+    userStatus: string;
+    /**
+     * connected_account_id is empty when user_status == NOT_CONNECTED.
+     *
+     * @generated from field: string connected_account_id = 6;
+     */
+    connectedAccountId: string;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.MyAppConnectionEntry.
+ * Use `create(MyAppConnectionEntrySchema)` to create a new message.
+ */
+export declare const MyAppConnectionEntrySchema: GenMessage<MyAppConnectionEntry>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.ListMyAppConnectionsResponse
+ */
+export type ListMyAppConnectionsResponse = Message<"scalekit.v1.connected_accounts.ListMyAppConnectionsResponse"> & {
+    /**
+     * @generated from field: repeated scalekit.v1.connected_accounts.MyAppConnectionEntry connections = 1;
+     */
+    connections: MyAppConnectionEntry[];
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.ListMyAppConnectionsResponse.
+ * Use `create(ListMyAppConnectionsResponseSchema)` to create a new message.
+ */
+export declare const ListMyAppConnectionsResponseSchema: GenMessage<ListMyAppConnectionsResponse>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.DisconnectMyConnectedAccountRequest
+ */
+export type DisconnectMyConnectedAccountRequest = Message<"scalekit.v1.connected_accounts.DisconnectMyConnectedAccountRequest"> & {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.DisconnectMyConnectedAccountRequest.
+ * Use `create(DisconnectMyConnectedAccountRequestSchema)` to create a new message.
+ */
+export declare const DisconnectMyConnectedAccountRequestSchema: GenMessage<DisconnectMyConnectedAccountRequest>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.GetMyConnectionMagicLinkRequest
+ */
+export type GetMyConnectionMagicLinkRequest = Message<"scalekit.v1.connected_accounts.GetMyConnectionMagicLinkRequest"> & {
+    /**
+     * @generated from field: string connection_name = 1;
+     */
+    connectionName: string;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.GetMyConnectionMagicLinkRequest.
+ * Use `create(GetMyConnectionMagicLinkRequestSchema)` to create a new message.
+ */
+export declare const GetMyConnectionMagicLinkRequestSchema: GenMessage<GetMyConnectionMagicLinkRequest>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.GetMyConnectionMagicLinkResponse
+ */
+export type GetMyConnectionMagicLinkResponse = Message<"scalekit.v1.connected_accounts.GetMyConnectionMagicLinkResponse"> & {
+    /**
+     * @generated from field: string link = 1;
+     */
+    link: string;
+    /**
+     * @generated from field: google.protobuf.Timestamp expiry = 2;
+     */
+    expiry?: Timestamp | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.GetMyConnectionMagicLinkResponse.
+ * Use `create(GetMyConnectionMagicLinkResponseSchema)` to create a new message.
+ */
+export declare const GetMyConnectionMagicLinkResponseSchema: GenMessage<GetMyConnectionMagicLinkResponse>;
+/**
  * @generated from message scalekit.v1.connected_accounts.ListConnectedAccountsRequest
  */
 export type ListConnectedAccountsRequest = Message<"scalekit.v1.connected_accounts.ListConnectedAccountsRequest"> & {
@@ -41,6 +156,10 @@ export type ListConnectedAccountsRequest = Message<"scalekit.v1.connected_accoun
      * @generated from field: string query = 8;
      */
     query: string;
+    /**
+     * @generated from field: repeated string connection_names = 9;
+     */
+    connectionNames: string[];
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.ListConnectedAccountsRequest.
@@ -572,6 +691,14 @@ export type AuthorizationDetails = Message<"scalekit.v1.connected_accounts.Autho
         value: GoogleDWDAuth;
         case: "googleDwd";
     } | {
+        /**
+         * Trusted IDP federated credentials (e.g. AWS STS temporary credentials)
+         *
+         * @generated from field: scalekit.v1.connected_accounts.TrustedIDPAuth trusted_idp = 4;
+         */
+        value: TrustedIDPAuth;
+        case: "trustedIdp";
+    } | {
         case: undefined;
         value?: undefined;
     };
@@ -610,6 +737,41 @@ export type GoogleDWDAuth = Message<"scalekit.v1.connected_accounts.GoogleDWDAut
  * Use `create(GoogleDWDAuthSchema)` to create a new message.
  */
 export declare const GoogleDWDAuthSchema: GenMessage<GoogleDWDAuth>;
+/**
+ * Trusted IDP federated authentication — used for TRUSTED_IDP connections (e.g. AWS Redshift).
+ * Send only db_user in requests; cached temporary credentials are managed server-side and
+ * returned only on output paths. secret_access_key and session_token are never exposed in
+ * public API responses.
+ *
+ * @generated from message scalekit.v1.connected_accounts.TrustedIDPAuth
+ */
+export type TrustedIDPAuth = Message<"scalekit.v1.connected_accounts.TrustedIDPAuth"> & {
+    /**
+     * @generated from field: string db_user = 1;
+     */
+    dbUser: string;
+    /**
+     * @generated from field: string access_key_id = 2;
+     */
+    accessKeyId: string;
+    /**
+     * @generated from field: string secret_access_key = 3;
+     */
+    secretAccessKey: string;
+    /**
+     * @generated from field: string session_token = 4;
+     */
+    sessionToken: string;
+    /**
+     * @generated from field: google.protobuf.Timestamp expiry = 5;
+     */
+    expiry?: Timestamp | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.TrustedIDPAuth.
+ * Use `create(TrustedIDPAuthSchema)` to create a new message.
+ */
+export declare const TrustedIDPAuthSchema: GenMessage<TrustedIDPAuth>;
 /**
  * OAuth 2.0 access and refresh tokens with scopes
  *
@@ -710,6 +872,29 @@ export type DisconnectConnectedAccountResponse = Message<"scalekit.v1.connected_
  * Use `create(DisconnectConnectedAccountResponseSchema)` to create a new message.
  */
 export declare const DisconnectConnectedAccountResponseSchema: GenMessage<DisconnectConnectedAccountResponse>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.GetRedirectUrlRequest
+ */
+export type GetRedirectUrlRequest = Message<"scalekit.v1.connected_accounts.GetRedirectUrlRequest"> & {};
+/**
+ * Describes the message scalekit.v1.connected_accounts.GetRedirectUrlRequest.
+ * Use `create(GetRedirectUrlRequestSchema)` to create a new message.
+ */
+export declare const GetRedirectUrlRequestSchema: GenMessage<GetRedirectUrlRequest>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.GetRedirectUrlResponse
+ */
+export type GetRedirectUrlResponse = Message<"scalekit.v1.connected_accounts.GetRedirectUrlResponse"> & {
+    /**
+     * @generated from field: string redirect_url = 1;
+     */
+    redirectUrl: string;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.GetRedirectUrlResponse.
+ * Use `create(GetRedirectUrlResponseSchema)` to create a new message.
+ */
+export declare const GetRedirectUrlResponseSchema: GenMessage<GetRedirectUrlResponse>;
 /**
  * Status of a connected account indicating its current state
  *
@@ -822,7 +1007,25 @@ export declare enum ConnectorType {
      *
      * @generated from enum value: GOOGLE_DWD = 9;
      */
-    GOOGLE_DWD = 9
+    GOOGLE_DWD = 9,
+    /**
+     * Trusted Identity Provider federation (e.g. AWS STS AssumeRoleWithWebIdentity)
+     *
+     * @generated from enum value: TRUSTED_IDP = 10;
+     */
+    TRUSTED_IDP = 10,
+    /**
+     * SMART on FHIR (SMART App Launch) — OAuth 2.0 authorization for FHIR servers
+     *
+     * @generated from enum value: SMART_FHIR = 11;
+     */
+    SMART_FHIR = 11,
+    /**
+     * No authentication — connector requires no credentials (e.g. public docs MCP servers)
+     *
+     * @generated from enum value: NO_AUTH = 12;
+     */
+    NO_AUTH = 12
 }
 /**
  * Describes the enum scalekit.v1.connected_accounts.ConnectorType.
@@ -913,6 +1116,16 @@ export declare const ConnectedAccountService: GenService<{
         output: typeof DisconnectConnectedAccountResponseSchema;
     };
     /**
+     * Get Redirect URL for Connected Account Portal
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.GetRedirectUrl
+     */
+    getRedirectUrl: {
+        methodKind: "unary";
+        input: typeof GetRedirectUrlRequestSchema;
+        output: typeof GetRedirectUrlResponseSchema;
+    };
+    /**
      * Get Connected Account Authentication Details
      *
      * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.GetConnectedAccountAuth
@@ -941,5 +1154,46 @@ export declare const ConnectedAccountService: GenService<{
         methodKind: "unary";
         input: typeof VerifyConnectedAccountUserRequestSchema;
         output: typeof VerifyConnectedAccountUserResponseSchema;
+    };
+    /**
+     * Phase 2 — SESSION_USER-authed: end-user lists every app connection
+     * configured in the env joined with their own per-connection status
+     * (CONNECTED / NOT_CONNECTED / EXPIRED / PENDING_AUTH / ...). Mirrors
+     * the shape of Gateway's list_connections meta-tool so /ui and the
+     * agent surface stay consistent. Server forces identifier from the
+     * session.
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.ListMyAppConnections
+     */
+    listMyAppConnections: {
+        methodKind: "unary";
+        input: typeof ListMyAppConnectionsRequestSchema;
+        output: typeof ListMyAppConnectionsResponseSchema;
+    };
+    /**
+     * Phase 2 — SESSION_USER-authed: end-user disconnects one of their
+     * own connected accounts. Ownership is enforced server-side: the
+     * target CA's identifier must equal the session identifier, else
+     * Forbidden.
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.DisconnectMyConnectedAccount
+     */
+    disconnectMyConnectedAccount: {
+        methodKind: "unary";
+        input: typeof DisconnectMyConnectedAccountRequestSchema;
+        output: typeof DisconnectConnectedAccountResponseSchema;
+    };
+    /**
+     * Phase 2 — SESSION_USER-authed: end-user gets a one-time magic link
+     * to connect (or reconnect) a specific app connection by name. The
+     * caller's identifier is resolved from the session — the request body
+     * carries no identifier field so a /ui caller cannot impersonate.
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.GetMyConnectionMagicLink
+     */
+    getMyConnectionMagicLink: {
+        methodKind: "unary";
+        input: typeof GetMyConnectionMagicLinkRequestSchema;
+        output: typeof GetMyConnectionMagicLinkResponseSchema;
     };
 }>;

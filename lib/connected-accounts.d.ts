@@ -32,6 +32,7 @@ export default class ConnectedAccountsClient {
         pageSize?: number;
         pageToken?: string;
         query?: string;
+        connectionNames?: string[];
     }): Promise<ListConnectedAccountsResponse>;
     /**
      * Creates a new connected account.

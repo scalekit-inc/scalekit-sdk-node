@@ -212,6 +212,7 @@ export default class ActionsClient {
     pageSize?: number;
     pageToken?: string;
     query?: string;
+    connectionNames?: string[];
   }): Promise<ListConnectedAccountsResponse> {
     return this.connectedAccounts.listConnectedAccounts({
       organizationId: params?.organizationId,
@@ -222,6 +223,7 @@ export default class ActionsClient {
       pageSize: params?.pageSize,
       pageToken: params?.pageToken,
       query: params?.query,
+      connectionNames: params?.connectionNames,
     });
   }
 
