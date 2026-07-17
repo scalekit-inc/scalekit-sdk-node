@@ -148,12 +148,16 @@ describe('Connected Accounts', () => {
         createdId = createResponse.connectedAccount?.id ?? null;
 
         const response = await client.connectedAccounts.listConnectedAccounts({
+          organizationId: testOrg,
           connectionNames: ['gmail'],
         });
 
         expect(response).toBeDefined();
         expect(response.connectedAccounts).toBeDefined();
         expect(Array.isArray(response.connectedAccounts)).toBe(true);
+        // Scoped to the freshly-created testOrg so the gmail account created
+        // above is the only match — asserting the filter returns it is
+        // deterministic here, not dependent on environment-wide data.
         expect(response.connectedAccounts.length).toBeGreaterThanOrEqual(1);
       } finally {
         try {
