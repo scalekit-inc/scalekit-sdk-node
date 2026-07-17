@@ -6,7 +6,7 @@
   </picture>
 </a>
 
-<p><strong>Official Node.js SDK for Scalekit — the auth stack for agents.</strong><br>
+<p><strong>Official Node.js SDK for Scalekit - the auth stack for agents.</strong><br>
 Authentication, authorization, and tool-calling for human-in-the-loop and autonomous agent flows.</p>
 
 [![npm version](https://img.shields.io/npm/v/@scalekit-sdk/node.svg)](https://www.npmjs.com/package/@scalekit-sdk/node)
@@ -21,22 +21,22 @@ Authentication, authorization, and tool-calling for human-in-the-loop and autono
 
 ---
 
-This is the official Node.js SDK for [Scalekit](https://scalekit.com), — the auth stack for agents. Build secure AI products faster with authentication for humans (SSO, passwordless, full-stack auth) and agents (MCP/APIs, delegated actions), all unified on one platform.
+This is the official Node.js SDK for [Scalekit](https://scalekit.com) - the auth stack for agents. Build secure AI products faster with authentication for humans (SSO, passwordless, full-stack auth) and agents (MCP/APIs, delegated actions), all unified on one platform.
 This Node.js SDK enables both traditional B2B authentication and cutting-edge agentic workflows.
 #### Agent-First Features
-- **Agent Identity** — Agents as first-class actors with human ownership and org context
-- **MCP-Native OAuth 2.1** — Purpose-built for Model Context Protocol with DCR/PKCE support
-- **Ephemeral Credentials** — Time-bound, task-based authorization (minutes, not days)
-- **Token Vault** — Per-User, Per-Tool token storage with rotation and progressive consent
-- **Human-in-the-Loop** — Step-up authentication when risk crosses thresholds
-- **Immutable Audit** — Track which user initiated, which agent acted, what resource was accessed
+- **Agent Identity** - Agents as first-class actors with human ownership and org context
+- **MCP-Native OAuth 2.1** - Purpose-built for Model Context Protocol with DCR/PKCE support
+- **Ephemeral Credentials** - Time-bound, task-based authorization (minutes, not days)
+- **Token Vault** - Per-User, Per-Tool token storage with rotation and progressive consent
+- **Human-in-the-Loop** - Step-up authentication when risk crosses thresholds
+- **Immutable Audit** - Track which user initiated, which agent acted, what resource was accessed
 #### Human Authentication
-- **Enterprise SSO** — Support for SAML and OIDC protocols
-- **SCIM Provisioning** — Automated user provisioning and deprovisioning
-- **Passwordless Authentication** — Magic links, OTP, and modern auth flows
-- **Multi-Tenant Architecture** — Organization-level authentication policies
-- **Social Logins** — Support for popular social identity providers
-- **Full-Stack Auth** — Complete IdP-of-record solution for B2B SaaS
+- **Enterprise SSO** - Support for SAML and OIDC protocols
+- **SCIM Provisioning** - Automated user provisioning and deprovisioning
+- **Passwordless Authentication** - Magic links, OTP, and modern auth flows
+- **Multi-Tenant Architecture** - Organization-level authentication policies
+- **Social Logins** - Support for popular social identity providers
+- **Full-Stack Auth** - Complete IdP-of-record solution for B2B SaaS
 ---
 ### Getting started
 #### Prerequisites
@@ -64,6 +64,26 @@ const authUrl = scalekitClient.getAuthorizationUrl("https://acme-corp.com/redire
   connectionId: "connection_id",
 });
 ```
+#### Client configuration
+The `ScalekitClient` constructor accepts an optional fourth argument to tune gRPC call deadlines:
+```javascript
+const scalekitClient = new ScalekitClient(
+  process.env.SCALEKIT_ENV_URL!,
+  process.env.SCALEKIT_CLIENT_ID!,
+  process.env.SCALEKIT_CLIENT_SECRET!,
+  {
+    timeoutMs: 20000,     // control-plane RPCs (organizations, users, connections)
+    toolTimeoutMs: 60000, // tool-execution RPCs (tools.*, actions.*)
+  }
+);
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `timeoutMs` | number | `20000` | Deadline in milliseconds for control-plane RPCs (organizations, users, connections, and similar). Set it below your infrastructure's backend timeout (for example, a GCP load balancer defaults to 30 seconds) so the SDK surfaces a clean `DeadlineExceeded` error instead of a dropped connection. |
+| `toolTimeoutMs` | number | `60000` | Deadline in milliseconds for tool-execution RPCs (`tools.*` and `actions.*`). These proxy to third-party provider APIs, such as Google Calendar or Slack, and can run longer than control-plane calls, so they use a separate, longer deadline. |
+
+> **Note**: Starting in v2.8.0, control-plane calls use a default 20-second deadline. A call that legitimately runs longer now fails with a `DeadlineExceeded` error instead of eventually succeeding. Raise `timeoutMs` if your workload needs more time.
 ---
 ### Example — SSO with Express.js
 ```javascript
@@ -131,20 +151,20 @@ app.listen(3000, () => {
 ---
 ### Helpful links
 #### Quickstart Guides
-- [SSO Integration](https://docs.scalekit.com/sso/quickstart/) — implement enterprise Single Sign-on
-- [Full Stack Auth](https://docs.scalekit.com/fsa/quickstart/) — complete authentication solution
-- [Passwordless Auth](https://docs.scalekit.com/passwordless/quickstart/) — modern authentication flows
-- [Social Logins](https://docs.scalekit.com/social-logins/quickstart/) — popular social identity providers
-- [Machine-to-Machine](https://docs.scalekit.com/m2m/quickstart/) — API authentication
+- [SSO Integration](https://docs.scalekit.com/sso/quickstart/) - implement enterprise Single Sign-on
+- [Full Stack Auth](https://docs.scalekit.com/fsa/quickstart/) - complete authentication solution
+- [Passwordless Auth](https://docs.scalekit.com/passwordless/quickstart/) - modern authentication flows
+- [Social Logins](https://docs.scalekit.com/social-logins/quickstart/) - popular social identity providers
+- [Machine-to-Machine](https://docs.scalekit.com/m2m/quickstart/) - API authentication
 #### Documentation & Reference
-- [API Reference](https://docs.scalekit.com/apis) — complete API documentation
-- [Developer Kit](https://docs.scalekit.com/dev-kit/) — tools and utilities
-- [API authentication guide](https://docs.scalekit.com/guides/authenticate-scalekit-api/) — secure API access
+- [API Reference](https://docs.scalekit.com/apis) - complete API documentation
+- [Developer Kit](https://docs.scalekit.com/dev-kit/) - tools and utilities
+- [API authentication guide](https://docs.scalekit.com/guides/authenticate-scalekit-api/) - secure API access
 #### Additional resources
-- [setup Guide](https://docs.scalekit.com/guides/setup-scalekit/) — initial platform configuration
-- [Code examples](https://docs.scalekit.com/directory/code-examples/) — ready-to-use code snippets
-- [Admin Portal Guide](https://docs.scalekit.com/directory/guides/admin-portal/) — administrative interface
-- [Launch Checklist](https://docs.scalekit.com/directory/guides/launch-checklist/) — Pre-production checklist
+- [setup Guide](https://docs.scalekit.com/guides/setup-scalekit/) - initial platform configuration
+- [Code examples](https://docs.scalekit.com/directory/code-examples/) - ready-to-use code snippets
+- [Admin Portal Guide](https://docs.scalekit.com/directory/guides/admin-portal/) - administrative interface
+- [Launch Checklist](https://docs.scalekit.com/directory/guides/launch-checklist/) - Pre-production checklist
 ---
 ### Contributing
 
