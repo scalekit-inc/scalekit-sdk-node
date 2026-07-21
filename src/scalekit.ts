@@ -20,6 +20,8 @@ import M2MClient from './m2mclient';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ActionsClient from './actions';
+import EventsClient from './events';
+import AuditLogsClient from './audit-logs';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import {
   AuthenticationOptions,
@@ -96,6 +98,8 @@ export default class ScalekitClient {
   readonly tools: ToolsClient;
   readonly connectedAccounts: ConnectedAccountsClient;
   readonly actions: ActionsClient;
+  readonly events: EventsClient;
+  readonly auditLogs: AuditLogsClient;
   constructor(
     envUrl: string,
     clientId: string,
@@ -141,6 +145,8 @@ export default class ScalekitClient {
       this.coreClient,
       this.connection
     );
+    this.events = new EventsClient(this.grpcConnect, this.coreClient);
+    this.auditLogs = new AuditLogsClient(this.grpcConnect, this.coreClient);
   }
 
   /**

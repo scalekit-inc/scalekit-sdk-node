@@ -14,6 +14,8 @@ import M2MClient from './m2mclient';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ActionsClient from './actions';
+import EventsClient from './events';
+import AuditLogsClient from './audit-logs';
 import { IdpInitiatedLoginClaims } from './types/auth';
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse, ScalekitOptions, TokenValidationOptions } from './types/scalekit';
 /**
@@ -68,6 +70,8 @@ export default class ScalekitClient {
     readonly tools: ToolsClient;
     readonly connectedAccounts: ConnectedAccountsClient;
     readonly actions: ActionsClient;
+    readonly events: EventsClient;
+    readonly auditLogs: AuditLogsClient;
     constructor(envUrl: string, clientId: string, clientSecret: string, options?: ScalekitOptions);
     /**
      * Utility method to generate the OAuth 2.0 authorization URL to initiate the SSO authentication flow.
