@@ -13,6 +13,8 @@
 - [Passwordless](#passwordless)
 - [Auth](#auth)
 - [WebAuthn](#webauthn)
+- [Events](#events)
+- [Audit Logs](#audit-logs)
 - [Error Handling](#error-handling)
 - [Type Definitions](#type-definitions)
 
@@ -5633,6 +5635,150 @@ await scalekitClient.auth.updateLoginUserDetails(
 **user:** `UserInput` - User details to update
 - `email?: string` - User's email address
 - `sub?: string` - Unique user identifier (subject)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Events
+
+<details><summary><code>client.events.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/events.ts">listEvents</a>(options?) -> Promise&lt;ListEventsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists events for the current environment, ordered most-recent first, including a total count of matching events. Pass `authRequestId` to see every event a specific authentication request produced — correlate it with the `authRequestId` returned by `client.auditLogs.listAuthRequests`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const response = await scalekitClient.events.listEvents({
+  authRequestId: 'areq_123456',
+  pageSize: 10,
+});
+
+console.log(`Found ${response.totalSize} events`);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**options:** `object` - Optional filter and pagination
+- `eventTypes?: string[]` - Filter by one or more event type names
+- `startTime?: Timestamp` - Only return events at or after this timestamp
+- `endTime?: Timestamp` - Only return events at or before this timestamp
+- `organizationId?: string` - Filter by organization ID
+- `source?: Source` - Filter by event source (SCALEKIT or DIR_SYNC)
+- `authRequestId?: string` - Filter by the authentication request that produced the events
+- `interceptorId?: string` - Filter by interceptor ID
+- `interceptorStatus?: string` - Filter by interceptor status
+- `interceptorDecision?: string` - Filter by interceptor decision
+- `connectionId?: string` - Filter by connection ID
+- `connectedAccountId?: string` - Filter by connected account ID
+- `pageSize?: number` - Number of events per page (defaults to 10 when unset)
+- `pageToken?: string` - Opaque pagination cursor from a previous response
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Audit Logs
+
+<details><summary><code>client.auditLogs.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/audit-logs.ts">listAuthRequests</a>(options?) -> Promise&lt;ListAuthLogResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists authentication request logs for the current environment, ordered most-recent first. Each entry's `authRequestId` can be passed to `client.events.listEvents`'s `authRequestId` filter to see every event a specific login produced.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const response = await scalekitClient.auditLogs.listAuthRequests({
+  email: 'jane.doe@example.com',
+  pageSize: 10,
+});
+
+console.log(`Found ${response.totalSize} authentication requests`);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**options:** `object` - Optional filters and pagination
+- `email?: string` - Filter by the end user's email address
+- `status?: string[]` - Filter by one or more outcome statuses (e.g. "SUCCESS", "FAILED")
+- `startTime?: Timestamp` - Only return logs at or after this timestamp
+- `endTime?: Timestamp` - Only return logs at or before this timestamp
+- `resourceId?: string` - Filter by resource ID
+- `connectedAccountIdentifier?: string` - Filter by connected account identifier
+- `clientId?: string` - Filter by client ID
+- `pageSize?: number` - Number of logs per page (defaults to 10 when unset)
+- `pageToken?: string` - Opaque pagination cursor from a previous response
 
 </dd>
 </dl>
