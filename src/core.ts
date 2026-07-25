@@ -89,6 +89,27 @@ export default class CoreClient {
 
       return config;
     });
+    // The token endpoint request body (and the request/response objects) can
+    // carry the plaintext client_secret (see authenticateClient below). If a
+    // request fails and the resulting AxiosError propagates uncaught, Node's
+    // default handler would dump the whole error — secret included. Strip the
+    // sensitive fields off the error before it leaves this client.
+    this.axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error instanceof AxiosError) {
+          if (error.config) {
+            delete (error.config as any).data;
+            delete (error.config as any).headers;
+          }
+          delete (error as any).request;
+          if (error.response) {
+            delete (error.response as any).request;
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
     // removing token creation at the time of constructor and instead letting the retry functionality handle generating a token whenever required.
     //this.authenticateClient();
   }
