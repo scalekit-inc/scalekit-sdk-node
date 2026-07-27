@@ -401,6 +401,20 @@ export type UpdateLoginUserDetailsRequest = Message<"scalekit.v1.auth.UpdateLogi
  */
 export declare const UpdateLoginUserDetailsRequestSchema: GenMessage<UpdateLoginUserDetailsRequest>;
 /**
+ * @generated from message scalekit.v1.auth.UpdateLoginUserDetailsResponse
+ */
+export type UpdateLoginUserDetailsResponse = Message<"scalekit.v1.auth.UpdateLoginUserDetailsResponse"> & {
+    /**
+     * @generated from field: string auth_request_id = 1;
+     */
+    authRequestId: string;
+};
+/**
+ * Describes the message scalekit.v1.auth.UpdateLoginUserDetailsResponse.
+ * Use `create(UpdateLoginUserDetailsResponseSchema)` to create a new message.
+ */
+export declare const UpdateLoginUserDetailsResponseSchema: GenMessage<UpdateLoginUserDetailsResponse>;
+/**
  * @generated from message scalekit.v1.auth.User
  */
 export type User = Message<"scalekit.v1.auth.User"> & {
@@ -472,6 +486,10 @@ export type User = Message<"scalekit.v1.auth.User"> & {
      * @generated from field: optional string organization_external_name = 17;
      */
     organizationExternalName?: string | undefined;
+    /**
+     * @generated from field: bool login_failed = 18;
+     */
+    loginFailed: boolean;
 };
 /**
  * Describes the message scalekit.v1.auth.User.
@@ -742,6 +760,6 @@ export declare const AuthService: GenService<{
     updateLoginUserDetails: {
         methodKind: "unary";
         input: typeof UpdateLoginUserDetailsRequestSchema;
-        output: typeof EmptySchema;
+        output: typeof UpdateLoginUserDetailsResponseSchema;
     };
 }>;

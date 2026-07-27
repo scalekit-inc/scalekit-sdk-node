@@ -1,9 +1,7 @@
 import type { JsonObject } from '@bufbuild/protobuf';
-import type { MessageShape } from '@bufbuild/protobuf';
-import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import CoreClient from './core';
 import GrpcConnect from './connect';
-import { type User } from './pkg/grpc/scalekit/v1/auth/auth_pb';
+import { type User, type UpdateLoginUserDetailsResponse } from './pkg/grpc/scalekit/v1/auth/auth_pb';
 /** User input for updateLoginUserDetails; customAttributes is a plain object (proto Struct → JsonObject in v2). */
 type UserInput = Partial<User> & {
     customAttributes?: JsonObject;
@@ -33,11 +31,13 @@ export default class AuthClient {
      * @param {string} [user.email] - User's email address
      * @param {string} [user.sub] - Unique user identifier (subject)
      *
-     * @returns {Promise<MessageShape<EmptySchema>>} Empty response on successful update
+     * @returns {Promise<UpdateLoginUserDetailsResponse>} Response containing the auth request ID,
+     *   which can be used to look up the authentication journey of the user using auth logs
      *
      * @throws {Error} When connectionId is missing or invalid
      * @throws {Error} When loginRequestId is missing or invalid
      * @throws {Error} When user object is invalid
+     * @throws {ScalekitServerException} If a network or server error occurs.
      *
      * @example
      * await scalekitClient.auth.updateLoginUserDetails(
@@ -52,6 +52,6 @@ export default class AuthClient {
      *
      * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Update Login User Details API}
      */
-    updateLoginUserDetails(connectionId: string, loginRequestId: string, user: UserInput): Promise<MessageShape<typeof EmptySchema>>;
+    updateLoginUserDetails(connectionId: string, loginRequestId: string, user: UserInput): Promise<UpdateLoginUserDetailsResponse>;
 }
 export {};
