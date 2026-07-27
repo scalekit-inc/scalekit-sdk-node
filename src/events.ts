@@ -58,7 +58,6 @@ export default class EventsClient {
    * // With a filter — pass a plain object literal, no cast required.
    * const response = await scalekitClient.events.listEventsPaginated(25, '', {
    *   eventTypes: ['user.created'],
-   *   source: Source.SCALEKIT,
    * });
    *
    * @see {@link https://docs.scalekit.com/apis/ | List Events API}
