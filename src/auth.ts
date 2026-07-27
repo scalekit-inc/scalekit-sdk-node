@@ -1,7 +1,5 @@
 import type { JsonObject } from '@bufbuild/protobuf';
 import { create } from '@bufbuild/protobuf';
-import type { MessageShape } from '@bufbuild/protobuf';
-import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import CoreClient from './core';
 import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
@@ -10,6 +8,7 @@ import {
   UpdateLoginUserDetailsRequestSchema,
   UserSchema,
   type User,
+  type UpdateLoginUserDetailsResponse,
 } from './pkg/grpc/scalekit/v1/auth/auth_pb';
 
 /** User input for updateLoginUserDetails; customAttributes is a plain object (proto Struct → JsonObject in v2). */
@@ -47,11 +46,13 @@ export default class AuthClient {
    * @param {string} [user.email] - User's email address
    * @param {string} [user.sub] - Unique user identifier (subject)
    *
-   * @returns {Promise<MessageShape<EmptySchema>>} Empty response on successful update
+   * @returns {Promise<UpdateLoginUserDetailsResponse>} Response containing the auth request ID,
+   *   which can be used to look up the authentication journey of the user using auth logs
    *
    * @throws {Error} When connectionId is missing or invalid
    * @throws {Error} When loginRequestId is missing or invalid
    * @throws {Error} When user object is invalid
+   * @throws {ScalekitServerException} If a network or server error occurs.
    *
    * @example
    * await scalekitClient.auth.updateLoginUserDetails(
@@ -70,7 +71,7 @@ export default class AuthClient {
     connectionId: string,
     loginRequestId: string,
     user: UserInput
-  ): Promise<MessageShape<typeof EmptySchema>> {
+  ): Promise<UpdateLoginUserDetailsResponse> {
     if (!connectionId || typeof connectionId !== 'string') {
       throw new Error('connectionId must be a non-empty string');
     }

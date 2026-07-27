@@ -1,0 +1,51 @@
+import GrpcConnect from './connect';
+import CoreClient from './core';
+import { ListEventsPaginatedResponse, EventFilter } from './pkg/grpc/scalekit/v1/events/events_pb';
+/**
+ * Client for reading Scalekit events.
+ *
+ * Events capture activity that occurs within your Scalekit environment — authentication
+ * journeys, directory sync changes, connected-account activity, and more. Use this client
+ * to page through the event log for auditing, monitoring, or building an activity feed.
+ *
+ * @example
+ * const scalekitClient = new ScalekitClient(envUrl, clientId, clientSecret);
+ * const eventsClient = scalekitClient.events;
+ *
+ * @see {@link https://docs.scalekit.com/apis/ | Scalekit API Documentation}
+ */
+export default class EventsClient {
+    private readonly grpcConnect;
+    private readonly coreClient;
+    private client;
+    constructor(grpcConnect: GrpcConnect, coreClient: CoreClient);
+    /**
+     * Lists events for the current environment using cursor-based pagination.
+     *
+     * Returns a page of events ordered most-recent first. The response carries cursor tokens
+     * for forward and backward pagination but omits the total event count. To page forward,
+     * pass the returned `nextPageToken` as the `pageToken` on the next call.
+     *
+     * @param {number} [pageSize] - Number of events per page. Defaults to 10 and is clamped to 100 server-side.
+     * @param {string} [pageToken] - Opaque cursor from a previous response (`nextPageToken`/`prevPageToken`).
+     * @param {EventFilter} [filter] - Optional filter (event types, time window, organization, source, and identifiers).
+     *
+     * @returns {Promise<ListEventsPaginatedResponse>} A page of events with `nextPageToken` and `prevPageToken` cursors
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     *
+     * @example
+     * const response = await scalekitClient.events.listEventsPaginated(10, '');
+     * response.events.forEach((event) => console.log(event.type, event.object));
+     *
+     * @example
+     * // With a filter
+     * const response = await scalekitClient.events.listEventsPaginated(25, '', {
+     *   eventTypes: ['user.created'],
+     *   source: Source.SCALEKIT,
+     * } as EventFilter);
+     *
+     * @see {@link https://docs.scalekit.com/apis/ | List Events API}
+     */
+    listEventsPaginated(pageSize?: number, pageToken?: string, filter?: EventFilter): Promise<ListEventsPaginatedResponse>;
+}

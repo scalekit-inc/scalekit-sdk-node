@@ -12,6 +12,7 @@
 - [Permissions](#permissions)
 - [Passwordless](#passwordless)
 - [Auth](#auth)
+- [Events](#events)
 - [WebAuthn](#webauthn)
 - [Error Handling](#error-handling)
 - [Type Definitions](#type-definitions)
@@ -5563,7 +5564,7 @@ console.log('Deleted:', response.success);
 
 ## Auth
 
-<details><summary><code>client.auth.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/auth.ts">updateLoginUserDetails</a>(connectionId, loginRequestId, user) -> Promise&lt;Empty&gt;</code></summary>
+<details><summary><code>client.auth.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/auth.ts">updateLoginUserDetails</a>(connectionId, loginRequestId, user) -> Promise&lt;UpdateLoginUserDetailsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -5592,7 +5593,7 @@ If you are using Auth for MCP solution of Scalekit in "Bring your own Auth" mode
 <dd>
 
 ```typescript
-await scalekitClient.auth.updateLoginUserDetails(
+const response = await scalekitClient.auth.updateLoginUserDetails(
   'conn_abc123',
   'login_xyz789',
   {
@@ -5600,6 +5601,9 @@ await scalekitClient.auth.updateLoginUserDetails(
     sub: 'unique_user_id_456',
   }
 );
+
+// The auth request ID can be used to look up the authentication journey via auth logs.
+console.log(response.authRequestId);
 ```
 </dd>
 </dl>
@@ -5633,6 +5637,93 @@ await scalekitClient.auth.updateLoginUserDetails(
 **user:** `UserInput` - User details to update
 - `email?: string` - User's email address
 - `sub?: string` - Unique user identifier (subject)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Events
+
+<details><summary><code>client.events.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/events.ts">listEventsPaginated</a>(pageSize?, pageToken?, filter?) -> Promise&lt;ListEventsPaginatedResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists events for the current environment using cursor-based pagination.
+
+Returns a page of events ordered most-recent first. The response carries cursor tokens for forward and backward pagination but omits the total event count. To page forward, pass the returned `nextPageToken` as the `pageToken` on the next call.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const response = await scalekitClient.events.listEventsPaginated(10, '');
+
+response.events.forEach((event) => {
+  console.log(event.type, event.object);
+});
+
+// Cursor tokens for paging forward/backward.
+console.log(response.nextPageToken, response.prevPageToken);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**pageSize:** `number?` - Number of events per page. Defaults to 10 and is clamped to 100 server-side.
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**pageToken:** `string?` - Opaque cursor from a previous response (`nextPageToken`/`prevPageToken`).
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**filter:** `EventFilter?` - Optional filter with fields:
+- `eventTypes?: string[]` - Event types to match
+- `startTime?: Timestamp` - Start of the time window
+- `endTime?: Timestamp` - End of the time window
+- `organizationId?: string` - Restrict to a single organization
+- `source?: Source` - Event source (e.g. `Source.SCALEKIT`)
+- `authRequestId?: string` - Restrict to a single auth request
 
 </dd>
 </dl>
