@@ -1,11 +1,13 @@
 /**
- * Regression test: a failed request through CoreClient's shared axios
- * instance (e.g. the client_credentials token exchange in authenticate())
- * must never leak the raw request body/headers or the underlying
- * request/response objects via the propagated error. The token endpoint
- * request body contains the plaintext client_secret, and an uncaught
- * AxiosError carrying `config.data`/`config.headers`/`request` would dump
- * it in full if it ever reaches Node's default exception handler.
+ * Regression test for CoreClient's redacting response interceptor.
+ *
+ * Every request through CoreClient's shared axios instance can attach two
+ * credentials to a failing AxiosError via `error.config`: the plaintext
+ * client_secret in the token endpoint's request body (`config.data`) and the
+ * Bearer access token in the Authorization header. `AxiosError.toJSON()` and
+ * Node's default handler would dump both if the error is logged wholesale or
+ * propagates uncaught. The interceptor masks just those two values, leaving
+ * the response/status/headers/request intact for debugging.
  */
 import { describe, it, expect } from '@jest/globals';
 import { AxiosError } from 'axios';
@@ -19,16 +21,13 @@ function makeClient(): CoreClient {
   );
 }
 
-describe('CoreClient axios response interceptor — error sanitization', () => {
-  it('strips config.data, config.headers, and request/response.request from a failing request', async () => {
+describe('CoreClient redacting response interceptor', () => {
+  it('masks the client_secret in the token request body while preserving other body fields and the response', async () => {
     const client = makeClient();
 
-    // Simulate the token endpoint rejecting the request (e.g. a rotated
-    // client_secret) by swapping in an adapter that rejects with an
-    // AxiosError shaped like a real failure: the request config still
-    // carries the urlencoded body (grant_type/client_id/client_secret) and
-    // headers, and both the request and response carry the raw request
-    // object, exactly as axios would populate them.
+    // Simulate the token endpoint rejecting (e.g. a rotated client_secret):
+    // the request config still carries the urlencoded body, and the response
+    // carries the server's status/body, exactly as axios populates them.
     client.axios.defaults.adapter = async (config) => {
       throw new AxiosError(
         'Request failed with status code 401',
@@ -56,20 +55,83 @@ describe('CoreClient axios response interceptor — error sanitization', () => {
       caught = error;
     }
 
+    // Still an AxiosError — callers' `instanceof AxiosError` / `error.response`
+    // branches keep working unchanged.
     expect(caught).toBeInstanceOf(AxiosError);
     const err = caught as AxiosError;
 
-    // The sensitive request body/headers must be gone off the config...
-    expect(err.config).toBeDefined();
-    expect(err.config?.data).toBeUndefined();
-    expect(err.config?.headers).toBeUndefined();
-    // ...and the raw request/response.request objects must be gone too.
-    expect((err as any).request).toBeUndefined();
-    expect((err.response as any)?.request).toBeUndefined();
+    // The secret value is masked out of the request body...
+    expect(typeof err.config?.data).toBe('string');
+    expect(err.config?.data).toContain('client_secret=[REDACTED]');
+    expect(err.config?.data).not.toContain('super-secret-value');
+    // ...but the non-secret body fields survive for debugging.
+    expect(err.config?.data).toContain('grant_type=client_credentials');
+    expect(err.config?.data).toContain('client_id=client_id');
 
-    // Belt-and-suspenders: the secret must not survive anywhere in the
-    // error's own serialization.
+    // The response (status/body) is preserved so callers can branch on it and
+    // read the server's error detail, and the request object is kept too.
+    expect(err.response?.status).toBe(401);
+    expect(err.response?.data).toEqual({ error: 'invalid_client' });
+    expect((err as any).request).toBeDefined();
+
     const serialized = JSON.stringify(err, Object.getOwnPropertyNames(err));
     expect(serialized).not.toContain('super-secret-value');
+  });
+
+  it('masks the Authorization bearer on any failed authenticated request while preserving the response', async () => {
+    const client = makeClient();
+    // An access token is present once the SDK has authenticated; the request
+    // interceptor then attaches it as a Bearer header to non-token calls.
+    client.accessToken = 'super-secret-access-token';
+
+    client.axios.defaults.adapter = async (config) => {
+      throw new AxiosError(
+        'Request failed with status code 500',
+        'ERR_BAD_RESPONSE',
+        config,
+        { rawRequestObject: true },
+        {
+          status: 500,
+          statusText: 'Internal Server Error',
+          headers: {},
+          config,
+          data: { error: 'boom' },
+          request: { rawRequestObject: true },
+        }
+      );
+    };
+
+    let caught: unknown;
+    try {
+      // Any authenticated call through the shared instance (e.g. getJwks or
+      // the actions proxy) carries the bearer; a bare GET exercises the same
+      // request-interceptor path.
+      await client.axios.get('/some-endpoint');
+    } catch (error) {
+      caught = error;
+    }
+
+    expect(caught).toBeInstanceOf(AxiosError);
+    const err = caught as AxiosError;
+
+    // The Authorization header value is masked...
+    const authHeader =
+      (err.config?.headers as Record<string, unknown> | undefined)
+        ?.Authorization ??
+      (err.config?.headers as Record<string, unknown> | undefined)
+        ?.authorization;
+    expect(authHeader).toBe('[REDACTED]');
+    // ...and the token does not survive anywhere in the config.
+    expect(JSON.stringify(err.config?.headers)).not.toContain(
+      'super-secret-access-token'
+    );
+
+    // Response/status/request are preserved for debugging.
+    expect(err.response?.status).toBe(500);
+    expect(err.response?.data).toEqual({ error: 'boom' });
+    expect((err as any).request).toBeDefined();
+
+    const serialized = JSON.stringify(err, Object.getOwnPropertyNames(err));
+    expect(serialized).not.toContain('super-secret-access-token');
   });
 });
