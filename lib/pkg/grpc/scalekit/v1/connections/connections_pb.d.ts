@@ -1755,6 +1755,10 @@ export type ListAppConnectionsRequest = Message<"scalekit.v1.connections.ListApp
      * @generated from field: optional string provider = 3;
      */
     provider?: string | undefined;
+    /**
+     * @generated from field: optional string query = 4;
+     */
+    query?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.ListAppConnectionsRequest.

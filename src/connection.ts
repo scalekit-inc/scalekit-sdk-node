@@ -244,11 +244,13 @@ export default class ConnectionClient {
     pageSize?: number;
     pageToken?: string;
     provider?: string;
+    query?: string;
   }): Promise<ListAppConnectionsResponse> {
     return this.coreClient.connectExec(this.client.listAppConnections, {
       pageSize: params?.pageSize,
       pageToken: params?.pageToken,
       provider: params?.provider,
+      query: params?.query,
     });
   }
 

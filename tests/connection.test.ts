@@ -67,6 +67,16 @@ describe('Connections', () => {
       expect(Array.isArray(response.connections)).toBe(true);
       expect(response.connections.length).toBeLessThanOrEqual(1);
     });
+
+    it('should accept a query filter', async () => {
+      const response = await client.connection.listAppConnections({
+        query: 'gmail',
+      });
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.connections)).toBe(true);
+      expect(typeof response.totalSize).toBe('number');
+    });
   });
 
   describe('createConnection', () => {

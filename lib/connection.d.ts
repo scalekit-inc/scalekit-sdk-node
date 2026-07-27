@@ -205,6 +205,7 @@ export default class ConnectionClient {
         pageSize?: number;
         pageToken?: string;
         provider?: string;
+        query?: string;
     }): Promise<ListAppConnectionsResponse>;
     /**
      * Enables an SSO connection for an organization.
