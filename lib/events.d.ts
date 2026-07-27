@@ -1,6 +1,7 @@
+import { type MessageInitShape } from '@bufbuild/protobuf';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { ListEventsPaginatedResponse, EventFilter } from './pkg/grpc/scalekit/v1/events/events_pb';
+import { ListEventsPaginatedResponse, EventFilterSchema } from './pkg/grpc/scalekit/v1/events/events_pb';
 /**
  * Client for reading Scalekit events.
  *
@@ -28,7 +29,10 @@ export default class EventsClient {
      *
      * @param {number} [pageSize] - Number of events per page. Defaults to 10 and is clamped to 100 server-side.
      * @param {string} [pageToken] - Opaque cursor from a previous response (`nextPageToken`/`prevPageToken`).
-     * @param {EventFilter} [filter] - Optional filter (event types, time window, organization, source, and identifiers).
+     * @param {MessageInitShape<typeof EventFilterSchema>} [filter] - Optional filter. Accepts a plain
+     *   object literal with any of: `eventTypes`, `startTime`, `endTime`, `organizationId`, `source`,
+     *   `authRequestId`, `interceptorId`, `interceptorStatus`, `interceptorDecision`, `connectionId`,
+     *   `connectedAccountId`. All fields are optional and fully type-checked.
      *
      * @returns {Promise<ListEventsPaginatedResponse>} A page of events with `nextPageToken` and `prevPageToken` cursors
      *
@@ -39,13 +43,13 @@ export default class EventsClient {
      * response.events.forEach((event) => console.log(event.type, event.object));
      *
      * @example
-     * // With a filter
+     * // With a filter — pass a plain object literal, no cast required.
      * const response = await scalekitClient.events.listEventsPaginated(25, '', {
      *   eventTypes: ['user.created'],
      *   source: Source.SCALEKIT,
-     * } as EventFilter);
+     * });
      *
      * @see {@link https://docs.scalekit.com/apis/ | List Events API}
      */
-    listEventsPaginated(pageSize?: number, pageToken?: string, filter?: EventFilter): Promise<ListEventsPaginatedResponse>;
+    listEventsPaginated(pageSize?: number, pageToken?: string, filter?: MessageInitShape<typeof EventFilterSchema>): Promise<ListEventsPaginatedResponse>;
 }

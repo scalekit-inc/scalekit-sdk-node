@@ -5654,7 +5654,7 @@ console.log(response.authRequestId);
 <dl>
 <dd>
 
-#### 📝 Description
+### 📝 Description
 
 <dl>
 <dd>
@@ -5717,13 +5717,18 @@ console.log(response.nextPageToken, response.prevPageToken);
 <dl>
 <dd>
 
-**filter:** `EventFilter?` - Optional filter with fields:
+**filter:** `MessageInitShape<typeof EventFilterSchema>?` - Optional filter. Pass a plain object literal (no cast required); all fields are optional and fully type-checked:
 - `eventTypes?: string[]` - Event types to match
 - `startTime?: Timestamp` - Start of the time window
 - `endTime?: Timestamp` - End of the time window
 - `organizationId?: string` - Restrict to a single organization
 - `source?: Source` - Event source (e.g. `Source.SCALEKIT`)
 - `authRequestId?: string` - Restrict to a single auth request
+- `interceptorId?: string` - Restrict to a single interceptor
+- `interceptorStatus?: string` - Match interceptor status
+- `interceptorDecision?: string` - Match interceptor decision
+- `connectionId?: string` - Restrict to a single connection
+- `connectedAccountId?: string` - Restrict to a single connected account
 
 </dd>
 </dl>

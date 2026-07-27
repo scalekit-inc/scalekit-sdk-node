@@ -36,7 +36,7 @@ describe('Auth - updateLoginUserDetails', () => {
         );
 
         expect(response).toBeDefined();
-        expect(response.authRequestId).toBeTruthy();
+        expect(response.authRequestId).toBe(loginRequestId!);
       }
     );
   });
