@@ -52,81 +52,6 @@ export function assertValidTimeout(name: string, value: number): void {
   }
 }
 
-// Node's real http adapter sets `error.request` (and `error.response.request`,
-// often the same reference) to the underlying `http.ClientRequest`. Its
-// enumerable `_header` property holds the fully-serialized request headers —
-// e.g. `Authorization: Bearer <token>\r\n...` — which `util.inspect` (and
-// therefore `console.error` and Node's default uncaught-exception/
-// unhandledRejection handler) prints verbatim. Redact the Authorization line
-// in place rather than deleting `_header` or the request object, so the rest
-// of the raw request remains available for debugging. Guarded for mocks/
-// non-Node adapters where `request` or `_header` may not exist or may not be
-// a string.
-function redactRawRequestHeader(request: unknown): void {
-  if (!request || typeof request !== 'object') {
-    return;
-  }
-  const req = request as Record<PropertyKey, unknown>;
-  if (typeof req._header === 'string') {
-    req._header = req._header.replace(
-      /^authorization:.*$/im,
-      'Authorization: [REDACTED]'
-    );
-  }
-  // Node also mirrors the outgoing headers on an internal symbol-keyed map
-  // (`Symbol(kOutHeaders)`) that the ClientRequest builds up before
-  // `_header` is serialized, and that map stays populated afterwards. It is
-  // enumerable, so `util.inspect` walks into it independently of `_header` —
-  // redact any Authorization entry there too. The stored shape is a
-  // `[displayName, value]` tuple; fall back to overwriting the value
-  // directly in case a future Node version stores a bare string instead.
-  for (const symbolKey of Object.getOwnPropertySymbols(req)) {
-    if (symbolKey.description !== 'kOutHeaders') {
-      continue;
-    }
-    const outHeaders = req[symbolKey];
-    if (!outHeaders || typeof outHeaders !== 'object') {
-      continue;
-    }
-    const headerMap = outHeaders as Record<string, unknown>;
-    for (const headerKey of Object.keys(headerMap)) {
-      if (headerKey.toLowerCase() !== 'authorization') {
-        continue;
-      }
-      const entry = headerMap[headerKey];
-      if (Array.isArray(entry)) {
-        entry[1] = '[REDACTED]';
-      } else {
-        headerMap[headerKey] = '[REDACTED]';
-      }
-    }
-  }
-  // By default (the config CoreClient actually runs with — `maxRedirects` is
-  // never set to 0), axios's Node adapter issues the request through
-  // `follow-redirects`, which leaves a `_redirectable` back-reference on the
-  // real `http.ClientRequest` pointing at its own wrapper. That wrapper keeps
-  // the original `_options.headers` object it was constructed with — a
-  // separate plain object from both `config.headers` and the ones above —
-  // still holding the plaintext Authorization value. Redact it too so the
-  // default (non-`maxRedirects: 0`) request path doesn't leak the token via
-  // this extra hop.
-  const redirectable = (req as { _redirectable?: unknown })._redirectable;
-  if (redirectable && typeof redirectable === 'object') {
-    const options = (redirectable as { _options?: unknown })._options;
-    if (options && typeof options === 'object') {
-      const optionHeaders = (options as { headers?: unknown }).headers;
-      if (optionHeaders && typeof optionHeaders === 'object') {
-        const headerMap = optionHeaders as Record<string, unknown>;
-        for (const headerKey of Object.keys(headerMap)) {
-          if (headerKey.toLowerCase() === 'authorization') {
-            headerMap[headerKey] = '[REDACTED]';
-          }
-        }
-      }
-    }
-  }
-}
-
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
@@ -164,70 +89,36 @@ export default class CoreClient {
 
       return config;
     });
-    // On failure, axios attaches the outgoing request config to the error, and
-    // that config carries two credentials: the plaintext client_secret in the
-    // token endpoint's request body (`config.data`) and the Bearer access
-    // token in the Authorization header. `AxiosError.toJSON()` and Node's
-    // default handler would dump both if the error is logged wholesale or
-    // propagates uncaught. Redact just those two values in place — leaving the
-    // response, status, headers, and request object intact for debugging — so
-    // nothing downstream (a caller's log, an APM that instruments axios, a
-    // user-registered interceptor) can observe the secret or the token.
-    //
-    // The real Node http adapter also attaches the raw `http.ClientRequest` as
-    // `error.request` (and the same reference as `error.response.request`).
-    // That object keeps the fully-serialized outgoing headers, including the
-    // Bearer token, in its enumerable `_header` string — and `util.inspect`
-    // (what `console.error(err)` and Node's default uncaught-exception/
-    // unhandledRejection handler use) walks into `request`/`response.request`
-    // and prints `_header` verbatim. Scrub the Authorization line out of
-    // `_header` on both references too, so the token can't resurface there.
+    // On failure, axios attaches copies of the outgoing request to the error
+    // that carry two credentials: the plaintext client_secret in the token
+    // endpoint's request body (`error.config.data`) and the Bearer access token
+    // in the Authorization header — the latter living on `error.config.headers`
+    // and, with the real Node adapter, on the raw `http.ClientRequest` at
+    // `error.request` / `error.response.request` (whose serialized `_header`
+    // holds it too). `AxiosError.toJSON()` and util.inspect (`console.error(err)`
+    // and Node's default uncaught-exception/unhandledRejection handler) would
+    // surface these if the error is logged wholesale or propagates uncaught.
+    // Drop the credential-bearing request copies off the error entirely. The
+    // response (status/body/headers), `message`, and `code` are untouched, so
+    // callers and the retry logic — which read only `error.response`,
+    // `error.response.status`, and `error.code` — keep working; only the
+    // non-secret request echo (body fields, request headers) is lost with them.
     this.axios.interceptors.response.use(
       (response) => response,
       (error) => {
-        if (error instanceof AxiosError && error.config) {
-          if (typeof error.config.data === 'string') {
-            // Anchor the match to a form-field boundary (start of string or
-            // `&`) so a similarly-named field (e.g. `other_client_secret=`)
-            // can't false-positive on the bare `client_secret=` substring,
-            // and use the `g` flag so every occurrence is redacted, not just
-            // the first, in case the body ever carries the field twice.
-            error.config.data = error.config.data.replace(
-              /(^|&)client_secret=[^&]*/g,
-              '$1client_secret=[REDACTED]'
-            );
-          }
-          const configHeaders = error.config.headers as
-            | {
-                set?: (k: string, v: string, rewrite?: boolean) => unknown;
-                has?: (k: string) => boolean;
-                [k: string]: unknown;
-              }
-            | undefined;
-          if (configHeaders) {
-            if (
-              typeof configHeaders.set === 'function' &&
-              typeof configHeaders.has === 'function'
-            ) {
-              // AxiosHeaders: case-insensitive lookup/set.
-              if (configHeaders.has('Authorization')) {
-                configHeaders.set('Authorization', '[REDACTED]', true);
-              }
-            } else {
-              // Plain object headers: match the key case-insensitively.
-              for (const key of Object.keys(configHeaders)) {
-                if (key.toLowerCase() === 'authorization') {
-                  configHeaders[key] = '[REDACTED]';
-                }
-              }
-            }
-          }
-        }
         if (error instanceof AxiosError) {
-          redactRawRequestHeader((error as { request?: unknown }).request);
-          redactRawRequestHeader(
-            (error.response as { request?: unknown } | undefined)?.request
-          );
+          if (error.config) {
+            const config = error.config as {
+              data?: unknown;
+              headers?: unknown;
+            };
+            delete config.data;
+            delete config.headers;
+          }
+          delete (error as { request?: unknown }).request;
+          if (error.response) {
+            delete (error.response as { request?: unknown }).request;
+          }
         }
         return Promise.reject(error);
       }
