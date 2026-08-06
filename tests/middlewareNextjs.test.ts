@@ -1,0 +1,273 @@
+import { describe, it, expect, jest as jestGlobal } from '@jest/globals';
+import { NextRequest } from 'next/server';
+
+import { ScalekitAuthNext } from '../src/frameworks/nextjs';
+import { decryptSession } from '../src/middleware/sessionCrypto';
+
+function fakeClient() {
+  return {
+    getAuthorizationUrl: jestGlobal.fn(),
+    authenticateWithCode: jestGlobal.fn(),
+    refreshAccessToken: jestGlobal.fn(),
+    validateToken: jestGlobal.fn(),
+    getLogoutUrl: jestGlobal.fn(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any;
+}
+
+function buildAuth(
+  secret = 'nextjs-test-secret',
+  extraOptions: Record<string, unknown> = {}
+) {
+  const client = fakeClient();
+  const auth = new ScalekitAuthNext({
+    client,
+    redirectUri: 'https://app.example.com/callback',
+    cookieEncryptionSecret: secret,
+    ...extraOptions,
+  });
+  return { auth, client };
+}
+
+function requestWithCookie(url: string, cookieValue?: string): NextRequest {
+  const headers: Record<string, string> = {};
+  if (cookieValue) {
+    headers['cookie'] = `sk_session=${cookieValue}`;
+  }
+  return new NextRequest(url, { headers });
+}
+
+describe('ScalekitAuthNext', () => {
+  it('login handler redirects to the authorization url', async () => {
+    const { auth, client } = buildAuth();
+    client.getAuthorizationUrl.mockReturnValue(
+      'https://auth.example.com/oauth/authorize?client_id=x'
+    );
+
+    const handler = auth.createLoginHandler();
+    const response = await handler();
+
+    expect(response.status).toBe(307); // NextResponse.redirect default
+    expect(response.headers.get('location')).toBe(
+      'https://auth.example.com/oauth/authorize?client_id=x'
+    );
+  });
+
+  it('callback handler sets an encrypted cookie and redirects', async () => {
+    const { auth, client } = buildAuth('callback-secret');
+    client.authenticateWithCode.mockResolvedValue({
+      user: { email: 'test.user@example.com' },
+      accessToken: 'at_1',
+      refreshToken: 'rt_1',
+      idToken: 'idt_1',
+      expiresIn: 300,
+    });
+    client.validateToken.mockResolvedValue({
+      email: 'test.user@example.com',
+      exp: Date.now() / 1000 + 300,
+    });
+
+    const handler = auth.createCallbackHandler();
+    const response = await handler(
+      new NextRequest('https://app.example.com/callback?code=abc123')
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('https://app.example.com/');
+    const setCookie = response.headers.get('set-cookie') ?? '';
+    expect(setCookie).toContain('sk_session=');
+    expect(setCookie).toContain('HttpOnly');
+    expect(setCookie).toContain('Secure');
+  });
+
+  it('withAuth without a cookie redirects to login, not a JSON 401', async () => {
+    // Same property tested for Flask/Express/Django: "no valid session" must
+    // be a real redirect a browser follows, not a JSON 401 a background
+    // fetch/XHR would silently swallow.
+    const { auth } = buildAuth();
+    const handler = auth.withAuth(async () => {
+      throw new Error('handler should not be called');
+    });
+
+    const response = await handler(
+      requestWithCookie('https://app.example.com/account')
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'https://app.example.com/login'
+    );
+    expect(response.headers.get('content-type') ?? '').not.toMatch(/json/);
+  });
+
+  it('withAuth with a valid session calls the handler with user', async () => {
+    const { auth, client } = buildAuth('valid-session-secret');
+    const cookieValue = auth.manager.createSessionCookie({
+      user: { email: 'test.user@example.com' },
+      accessToken: 'at_1',
+      refreshToken: 'rt_1',
+      expiresAt: Date.now() / 1000 + 3600,
+    });
+
+    const handler = auth.withAuth(async (_req, { user }) => {
+      return Response.json({
+        email: (user as { email?: string })?.email,
+      }) as never;
+    });
+
+    const response = await handler(
+      requestWithCookie('https://app.example.com/account', cookieValue)
+    );
+
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { email?: string };
+    expect(body.email).toBe('test.user@example.com');
+    expect(client.refreshAccessToken).not.toHaveBeenCalled();
+  });
+
+  it('withAuth with an expired session refreshes transparently', async () => {
+    const { auth, client } = buildAuth('expired-session-secret');
+    client.refreshAccessToken.mockResolvedValue({
+      accessToken: 'at_new',
+      refreshToken: 'rt_new',
+    });
+    client.validateToken.mockResolvedValue({
+      email: 'test.user@example.com',
+      exp: Date.now() / 1000 + 300,
+    });
+    const cookieValue = auth.manager.createSessionCookie({
+      user: { email: 'test.user@example.com' },
+      accessToken: 'at_old',
+      refreshToken: 'rt_old',
+      expiresAt: Date.now() / 1000 - 10,
+    });
+
+    const handler = auth.withAuth(
+      async () => Response.json({ ok: true }) as never
+    );
+    const response = await handler(
+      requestWithCookie('https://app.example.com/account', cookieValue)
+    );
+
+    expect(response.status).toBe(200);
+    expect(client.refreshAccessToken).toHaveBeenCalledWith('rt_old');
+
+    const setCookie = response.headers.get('set-cookie') ?? '';
+    expect(setCookie).toContain('sk_session=');
+    const newCookieValue = setCookie.split('sk_session=')[1].split(';')[0];
+    const newPayload = decryptSession(newCookieValue, 'expired-session-secret');
+    expect(newPayload.accessToken).toBe('at_new');
+  });
+
+  it('withAuth with a failed refresh redirects to login', async () => {
+    const { auth, client } = buildAuth('failed-refresh-secret');
+    client.refreshAccessToken.mockRejectedValue(new Error('invalid_grant'));
+    const cookieValue = auth.manager.createSessionCookie({
+      user: { email: 'user@example.com' },
+      accessToken: 'at_old',
+      refreshToken: 'rt_old',
+      expiresAt: Date.now() / 1000 - 10,
+    });
+
+    const handler = auth.withAuth(async () => {
+      throw new Error('handler should not be called');
+    });
+    const response = await handler(
+      requestWithCookie('https://app.example.com/account', cookieValue)
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'https://app.example.com/login'
+    );
+  });
+
+  it('logout with an invalid cookie falls back to local redirect', async () => {
+    const { auth, client } = buildAuth();
+    const handler = auth.createLogoutHandler();
+
+    const response = await handler(
+      requestWithCookie('https://app.example.com/logout', 'some-garbage-value')
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('https://app.example.com/');
+    expect(client.getLogoutUrl).not.toHaveBeenCalled();
+  });
+
+  it('logout without any cookie falls back to local redirect', async () => {
+    const { auth, client } = buildAuth();
+    const handler = auth.createLogoutHandler();
+
+    const response = await handler(
+      new NextRequest('https://app.example.com/logout')
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('https://app.example.com/');
+    expect(client.getLogoutUrl).not.toHaveBeenCalled();
+  });
+
+  it('logout with a valid session does full logout via idTokenHint', async () => {
+    const { auth, client } = buildAuth('full-logout-secret');
+    client.getLogoutUrl.mockReturnValue(
+      'https://auth.example.com/oidc/logout?id_token_hint=abc'
+    );
+    const cookieValue = auth.manager.createSessionCookie({
+      user: { email: 'test.user@example.com' },
+      accessToken: 'at_1',
+      refreshToken: 'rt_1',
+      idToken: 'idt_1',
+      expiresAt: Date.now() / 1000 + 3600,
+    });
+
+    const handler = auth.createLogoutHandler();
+    const response = await handler(
+      requestWithCookie('https://app.example.com/logout', cookieValue)
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'https://auth.example.com/oidc/logout?id_token_hint=abc'
+    );
+
+    const callOptions = client.getLogoutUrl.mock.calls[0][0];
+    expect(callOptions.idTokenHint).toBe('idt_1');
+    expect(callOptions.postLogoutRedirectUri).toMatch(/^https:\/\//);
+  });
+
+  it('full logout disabled does local-only logout', async () => {
+    const { auth, client } = buildAuth('local-only-secret', {
+      fullLogout: false,
+    });
+    const cookieValue = auth.manager.createSessionCookie({
+      user: { email: 'test.user@example.com' },
+      accessToken: 'at_1',
+      refreshToken: 'rt_1',
+      idToken: 'idt_1',
+      expiresAt: Date.now() / 1000 + 3600,
+    });
+
+    const handler = auth.createLogoutHandler();
+    const response = await handler(
+      requestWithCookie('https://app.example.com/logout', cookieValue)
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe('https://app.example.com/');
+    expect(client.getLogoutUrl).not.toHaveBeenCalled();
+  });
+});
+
+describe('ScalekitAuthNext construction', () => {
+  it('throws immediately when cookieEncryptionSecret is missing', () => {
+    expect(
+      () =>
+        new ScalekitAuthNext({
+          client: fakeClient(),
+          redirectUri: 'https://app.example.com/callback',
+          cookieEncryptionSecret: '',
+        })
+    ).toThrow();
+  });
+});
