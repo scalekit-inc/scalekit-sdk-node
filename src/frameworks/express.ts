@@ -25,6 +25,20 @@ import {
   ScalekitClientLike,
   SessionRefreshManager,
 } from '../middleware/sessionManager';
+import { randomBytes, timingSafeEqual } from 'crypto';
+
+// Short-lived cookie carrying the OAuth `state` value between /login and
+// /callback -- see scalekit-sdk-python's scalekit.frameworks.flask for the
+// full CSRF reasoning (identical here, not framework-specific).
+const STATE_COOKIE_NAME = 'sk_oauth_state';
+const STATE_COOKIE_MAX_AGE = 600; // 10 minutes
+
+function timingSafeStateEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -199,10 +213,18 @@ export class ScalekitAuth {
     // explanation (same backend behavior, not framework-specific): a normal
     // FSA client does not get offline_access added automatically -- that
     // auto-add only applies to MCP/agent clients.
+    // state binds this authorization request to the browser that started
+    // it, so callbackHandler can reject a forged callback carrying an
+    // attacker's own authorization code (CSRF).
+    const state = randomBytes(32).toString('base64url');
     const options: AuthorizationUrlOptions = {
       scopes: ['openid', 'profile', 'email', 'offline_access'],
+      state,
     };
     const url = this.client.getAuthorizationUrl(this.redirectUri, options);
+    new ExpressResponseAdapter(res).setCookie(STATE_COOKIE_NAME, state, {
+      maxAge: STATE_COOKIE_MAX_AGE,
+    });
     res.redirect(url);
   };
 
@@ -210,19 +232,54 @@ export class ScalekitAuth {
     req: Request,
     res: Response
   ): Promise<void> => {
-    const code = req.query.code as string;
-    const result = await this.client.authenticateWithCode(
-      code,
-      this.redirectUri
+    const redirectToLogin = () => {
+      new ExpressResponseAdapter(res).deleteCookie(STATE_COOKIE_NAME);
+      res.redirect(this.loginPath);
+    };
+
+    // The provider redirects here with `error` (no `code`) if the user
+    // cancels consent or the request is otherwise rejected -- never reflect
+    // error/error_description into the response, it's attacker-influenced.
+    const error = req.query.error;
+    const code = req.query.code;
+    if (error || typeof code !== 'string' || !code) {
+      redirectToLogin();
+      return;
+    }
+
+    const storedState = new ExpressRequestAdapter(req).getCookie(
+      STATE_COOKIE_NAME
     );
-    // Access-token claims (not id_token claims) are the source of truth for
-    // `user` -- customers can configure custom access-token claims in the
-    // Scalekit dashboard, and this is also what stays fresh on every refresh
-    // (see SessionRefreshManager.doRefresh). idToken is kept separately,
-    // only for use as idTokenHint on logout.
-    const claims = await this.client.validateToken<Record<string, unknown>>(
-      result.accessToken
-    );
+    const returnedState = req.query.state;
+    if (
+      !storedState ||
+      typeof returnedState !== 'string' ||
+      !returnedState ||
+      !timingSafeStateEqual(storedState, returnedState)
+    ) {
+      // Missing or mismatched state -- this callback did not originate from
+      // a /login this browser actually made. Refuse the exchange.
+      redirectToLogin();
+      return;
+    }
+
+    let result;
+    let claims: Record<string, unknown>;
+    try {
+      result = await this.client.authenticateWithCode(code, this.redirectUri);
+      // Access-token claims (not id_token claims) are the source of truth for
+      // `user` -- customers can configure custom access-token claims in the
+      // Scalekit dashboard, and this is also what stays fresh on every refresh
+      // (see SessionRefreshManager.doRefresh). idToken is kept separately,
+      // only for use as idTokenHint on logout.
+      claims = await this.client.validateToken<Record<string, unknown>>(
+        result.accessToken
+      );
+    } catch {
+      redirectToLogin();
+      return;
+    }
+
     const payload = {
       user: claims,
       accessToken: result.accessToken,
@@ -234,10 +291,9 @@ export class ScalekitAuth {
           : Date.now() / 1000 + (result.expiresIn ?? 300),
     };
     const cookieValue = this.manager.createSessionCookie(payload);
-    new ExpressResponseAdapter(res).setCookie(
-      this.manager.cookieName,
-      cookieValue
-    );
+    const adapter = new ExpressResponseAdapter(res);
+    adapter.setCookie(this.manager.cookieName, cookieValue);
+    adapter.deleteCookie(STATE_COOKIE_NAME);
     res.redirect(this.postLoginRedirect);
   };
 
@@ -261,6 +317,14 @@ export class ScalekitAuth {
       // Scalekit requires an absolute, dashboard-registered post-logout
       // redirect URI -- absolutize a relative default against the current
       // request's host, same as the Flask/FastAPI/Django adapters.
+      //
+      // req.protocol only reflects "https" behind a TLS-terminating proxy
+      // if the app has `app.set('trust proxy', ...)` configured -- see
+      // https://expressjs.com/en/guide/behind-proxies.html. Without it,
+      // this can build an http:// URI in production, which Scalekit's
+      // dashboard will reject if the registered URI is https://. Either
+      // configure trust proxy, or pass an absolute postLogoutRedirectUri
+      // to the constructor to bypass this entirely.
       let absoluteRedirectUri = this.postLogoutRedirectUri;
       if (!/^https?:\/\//.test(absoluteRedirectUri)) {
         absoluteRedirectUri = `${req.protocol}://${req.get('host')}${absoluteRedirectUri}`;

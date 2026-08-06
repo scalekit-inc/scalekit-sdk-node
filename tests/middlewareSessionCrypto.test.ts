@@ -71,4 +71,13 @@ describe('sessionCrypto', () => {
       InvalidSessionError
     );
   });
+
+  it('throws instead of silently producing a cookie the browser will drop', () => {
+    // Browsers silently drop cookies over ~4096 bytes -- a customer with many
+    // custom access-token claims could hit this. Must fail loudly at encrypt
+    // time instead of producing a cookie that just vanishes client-side.
+    const oversizedPayload = { ...payload, user: { claim: 'x'.repeat(4000) } };
+
+    expect(() => encryptSession(oversizedPayload, secret)).toThrow();
+  });
 });

@@ -195,4 +195,40 @@ describe('SessionRefreshManager concurrency', () => {
       expect(result.newCookieValue).toBeDefined();
     }
   });
+
+  it('retries after a transient refresh failure instead of caching it for the full TTL', async () => {
+    const secret = 'retry-after-failure-secret';
+    let attempts = 0;
+
+    const client = fakeClient({
+      refreshAccessToken: jestGlobal.fn(async () => {
+        attempts += 1;
+        if (attempts === 1) throw new Error('ETIMEDOUT');
+        return { accessToken: 'at_new', refreshToken: 'rt_new' };
+      }),
+      validateToken: jestGlobal.fn(async () => ({
+        email: 'user@example.com',
+        exp: Date.now() / 1000 + 300,
+      })),
+    });
+    const manager = new SessionRefreshManager(client, secret);
+    const cookie = encryptSession(
+      {
+        user: { email: 'user@example.com' },
+        accessToken: 'at_old',
+        refreshToken: 'rt_shared',
+        expiresAt: Date.now() / 1000 - 10,
+      },
+      secret
+    );
+
+    const first = await manager.check(new FakeRequest(cookie));
+    expect(first.authenticated).toBe(false);
+    expect(first.reason).toBe('refresh_failed');
+
+    const second = await manager.check(new FakeRequest(cookie));
+    expect(second.authenticated).toBe(true);
+    expect(second.newCookieValue).toBeDefined();
+    expect(attempts).toBe(2);
+  });
 });
