@@ -138,7 +138,7 @@ If instead Scalekit hosts your login UI and you want it to also manage the sessi
 Register these under **Dashboard → Authentication → Redirects** before testing:
 - **Redirect URI** — your `redirectUri` (the `/callback` path). Scalekit rejects the exchange if this doesn't match exactly.
 - **Post Logout Redirect URI** — where users land after full logout. A relative path gets auto-absolutized against the request host, but the resulting absolute URL must still be registered.
-- **Initiate Login URL** — your `/login` path. Scalekit redirects here (not `/callback`) for a bookmarked login page, an IdP portal tile, or an invite/magic link — `loginHandler`/`createLoginHandler` already handle this correctly, including the `idpInitiatedLogin` case, with no extra code required.
+- **Initiate Login URL** — your `/login` path. Scalekit redirects here (not `/callback`) for a bookmarked login page, an IdP portal tile, or an invite/magic link — `loginHandler`/`createLoginHandler` already handle this correctly, including the `idp_initiated_login` query parameter case, with no extra code required.
 
 ```bash
 npm install @scalekit-sdk/node express   # or: npm install @scalekit-sdk/node next
@@ -170,17 +170,36 @@ app.get("/account", auth.requiresAuth, (req, res) => {
 ```
 
 ```javascript
-// Next.js (App Router) -- one auth instance, re-exported from each route file
+// Next.js (App Router) -- one auth instance, constructed once and re-exported
 // lib/auth.js
-export const auth = new ScalekitAuthNext({ client, redirectUri, cookieEncryptionSecret });
+import ScalekitClient from "@scalekit-sdk/node";
+import { ScalekitAuthNext } from "@scalekit-sdk/node/lib/frameworks/nextjs";
+
+const client = new ScalekitClient(
+  process.env.SCALEKIT_ENV_URL,
+  process.env.SCALEKIT_CLIENT_ID,
+  process.env.SCALEKIT_CLIENT_SECRET
+);
+export const auth = new ScalekitAuthNext({
+  client,
+  redirectUri: "https://myapp.com/callback",
+  cookieEncryptionSecret: process.env.COOKIE_ENCRYPTION_SECRET, // openssl rand -base64 32
+});
 
 // app/login/route.js
+import { auth } from "../../lib/auth";
 export const GET = auth.createLoginHandler();
+
 // app/callback/route.js
+import { auth } from "../../lib/auth";
 export const GET = auth.createCallbackHandler();
+
 // app/logout/route.js
+import { auth } from "../../lib/auth";
 export const GET = auth.createLogoutHandler();
+
 // app/account/route.js
+import { auth } from "../../lib/auth";
 export const GET = auth.withAuth(async (request, { user }) => Response.json({ email: user?.email }));
 ```
 
