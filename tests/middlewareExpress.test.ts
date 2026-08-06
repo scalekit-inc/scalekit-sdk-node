@@ -12,6 +12,7 @@ function fakeClient() {
     refreshAccessToken: jestGlobal.fn(),
     validateToken: jestGlobal.fn(),
     getLogoutUrl: jestGlobal.fn(),
+    getIdpInitiatedLoginClaims: jestGlobal.fn(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any;
 }
@@ -61,6 +62,55 @@ describe('ScalekitAuth (Express)', () => {
     expect(res.headers.location).toBe(
       'https://auth.example.com/oauth/authorize?client_id=x'
     );
+  });
+
+  it('login with idp_initiated_login uses claims for the authorization url', async () => {
+    // /login doubles as the dashboard-registered "Initiate Login URL" --
+    // Scalekit can land users here with an idp_initiated_login JWT (e.g. an
+    // IdP portal tile click with an active session) instead of a plain hit.
+    const { app, client } = buildApp();
+    client.getIdpInitiatedLoginClaims.mockResolvedValue({
+      connection_id: 'conn_123',
+      organization_id: 'org_456',
+      login_hint: 'user@example.com',
+    });
+    client.getAuthorizationUrl.mockReturnValue(
+      'https://auth.example.com/oauth/authorize?client_id=x'
+    );
+
+    const res = await request(app)
+      .get('/login?idp_initiated_login=some.jwt.token')
+      .redirects(0);
+
+    expect(res.status).toBe(302);
+    expect(client.getIdpInitiatedLoginClaims).toHaveBeenCalledWith(
+      'some.jwt.token'
+    );
+    const callOptions = client.getAuthorizationUrl.mock.calls[0][1];
+    expect(callOptions.connectionId).toBe('conn_123');
+    expect(callOptions.organizationId).toBe('org_456');
+    expect(callOptions.loginHint).toBe('user@example.com');
+  });
+
+  it('login with an invalid idp_initiated_login falls back to normal login', async () => {
+    const { app, client } = buildApp();
+    client.getIdpInitiatedLoginClaims.mockRejectedValue(
+      new Error('invalid token')
+    );
+    client.getAuthorizationUrl.mockReturnValue(
+      'https://auth.example.com/oauth/authorize?client_id=x'
+    );
+
+    const res = await request(app)
+      .get('/login?idp_initiated_login=garbage')
+      .redirects(0);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe(
+      'https://auth.example.com/oauth/authorize?client_id=x'
+    );
+    const callOptions = client.getAuthorizationUrl.mock.calls[0][1];
+    expect(callOptions.connectionId).toBeUndefined();
   });
 
   it('callback sets an encrypted cookie and redirects', async () => {

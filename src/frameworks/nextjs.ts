@@ -200,20 +200,41 @@ export class ScalekitAuthNext {
   }
 
   createLoginHandler() {
-    return async (): Promise<AnyNextResponse> => {
+    return async (request: NextRequest): Promise<AnyNextResponse> => {
       // offline_access is required to get a refreshToken back at all -- see
       // scalekit-sdk-python's scalekit.frameworks.flask for the full
       // explanation (same backend behavior, not framework-specific): a
       // normal FSA client does not get offline_access added automatically --
       // that auto-add only applies to MCP/agent clients.
-      // state binds this authorization request to the browser that started
-      // it, so createCallbackHandler can reject a forged callback carrying
-      // an attacker's own authorization code (CSRF).
-      const state = generateState();
       const options: AuthorizationUrlOptions = {
         scopes: ['openid', 'profile', 'email', 'offline_access'],
-        state,
       };
+
+      // This handler doubles as the dashboard-registered "Initiate Login
+      // URL" -- see scalekit-sdk-python's scalekit.frameworks.flask for the
+      // full reasoning. relayState is intentionally not forwarded as our
+      // OAuth `state` -- we use our own random value for CSRF cookie-binding
+      // instead (see below).
+      const idpInitiatedLogin = request.nextUrl.searchParams.get(
+        'idp_initiated_login'
+      );
+      if (idpInitiatedLogin) {
+        try {
+          const claims =
+            await this.client.getIdpInitiatedLoginClaims(idpInitiatedLogin);
+          options.connectionId = claims.connection_id;
+          options.organizationId = claims.organization_id;
+          options.loginHint = claims.login_hint;
+        } catch {
+          // falls back to a normal login below
+        }
+      }
+
+      // Bind this authorization request to the browser that started it, so
+      // createCallbackHandler can reject a forged callback carrying an
+      // attacker's own authorization code (CSRF).
+      const state = generateState();
+      options.state = state;
       const url = this.client.getAuthorizationUrl(this.redirectUri, options);
       const response = NextResponse.redirect(url);
       new NextResponseAdapter(response).setCookie(STATE_COOKIE_NAME, state, {

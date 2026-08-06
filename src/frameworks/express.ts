@@ -199,20 +199,42 @@ export class ScalekitAuth {
     return undefined;
   }
 
-  private loginHandler = (_req: Request, res: Response): void => {
+  private loginHandler = async (req: Request, res: Response): Promise<void> => {
     // offline_access is required to get a refreshToken back at all -- see
     // scalekit-sdk-python's scalekit.frameworks.flask for the full
     // explanation (same backend behavior, not framework-specific): a normal
     // FSA client does not get offline_access added automatically -- that
     // auto-add only applies to MCP/agent clients.
-    // state binds this authorization request to the browser that started
-    // it, so callbackHandler can reject a forged callback carrying an
-    // attacker's own authorization code (CSRF).
-    const state = generateState();
     const options: AuthorizationUrlOptions = {
       scopes: ['openid', 'profile', 'email', 'offline_access'],
-      state,
     };
+
+    // This handler doubles as the dashboard-registered "Initiate Login URL":
+    // Scalekit lands users here (not /callback) for a bookmarked/direct
+    // login-page hit, an IdP portal tile, or an invite/magic link. If
+    // there's an active session at that moment, Scalekit attaches an
+    // idpInitiatedLogin JWT so the flow can jump straight to the right
+    // connection/org instead of a generic login. relayState is
+    // intentionally not forwarded as our OAuth `state` -- we use our own
+    // random value for CSRF cookie-binding instead (see below).
+    const idpInitiatedLogin = req.query.idp_initiated_login;
+    if (typeof idpInitiatedLogin === 'string') {
+      try {
+        const claims =
+          await this.client.getIdpInitiatedLoginClaims(idpInitiatedLogin);
+        options.connectionId = claims.connection_id;
+        options.organizationId = claims.organization_id;
+        options.loginHint = claims.login_hint;
+      } catch {
+        // falls back to a normal login below
+      }
+    }
+
+    // Bind this authorization request to the browser that started it, so
+    // callbackHandler can reject a forged callback carrying an attacker's
+    // own authorization code (CSRF).
+    const state = generateState();
+    options.state = state;
     const url = this.client.getAuthorizationUrl(this.redirectUri, options);
     new ExpressResponseAdapter(res).setCookie(STATE_COOKIE_NAME, state, {
       maxAge: STATE_COOKIE_MAX_AGE,
