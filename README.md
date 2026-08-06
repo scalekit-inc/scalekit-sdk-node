@@ -129,9 +129,57 @@ app.listen(3000, () => {
 | **Next.js** | [scalekit-nextjs-demo](https://github.com/scalekit-developers/scalekit-nextjs-demo) | Modern React/Next.js application |
     **Auth.js** | [scalekit-authjs-example](https://github.com/scalekit-developers/scalekit-authjs-example) | Next.js with Auth.js (next-auth v5) |
 
-#### Encrypted-session middleware examples (in this repo)
+#### Full Stack Auth — encrypted-session middleware for Express and Next.js
 
-`@scalekit-sdk/node` ships optional Express and Next.js extras (`@scalekit-sdk/node/lib/frameworks/express`, `.../nextjs`) that handle encrypted session cookies, transparent token refresh, and secure login/callback/logout routes for you — see [`examples/express`](./examples/express) and [`examples/nextjs`](./examples/nextjs) for minimal, runnable versions of the middleware itself. For complete production-oriented sample apps, see the framework repos in the table above.
+The example above is for **Modular SSO**: Scalekit brokers the OAuth exchange with your customer's own IdP via a `connectionId`, and your app owns its own session however it likes.
+
+If instead Scalekit hosts your login UI and you want it to also manage the session lifecycle for you (**Full Stack Auth**), `@scalekit-sdk/node` ships optional Express and Next.js extras that handle the encrypted session cookie, transparent token refresh, CSRF-safe login/callback, and full logout for you — no hand-rolled cookies, no manual refresh timing.
+
+```bash
+npm install @scalekit-sdk/node express   # or: npm install @scalekit-sdk/node next
+```
+
+```javascript
+// Express
+import express from "express";
+import ScalekitClient from "@scalekit-sdk/node";
+import { ScalekitAuth } from "@scalekit-sdk/node/lib/frameworks/express";
+
+const client = new ScalekitClient(
+  process.env.SCALEKIT_ENV_URL,
+  process.env.SCALEKIT_CLIENT_ID,
+  process.env.SCALEKIT_CLIENT_SECRET
+);
+const auth = new ScalekitAuth({
+  client,
+  redirectUri: "https://myapp.com/callback",
+  cookieEncryptionSecret: process.env.COOKIE_ENCRYPTION_SECRET, // openssl rand -base64 32
+});
+
+const app = express();
+app.use(auth.router); // registers /login, /callback, /logout
+
+app.get("/account", auth.requiresAuth, (req, res) => {
+  res.json({ email: req.scalekitUser?.email });
+});
+```
+
+```javascript
+// Next.js (App Router) -- one auth instance, re-exported from each route file
+// lib/auth.js
+export const auth = new ScalekitAuthNext({ client, redirectUri, cookieEncryptionSecret });
+
+// app/login/route.js
+export const GET = auth.createLoginHandler();
+// app/callback/route.js
+export const GET = auth.createCallbackHandler();
+// app/logout/route.js
+export const GET = auth.createLogoutHandler();
+// app/account/route.js
+export const GET = auth.withAuth(async (request, { user }) => Response.json({ email: user?.email }));
+```
+
+See [`examples/express`](./examples/express) and [`examples/nextjs`](./examples/nextjs) for complete, runnable versions. For a fuller production-oriented sample app, see the framework repos in the table above.
 ---
 ### Helpful links
 #### Quickstart Guides
