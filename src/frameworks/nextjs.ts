@@ -26,22 +26,14 @@ import {
   SessionRefreshManager,
   SessionResult,
 } from '../middleware/sessionManager';
-import { randomBytes, timingSafeEqual } from 'crypto';
+import {
+  generateState,
+  STATE_COOKIE_MAX_AGE,
+  STATE_COOKIE_NAME,
+  verifyState,
+} from '../middleware/csrfState';
 
 type AnyNextResponse = InstanceType<typeof import('next/server').NextResponse>;
-
-// Short-lived cookie carrying the OAuth `state` value between the login and
-// callback handlers -- see scalekit-sdk-python's scalekit.frameworks.flask
-// for the full CSRF reasoning (identical here, not framework-specific).
-const STATE_COOKIE_NAME = 'sk_oauth_state';
-const STATE_COOKIE_MAX_AGE = 600; // 10 minutes
-
-function timingSafeStateEqual(a: string, b: string): boolean {
-  const bufA = Buffer.from(a);
-  const bufB = Buffer.from(b);
-  if (bufA.length !== bufB.length) return false;
-  return timingSafeEqual(bufA, bufB);
-}
 
 class NextRequestAdapter implements RequestAdapter {
   constructor(private req: NextRequest) {}
@@ -217,7 +209,7 @@ export class ScalekitAuthNext {
       // state binds this authorization request to the browser that started
       // it, so createCallbackHandler can reject a forged callback carrying
       // an attacker's own authorization code (CSRF).
-      const state = randomBytes(32).toString('base64url');
+      const state = generateState();
       const options: AuthorizationUrlOptions = {
         scopes: ['openid', 'profile', 'email', 'offline_access'],
         state,
@@ -254,44 +246,48 @@ export class ScalekitAuthNext {
       const storedState = new NextRequestAdapter(request).getCookie(
         STATE_COOKIE_NAME
       );
-      const returnedState = request.nextUrl.searchParams.get('state');
-      if (
-        !storedState ||
-        !returnedState ||
-        !timingSafeStateEqual(storedState, returnedState)
-      ) {
+      const returnedState =
+        request.nextUrl.searchParams.get('state') ?? undefined;
+      if (!verifyState(storedState, returnedState)) {
         // Missing or mismatched state -- this callback did not originate
         // from a login this browser actually made. Refuse the exchange.
         return redirectToLogin();
       }
 
-      let result;
-      let claims: Record<string, unknown>;
+      let cookieValue: string;
       try {
-        result = await this.client.authenticateWithCode(code, this.redirectUri);
+        const result = await this.client.authenticateWithCode(
+          code,
+          this.redirectUri
+        );
         // Access-token claims (not id_token claims) are the source of truth
         // for `user` -- customers can configure custom access-token claims in
         // the Scalekit dashboard, and this is also what stays fresh on every
         // refresh (see SessionRefreshManager.doRefresh). idToken is kept
         // separately, only for use as idTokenHint on logout.
-        claims = await this.client.validateToken<Record<string, unknown>>(
+        const claims = await this.client.validateToken<Record<string, unknown>>(
           result.accessToken
         );
+        const payload = {
+          user: claims,
+          accessToken: result.accessToken,
+          refreshToken: result.refreshToken,
+          idToken: result.idToken,
+          expiresAt:
+            typeof claims.exp === 'number'
+              ? claims.exp
+              : Date.now() / 1000 + (result.expiresIn ?? 300),
+        };
+        // createSessionCookie throws if the encrypted payload exceeds the
+        // browser cookie size limit (e.g. several custom access-token
+        // claims configured) -- must stay inside this try, not just the
+        // network calls above, or this route handler throws with no
+        // wrapper around it.
+        cookieValue = this.manager.createSessionCookie(payload);
       } catch {
         return redirectToLogin();
       }
 
-      const payload = {
-        user: claims,
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
-        idToken: result.idToken,
-        expiresAt:
-          typeof claims.exp === 'number'
-            ? claims.exp
-            : Date.now() / 1000 + (result.expiresIn ?? 300),
-      };
-      const cookieValue = this.manager.createSessionCookie(payload);
       const response = NextResponse.redirect(
         new URL(this.postLoginRedirect, request.url)
       );
