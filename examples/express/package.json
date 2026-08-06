@@ -1,0 +1,13 @@
+{
+  "name": "scalekit-express-example",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@scalekit-sdk/node": "file:../..",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}

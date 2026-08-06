@@ -128,6 +128,10 @@ app.listen(3000, () => {
 | **Express.js** | [scalekit-express-example](https://github.com/scalekit-developers/scalekit-express-example) | Basic Express.js server implementation |
 | **Next.js** | [scalekit-nextjs-demo](https://github.com/scalekit-developers/scalekit-nextjs-demo) | Modern React/Next.js application |
     **Auth.js** | [scalekit-authjs-example](https://github.com/scalekit-developers/scalekit-authjs-example) | Next.js with Auth.js (next-auth v5) |
+
+#### Encrypted-session middleware examples (in this repo)
+
+`@scalekit-sdk/node` ships optional Express and Next.js extras (`@scalekit-sdk/node/lib/frameworks/express`, `.../nextjs`) that handle encrypted session cookies, transparent token refresh, and secure login/callback/logout routes for you — see [`examples/express`](./examples/express) and [`examples/nextjs`](./examples/nextjs) for minimal, runnable versions of the middleware itself. For complete production-oriented sample apps, see the framework repos in the table above.
 ---
 ### Helpful links
 #### Quickstart Guides
