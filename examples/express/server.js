@@ -19,9 +19,18 @@ const auth = new ScalekitAuth({
 const app = express();
 app.use(auth.router);
 
-app.get('/', (_req, res) => {
+function hasSessionCookie(req) {
+  const cookieHeader = req.headers.cookie || '';
+  return cookieHeader
+    .split(';')
+    .some((c) => c.trim().startsWith(`${auth.manager.cookieName}=`));
+}
+
+app.get('/', (req, res) => {
   res.send(
-    '<a href="/login">Login</a> | <a href="/account">Account</a> | <a href="/logout">Logout</a>'
+    hasSessionCookie(req)
+      ? '<a href="/account">Account</a> | <a href="/logout">Logout</a>'
+      : '<a href="/login">Login</a>'
   );
 });
 
