@@ -135,6 +135,11 @@ The example above is for **Modular SSO**: Scalekit brokers the OAuth exchange wi
 
 If instead Scalekit hosts your login UI and you want it to also manage the session lifecycle for you (**Full Stack Auth**), `@scalekit-sdk/node` ships optional Express and Next.js extras that handle the encrypted session cookie, transparent token refresh, CSRF-safe login/callback, and full logout for you — no hand-rolled cookies, no manual refresh timing.
 
+Register these under **Dashboard → Authentication → Redirects** before testing:
+- **Redirect URI** — your `redirectUri` (the `/callback` path). Scalekit rejects the exchange if this doesn't match exactly.
+- **Post Logout Redirect URI** — where users land after full logout. A relative path gets auto-absolutized against the request host, but the resulting absolute URL must still be registered.
+- **Initiate Login URL** — your `/login` path. Scalekit redirects here (not `/callback`) for a bookmarked login page, an IdP portal tile, or an invite/magic link — `loginHandler`/`createLoginHandler` already handle this correctly, including the `idpInitiatedLogin` case, with no extra code required.
+
 ```bash
 npm install @scalekit-sdk/node express   # or: npm install @scalekit-sdk/node next
 ```
