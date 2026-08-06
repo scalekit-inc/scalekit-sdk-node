@@ -37,6 +37,23 @@ function requestWithCookie(url: string, cookieValue?: string): NextRequest {
   return new NextRequest(url, { headers });
 }
 
+function requestWithCookies(
+  url: string,
+  cookies: Record<string, string>
+): NextRequest {
+  const cookieHeader = Object.entries(cookies)
+    .map(([name, value]) => `${name}=${value}`)
+    .join('; ');
+  return new NextRequest(url, { headers: { cookie: cookieHeader } });
+}
+
+async function loginAndGetState(auth: ScalekitAuthNext): Promise<string> {
+  const handler = auth.createLoginHandler();
+  const response = await handler();
+  const setCookie = response.headers.get('set-cookie') ?? '';
+  return setCookie.split('sk_oauth_state=')[1]?.split(';')[0] ?? '';
+}
+
 describe('ScalekitAuthNext', () => {
   it('login handler redirects to the authorization url', async () => {
     const { auth, client } = buildAuth();
@@ -55,6 +72,9 @@ describe('ScalekitAuthNext', () => {
 
   it('callback handler sets an encrypted cookie and redirects', async () => {
     const { auth, client } = buildAuth('callback-secret');
+    client.getAuthorizationUrl.mockReturnValue(
+      'https://auth.example.com/oauth/authorize'
+    );
     client.authenticateWithCode.mockResolvedValue({
       user: { email: 'test.user@example.com' },
       accessToken: 'at_1',
@@ -67,9 +87,13 @@ describe('ScalekitAuthNext', () => {
       exp: Date.now() / 1000 + 300,
     });
 
+    const state = await loginAndGetState(auth);
     const handler = auth.createCallbackHandler();
     const response = await handler(
-      new NextRequest('https://app.example.com/callback?code=abc123')
+      requestWithCookies(
+        `https://app.example.com/callback?code=abc123&state=${state}`,
+        { sk_oauth_state: state }
+      )
     );
 
     expect(response.status).toBe(307);
@@ -78,6 +102,77 @@ describe('ScalekitAuthNext', () => {
     expect(setCookie).toContain('sk_session=');
     expect(setCookie).toContain('HttpOnly');
     expect(setCookie).toContain('Secure');
+  });
+
+  it('callback handler with a provider error redirects to login, not a 500', async () => {
+    const { auth, client } = buildAuth();
+    const handler = auth.createCallbackHandler();
+
+    const response = await handler(
+      new NextRequest('https://app.example.com/callback?error=access_denied')
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'https://app.example.com/login'
+    );
+    expect(client.authenticateWithCode).not.toHaveBeenCalled();
+  });
+
+  it('callback handler with a missing code redirects to login', async () => {
+    const { auth, client } = buildAuth();
+    const handler = auth.createCallbackHandler();
+
+    const response = await handler(
+      new NextRequest('https://app.example.com/callback')
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'https://app.example.com/login'
+    );
+    expect(client.authenticateWithCode).not.toHaveBeenCalled();
+  });
+
+  it('callback handler with a missing state redirects to login', async () => {
+    // No login call at all -- no state cookie exists, simulating a forged
+    // callback URL sent directly to a victim.
+    const { auth, client } = buildAuth();
+    const handler = auth.createCallbackHandler();
+
+    const response = await handler(
+      new NextRequest(
+        'https://app.example.com/callback?code=abc123&state=whatever'
+      )
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'https://app.example.com/login'
+    );
+    expect(client.authenticateWithCode).not.toHaveBeenCalled();
+  });
+
+  it('callback handler with a mismatched state redirects to login', async () => {
+    const { auth, client } = buildAuth();
+    client.getAuthorizationUrl.mockReturnValue(
+      'https://auth.example.com/oauth/authorize'
+    );
+
+    const state = await loginAndGetState(auth);
+    const handler = auth.createCallbackHandler();
+    const response = await handler(
+      requestWithCookies(
+        'https://app.example.com/callback?code=abc123&state=attacker-supplied',
+        { sk_oauth_state: state }
+      )
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'https://app.example.com/login'
+    );
+    expect(client.authenticateWithCode).not.toHaveBeenCalled();
   });
 
   it('withAuth without a cookie redirects to login, not a JSON 401', async () => {
@@ -157,6 +252,47 @@ describe('ScalekitAuthNext', () => {
     const newCookieValue = setCookie.split('sk_session=')[1].split(';')[0];
     const newPayload = decryptSession(newCookieValue, 'expired-session-secret');
     expect(newPayload.accessToken).toBe('at_new');
+  });
+
+  it('withAuth rebuilds the response when the handler returns one with immutable headers', async () => {
+    // A wrapped handler proxying an upstream fetch() result is an ordinary
+    // App Router pattern -- that Response's headers are immutable, so
+    // appending the refreshed cookie must not just throw and drop it.
+    const { auth, client } = buildAuth('immutable-headers-secret');
+    client.refreshAccessToken.mockResolvedValue({
+      accessToken: 'at_new',
+      refreshToken: 'rt_new',
+    });
+    client.validateToken.mockResolvedValue({
+      email: 'test.user@example.com',
+      exp: Date.now() / 1000 + 300,
+    });
+    const cookieValue = auth.manager.createSessionCookie({
+      user: { email: 'test.user@example.com' },
+      accessToken: 'at_old',
+      refreshToken: 'rt_old',
+      expiresAt: Date.now() / 1000 - 10,
+    });
+
+    // Simulates the immutable-headers guard a real fetch()-derived Response
+    // carries (verified separately: Node's fetch() results throw on
+    // `.headers.append()` the same way) without making a real network call.
+    const immutableResponse = new Response('upstream body', { status: 200 });
+    jestGlobal
+      .spyOn(immutableResponse.headers, 'append')
+      .mockImplementation(() => {
+        throw new TypeError('immutable');
+      });
+
+    const handler = auth.withAuth(async () => immutableResponse as never);
+    const response = await handler(
+      requestWithCookie('https://app.example.com/account', cookieValue)
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe('upstream body');
+    const setCookie = response.headers.get('set-cookie') ?? '';
+    expect(setCookie).toContain('sk_session=');
   });
 
   it('withAuth with a failed refresh redirects to login', async () => {

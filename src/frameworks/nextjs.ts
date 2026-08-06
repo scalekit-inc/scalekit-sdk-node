@@ -26,8 +26,22 @@ import {
   SessionRefreshManager,
   SessionResult,
 } from '../middleware/sessionManager';
+import { randomBytes, timingSafeEqual } from 'crypto';
 
 type AnyNextResponse = InstanceType<typeof import('next/server').NextResponse>;
+
+// Short-lived cookie carrying the OAuth `state` value between the login and
+// callback handlers -- see scalekit-sdk-python's scalekit.frameworks.flask
+// for the full CSRF reasoning (identical here, not framework-specific).
+const STATE_COOKIE_NAME = 'sk_oauth_state';
+const STATE_COOKIE_MAX_AGE = 600; // 10 minutes
+
+function timingSafeStateEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 class NextRequestAdapter implements RequestAdapter {
   constructor(private req: NextRequest) {}
@@ -72,20 +86,39 @@ function serializeDeleteCookie(
  * `.cookies` API, since a wrapped Route Handler (see withAuth) can
  * legitimately return a plain Web `Response` (e.g. `Response.json(...)`)
  * instead of a `NextResponse` -- a plain Response has no `.cookies` at all.
- * `Headers.append('set-cookie', ...)` works identically on both.
+ * `Headers.append('set-cookie', ...)` works identically on both -- except
+ * when the handler proxies an upstream `fetch()` response (an ordinary App
+ * Router pattern): that Response's headers are immutable, so `.append()`
+ * throws. `res` is mutable so callers can swap in a rebuilt Response on that
+ * path -- see withAuth, which is the only caller that needs to.
  */
 class NextResponseAdapter implements ResponseAdapter {
-  constructor(private res: Response) {}
+  constructor(public res: Response) {}
+
+  private appendSetCookie(cookie: string): void {
+    try {
+      this.res.headers.append('set-cookie', cookie);
+    } catch {
+      // Headers of a fetch()-derived Response are immutable -- rebuild the
+      // response with a mutable copy of its headers before retrying, so the
+      // caller's already-held reference (and its own `res`) point at a
+      // response that will actually carry the cookie.
+      const rebuilt = new Response(this.res.body, {
+        status: this.res.status,
+        statusText: this.res.statusText,
+        headers: new Headers(this.res.headers),
+      });
+      rebuilt.headers.append('set-cookie', cookie);
+      this.res = rebuilt;
+    }
+  }
 
   setCookie(name: string, value: string, options: SetCookieOptions = {}): void {
-    this.res.headers.append(
-      'set-cookie',
-      serializeSetCookie(name, value, options)
-    );
+    this.appendSetCookie(serializeSetCookie(name, value, options));
   }
 
   deleteCookie(name: string, options: DeleteCookieOptions = {}): void {
-    this.res.headers.append('set-cookie', serializeDeleteCookie(name, options));
+    this.appendSetCookie(serializeDeleteCookie(name, options));
   }
 }
 
@@ -181,29 +214,73 @@ export class ScalekitAuthNext {
       // explanation (same backend behavior, not framework-specific): a
       // normal FSA client does not get offline_access added automatically --
       // that auto-add only applies to MCP/agent clients.
+      // state binds this authorization request to the browser that started
+      // it, so createCallbackHandler can reject a forged callback carrying
+      // an attacker's own authorization code (CSRF).
+      const state = randomBytes(32).toString('base64url');
       const options: AuthorizationUrlOptions = {
         scopes: ['openid', 'profile', 'email', 'offline_access'],
+        state,
       };
       const url = this.client.getAuthorizationUrl(this.redirectUri, options);
-      return NextResponse.redirect(url);
+      const response = NextResponse.redirect(url);
+      new NextResponseAdapter(response).setCookie(STATE_COOKIE_NAME, state, {
+        maxAge: STATE_COOKIE_MAX_AGE,
+      });
+      return response;
     };
   }
 
   createCallbackHandler() {
     return async (request: NextRequest): Promise<AnyNextResponse> => {
-      const code = request.nextUrl.searchParams.get('code') ?? '';
-      const result = await this.client.authenticateWithCode(
-        code,
-        this.redirectUri
+      const redirectToLogin = () => {
+        const resp = NextResponse.redirect(
+          new URL(this.loginPath, request.url)
+        );
+        new NextResponseAdapter(resp).deleteCookie(STATE_COOKIE_NAME);
+        return resp;
+      };
+
+      // The provider redirects here with `error` (no `code`) if the user
+      // cancels consent or the request is otherwise rejected -- never
+      // reflect error/error_description into the response, it's
+      // attacker-influenced.
+      const error = request.nextUrl.searchParams.get('error');
+      const code = request.nextUrl.searchParams.get('code');
+      if (error || !code) {
+        return redirectToLogin();
+      }
+
+      const storedState = new NextRequestAdapter(request).getCookie(
+        STATE_COOKIE_NAME
       );
-      // Access-token claims (not id_token claims) are the source of truth
-      // for `user` -- customers can configure custom access-token claims in
-      // the Scalekit dashboard, and this is also what stays fresh on every
-      // refresh (see SessionRefreshManager.doRefresh). idToken is kept
-      // separately, only for use as idTokenHint on logout.
-      const claims = await this.client.validateToken<Record<string, unknown>>(
-        result.accessToken
-      );
+      const returnedState = request.nextUrl.searchParams.get('state');
+      if (
+        !storedState ||
+        !returnedState ||
+        !timingSafeStateEqual(storedState, returnedState)
+      ) {
+        // Missing or mismatched state -- this callback did not originate
+        // from a login this browser actually made. Refuse the exchange.
+        return redirectToLogin();
+      }
+
+      let result;
+      let claims: Record<string, unknown>;
+      try {
+        result = await this.client.authenticateWithCode(code, this.redirectUri);
+        // Access-token claims (not id_token claims) are the source of truth
+        // for `user` -- customers can configure custom access-token claims in
+        // the Scalekit dashboard, and this is also what stays fresh on every
+        // refresh (see SessionRefreshManager.doRefresh). idToken is kept
+        // separately, only for use as idTokenHint on logout.
+        claims = await this.client.validateToken<Record<string, unknown>>(
+          result.accessToken
+        );
+      } catch {
+        return redirectToLogin();
+      }
+
       const payload = {
         user: claims,
         accessToken: result.accessToken,
@@ -218,10 +295,9 @@ export class ScalekitAuthNext {
       const response = NextResponse.redirect(
         new URL(this.postLoginRedirect, request.url)
       );
-      new NextResponseAdapter(response).setCookie(
-        this.manager.cookieName,
-        cookieValue
-      );
+      const adapter = new NextResponseAdapter(response);
+      adapter.setCookie(this.manager.cookieName, cookieValue);
+      adapter.deleteCookie(STATE_COOKIE_NAME);
       return response;
     };
   }
@@ -314,10 +390,13 @@ export class ScalekitAuthNext {
       });
 
       if (result.newCookieValue) {
-        new NextResponseAdapter(response).setCookie(
-          this.manager.cookieName,
-          result.newCookieValue
-        );
+        // Capture the adapter, not just `response` -- if the handler's
+        // response has immutable headers (e.g. it proxied an upstream
+        // fetch() call), the adapter rebuilds it internally and `adapter.res`
+        // is the one that actually carries the new cookie.
+        const adapter = new NextResponseAdapter(response);
+        adapter.setCookie(this.manager.cookieName, result.newCookieValue);
+        return adapter.res as AnyNextResponse;
       }
       return response;
     };
