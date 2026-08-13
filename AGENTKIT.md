@@ -8,7 +8,7 @@ Create a single [`ScalekitClient`](https://github.com/scalekit-inc/scalekit-sdk-
 import { ScalekitClient } from '@scalekit-sdk/node';
 
 const scalekitClient = new ScalekitClient(
-  process.env.SCALEKIT_ENV_URL!,
+  process.env.SCALEKIT_ENVIRONMENT_URL!,
   process.env.SCALEKIT_CLIENT_ID!,
   process.env.SCALEKIT_CLIENT_SECRET!
 );

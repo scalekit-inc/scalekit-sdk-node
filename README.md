@@ -54,7 +54,7 @@ pnpm add @scalekit-sdk/node
 ```javascript
 import { ScalekitClient } from "@scalekit-sdk/node";
 const scalekitClient = new ScalekitClient(
-  process.env.SCALEKIT_ENV_URL!,
+  process.env.SCALEKIT_ENVIRONMENT_URL!,
   process.env.SCALEKIT_CLIENT_ID!,
   process.env.SCALEKIT_CLIENT_SECRET!
 );
@@ -71,7 +71,7 @@ import express from "express";
 import { ScalekitClient } from "@scalekit-sdk/node";
 const app = express();
 const scalekitClient = new ScalekitClient(
-  process.env.SCALEKIT_ENV_URL!,
+  process.env.SCALEKIT_ENVIRONMENT_URL!,
   process.env.SCALEKIT_CLIENT_ID!,
   process.env.SCALEKIT_CLIENT_SECRET!
 );
@@ -151,7 +151,7 @@ import ScalekitClient from "@scalekit-sdk/node";
 import { ScalekitAuth } from "@scalekit-sdk/node/lib/frameworks/express";
 
 const client = new ScalekitClient(
-  process.env.SCALEKIT_ENV_URL,
+  process.env.SCALEKIT_ENVIRONMENT_URL,
   process.env.SCALEKIT_CLIENT_ID,
   process.env.SCALEKIT_CLIENT_SECRET
 );
@@ -176,7 +176,7 @@ import ScalekitClient from "@scalekit-sdk/node";
 import { ScalekitAuthNext } from "@scalekit-sdk/node/lib/frameworks/nextjs";
 
 const client = new ScalekitClient(
-  process.env.SCALEKIT_ENV_URL,
+  process.env.SCALEKIT_ENVIRONMENT_URL,
   process.env.SCALEKIT_CLIENT_ID,
   process.env.SCALEKIT_CLIENT_SECRET
 );

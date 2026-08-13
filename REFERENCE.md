@@ -32,7 +32,7 @@ Find your Environment URL, Client ID, and Client Secret in Scalekit Dashboard â†
 import { ScalekitClient } from '@scalekit-sdk/node';
 
 const scalekitClient = new ScalekitClient(
-  process.env.SCALEKIT_ENV_URL!,
+  process.env.SCALEKIT_ENVIRONMENT_URL!,
   process.env.SCALEKIT_CLIENT_ID!,
   process.env.SCALEKIT_CLIENT_SECRET!
 );
