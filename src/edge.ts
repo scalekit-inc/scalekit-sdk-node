@@ -70,6 +70,7 @@ export class ScalekitEdgeClient {
       state: options?.state,
       nonce: options?.nonce,
       domain_hint: options?.domainHint,
+      domain: options?.domainHint,
       login_hint: options?.loginHint,
       code_challenge: options?.codeChallenge,
       code_challenge_method: options?.codeChallengeMethod,

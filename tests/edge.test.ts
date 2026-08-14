@@ -62,6 +62,16 @@ describe('ScalekitEdgeClient.getAuthorizationUrl', () => {
       true
     );
   });
+
+  it('sets both domain_hint and domain when domainHint is provided', () => {
+    const url = client.getAuthorizationUrl('https://app.example.com/callback', {
+      domainHint: 'example.com',
+    });
+    const parsed = new URL(url);
+
+    expect(parsed.searchParams.get('domain_hint')).toBe('example.com');
+    expect(parsed.searchParams.get('domain')).toBe('example.com');
+  });
 });
 
 describe('ScalekitEdgeClient.getLogoutUrl', () => {
