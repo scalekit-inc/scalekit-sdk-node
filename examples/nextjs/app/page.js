@@ -1,14 +1,12 @@
-import { cookies } from 'next/headers';
 import { auth } from '../lib/auth';
 
 export default async function Home() {
-  const cookieStore = await cookies();
-  const loggedIn = Boolean(cookieStore.get(auth.manager.cookieName));
+  const user = await auth.currentUser();
 
   return (
     <div>
       <h1>Next.js middleware example</h1>
-      {loggedIn ? (
+      {user ? (
         <>
           <a href="/account">Account</a> | <a href="/logout">Logout</a>
         </>
