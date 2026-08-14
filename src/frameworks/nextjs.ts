@@ -398,6 +398,28 @@ export class ScalekitAuthNext {
   }
 
   /**
+   * Builds a redirect to the login page when authentication fails.
+   * Sanitizes the returnTo query param to prevent open redirect attacks,
+   * and conditionally clears the session cookie if needed.
+   */
+  private buildUnauthenticatedRedirect(
+    request: NextRequest,
+    result: SessionResult,
+    returnToSource: string
+  ): AnyNextResponse {
+    const returnTo = sanitizeReturnTo(returnToSource);
+    const loginUrl = new URL(this.loginPath, request.url);
+    if (returnTo) {
+      loginUrl.searchParams.set('returnTo', returnTo);
+    }
+    const response = NextResponse.redirect(loginUrl);
+    if (result.shouldClearCookie) {
+      new NextResponseAdapter(response).deleteCookie(this.manager.cookieName);
+    }
+    return response as AnyNextResponse;
+  }
+
+  /**
    * Wraps a Route Handler so it only runs when there's a valid (or
    * transparently-refreshed) session. On "no valid session," redirects to
    * `loginPath` -- a real 3xx redirect, never a JSON 401 a background
@@ -419,20 +441,11 @@ export class ScalekitAuthNext {
       );
 
       if (!result.authenticated) {
-        const returnTo = sanitizeReturnTo(
+        return this.buildUnauthenticatedRedirect(
+          request,
+          result,
           request.nextUrl.pathname + request.nextUrl.search
         );
-        const loginUrl = new URL(this.loginPath, request.url);
-        if (returnTo) {
-          loginUrl.searchParams.set('returnTo', returnTo);
-        }
-        const response = NextResponse.redirect(loginUrl);
-        if (result.shouldClearCookie) {
-          new NextResponseAdapter(response).deleteCookie(
-            this.manager.cookieName
-          );
-        }
-        return response;
       }
 
       const response = await handler(request, {
@@ -491,18 +504,11 @@ export class ScalekitAuthNext {
       const result = await this.manager.check(new NextRequestAdapter(request));
 
       if (!result.authenticated) {
-        const returnTo = sanitizeReturnTo(pathname + request.nextUrl.search);
-        const loginUrl = new URL(this.loginPath, request.url);
-        if (returnTo) {
-          loginUrl.searchParams.set('returnTo', returnTo);
-        }
-        const response = NextResponse.redirect(loginUrl);
-        if (result.shouldClearCookie) {
-          new NextResponseAdapter(response).deleteCookie(
-            this.manager.cookieName
-          );
-        }
-        return response;
+        return this.buildUnauthenticatedRedirect(
+          request,
+          result,
+          pathname + request.nextUrl.search
+        );
       }
 
       const response = NextResponse.next();
