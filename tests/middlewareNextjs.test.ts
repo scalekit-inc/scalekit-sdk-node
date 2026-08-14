@@ -257,7 +257,7 @@ describe('ScalekitAuthNext', () => {
 
   it('withAuth with a valid session calls the handler with user', async () => {
     const { auth, client } = buildAuth('valid-session-secret');
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'test.user@example.com' },
       accessToken: 'at_1',
       refreshToken: 'rt_1',
@@ -290,7 +290,7 @@ describe('ScalekitAuthNext', () => {
       email: 'test.user@example.com',
       exp: Date.now() / 1000 + 300,
     });
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'test.user@example.com' },
       accessToken: 'at_old',
       refreshToken: 'rt_old',
@@ -310,7 +310,7 @@ describe('ScalekitAuthNext', () => {
     const setCookie = response.headers.get('set-cookie') ?? '';
     expect(setCookie).toContain('sk_session=');
     const newCookieValue = setCookie.split('sk_session=')[1].split(';')[0];
-    const newPayload = decryptSession(newCookieValue, 'expired-session-secret');
+    const newPayload = await decryptSession(newCookieValue, 'expired-session-secret');
     expect(newPayload.accessToken).toBe('at_new');
   });
 
@@ -327,7 +327,7 @@ describe('ScalekitAuthNext', () => {
       email: 'test.user@example.com',
       exp: Date.now() / 1000 + 300,
     });
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'test.user@example.com' },
       accessToken: 'at_old',
       refreshToken: 'rt_old',
@@ -358,7 +358,7 @@ describe('ScalekitAuthNext', () => {
   it('withAuth with a failed refresh redirects to login', async () => {
     const { auth, client } = buildAuth('failed-refresh-secret');
     client.refreshAccessToken.mockRejectedValue(new Error('invalid_grant'));
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'user@example.com' },
       accessToken: 'at_old',
       refreshToken: 'rt_old',
@@ -409,7 +409,7 @@ describe('ScalekitAuthNext', () => {
     client.getLogoutUrl.mockReturnValue(
       'https://auth.example.com/oidc/logout?id_token_hint=abc'
     );
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'test.user@example.com' },
       accessToken: 'at_1',
       refreshToken: 'rt_1',
@@ -436,7 +436,7 @@ describe('ScalekitAuthNext', () => {
     const { auth, client } = buildAuth('local-only-secret', {
       fullLogout: false,
     });
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'test.user@example.com' },
       accessToken: 'at_1',
       refreshToken: 'rt_1',

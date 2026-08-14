@@ -19,7 +19,6 @@ import {
   ResponseAdapter,
   SetCookieOptions,
 } from '../middleware/protocol';
-import { InvalidSessionError } from '../middleware/sessionCrypto';
 import {
   DEFAULT_COOKIE_NAME,
   ScalekitClientLike,
@@ -304,7 +303,7 @@ export class ScalekitAuthNext {
         // claims configured) -- must stay inside this try, not just the
         // network calls above, or this route handler throws with no
         // wrapper around it.
-        cookieValue = this.manager.createSessionCookie(payload);
+        cookieValue = await this.manager.createSessionCookie(payload);
       } catch {
         return redirectToLogin();
       }
@@ -327,10 +326,9 @@ export class ScalekitAuthNext {
       let idToken: string | undefined;
       if (cookieValue) {
         try {
-          const payload = this.manager.decryptCookieValue(cookieValue);
+          const payload = await this.manager.decryptCookieValue(cookieValue);
           idToken = payload.idToken as string | undefined;
-        } catch (err) {
-          if (!(err instanceof InvalidSessionError)) throw err;
+        } catch {
           // nothing usable to hint with -- fall through to local-only redirect
         }
       }
