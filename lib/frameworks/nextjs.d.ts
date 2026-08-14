@@ -88,8 +88,8 @@ export declare class ScalekitAuthNext {
      */
     withAuth<Ctx = unknown>(handler: (request: NextRequest, context: AuthenticatedRouteContext & Ctx) => Promise<AnyNextResponse> | AnyNextResponse): (request: NextRequest, context?: Ctx) => Promise<AnyNextResponse>;
     /**
-     * Secure-by-default Edge middleware: every route is gated unless listed in
-     * `publicRoutes` or one of the auth flow's own paths (loginPath,
+     * Secure-by-default Next.js middleware: every route is gated unless listed
+     * in `publicRoutes` or one of the auth flow's own paths (loginPath,
      * callbackPath, logoutPath -- excluded automatically so the auth flow
      * never redirects to itself). Modeled on WorkOS AuthKit's
      * authkitMiddleware()/unauthenticatedPaths, not an opt-in matcher --
@@ -97,14 +97,23 @@ export declare class ScalekitAuthNext {
      * *closed* (redirected to login) instead of *open* (silently
      * unprotected).
      *
-     * Next.js requires `export const config = { matcher: [...] }` as a
-     * separate, statically-analyzable export in your own middleware.ts --
-     * this cannot generate that for you. A recommended default (excluding
-     * _next/static, _next/image, favicon.ico) belongs in your own file:
+     * Runs on the Node.js middleware runtime, not Edge Runtime -- verified via
+     * a real `next build`: `ScalekitClient` (its User-Agent construction in
+     * core.ts, and its gRPC transport) is Node-only, so `export const config`
+     * must pin `runtime: 'nodejs'` explicitly, or the build fails. This
+     * module's own crypto (sessionCrypto.ts) no longer blocks an Edge move,
+     * but ScalekitClient itself would need Edge-safe alternatives first.
+     *
+     * Next.js requires `export const config = { matcher: [...], runtime:
+     * 'nodejs' }` as a separate, statically-analyzable export in your own
+     * middleware.ts -- this cannot generate that for you. A recommended
+     * default (excluding _next/static, _next/image, favicon.ico) belongs in
+     * your own file:
      *
      *   // middleware.ts
      *   export default auth.createMiddleware({ publicRoutes: ['/', '/pricing'] });
      *   export const config = {
+     *     runtime: 'nodejs',
      *     matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
      *   };
      */

@@ -37,10 +37,14 @@ export class InvalidSessionError extends Error {
   }
 }
 
-// webcrypto.subtle (not node:crypto's createCipheriv/hkdfSync) so this module
-// runs unchanged in both plain Node and Next.js's Edge middleware runtime --
-// one crypto implementation for both, not two to keep in sync. Promise-based,
-// so encryptSession/decryptSession are async -- see sessionManager.ts callers.
+// webcrypto.subtle (not node:crypto's createCipheriv/hkdfSync), so this
+// module's own crypto primitives are Web-standard rather than Node-only.
+// createMiddleware() (see nextjs.ts) currently still runs on the Node.js
+// middleware runtime, not true Edge Runtime -- ScalekitClient's own
+// User-Agent construction and gRPC transport are Node-only, independent of
+// this file -- but this migration means sessionCrypto.ts itself is no
+// longer what's blocking a future move to Edge. Promise-based, so
+// encryptSession/decryptSession are async -- see sessionManager.ts callers.
 async function deriveKey(secret: string): Promise<CryptoKey> {
   if (!secret) {
     throw new Error(SECRET_HELP);
