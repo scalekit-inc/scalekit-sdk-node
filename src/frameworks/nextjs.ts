@@ -12,7 +12,6 @@ try {
   );
 }
 
-import ScalekitClient from '../scalekit';
 import { AuthorizationUrlOptions, LogoutUrlOptions } from '../types/scalekit';
 import {
   DeleteCookieOptions,
@@ -118,10 +117,7 @@ class NextResponseAdapter implements ResponseAdapter {
 }
 
 export interface ScalekitAuthNextOptions {
-  client?: ScalekitAuthClient;
-  clientId?: string;
-  clientSecret?: string;
-  envUrl?: string;
+  client: ScalekitAuthClient;
   redirectUri: string;
   cookieEncryptionSecret: string;
   cookieName?: string;
@@ -189,13 +185,7 @@ export class ScalekitAuthNext {
   private readonly fullLogout: boolean;
 
   constructor(options: ScalekitAuthNextOptions) {
-    this.client =
-      options.client ??
-      new ScalekitClient(
-        options.envUrl!,
-        options.clientId!,
-        options.clientSecret!
-      );
+    this.client = options.client;
     this.redirectUri = options.redirectUri;
     this.loginPath = options.loginPath ?? '/login';
     this.callbackPath = options.callbackPath ?? '/callback';

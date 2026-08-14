@@ -3,10 +3,7 @@ import { ScalekitAuthClient } from '../middleware/protocol';
 import { SessionRefreshManager } from '../middleware/sessionManager';
 type AnyNextResponse = InstanceType<typeof import('next/server').NextResponse>;
 export interface ScalekitAuthNextOptions {
-    client?: ScalekitAuthClient;
-    clientId?: string;
-    clientSecret?: string;
-    envUrl?: string;
+    client: ScalekitAuthClient;
     redirectUri: string;
     cookieEncryptionSecret: string;
     cookieName?: string;
