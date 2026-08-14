@@ -452,4 +452,67 @@ export class ScalekitAuthNext {
       return response;
     };
   }
+
+  /**
+   * Secure-by-default Edge middleware: every route is gated unless listed in
+   * `publicRoutes` or one of the auth flow's own paths (loginPath,
+   * callbackPath, logoutPath -- excluded automatically so the auth flow
+   * never redirects to itself). Modeled on WorkOS AuthKit's
+   * authkitMiddleware()/unauthenticatedPaths, not an opt-in matcher --
+   * deliberately inverts the failure direction so an unlisted route fails
+   * *closed* (redirected to login) instead of *open* (silently
+   * unprotected).
+   *
+   * Next.js requires `export const config = { matcher: [...] }` as a
+   * separate, statically-analyzable export in your own middleware.ts --
+   * this cannot generate that for you. A recommended default (excluding
+   * _next/static, _next/image, favicon.ico) belongs in your own file:
+   *
+   *   // middleware.ts
+   *   export default auth.createMiddleware({ publicRoutes: ['/', '/pricing'] });
+   *   export const config = {
+   *     matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+   *   };
+   */
+  createMiddleware(options: { publicRoutes?: string[] } = {}) {
+    const publicRoutes = new Set(options.publicRoutes ?? []);
+    const authFlowPaths = new Set([
+      this.loginPath,
+      this.callbackPath,
+      this.logoutPath,
+    ]);
+
+    return async (request: NextRequest): Promise<AnyNextResponse> => {
+      const pathname = request.nextUrl.pathname;
+      if (authFlowPaths.has(pathname) || publicRoutes.has(pathname)) {
+        return NextResponse.next() as AnyNextResponse;
+      }
+
+      const result = await this.manager.check(new NextRequestAdapter(request));
+
+      if (!result.authenticated) {
+        const returnTo = sanitizeReturnTo(pathname + request.nextUrl.search);
+        const loginUrl = new URL(this.loginPath, request.url);
+        if (returnTo) {
+          loginUrl.searchParams.set('returnTo', returnTo);
+        }
+        const response = NextResponse.redirect(loginUrl);
+        if (result.shouldClearCookie) {
+          new NextResponseAdapter(response).deleteCookie(
+            this.manager.cookieName
+          );
+        }
+        return response;
+      }
+
+      const response = NextResponse.next();
+      if (result.newCookieValue) {
+        new NextResponseAdapter(response).setCookie(
+          this.manager.cookieName,
+          result.newCookieValue
+        );
+      }
+      return response as AnyNextResponse;
+    };
+  }
 }

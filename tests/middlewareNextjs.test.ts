@@ -527,3 +527,71 @@ describe('ScalekitAuthNext construction', () => {
     ).toThrow();
   });
 });
+
+describe('ScalekitAuthNext.createMiddleware', () => {
+  it('redirects an unauthenticated request on a protected route, with returnTo', async () => {
+    const { auth } = buildAuth();
+    const middleware = auth.createMiddleware();
+
+    const response = await middleware(
+      requestWithCookie('https://app.example.com/account?tab=billing')
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'https://app.example.com/login?returnTo=%2Faccount%3Ftab%3Dbilling'
+    );
+  });
+
+  it('passes through a publicRoutes entry with no session check at all', async () => {
+    const { auth, client } = buildAuth();
+    const middleware = auth.createMiddleware({ publicRoutes: ['/pricing'] });
+
+    const response = await middleware(
+      new NextRequest('https://app.example.com/pricing')
+    );
+
+    expect(response.status).toBe(200); // NextResponse.next() default
+    expect(client.validateToken).not.toHaveBeenCalled();
+    expect(client.refreshAccessToken).not.toHaveBeenCalled();
+  });
+
+  it('always excludes loginPath/callbackPath/logoutPath from gating', async () => {
+    const { auth } = buildAuth();
+    const middleware = auth.createMiddleware();
+
+    for (const path of ['/login', '/callback', '/logout']) {
+      const response = await middleware(
+        new NextRequest(`https://app.example.com${path}`)
+      );
+      expect(response.status).toBe(200);
+    }
+  });
+
+  it('passes through an authenticated request and attaches a refreshed cookie', async () => {
+    const { auth, client } = buildAuth('middleware-refresh-secret');
+    client.refreshAccessToken.mockResolvedValue({
+      accessToken: 'at_new',
+      refreshToken: 'rt_new',
+    });
+    client.validateToken.mockResolvedValue({
+      email: 'test.user@example.com',
+      exp: Date.now() / 1000 + 300,
+    });
+    const cookieValue = await auth.manager.createSessionCookie({
+      user: { email: 'test.user@example.com' },
+      accessToken: 'at_old',
+      refreshToken: 'rt_old',
+      expiresAt: Date.now() / 1000 - 10,
+    });
+    const middleware = auth.createMiddleware();
+
+    const response = await middleware(
+      requestWithCookie('https://app.example.com/account', cookieValue)
+    );
+
+    expect(response.status).toBe(200);
+    const setCookie = response.headers.get('set-cookie') ?? '';
+    expect(setCookie).toContain('sk_session=');
+  });
+});
