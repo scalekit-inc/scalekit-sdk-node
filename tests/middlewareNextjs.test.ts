@@ -250,9 +250,66 @@ describe('ScalekitAuthNext', () => {
 
     expect(response.status).toBe(307);
     expect(response.headers.get('location')).toBe(
-      'https://app.example.com/login'
+      'https://app.example.com/login?returnTo=%2Faccount'
     );
     expect(response.headers.get('content-type') ?? '').not.toMatch(/json/);
+  });
+
+  it('withAuth without a cookie redirects to login with returnTo set', async () => {
+    const { auth } = buildAuth();
+    const handler = auth.withAuth(async () => {
+      throw new Error('handler should not be called');
+    });
+
+    const response = await handler(
+      requestWithCookie('https://app.example.com/account?tab=billing')
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'https://app.example.com/login?returnTo=%2Faccount%3Ftab%3Dbilling'
+    );
+  });
+
+  it('completing login lands back on the preserved returnTo path', async () => {
+    const { auth, client } = buildAuth('returnto-secret');
+    client.getAuthorizationUrl.mockReturnValue(
+      'https://auth.example.com/oauth/authorize'
+    );
+    client.authenticateWithCode.mockResolvedValue({
+      user: { email: 'test.user@example.com' },
+      accessToken: 'at_1',
+      refreshToken: 'rt_1',
+      idToken: 'idt_1',
+      expiresIn: 300,
+    });
+    client.validateToken.mockResolvedValue({
+      email: 'test.user@example.com',
+      exp: Date.now() / 1000 + 300,
+    });
+
+    const loginHandler = auth.createLoginHandler();
+    const loginResponse = await loginHandler(
+      new NextRequest('https://app.example.com/login?returnTo=%2Faccount')
+    );
+    const setCookie = loginResponse.headers.get('set-cookie') ?? '';
+    const state = setCookie.split('sk_oauth_state=')[1]?.split(';')[0] ?? '';
+    const returnToCookie =
+      setCookie.split('sk_return_to=')[1]?.split(';')[0] ?? '';
+    expect(returnToCookie).toBeTruthy();
+
+    const callbackHandler = auth.createCallbackHandler();
+    const response = await callbackHandler(
+      requestWithCookies(
+        `https://app.example.com/callback?code=abc123&state=${state}`,
+        { sk_oauth_state: state, sk_return_to: returnToCookie }
+      )
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'https://app.example.com/account'
+    );
   });
 
   it('withAuth with a valid session calls the handler with user', async () => {
@@ -310,7 +367,10 @@ describe('ScalekitAuthNext', () => {
     const setCookie = response.headers.get('set-cookie') ?? '';
     expect(setCookie).toContain('sk_session=');
     const newCookieValue = setCookie.split('sk_session=')[1].split(';')[0];
-    const newPayload = await decryptSession(newCookieValue, 'expired-session-secret');
+    const newPayload = await decryptSession(
+      newCookieValue,
+      'expired-session-secret'
+    );
     expect(newPayload.accessToken).toBe('at_new');
   });
 
@@ -374,7 +434,7 @@ describe('ScalekitAuthNext', () => {
 
     expect(response.status).toBe(307);
     expect(response.headers.get('location')).toBe(
-      'https://app.example.com/login'
+      'https://app.example.com/login?returnTo=%2Faccount'
     );
   });
 

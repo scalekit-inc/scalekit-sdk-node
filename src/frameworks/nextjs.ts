@@ -27,6 +27,8 @@ import {
 } from '../middleware/sessionManager';
 import {
   generateState,
+  RETURN_TO_COOKIE_NAME,
+  sanitizeReturnTo,
   STATE_COOKIE_MAX_AGE,
   STATE_COOKIE_NAME,
   verifyState,
@@ -132,6 +134,15 @@ export interface ScalekitAuthNextOptions {
    * for most apps. Set to false to opt into local-only logout.
    */
   fullLogout?: boolean;
+  /**
+   * Only used by createMiddleware() to auto-exclude the auth flow's own
+   * routes from the secure-by-default gating check -- Next.js doesn't
+   * self-register routes the way Express's Router does, so these three
+   * paths must be told explicitly (defaults match the conventional
+   * app/callback/route.ts, app/logout/route.ts locations).
+   */
+  callbackPath?: string;
+  logoutPath?: string;
 }
 
 export interface AuthenticatedRouteContext {
@@ -169,6 +180,8 @@ export class ScalekitAuthNext {
 
   private readonly redirectUri: string;
   private readonly loginPath: string;
+  private readonly callbackPath: string;
+  private readonly logoutPath: string;
   private readonly postLoginRedirect: string;
   private readonly postLogoutRedirectUri: string;
   private readonly fullLogout: boolean;
@@ -183,6 +196,8 @@ export class ScalekitAuthNext {
       );
     this.redirectUri = options.redirectUri;
     this.loginPath = options.loginPath ?? '/login';
+    this.callbackPath = options.callbackPath ?? '/callback';
+    this.logoutPath = options.logoutPath ?? '/logout';
     this.postLoginRedirect = options.postLoginRedirect ?? '/';
     this.postLogoutRedirectUri =
       options.postLogoutRedirectUri ?? this.postLoginRedirect;
@@ -236,10 +251,21 @@ export class ScalekitAuthNext {
       options.state = state;
       const url = this.client.getAuthorizationUrl(this.redirectUri, options);
       const response = NextResponse.redirect(url);
-      new NextResponseAdapter(response).setCookie(STATE_COOKIE_NAME, state, {
+      const adapter = new NextResponseAdapter(response);
+      adapter.setCookie(STATE_COOKIE_NAME, state, {
         maxAge: STATE_COOKIE_MAX_AGE,
       });
-      return response;
+
+      const returnTo = sanitizeReturnTo(
+        request.nextUrl.searchParams.get('returnTo')
+      );
+      if (returnTo) {
+        adapter.setCookie(RETURN_TO_COOKIE_NAME, returnTo, {
+          maxAge: STATE_COOKIE_MAX_AGE,
+        });
+      }
+
+      return adapter.res as AnyNextResponse;
     };
   }
 
@@ -249,8 +275,10 @@ export class ScalekitAuthNext {
         const resp = NextResponse.redirect(
           new URL(this.loginPath, request.url)
         );
-        new NextResponseAdapter(resp).deleteCookie(STATE_COOKIE_NAME);
-        return resp;
+        const adapter = new NextResponseAdapter(resp);
+        adapter.deleteCookie(STATE_COOKIE_NAME);
+        adapter.deleteCookie(RETURN_TO_COOKIE_NAME);
+        return adapter.res as AnyNextResponse;
       };
 
       // The provider redirects here with `error` (no `code`) if the user
@@ -263,9 +291,8 @@ export class ScalekitAuthNext {
         return redirectToLogin();
       }
 
-      const storedState = new NextRequestAdapter(request).getCookie(
-        STATE_COOKIE_NAME
-      );
+      const requestAdapter = new NextRequestAdapter(request);
+      const storedState = requestAdapter.getCookie(STATE_COOKIE_NAME);
       const returnedState =
         request.nextUrl.searchParams.get('state') ?? undefined;
       if (!verifyState(storedState, returnedState)) {
@@ -308,13 +335,17 @@ export class ScalekitAuthNext {
         return redirectToLogin();
       }
 
+      const returnTo = sanitizeReturnTo(
+        requestAdapter.getCookie(RETURN_TO_COOKIE_NAME)
+      );
       const response = NextResponse.redirect(
-        new URL(this.postLoginRedirect, request.url)
+        new URL(returnTo ?? this.postLoginRedirect, request.url)
       );
       const adapter = new NextResponseAdapter(response);
       adapter.setCookie(this.manager.cookieName, cookieValue);
       adapter.deleteCookie(STATE_COOKIE_NAME);
-      return response;
+      adapter.deleteCookie(RETURN_TO_COOKIE_NAME);
+      return adapter.res as AnyNextResponse;
     };
   }
 
@@ -388,9 +419,14 @@ export class ScalekitAuthNext {
       );
 
       if (!result.authenticated) {
-        const response = NextResponse.redirect(
-          new URL(this.loginPath, request.url)
+        const returnTo = sanitizeReturnTo(
+          request.nextUrl.pathname + request.nextUrl.search
         );
+        const loginUrl = new URL(this.loginPath, request.url);
+        if (returnTo) {
+          loginUrl.searchParams.set('returnTo', returnTo);
+        }
+        const response = NextResponse.redirect(loginUrl);
         if (result.shouldClearCookie) {
           new NextResponseAdapter(response).deleteCookie(
             this.manager.cookieName
