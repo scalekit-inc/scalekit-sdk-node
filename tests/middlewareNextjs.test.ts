@@ -315,6 +315,45 @@ describe('ScalekitAuthNext', () => {
     );
   });
 
+  it('rejects an open-redirect returnTo and falls back to postLoginRedirect', async () => {
+    const { auth, client } = buildAuth('returnto-open-redirect-secret');
+    client.getAuthorizationUrl.mockReturnValue(
+      'https://auth.example.com/oauth/authorize'
+    );
+    client.authenticateWithCode.mockResolvedValue({
+      user: { email: 'test.user@example.com' },
+      accessToken: 'at_1',
+      refreshToken: 'rt_1',
+      idToken: 'idt_1',
+      expiresIn: 300,
+    });
+    client.validateToken.mockResolvedValue({
+      email: 'test.user@example.com',
+      exp: Date.now() / 1000 + 300,
+    });
+
+    const loginHandler = auth.createLoginHandler();
+    const loginResponse = await loginHandler(
+      new NextRequest('https://app.example.com/login?returnTo=https://evil.com')
+    );
+    const setCookie = loginResponse.headers.get('set-cookie') ?? '';
+    expect(setCookie.includes('sk_return_to=')).toBe(false);
+    const state = setCookie.split('sk_oauth_state=')[1]?.split(';')[0] ?? '';
+
+    const callbackHandler = auth.createCallbackHandler();
+    const response = await callbackHandler(
+      requestWithCookies(
+        `https://app.example.com/callback?code=abc123&state=${state}`,
+        { sk_oauth_state: state }
+      )
+    );
+
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toBe(
+      'https://app.example.com/'
+    );
+  });
+
   it('withAuth with a valid session calls the handler with user', async () => {
     const { auth, client } = buildAuth('valid-session-secret');
     const cookieValue = await auth.manager.createSessionCookie({
