@@ -205,6 +205,35 @@ export const GET = auth.withAuth(async (request, { user }) => Response.json({ em
 
 See [`examples/express`](./examples/express) and [`examples/nextjs`](./examples/nextjs) for complete, runnable versions. For a fuller production-oriented sample app, see the framework repos in the table above.
 
+##### `createMiddleware()` — secure-by-default route protection (Next.js)
+
+Instead of wrapping every protected route with `withAuth`, `createMiddleware()` gates every route unless it's explicitly public or part of the auth flow itself — an unlisted route fails *closed* (redirects to `/login?returnTo=<path>`, restored after login) instead of *open*, so no route can be accidentally left unprotected:
+
+```javascript
+// middleware.ts
+import { auth } from "./lib/auth";
+
+export default auth.createMiddleware({
+  publicRoutes: ["/", "/pricing"],
+});
+
+// Next.js requires this as a separate, statically-analyzable export --
+// parsed at build time, so it can't be generated for you.
+export const config = {
+  runtime: "nodejs", // see ScalekitEdgeClient below for real Edge Runtime
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+};
+```
+
+For Server Components, Route Handlers, or Server Actions that just need to read the session without gating the route:
+
+```javascript
+const user = await auth.currentUser(); // Record<string, unknown> | undefined -- never accessToken/refreshToken
+const session = await auth.getSession(); // { user, expiresAt } | null
+```
+
+Both are read-only — they don't refresh an expiring session; only `createMiddleware()`/`withAuth()` write a new session cookie.
+
 #### ScalekitEdgeClient — for Next.js middleware on Edge Runtime
 
 The default `ScalekitClient` (above) uses a gRPC transport and Node-only APIs, which don't work inside Next.js Edge Runtime middleware. `@scalekit-sdk/node/edge` exports `ScalekitEdgeClient`, a `fetch` + [`jose`](https://github.com/panva/jose)-based alternative covering the same auth-flow methods (`getAuthorizationUrl`, `authenticateWithCode`, `refreshAccessToken`, `validateToken`, `getLogoutUrl`, `getIdpInitiatedLoginClaims`) used by `ScalekitAuth`/`ScalekitAuthNext`. It's a drop-in `client` for either adapter — not a general replacement for `ScalekitClient`, which remains the default for everything else (organizations, connections, directories, etc.).
