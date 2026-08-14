@@ -4,6 +4,9 @@ import { NextRequest } from 'next/server';
 import { ScalekitAuthNext } from '../src/frameworks/nextjs';
 import { decryptSession } from '../src/middleware/sessionCrypto';
 
+// Mock next/headers for getSession() / currentUser() tests
+jestGlobal.mock('next/headers', () => ({ cookies: jestGlobal.fn() }));
+
 function fakeClient() {
   return {
     getAuthorizationUrl: jestGlobal.fn(),
@@ -593,5 +596,65 @@ describe('ScalekitAuthNext.createMiddleware', () => {
     expect(response.status).toBe(200);
     const setCookie = response.headers.get('set-cookie') ?? '';
     expect(setCookie).toContain('sk_session=');
+  });
+});
+
+describe('ScalekitAuthNext.getSession / currentUser', () => {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { cookies } = require('next/headers');
+
+  function mockCookieStore(value: string | undefined) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (cookies as any).mockResolvedValue({
+      get: (name: string) =>
+        name === 'sk_session' && value ? { value } : undefined,
+    });
+  }
+
+  it('returns only {user, expiresAt} for a valid cookie -- never tokens', async () => {
+    const { auth } = buildAuth('get-session-secret');
+    const expiresAt = Date.now() / 1000 + 3600;
+    const cookieValue = await auth.manager.createSessionCookie({
+      user: { sub: 'user_123' },
+      accessToken: 'at_should_not_leak',
+      refreshToken: 'rt_should_not_leak',
+      idToken: 'idt_should_not_leak',
+      expiresAt,
+    });
+    mockCookieStore(cookieValue);
+
+    const session = await auth.getSession();
+
+    expect(session).toEqual({ user: { sub: 'user_123' }, expiresAt });
+    expect(Object.keys(session ?? {}).sort()).toEqual(['expiresAt', 'user']);
+  });
+
+  it('currentUser() is sugar for getSession()?.user', async () => {
+    const { auth } = buildAuth('current-user-secret');
+    const cookieValue = await auth.manager.createSessionCookie({
+      user: { sub: 'user_456' },
+      accessToken: 'at_1',
+      refreshToken: 'rt_1',
+      expiresAt: Date.now() / 1000 + 3600,
+    });
+    mockCookieStore(cookieValue);
+
+    expect(await auth.currentUser()).toEqual({ sub: 'user_456' });
+  });
+
+  it('returns null/undefined for a missing cookie, never throws', async () => {
+    const { auth } = buildAuth('no-cookie-secret');
+    mockCookieStore(undefined);
+
+    expect(await auth.getSession()).toBeNull();
+    expect(await auth.currentUser()).toBeUndefined();
+  });
+
+  it('returns null/undefined for a tampered cookie, never throws', async () => {
+    const { auth } = buildAuth('tampered-secret');
+    mockCookieStore('not-a-valid-session-cookie');
+
+    expect(await auth.getSession()).toBeNull();
+    expect(await auth.currentUser()).toBeUndefined();
   });
 });

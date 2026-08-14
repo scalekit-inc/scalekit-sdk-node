@@ -1,4 +1,5 @@
 import type { NextRequest } from 'next/server';
+import { cookies } from 'next/headers';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 let NextResponse: typeof import('next/server').NextResponse;
@@ -520,5 +521,48 @@ export class ScalekitAuthNext {
       }
       return response as AnyNextResponse;
     };
+  }
+
+  /**
+   * Read-only session lookup for Server Components / Route Handlers / Server
+   * Actions -- anywhere `cookies()` from `next/headers` is available. Never
+   * refreshes or writes a new cookie (only createMiddleware()/withAuth() can
+   * do that) -- a Server Component calling this right after expiry but
+   * before the next middleware-guarded navigation may see a
+   * stale-but-not-yet-refreshed session; expiresAt is still honest and the
+   * next real navigation refreshes transparently.
+   *
+   * Deliberately returns only {user, expiresAt} -- never accessToken/
+   * refreshToken. If a real need for a getAccessToken() shows up later,
+   * that's a deliberate, separately-considered follow-up, not something to
+   * expose by default just because it happens to be in scope here.
+   */
+  async getSession(): Promise<{
+    user: Record<string, unknown>;
+    expiresAt: number;
+  } | null> {
+    const cookieStore = await cookies();
+    const cookieValue = cookieStore.get(this.manager.cookieName)?.value;
+    if (!cookieValue) return null;
+
+    let payload: Record<string, unknown>;
+    try {
+      payload = await this.manager.decryptCookieValue(cookieValue);
+    } catch {
+      return null;
+    }
+
+    const expiresAt =
+      typeof payload.expiresAt === 'number' ? payload.expiresAt : 0;
+    return {
+      user: (payload.user as Record<string, unknown>) ?? {},
+      expiresAt,
+    };
+  }
+
+  /** Sugar over getSession() for the common case of just needing the claims. */
+  async currentUser(): Promise<Record<string, unknown> | undefined> {
+    const session = await this.getSession();
+    return session?.user;
   }
 }
