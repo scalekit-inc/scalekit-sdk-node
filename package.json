@@ -4,6 +4,24 @@
   "description": "Official Scalekit Node SDK",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./express": {
+      "types": "./lib/frameworks/express.d.ts",
+      "default": "./lib/frameworks/express.js"
+    },
+    "./next": {
+      "types": "./lib/frameworks/nextjs.d.ts",
+      "default": "./lib/frameworks/nextjs.js"
+    },
+    "./edge": {
+      "types": "./lib/edge.d.ts",
+      "default": "./lib/edge.js"
+    }
+  },
   "files": [
     "lib",
     "README.md",
