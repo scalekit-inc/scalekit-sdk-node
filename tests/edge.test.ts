@@ -453,6 +453,83 @@ describe('ScalekitEdgeClient.validateToken', () => {
     expect(caughtError?.statusCode).toBe(401);
     expect(caughtError?.message).toContain('admin');
   });
+
+  it('validates audience option correctly', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ keys: [publicJwk] }),
+    } as Response);
+
+    const token = await signTestToken({
+      email: 'user@example.com',
+      aud: 'my-app',
+    });
+
+    // Should pass with matching audience
+    const payload = await client.validateToken<{ email: string }>(token, {
+      audience: ['my-app'],
+    });
+    expect(payload.email).toBe('user@example.com');
+
+    // Should fail with mismatched audience
+    await expect(
+      client.validateToken(token, {
+        audience: ['wrong-app'],
+      })
+    ).rejects.toThrow(ScalekitEdgeError);
+
+    // Should fail with specific 401 status
+    let caughtError: ScalekitEdgeError | undefined;
+    try {
+      await client.validateToken(token, {
+        audience: ['wrong-app'],
+      });
+    } catch (err) {
+      caughtError = err as ScalekitEdgeError;
+    }
+    expect(caughtError?.statusCode).toBe(401);
+  });
+
+  it('propagates JWKS fetch failures distinctly from bad-token errors', async () => {
+    // Mock fetch to reject with a network error when trying to fetch JWKS
+    jestGlobal.spyOn(global, 'fetch').mockRejectedValue(
+      new TypeError('fetch failed: network error')
+    );
+
+    // Sign a token (this doesn't use fetch, so it will succeed)
+    const token = await signTestToken({
+      email: 'user@example.com',
+    });
+
+    // When validateToken tries to fetch the JWKS, it should fail with a network error
+    let caughtError: unknown;
+    try {
+      await client.validateToken(token);
+    } catch (err) {
+      caughtError = err;
+    }
+
+    expect(caughtError).toBeDefined();
+
+    // The error should NOT be a ScalekitEdgeError(401).
+    // Network/JWKS fetch errors should propagate distinctly to allow callers
+    // to distinguish infrastructure failures from bad-token validation failures.
+    expect(caughtError).not.toEqual(
+      expect.objectContaining({
+        statusCode: 401,
+      })
+    );
+
+    // The error should either be the original TypeError or wrapped by jose as JWKSTimeout
+    const isNetworkError =
+      caughtError instanceof TypeError ||
+      caughtError instanceof jose.errors.JWKSTimeout ||
+      (caughtError instanceof Error &&
+        (caughtError.message.includes('fetch') || caughtError.message.includes('network')));
+    expect(isNetworkError).toBe(true);
+  });
 });
 
 describe('ScalekitEdgeClient.getIdpInitiatedLoginClaims', () => {

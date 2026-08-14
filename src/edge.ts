@@ -214,8 +214,27 @@ export class ScalekitEdgeClient {
 
       return payload;
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      throw new ScalekitEdgeError(401, `token validation failed: ${message}`);
+      // JWKS-fetch/timeout errors should propagate as-is, not as 401.
+      // These are infrastructure failures, not token validation failures.
+      if (err instanceof jose.errors.JWKSTimeout) {
+        throw err;
+      }
+
+      // Token validation errors (JOSEError subclasses except JWKSTimeout, and our
+      // requiredScopes check) should be wrapped as 401. Everything else (raw
+      // network errors not wrapped by jose) should propagate as-is.
+      if (err instanceof jose.errors.JOSEError) {
+        const message = err instanceof Error ? err.message : String(err);
+        throw new ScalekitEdgeError(401, `token validation failed: ${message}`);
+      }
+
+      // Our own error from requiredScopes check
+      if (err instanceof Error && err.message.includes('Token missing required scopes')) {
+        throw new ScalekitEdgeError(401, `token validation failed: ${err.message}`);
+      }
+
+      // Everything else (raw network/infrastructure errors) propagates as-is
+      throw err;
     }
   }
 
