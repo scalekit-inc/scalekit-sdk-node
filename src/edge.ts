@@ -1,7 +1,15 @@
+import * as jose from 'jose';
+import QueryString from 'qs';
+import { IdTokenClaimToUserMap } from './constants/user';
 import {
+  AuthenticationOptions,
+  AuthenticationResponse,
   AuthorizationUrlOptions,
+  GrantType,
   LogoutUrlOptions,
+  RefreshTokenResponse,
 } from './types/scalekit';
+import { IdTokenClaim, User } from './types/auth';
 
 /**
  * Raised on any non-2xx response from Scalekit's REST endpoints. Simple,
@@ -85,5 +93,73 @@ export class ScalekitEdgeClient {
       post_logout_redirect_uri: options?.postLogoutRedirectUri,
       state: options?.state,
     });
+  }
+
+  private async postToken(body: Record<string, string>): Promise<{
+    id_token?: string;
+    access_token: string;
+    expires_in?: number;
+    refresh_token: string;
+  }> {
+    const response = await fetch(`${this.baseUrl}/${TOKEN_PATH}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: QueryString.stringify(body),
+    });
+
+    const data = (await response.json()) as any;
+    if (!response.ok) {
+      throw new ScalekitEdgeError(
+        response.status,
+        data.error_description ?? data.error ?? 'token request failed',
+        data.error
+      );
+    }
+    return data;
+  }
+
+  async authenticateWithCode(
+    code: string,
+    redirectUri: string,
+    options?: AuthenticationOptions
+  ): Promise<AuthenticationResponse> {
+    const data = await this.postToken({
+      code,
+      redirect_uri: redirectUri,
+      grant_type: GrantType.AuthorizationCode,
+      client_id: this.clientId,
+      client_secret: this.clientSecret,
+      ...(options?.codeVerifier && { code_verifier: options.codeVerifier }),
+    });
+
+    const claims = jose.decodeJwt<IdTokenClaim>(data.id_token!);
+    const user: any = {};
+    for (const [k, v] of Object.entries(claims)) {
+      if (IdTokenClaimToUserMap[k as keyof IdTokenClaim]) {
+        user[IdTokenClaimToUserMap[k as keyof IdTokenClaim]] = v;
+      }
+    }
+
+    return {
+      user,
+      idToken: data.id_token!,
+      accessToken: data.access_token,
+      expiresIn: data.expires_in!,
+      refreshToken: data.refresh_token,
+    };
+  }
+
+  async refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse> {
+    const data = await this.postToken({
+      grant_type: GrantType.RefreshToken,
+      client_id: this.clientId,
+      client_secret: this.clientSecret,
+      refresh_token: refreshToken,
+    });
+
+    return {
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+    };
   }
 }

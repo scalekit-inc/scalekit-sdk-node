@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect, afterEach, jest as jestGlobal } from '@jest/globals';
 import { ScalekitEdgeClient, ScalekitEdgeError } from '../src/edge';
 
 describe('ScalekitEdgeClient construction', () => {
@@ -116,5 +116,126 @@ describe('ScalekitEdgeError', () => {
   it('errorCode is optional', () => {
     const err = new ScalekitEdgeError(500, 'server error');
     expect(err.errorCode).toBeUndefined();
+  });
+});
+
+describe('ScalekitEdgeClient.authenticateWithCode', () => {
+  const client = new ScalekitEdgeClient(
+    'https://acme.scalekit.cloud',
+    'skc_123',
+    'secret'
+  );
+
+  afterEach(() => {
+    jestGlobal.restoreAllMocks();
+  });
+
+  it('exchanges a code for tokens and derives user from the id_token', async () => {
+    // A minimal unsigned-looking JWT is fine here -- authenticateWithCode only
+    // decodes claims (jose.decodeJwt), it does not verify the signature.
+    const idTokenPayload = {
+      sub: 'user_123',
+      name: 'Test User',
+      given_name: 'Test',
+      email: 'test.user@example.com',
+      email_verified: true,
+    };
+    const idToken = `${Buffer.from(JSON.stringify({ alg: 'none' })).toString(
+      'base64url'
+    )}.${Buffer.from(JSON.stringify(idTokenPayload)).toString(
+      'base64url'
+    )}.`;
+
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id_token: idToken,
+        access_token: 'at_123',
+        expires_in: 300,
+        refresh_token: 'rt_123',
+      }),
+    } as unknown as Response);
+
+    const result = await client.authenticateWithCode(
+      'auth_code',
+      'https://app.example.com/callback'
+    );
+
+    expect(result.accessToken).toBe('at_123');
+    expect(result.refreshToken).toBe('rt_123');
+    expect(result.expiresIn).toBe(300);
+    expect(result.idToken).toBe(idToken);
+    expect(result.user.email).toBe('test.user@example.com');
+
+    const [url, init] = (global.fetch as any).mock.calls[0];
+    expect(url).toBe('https://acme.scalekit.cloud/oauth/token');
+    expect(init.method).toBe('POST');
+    const body = new URLSearchParams(init.body as string);
+    expect(body.get('grant_type')).toBe('authorization_code');
+    expect(body.get('code')).toBe('auth_code');
+    expect(body.get('redirect_uri')).toBe('https://app.example.com/callback');
+    expect(body.get('client_id')).toBe('skc_123');
+    expect(body.get('client_secret')).toBe('secret');
+  });
+
+  it('throws ScalekitEdgeError on a non-2xx response', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({
+        error: 'invalid_grant',
+        error_description: 'code has expired',
+      }),
+    } as unknown as Response);
+
+    await expect(
+      client.authenticateWithCode('bad_code', 'https://app.example.com/callback')
+    ).rejects.toThrow(ScalekitEdgeError);
+  });
+});
+
+describe('ScalekitEdgeClient.refreshAccessToken', () => {
+  const client = new ScalekitEdgeClient(
+    'https://acme.scalekit.cloud',
+    'skc_123',
+    'secret'
+  );
+
+  afterEach(() => {
+    jestGlobal.restoreAllMocks();
+  });
+
+  it('refreshes tokens', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        access_token: 'at_new',
+        refresh_token: 'rt_new',
+      }),
+    } as unknown as Response);
+
+    const result = await client.refreshAccessToken('rt_old');
+
+    expect(result.accessToken).toBe('at_new');
+    expect(result.refreshToken).toBe('rt_new');
+
+    const [, init] = (global.fetch as any).mock.calls[0];
+    const body = new URLSearchParams(init.body as string);
+    expect(body.get('grant_type')).toBe('refresh_token');
+    expect(body.get('refresh_token')).toBe('rt_old');
+  });
+
+  it('throws ScalekitEdgeError on a non-2xx response', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 400,
+      json: async () => ({ error: 'invalid_grant' }),
+    } as unknown as Response);
+
+    await expect(client.refreshAccessToken('dead_token')).rejects.toThrow(
+      ScalekitEdgeError
+    );
   });
 });
