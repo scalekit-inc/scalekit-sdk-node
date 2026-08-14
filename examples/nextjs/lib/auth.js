@@ -1,5 +1,5 @@
 const ScalekitClient = require('@scalekit-sdk/node').default;
-const { ScalekitAuthNext } = require('@scalekit-sdk/node/lib/frameworks/nextjs');
+const { ScalekitAuthNext } = require('@scalekit-sdk/node/next');
 
 const client = new ScalekitClient(
   process.env.SCALEKIT_ENVIRONMENT_URL,

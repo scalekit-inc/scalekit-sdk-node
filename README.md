@@ -148,7 +148,7 @@ npm install @scalekit-sdk/node express   # or: npm install @scalekit-sdk/node ne
 // Express
 import express from "express";
 import ScalekitClient from "@scalekit-sdk/node";
-import { ScalekitAuth } from "@scalekit-sdk/node/lib/frameworks/express";
+import { ScalekitAuth } from "@scalekit-sdk/node/express";
 
 const client = new ScalekitClient(
   process.env.SCALEKIT_ENV_URL,
@@ -173,7 +173,7 @@ app.get("/account", auth.requiresAuth, (req, res) => {
 // Next.js (App Router) -- one auth instance, constructed once and re-exported
 // lib/auth.js
 import ScalekitClient from "@scalekit-sdk/node";
-import { ScalekitAuthNext } from "@scalekit-sdk/node/lib/frameworks/nextjs";
+import { ScalekitAuthNext } from "@scalekit-sdk/node/next";
 
 const client = new ScalekitClient(
   process.env.SCALEKIT_ENV_URL,
@@ -204,6 +204,29 @@ export const GET = auth.withAuth(async (request, { user }) => Response.json({ em
 ```
 
 See [`examples/express`](./examples/express) and [`examples/nextjs`](./examples/nextjs) for complete, runnable versions. For a fuller production-oriented sample app, see the framework repos in the table above.
+
+#### ScalekitEdgeClient — for Next.js middleware on Edge Runtime
+
+The default `ScalekitClient` (above) uses a gRPC transport and Node-only APIs, which don't work inside Next.js Edge Runtime middleware. `@scalekit-sdk/node/edge` exports `ScalekitEdgeClient`, a `fetch` + [`jose`](https://github.com/panva/jose)-based alternative covering the same auth-flow methods (`getAuthorizationUrl`, `authenticateWithCode`, `refreshAccessToken`, `validateToken`, `getLogoutUrl`, `getIdpInitiatedLoginClaims`) used by `ScalekitAuth`/`ScalekitAuthNext`. It's a drop-in `client` for either adapter — not a general replacement for `ScalekitClient`, which remains the default for everything else (organizations, connections, directories, etc.).
+
+```javascript
+// lib/auth.js (Next.js middleware, Edge Runtime)
+import { ScalekitEdgeClient } from "@scalekit-sdk/node/edge";
+import { ScalekitAuthNext } from "@scalekit-sdk/node/next";
+
+const client = new ScalekitEdgeClient(
+  process.env.SCALEKIT_ENV_URL,
+  process.env.SCALEKIT_CLIENT_ID,
+  process.env.SCALEKIT_CLIENT_SECRET
+);
+export const auth = new ScalekitAuthNext({
+  client,
+  redirectUri: "https://myapp.com/callback",
+  cookieEncryptionSecret: process.env.COOKIE_ENCRYPTION_SECRET,
+});
+```
+
+See [`examples/nextjs-edge`](./examples/nextjs-edge) for a complete, runnable version, including the `runtime: 'experimental-edge'` middleware config this requires.
 ---
 ### Helpful links
 #### Quickstart Guides

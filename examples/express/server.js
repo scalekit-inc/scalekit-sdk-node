@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const ScalekitClient = require('@scalekit-sdk/node').default;
-const { ScalekitAuth } = require('@scalekit-sdk/node/lib/frameworks/express');
+const { ScalekitAuth } = require('@scalekit-sdk/node/express');
 
 const client = new ScalekitClient(
   process.env.SCALEKIT_ENVIRONMENT_URL,
