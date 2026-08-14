@@ -1,3 +1,5 @@
+import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse, TokenValidationOptions } from '../types/scalekit';
+import { IdpInitiatedLoginClaims } from '../types/auth';
 /**
  * Framework-agnostic view of an incoming HTTP request.
  *
@@ -8,6 +10,21 @@
 export interface RequestAdapter {
     getCookie(name: string): string | undefined;
     getRequestUrl(): string;
+}
+/**
+ * Minimal shape of the auth-flow methods every framework adapter (Express,
+ * Next.js) needs from a client -- satisfied structurally by both the full
+ * ScalekitClient (gRPC + REST) and ScalekitEdgeClient (REST-only, Edge-safe).
+ * Adapters depend on this, never the concrete ScalekitClient class, so a
+ * customer can pass either without any adapter code caring which.
+ */
+export interface ScalekitAuthClient {
+    getAuthorizationUrl(redirectUri: string, options?: AuthorizationUrlOptions): string;
+    authenticateWithCode(code: string, redirectUri: string, options?: AuthenticationOptions): Promise<AuthenticationResponse>;
+    refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse>;
+    validateToken<T>(token: string, options?: TokenValidationOptions): Promise<T>;
+    getLogoutUrl(options?: LogoutUrlOptions): string;
+    getIdpInitiatedLoginClaims(idpInitiatedLoginToken: string, options?: TokenValidationOptions): Promise<IdpInitiatedLoginClaims>;
 }
 export interface SetCookieOptions {
     maxAge?: number;

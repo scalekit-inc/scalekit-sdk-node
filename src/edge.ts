@@ -57,12 +57,17 @@ export class ScalekitEdgeClient {
 
   private getJwks(): ReturnType<typeof jose.createRemoteJWKSet> {
     if (!this.jwks) {
-      this.jwks = jose.createRemoteJWKSet(new URL(`${this.baseUrl}/${JWKS_PATH}`));
+      this.jwks = jose.createRemoteJWKSet(
+        new URL(`${this.baseUrl}/${JWKS_PATH}`)
+      );
     }
     return this.jwks;
   }
 
-  private buildUrl(path: string, params: Record<string, string | undefined>): string {
+  private buildUrl(
+    path: string,
+    params: Record<string, string | undefined>
+  ): string {
     const url = new URL(`${this.baseUrl}/${path}`);
     for (const [key, value] of Object.entries(params)) {
       if (value !== undefined) {
@@ -116,7 +121,7 @@ export class ScalekitEdgeClient {
       body: QueryString.stringify(body),
     });
 
-    const data = await response.json() as {
+    const data = (await response.json()) as {
       id_token?: string;
       access_token: string;
       expires_in?: number;
@@ -152,7 +157,9 @@ export class ScalekitEdgeClient {
     const user = <User>{};
     for (const [k, v] of Object.entries(claims)) {
       if (IdTokenClaimToUserMap[k as keyof IdTokenClaim]) {
-        (user as Record<string, unknown>)[IdTokenClaimToUserMap[k as keyof IdTokenClaim]] = v;
+        (user as Record<string, unknown>)[
+          IdTokenClaimToUserMap[k as keyof IdTokenClaim]
+        ] = v;
       }
     }
 
@@ -165,7 +172,9 @@ export class ScalekitEdgeClient {
     };
   }
 
-  async refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse> {
+  async refreshAccessToken(
+    refreshToken: string
+  ): Promise<RefreshTokenResponse> {
     if (!refreshToken) {
       throw new Error('Refresh token is required');
     }
@@ -206,34 +215,43 @@ export class ScalekitEdgeClient {
         const scopes = Array.isArray(claims.scopes)
           ? claims.scopes.filter((scope: string) => !!scope?.trim?.())
           : [];
-        const missing = options.requiredScopes.filter((s) => !scopes.includes(s));
+        const missing = options.requiredScopes.filter(
+          (s) => !scopes.includes(s)
+        );
         if (missing.length > 0) {
-          throw new Error(`Token missing required scopes: ${missing.join(', ')}`);
+          throw new Error(
+            `Token missing required scopes: ${missing.join(', ')}`
+          );
         }
       }
 
       return payload;
     } catch (err) {
-      // JWKS-fetch/timeout errors should propagate as-is, not as 401.
-      // These are infrastructure failures, not token validation failures.
-      if (err instanceof jose.errors.JWKSTimeout) {
-        throw err;
-      }
+      // Explicit allowlist of bad-token-shaped errors that should be wrapped as 401.
+      // These indicate the token itself is invalid, expired, or lacks required scopes.
+      const badTokenShapedErrors = [
+        jose.errors.JWTClaimValidationFailed,
+        jose.errors.JWTExpired,
+        jose.errors.JWSSignatureVerificationFailed,
+        jose.errors.JWTInvalid,
+        jose.errors.JWSInvalid,
+        jose.errors.JWKSNoMatchingKey,
+      ];
 
-      // Token validation errors (JOSEError subclasses except JWKSTimeout, and our
-      // requiredScopes check) should be wrapped as 401. Everything else (raw
-      // network errors not wrapped by jose) should propagate as-is.
-      if (err instanceof jose.errors.JOSEError) {
+      // Check if error matches any bad-token-shaped class, or is our own requiredScopes check
+      const isBadTokenError =
+        badTokenShapedErrors.some((cls) => err instanceof cls) ||
+        (err instanceof Error &&
+          err.message.includes('Token missing required scopes'));
+
+      if (isBadTokenError) {
         const message = err instanceof Error ? err.message : String(err);
         throw new ScalekitEdgeError(401, `token validation failed: ${message}`);
       }
 
-      // Our own error from requiredScopes check
-      if (err instanceof Error && err.message.includes('Token missing required scopes')) {
-        throw new ScalekitEdgeError(401, `token validation failed: ${err.message}`);
-      }
-
-      // Everything else (raw network/infrastructure errors) propagates as-is
+      // Everything else (JWKSInvalid, JWKSMultipleMatchingKeys, JWKSTimeout, JOSENotSupported,
+      // JOSEAlgNotAllowed, JWEInvalid, JWEDecryptionFailed, JWKInvalid, raw network errors, etc.)
+      // propagates as-is. These are infrastructure/config problems, not bad-token-shaped failures.
       throw err;
     }
   }

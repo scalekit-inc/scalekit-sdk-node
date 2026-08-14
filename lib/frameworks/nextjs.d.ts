@@ -1,9 +1,9 @@
 import type { NextRequest } from 'next/server';
-import ScalekitClient from '../scalekit';
+import { ScalekitAuthClient } from '../middleware/protocol';
 import { SessionRefreshManager } from '../middleware/sessionManager';
 type AnyNextResponse = InstanceType<typeof import('next/server').NextResponse>;
 export interface ScalekitAuthNextOptions {
-    client?: ScalekitClient;
+    client?: ScalekitAuthClient;
     clientId?: string;
     clientSecret?: string;
     envUrl?: string;
@@ -60,7 +60,7 @@ export interface AuthenticatedRouteContext {
  *   });
  */
 export declare class ScalekitAuthNext {
-    readonly client: ScalekitClient;
+    readonly client: ScalekitAuthClient;
     readonly manager: SessionRefreshManager;
     private readonly redirectUri;
     private readonly loginPath;

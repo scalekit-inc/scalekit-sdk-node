@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response, Router } from 'express';
-import ScalekitClient from '../scalekit';
+import { ScalekitAuthClient } from '../middleware/protocol';
 import { SessionRefreshManager } from '../middleware/sessionManager';
 declare global {
     namespace Express {
@@ -9,7 +9,7 @@ declare global {
     }
 }
 export interface ScalekitAuthOptions {
-    client?: ScalekitClient;
+    client?: ScalekitAuthClient;
     clientId?: string;
     clientSecret?: string;
     envUrl?: string;
@@ -51,7 +51,7 @@ export interface ScalekitAuthOptions {
  *   });
  */
 export declare class ScalekitAuth {
-    readonly client: ScalekitClient;
+    readonly client: ScalekitAuthClient;
     readonly manager: SessionRefreshManager;
     readonly router: Router;
     private readonly redirectUri;

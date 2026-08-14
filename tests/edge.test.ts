@@ -1,4 +1,12 @@
-import { describe, it, expect, afterEach, beforeAll, beforeEach, jest as jestGlobal } from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  jest as jestGlobal,
+} from '@jest/globals';
 import * as jose from 'jose';
 import { ScalekitEdgeClient, ScalekitEdgeError } from '../src/edge';
 
@@ -143,9 +151,7 @@ describe('ScalekitEdgeClient.authenticateWithCode', () => {
     };
     const idToken = `${Buffer.from(JSON.stringify({ alg: 'none' })).toString(
       'base64url'
-    )}.${Buffer.from(JSON.stringify(idTokenPayload)).toString(
-      'base64url'
-    )}.`;
+    )}.${Buffer.from(JSON.stringify(idTokenPayload)).toString('base64url')}.`;
 
     jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
@@ -191,7 +197,10 @@ describe('ScalekitEdgeClient.authenticateWithCode', () => {
     } as unknown as Response);
 
     await expect(
-      client.authenticateWithCode('bad_code', 'https://app.example.com/callback')
+      client.authenticateWithCode(
+        'bad_code',
+        'https://app.example.com/callback'
+      )
     ).rejects.toThrow(ScalekitEdgeError);
   });
 });
@@ -281,7 +290,9 @@ describe('ScalekitEdgeClient.refreshAccessToken', () => {
 
 describe('ScalekitEdgeClient.validateToken', () => {
   let publicJwk: jose.JWK;
-  let privateKey: Awaited<ReturnType<typeof jose.generateKeyPair>>['privateKey'];
+  let privateKey: Awaited<
+    ReturnType<typeof jose.generateKeyPair>
+  >['privateKey'];
   let client: ScalekitEdgeClient;
 
   beforeAll(async () => {
@@ -346,10 +357,7 @@ describe('ScalekitEdgeClient.validateToken', () => {
   });
 
   it('caches the JWKS resolver across multiple validateToken calls', async () => {
-    const createRemoteJWKSetSpy = jestGlobal.spyOn(
-      jose,
-      'createRemoteJWKSet'
-    );
+    const createRemoteJWKSetSpy = jestGlobal.spyOn(jose, 'createRemoteJWKSet');
 
     jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
@@ -494,9 +502,9 @@ describe('ScalekitEdgeClient.validateToken', () => {
 
   it('propagates JWKS fetch failures distinctly from bad-token errors', async () => {
     // Mock fetch to reject with a network error when trying to fetch JWKS
-    jestGlobal.spyOn(global, 'fetch').mockRejectedValue(
-      new TypeError('fetch failed: network error')
-    );
+    jestGlobal
+      .spyOn(global, 'fetch')
+      .mockRejectedValue(new TypeError('fetch failed: network error'));
 
     // Sign a token (this doesn't use fetch, so it will succeed)
     const token = await signTestToken({
@@ -527,8 +535,46 @@ describe('ScalekitEdgeClient.validateToken', () => {
       caughtError instanceof TypeError ||
       caughtError instanceof jose.errors.JWKSTimeout ||
       (caughtError instanceof Error &&
-        (caughtError.message.includes('fetch') || caughtError.message.includes('network')));
+        (caughtError.message.includes('fetch') ||
+          caughtError.message.includes('network')));
     expect(isNetworkError).toBe(true);
+  });
+
+  it('propagates JWKSInvalid distinctly when JWKS endpoint returns malformed content', async () => {
+    // Mock fetch to return a 200 response with invalid JWKS content (not { keys: [...] })
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ not: 'a valid jwks' }), // Malformed JWKS
+    } as Response);
+
+    // Sign a token (this doesn't use fetch, so it will succeed)
+    const token = await signTestToken({
+      email: 'user@example.com',
+    });
+
+    // When validateToken tries to use the malformed JWKS, jose should throw JWKSInvalid
+    let caughtError: unknown;
+    try {
+      await client.validateToken(token);
+    } catch (err) {
+      caughtError = err;
+    }
+
+    expect(caughtError).toBeDefined();
+
+    // The error should NOT be a ScalekitEdgeError(401).
+    // JWKSInvalid is an infrastructure/config problem (malformed JWKS response),
+    // not a bad-token-shaped failure, so it should propagate distinctly.
+    expect(caughtError).not.toBeInstanceOf(ScalekitEdgeError);
+
+    // The error should be JWKSInvalid or something derived from JOSEError
+    // (but not wrapped in ScalekitEdgeError)
+    const isInfraError =
+      caughtError instanceof jose.errors.JWKSInvalid ||
+      (caughtError instanceof Error && caughtError.message.includes('JWKS'));
+    expect(isInfraError).toBe(true);
   });
 });
 
@@ -539,13 +585,11 @@ describe('ScalekitEdgeClient.getIdpInitiatedLoginClaims', () => {
       'skc_123',
       'secret'
     );
-    const spy = jestGlobal
-      .spyOn(client, 'validateToken')
-      .mockResolvedValue({
-        connection_id: 'conn_1',
-        organization_id: 'org_1',
-        login_hint: 'user@example.com',
-      });
+    const spy = jestGlobal.spyOn(client, 'validateToken').mockResolvedValue({
+      connection_id: 'conn_1',
+      organization_id: 'org_1',
+      login_hint: 'user@example.com',
+    });
 
     const claims = await client.getIdpInitiatedLoginClaims('some.jwt.token');
 
