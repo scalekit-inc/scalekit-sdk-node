@@ -238,4 +238,42 @@ describe('ScalekitEdgeClient.refreshAccessToken', () => {
       ScalekitEdgeError
     );
   });
+
+  it('throws immediately if refreshToken is falsy, without calling fetch', async () => {
+    const fetchSpy = jestGlobal.spyOn(global, 'fetch');
+
+    await expect(client.refreshAccessToken('')).rejects.toThrow(
+      'Refresh token is required'
+    );
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('throws if response has no access_token, even on 200', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        refresh_token: 'rt_new',
+      }),
+    } as unknown as Response);
+
+    await expect(client.refreshAccessToken('rt_old')).rejects.toThrow(
+      'Missing access_token in authentication response'
+    );
+  });
+
+  it('throws if response has no refresh_token, even on 200', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        access_token: 'at_new',
+      }),
+    } as unknown as Response);
+
+    await expect(client.refreshAccessToken('rt_old')).rejects.toThrow(
+      'Missing refresh_token in authentication response'
+    );
+  });
 });

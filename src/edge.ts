@@ -107,7 +107,14 @@ export class ScalekitEdgeClient {
       body: QueryString.stringify(body),
     });
 
-    const data = (await response.json()) as any;
+    const data = await response.json() as {
+      id_token?: string;
+      access_token: string;
+      expires_in?: number;
+      refresh_token: string;
+      error?: string;
+      error_description?: string;
+    };
     if (!response.ok) {
       throw new ScalekitEdgeError(
         response.status,
@@ -133,10 +140,10 @@ export class ScalekitEdgeClient {
     });
 
     const claims = jose.decodeJwt<IdTokenClaim>(data.id_token!);
-    const user: any = {};
+    const user = <User>{};
     for (const [k, v] of Object.entries(claims)) {
       if (IdTokenClaimToUserMap[k as keyof IdTokenClaim]) {
-        user[IdTokenClaimToUserMap[k as keyof IdTokenClaim]] = v;
+        (user as Record<string, unknown>)[IdTokenClaimToUserMap[k as keyof IdTokenClaim]] = v;
       }
     }
 
@@ -150,12 +157,24 @@ export class ScalekitEdgeClient {
   }
 
   async refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse> {
+    if (!refreshToken) {
+      throw new Error('Refresh token is required');
+    }
+
     const data = await this.postToken({
       grant_type: GrantType.RefreshToken,
       client_id: this.clientId,
       client_secret: this.clientSecret,
       refresh_token: refreshToken,
     });
+
+    // Validate that all required properties exist
+    if (!data.access_token) {
+      throw new Error('Missing access_token in authentication response');
+    }
+    if (!data.refresh_token) {
+      throw new Error('Missing refresh_token in authentication response');
+    }
 
     return {
       accessToken: data.access_token,
