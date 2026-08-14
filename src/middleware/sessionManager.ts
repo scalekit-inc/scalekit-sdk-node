@@ -90,7 +90,7 @@ export class SessionRefreshManager {
 
     let payload: Record<string, unknown>;
     try {
-      payload = decryptSession(cookieValue, this.secret);
+      payload = await decryptSession(cookieValue, this.secret);
     } catch (err) {
       if (err instanceof InvalidSessionError) {
         return {
@@ -179,7 +179,7 @@ export class SessionRefreshManager {
         expiresAt:
           typeof claims.exp === 'number' ? claims.exp : Date.now() / 1000 + 300,
       };
-      const newCookieValue = encryptSession(newPayload, this.secret);
+      const newCookieValue = await encryptSession(newPayload, this.secret);
       result = { authenticated: true, user: claims, newCookieValue };
       this.refreshCache.set(refreshToken, { result, createdAt: Date.now() });
       return result;
@@ -204,7 +204,7 @@ export class SessionRefreshManager {
   }
 
   /** Encrypt a fresh session payload (e.g. right after authenticateWithCode). */
-  createSessionCookie(payload: Record<string, unknown>): string {
+  async createSessionCookie(payload: Record<string, unknown>): Promise<string> {
     return encryptSession(payload, this.secret);
   }
 
@@ -214,7 +214,7 @@ export class SessionRefreshManager {
    * can't be decrypted -- callers that just want "is there a usable idToken"
    * should catch that and fall back gracefully, same as check() does.
    */
-  decryptCookieValue(value: string): Record<string, unknown> {
+  async decryptCookieValue(value: string): Promise<Record<string, unknown>> {
     return decryptSession(value, this.secret);
   }
 

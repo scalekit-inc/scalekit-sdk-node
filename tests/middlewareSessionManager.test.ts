@@ -37,7 +37,7 @@ describe('SessionRefreshManager construction', () => {
 describe('SessionRefreshManager.check', () => {
   const secret = 'test-secret-for-manager';
 
-  function cookieFor(expiresAt: number, refreshToken = 'rt_original') {
+  async function cookieFor(expiresAt: number, refreshToken = 'rt_original') {
     return encryptSession(
       {
         user: { email: 'user@example.com' },
@@ -72,7 +72,7 @@ describe('SessionRefreshManager.check', () => {
   it('passes through a valid unexpired session without refreshing', async () => {
     const client = fakeClient();
     const manager = new SessionRefreshManager(client, secret);
-    const cookie = cookieFor(Date.now() / 1000 + 3600);
+    const cookie = await cookieFor(Date.now() / 1000 + 3600);
 
     const result = await manager.check(new FakeRequest(cookie));
 
@@ -95,7 +95,7 @@ describe('SessionRefreshManager.check', () => {
       })),
     });
     const manager = new SessionRefreshManager(client, secret);
-    const cookie = cookieFor(Date.now() / 1000 - 10); // already expired
+    const cookie = await cookieFor(Date.now() / 1000 - 10);
 
     const result = await manager.check(new FakeRequest(cookie));
 
@@ -104,10 +104,9 @@ describe('SessionRefreshManager.check', () => {
     expect(client.refreshAccessToken).toHaveBeenCalledWith('rt_original');
     expect(client.validateToken).toHaveBeenCalledWith('at_new');
 
-    const newPayload = decryptSession(result.newCookieValue!, secret);
+    const newPayload = await decryptSession(result.newCookieValue!, secret);
     expect(newPayload.accessToken).toBe('at_new');
     expect(newPayload.refreshToken).toBe('rt_new');
-    // user/claims must come from the freshly-issued access token, not the old cache
     expect(newPayload.user).toEqual({
       email: 'user@example.com',
       exp: freshExpiry,
@@ -122,7 +121,7 @@ describe('SessionRefreshManager.check', () => {
       }),
     });
     const manager = new SessionRefreshManager(client, secret);
-    const cookie = cookieFor(Date.now() / 1000 - 10);
+    const cookie = await cookieFor(Date.now() / 1000 - 10);
 
     const result = await manager.check(new FakeRequest(cookie));
 
@@ -134,7 +133,7 @@ describe('SessionRefreshManager.check', () => {
   it('treats an expired session with no refresh token as invalid', async () => {
     const client = fakeClient();
     const manager = new SessionRefreshManager(client, secret);
-    const cookie = encryptSession(
+    const cookie = await encryptSession(
       {
         user: {},
         accessToken: 'at_old',
@@ -174,7 +173,7 @@ describe('SessionRefreshManager concurrency', () => {
     });
     const manager = new SessionRefreshManager(client, secret);
 
-    const cookie = encryptSession(
+    const cookie = await encryptSession(
       {
         user: { email: 'test.user@example.com' },
         accessToken: 'at_old',
@@ -212,7 +211,7 @@ describe('SessionRefreshManager concurrency', () => {
       })),
     });
     const manager = new SessionRefreshManager(client, secret);
-    const cookie = encryptSession(
+    const cookie = await encryptSession(
       {
         user: { email: 'user@example.com' },
         accessToken: 'at_old',
