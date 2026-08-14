@@ -1,4 +1,18 @@
-import { webcrypto } from 'crypto';
+// Edge Runtime rejects `import { webcrypto } from 'crypto'` at REQUEST TIME with
+// "The edge runtime does not support Node.js 'crypto' module" -- confirmed via a
+// real live request through createMiddleware(), not just `next build` (which does
+// not exercise this code path unless a request actually carries a session cookie
+// to decrypt, so the build check alone missed this). Edge Runtime does provide the
+// Web Crypto API as the bare global `crypto`; Node has had the same global since
+// v19 -- only Node 18.x (this SDK's floor) may lack it, where
+// `require('crypto').webcrypto` is the equivalent. Short-circuits so the `require`
+// branch is never evaluated (and its property access never attempted) wherever the
+// global already exists, i.e. Edge Runtime and Node >=19.
+const webcrypto =
+  typeof globalThis.crypto !== 'undefined'
+    ? globalThis.crypto
+    : // eslint-disable-next-line @typescript-eslint/no-var-requires
+      (require('crypto').webcrypto as typeof globalThis.crypto);
 
 // Bumped whenever the wire format changes. Older versions must fail gracefully
 // (InvalidSessionError, forcing re-login) rather than crash -- see decryptSession.
