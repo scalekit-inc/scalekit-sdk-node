@@ -8,8 +8,9 @@ import {
   GrantType,
   LogoutUrlOptions,
   RefreshTokenResponse,
+  TokenValidationOptions,
 } from './types/scalekit';
-import { IdTokenClaim, User } from './types/auth';
+import { IdTokenClaim, IdpInitiatedLoginClaims, User } from './types/auth';
 
 /**
  * Raised on any non-2xx response from Scalekit's REST endpoints. Simple,
@@ -44,6 +45,7 @@ const JWKS_PATH = 'keys';
  */
 export class ScalekitEdgeClient {
   private readonly baseUrl: string;
+  private jwks?: ReturnType<typeof jose.createRemoteJWKSet>;
 
   constructor(
     envUrl: string,
@@ -51,6 +53,13 @@ export class ScalekitEdgeClient {
     private readonly clientSecret: string
   ) {
     this.baseUrl = envUrl.replace(/\/+$/, '');
+  }
+
+  private getJwks(): ReturnType<typeof jose.createRemoteJWKSet> {
+    if (!this.jwks) {
+      this.jwks = jose.createRemoteJWKSet(new URL(`${this.baseUrl}/${JWKS_PATH}`));
+    }
+    return this.jwks;
   }
 
   private buildUrl(path: string, params: Record<string, string | undefined>): string {
@@ -180,5 +189,38 @@ export class ScalekitEdgeClient {
       accessToken: data.access_token,
       refreshToken: data.refresh_token,
     };
+  }
+
+  async validateToken<T>(
+    token: string,
+    options?: TokenValidationOptions
+  ): Promise<T> {
+    const { payload } = await jose.jwtVerify<T>(token, this.getJwks(), {
+      ...(options?.issuer && { issuer: options.issuer }),
+      ...(options?.audience && { audience: options.audience }),
+    });
+
+    if (options?.requiredScopes && options.requiredScopes.length > 0) {
+      const claims = jose.decodeJwt(token);
+      const scopes = Array.isArray(claims.scopes)
+        ? claims.scopes.filter((scope: string) => !!scope?.trim?.())
+        : [];
+      const missing = options.requiredScopes.filter((s) => !scopes.includes(s));
+      if (missing.length > 0) {
+        throw new Error(`Token missing required scopes: ${missing.join(', ')}`);
+      }
+    }
+
+    return payload;
+  }
+
+  async getIdpInitiatedLoginClaims(
+    idpInitiatedLoginToken: string,
+    options?: TokenValidationOptions
+  ): Promise<IdpInitiatedLoginClaims> {
+    return this.validateToken<IdpInitiatedLoginClaims>(
+      idpInitiatedLoginToken,
+      options
+    );
   }
 }

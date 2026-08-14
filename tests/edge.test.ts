@@ -1,4 +1,5 @@
-import { describe, it, expect, afterEach, jest as jestGlobal } from '@jest/globals';
+import { describe, it, expect, afterEach, beforeAll, beforeEach, jest as jestGlobal } from '@jest/globals';
+import * as jose from 'jose';
 import { ScalekitEdgeClient, ScalekitEdgeError } from '../src/edge';
 
 describe('ScalekitEdgeClient construction', () => {
@@ -275,5 +276,94 @@ describe('ScalekitEdgeClient.refreshAccessToken', () => {
     await expect(client.refreshAccessToken('rt_old')).rejects.toThrow(
       'Missing refresh_token in authentication response'
     );
+  });
+});
+
+describe('ScalekitEdgeClient.validateToken', () => {
+  let publicJwk: jose.JWK;
+  let privateKey: Awaited<ReturnType<typeof jose.generateKeyPair>>['privateKey'];
+  let client: ScalekitEdgeClient;
+
+  beforeAll(async () => {
+    const { publicKey, privateKey: priv } = await jose.generateKeyPair('RS256');
+    privateKey = priv;
+    publicJwk = await jose.exportJWK(publicKey);
+    publicJwk.kid = 'test-key-1';
+    publicJwk.alg = 'RS256';
+    publicJwk.use = 'sig';
+  });
+
+  beforeEach(() => {
+    client = new ScalekitEdgeClient(
+      'https://acme.scalekit.cloud',
+      'skc_123',
+      'secret'
+    );
+  });
+
+  afterEach(() => {
+    jestGlobal.restoreAllMocks();
+  });
+
+  async function signTestToken(payload: Record<string, unknown>) {
+    return new jose.SignJWT(payload)
+      .setProtectedHeader({ alg: 'RS256', kid: 'test-key-1' })
+      .setIssuedAt()
+      .setExpirationTime('1h')
+      .sign(privateKey);
+  }
+
+  it('verifies a real RS256 token against a mocked JWKS endpoint', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ keys: [publicJwk] }),
+    } as Response);
+
+    const token = await signTestToken({ email: 'user@example.com' });
+    const payload = await client.validateToken<{ email: string }>(token);
+
+    expect(payload.email).toBe('user@example.com');
+  });
+
+  it('rejects a token signed by an unrelated key', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ keys: [publicJwk] }),
+    } as Response);
+
+    const { privateKey: otherKey } = await jose.generateKeyPair('RS256');
+    const forgedToken = await new jose.SignJWT({ email: 'attacker@evil.com' })
+      .setProtectedHeader({ alg: 'RS256', kid: 'test-key-1' })
+      .setIssuedAt()
+      .setExpirationTime('1h')
+      .sign(otherKey);
+
+    await expect(client.validateToken(forgedToken)).rejects.toThrow();
+  });
+});
+
+describe('ScalekitEdgeClient.getIdpInitiatedLoginClaims', () => {
+  it('delegates to validateToken', async () => {
+    const client = new ScalekitEdgeClient(
+      'https://acme.scalekit.cloud',
+      'skc_123',
+      'secret'
+    );
+    const spy = jestGlobal
+      .spyOn(client, 'validateToken')
+      .mockResolvedValue({
+        connection_id: 'conn_1',
+        organization_id: 'org_1',
+        login_hint: 'user@example.com',
+      });
+
+    const claims = await client.getIdpInitiatedLoginClaims('some.jwt.token');
+
+    expect(spy).toHaveBeenCalledWith('some.jwt.token', undefined);
+    expect(claims.connection_id).toBe('conn_1');
   });
 });
