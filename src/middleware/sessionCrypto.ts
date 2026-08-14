@@ -1,15 +1,11 @@
-import {
-  createCipheriv,
-  createDecipheriv,
-  hkdfSync,
-  randomBytes,
-} from 'crypto';
+import { webcrypto } from 'crypto';
 
 // Bumped whenever the wire format changes. Older versions must fail gracefully
 // (InvalidSessionError, forcing re-login) rather than crash -- see decryptSession.
 const SESSION_FORMAT_VERSION = 1;
 const NONCE_SIZE = 12; // bytes, standard for AES-GCM
 const AUTH_TAG_SIZE = 16; // bytes, standard for AES-GCM
+const AUTH_TAG_BITS = AUTH_TAG_SIZE * 8;
 
 // Browsers silently drop cookies larger than ~4096 bytes (name + attributes
 // included), which would look like a random, unexplained logout. Fail loudly
@@ -19,8 +15,8 @@ const MAX_COOKIE_VALUE_BYTES = 3800;
 // Fixed, non-secret HKDF salt/info: cookieEncryptionSecret itself is expected to be a
 // high-entropy, developer-generated secret (not a low-entropy password), so a fast KDF
 // derivation is appropriate here -- this is not password storage.
-const HKDF_SALT = Buffer.from('scalekit-session-v1', 'utf8');
-const HKDF_INFO = Buffer.from('scalekit-encrypted-session', 'utf8');
+const HKDF_SALT = new TextEncoder().encode('scalekit-session-v1');
+const HKDF_INFO = new TextEncoder().encode('scalekit-encrypted-session');
 
 const SECRET_HELP =
   'cookieEncryptionSecret is required. Generate a strong random secret, e.g.:\n' +
@@ -41,18 +37,30 @@ export class InvalidSessionError extends Error {
   }
 }
 
-function deriveKey(secret: string): Buffer {
+// webcrypto.subtle (not node:crypto's createCipheriv/hkdfSync) so this module
+// runs unchanged in both plain Node and Next.js's Edge middleware runtime --
+// one crypto implementation for both, not two to keep in sync. Promise-based,
+// so encryptSession/decryptSession are async -- see sessionManager.ts callers.
+async function deriveKey(secret: string): Promise<CryptoKey> {
   if (!secret) {
     throw new Error(SECRET_HELP);
   }
-  const derived = hkdfSync(
-    'sha256',
-    Buffer.from(secret, 'utf8'),
-    HKDF_SALT,
-    HKDF_INFO,
-    32
+  const secretKey = await webcrypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    'HKDF',
+    false,
+    ['deriveBits']
   );
-  return Buffer.from(derived);
+  const bits = await webcrypto.subtle.deriveBits(
+    { name: 'HKDF', hash: 'SHA-256', salt: HKDF_SALT, info: HKDF_INFO },
+    secretKey,
+    256
+  );
+  return webcrypto.subtle.importKey('raw', bits, 'AES-GCM', false, [
+    'encrypt',
+    'decrypt',
+  ]);
 }
 
 /**
@@ -64,23 +72,29 @@ function deriveKey(secret: string): Buffer {
  * @param secret cookieEncryptionSecret -- required, no default (see module docs).
  * @returns base64url-encoded, versioned ciphertext string.
  */
-export function encryptSession(
+export async function encryptSession(
   payload: Record<string, unknown>,
   secret: string
-): string {
-  const key = deriveKey(secret);
-  const nonce = randomBytes(NONCE_SIZE);
-  const plaintext = Buffer.from(JSON.stringify(payload), 'utf8');
+): Promise<string> {
+  const key = await deriveKey(secret);
+  const nonce = webcrypto.getRandomValues(new Uint8Array(NONCE_SIZE));
+  const plaintext = new TextEncoder().encode(JSON.stringify(payload));
 
-  const cipher = createCipheriv('aes-256-gcm', key, nonce);
-  const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
-  const authTag = cipher.getAuthTag();
+  // Web Crypto's AES-GCM encrypt() appends the auth tag to the ciphertext
+  // itself (unlike node:crypto's separate cipher.getAuthTag()) -- the wire
+  // format (version byte + nonce + ciphertext+tag) is unchanged either way.
+  const ciphertextWithTag = new Uint8Array(
+    await webcrypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: nonce, tagLength: AUTH_TAG_BITS },
+      key,
+      plaintext
+    )
+  );
 
   const raw = Buffer.concat([
     Buffer.from([SESSION_FORMAT_VERSION]),
-    nonce,
-    ciphertext,
-    authTag,
+    Buffer.from(nonce),
+    Buffer.from(ciphertextWithTag),
   ]);
   const encoded = raw.toString('base64url');
   if (encoded.length > MAX_COOKIE_VALUE_BYTES) {
@@ -105,15 +119,15 @@ export function encryptSession(
  *   with, or uses an unsupported format version. Never throws any other
  *   error type for these cases.
  */
-export function decryptSession(
+export async function decryptSession(
   token: string,
   secret: string
-): Record<string, unknown> {
+): Promise<Record<string, unknown>> {
   if (!token) {
     throw new InvalidSessionError('no session cookie provided');
   }
 
-  const key = deriveKey(secret);
+  const key = await deriveKey(secret);
 
   let raw: Buffer;
   try {
@@ -136,18 +150,16 @@ export function decryptSession(
   }
 
   const nonce = raw.subarray(1, 1 + NONCE_SIZE);
-  const authTag = raw.subarray(raw.length - AUTH_TAG_SIZE);
-  const ciphertext = raw.subarray(1 + NONCE_SIZE, raw.length - AUTH_TAG_SIZE);
+  const ciphertextWithTag = raw.subarray(1 + NONCE_SIZE);
 
   let payload: unknown;
   try {
-    const decipher = createDecipheriv('aes-256-gcm', key, nonce);
-    decipher.setAuthTag(authTag);
-    const plaintext = Buffer.concat([
-      decipher.update(ciphertext),
-      decipher.final(),
-    ]);
-    payload = JSON.parse(plaintext.toString('utf8'));
+    const plaintext = await webcrypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: new Uint8Array(nonce), tagLength: AUTH_TAG_BITS },
+      key,
+      new Uint8Array(ciphertextWithTag)
+    );
+    payload = JSON.parse(Buffer.from(plaintext).toString('utf8'));
   } catch (err) {
     if (err instanceof InvalidSessionError) throw err;
     throw new InvalidSessionError(
