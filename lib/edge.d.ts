@@ -1,5 +1,6 @@
 import { AuthenticationOptions, AuthenticationResponse, AuthorizationUrlOptions, LogoutUrlOptions, RefreshTokenResponse, TokenValidationOptions } from './types/scalekit';
 import { IdpInitiatedLoginClaims } from './types/auth';
+import { ScalekitAuthClient } from './middleware/protocol';
 /**
  * Raised on any non-2xx response from Scalekit's REST endpoints. Simple,
  * REST-native shape (statusCode/message/errorCode) rather than the gRPC-
@@ -20,7 +21,7 @@ export declare class ScalekitEdgeError extends Error {
  * replacement: no organization/connection/directory/etc. methods, and
  * ScalekitClient remains the default for everything else.
  */
-export declare class ScalekitEdgeClient {
+export declare class ScalekitEdgeClient implements ScalekitAuthClient {
     private readonly clientId;
     private readonly clientSecret;
     private readonly baseUrl;
