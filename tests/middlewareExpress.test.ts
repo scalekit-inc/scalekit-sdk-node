@@ -212,7 +212,7 @@ describe('ScalekitAuth (Express)', () => {
 
   it('protected route with a valid session succeeds', async () => {
     const { app, auth, client } = buildApp('valid-session-secret');
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'test.user@example.com' },
       accessToken: 'at_1',
       refreshToken: 'rt_1',
@@ -238,7 +238,7 @@ describe('ScalekitAuth (Express)', () => {
       email: 'test.user@example.com',
       exp: Date.now() / 1000 + 300,
     });
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'test.user@example.com' },
       accessToken: 'at_old',
       refreshToken: 'rt_old',
@@ -255,14 +255,14 @@ describe('ScalekitAuth (Express)', () => {
     const setCookie = res.headers['set-cookie']?.[0] ?? '';
     expect(setCookie).toContain('sk_session=');
     const newCookieValue = setCookie.split('sk_session=')[1].split(';')[0];
-    const newPayload = decryptSession(newCookieValue, 'expired-session-secret');
+    const newPayload = await decryptSession(newCookieValue, 'expired-session-secret');
     expect(newPayload.accessToken).toBe('at_new');
   });
 
   it('protected route with a failed refresh clears the cookie and redirects', async () => {
     const { app, auth, client } = buildApp('failed-refresh-secret');
     client.refreshAccessToken.mockRejectedValue(new Error('invalid_grant'));
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'user@example.com' },
       accessToken: 'at_old',
       refreshToken: 'rt_old',
@@ -306,7 +306,7 @@ describe('ScalekitAuth (Express)', () => {
     client.getLogoutUrl.mockReturnValue(
       'https://auth.example.com/oidc/logout?id_token_hint=abc'
     );
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'test.user@example.com' },
       accessToken: 'at_1',
       refreshToken: 'rt_1',
@@ -349,7 +349,7 @@ describe('ScalekitAuth (Express)', () => {
       cookieEncryptionSecret: 'trust-proxy-secret',
     });
     app.use(auth.router);
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'test.user@example.com' },
       accessToken: 'at_1',
       refreshToken: 'rt_1',
@@ -373,7 +373,7 @@ describe('ScalekitAuth (Express)', () => {
     const { app, auth, client } = buildApp('local-only-secret', {
       fullLogout: false,
     });
-    const cookieValue = auth.manager.createSessionCookie({
+    const cookieValue = await auth.manager.createSessionCookie({
       user: { email: 'test.user@example.com' },
       accessToken: 'at_1',
       refreshToken: 'rt_1',

@@ -19,7 +19,6 @@ import {
   ResponseAdapter,
   SetCookieOptions,
 } from '../middleware/protocol';
-import { InvalidSessionError } from '../middleware/sessionCrypto';
 import {
   DEFAULT_COOKIE_NAME,
   ScalekitClientLike,
@@ -306,7 +305,7 @@ export class ScalekitAuth {
       // into Express's router throws with no wrapper. On Express 4 (allowed
       // by this package's peerDeps) that's an unhandled rejection, not an
       // error response.
-      cookieValue = this.manager.createSessionCookie(payload);
+      cookieValue = await this.manager.createSessionCookie(payload);
     } catch {
       redirectToLogin();
       return;
@@ -318,17 +317,16 @@ export class ScalekitAuth {
     res.redirect(this.postLoginRedirect);
   };
 
-  private logoutHandler = (req: Request, res: Response): void => {
+  private logoutHandler = async (req: Request, res: Response): Promise<void> => {
     const cookieValue = new ExpressRequestAdapter(req).getCookie(
       this.manager.cookieName
     );
     let idToken: string | undefined;
     if (cookieValue) {
       try {
-        const payload = this.manager.decryptCookieValue(cookieValue);
+        const payload = await this.manager.decryptCookieValue(cookieValue);
         idToken = payload.idToken as string | undefined;
-      } catch (err) {
-        if (!(err instanceof InvalidSessionError)) throw err;
+      } catch {
         // nothing usable to hint with -- fall through to local-only redirect
       }
     }
