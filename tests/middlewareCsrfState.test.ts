@@ -43,6 +43,18 @@ describe('sanitizeReturnTo', () => {
     expect(sanitizeReturnTo('/\\evil.com')).toBeUndefined();
   });
 
+  it('rejects tab characters that browsers strip during URL parsing', () => {
+    expect(sanitizeReturnTo('/\t/evil.com')).toBeUndefined();
+  });
+
+  it('rejects carriage return characters that browsers strip during URL parsing', () => {
+    expect(sanitizeReturnTo('/\r/evil.com')).toBeUndefined();
+  });
+
+  it('rejects line feed characters that browsers strip during URL parsing', () => {
+    expect(sanitizeReturnTo('/\n/evil.com')).toBeUndefined();
+  });
+
   it('rejects a value not starting with a slash', () => {
     expect(sanitizeReturnTo('account')).toBeUndefined();
   });

@@ -46,8 +46,9 @@ export function verifyState(
  * same-origin relative paths. The value is attacker-influenceable (read from
  * a query string on the login redirect), so this is a real open-redirect
  * guard, not a cosmetic check: rejects absolute URLs (`https://evil.com`),
- * protocol-relative URLs (`//evil.com`), and backslash variants some
- * browsers normalize into a protocol-relative URL (`/\evil.com`).
+ * protocol-relative URLs (`//evil.com`), backslash variants some
+ * browsers normalize into a protocol-relative URL (`/\evil.com`), and
+ * tab/CR/LF characters that the WHATWG URL spec strips during parsing.
  */
 export function sanitizeReturnTo(
   value: string | null | undefined
@@ -56,7 +57,8 @@ export function sanitizeReturnTo(
   if (
     !value.startsWith('/') ||
     value.startsWith('//') ||
-    value.includes('\\')
+    value.includes('\\') ||
+    /[\t\r\n]/.test(value)
   ) {
     return undefined;
   }
