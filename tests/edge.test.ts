@@ -156,12 +156,13 @@ describe('ScalekitEdgeClient.authenticateWithCode', () => {
     jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({
-        id_token: idToken,
-        access_token: 'at_123',
-        expires_in: 300,
-        refresh_token: 'rt_123',
-      }),
+      text: async () =>
+        JSON.stringify({
+          id_token: idToken,
+          access_token: 'at_123',
+          expires_in: 300,
+          refresh_token: 'rt_123',
+        }),
     } as unknown as Response);
 
     const result = await client.authenticateWithCode(
@@ -190,10 +191,12 @@ describe('ScalekitEdgeClient.authenticateWithCode', () => {
     jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
       ok: false,
       status: 400,
-      json: async () => ({
-        error: 'invalid_grant',
-        error_description: 'code has expired',
-      }),
+      statusText: 'Bad Request',
+      text: async () =>
+        JSON.stringify({
+          error: 'invalid_grant',
+          error_description: 'code has expired',
+        }),
     } as unknown as Response);
 
     await expect(
@@ -202,6 +205,26 @@ describe('ScalekitEdgeClient.authenticateWithCode', () => {
         'https://app.example.com/callback'
       )
     ).rejects.toThrow(ScalekitEdgeError);
+  });
+
+  it('throws a clear error when id_token is missing from a 200 response', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () =>
+        JSON.stringify({
+          access_token: 'at_123',
+          expires_in: 300,
+          refresh_token: 'rt_123',
+        }),
+    } as unknown as Response);
+
+    await expect(
+      client.authenticateWithCode(
+        'auth_code',
+        'https://app.example.com/callback'
+      )
+    ).rejects.toThrow('Missing id_token in authentication response');
   });
 });
 
@@ -220,10 +243,11 @@ describe('ScalekitEdgeClient.refreshAccessToken', () => {
     jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({
-        access_token: 'at_new',
-        refresh_token: 'rt_new',
-      }),
+      text: async () =>
+        JSON.stringify({
+          access_token: 'at_new',
+          refresh_token: 'rt_new',
+        }),
     } as unknown as Response);
 
     const result = await client.refreshAccessToken('rt_old');
@@ -241,12 +265,33 @@ describe('ScalekitEdgeClient.refreshAccessToken', () => {
     jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
       ok: false,
       status: 400,
-      json: async () => ({ error: 'invalid_grant' }),
+      statusText: 'Bad Request',
+      text: async () => JSON.stringify({ error: 'invalid_grant' }),
     } as unknown as Response);
 
     await expect(client.refreshAccessToken('dead_token')).rejects.toThrow(
       ScalekitEdgeError
     );
+  });
+
+  it('throws a ScalekitEdgeError when the error response body is not JSON', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: false,
+      status: 502,
+      statusText: 'Bad Gateway',
+      text: async () => '<html>502 Bad Gateway</html>',
+    } as unknown as Response);
+
+    let caughtError: ScalekitEdgeError | undefined;
+    try {
+      await client.refreshAccessToken('rt_old');
+    } catch (err) {
+      caughtError = err as ScalekitEdgeError;
+    }
+
+    expect(caughtError).toBeInstanceOf(ScalekitEdgeError);
+    expect(caughtError?.statusCode).toBe(502);
+    expect(caughtError?.message).toBe('<html>502 Bad Gateway</html>');
   });
 
   it('throws immediately if refreshToken is falsy, without calling fetch', async () => {
@@ -263,9 +308,10 @@ describe('ScalekitEdgeClient.refreshAccessToken', () => {
     jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({
-        refresh_token: 'rt_new',
-      }),
+      text: async () =>
+        JSON.stringify({
+          refresh_token: 'rt_new',
+        }),
     } as unknown as Response);
 
     await expect(client.refreshAccessToken('rt_old')).rejects.toThrow(
@@ -277,9 +323,10 @@ describe('ScalekitEdgeClient.refreshAccessToken', () => {
     jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({
-        access_token: 'at_new',
-      }),
+      text: async () =>
+        JSON.stringify({
+          access_token: 'at_new',
+        }),
     } as unknown as Response);
 
     await expect(client.refreshAccessToken('rt_old')).rejects.toThrow(

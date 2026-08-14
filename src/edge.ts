@@ -11,6 +11,7 @@ import {
   TokenValidationOptions,
 } from './types/scalekit';
 import { IdTokenClaim, IdpInitiatedLoginClaims, User } from './types/auth';
+import { ScalekitAuthClient } from './middleware/protocol';
 
 /**
  * Raised on any non-2xx response from Scalekit's REST endpoints. Simple,
@@ -43,7 +44,7 @@ const JWKS_PATH = 'keys';
  * replacement: no organization/connection/directory/etc. methods, and
  * ScalekitClient remains the default for everything else.
  */
-export class ScalekitEdgeClient {
+export class ScalekitEdgeClient implements ScalekitAuthClient {
   private readonly baseUrl: string;
   private jwks?: ReturnType<typeof jose.createRemoteJWKSet>;
 
@@ -121,7 +122,13 @@ export class ScalekitEdgeClient {
       body: QueryString.stringify(body),
     });
 
-    const data = (await response.json()) as {
+    // Read the body as text first rather than calling response.json()
+    // directly -- a 502/504 HTML error page or a plain-text error response
+    // (common from CDNs/edge proxies fronting Edge-deployed apps) would
+    // otherwise throw a raw, unclassifiable SyntaxError from response.json()
+    // itself instead of a catchable ScalekitEdgeError.
+    const text = await response.text();
+    let data: {
       id_token?: string;
       access_token: string;
       expires_in?: number;
@@ -129,6 +136,11 @@ export class ScalekitEdgeClient {
       error?: string;
       error_description?: string;
     };
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new ScalekitEdgeError(response.status, text || response.statusText);
+    }
     if (!response.ok) {
       throw new ScalekitEdgeError(
         response.status,
@@ -153,7 +165,23 @@ export class ScalekitEdgeClient {
       ...(options?.codeVerifier && { code_verifier: options.codeVerifier }),
     });
 
-    const claims = jose.decodeJwt<IdTokenClaim>(data.id_token!);
+    // Validate that all required properties exist. A 200 response missing
+    // one of these otherwise produces a raw, undiagnosable TypeError from
+    // inside jose.decodeJwt rather than a clear, catchable error.
+    if (!data.id_token) {
+      throw new Error('Missing id_token in authentication response');
+    }
+    if (!data.access_token) {
+      throw new Error('Missing access_token in authentication response');
+    }
+    if (!data.refresh_token) {
+      throw new Error('Missing refresh_token in authentication response');
+    }
+    if (data.expires_in === undefined) {
+      throw new Error('Missing expires_in in authentication response');
+    }
+
+    const claims = jose.decodeJwt<IdTokenClaim>(data.id_token);
     const user = <User>{};
     for (const [k, v] of Object.entries(claims)) {
       if (IdTokenClaimToUserMap[k as keyof IdTokenClaim]) {
@@ -165,9 +193,9 @@ export class ScalekitEdgeClient {
 
     return {
       user,
-      idToken: data.id_token!,
+      idToken: data.id_token,
       accessToken: data.access_token,
-      expiresIn: data.expires_in!,
+      expiresIn: data.expires_in,
       refreshToken: data.refresh_token,
     };
   }
