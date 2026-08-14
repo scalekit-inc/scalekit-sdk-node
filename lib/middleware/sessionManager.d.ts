@@ -45,14 +45,14 @@ export declare class SessionRefreshManager {
     private refresh;
     private doRefresh;
     /** Encrypt a fresh session payload (e.g. right after authenticateWithCode). */
-    createSessionCookie(payload: Record<string, unknown>): string;
+    createSessionCookie(payload: Record<string, unknown>): Promise<string>;
     /**
      * Decrypt a raw cookie value (e.g. for extracting idToken during logout,
      * before the cookie is cleared). Throws InvalidSessionError if the cookie
      * can't be decrypted -- callers that just want "is there a usable idToken"
      * should catch that and fall back gracefully, same as check() does.
      */
-    decryptCookieValue(value: string): Record<string, unknown>;
+    decryptCookieValue(value: string): Promise<Record<string, unknown>>;
     /** Apply a SessionResult's cookie side effects to an outgoing response. */
     apply(result: SessionResult, response: ResponseAdapter): void;
 }

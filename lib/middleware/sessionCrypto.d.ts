@@ -15,7 +15,7 @@ export declare class InvalidSessionError extends Error {
  * @param secret cookieEncryptionSecret -- required, no default (see module docs).
  * @returns base64url-encoded, versioned ciphertext string.
  */
-export declare function encryptSession(payload: Record<string, unknown>, secret: string): string;
+export declare function encryptSession(payload: Record<string, unknown>, secret: string): Promise<string>;
 /**
  * Decrypt a session cookie value produced by encryptSession().
  *
@@ -28,4 +28,4 @@ export declare function encryptSession(payload: Record<string, unknown>, secret:
  *   with, or uses an unsupported format version. Never throws any other
  *   error type for these cases.
  */
-export declare function decryptSession(token: string, secret: string): Record<string, unknown>;
+export declare function decryptSession(token: string, secret: string): Promise<Record<string, unknown>>;
