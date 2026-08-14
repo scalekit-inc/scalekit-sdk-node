@@ -26,6 +26,8 @@ import {
 } from '../middleware/sessionManager';
 import {
   generateState,
+  RETURN_TO_COOKIE_NAME,
+  sanitizeReturnTo,
   STATE_COOKIE_MAX_AGE,
   STATE_COOKIE_NAME,
   verifyState,
@@ -235,9 +237,25 @@ export class ScalekitAuth {
     const state = generateState();
     options.state = state;
     const url = this.client.getAuthorizationUrl(this.redirectUri, options);
-    new ExpressResponseAdapter(res).setCookie(STATE_COOKIE_NAME, state, {
+    const adapter = new ExpressResponseAdapter(res);
+    adapter.setCookie(STATE_COOKIE_NAME, state, {
       maxAge: STATE_COOKIE_MAX_AGE,
     });
+
+    // Preserve the page the caller was trying to reach (set by requiresAuth's
+    // redirect below) so callbackHandler can send them back there instead of
+    // the fixed postLoginRedirect -- re-validated here since query strings
+    // are always attacker-influenceable, even if requiresAuth's own value was
+    // somehow bypassed by a direct /login?returnTo= hit.
+    const returnTo = sanitizeReturnTo(
+      typeof req.query.returnTo === 'string' ? req.query.returnTo : undefined
+    );
+    if (returnTo) {
+      adapter.setCookie(RETURN_TO_COOKIE_NAME, returnTo, {
+        maxAge: STATE_COOKIE_MAX_AGE,
+      });
+    }
+
     res.redirect(url);
   };
 
@@ -246,7 +264,9 @@ export class ScalekitAuth {
     res: Response
   ): Promise<void> => {
     const redirectToLogin = () => {
-      new ExpressResponseAdapter(res).deleteCookie(STATE_COOKIE_NAME);
+      const adapter = new ExpressResponseAdapter(res);
+      adapter.deleteCookie(STATE_COOKIE_NAME);
+      adapter.deleteCookie(RETURN_TO_COOKIE_NAME);
       res.redirect(this.loginPath);
     };
 
@@ -260,9 +280,8 @@ export class ScalekitAuth {
       return;
     }
 
-    const storedState = new ExpressRequestAdapter(req).getCookie(
-      STATE_COOKIE_NAME
-    );
+    const requestAdapter = new ExpressRequestAdapter(req);
+    const storedState = requestAdapter.getCookie(STATE_COOKIE_NAME);
     const returnedState = req.query.state;
     if (
       typeof returnedState !== 'string' ||
@@ -314,10 +333,17 @@ export class ScalekitAuth {
     const adapter = new ExpressResponseAdapter(res);
     adapter.setCookie(this.manager.cookieName, cookieValue);
     adapter.deleteCookie(STATE_COOKIE_NAME);
-    res.redirect(this.postLoginRedirect);
+    const returnTo = sanitizeReturnTo(
+      requestAdapter.getCookie(RETURN_TO_COOKIE_NAME)
+    );
+    adapter.deleteCookie(RETURN_TO_COOKIE_NAME);
+    res.redirect(returnTo ?? this.postLoginRedirect);
   };
 
-  private logoutHandler = async (req: Request, res: Response): Promise<void> => {
+  private logoutHandler = async (
+    req: Request,
+    res: Response
+  ): Promise<void> => {
     const cookieValue = new ExpressRequestAdapter(req).getCookie(
       this.manager.cookieName
     );
@@ -377,7 +403,11 @@ export class ScalekitAuth {
       // A real redirect, never a JSON 401 -- a background fetch/XHR would
       // silently swallow a 401, which is exactly the failure mode this
       // design exists to avoid.
-      res.redirect(this.loginPath);
+      const returnTo = sanitizeReturnTo(req.originalUrl);
+      const loginUrl = returnTo
+        ? `${this.loginPath}?returnTo=${encodeURIComponent(returnTo)}`
+        : this.loginPath;
+      res.redirect(loginUrl);
       return;
     }
 

@@ -206,8 +206,98 @@ describe('ScalekitAuth (Express)', () => {
     const res = await request(app).get('/account').redirects(0);
 
     expect(res.status).toBe(302);
-    expect(res.headers.location).toBe('/login');
+    expect(res.headers.location).toBe('/login?returnTo=%2Faccount');
     expect(res.headers['content-type']).not.toMatch(/json/);
+  });
+
+  it('protected route without a session redirects to login with returnTo set', async () => {
+    const { app } = buildApp();
+
+    const res = await request(app).get('/account?tab=billing').redirects(0);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe(
+      '/login?returnTo=%2Faccount%3Ftab%3Dbilling'
+    );
+  });
+
+  it('completing login lands back on the preserved returnTo path', async () => {
+    const { app, client } = buildApp('returnto-secret');
+    client.getAuthorizationUrl.mockReturnValue(
+      'https://auth.example.com/oauth/authorize'
+    );
+    client.authenticateWithCode.mockResolvedValue({
+      user: { email: 'test.user@example.com' },
+      accessToken: 'at_1',
+      refreshToken: 'rt_1',
+      idToken: 'idt_1',
+      expiresIn: 300,
+    });
+    client.validateToken.mockResolvedValue({
+      email: 'test.user@example.com',
+      exp: Date.now() / 1000 + 300,
+    });
+
+    const loginRes = await request(app)
+      .get('/login?returnTo=%2Faccount')
+      .redirects(0);
+    const setCookies = (loginRes.headers['set-cookie'] ?? []) as unknown as string[];
+    const state = setCookies
+      .find((c) => c.startsWith('sk_oauth_state='))
+      ?.split('sk_oauth_state=')[1]
+      ?.split(';')[0];
+    const returnToCookie = setCookies
+      .find((c) => c.startsWith('sk_return_to='))
+      ?.split('sk_return_to=')[1]
+      ?.split(';')[0];
+    expect(returnToCookie).toBeDefined();
+
+    const res = await request(app)
+      .get(`/callback?code=abc123&state=${state}`)
+      .set('Cookie', [
+        `sk_oauth_state=${state}`,
+        `sk_return_to=${returnToCookie}`,
+      ])
+      .redirects(0);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe('/account');
+  });
+
+  it('rejects an open-redirect returnTo and falls back to postLoginRedirect', async () => {
+    const { app, client } = buildApp('returnto-open-redirect-secret');
+    client.getAuthorizationUrl.mockReturnValue(
+      'https://auth.example.com/oauth/authorize'
+    );
+    client.authenticateWithCode.mockResolvedValue({
+      user: { email: 'test.user@example.com' },
+      accessToken: 'at_1',
+      refreshToken: 'rt_1',
+      idToken: 'idt_1',
+      expiresIn: 300,
+    });
+    client.validateToken.mockResolvedValue({
+      email: 'test.user@example.com',
+      exp: Date.now() / 1000 + 300,
+    });
+
+    const loginRes = await request(app)
+      .get('/login?returnTo=https://evil.com')
+      .redirects(0);
+    const setCookies = (loginRes.headers['set-cookie'] ?? []) as unknown as string[];
+    expect(setCookies.some((c) => c.startsWith('sk_return_to='))).toBe(false);
+    const state = setCookies
+      .find((c) => c.startsWith('sk_oauth_state='))
+      ?.split('sk_oauth_state=')[1]
+      ?.split(';')[0];
+
+    const res = await request(app)
+      .get(`/callback?code=abc123&state=${state}`)
+      .set('Cookie', [`sk_oauth_state=${state}`])
+      .redirects(0);
+
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe('/');
   });
 
   it('protected route with a valid session succeeds', async () => {
@@ -255,7 +345,10 @@ describe('ScalekitAuth (Express)', () => {
     const setCookie = res.headers['set-cookie']?.[0] ?? '';
     expect(setCookie).toContain('sk_session=');
     const newCookieValue = setCookie.split('sk_session=')[1].split(';')[0];
-    const newPayload = await decryptSession(newCookieValue, 'expired-session-secret');
+    const newPayload = await decryptSession(
+      newCookieValue,
+      'expired-session-secret'
+    );
     expect(newPayload.accessToken).toBe('at_new');
   });
 
@@ -275,7 +368,7 @@ describe('ScalekitAuth (Express)', () => {
       .redirects(0);
 
     expect(res.status).toBe(302);
-    expect(res.headers.location).toBe('/login');
+    expect(res.headers.location).toBe('/login?returnTo=%2Faccount');
   });
 
   it('logout with an invalid cookie falls back to local redirect', async () => {
