@@ -241,7 +241,8 @@ describe('ScalekitAuth (Express)', () => {
     const loginRes = await request(app)
       .get('/login?returnTo=%2Faccount')
       .redirects(0);
-    const setCookies = (loginRes.headers['set-cookie'] ?? []) as unknown as string[];
+    const setCookies = (loginRes.headers['set-cookie'] ??
+      []) as unknown as string[];
     const state = setCookies
       .find((c) => c.startsWith('sk_oauth_state='))
       ?.split('sk_oauth_state=')[1]
@@ -284,7 +285,8 @@ describe('ScalekitAuth (Express)', () => {
     const loginRes = await request(app)
       .get('/login?returnTo=https://evil.com')
       .redirects(0);
-    const setCookies = (loginRes.headers['set-cookie'] ?? []) as unknown as string[];
+    const setCookies = (loginRes.headers['set-cookie'] ??
+      []) as unknown as string[];
     expect(setCookies.some((c) => c.startsWith('sk_return_to='))).toBe(false);
     const state = setCookies
       .find((c) => c.startsWith('sk_oauth_state='))

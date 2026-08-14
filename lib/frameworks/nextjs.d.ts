@@ -115,10 +115,13 @@ export declare class ScalekitAuthNext {
      * Read-only session lookup for Server Components / Route Handlers / Server
      * Actions -- anywhere `cookies()` from `next/headers` is available. Never
      * refreshes or writes a new cookie (only createMiddleware()/withAuth() can
-     * do that) -- a Server Component calling this right after expiry but
-     * before the next middleware-guarded navigation may see a
-     * stale-but-not-yet-refreshed session; expiresAt is still honest and the
-     * next real navigation refreshes transparently.
+     * do that) -- a Server Component calling this on a later request after expiry
+     * will see the refreshed session. Note: if createMiddleware() refreshed the
+     * session during the *current* request, that refreshed cookie is not visible
+     * to a Server Component's getSession() call within that same request -- Next.js
+     * requires explicitly propagating updated request headers for that, which this
+     * method does not do -- so expiresAt may read as already-past in that specific
+     * same-request case; the next actual request will see the refreshed cookie normally.
      *
      * Deliberately returns only {user, expiresAt} -- never accessToken/
      * refreshToken. If a real need for a getAccessToken() shows up later,

@@ -349,9 +349,7 @@ describe('ScalekitAuthNext', () => {
     );
 
     expect(response.status).toBe(307);
-    expect(response.headers.get('location')).toBe(
-      'https://app.example.com/'
-    );
+    expect(response.headers.get('location')).toBe('https://app.example.com/');
   });
 
   it('withAuth with a valid session calls the handler with user', async () => {
