@@ -344,6 +344,115 @@ describe('ScalekitEdgeClient.validateToken', () => {
 
     await expect(client.validateToken(forgedToken)).rejects.toThrow();
   });
+
+  it('caches the JWKS resolver across multiple validateToken calls', async () => {
+    const createRemoteJWKSetSpy = jestGlobal.spyOn(
+      jose,
+      'createRemoteJWKSet'
+    );
+
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ keys: [publicJwk] }),
+    } as Response);
+
+    const token1 = await signTestToken({ email: 'user1@example.com' });
+    const token2 = await signTestToken({ email: 'user2@example.com' });
+
+    const payload1 = await client.validateToken<{ email: string }>(token1);
+    const payload2 = await client.validateToken<{ email: string }>(token2);
+
+    expect(payload1.email).toBe('user1@example.com');
+    expect(payload2.email).toBe('user2@example.com');
+
+    // createRemoteJWKSet should have been called exactly once, not twice
+    expect(createRemoteJWKSetSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('wraps token verification errors in ScalekitEdgeError', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ keys: [publicJwk] }),
+    } as Response);
+
+    const expiredToken = await new jose.SignJWT({ email: 'user@example.com' })
+      .setProtectedHeader({ alg: 'RS256', kid: 'test-key-1' })
+      .setIssuedAt()
+      .setExpirationTime('-1h') // Expired
+      .sign(privateKey);
+
+    await expect(client.validateToken(expiredToken)).rejects.toThrow(
+      ScalekitEdgeError
+    );
+    await expect(client.validateToken(expiredToken)).rejects.toMatchObject({
+      statusCode: 401,
+    });
+  });
+
+  it('validates issuer option correctly', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ keys: [publicJwk] }),
+    } as Response);
+
+    const token = await signTestToken({
+      email: 'user@example.com',
+      iss: 'https://issuer.example.com',
+    });
+
+    // Should pass with matching issuer
+    const payload = await client.validateToken<{ email: string }>(token, {
+      issuer: 'https://issuer.example.com',
+    });
+    expect(payload.email).toBe('user@example.com');
+
+    // Should fail with mismatched issuer
+    await expect(
+      client.validateToken(token, {
+        issuer: 'https://different-issuer.example.com',
+      })
+    ).rejects.toThrow(ScalekitEdgeError);
+  });
+
+  it('validates requiredScopes option correctly', async () => {
+    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      json: async () => ({ keys: [publicJwk] }),
+    } as Response);
+
+    const token = await signTestToken({
+      email: 'user@example.com',
+      scopes: ['read', 'write'],
+    });
+
+    // Should pass with required scope present
+    const payload = await client.validateToken<{ email: string }>(token, {
+      requiredScopes: ['read'],
+    });
+    expect(payload.email).toBe('user@example.com');
+
+    // Should fail with required scope missing
+    let caughtError: ScalekitEdgeError | undefined;
+    try {
+      await client.validateToken(token, {
+        requiredScopes: ['admin'],
+      });
+    } catch (err) {
+      caughtError = err as ScalekitEdgeError;
+    }
+
+    expect(caughtError).toBeInstanceOf(ScalekitEdgeError);
+    expect(caughtError?.statusCode).toBe(401);
+    expect(caughtError?.message).toContain('admin');
+  });
 });
 
 describe('ScalekitEdgeClient.getIdpInitiatedLoginClaims', () => {

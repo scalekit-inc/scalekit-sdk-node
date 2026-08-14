@@ -195,23 +195,28 @@ export class ScalekitEdgeClient {
     token: string,
     options?: TokenValidationOptions
   ): Promise<T> {
-    const { payload } = await jose.jwtVerify<T>(token, this.getJwks(), {
-      ...(options?.issuer && { issuer: options.issuer }),
-      ...(options?.audience && { audience: options.audience }),
-    });
+    try {
+      const { payload } = await jose.jwtVerify<T>(token, this.getJwks(), {
+        ...(options?.issuer && { issuer: options.issuer }),
+        ...(options?.audience && { audience: options.audience }),
+      });
 
-    if (options?.requiredScopes && options.requiredScopes.length > 0) {
-      const claims = jose.decodeJwt(token);
-      const scopes = Array.isArray(claims.scopes)
-        ? claims.scopes.filter((scope: string) => !!scope?.trim?.())
-        : [];
-      const missing = options.requiredScopes.filter((s) => !scopes.includes(s));
-      if (missing.length > 0) {
-        throw new Error(`Token missing required scopes: ${missing.join(', ')}`);
+      if (options?.requiredScopes && options.requiredScopes.length > 0) {
+        const claims = jose.decodeJwt(token);
+        const scopes = Array.isArray(claims.scopes)
+          ? claims.scopes.filter((scope: string) => !!scope?.trim?.())
+          : [];
+        const missing = options.requiredScopes.filter((s) => !scopes.includes(s));
+        if (missing.length > 0) {
+          throw new Error(`Token missing required scopes: ${missing.join(', ')}`);
+        }
       }
-    }
 
-    return payload;
+      return payload;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new ScalekitEdgeError(401, `token validation failed: ${message}`);
+    }
   }
 
   async getIdpInitiatedLoginClaims(
