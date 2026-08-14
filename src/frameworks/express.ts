@@ -18,6 +18,7 @@ import {
   RequestAdapter,
   ResponseAdapter,
   SetCookieOptions,
+  ScalekitAuthClient,
 } from '../middleware/protocol';
 import {
   DEFAULT_COOKIE_NAME,
@@ -105,7 +106,7 @@ class ExpressResponseAdapter implements ResponseAdapter {
 }
 
 export interface ScalekitAuthOptions {
-  client?: ScalekitClient;
+  client?: ScalekitAuthClient;
   clientId?: string;
   clientSecret?: string;
   envUrl?: string;
@@ -148,7 +149,7 @@ export interface ScalekitAuthOptions {
  *   });
  */
 export class ScalekitAuth {
-  readonly client: ScalekitClient;
+  readonly client: ScalekitAuthClient;
   readonly manager: SessionRefreshManager;
   readonly router: Router;
 
