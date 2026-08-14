@@ -11,6 +11,15 @@ import { randomBytes, timingSafeEqual } from 'crypto';
 export const STATE_COOKIE_NAME = 'sk_oauth_state';
 export const STATE_COOKIE_MAX_AGE = 600; // 10 minutes -- generous for a slow login, still short-lived
 
+/**
+ * Short-lived cookie carrying a validated post-login redirect target between
+ * the login and callback handlers, so requiresAuth/createMiddleware can send
+ * a user back to the page they originally requested instead of a fixed
+ * postLoginRedirect. Shared by every framework adapter, same as the OAuth
+ * state cookie above.
+ */
+export const RETURN_TO_COOKIE_NAME = 'sk_return_to';
+
 /** A fresh, random OAuth state value for a login handler to issue. */
 export function generateState(): string {
   return randomBytes(32).toString('base64url');
@@ -30,4 +39,26 @@ export function verifyState(
   const bufB = Buffer.from(returnedState);
   if (bufA.length !== bufB.length) return false;
   return timingSafeEqual(bufA, bufB);
+}
+
+/**
+ * Validates a candidate post-login redirect target, accepting only
+ * same-origin relative paths. The value is attacker-influenceable (read from
+ * a query string on the login redirect), so this is a real open-redirect
+ * guard, not a cosmetic check: rejects absolute URLs (`https://evil.com`),
+ * protocol-relative URLs (`//evil.com`), and backslash variants some
+ * browsers normalize into a protocol-relative URL (`/\evil.com`).
+ */
+export function sanitizeReturnTo(
+  value: string | null | undefined
+): string | undefined {
+  if (!value) return undefined;
+  if (
+    !value.startsWith('/') ||
+    value.startsWith('//') ||
+    value.includes('\\')
+  ) {
+    return undefined;
+  }
+  return value;
 }
