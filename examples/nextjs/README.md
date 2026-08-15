@@ -14,6 +14,8 @@ npm run dev
 
 Register these in your Scalekit dashboard: `http://localhost:5001/callback` as an allowed redirect URI, `http://localhost:5001/` as an allowed post-logout redirect URI, and `http://localhost:5001/login` as the Initiate Login URL.
 
+Run one example at a time. The Express and Next.js examples both default to `:5001`, so running them together (or with the Python examples) collides on ports and dashboard-registered redirect URIs. To run more than one, change `PORT` / `REDIRECT_URI` and register each URI.
+
 ## What this demonstrates
 
 - `app/login/route.js`, `app/callback/route.js`, `app/logout/route.js` — Route Handlers built from `createLoginHandler()` / `createCallbackHandler()` / `createLogoutHandler()`.

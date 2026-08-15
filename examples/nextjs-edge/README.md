@@ -16,6 +16,8 @@ npm run dev
 
 Register these in your Scalekit dashboard: `http://localhost:5002/callback` as an allowed redirect URI, `http://localhost:5002/` as an allowed post-logout redirect URI, and `http://localhost:5002/login` as the Initiate Login URL.
 
+This example uses `:5002` so it can sit next to Express/Next on `:5001`. Still register these URIs — they are not the same as the `:5001` examples. Run one app per registered redirect, or change `PORT` / `REDIRECT_URI` and register each extra URI.
+
 ## What this demonstrates
 
 - `lib/auth.js` — `ScalekitEdgeClient` (`@scalekit-sdk/node/edge`) passed into `ScalekitAuthNext` (`@scalekit-sdk/node/next`), the same session-management layer used in `examples/nextjs`, now running on an Edge-Runtime-safe client.
