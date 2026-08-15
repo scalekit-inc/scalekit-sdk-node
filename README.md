@@ -165,7 +165,7 @@ const app = express();
 app.use(auth.router); // registers /login, /callback, /logout
 
 app.get("/account", auth.requiresAuth, (req, res) => {
-  res.json({ email: req.scalekitUser?.email });
+  res.json({ sub: req.scalekitUser?.sub });
 });
 ```
 
@@ -200,8 +200,10 @@ export const GET = auth.createLogoutHandler();
 
 // app/account/route.js
 import { auth } from "../../lib/auth";
-export const GET = auth.withAuth(async (request, { user }) => Response.json({ email: user?.email }));
+export const GET = auth.withAuth(async (request, { user }) => Response.json({ sub: user?.sub }));
 ```
+
+`req.scalekitUser` / `user` is access-token claims, not an id_token profile. `sub` is always present; `email` only appears if you add it as a custom access-token claim in the dashboard.
 
 See [`examples/express`](./examples/express) and [`examples/nextjs`](./examples/nextjs) for complete, runnable versions. For a fuller production-oriented sample app, see the framework repos in the table above.
 
