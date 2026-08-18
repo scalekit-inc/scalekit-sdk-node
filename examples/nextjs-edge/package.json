@@ -1,0 +1,14 @@
+{
+  "name": "scalekit-nextjs-edge-example",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "next dev -p 5002"
+  },
+  "dependencies": {
+    "@scalekit-sdk/node": "file:../..",
+    "next": "^16.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}

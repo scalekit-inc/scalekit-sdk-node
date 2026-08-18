@@ -128,6 +128,136 @@ app.listen(3000, () => {
 | **Express.js** | [scalekit-express-example](https://github.com/scalekit-developers/scalekit-express-example) | Basic Express.js server implementation |
 | **Next.js** | [scalekit-nextjs-demo](https://github.com/scalekit-developers/scalekit-nextjs-demo) | Modern React/Next.js application |
     **Auth.js** | [scalekit-authjs-example](https://github.com/scalekit-developers/scalekit-authjs-example) | Next.js with Auth.js (next-auth v5) |
+
+#### Full Stack Auth — encrypted-session middleware for Express and Next.js
+
+The example above is for **Modular SSO**: Scalekit brokers the OAuth exchange with your customer's own IdP via a `connectionId`, and your app owns its own session however it likes.
+
+If instead Scalekit hosts your login UI and you want it to also manage the session lifecycle for you (**Full Stack Auth**), `@scalekit-sdk/node` ships optional Express and Next.js extras that handle the encrypted session cookie, transparent token refresh, CSRF-safe login/callback, and full logout for you — no hand-rolled cookies, no manual refresh timing.
+
+Register these under **Dashboard → Authentication → Redirects** before testing:
+- **Redirect URI** — your `redirectUri` (the `/callback` path). Scalekit rejects the exchange if this doesn't match exactly.
+- **Post Logout Redirect URI** — where users land after full logout. A relative path gets auto-absolutized against the request host, but the resulting absolute URL must still be registered.
+- **Initiate Login URL** — your `/login` path. Scalekit redirects here (not `/callback`) for a bookmarked login page, an IdP portal tile, or an invite/magic link — `loginHandler`/`createLoginHandler` already handle this correctly, including the `idp_initiated_login` query parameter case, with no extra code required.
+
+```bash
+npm install @scalekit-sdk/node express   # or: npm install @scalekit-sdk/node next
+```
+
+```javascript
+// Express
+import express from "express";
+import ScalekitClient from "@scalekit-sdk/node";
+import { ScalekitAuth } from "@scalekit-sdk/node/express";
+
+const client = new ScalekitClient(
+  process.env.SCALEKIT_ENV_URL,
+  process.env.SCALEKIT_CLIENT_ID,
+  process.env.SCALEKIT_CLIENT_SECRET
+);
+const auth = new ScalekitAuth({
+  client,
+  redirectUri: "https://myapp.com/callback",
+  cookieEncryptionSecret: process.env.COOKIE_ENCRYPTION_SECRET, // openssl rand -base64 32
+});
+
+const app = express();
+app.use(auth.router); // registers /login, /callback, /logout
+
+app.get("/account", auth.requiresAuth, (req, res) => {
+  res.json({ sub: req.scalekitUser?.sub });
+});
+```
+
+```javascript
+// Next.js (App Router) -- one auth instance, constructed once and re-exported
+// lib/auth.js
+import ScalekitClient from "@scalekit-sdk/node";
+import { ScalekitAuthNext } from "@scalekit-sdk/node/next";
+
+const client = new ScalekitClient(
+  process.env.SCALEKIT_ENV_URL,
+  process.env.SCALEKIT_CLIENT_ID,
+  process.env.SCALEKIT_CLIENT_SECRET
+);
+export const auth = new ScalekitAuthNext({
+  client,
+  redirectUri: "https://myapp.com/callback",
+  cookieEncryptionSecret: process.env.COOKIE_ENCRYPTION_SECRET, // openssl rand -base64 32
+});
+
+// app/login/route.js
+import { auth } from "../../lib/auth";
+export const GET = auth.createLoginHandler();
+
+// app/callback/route.js
+import { auth } from "../../lib/auth";
+export const GET = auth.createCallbackHandler();
+
+// app/logout/route.js
+import { auth } from "../../lib/auth";
+export const GET = auth.createLogoutHandler();
+
+// app/account/route.js
+import { auth } from "../../lib/auth";
+export const GET = auth.withAuth(async (request, { user }) => Response.json({ sub: user?.sub }));
+```
+
+`req.scalekitUser` / `user` is access-token claims, not an id_token profile. `sub` is always present; `email` only appears if you add it as a custom access-token claim in the dashboard.
+
+See [`examples/express`](./examples/express) and [`examples/nextjs`](./examples/nextjs) for complete, runnable versions. For a fuller production-oriented sample app, see the framework repos in the table above.
+
+##### `createMiddleware()` — secure-by-default route protection (Next.js)
+
+Instead of wrapping every protected route with `withAuth`, `createMiddleware()` gates every route unless it's explicitly public or part of the auth flow itself — an unlisted route fails *closed* (redirects to `/login?returnTo=<path>`, restored after login) instead of *open*, so no route can be accidentally left unprotected:
+
+```javascript
+// middleware.ts
+import { auth } from "./lib/auth";
+
+export default auth.createMiddleware({
+  publicRoutes: ["/", "/pricing"],
+});
+
+// Next.js requires this as a separate, statically-analyzable export --
+// parsed at build time, so it can't be generated for you.
+export const config = {
+  runtime: "nodejs", // see ScalekitEdgeClient below for real Edge Runtime
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+};
+```
+
+For Server Components, Route Handlers, or Server Actions that just need to read the session without gating the route:
+
+```javascript
+const user = await auth.currentUser(); // Record<string, unknown> | undefined -- never accessToken/refreshToken
+const session = await auth.getSession(); // { user, expiresAt } | null
+```
+
+Both are read-only — they don't refresh an expiring session; only `createMiddleware()`/`withAuth()` write a new session cookie.
+
+#### ScalekitEdgeClient — for Next.js middleware on Edge Runtime
+
+The default `ScalekitClient` (above) uses a gRPC transport and Node-only APIs, which don't work inside Next.js Edge Runtime middleware. `@scalekit-sdk/node/edge` exports `ScalekitEdgeClient`, a `fetch` + [`jose`](https://github.com/panva/jose)-based alternative covering the same auth-flow methods (`getAuthorizationUrl`, `authenticateWithCode`, `refreshAccessToken`, `validateToken`, `getLogoutUrl`, `getIdpInitiatedLoginClaims`) used by `ScalekitAuth`/`ScalekitAuthNext`. It's a drop-in `client` for either adapter — not a general replacement for `ScalekitClient`, which remains the default for everything else (organizations, connections, directories, etc.).
+
+```javascript
+// lib/auth.js (Next.js middleware, Edge Runtime)
+import { ScalekitEdgeClient } from "@scalekit-sdk/node/edge";
+import { ScalekitAuthNext } from "@scalekit-sdk/node/next";
+
+const client = new ScalekitEdgeClient(
+  process.env.SCALEKIT_ENV_URL,
+  process.env.SCALEKIT_CLIENT_ID,
+  process.env.SCALEKIT_CLIENT_SECRET
+);
+export const auth = new ScalekitAuthNext({
+  client,
+  redirectUri: "https://myapp.com/callback",
+  cookieEncryptionSecret: process.env.COOKIE_ENCRYPTION_SECRET,
+});
+```
+
+See [`examples/nextjs-edge`](./examples/nextjs-edge) for a complete, runnable version, including the `runtime: 'experimental-edge'` middleware config this requires.
 ---
 ### Helpful links
 #### Quickstart Guides
