@@ -3,6 +3,22 @@ import { type Client, type Transport, createClient } from '@connectrpc/connect';
 import { createGrpcTransport } from '@connectrpc/connect-node';
 import CoreClient, { headers } from './core';
 
+// A gRPC transport keeps one long-lived HTTP/2 session. connect-node defaults to
+// pingIntervalMs: Infinity (so a pooled connection is NEVER verified before it is
+// reused) and idleConnectionTimeoutMs: 15 min (so the client holds idle sessions
+// far longer than an edge/LB typically does). When the edge closes an idle
+// connection first, the client writes into a dead socket and the call fails with
+// ECONNRESET — which connect-node surfaces as Code.Aborted (see
+// errors/base-exception.ts). These settings close that gap:
+//   - pingIntervalMs: once a session has been idle past this, connect-node sends a
+//     PING to verify it is still alive before reusing it, transparently opening a
+//     fresh connection if the PING fails. Must sit below the edge idle timeout.
+//   - idleConnectionTimeoutMs: the client drops its own idle sessions well before
+//     the edge would, so it rarely gets near that window in the first place.
+const PING_INTERVAL_MS = 30_000;
+const PING_TIMEOUT_MS = 5_000;
+const IDLE_CONNECTION_TIMEOUT_MS = 60_000;
+
 export default class GrpcConnect {
   private transport: Transport;
   constructor(
@@ -12,6 +28,14 @@ export default class GrpcConnect {
     this.transport = createGrpcTransport({
       baseUrl: this.coreClient.envUrl,
       defaultTimeoutMs: timeoutMs,
+      pingIntervalMs: PING_INTERVAL_MS,
+      pingTimeoutMs: PING_TIMEOUT_MS,
+      // Must stay false: pinging *idle* connections (those with no active streams)
+      // can draw GOAWAY/ENHANCE_YOUR_CALM from a server that does not permit
+      // keepalive without calls. The verify-before-reuse PING driven by
+      // pingIntervalMs is independent of this flag and still applies.
+      pingIdleConnection: false,
+      idleConnectionTimeoutMs: IDLE_CONNECTION_TIMEOUT_MS,
       interceptors: [
         (next) => {
           return (req) => {

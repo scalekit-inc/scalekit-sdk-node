@@ -53,6 +53,33 @@ const HTTP_STATUS = {
   GATEWAY_TIMEOUT: 504,
 };
 
+// Node socket error codes that indicate a transport-level connection reset
+// rather than a server-sent gRPC status. connect-node maps these to Code.Aborted
+// (see @connectrpc/connect-node node-error.ts), which would otherwise be promoted
+// to ScalekitConflictException and look like an HTTP 409 the caller never caused.
+const TRANSPORT_RESET_CODES = new Set(['ECONNRESET', 'EPIPE']);
+
+/**
+ * Walk a ConnectError's `cause` chain looking for an underlying Node socket error
+ * whose `code` marks a transport-level connection reset. connect-node attaches the
+ * raw Node error as `cause` (`ce.cause = reason`). A genuine server-sent Aborted
+ * (e.g. an optimistic-concurrency conflict) has no such cause and must keep
+ * mapping to ScalekitConflictException.
+ */
+function hasTransportResetCause(error: unknown): boolean {
+  const seen = new Set<unknown>();
+  let current: unknown = error;
+  while (current instanceof Error && !seen.has(current)) {
+    seen.add(current);
+    const code = (current as { code?: unknown }).code;
+    if (typeof code === 'string' && TRANSPORT_RESET_CODES.has(code)) {
+      return true;
+    }
+    current = (current as { cause?: unknown }).cause;
+  }
+  return false;
+}
+
 // Base exception class
 export class ScalekitException extends Error {
   constructor(error: any) {
@@ -271,6 +298,30 @@ export class ScalekitServerException extends ScalekitException {
       error instanceof ConnectError
         ? error.code
         : HTTP_TO_GRPC[error.status] || Code.Unknown;
+
+    // A transport-level connection reset (ECONNRESET/EPIPE) is surfaced by
+    // connect-node as Code.Aborted. That is NOT a real conflict — an idle
+    // keep-alive socket was reused after the edge closed it, or the connection
+    // dropped mid-flight. Re-key it as Unavailable so the resulting exception is
+    // consistent end to end: ScalekitServiceUnavailableException with grpcStatus
+    // UNAVAILABLE (14) and httpStatus 503, rather than the misleading
+    // ScalekitConflictException / Aborted (10) / 409. The underlying socket error
+    // is preserved as the cause. A genuine server-sent Aborted (no ECONNRESET/EPIPE
+    // cause) still falls through to the switch below and stays a conflict.
+    if (
+      error instanceof ConnectError &&
+      grpcStatus === Code.Aborted &&
+      hasTransportResetCause(error)
+    ) {
+      const transientError = new ConnectError(
+        error.rawMessage,
+        Code.Unavailable,
+        error.metadata,
+        undefined,
+        error.cause
+      );
+      return new specific.ScalekitServiceUnavailableException(transientError);
+    }
 
     // isToolError may be pre-computed by the caller (_connectExec already calls findDetails).
     // Fall back to parsing here only when called standalone (e.g. Axios path, tests).
