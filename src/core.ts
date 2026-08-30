@@ -38,6 +38,8 @@ const tokenEndpoint = 'oauth/token';
 const jwksEndpoint = 'keys';
 const DEFAULT_TOOL_TIMEOUT_MS = 60_000;
 export const DEFAULT_TIMEOUT_MS = 20_000;
+export const DEFAULT_PING_INTERVAL_MS = 30_000;
+export const DEFAULT_PING_TIMEOUT_MS = 5_000;
 
 // A non-positive timeout is never what the caller wants: connect-es treats a
 // per-call timeoutMs <= 0 as "no deadline" (reintroducing indefinite hangs)
@@ -68,10 +70,14 @@ export default class CoreClient {
     readonly clientId: string,
     readonly clientSecret: string,
     readonly toolTimeoutMs: number = DEFAULT_TOOL_TIMEOUT_MS,
-    readonly timeoutMs: number = DEFAULT_TIMEOUT_MS
+    readonly timeoutMs: number = DEFAULT_TIMEOUT_MS,
+    readonly pingIntervalMs: number = DEFAULT_PING_INTERVAL_MS,
+    readonly pingTimeoutMs: number = DEFAULT_PING_TIMEOUT_MS
   ) {
     assertValidTimeout('toolTimeoutMs', toolTimeoutMs);
     assertValidTimeout('timeoutMs', timeoutMs);
+    assertValidTimeout('pingIntervalMs', pingIntervalMs);
+    assertValidTimeout('pingTimeoutMs', pingTimeoutMs);
     // The instance-level timeout bounds every HTTP call made through this
     // client — including the token endpoint and JWKS fetches, which otherwise
     // hang forever on a silently dropped connection (the same failure mode

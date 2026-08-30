@@ -80,4 +80,23 @@ export interface ScalekitOptions {
    * Must be a positive finite number; the constructor throws otherwise.
    */
   toolTimeoutMs?: number;
+
+  /**
+   * How often, in milliseconds, an idle pooled gRPC connection is verified
+   * (via an HTTP/2 PING) before being reused. On a failed verification a
+   * fresh connection is opened first, so a connection silently dropped by a
+   * network intermediary while idle never surfaces as an error. Defaults to
+   * 30000 (30 s).
+   *
+   * Lower this if your network path (a strict corporate firewall, for
+   * example) drops idle connections faster than the default window.
+   */
+  pingIntervalMs?: number;
+
+  /**
+   * How long, in milliseconds, to wait for a PING response before treating
+   * an idle connection as dead and opening a fresh one. Defaults to 5000
+   * (5 s).
+   */
+  pingTimeoutMs?: number;
 }

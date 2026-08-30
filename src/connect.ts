@@ -15,8 +15,9 @@ import CoreClient, { headers } from './core';
 //     fresh connection if the PING fails. Must sit below the edge idle timeout.
 //   - idleConnectionTimeoutMs: the client drops its own idle sessions well before
 //     the edge would, so it rarely gets near that window in the first place.
-const PING_INTERVAL_MS = 30_000;
-const PING_TIMEOUT_MS = 5_000;
+// pingIntervalMs/pingTimeoutMs are configurable via ScalekitOptions (see core.ts);
+// idleConnectionTimeoutMs is not, since it just needs to sit comfortably below
+// most edges' idle window and isn't a value callers should typically need to tune.
 const IDLE_CONNECTION_TIMEOUT_MS = 60_000;
 
 export default class GrpcConnect {
@@ -28,8 +29,8 @@ export default class GrpcConnect {
     this.transport = createGrpcTransport({
       baseUrl: this.coreClient.envUrl,
       defaultTimeoutMs: timeoutMs,
-      pingIntervalMs: PING_INTERVAL_MS,
-      pingTimeoutMs: PING_TIMEOUT_MS,
+      pingIntervalMs: this.coreClient.pingIntervalMs,
+      pingTimeoutMs: this.coreClient.pingTimeoutMs,
       // Must stay false: pinging *idle* connections (those with no active streams)
       // can draw GOAWAY/ENHANCE_YOUR_CALM from a server that does not permit
       // keepalive without calls. The verify-before-reuse PING driven by
