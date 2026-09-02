@@ -16,6 +16,8 @@ import {
   ListToolsRequestSchema,
   ListToolsResponse,
   ScopedToolFilterSchema,
+  SearchToolsRequestSchema,
+  SearchToolsResponse,
   ToolService,
 } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 
@@ -129,6 +131,38 @@ export default class ToolsClient {
         identifier,
         ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
         ...(options?.pageToken && { pageToken: options.pageToken }),
+      }),
+      { timeoutMs: this.coreClient.toolTimeoutMs }
+    );
+  }
+
+  /**
+   * Searches tools ranked by relevance to a natural-language query — the job to be
+   * done, not an exact tool name.
+   *
+   * Pass `identifier` to also get per-connection readiness (usable now, needs a new
+   * connection, or needs re-auth) so you can gate execution on the right auth step.
+   *
+   * @param query Natural-language query or keywords describing the job to be done. 1-256 characters.
+   * @param options Optional parameters
+   * @param options.identifier Connected-account identifier (for example, email or workspace ID).
+   *                            When set, each result is annotated with readiness for this identifier's connections.
+   * @param options.topK Maximum number of ranked results to return. Defaults to 10, capped at 50.
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   */
+  async searchTools(
+    query: string,
+    options?: {
+      identifier?: string;
+      topK?: number;
+    }
+  ): Promise<SearchToolsResponse> {
+    return this.coreClient.connectExec(
+      this.client.searchTools,
+      create(SearchToolsRequestSchema, {
+        query,
+        ...(options?.identifier && { identifier: options.identifier }),
+        ...(options?.topK !== undefined && { topK: options.topK }),
       }),
       { timeoutMs: this.coreClient.toolTimeoutMs }
     );

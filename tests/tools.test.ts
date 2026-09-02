@@ -274,6 +274,36 @@ describe('Tools', () => {
     });
   });
 
+  describe('searchTools', () => {
+    it('should search tools ranked by relevance to a query', async () => {
+      const response = await client.tools.searchTools(
+        'send a message to a slack channel',
+        {
+          topK: 5,
+        }
+      );
+
+      expect(response).toBeDefined();
+      expect(response.tools).toBeDefined();
+      expect(Array.isArray(response.tools)).toBe(true);
+    });
+
+    it('should annotate readiness when an identifier is passed', async () => {
+      const response = await client.tools.searchTools('fetch documents', {
+        identifier: 'test@example.com',
+        topK: 5,
+      });
+
+      expect(response).toBeDefined();
+      for (const tool of response.tools) {
+        expect(Array.isArray(tool.connections)).toBe(true);
+        for (const connection of tool.connections) {
+          expect(connection.readinessState).toBeDefined();
+        }
+      }
+    });
+  });
+
   describe('listAvailableTools', () => {
     it('should list available tools with identifier', async () => {
       const identifier = 'test_identifier';

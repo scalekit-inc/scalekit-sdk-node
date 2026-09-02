@@ -1,7 +1,7 @@
 import { type MessageInitShape } from '@bufbuild/protobuf';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { ExecuteToolResponse, FilterSchema, ListAvailableToolsResponse, ListScopedToolsResponse, ListToolsResponse, ScopedToolFilterSchema } from './pkg/grpc/scalekit/v1/tools/tools_pb';
+import { ExecuteToolResponse, FilterSchema, ListAvailableToolsResponse, ListScopedToolsResponse, ListToolsResponse, ScopedToolFilterSchema, SearchToolsResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * Client for listing and executing tools.
  *
@@ -70,6 +70,24 @@ export default class ToolsClient {
         pageSize?: number;
         pageToken?: string;
     }): Promise<ListAvailableToolsResponse>;
+    /**
+     * Searches tools ranked by relevance to a natural-language query — the job to be
+     * done, not an exact tool name.
+     *
+     * Pass `identifier` to also get per-connection readiness (usable now, needs a new
+     * connection, or needs re-auth) so you can gate execution on the right auth step.
+     *
+     * @param query Natural-language query or keywords describing the job to be done. 1-256 characters.
+     * @param options Optional parameters
+     * @param options.identifier Connected-account identifier (for example, email or workspace ID).
+     *                            When set, each result is annotated with readiness for this identifier's connections.
+     * @param options.topK Maximum number of ranked results to return. Defaults to 10, capped at 50.
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    searchTools(query: string, options?: {
+        identifier?: string;
+        topK?: number;
+    }): Promise<SearchToolsResponse>;
     /**
      * Executes a tool using credentials from a connected account.
      *
