@@ -305,9 +305,12 @@ export class ScalekitServerException extends ScalekitException {
     // dropped mid-flight. Re-key it as Unavailable so the resulting exception is
     // consistent end to end: ScalekitServiceUnavailableException with grpcStatus
     // UNAVAILABLE (14) and httpStatus 503, rather than the misleading
-    // ScalekitConflictException / Aborted (10) / 409. The underlying socket error
-    // is preserved as the cause. A genuine server-sent Aborted (no ECONNRESET/EPIPE
-    // cause) still falls through to the switch below and stays a conflict.
+    // ScalekitConflictException / Aborted (10) / 409. error.details is carried
+    // over (not dropped) so findDetails()/errorCode/unpackedDetails on the
+    // promoted exception still reflect whatever the original error carried,
+    // and the underlying socket error is preserved as the cause. A genuine
+    // server-sent Aborted (no ECONNRESET/EPIPE cause) still falls through to
+    // the switch below and stays a conflict.
     if (
       error instanceof ConnectError &&
       grpcStatus === Code.Aborted &&
@@ -320,6 +323,11 @@ export class ScalekitServerException extends ScalekitException {
         undefined,
         error.cause
       );
+      // error.details holds already-received (IncomingDetail) entries, which
+      // the constructor's outgoingDetails param isn't typed to accept (it's
+      // meant for a sender constructing a fresh error) — assign the field
+      // directly instead; findDetails() handles both shapes at runtime.
+      transientError.details = error.details;
       return new specific.ScalekitServiceUnavailableException(transientError);
     }
 

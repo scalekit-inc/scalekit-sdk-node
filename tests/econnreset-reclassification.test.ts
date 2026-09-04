@@ -12,6 +12,7 @@ import {
   ScalekitConflictException,
   ScalekitServiceUnavailableException,
 } from '../src/errors';
+import { ErrorInfoSchema } from '../src/pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
 
 /** A ConnectError(code=Aborted) whose cause is a Node socket error, mirroring
  *  what @connectrpc/connect-node produces (`ce.cause = reason`). */
@@ -61,6 +62,24 @@ describe('ECONNRESET reclassification', () => {
 
     const promoted = ScalekitServerException.promote(ce);
     expect(promoted).toBeInstanceOf(ScalekitServiceUnavailableException);
+  });
+
+  it('preserves error details/errorCode across the Aborted → Unavailable re-key', () => {
+    const cause = Object.assign(new Error('read ECONNRESET'), {
+      code: 'ECONNRESET',
+    });
+    const ce = new ConnectError('read ECONNRESET', Code.Aborted, undefined, [
+      { desc: ErrorInfoSchema, value: { errorCode: 'SOME_ERROR_CODE' } },
+    ]);
+    ce.cause = cause;
+
+    const promoted = ScalekitServerException.promote(
+      ce
+    ) as ScalekitServiceUnavailableException;
+    expect(promoted).toBeInstanceOf(ScalekitServiceUnavailableException);
+    expect(promoted.errorCode).toBe('SOME_ERROR_CODE');
+    expect(promoted.unpackedDetails).toHaveLength(1);
+    expect(promoted.unpackedDetails[0].errorCode).toBe('SOME_ERROR_CODE');
   });
 
   it('genuine server-sent Aborted (no socket cause) still → ScalekitConflictException', () => {
