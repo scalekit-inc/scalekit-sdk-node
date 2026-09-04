@@ -26,15 +26,29 @@ import CoreClient, { headers } from './core';
 //     scalekit-sdk-python#195, merged) against the same backend, so this is a
 //     known-safe traffic pattern, not a theoretical one.
 //   - idleConnectionTimeoutMs: matches the backend's own MaxConnectionIdle (5
-//     min, cmd/grpc.go) rather than sitting below pingIntervalMs — set it any
-//     lower and the client would close its own idle connections at essentially
-//     the same moment a keepalive ping would fire, defeating the point of
-//     pinging idle connections at all.
+//     min, cmd/grpc.go) by default — but pingIntervalMs is caller-configurable
+//     (see ScalekitOptions in core.ts) while this constant on its own isn't,
+//     so a caller-supplied pingIntervalMs above the default would otherwise
+//     let idleConnectionTimeoutMs close the connection before a single
+//     keepalive ping ever gets a chance to fire, silently defeating
+//     pingIdleConnection for that caller. idleConnectionTimeoutMsFor() below
+//     derives the real bound from whatever pingIntervalMs is actually in use
+//     instead of a bare constant, so this relationship always holds.
 // pingIntervalMs/pingTimeoutMs are configurable via ScalekitOptions (see core.ts);
-// idleConnectionTimeoutMs is not, since it's paired specifically with the
-// backend's own idle bound above and isn't a value callers should typically
-// need to tune independently.
-const IDLE_CONNECTION_TIMEOUT_MS = 300_000;
+// idleConnectionTimeoutMs is not directly, since it's derived from
+// pingIntervalMs specifically to preserve the relationship above rather than
+// being a value callers should tune independently.
+const MIN_IDLE_CONNECTION_TIMEOUT_MS = 300_000;
+// How many keepalive-ping cycles an idle connection gets to survive before
+// the client closes it anyway — real margin, not just "more than one".
+const IDLE_PING_CYCLES_BEFORE_CLOSE = 5;
+
+function idleConnectionTimeoutMsFor(pingIntervalMs: number): number {
+  return Math.max(
+    MIN_IDLE_CONNECTION_TIMEOUT_MS,
+    pingIntervalMs * IDLE_PING_CYCLES_BEFORE_CLOSE
+  );
+}
 
 export default class GrpcConnect {
   private transport: Transport;
@@ -51,7 +65,9 @@ export default class GrpcConnect {
       // active ones — see the comment above for why this is safe against this
       // backend specifically.
       pingIdleConnection: true,
-      idleConnectionTimeoutMs: IDLE_CONNECTION_TIMEOUT_MS,
+      idleConnectionTimeoutMs: idleConnectionTimeoutMsFor(
+        this.coreClient.pingIntervalMs
+      ),
       interceptors: [
         (next) => {
           return (req) => {
