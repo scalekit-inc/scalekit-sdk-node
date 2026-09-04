@@ -85,11 +85,15 @@ export interface ScalekitOptions {
    * How often, in milliseconds, an idle pooled gRPC connection is verified
    * (via an HTTP/2 PING) before being reused. On a failed verification a
    * fresh connection is opened first, so a connection silently dropped by a
-   * network intermediary while idle never surfaces as an error. Defaults to
-   * 30000 (30 s).
+   * network intermediary while idle never surfaces as an error. Also governs
+   * the keepalive ping cadence during a long-running call (e.g. tool
+   * execution). Defaults to 60000 (60 s).
    *
-   * Lower this if your network path (a strict corporate firewall, for
-   * example) drops idle connections faster than the default window.
+   * Keep this well above the Scalekit backend's 30s keepalive minimum
+   * interval — a lower value risks the connection being flagged as abusive
+   * and force-closed mid-call. Lower it only if your network path (a strict
+   * corporate firewall, for example) drops idle connections faster than the
+   * default window, and coordinate with Scalekit first.
    */
   pingIntervalMs?: number;
 

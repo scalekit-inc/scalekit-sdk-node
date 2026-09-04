@@ -17,7 +17,7 @@ export declare const headers: {
     authorization: string;
 };
 export declare const DEFAULT_TIMEOUT_MS = 20000;
-export declare const DEFAULT_PING_INTERVAL_MS = 30000;
+export declare const DEFAULT_PING_INTERVAL_MS = 60000;
 export declare const DEFAULT_PING_TIMEOUT_MS = 5000;
 export declare function assertValidTimeout(name: string, value: number): void;
 export default class CoreClient {

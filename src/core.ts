@@ -38,7 +38,17 @@ const tokenEndpoint = 'oauth/token';
 const jwksEndpoint = 'keys';
 const DEFAULT_TOOL_TIMEOUT_MS = 60_000;
 export const DEFAULT_TIMEOUT_MS = 20_000;
-export const DEFAULT_PING_INTERVAL_MS = 30_000;
+// Must clear the backend's EnforcementPolicy.MinTime (30s, scalekit's cmd/grpc.go)
+// with real margin, not just match it: connect-node's ping loop keeps running at
+// this interval for as long as a stream is open (see http2-session-manager.js's
+// resetPingInterval, gated on streamCount > 0 independent of pingIdleConnection),
+// so a value equal to MinTime leaves zero room for jitter between our timer and
+// the server's strike window — one early ping is a strike, enough strikes and the
+// server GOAWAYs the connection mid-call. This bit the Python SDK for the same
+// reason (scalekit-sdk-python#195 raised its equivalent default 30s -> 60s); the
+// Java SDK's 60s keepAliveTime is the precedent the backend's own MinTime margin
+// was sized against.
+export const DEFAULT_PING_INTERVAL_MS = 60_000;
 export const DEFAULT_PING_TIMEOUT_MS = 5_000;
 
 // A non-positive timeout is never what the caller wants: connect-es treats a
