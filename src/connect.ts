@@ -5,27 +5,36 @@ import CoreClient, { headers } from './core';
 
 // A gRPC transport keeps one long-lived HTTP/2 session. connect-node defaults to
 // pingIntervalMs: Infinity (so a pooled connection is NEVER verified before it is
-// reused) and idleConnectionTimeoutMs: 15 min (so the client holds idle sessions
-// far longer than an edge/LB typically does). When the edge closes an idle
-// connection first, the client writes into a dead socket and the call fails with
-// ECONNRESET — which connect-node surfaces as Code.Aborted (see
-// errors/base-exception.ts). These settings close that gap:
-//   - pingIntervalMs: once a session has been idle past this, connect-node sends a
-//     PING to verify it is still alive before reusing it, transparently opening a
-//     fresh connection if the PING fails. Must sit below the edge idle timeout.
-//     NOT idle-only, though: connect-node's session manager also runs this same
-//     ping loop continuously while a stream is open (http2-session-manager.js's
-//     resetPingInterval is gated on streamCount > 0, independent of
-//     pingIdleConnection below) — so this value also sets the keepalive cadence
-//     during a long-running call. It must clear the backend's 30s keepalive
-//     EnforcementPolicy.MinTime with real margin for that reason; see
+// reused, idle or not) and idleConnectionTimeoutMs: 15 min (so the client holds
+// idle sessions far longer than an edge/LB typically does). When the edge closes
+// an idle connection first, the client writes into a dead socket and the call
+// fails with ECONNRESET — which connect-node surfaces as Code.Aborted (see
+// errors/base-exception.ts). These settings close that gap by keeping idle
+// connections proactively verified instead of discovering they're dead only when
+// a real request needs one:
+//   - pingIntervalMs: the keepalive cadence, both for a session with an active
+//     stream (http2-session-manager.js's resetPingInterval is gated on
+//     streamCount > 0 independent of pingIdleConnection below — so this value
+//     also bounds the ping rate during a long-running call) and, with
+//     pingIdleConnection below, for one sitting idle. It must clear the
+//     backend's 30s keepalive EnforcementPolicy.MinTime with real margin; see
 //     DEFAULT_PING_INTERVAL_MS in core.ts.
-//   - idleConnectionTimeoutMs: the client drops its own idle sessions well before
-//     the edge would, so it rarely gets near that window in the first place.
+//   - pingIdleConnection: true so idle connections are pinged on this same
+//     cadence instead of only verified lazily on next use — the backend
+//     confirms PermitWithoutStream: true (scalekit's cmd/grpc.go) and the
+//     Python SDK already runs the equivalent (keepalive_permit_without_calls: 1,
+//     scalekit-sdk-python#195, merged) against the same backend, so this is a
+//     known-safe traffic pattern, not a theoretical one.
+//   - idleConnectionTimeoutMs: matches the backend's own MaxConnectionIdle (5
+//     min, cmd/grpc.go) rather than sitting below pingIntervalMs — set it any
+//     lower and the client would close its own idle connections at essentially
+//     the same moment a keepalive ping would fire, defeating the point of
+//     pinging idle connections at all.
 // pingIntervalMs/pingTimeoutMs are configurable via ScalekitOptions (see core.ts);
-// idleConnectionTimeoutMs is not, since it just needs to sit comfortably below
-// most edges' idle window and isn't a value callers should typically need to tune.
-const IDLE_CONNECTION_TIMEOUT_MS = 60_000;
+// idleConnectionTimeoutMs is not, since it's paired specifically with the
+// backend's own idle bound above and isn't a value callers should typically
+// need to tune independently.
+const IDLE_CONNECTION_TIMEOUT_MS = 300_000;
 
 export default class GrpcConnect {
   private transport: Transport;
@@ -38,11 +47,10 @@ export default class GrpcConnect {
       defaultTimeoutMs: timeoutMs,
       pingIntervalMs: this.coreClient.pingIntervalMs,
       pingTimeoutMs: this.coreClient.pingTimeoutMs,
-      // Must stay false: pinging *idle* connections (those with no active streams)
-      // can draw GOAWAY/ENHANCE_YOUR_CALM from a server that does not permit
-      // keepalive without calls. The verify-before-reuse PING driven by
-      // pingIntervalMs is independent of this flag and still applies.
-      pingIdleConnection: false,
+      // Idle connections are pinged on the same pingIntervalMs cadence as
+      // active ones — see the comment above for why this is safe against this
+      // backend specifically.
+      pingIdleConnection: true,
       idleConnectionTimeoutMs: IDLE_CONNECTION_TIMEOUT_MS,
       interceptors: [
         (next) => {
