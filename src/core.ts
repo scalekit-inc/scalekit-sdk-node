@@ -51,6 +51,15 @@ export const DEFAULT_TIMEOUT_MS = 20_000;
 export const DEFAULT_PING_INTERVAL_MS = 60_000;
 export const DEFAULT_PING_TIMEOUT_MS = 5_000;
 
+// The floor tracks DEFAULT_PING_INTERVAL_MS for the same reason spelled out
+// above: connect-node has no clamp of its own (unlike grpc-core, which
+// silently raises sub-10s keepalive values to 10s), so a caller-supplied
+// value below this genuinely pings at that rate, every ping under the
+// backend's 30s MinTime a strike. 0 is handled separately (see
+// assertValidPingInterval below) as the deliberate "disabled" escape hatch —
+// only 1..59999 is rejected.
+export const MIN_PING_INTERVAL_MS = 60_000;
+
 // A non-positive timeout is never what the caller wants: connect-es treats a
 // per-call timeoutMs <= 0 as "no deadline" (reintroducing indefinite hangs)
 // but a transport defaultTimeoutMs of 0 as an immediately-expired deadline,
@@ -60,6 +69,27 @@ export function assertValidTimeout(name: string, value: number): void {
   if (!Number.isFinite(value) || value <= 0) {
     throw new Error(
       `${name} must be a positive finite number of milliseconds, got ${value}`
+    );
+  }
+}
+
+// pingIntervalMs=0 is a deliberate escape hatch (mirrors the Python SDK's
+// keepalive_time_ms=0): connect-node's own default is pingIntervalMs:
+// Infinity ("never ping"), and a customer whose network path or corporate
+// proxy rejects our pings needs a runtime way back to that default without
+// downgrading the whole SDK. Anything else must clear MIN_PING_INTERVAL_MS
+// with real margin — see the constant's own comment for why.
+export function assertValidPingInterval(value: number): void {
+  if (value === 0) {
+    return;
+  }
+  assertValidTimeout('pingIntervalMs', value);
+  if (value < MIN_PING_INTERVAL_MS) {
+    throw new Error(
+      `pingIntervalMs must be 0 (disabled) or >= ${MIN_PING_INTERVAL_MS}; got ${value}. ` +
+        `A value below the default leaves too little margin over the Scalekit ` +
+        `server's 30s keepalive MinTime — early pings are struck as abusive, ` +
+        `and enough strikes GOAWAYs the connection mid-call.`
     );
   }
 }
@@ -86,8 +116,19 @@ export default class CoreClient {
   ) {
     assertValidTimeout('toolTimeoutMs', toolTimeoutMs);
     assertValidTimeout('timeoutMs', timeoutMs);
-    assertValidTimeout('pingIntervalMs', pingIntervalMs);
+    assertValidPingInterval(pingIntervalMs);
     assertValidTimeout('pingTimeoutMs', pingTimeoutMs);
+    // A pingTimeoutMs at or above pingIntervalMs means the interval timer can
+    // fire again (scheduling the next ping and its own watchdog) before the
+    // previous ping's watchdog would ever have tripped — resetPingInterval's
+    // stopPingInterval() cancels that stale watchdog outright, so a hung ping
+    // response would silently never be detected as hung. Skip when pinging is
+    // disabled (pingIntervalMs === 0); pingTimeoutMs is unused in that state.
+    if (pingIntervalMs !== 0 && pingTimeoutMs >= pingIntervalMs) {
+      throw new Error(
+        `pingTimeoutMs (${pingTimeoutMs}) must be less than pingIntervalMs (${pingIntervalMs}).`
+      );
+    }
     // The instance-level timeout bounds every HTTP call made through this
     // client — including the token endpoint and JWKS fetches, which otherwise
     // hang forever on a silently dropped connection (the same failure mode

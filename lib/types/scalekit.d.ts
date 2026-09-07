@@ -78,11 +78,14 @@ export interface ScalekitOptions {
      * opened, so a connection silently dropped by a network intermediary never
      * surfaces as an error on the next real request. Defaults to 60000 (60 s).
      *
-     * Keep this well above the Scalekit backend's 30s keepalive minimum
-     * interval — a lower value risks the connection being flagged as abusive
-     * and force-closed mid-call. Lower it only if your network path (a strict
-     * corporate firewall, for example) drops idle connections faster than the
-     * default window, and coordinate with Scalekit first.
+     * Must be 0 or at least 60000 — the constructor throws otherwise. Set to
+     * `0` to disable keepalive entirely (connect-node's own default of never
+     * pinging) if your network path or corporate proxy rejects the pings; do
+     * this only as a last resort, since it reintroduces the silent
+     * stale-connection failures this option exists to prevent. There is no
+     * supported way to ping faster than the default: any value below 60000
+     * (other than 0) leaves too little margin over the Scalekit backend's 30s
+     * keepalive minimum interval, and gets flagged as abusive.
      */
     pingIntervalMs?: number;
     /**

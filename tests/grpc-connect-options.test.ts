@@ -1,10 +1,13 @@
 /**
  * GrpcConnect wires pingIntervalMs/pingTimeoutMs/pingIdleConnection into
  * createGrpcTransport, and derives idleConnectionTimeoutMs from whatever
- * pingIntervalMs is actually configured (see connect.ts's idleConnectionTimeoutMsFor).
- * Nothing else exercises this option object directly, so a future edit that
- * flips pingIdleConnection back to false, or breaks the derivation formula,
- * would otherwise go uncaught.
+ * pingIntervalMs is actually configured (see connect.ts's idleConnectionTimeoutMsFor),
+ * capped strictly below the backend's 5-minute MaxConnectionIdle. Given
+ * MIN_PING_INTERVAL_MS (core.ts, 60s), the cap binds for every currently-valid
+ * non-zero pingIntervalMs -- the result is 240000 across the whole valid
+ * range today, not just at the default. Nothing else exercises this option
+ * object directly, so a future edit that flips pingIdleConnection back to
+ * false, or breaks the cap, would otherwise go uncaught.
  *
  * tests/setup.ts (setupFilesAfterEnv, shared by every test file) eagerly
  * constructs a real ScalekitClient in a top-level beforeAll, which imports the
@@ -55,30 +58,36 @@ describe('GrpcConnect transport options', () => {
     expect(options.pingTimeoutMs).toBe(5_000);
   });
 
-  it('defaults idleConnectionTimeoutMs to 300000 (5x the default 60s ping interval)', () => {
+  it('defaults idleConnectionTimeoutMs to the 240000 ceiling, not the 300000 backend bound', () => {
+    // 60_000 (MIN_PING_INTERVAL_MS) * 5 = 300_000, which would exceed the
+    // backend's own 300_000 MaxConnectionIdle if left uncapped -- the ceiling
+    // must bind even at the default, keeping the client's own close strictly
+    // ahead of the backend's.
     buildTransport();
 
     const options = mockCreateGrpcTransport.mock.calls[0][0] as any;
-    expect(options.idleConnectionTimeoutMs).toBe(300_000);
+    expect(options.idleConnectionTimeoutMs).toBe(240_000);
+    expect(options.idleConnectionTimeoutMs).toBeLessThan(300_000);
   });
 
-  it('widens idleConnectionTimeoutMs when a caller configures a larger pingIntervalMs', () => {
-    // 100_000 * 5 = 500_000, comfortably above the 300_000 floor -- must not
-    // silently clamp back down to the floor and starve idle connections of a
-    // single successful ping cycle before close.
+  it('stays at the 240000 ceiling for any valid larger pingIntervalMs too', () => {
+    // Every currently-valid non-zero pingIntervalMs is >= MIN_PING_INTERVAL_MS
+    // (60_000), so pingIntervalMs * 5 always exceeds the 240_000 ceiling --
+    // the ceiling is what actually binds across the whole valid range today,
+    // not just at the default.
     buildTransport({ pingIntervalMs: 100_000 });
 
     const options = mockCreateGrpcTransport.mock.calls[0][0] as any;
-    expect(options.pingIntervalMs).toBe(100_000);
-    expect(options.idleConnectionTimeoutMs).toBe(500_000);
+    expect(options.idleConnectionTimeoutMs).toBe(240_000);
   });
 
-  it('keeps idleConnectionTimeoutMs at the 300000 floor for a small pingIntervalMs', () => {
-    // 5_000 * 5 = 25_000, well under the floor -- the floor must win so an
-    // aggressively low pingIntervalMs doesn't also shrink the idle-close bound.
-    buildTransport({ pingIntervalMs: 5_000 });
+  it('pingIntervalMs=0 disables keepalive entirely -- no ping options passed at all', () => {
+    buildTransport({ pingIntervalMs: 0 });
 
     const options = mockCreateGrpcTransport.mock.calls[0][0] as any;
-    expect(options.idleConnectionTimeoutMs).toBe(300_000);
+    expect(options.pingIntervalMs).toBeUndefined();
+    expect(options.pingTimeoutMs).toBeUndefined();
+    expect(options.pingIdleConnection).toBeUndefined();
+    expect(options.idleConnectionTimeoutMs).toBeUndefined();
   });
 });

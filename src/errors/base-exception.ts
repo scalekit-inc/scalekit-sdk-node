@@ -53,11 +53,24 @@ const HTTP_STATUS = {
   GATEWAY_TIMEOUT: 504,
 };
 
-// Node socket error codes that indicate a transport-level connection reset
-// rather than a server-sent gRPC status. connect-node maps these to Code.Aborted
-// (see @connectrpc/connect-node node-error.ts), which would otherwise be promoted
-// to ScalekitConflictException and look like an HTTP 409 the caller never caused.
-const TRANSPORT_RESET_CODES = new Set(['ECONNRESET', 'EPIPE']);
+// Node/HTTP2 error codes that indicate a transport-level connection reset
+// rather than a server-sent gRPC status. Per connect-node's own
+// connectErrorFromNodeReason (node_modules/@connectrpc/connect-node/dist/cjs/node-error.js),
+// ECONNRESET, ERR_STREAM_DESTROYED, and ERR_HTTP2_INVALID_STREAM are the three
+// codes explicitly mapped to Code.Aborted; anything else (ETIMEDOUT, ENOTFOUND,
+// EAI_AGAIN, ECONNREFUSED) maps to Code.Unavailable already and never reaches
+// this set. Without this reclassification, any of these three would be
+// promoted to ScalekitConflictException and look like an HTTP 409 the caller
+// never caused. EPIPE is NOT one of connect-node's explicitly-mapped codes
+// (it falls through to the default Code.Internal) but is kept here too, at
+// zero cost, in case it ever appears nested under one of the three above in a
+// cause chain that IS Aborted at the top.
+const TRANSPORT_RESET_CODES = new Set([
+  'ECONNRESET',
+  'ERR_STREAM_DESTROYED',
+  'ERR_HTTP2_INVALID_STREAM',
+  'EPIPE',
+]);
 
 /**
  * Walk a ConnectError's `cause` chain looking for an underlying Node socket error

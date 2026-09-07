@@ -52,6 +52,26 @@ describe('ECONNRESET reclassification', () => {
     expect(promoted).toBeInstanceOf(ScalekitServiceUnavailableException);
   });
 
+  // ECONNRESET was the only code originally covered, but connect-node's own
+  // connectErrorFromNodeReason (node_modules/@connectrpc/connect-node/dist/cjs/node-error.js)
+  // maps two more Node/HTTP2 error codes to the same Code.Aborted bucket —
+  // both must get the same reclassification, not just ECONNRESET.
+  it('Aborted caused by ERR_STREAM_DESTROYED → ScalekitServiceUnavailableException', () => {
+    const promoted = ScalekitServerException.promote(
+      abortedWithCause('ERR_STREAM_DESTROYED')
+    );
+    expect(promoted).toBeInstanceOf(ScalekitServiceUnavailableException);
+    expect(promoted).not.toBeInstanceOf(ScalekitConflictException);
+  });
+
+  it('Aborted caused by ERR_HTTP2_INVALID_STREAM → ScalekitServiceUnavailableException', () => {
+    const promoted = ScalekitServerException.promote(
+      abortedWithCause('ERR_HTTP2_INVALID_STREAM')
+    );
+    expect(promoted).toBeInstanceOf(ScalekitServiceUnavailableException);
+    expect(promoted).not.toBeInstanceOf(ScalekitConflictException);
+  });
+
   it('finds the reset code nested deeper in the cause chain', () => {
     const root = Object.assign(new Error('read ECONNRESET'), {
       code: 'ECONNRESET',
