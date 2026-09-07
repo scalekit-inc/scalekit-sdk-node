@@ -17,6 +17,7 @@ import PermissionClient from './permission';
 import WebAuthnClient from './webauthn';
 import TokenClient from './token';
 import M2MClient from './m2mclient';
+import ResourceClient from './resource';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ActionsClient from './actions';
@@ -94,6 +95,7 @@ export default class ScalekitClient {
   readonly webauthn: WebAuthnClient;
   readonly token: TokenClient;
   readonly m2m: M2MClient;
+  readonly resources: ResourceClient;
   readonly tools: ToolsClient;
   readonly connectedAccounts: ConnectedAccountsClient;
   readonly actions: ActionsClient;
@@ -134,6 +136,7 @@ export default class ScalekitClient {
     this.webauthn = new WebAuthnClient(this.grpcConnect, this.coreClient);
     this.token = new TokenClient(this.grpcConnect, this.coreClient);
     this.m2m = new M2MClient(this.grpcConnect, this.coreClient);
+    this.resources = new ResourceClient(this.grpcConnect, this.coreClient);
     this.tools = new ToolsClient(this.grpcConnect, this.coreClient);
     this.connectedAccounts = new ConnectedAccountsClient(
       this.grpcConnect,
