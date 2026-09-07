@@ -80,4 +80,29 @@ export interface ScalekitOptions {
    * Must be a positive finite number; the constructor throws otherwise.
    */
   toolTimeoutMs?: number;
+
+  /**
+   * How often, in milliseconds, an HTTP/2 PING is sent to keep a pooled gRPC
+   * connection verified — both while it's idle and while a long-running call
+   * (e.g. tool execution) is in flight. On a failed ping a fresh connection is
+   * opened, so a connection silently dropped by a network intermediary never
+   * surfaces as an error on the next real request. Defaults to 60000 (60 s).
+   *
+   * Must be 0 or at least 60000 — the constructor throws otherwise. Set to
+   * `0` to disable keepalive entirely (connect-node's own default of never
+   * pinging) if your network path or corporate proxy rejects the pings; do
+   * this only as a last resort, since it reintroduces the silent
+   * stale-connection failures this option exists to prevent. There is no
+   * supported way to ping faster than the default: any value below 60000
+   * (other than 0) leaves too little margin over the Scalekit backend's 30s
+   * keepalive minimum interval, and gets flagged as abusive.
+   */
+  pingIntervalMs?: number;
+
+  /**
+   * How long, in milliseconds, to wait for a PING response before treating
+   * an idle connection as dead and opening a fresh one. Defaults to 5000
+   * (5 s).
+   */
+  pingTimeoutMs?: number;
 }
