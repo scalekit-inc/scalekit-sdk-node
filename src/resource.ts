@@ -4,17 +4,20 @@ import CoreClient from './core';
 import {
   ClientService,
   ResourceUserConsent,
+  ResourceUserConsentFilter,
   ListResourceUserConsentsResponse,
   RevokeUserConsentResponse,
 } from './pkg/grpc/scalekit/v1/clients/clients_pb';
 
 export interface ListUserConsentsOptions {
-  /** Case-insensitive substring match on external user IDs. */
+  /** Case-insensitive substring match on external user IDs. Ignored when userIds is set. */
   search?: string;
   /** Page size, max 30. */
   pageSize?: number;
   /** Pagination cursor. */
   pageToken?: string;
+  /** Exact match on external user IDs, max 25. Takes precedence over search. */
+  userIds?: string[];
 }
 
 /**
@@ -46,8 +49,12 @@ export default class ResourceClient {
    * `clientName`, `scopes` and `grantedAt`. The response also carries
    * `totalSize` plus `nextPageToken` / `prevPageToken` cursors.
    *
+   * Pass `userIds` to match specific users exactly, or `search` for a
+   * case-insensitive substring match. When both are given, `userIds` wins and
+   * `search` is ignored.
+   *
    * @param resourceId - The resource whose consents to list (format: res_xxxxx)
-   * @param options - Optional search and pagination options
+   * @param options - Optional filter, search and pagination options
    * @returns ListResourceUserConsentsResponse with consents array and pagination cursors
    */
   async listUserConsents(
@@ -60,6 +67,9 @@ export default class ResourceClient {
       ...(options?.search && { search: options.search }),
       ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
       ...(options?.pageToken && { pageToken: options.pageToken }),
+      ...(options?.userIds?.length && {
+        filter: { externalUserId: options.userIds },
+      }),
     });
   }
 
@@ -93,6 +103,7 @@ export default class ResourceClient {
 
 export {
   ResourceUserConsent,
+  ResourceUserConsentFilter,
   ListResourceUserConsentsResponse,
   RevokeUserConsentResponse,
 };

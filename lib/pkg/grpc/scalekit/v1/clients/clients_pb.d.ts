@@ -805,12 +805,30 @@ export type ListResourceUserConsentsRequest = Message<"scalekit.v1.clients.ListR
      * @generated from field: string page_token = 4;
      */
     pageToken: string;
+    /**
+     * @generated from field: scalekit.v1.clients.ResourceUserConsentFilter filter = 5;
+     */
+    filter?: ResourceUserConsentFilter | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.ListResourceUserConsentsRequest.
  * Use `create(ListResourceUserConsentsRequestSchema)` to create a new message.
  */
 export declare const ListResourceUserConsentsRequestSchema: GenMessage<ListResourceUserConsentsRequest>;
+/**
+ * @generated from message scalekit.v1.clients.ResourceUserConsentFilter
+ */
+export type ResourceUserConsentFilter = Message<"scalekit.v1.clients.ResourceUserConsentFilter"> & {
+    /**
+     * @generated from field: repeated string external_user_id = 1;
+     */
+    externalUserId: string[];
+};
+/**
+ * Describes the message scalekit.v1.clients.ResourceUserConsentFilter.
+ * Use `create(ResourceUserConsentFilterSchema)` to create a new message.
+ */
+export declare const ResourceUserConsentFilterSchema: GenMessage<ResourceUserConsentFilter>;
 /**
  * @generated from message scalekit.v1.clients.ListResourceUserConsentsResponse
  */
@@ -1658,6 +1676,103 @@ export type UpdateClientResponse = Message<"scalekit.v1.clients.UpdateClientResp
  */
 export declare const UpdateClientResponseSchema: GenMessage<UpdateClientResponse>;
 /**
+ * AddEnvironmentRedirectUriRequest carries the one URI to append to the environment
+ * client's post-login URIs.
+ *
+ * There is no client_id field, deliberately. The environment client is resolved from the
+ * caller's authenticated environment, so there is nothing here for a caller — or a model
+ * — to point at another tenant's client with. That is also why this is not a
+ * `scope_fields` entry on the agent tool: a field that does not exist cannot be left at
+ * whatever the model supplied.
+ *
+ * @generated from message scalekit.v1.clients.AddEnvironmentRedirectUriRequest
+ */
+export type AddEnvironmentRedirectUriRequest = Message<"scalekit.v1.clients.AddEnvironmentRedirectUriRequest"> & {
+    /**
+     * @generated from field: string redirect_uri = 1;
+     */
+    redirectUri: string;
+};
+/**
+ * Describes the message scalekit.v1.clients.AddEnvironmentRedirectUriRequest.
+ * Use `create(AddEnvironmentRedirectUriRequestSchema)` to create a new message.
+ */
+export declare const AddEnvironmentRedirectUriRequestSchema: GenMessage<AddEnvironmentRedirectUriRequest>;
+/**
+ * RemoveEnvironmentRedirectUriRequest carries the one URI to drop from the environment
+ * client's post-login URIs. See AddEnvironmentRedirectUriRequest for why there is no
+ * client_id.
+ *
+ * @generated from message scalekit.v1.clients.RemoveEnvironmentRedirectUriRequest
+ */
+export type RemoveEnvironmentRedirectUriRequest = Message<"scalekit.v1.clients.RemoveEnvironmentRedirectUriRequest"> & {
+    /**
+     * @generated from field: string redirect_uri = 1;
+     */
+    redirectUri: string;
+};
+/**
+ * Describes the message scalekit.v1.clients.RemoveEnvironmentRedirectUriRequest.
+ * Use `create(RemoveEnvironmentRedirectUriRequestSchema)` to create a new message.
+ */
+export declare const RemoveEnvironmentRedirectUriRequestSchema: GenMessage<RemoveEnvironmentRedirectUriRequest>;
+/**
+ * SetEnvironmentInitiateLoginUriRequest carries the replacement initiate-login URI. See
+ * AddEnvironmentRedirectUriRequest for why there is no client_id.
+ *
+ * @generated from message scalekit.v1.clients.SetEnvironmentInitiateLoginUriRequest
+ */
+export type SetEnvironmentInitiateLoginUriRequest = Message<"scalekit.v1.clients.SetEnvironmentInitiateLoginUriRequest"> & {
+    /**
+     * Required and non-empty: this operation SETS the URI and cannot clear it. An empty
+     * value would render on the support agent's approval card as `(not set)`, which reads
+     * as "unchanged" rather than "cleared" — so clearing is left to UpdateClient, where the
+     * field mask says plainly what is happening.
+     *
+     * @generated from field: string initiate_login_uri = 1;
+     */
+    initiateLoginUri: string;
+};
+/**
+ * Describes the message scalekit.v1.clients.SetEnvironmentInitiateLoginUriRequest.
+ * Use `create(SetEnvironmentInitiateLoginUriRequestSchema)` to create a new message.
+ */
+export declare const SetEnvironmentInitiateLoginUriRequestSchema: GenMessage<SetEnvironmentInitiateLoginUriRequest>;
+/**
+ * EnvironmentLoginUrisResponse is the login-URI configuration of the environment client
+ * after the change.
+ *
+ * Its shape deliberately matches what the support agent's `list_redirect_uris` read tool
+ * returns, key for key, so a member (and the model) reads the same four things before and
+ * after a write instead of having to reconcile two vocabularies. `redirect_uris` is the
+ * stored post-login URI list under the name the dashboard and the docs use for it.
+ *
+ * @generated from message scalekit.v1.clients.EnvironmentLoginUrisResponse
+ */
+export type EnvironmentLoginUrisResponse = Message<"scalekit.v1.clients.EnvironmentLoginUrisResponse"> & {
+    /**
+     * @generated from field: string client_id = 1;
+     */
+    clientId: string;
+    /**
+     * @generated from field: repeated string redirect_uris = 2;
+     */
+    redirectUris: string[];
+    /**
+     * @generated from field: repeated string post_logout_redirect_uris = 3;
+     */
+    postLogoutRedirectUris: string[];
+    /**
+     * @generated from field: string initiate_login_uri = 4;
+     */
+    initiateLoginUri: string;
+};
+/**
+ * Describes the message scalekit.v1.clients.EnvironmentLoginUrisResponse.
+ * Use `create(EnvironmentLoginUrisResponseSchema)` to create a new message.
+ */
+export declare const EnvironmentLoginUrisResponseSchema: GenMessage<EnvironmentLoginUrisResponse>;
+/**
  * @generated from message scalekit.v1.clients.CreateClientSecretRequest
  */
 export type CreateClientSecretRequest = Message<"scalekit.v1.clients.CreateClientSecretRequest"> & {
@@ -2431,6 +2546,51 @@ export declare const ClientService: GenService<{
         methodKind: "unary";
         input: typeof UpdateClientRequestSchema;
         output: typeof UpdateClientResponseSchema;
+    };
+    /**
+     * Delta operations on the ENVIRONMENT client's login URIs — the single OIDC client
+     * every environment is provisioned with, which is what the dashboard's "Redirect URIs"
+     * settings and the support agent's `list_redirect_uris` tool both read.
+     *
+     * WHY THESE EXIST rather than an (agent_tool) annotation on UpdateClient, because it
+     * reads as duplication otherwise. Two independent reasons, and either alone is enough:
+     *
+     *  1. The approval card. A gated write's summary must name every value the model chose
+     *     (protoc-gen-agenttool's checkWriteSummaryCoversRequest), and UpdateClient's
+     *     request carries a whole Client message plus a FieldMask — a message and a
+     *     repeated field, neither of which has a one-line rendering on a card. Hiding both
+     *     leaves a tool that can set nothing. A request that is one URI is the only shape
+     *     the gate can describe honestly.
+     *  2. Read-modify-write belongs on the server. UpdateClient REPLACES post_login_uris
+     *     wholesale, so "add one URI" through it means the caller reads the list, appends,
+     *     and writes it back — and any concurrent edit between the read and the write is
+     *     silently discarded. Here the list is read and written inside one call.
+     *
+     * PREVIEW because they are dashboard/agent conveniences over UpdateClient, not a new
+     * public API surface: the public way to set these remains UpdateClient.
+     *
+     * @generated from rpc scalekit.v1.clients.ClientService.AddEnvironmentRedirectUri
+     */
+    addEnvironmentRedirectUri: {
+        methodKind: "unary";
+        input: typeof AddEnvironmentRedirectUriRequestSchema;
+        output: typeof EnvironmentLoginUrisResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.clients.ClientService.RemoveEnvironmentRedirectUri
+     */
+    removeEnvironmentRedirectUri: {
+        methodKind: "unary";
+        input: typeof RemoveEnvironmentRedirectUriRequestSchema;
+        output: typeof EnvironmentLoginUrisResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.clients.ClientService.SetEnvironmentInitiateLoginUri
+     */
+    setEnvironmentInitiateLoginUri: {
+        methodKind: "unary";
+        input: typeof SetEnvironmentInitiateLoginUriRequestSchema;
+        output: typeof EnvironmentLoginUrisResponseSchema;
     };
     /**
      * @generated from rpc scalekit.v1.clients.ClientService.DeleteClient

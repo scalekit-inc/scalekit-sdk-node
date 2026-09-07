@@ -23,9 +23,8 @@ describe('Resource Client (UserConsents)', () => {
 
   describe('listUserConsents', () => {
     it('should list consents for a resource', async () => {
-      const response = await client.resources.listUserConsents(
-        TEST_RESOURCE_ID
-      );
+      const response =
+        await client.resources.listUserConsents(TEST_RESOURCE_ID);
 
       expect(response).toBeDefined();
       expect(Array.isArray(response.consents)).toBe(true);
@@ -47,6 +46,27 @@ describe('Resource Client (UserConsents)', () => {
       const response = await client.resources.listUserConsents(
         TEST_RESOURCE_ID,
         { search: 'usr_' }
+      );
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.consents)).toBe(true);
+    });
+
+    it('should accept an exact userIds filter', async () => {
+      const response = await client.resources.listUserConsents(
+        TEST_RESOURCE_ID,
+        { userIds: ['usr_does_not_exist'] }
+      );
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.consents)).toBe(true);
+    });
+
+    it('should accept userIds together with search', async () => {
+      // userIds takes precedence server-side; search is ignored.
+      const response = await client.resources.listUserConsents(
+        TEST_RESOURCE_ID,
+        { userIds: ['usr_does_not_exist'], search: 'usr_' }
       );
 
       expect(response).toBeDefined();
