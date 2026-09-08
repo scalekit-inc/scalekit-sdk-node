@@ -17,20 +17,26 @@ export declare const headers: {
     authorization: string;
 };
 export declare const DEFAULT_TIMEOUT_MS = 20000;
+export declare const DEFAULT_PING_INTERVAL_MS = 60000;
+export declare const DEFAULT_PING_TIMEOUT_MS = 5000;
+export declare const MIN_PING_INTERVAL_MS = 60000;
 export declare function assertValidTimeout(name: string, value: number): void;
+export declare function assertValidPingInterval(value: number): void;
 export default class CoreClient {
     readonly envUrl: string;
     readonly clientId: string;
     readonly clientSecret: string;
     readonly toolTimeoutMs: number;
     readonly timeoutMs: number;
+    readonly pingIntervalMs: number;
+    readonly pingTimeoutMs: number;
     keys: JWK[];
     accessToken: string | null;
     axios: Axios;
     sdkVersion: string;
     apiVersion: string;
     userAgent: string;
-    constructor(envUrl: string, clientId: string, clientSecret: string, toolTimeoutMs?: number, timeoutMs?: number);
+    constructor(envUrl: string, clientId: string, clientSecret: string, toolTimeoutMs?: number, timeoutMs?: number, pingIntervalMs?: number, pingTimeoutMs?: number);
     private authenticateClient;
     /**
      * Authenticate with the code
