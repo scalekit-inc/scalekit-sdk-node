@@ -160,6 +160,10 @@ export type ListConnectedAccountsRequest = Message<"scalekit.v1.connected_accoun
      * @generated from field: repeated string connection_names = 9;
      */
     connectionNames: string[];
+    /**
+     * @generated from field: optional bool is_org_wide_credential = 10;
+     */
+    isOrgWideCredential?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.ListConnectedAccountsRequest.
@@ -432,6 +436,54 @@ export type GetMagicLinkForConnectedAccountResponse = Message<"scalekit.v1.conne
  */
 export declare const GetMagicLinkForConnectedAccountResponseSchema: GenMessage<GetMagicLinkForConnectedAccountResponse>;
 /**
+ * @generated from message scalekit.v1.connected_accounts.AuthorizeOrgWideCredentialRequest
+ */
+export type AuthorizeOrgWideCredentialRequest = Message<"scalekit.v1.connected_accounts.AuthorizeOrgWideCredentialRequest"> & {
+    /**
+     * @generated from field: string connection_id = 1;
+     */
+    connectionId: string;
+    /**
+     * @generated from field: scalekit.v1.connected_accounts.AuthorizationDetails authorization_details = 2;
+     */
+    authorizationDetails?: AuthorizationDetails | undefined;
+    /**
+     * @generated from field: google.protobuf.Struct api_config = 3;
+     */
+    apiConfig?: JsonObject | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.AuthorizeOrgWideCredentialRequest.
+ * Use `create(AuthorizeOrgWideCredentialRequestSchema)` to create a new message.
+ */
+export declare const AuthorizeOrgWideCredentialRequestSchema: GenMessage<AuthorizeOrgWideCredentialRequest>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.AuthorizeOrgWideCredentialResponse
+ */
+export type AuthorizeOrgWideCredentialResponse = Message<"scalekit.v1.connected_accounts.AuthorizeOrgWideCredentialResponse"> & {
+    /**
+     * @generated from field: optional string link = 1;
+     */
+    link?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.Timestamp expiry = 2;
+     */
+    expiry?: Timestamp | undefined;
+    /**
+     * @generated from field: string connected_account_id = 3;
+     */
+    connectedAccountId: string;
+    /**
+     * @generated from field: scalekit.v1.connected_accounts.ConnectorStatus status = 4;
+     */
+    status: ConnectorStatus;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.AuthorizeOrgWideCredentialResponse.
+ * Use `create(AuthorizeOrgWideCredentialResponseSchema)` to create a new message.
+ */
+export declare const AuthorizeOrgWideCredentialResponseSchema: GenMessage<AuthorizeOrgWideCredentialResponse>;
+/**
  * @generated from message scalekit.v1.connected_accounts.VerifyConnectedAccountUserRequest
  */
 export type VerifyConnectedAccountUserRequest = Message<"scalekit.v1.connected_accounts.VerifyConnectedAccountUserRequest"> & {
@@ -559,6 +611,10 @@ export type ConnectedAccount = Message<"scalekit.v1.connected_accounts.Connected
      * @generated from field: google.protobuf.Struct api_config = 12;
      */
     apiConfig?: JsonObject | undefined;
+    /**
+     * @generated from field: bool is_org_wide_credential = 13;
+     */
+    isOrgWideCredential: boolean;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.ConnectedAccount.
@@ -651,6 +707,10 @@ export type ConnectedAccountForList = Message<"scalekit.v1.connected_accounts.Co
      * @generated from field: string connection_id = 11;
      */
     connectionId: string;
+    /**
+     * @generated from field: bool is_org_wide_credential = 12;
+     */
+    isOrgWideCredential: boolean;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.ConnectedAccountForList.
@@ -1094,6 +1154,16 @@ export declare const ConnectedAccountService: GenService<{
         methodKind: "unary";
         input: typeof GetMagicLinkForConnectedAccountRequestSchema;
         output: typeof GetMagicLinkForConnectedAccountResponseSchema;
+    };
+    /**
+     * Authorize the shared credential for an ORG_WIDE connection
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.AuthorizeOrgWideCredential
+     */
+    authorizeOrgWideCredential: {
+        methodKind: "unary";
+        input: typeof AuthorizeOrgWideCredentialRequestSchema;
+        output: typeof AuthorizeOrgWideCredentialResponseSchema;
     };
     /**
      * Get Connected Account by ID

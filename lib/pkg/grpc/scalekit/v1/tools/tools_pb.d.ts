@@ -1,4 +1,4 @@
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import type { EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
 import type { JsonObject, Message } from "@bufbuild/protobuf";
 /**
@@ -256,6 +256,59 @@ export type ExecuteToolResponse = Message<"scalekit.v1.tools.ExecuteToolResponse
  */
 export declare const ExecuteToolResponseSchema: GenMessage<ExecuteToolResponse>;
 /**
+ * RefreshToolsRequest identifies a single connected account whose tool cache should be
+ * resynced. The fields mirror ExecuteToolRequest: supply connected_account_id to identify
+ * the account directly, or connector together with identifier (optionally scoped by
+ * organization_id / user_id when the same identifier exists across orgs or users).
+ *
+ * @generated from message scalekit.v1.tools.RefreshToolsRequest
+ */
+export type RefreshToolsRequest = Message<"scalekit.v1.tools.RefreshToolsRequest"> & {
+    /**
+     * @generated from field: optional string identifier = 1;
+     */
+    identifier?: string | undefined;
+    /**
+     * @generated from field: optional string connected_account_id = 2;
+     */
+    connectedAccountId?: string | undefined;
+    /**
+     * @generated from field: optional string connector = 3;
+     */
+    connector?: string | undefined;
+    /**
+     * @generated from field: optional string organization_id = 4;
+     */
+    organizationId?: string | undefined;
+    /**
+     * @generated from field: optional string user_id = 5;
+     */
+    userId?: string | undefined;
+};
+/**
+ * Describes the message scalekit.v1.tools.RefreshToolsRequest.
+ * Use `create(RefreshToolsRequestSchema)` to create a new message.
+ */
+export declare const RefreshToolsRequestSchema: GenMessage<RefreshToolsRequest>;
+/**
+ * @generated from message scalekit.v1.tools.RefreshToolsResponse
+ */
+export type RefreshToolsResponse = Message<"scalekit.v1.tools.RefreshToolsResponse"> & {
+    /**
+     * @generated from field: repeated scalekit.v1.tools.Tool tools = 1;
+     */
+    tools: Tool[];
+    /**
+     * @generated from field: uint32 total_size = 2;
+     */
+    totalSize: number;
+};
+/**
+ * Describes the message scalekit.v1.tools.RefreshToolsResponse.
+ * Use `create(RefreshToolsResponseSchema)` to create a new message.
+ */
+export declare const RefreshToolsResponseSchema: GenMessage<RefreshToolsResponse>;
+/**
  * @generated from message scalekit.v1.tools.SetToolDefaultRequest
  */
 export type SetToolDefaultRequest = Message<"scalekit.v1.tools.SetToolDefaultRequest"> & {
@@ -456,6 +509,140 @@ export type ListAvailableToolsResponse = Message<"scalekit.v1.tools.ListAvailabl
  */
 export declare const ListAvailableToolsResponseSchema: GenMessage<ListAvailableToolsResponse>;
 /**
+ * @generated from message scalekit.v1.tools.SearchToolsRequest
+ */
+export type SearchToolsRequest = Message<"scalekit.v1.tools.SearchToolsRequest"> & {
+    /**
+     * @generated from field: string query = 1;
+     */
+    query: string;
+    /**
+     * @generated from field: optional string identifier = 2;
+     */
+    identifier?: string | undefined;
+    /**
+     * @generated from field: uint32 top_k = 3;
+     */
+    topK: number;
+};
+/**
+ * Describes the message scalekit.v1.tools.SearchToolsRequest.
+ * Use `create(SearchToolsRequestSchema)` to create a new message.
+ */
+export declare const SearchToolsRequestSchema: GenMessage<SearchToolsRequest>;
+/**
+ * @generated from message scalekit.v1.tools.SearchToolsResponse
+ */
+export type SearchToolsResponse = Message<"scalekit.v1.tools.SearchToolsResponse"> & {
+    /**
+     * @generated from field: repeated scalekit.v1.tools.SearchedTool tools = 1;
+     */
+    tools: SearchedTool[];
+};
+/**
+ * Describes the message scalekit.v1.tools.SearchToolsResponse.
+ * Use `create(SearchToolsResponseSchema)` to create a new message.
+ */
+export declare const SearchToolsResponseSchema: GenMessage<SearchToolsResponse>;
+/**
+ * @generated from message scalekit.v1.tools.SearchedTool
+ */
+export type SearchedTool = Message<"scalekit.v1.tools.SearchedTool"> & {
+    /**
+     * @generated from field: string name = 1;
+     */
+    name: string;
+    /**
+     * @generated from field: string provider = 2;
+     */
+    provider: string;
+    /**
+     * @generated from field: string description = 3;
+     */
+    description: string;
+    /**
+     * @generated from field: double score = 4;
+     */
+    score: number;
+    /**
+     * @generated from field: repeated scalekit.v1.tools.ConnectionReadiness connections = 5;
+     */
+    connections: ConnectionReadiness[];
+};
+/**
+ * Describes the message scalekit.v1.tools.SearchedTool.
+ * Use `create(SearchedToolSchema)` to create a new message.
+ */
+export declare const SearchedToolSchema: GenMessage<SearchedTool>;
+/**
+ * @generated from message scalekit.v1.tools.ConnectionReadiness
+ */
+export type ConnectionReadiness = Message<"scalekit.v1.tools.ConnectionReadiness"> & {
+    /**
+     * @generated from field: string connection_name = 1;
+     */
+    connectionName: string;
+    /**
+     * @generated from field: string connected_account_id = 2;
+     */
+    connectedAccountId: string;
+    /**
+     * @generated from field: scalekit.v1.tools.ToolReadinessState readiness_state = 3;
+     */
+    readinessState: ToolReadinessState;
+};
+/**
+ * Describes the message scalekit.v1.tools.ConnectionReadiness.
+ * Use `create(ConnectionReadinessSchema)` to create a new message.
+ */
+export declare const ConnectionReadinessSchema: GenMessage<ConnectionReadiness>;
+/**
+ * ToolReadinessState describes whether a tool in a search result can be
+ * invoked right now for a given connected-account identifier and one specific
+ * connection, or needs a setup step first. Set per-connection (see
+ * ConnectionReadiness) — only meaningful when the search request supplies an
+ * identifier; otherwise it is TOOL_READINESS_STATE_UNSPECIFIED.
+ *
+ * @generated from enum scalekit.v1.tools.ToolReadinessState
+ */
+export declare enum ToolReadinessState {
+    /**
+     * Readiness was not evaluated (no identifier supplied in the request).
+     *
+     * @generated from enum value: TOOL_READINESS_STATE_UNSPECIFIED = 0;
+     */
+    UNSPECIFIED = 0,
+    /**
+     * The identifier has an active connected account for this connection; the
+     * tool can be executed immediately via ExecuteTool using its
+     * connected_account_id.
+     *
+     * @generated from enum value: TOOL_READINESS_STATE_READY = 1;
+     */
+    READY = 1,
+    /**
+     * A connected account exists for this connection but is not active (e.g.
+     * disconnected or pending); the end user must re-establish the connection
+     * before the tool can be used through it. A connection the identifier has
+     * never connected at all is not represented by this state — it is left
+     * out of the connections list entirely instead.
+     *
+     * @generated from enum value: TOOL_READINESS_STATE_NEEDS_CONNECTION = 2;
+     */
+    NEEDS_CONNECTION = 2,
+    /**
+     * A connected account exists for this connection but its token is expired;
+     * the end user must re-authenticate before the tool can be used through it.
+     *
+     * @generated from enum value: TOOL_READINESS_STATE_NEEDS_REAUTH = 3;
+     */
+    NEEDS_REAUTH = 3
+}
+/**
+ * Describes the enum scalekit.v1.tools.ToolReadinessState.
+ */
+export declare const ToolReadinessStateSchema: GenEnum<ToolReadinessState>;
+/**
  * @generated from service scalekit.v1.tools.ToolService
  */
 export declare const ToolService: GenService<{
@@ -492,6 +679,16 @@ export declare const ToolService: GenService<{
         output: typeof ListAvailableToolsResponseSchema;
     };
     /**
+     * Search tools by natural-language query
+     *
+     * @generated from rpc scalekit.v1.tools.ToolService.SearchTools
+     */
+    searchTools: {
+        methodKind: "unary";
+        input: typeof SearchToolsRequestSchema;
+        output: typeof SearchToolsResponseSchema;
+    };
+    /**
      * @generated from rpc scalekit.v1.tools.ToolService.SetToolDefault
      */
     setToolDefault: {
@@ -524,5 +721,13 @@ export declare const ToolService: GenService<{
         methodKind: "unary";
         input: typeof ExecuteToolRequestSchema;
         output: typeof ExecuteToolResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.tools.ToolService.RefreshTools
+     */
+    refreshTools: {
+        methodKind: "unary";
+        input: typeof RefreshToolsRequestSchema;
+        output: typeof RefreshToolsResponseSchema;
     };
 }>;

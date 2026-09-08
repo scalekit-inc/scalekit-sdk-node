@@ -107,6 +107,10 @@ export type DiscoveryRequest = Message<"scalekit.v1.auth.DiscoveryRequest"> & {
      * @generated from field: scalekit.v1.auth.Intent intent = 2;
      */
     intent: Intent;
+    /**
+     * @generated from field: string g_recaptcha_response = 3;
+     */
+    gRecaptchaResponse: string;
 };
 /**
  * Describes the message scalekit.v1.auth.DiscoveryRequest.
@@ -236,12 +240,30 @@ export type OTPRequest = Message<"scalekit.v1.auth.OTPRequest"> & {
      * @generated from field: string code_challenge = 1;
      */
     codeChallenge: string;
+    /**
+     * @generated from field: string g_recaptcha_response = 2;
+     */
+    gRecaptchaResponse: string;
 };
 /**
  * Describes the message scalekit.v1.auth.OTPRequest.
  * Use `create(OTPRequestSchema)` to create a new message.
  */
 export declare const OTPRequestSchema: GenMessage<OTPRequest>;
+/**
+ * @generated from message scalekit.v1.auth.ResendPasswordlessRequest
+ */
+export type ResendPasswordlessRequest = Message<"scalekit.v1.auth.ResendPasswordlessRequest"> & {
+    /**
+     * @generated from field: string g_recaptcha_response = 1;
+     */
+    gRecaptchaResponse: string;
+};
+/**
+ * Describes the message scalekit.v1.auth.ResendPasswordlessRequest.
+ * Use `create(ResendPasswordlessRequestSchema)` to create a new message.
+ */
+export declare const ResendPasswordlessRequestSchema: GenMessage<ResendPasswordlessRequest>;
 /**
  * @generated from message scalekit.v1.auth.ListUserOrganizationsResponse
  */
@@ -695,7 +717,7 @@ export declare const AuthService: GenService<{
      */
     resendPasswordless: {
         methodKind: "unary";
-        input: typeof EmptySchema;
+        input: typeof ResendPasswordlessRequestSchema;
         output: typeof EmptySchema;
     };
     /**
