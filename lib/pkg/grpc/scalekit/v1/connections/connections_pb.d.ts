@@ -143,6 +143,14 @@ export type CreateConnection = Message<"scalekit.v1.connections.CreateConnection
      * @generated from field: optional string key_id = 4;
      */
     keyId?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.Struct context = 5;
+     */
+    context?: JsonObject | undefined;
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionAuthMode auth_mode = 6;
+     */
+    authMode: ConnectionAuthMode;
 };
 /**
  * Describes the message scalekit.v1.connections.CreateConnection.
@@ -272,6 +280,14 @@ export type Connection = Message<"scalekit.v1.connections.Connection"> & {
      * @generated from field: optional string mcp_server_url = 29;
      */
     mcpServerUrl?: string | undefined;
+    /**
+     * @generated from field: optional string resolved_proxy_url = 30;
+     */
+    resolvedProxyUrl?: string | undefined;
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionAuthMode auth_mode = 31;
+     */
+    authMode: ConnectionAuthMode;
 };
 /**
  * Describes the message scalekit.v1.connections.Connection.
@@ -609,6 +625,10 @@ export type ListConnection = Message<"scalekit.v1.connections.ListConnection"> &
      * @generated from field: string mcp_server_url = 13;
      */
     mcpServerUrl: string;
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionAuthMode auth_mode = 14;
+     */
+    authMode: ConnectionAuthMode;
 };
 /**
  * Describes the message scalekit.v1.connections.ListConnection.
@@ -931,6 +951,14 @@ export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnec
      * @generated from field: optional scalekit.v1.connections.OauthExtensions extensions = 24;
      */
     extensions?: OauthExtensions | undefined;
+    /**
+     * @generated from field: google.protobuf.StringValue token_endpoint_auth_method = 25;
+     */
+    tokenEndpointAuthMethod?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.StringValue googleads_developer_token = 26;
+     */
+    googleadsDeveloperToken?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.OAuthConnectionConfig.
@@ -2170,6 +2198,35 @@ export declare enum ConnectionStatus {
  * Describes the enum scalekit.v1.connections.ConnectionStatus.
  */
 export declare const ConnectionStatusSchema: GenEnum<ConnectionStatus>;
+/**
+ * Credential-sharing mode for an MCP Gateway app connection.
+ *
+ * @generated from enum scalekit.v1.connections.ConnectionAuthMode
+ */
+export declare enum ConnectionAuthMode {
+    /**
+     * Default/unknown — treated as USER
+     *
+     * @generated from enum value: CONNECTION_AUTH_MODE_UNSPECIFIED = 0;
+     */
+    CONNECTION_AUTH_MODE_UNSPECIFIED = 0,
+    /**
+     * Each end user authorizes and holds their own credential (default)
+     *
+     * @generated from enum value: USER = 1;
+     */
+    USER = 1,
+    /**
+     * One admin-authorized credential is shared; each end user still grants personal consent before it can act on their behalf
+     *
+     * @generated from enum value: ORG_WIDE = 2;
+     */
+    ORG_WIDE = 2
+}
+/**
+ * Describes the enum scalekit.v1.connections.ConnectionAuthMode.
+ */
+export declare const ConnectionAuthModeSchema: GenEnum<ConnectionAuthMode>;
 /**
  * @generated from enum scalekit.v1.connections.ConnectionProvider
  */

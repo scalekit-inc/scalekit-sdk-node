@@ -4,7 +4,7 @@
 
 import type { GenEnum, GenExtension, GenFile, GenMessage } from "@bufbuild/protobuf/codegenv2";
 import { enumDesc, extDesc, fileDesc, messageDesc } from "@bufbuild/protobuf/codegenv2";
-import type { MethodOptions } from "@bufbuild/protobuf/wkt";
+import type { FieldOptions, MethodOptions } from "@bufbuild/protobuf/wkt";
 import { file_google_protobuf_descriptor } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 
@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file scalekit/v1/options/options.proto.
  */
 export const file_scalekit_v1_options_options: GenFile = /*@__PURE__*/
-  fileDesc("CiFzY2FsZWtpdC92MS9vcHRpb25zL29wdGlvbnMucHJvdG8SE3NjYWxla2l0LnYxLm9wdGlvbnMilAEKCkF1dGhPcHRpb24SRAoTYXV0aGVudGljYXRpb25fdHlwZRgDIAEoDjInLnNjYWxla2l0LnYxLm9wdGlvbnMuQXV0aGVudGljYXRpb25UeXBlEhMKC3Blcm1pc3Npb25zGAEgAygJEisKBnBvbGljeRgCIAEoDjIbLnNjYWxla2l0LnYxLm9wdGlvbnMuUG9saWN5KioKBlBvbGljeRIICgRERU5ZEAASCwoHUEFSVElBTBABEgkKBUFMTE9XEAIq1QUKEkF1dGhlbnRpY2F0aW9uVHlwZRILCgdCTE9DS0VEEAASCAoETk9ORRABEg0KCVdPUktTUEFDRRBAEhMKD0NVU1RPTUVSX1BPUlRBTBAgEgsKB1NFU1NJT04QEBIVChFXT1JLU1BBQ0VfU0VTU0lPThBQEhQKEFdPUktTUEFDRV9DTElFTlQQRBIlCiFXT1JLU1BBQ0VfU0VTU0lPTl9DVVNUT01FUl9QT1JUQUwQcBIsCihXT1JLU1BBQ0VfU0VTU0lPTl9DVVNUT01FUl9QT1JUQUxfQ0xJRU5UEHQSJAogV09SS1NQQUNFX0NVU1RPTUVSX1BPUlRBTF9DTElFTlQQZBIdChlXT1JLU1BBQ0VfQ1VTVE9NRVJfUE9SVEFMEGASCAoEVVNFUhAIEgoKBkNMSUVOVBAEEhIKDlNFU1NJT05fQ0xJRU5UEBQSHAoYV09SS1NQQUNFX1NFU1NJT05fQ0xJRU5UEFQSIgoeQ1VTVE9NRVJfUE9SVEFMX1NFU1NJT05fQ0xJRU5UEDQSEAoMU0VTU0lPTl9VU0VSEBgSEwoOQUNUSU9OU19QT1JUQUwQgAESNQowV09SS1NQQUNFX1NFU1NJT05fQ1VTVE9NRVJfUE9SVEFMX0FDVElPTlNfUE9SVEFMEPABEjwKN1dPUktTUEFDRV9TRVNTSU9OX0NVU1RPTUVSX1BPUlRBTF9BQ1RJT05TX1BPUlRBTF9DTElFTlQQ9AESHQoYV09SS1NQQUNFX0FDVElPTlNfUE9SVEFMEMABEiQKH1dPUktTUEFDRV9BQ1RJT05TX1BPUlRBTF9DTElFTlQQxAESNAovV09SS1NQQUNFX0FDVElPTlNfUE9SVEFMX0NVU1RPTUVSX1BPUlRBTF9DTElFTlQQ5AESLQooV09SS1NQQUNFX0NVU1RPTUVSX1BPUlRBTF9BQ1RJT05TX1BPUlRBTBDgATpiCgthdXRoX29wdGlvbhIeLmdvb2dsZS5wcm90b2J1Zi5NZXRob2RPcHRpb25zGNCGAyABKAsyHy5zY2FsZWtpdC52MS5vcHRpb25zLkF1dGhPcHRpb25SCmF1dGhPcHRpb25CNlo0Z2l0aHViLmNvbS9zY2FsZWtpdC1pbmMvc2NhbGVraXQvcGtnL2dycGMvYXV0aG9wdGlvbmIGcHJvdG8z", [file_google_protobuf_descriptor]);
+  fileDesc("CiFzY2FsZWtpdC92MS9vcHRpb25zL29wdGlvbnMucHJvdG8SE3NjYWxla2l0LnYxLm9wdGlvbnMilAEKCkF1dGhPcHRpb24SRAoTYXV0aGVudGljYXRpb25fdHlwZRgDIAEoDjInLnNjYWxla2l0LnYxLm9wdGlvbnMuQXV0aGVudGljYXRpb25UeXBlEhMKC3Blcm1pc3Npb25zGAEgAygJEisKBnBvbGljeRgCIAEoDjIbLnNjYWxla2l0LnYxLm9wdGlvbnMuUG9saWN5IowBCg9BZ2VudFRvb2xPcHRpb24SDAoEbmFtZRgBIAEoCRITCgtkZXNjcmlwdGlvbhgCIAEoCRIvCghtdXRhdGlvbhgDIAEoDjIdLnNjYWxla2l0LnYxLm9wdGlvbnMuTXV0YXRpb24SDwoHc3VtbWFyeRgEIAEoCRIUCgxzY29wZV9maWVsZHMYBSADKAkiIgoQQWdlbnRGaWVsZE9wdGlvbhIOCgZleHBvc2UYASABKAgqKgoGUG9saWN5EggKBERFTlkQABILCgdQQVJUSUFMEAESCQoFQUxMT1cQAirVBQoSQXV0aGVudGljYXRpb25UeXBlEgsKB0JMT0NLRUQQABIICgROT05FEAESDQoJV09SS1NQQUNFEEASEwoPQ1VTVE9NRVJfUE9SVEFMECASCwoHU0VTU0lPThAQEhUKEVdPUktTUEFDRV9TRVNTSU9OEFASFAoQV09SS1NQQUNFX0NMSUVOVBBEEiUKIVdPUktTUEFDRV9TRVNTSU9OX0NVU1RPTUVSX1BPUlRBTBBwEiwKKFdPUktTUEFDRV9TRVNTSU9OX0NVU1RPTUVSX1BPUlRBTF9DTElFTlQQdBIkCiBXT1JLU1BBQ0VfQ1VTVE9NRVJfUE9SVEFMX0NMSUVOVBBkEh0KGVdPUktTUEFDRV9DVVNUT01FUl9QT1JUQUwQYBIICgRVU0VSEAgSCgoGQ0xJRU5UEAQSEgoOU0VTU0lPTl9DTElFTlQQFBIcChhXT1JLU1BBQ0VfU0VTU0lPTl9DTElFTlQQVBIiCh5DVVNUT01FUl9QT1JUQUxfU0VTU0lPTl9DTElFTlQQNBIQCgxTRVNTSU9OX1VTRVIQGBITCg5BQ1RJT05TX1BPUlRBTBCAARI1CjBXT1JLU1BBQ0VfU0VTU0lPTl9DVVNUT01FUl9QT1JUQUxfQUNUSU9OU19QT1JUQUwQ8AESPAo3V09SS1NQQUNFX1NFU1NJT05fQ1VTVE9NRVJfUE9SVEFMX0FDVElPTlNfUE9SVEFMX0NMSUVOVBD0ARIdChhXT1JLU1BBQ0VfQUNUSU9OU19QT1JUQUwQwAESJAofV09SS1NQQUNFX0FDVElPTlNfUE9SVEFMX0NMSUVOVBDEARI0Ci9XT1JLU1BBQ0VfQUNUSU9OU19QT1JUQUxfQ1VTVE9NRVJfUE9SVEFMX0NMSUVOVBDkARItCihXT1JLU1BBQ0VfQ1VTVE9NRVJfUE9SVEFMX0FDVElPTlNfUE9SVEFMEOABKjkKCE11dGF0aW9uEhgKFE1VVEFUSU9OX1VOU1BFQ0lGSUVEEAASCAoEUkVBRBABEgkKBVdSSVRFEAI6YgoLYXV0aF9vcHRpb24SHi5nb29nbGUucHJvdG9idWYuTWV0aG9kT3B0aW9ucxjQhgMgASgLMh8uc2NhbGVraXQudjEub3B0aW9ucy5BdXRoT3B0aW9uUgphdXRoT3B0aW9uOmUKCmFnZW50X3Rvb2wSHi5nb29nbGUucHJvdG9idWYuTWV0aG9kT3B0aW9ucxjRhgMgASgLMiQuc2NhbGVraXQudjEub3B0aW9ucy5BZ2VudFRvb2xPcHRpb25SCWFnZW50VG9vbDpnCgthZ2VudF9maWVsZBIdLmdvb2dsZS5wcm90b2J1Zi5GaWVsZE9wdGlvbnMY0oYDIAEoCzIlLnNjYWxla2l0LnYxLm9wdGlvbnMuQWdlbnRGaWVsZE9wdGlvblIKYWdlbnRGaWVsZEI2WjRnaXRodWIuY29tL3NjYWxla2l0LWluYy9zY2FsZWtpdC9wa2cvZ3JwYy9hdXRob3B0aW9uYgZwcm90bzM", [file_google_protobuf_descriptor]);
 
 /**
  * @generated from message scalekit.v1.options.AuthOption
@@ -40,6 +40,123 @@ export type AuthOption = Message<"scalekit.v1.options.AuthOption"> & {
  */
 export const AuthOptionSchema: GenMessage<AuthOption> = /*@__PURE__*/
   messageDesc(file_scalekit_v1_options_options, 0);
+
+/**
+ * AgentToolOption declares an RPC as a support-agent tool and carries everything the
+ * model needs to call it. The protoc-gen-agenttool plugin reads this option at build
+ * time and emits compiled Go tool definitions; nothing is resolved at runtime.
+ *
+ * @generated from message scalekit.v1.options.AgentToolOption
+ */
+export type AgentToolOption = Message<"scalekit.v1.options.AgentToolOption"> & {
+  /**
+   * Model-facing tool name. Defaults to snake_case of the RPC method name when empty.
+   *
+   * Set this explicitly whenever the derived name would be wrong or would change an
+   * existing tool name. Example: the RPC is `ListOrganization` (singular), so the
+   * derived name is `list_organization`, but the tool the model already knows is
+   * `list_organizations`.
+   *
+   * @generated from field: string name = 1;
+   */
+  name: string;
+
+  /**
+   * Model-facing description. States what the tool does and when to use it, in that
+   * order, so the model can pick between similar tools. This text is the only guidance
+   * the model receives about the tool, so it must be self-contained: do not rely on the
+   * RPC's OpenAPI description, which is not read by the generator.
+   *
+   * @generated from field: string description = 2;
+   */
+  description: string;
+
+  /**
+   * Declares whether the tool reads or writes. Required.
+   *
+   * MUTATION_UNSPECIFIED fails the build. The value drives the write-confirmation gate,
+   * so a missing value would silently let a mutating tool run without human approval.
+   * Failing the build keeps that decision fail-closed and moves it to review time.
+   *
+   * @generated from field: scalekit.v1.options.Mutation mutation = 3;
+   */
+  mutation: Mutation;
+
+  /**
+   * Human-readable approval-card template shown to the operator before a WRITE tool
+   * runs. Interpolates request fields by their proto path in braces, for example
+   * "Create organization {organization.display_name}".
+   *
+   * Required in practice for WRITE tools: without it the approval card cannot describe
+   * what the operator is approving.
+   *
+   * @generated from field: string summary = 4;
+   */
+  summary: string;
+
+  /**
+   * Request fields supplied by the caller's session rather than by the model, named by
+   * their proto field name in the request message.
+   *
+   * The generator strips these fields from the input schema, and the executor overwrites
+   * them from the resolved session identity after decoding the model's arguments. This
+   * is what stops the model from choosing its own tenant scope. The generator verifies
+   * every name resolves to a field on the request message and fails the build on a typo,
+   * because a misspelled entry would silently leave the field model-controlled.
+   *
+   * @generated from field: repeated string scope_fields = 5;
+   */
+  scopeFields: string[];
+};
+
+/**
+ * Describes the message scalekit.v1.options.AgentToolOption.
+ * Use `create(AgentToolOptionSchema)` to create a new message.
+ */
+export const AgentToolOptionSchema: GenMessage<AgentToolOption> = /*@__PURE__*/
+  messageDesc(file_scalekit_v1_options_options, 1);
+
+/**
+ * AgentFieldOption controls a single field's visibility to the support agent.
+ *
+ * PRESENCE RULES — the generator reads this option with `proto.HasExtension`, not by
+ * reading the zero value, so three states are distinguishable and they behave differently:
+ *
+ *   1. Option ABSENT              => field is EXPOSED. This is the default; most fields
+ *                                    carry no annotation at all.
+ *   2. `[(agent_field).expose = false]` => field is HIDDEN. This is the only way to hide a
+ *                                    field: stripped from the request schema and dropped
+ *                                    from the projected response.
+ *   3. `[(agent_field).expose = true]`  => field is EXPOSED, explicitly. Semantically
+ *                                    identical to state 1, but it records an acknowledged
+ *                                    review decision, which is what satisfies the
+ *                                    generator's guard on sensitive-looking field names
+ *                                    (`*secret*`, `*token*`, `*password*`, `*private_key*`,
+ *                                    `*credential*`). Those names fail the build unless
+ *                                    annotated either way.
+ *
+ * Do NOT read state 1 as `expose: false`. An absent option and an explicit `expose: false`
+ * are opposite outcomes, and `[(agent_field) = {}]` reads as state 2 because `expose`
+ * defaults to false inside a present message.
+ *
+ * @generated from message scalekit.v1.options.AgentFieldOption
+ */
+export type AgentFieldOption = Message<"scalekit.v1.options.AgentFieldOption"> & {
+  /**
+   * Whether the agent sees this field. Only meaningful when the option is present; see the
+   * presence rules on the message.
+   *
+   * @generated from field: bool expose = 1;
+   */
+  expose: boolean;
+};
+
+/**
+ * Describes the message scalekit.v1.options.AgentFieldOption.
+ * Use `create(AgentFieldOptionSchema)` to create a new message.
+ */
+export const AgentFieldOptionSchema: GenMessage<AgentFieldOption> = /*@__PURE__*/
+  messageDesc(file_scalekit_v1_options_options, 2);
 
 /**
  * @generated from enum scalekit.v1.options.Policy
@@ -243,8 +360,68 @@ export const AuthenticationTypeSchema: GenEnum<AuthenticationType> = /*@__PURE__
   enumDesc(file_scalekit_v1_options_options, 1);
 
 /**
+ * Mutation classifies a tool by its effect on stored state.
+ *
+ * @generated from enum scalekit.v1.options.Mutation
+ */
+export enum Mutation {
+  /**
+   * Not set. This is the zero value and is ALWAYS a build error on an RPC annotated with
+   * agent_tool — an unclassified tool would bypass the write-confirmation gate, so the
+   * generator refuses to guess.
+   *
+   * @generated from enum value: MUTATION_UNSPECIFIED = 0;
+   */
+  MUTATION_UNSPECIFIED = 0,
+
+  /**
+   * The tool only reads. It runs without operator approval.
+   *
+   * @generated from enum value: READ = 1;
+   */
+  READ = 1,
+
+  /**
+   * The tool changes state. The agent suspends the turn, asks the operator to approve the
+   * call using `summary`, and records an audit event when the approved call executes.
+   *
+   * @generated from enum value: WRITE = 2;
+   */
+  WRITE = 2,
+}
+
+/**
+ * Describes the enum scalekit.v1.options.Mutation.
+ */
+export const MutationSchema: GenEnum<Mutation> = /*@__PURE__*/
+  enumDesc(file_scalekit_v1_options_options, 2);
+
+/**
  * @generated from extension: scalekit.v1.options.AuthOption auth_option = 50000;
  */
 export const auth_option: GenExtension<MethodOptions, AuthOption> = /*@__PURE__*/
   extDesc(file_scalekit_v1_options_options, 0);
+
+/**
+ * Exposes this RPC to the support agent as a callable tool. The
+ * protoc-gen-agenttool plugin generates a tool definition (model-facing name and
+ * description, JSON Schema for the request, and a response projection) for every
+ * RPC that carries this option. RPCs without it are never reachable by the agent.
+ *
+ * @generated from extension: scalekit.v1.options.AgentToolOption agent_tool = 50001;
+ */
+export const agent_tool: GenExtension<MethodOptions, AgentToolOption> = /*@__PURE__*/
+  extDesc(file_scalekit_v1_options_options, 1);
+
+/**
+ * Controls whether the support agent sees this field. Applies to request fields
+ * (schema generation) and response fields (output projection).
+ *
+ * Absence of this option means the field IS exposed. See AgentFieldOption for the
+ * full presence rules — an absent option and `{expose: false}` are not the same.
+ *
+ * @generated from extension: scalekit.v1.options.AgentFieldOption agent_field = 50002;
+ */
+export const agent_field: GenExtension<FieldOptions, AgentFieldOption> = /*@__PURE__*/
+  extDesc(file_scalekit_v1_options_options, 2);
 
