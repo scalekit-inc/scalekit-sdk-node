@@ -153,6 +153,24 @@ describe('Actions', () => {
       expect(Array.isArray(response.tools)).toBe(true);
     });
 
+    it('should return the normalized (mapped) tool shape', async () => {
+      const response = await client.actions.listTools({ pageSize: 1 });
+
+      if (response.tools.length === 0) {
+        return;
+      }
+
+      const tool = response.tools[0];
+
+      expect(typeof tool.id).toBe('string');
+      expect(typeof tool.provider).toBe('string');
+      expect(Array.isArray(tool.tags)).toBe(true);
+
+      // Internal proto field must not leak through the mapper.
+      const raw = tool as unknown as Record<string, unknown>;
+      expect(raw.$typeName).toBeUndefined();
+    });
+
     it('should respect the pageSize parameter', async () => {
       const response = await client.actions.listTools({ pageSize: 1 });
 

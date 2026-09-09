@@ -1,4 +1,4 @@
-import { create } from '@bufbuild/protobuf';
+import { create, type JsonObject } from '@bufbuild/protobuf';
 import { AxiosError, AxiosResponse } from 'axios';
 import CoreClient, { assertValidTimeout } from './core';
 import {
@@ -85,8 +85,49 @@ import {
 } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import {
   ExecuteToolResponse,
-  ListToolsResponse,
+  Tool,
 } from './pkg/grpc/scalekit/v1/tools/tools_pb';
+
+/**
+ * Normalized, consumer-friendly view of a tool returned by
+ * {@link ActionsClient.listTools}. Internal proto fields (`$typeName`) are
+ * omitted — every other field passes through unchanged from the generated
+ * `Tool` message.
+ */
+export interface ActionTool {
+  id: string;
+  provider: string;
+  definition?: JsonObject;
+  metadata?: JsonObject;
+  tags: string[];
+  isDefault?: boolean;
+  updatedAt?: Timestamp;
+}
+
+/** Normalized response returned by {@link ActionsClient.listTools}. */
+export interface ListToolsResult {
+  tools: ActionTool[];
+  toolNames: string[];
+  nextPageToken: string;
+  prevPageToken: string;
+  totalSize: number;
+}
+
+/**
+ * Map a raw {@link Tool} proto message to the normalized {@link ActionTool}
+ * shape exposed by the actions namespace.
+ */
+function mapTool(tool: Tool): ActionTool {
+  return {
+    id: tool.id,
+    provider: tool.provider,
+    definition: tool.definition,
+    metadata: tool.metadata,
+    tags: tool.tags,
+    isDefault: tool.isDefault,
+    updatedAt: tool.updatedAt,
+  };
+}
 
 /**
  * This class is intended to be accessed via `ScalekitClient.actions`.
@@ -170,7 +211,7 @@ export default class ActionsClient {
     summary?: boolean;
     pageSize?: number;
     pageToken?: string;
-  }): Promise<ListToolsResponse> {
+  }): Promise<ListToolsResult> {
     const {
       connectionName,
       identifier,
@@ -185,7 +226,7 @@ export default class ActionsClient {
       pageToken,
     } = params ?? {};
 
-    return this.tools.listTools({
+    const response = await this.tools.listTools({
       filter: {
         connector: connectionName,
         identifier,
@@ -200,6 +241,14 @@ export default class ActionsClient {
       pageSize,
       pageToken,
     });
+
+    return {
+      tools: response.tools.map(mapTool),
+      toolNames: response.toolNames,
+      nextPageToken: response.nextPageToken,
+      prevPageToken: response.prevPageToken,
+      totalSize: response.totalSize,
+    };
   }
 
   /**
