@@ -154,11 +154,14 @@ describe('Actions', () => {
     });
 
     it('should return the normalized (mapped) tool shape', async () => {
-      // Scoped to GMAIL_CONNECTION_NAME so at least one tool (gmail_fetch_mails,
-      // per the fixture assumptions above) is deterministically present —
-      // an unscoped call could return zero tools in an empty workspace.
+      // Scoped to GMAIL_CONNECTION_NAME + GMAIL_IDENTIFIER (the pair, per the
+      // filter's connected-account resolution semantics — connectionName alone
+      // fails server-side) so at least one tool (gmail_fetch_mails, per the
+      // fixture assumptions above) is deterministically present — an unscoped
+      // call could return zero tools in an empty workspace.
       const response = await client.actions.listTools({
         connectionName: GMAIL_CONNECTION_NAME,
+        identifier: GMAIL_IDENTIFIER,
       });
 
       expect(response.tools.length).toBeGreaterThan(0);
