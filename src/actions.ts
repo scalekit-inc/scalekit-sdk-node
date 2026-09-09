@@ -153,7 +153,8 @@ export default class ActionsClient {
   /**
    * List tools available in your workspace, optionally scoped to a connected account.
    *
-   * Thin wrapper around ToolsClient.listTools.
+   * Thin wrapper around ToolsClient.listTools. Use `connectedAccountId` as a
+   * direct alternative to the `connectionName` + `identifier` combination.
    *
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
