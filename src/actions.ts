@@ -83,7 +83,10 @@ import {
   UpdateConnectedAccountSchema,
   VerifyConnectedAccountUserResponse,
 } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
-import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
+import {
+  ExecuteToolResponse,
+  ListToolsResponse,
+} from './pkg/grpc/scalekit/v1/tools/tools_pb';
 
 /**
  * This class is intended to be accessed via `ScalekitClient.actions`.
@@ -144,6 +147,57 @@ export default class ActionsClient {
       connector,
       organizationId,
       userId,
+    });
+  }
+
+  /**
+   * List tools available in your workspace, optionally scoped to a connected account.
+   *
+   * Thin wrapper around ToolsClient.listTools.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   */
+  async listTools(params?: {
+    connectionName?: string;
+    identifier?: string;
+    provider?: string;
+    toolName?: string[];
+    query?: string;
+    organizationId?: string;
+    userId?: string;
+    connectedAccountId?: string;
+    summary?: boolean;
+    pageSize?: number;
+    pageToken?: string;
+  }): Promise<ListToolsResponse> {
+    const {
+      connectionName,
+      identifier,
+      provider,
+      toolName,
+      query,
+      organizationId,
+      userId,
+      connectedAccountId,
+      summary,
+      pageSize,
+      pageToken,
+    } = params ?? {};
+
+    return this.tools.listTools({
+      filter: {
+        connector: connectionName,
+        identifier,
+        provider,
+        toolName,
+        query,
+        organizationId,
+        userId,
+        connectedAccountId,
+        summary,
+      },
+      pageSize,
+      pageToken,
     });
   }
 
