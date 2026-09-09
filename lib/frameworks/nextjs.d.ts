@@ -66,6 +66,7 @@ export declare class ScalekitAuthNext {
     private readonly postLoginRedirect;
     private readonly postLogoutRedirectUri;
     private readonly fullLogout;
+    private readonly baseUrl;
     constructor(options: ScalekitAuthNextOptions);
     createLoginHandler(): (request: NextRequest) => Promise<AnyNextResponse>;
     createCallbackHandler(): (request: NextRequest) => Promise<AnyNextResponse>;

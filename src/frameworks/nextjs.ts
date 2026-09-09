@@ -183,6 +183,7 @@ export class ScalekitAuthNext {
   private readonly postLoginRedirect: string;
   private readonly postLogoutRedirectUri: string;
   private readonly fullLogout: boolean;
+  private readonly baseUrl: string;
 
   constructor(options: ScalekitAuthNextOptions) {
     this.client = options.client;
@@ -194,6 +195,19 @@ export class ScalekitAuthNext {
     this.postLogoutRedirectUri =
       options.postLogoutRedirectUri ?? this.postLoginRedirect;
     this.fullLogout = options.fullLogout ?? true;
+    // `redirectUri` is always an absolute, dashboard-registered URL -- its
+    // origin is the one real source of truth for "what public URL is this
+    // app deployed at." request.url is NOT reliable for this: Next.js's
+    // self-hosted `next start` server builds NextRequest.url from its own
+    // bind address (http://localhost:<PORT>) rather than the Host/
+    // X-Forwarded-Host headers when running behind a reverse-proxying host
+    // (Render, Railway, Fly.io, a bare nginx/Traefik setup, etc.) that
+    // terminates TLS and forwards over plain HTTP -- confirmed live on
+    // Render: Host and X-Forwarded-Host both carried the correct public
+    // hostname, but request.url still reported https://localhost:10000/...
+    // Every redirect below used to resolve against request.url and so sent
+    // users to a URL only reachable from inside the container.
+    this.baseUrl = new URL(this.redirectUri).origin;
 
     // Raises immediately if cookieEncryptionSecret is missing -- see
     // SessionRefreshManager and sessionCrypto for why there is
@@ -265,7 +279,7 @@ export class ScalekitAuthNext {
     return async (request: NextRequest): Promise<AnyNextResponse> => {
       const redirectToLogin = () => {
         const resp = NextResponse.redirect(
-          new URL(this.loginPath, request.url)
+          new URL(this.loginPath, this.baseUrl)
         );
         const adapter = new NextResponseAdapter(resp);
         adapter.deleteCookie(STATE_COOKIE_NAME);
@@ -331,7 +345,7 @@ export class ScalekitAuthNext {
         requestAdapter.getCookie(RETURN_TO_COOKIE_NAME)
       );
       const response = NextResponse.redirect(
-        new URL(returnTo ?? this.postLoginRedirect, request.url)
+        new URL(returnTo ?? this.postLoginRedirect, this.baseUrl)
       );
       const adapter = new NextResponseAdapter(response);
       adapter.setCookie(this.manager.cookieName, cookieValue);
@@ -365,7 +379,7 @@ export class ScalekitAuthNext {
         if (!/^https?:\/\//.test(absoluteRedirectUri)) {
           absoluteRedirectUri = new URL(
             absoluteRedirectUri,
-            request.url
+            this.baseUrl
           ).toString();
         }
         const options: LogoutUrlOptions = {
@@ -382,7 +396,7 @@ export class ScalekitAuthNext {
       const response = NextResponse.redirect(
         redirectUrl.startsWith('http')
           ? redirectUrl
-          : new URL(redirectUrl, request.url)
+          : new URL(redirectUrl, this.baseUrl)
       );
       new NextResponseAdapter(response).deleteCookie(this.manager.cookieName);
       return response;
@@ -400,7 +414,7 @@ export class ScalekitAuthNext {
     returnToSource: string
   ): AnyNextResponse {
     const returnTo = sanitizeReturnTo(returnToSource);
-    const loginUrl = new URL(this.loginPath, request.url);
+    const loginUrl = new URL(this.loginPath, this.baseUrl);
     if (returnTo) {
       loginUrl.searchParams.set('returnTo', returnTo);
     }

@@ -71,6 +71,40 @@ Lists tools that can be made available for an identifier (distinct from scoped t
 </dd></dl>
 </details>
 
+<details><summary><code>client.tools.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts">searchTools</a>(query, options?) -> Promise&lt;SearchToolsResponse&gt;</code></summary>
+<dl><dd>
+
+### 📝 Description
+
+Searches tools ranked by relevance to a natural-language query — the job to be done,
+not an exact tool name. Pass `options.identifier` to also get per-connection readiness
+(usable now, needs a new connection, or needs re-auth) so you can gate execution on
+the right auth step.
+
+### 🔌 Usage
+
+```typescript
+const res = await scalekitClient.tools.searchTools(
+  'send a message to a slack channel',
+  { identifier: 'user@example.com', topK: 10 }
+);
+
+for (const tool of res.tools) {
+  console.log(tool.name, tool.score);
+  for (const connection of tool.connections) {
+    console.log(
+      ' ',
+      connection.connectionName,
+      connection.readinessState,
+      connection.connectedAccountId
+    );
+  }
+}
+```
+
+</dd></dl>
+</details>
+
 <details><summary><code>client.tools.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts">executeTool</a>(params) -> Promise&lt;ExecuteToolResponse&gt;</code></summary>
 <dl><dd>
 

@@ -13,6 +13,8 @@
 - [Passwordless](#passwordless)
 - [Auth](#auth)
 - [Events](#events)
+- [Resources](#resources)
+- [Tools](#tools)
 - [WebAuthn](#webauthn)
 - [Error Handling](#error-handling)
 - [Type Definitions](#type-definitions)
@@ -5729,6 +5731,242 @@ console.log(response.nextPageToken, response.prevPageToken);
 - `interceptorDecision?: string` - Match interceptor decision
 - `connectionId?: string` - Restrict to a single connection
 - `connectedAccountId?: string` - Restrict to a single connected account
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Resources
+
+Access the consents your end users grant against a resource, such as an MCP server. A consent records that one end user allowed a specific API client to act on their behalf. Each consent identifies the user by `externalUserId` — the identifier your application supplied when the consent was granted.
+
+Access via `scalekitClient.resources`.
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">listUserConsents</a>(resourceId, options?) -> Promise&lt;ListResourceUserConsentsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the end-user consents granted against a resource, with pagination.
+
+Each returned consent carries `id`, `externalUserId`, `clientId`, `clientName`, `scopes` and `grantedAt`. The response also carries `totalSize` plus `nextPageToken` / `prevPageToken` cursors.
+
+Filter by user in one of two ways. Pass `userIds` to match specific external user IDs exactly and case-sensitively. Pass `search` for a case-insensitive substring match. When you give both, `userIds` wins and `search` is ignored.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.resources.listUserConsents('<RESOURCE_ID>', {
+  search: '<OPTIONAL_SEARCH>',
+  pageSize: 20,
+  userIds: ['<EXTERNAL_USER_ID>'], // optional; takes precedence over search
+});
+
+console.log(res.totalSize, res.nextPageToken);
+for (const consent of res.consents) {
+  console.log(consent.id, consent.externalUserId, consent.clientId, consent.scopes);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource whose consents to list (format: `res_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `ListUserConsentsOptions` - Optional filter, search and pagination options
+- `search?: string` - Case-insensitive substring match on external user IDs. Ignored when `userIds` is set.
+- `pageSize?: number` - Page size, max 30
+- `pageToken?: string` - Pagination cursor from a previous response (`nextPageToken`/`prevPageToken`)
+- `userIds?: string[]` - Exact match on external user IDs, max 25. Takes precedence over `search`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">revokeUserConsent</a>(clientId, consentId) -> Promise&lt;RevokeUserConsentResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Revokes a single end-user consent held by an API client.
+
+Deletes the consent, so the client is prompted for consent again on its next authorization attempt, and revokes every active refresh token issued to that client for the same user. Access tokens already issued stay valid until they expire.
+
+Note that `clientId` is the API client that holds the consent (format: `m2m_...`), not the resource id. This matches the underlying route `DELETE /clients/{client_id}/consents/{consent_id}`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.resources.revokeUserConsent('<CLIENT_ID>', '<CONSENT_ID>');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client holding the consent (format: `m2m_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consentId:** `string` - The consent to revoke (format: `usrcnst_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Tools
+
+Access via `scalekitClient.tools`.
+
+<details><summary><code>client.tools.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts">searchTools</a>(query, options?) -> Promise&lt;SearchToolsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Searches tools ranked by relevance to a natural-language query — the job to be done, not an exact tool name.
+
+Pass `options.identifier` to also get per-connection readiness (`READY`, `NEEDS_CONNECTION`, or `NEEDS_REAUTH`) on each result, so you can gate execution on the right auth step before calling `executeTool`. `NEEDS_CONNECTION` means an existing connected account for that provider is inactive; an empty `connections` list means no account exists for the provider at all (not an error). Only pass a result's `connectedAccountId` to `executeTool` when `readinessState` is `ToolReadinessState.READY`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ToolReadinessState } from '@scalekit-sdk/node';
+
+const res = await scalekitClient.tools.searchTools(
+  'send a message to a slack channel',
+  { identifier: 'user@example.com', topK: 10 }
+);
+
+for (const tool of res.tools) {
+  console.log(tool.name, tool.score);
+  for (const connection of tool.connections) {
+    // readinessState is a number at runtime -- always compare against the
+    // named enum constant, never a raw number or a string.
+    const isReady = connection.readinessState === ToolReadinessState.READY;
+    console.log(' ', connection.connectionName, isReady, connection.connectedAccountId);
+  }
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**query:** `string` - Natural-language query or keywords describing the job to be done. 1-256 characters.
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `object` - Optional search options
+- `identifier?: string` - Connected-account identifier (e.g. the end user's email or ID). When set, each result is annotated with readiness for this identifier's connections.
+- `topK?: number` - Maximum number of ranked results to return. Defaults to 10, capped at 50.
 
 </dd>
 </dl>
