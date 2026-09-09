@@ -5926,6 +5926,8 @@ Pass `options.identifier` to also get per-connection readiness (`READY`, `NEEDS_
 <dd>
 
 ```typescript
+import { ToolReadinessState } from '@scalekit-sdk/node';
+
 const res = await scalekitClient.tools.searchTools(
   'send a message to a slack channel',
   { identifier: 'user@example.com', topK: 10 }
@@ -5934,12 +5936,10 @@ const res = await scalekitClient.tools.searchTools(
 for (const tool of res.tools) {
   console.log(tool.name, tool.score);
   for (const connection of tool.connections) {
-    console.log(
-      ' ',
-      connection.connectionName,
-      connection.readinessState,
-      connection.connectedAccountId
-    );
+    // readinessState is a number at runtime -- always compare against the
+    // named enum constant, never a raw number or a string.
+    const isReady = connection.readinessState === ToolReadinessState.READY;
+    console.log(' ', connection.connectionName, isReady, connection.connectedAccountId);
   }
 }
 ```
