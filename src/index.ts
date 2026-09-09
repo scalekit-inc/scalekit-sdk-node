@@ -25,3 +25,11 @@ export type {
   SearchedTool,
   ConnectionReadiness,
 } from './pkg/grpc/scalekit/v1/tools/tools_pb';
+
+// Generated types surfaced in the public `tools.listTools` / `actions.listTools`
+// APIs — re-export them so callers can name the return type instead of importing
+// the internal pb path.
+export type {
+  ListToolsResponse,
+  Tool,
+} from './pkg/grpc/scalekit/v1/tools/tools_pb';
