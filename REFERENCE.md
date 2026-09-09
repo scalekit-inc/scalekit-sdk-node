@@ -14,6 +14,7 @@
 - [Auth](#auth)
 - [Events](#events)
 - [Resources](#resources)
+- [Tools](#tools)
 - [WebAuthn](#webauthn)
 - [Error Handling](#error-handling)
 - [Type Definitions](#type-definitions)
@@ -5881,6 +5882,91 @@ await scalekitClient.resources.revokeUserConsent('<CLIENT_ID>', '<CONSENT_ID>');
 <dd>
 
 **consentId:** `string` - The consent to revoke (format: `usrcnst_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Tools
+
+Access via `scalekitClient.tools`.
+
+<details><summary><code>client.tools.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts">searchTools</a>(query, options?) -> Promise&lt;SearchToolsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Searches tools ranked by relevance to a natural-language query — the job to be done, not an exact tool name.
+
+Pass `options.identifier` to also get per-connection readiness (`READY`, `NEEDS_CONNECTION`, or `NEEDS_REAUTH`) on each result, so you can gate execution on the right auth step before calling `executeTool`. `NEEDS_CONNECTION` means an existing connected account for that provider is inactive; an empty `connections` list means no account exists for the provider at all (not an error). Only pass a result's `connectedAccountId` to `executeTool` when `readinessState` is `ToolReadinessState.READY`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.tools.searchTools(
+  'send a message to a slack channel',
+  { identifier: 'user@example.com', topK: 10 }
+);
+
+for (const tool of res.tools) {
+  console.log(tool.name, tool.score);
+  for (const connection of tool.connections) {
+    console.log(
+      ' ',
+      connection.connectionName,
+      connection.readinessState,
+      connection.connectedAccountId
+    );
+  }
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**query:** `string` - Natural-language query or keywords describing the job to be done. 1-256 characters.
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `object` - Optional search options
+- `identifier?: string` - Connected-account identifier (e.g. the end user's email or ID). When set, each result is annotated with readiness for this identifier's connections.
+- `topK?: number` - Maximum number of ranked results to return. Defaults to 10, capped at 50.
 
 </dd>
 </dl>
