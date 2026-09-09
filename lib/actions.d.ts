@@ -41,7 +41,7 @@ export interface ListAppConnectionsResult {
     totalSize: number;
 }
 import { CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
-import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
+import { ExecuteToolResponse, ListToolsResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * This class is intended to be accessed via `ScalekitClient.actions`.
  * It composes the existing ToolsClient and ConnectedAccountsClient
@@ -77,6 +77,26 @@ export default class ActionsClient {
         organizationId?: string;
         userId?: string;
     }): Promise<ExecuteToolResponse>;
+    /**
+     * List tools available in your workspace, optionally scoped to a connected account.
+     *
+     * Thin wrapper around ToolsClient.listTools.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    listTools(params?: {
+        connectionName?: string;
+        identifier?: string;
+        provider?: string;
+        toolName?: string[];
+        query?: string;
+        organizationId?: string;
+        userId?: string;
+        connectedAccountId?: string;
+        summary?: boolean;
+        pageSize?: number;
+        pageToken?: string;
+    }): Promise<ListToolsResponse>;
     /**
      * Get an authorization magic link for a connected account.
      *
