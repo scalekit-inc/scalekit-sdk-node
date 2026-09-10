@@ -1,3 +1,4 @@
+import { type JsonObject } from '@bufbuild/protobuf';
 import { AxiosResponse } from 'axios';
 import CoreClient from './core';
 import ToolsClient from './tools';
@@ -43,6 +44,29 @@ export interface ListAppConnectionsResult {
 import { CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
+ * Normalized, consumer-friendly view of a tool returned by
+ * {@link ActionsClient.listTools}. Internal proto fields (`$typeName`) are
+ * omitted — every other field passes through unchanged from the generated
+ * `Tool` message.
+ */
+export interface ActionTool {
+    id: string;
+    provider: string;
+    definition?: JsonObject;
+    metadata?: JsonObject;
+    tags: string[];
+    isDefault?: boolean;
+    updatedAt?: Timestamp;
+}
+/** Normalized response returned by {@link ActionsClient.listTools}. */
+export interface ListToolsResult {
+    tools: ActionTool[];
+    toolNames: string[];
+    nextPageToken: string;
+    prevPageToken: string;
+    totalSize: number;
+}
+/**
  * This class is intended to be accessed via `ScalekitClient.actions`.
  * It composes the existing ToolsClient and ConnectedAccountsClient
  * without changing their behavior.
@@ -77,6 +101,27 @@ export default class ActionsClient {
         organizationId?: string;
         userId?: string;
     }): Promise<ExecuteToolResponse>;
+    /**
+     * List tools available in your workspace, optionally scoped to a connected account.
+     *
+     * Thin wrapper around ToolsClient.listTools. Use `connectedAccountId` as a
+     * direct alternative to the `connectionName` + `identifier` combination.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    listTools(params?: {
+        connectionName?: string;
+        identifier?: string;
+        provider?: string;
+        toolName?: string[];
+        query?: string;
+        organizationId?: string;
+        userId?: string;
+        connectedAccountId?: string;
+        summary?: boolean;
+        pageSize?: number;
+        pageToken?: string;
+    }): Promise<ListToolsResult>;
     /**
      * Get an authorization magic link for a connected account.
      *

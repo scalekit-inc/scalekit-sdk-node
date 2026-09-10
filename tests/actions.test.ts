@@ -127,6 +127,64 @@ describe('Actions', () => {
     });
   });
 
+  describe('listTools', () => {
+    it('should expose listTools on the actions namespace', () => {
+      expect(typeof client.actions.listTools).toBe('function');
+    });
+
+    it('should list tools available in the workspace', async () => {
+      const response = await client.actions.listTools();
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.tools)).toBe(true);
+      expect(Array.isArray(response.toolNames)).toBe(true);
+      expect(typeof response.totalSize).toBe('number');
+      expect(typeof response.nextPageToken).toBe('string');
+      expect(typeof response.prevPageToken).toBe('string');
+    });
+
+    it('should scope tools by connectionName and identifier', async () => {
+      const response = await client.actions.listTools({
+        connectionName: GMAIL_CONNECTION_NAME,
+        identifier: GMAIL_IDENTIFIER,
+      });
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.tools)).toBe(true);
+    });
+
+    it('should return the normalized (mapped) tool shape', async () => {
+      // Scoped to GMAIL_CONNECTION_NAME + GMAIL_IDENTIFIER (the pair, per the
+      // filter's connected-account resolution semantics — connectionName alone
+      // fails server-side) so at least one tool (gmail_fetch_mails, per the
+      // fixture assumptions above) is deterministically present — an unscoped
+      // call could return zero tools in an empty workspace.
+      const response = await client.actions.listTools({
+        connectionName: GMAIL_CONNECTION_NAME,
+        identifier: GMAIL_IDENTIFIER,
+      });
+
+      expect(response.tools.length).toBeGreaterThan(0);
+
+      const tool = response.tools[0];
+
+      expect(typeof tool.id).toBe('string');
+      expect(typeof tool.provider).toBe('string');
+      expect(Array.isArray(tool.tags)).toBe(true);
+
+      // Internal proto field must not leak through the mapper.
+      const raw = tool as unknown as Record<string, unknown>;
+      expect(raw.$typeName).toBeUndefined();
+    });
+
+    it('should respect the pageSize parameter', async () => {
+      const response = await client.actions.listTools({ pageSize: 1 });
+
+      expect(response).toBeDefined();
+      expect(response.tools.length).toBeLessThanOrEqual(1);
+    });
+  });
+
   describe('getAuthorizationLink', () => {
     it('should call underlying magic link API', async () => {
       try {

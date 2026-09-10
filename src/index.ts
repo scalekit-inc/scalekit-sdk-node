@@ -25,3 +25,15 @@ export type {
   SearchedTool,
   ConnectionReadiness,
 } from './pkg/grpc/scalekit/v1/tools/tools_pb';
+
+// Generated types surfaced in the public `tools.listTools` API — re-export
+// them so callers can name the return type instead of importing the internal
+// pb path. `actions.listTools` returns the normalized ListToolsResult/ActionTool
+// shape below instead (no `$typeName`), consistent with `actions.listConnections`.
+export type {
+  ListToolsResponse,
+  Tool,
+} from './pkg/grpc/scalekit/v1/tools/tools_pb';
+
+// Normalized types surfaced in the public `actions.listTools` API.
+export type { ActionTool, ListToolsResult } from './actions';
