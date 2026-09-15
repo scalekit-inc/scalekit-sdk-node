@@ -5779,16 +5779,12 @@ Returns the created `client` and a `plainSecret` — the plaintext client secret
 ```typescript
 const res = await scalekitClient.resources.createResourceClient('<RESOURCE_ID>', {
   name: 'My Resource Client',
-  description: '<OPTIONAL_DESCRIPTION>',
-  scopes: ['read', 'write'],
-  audience: ['<AUDIENCE>'],
-  customClaims: { plan: 'pro' },
-  expiry: 86400,
-  redirectUris: ['https://example.com/callback'],
 });
 
 console.log(res.client?.clientId, res.plainSecret);
 ```
+
+`options` also accepts `description`, `scopes`, `audience`, `customClaims`, `expiry` and `redirectUris` — see Parameters below.
 </dd>
 </dl>
 </dd>
@@ -6048,9 +6044,7 @@ console.log(res.client?.name, res.client?.scopes);
 <dl>
 <dd>
 
-Permanently deletes an API client scoped to a resource.
-
-`DeleteResourceClient` shares its underlying delete path with client deletion in general, so nothing forces the given `clientId` to actually belong to `resourceId` — but this method lives under `this.resources`, so callers reasonably expect it to only ever touch clients within that resource. This fetches the client first and verifies its own `resourceId` matches before deleting, and refuses instead of trusting the id pair blindly.
+Permanently deletes the API client if it belongs to this resource. Throws if the client is missing or scoped to a different resource — see the source for why that check exists on top of the server's own validation.
 </dd>
 </dl>
 </dd>
