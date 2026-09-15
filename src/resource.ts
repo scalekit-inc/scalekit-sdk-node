@@ -61,7 +61,7 @@ export interface UpdateResourceClientOptions {
   description?: string;
   /** Updated scopes (replaces existing; pass [] to clear) */
   scopes?: string[];
-  /** Updated audience values. Currently a no-op server-side on update regardless of value — not yet wired up on the backend. */
+  /** Not settable on update by design — a resource client's audience is fixed to the resource it was created under, so this is a no-op server-side regardless of value. Present here only to mirror the underlying proto shape. */
   audience?: string[];
   /** Custom claims to set (replaces existing; pass {} to clear) */
   customClaims?: { [key: string]: string };
@@ -172,9 +172,9 @@ export default class ResourceClient {
    * the server only honors that mask for `scopes`, `customClaims` and
    * `redirectUris` — pass an empty value (e.g. `scopes: []`) to clear one of
    * those. `name` and `description` are applied only when non-empty (an empty
-   * string is a no-op, not a clear), and `audience` is currently not applied
-   * on update at all, regardless of value — verified against a live
-   * environment; see PR discussion for the backend follow-up.
+   * string is a no-op, not a clear). `audience` cannot be changed here at all
+   * — a resource client's audience is fixed to the resource it belongs to, by
+   * design, not something this call can widen or repoint.
    *
    * @param resourceId - The resource the client must belong to (format: res_xxxxx)
    * @param clientId - The client ID to update

@@ -5962,7 +5962,7 @@ for (const c of res.clients) {
 
 Updates an existing API client scoped to a resource.
 
-Only the fields present in `options` are changed. An `update_mask` built from those same fields is sent alongside the partial `client` payload, but the server only honors that mask for `scopes`, `customClaims` and `redirectUris` — pass an empty value (e.g. `scopes: []`) to clear one of those. `name` and `description` are applied only when non-empty (an empty string is a no-op, not a clear), and `audience` is currently not applied on update at all, regardless of value — verified against a live environment.
+Only the fields present in `options` are changed. An `update_mask` built from those same fields is sent alongside the partial `client` payload, but the server only honors that mask for `scopes`, `customClaims` and `redirectUris` — pass an empty value (e.g. `scopes: []`) to clear one of those. `name` and `description` are applied only when non-empty (an empty string is a no-op, not a clear). `audience` cannot be changed here at all — a resource client's audience is fixed to the resource it belongs to, by design.
 </dd>
 </dl>
 </dd>
@@ -6017,7 +6017,7 @@ console.log(res.client?.name, res.client?.scopes);
 - `name?: string` - Updated name. An empty string is a no-op server-side, not a clear.
 - `description?: string` - Updated description. An empty string is a no-op server-side, not a clear.
 - `scopes?: string[]` - Updated scopes (replaces existing; pass `[]` to clear)
-- `audience?: string[]` - Updated audience values. Currently a no-op server-side on update regardless of value — not yet wired up on the backend.
+- `audience?: string[]` - Not settable on update by design — a resource client's audience is fixed to the resource it was created under. Present here only to mirror the underlying proto shape.
 - `customClaims?: { [key: string]: string }` - Custom claims to set (replaces existing; pass `{}` to clear)
 - `expiry?: number` - Updated access token lifetime in seconds
 - `redirectUris?: string[]` - Updated redirect URIs (replaces existing; pass `[]` to clear)
