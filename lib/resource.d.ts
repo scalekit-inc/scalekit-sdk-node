@@ -30,21 +30,21 @@ export interface CreateResourceClientOptions {
     redirectUris?: string[];
 }
 export interface UpdateResourceClientOptions {
-    /** Updated name */
+    /** Updated name. An empty string is a no-op server-side, not a clear — the server only applies this field when non-empty. */
     name?: string;
-    /** Updated description */
+    /** Updated description. An empty string is a no-op server-side, not a clear — the server only applies this field when non-empty. */
     description?: string;
-    /** Updated scopes (replaces existing) */
+    /** Updated scopes (replaces existing; pass [] to clear) */
     scopes?: string[];
-    /** Updated audience values (replaces existing) */
+    /** Updated audience values. Currently a no-op server-side on update regardless of value — not yet wired up on the backend. */
     audience?: string[];
-    /** Custom claims to set (replaces existing) */
+    /** Custom claims to set (replaces existing; pass {} to clear) */
     customClaims?: {
         [key: string]: string;
     };
     /** Updated access token lifetime in seconds */
     expiry?: number;
-    /** Updated redirect URIs (replaces existing) */
+    /** Updated redirect URIs (replaces existing; pass [] to clear) */
     redirectUris?: string[];
 }
 /**
@@ -98,9 +98,13 @@ export default class ResourceClient {
      * Updates an existing API client scoped to a resource.
      *
      * Only the fields present in `options` are changed. An `update_mask` built
-     * from those same fields is sent alongside the partial `client` payload, so
-     * the server never mistakes "not passed" for "clear this field" — pass an
-     * empty array (e.g. `scopes: []`) to clear a field instead of omitting it.
+     * from those same fields is sent alongside the partial `client` payload, but
+     * the server only honors that mask for `scopes`, `customClaims` and
+     * `redirectUris` — pass an empty value (e.g. `scopes: []`) to clear one of
+     * those. `name` and `description` are applied only when non-empty (an empty
+     * string is a no-op, not a clear), and `audience` is currently not applied
+     * on update at all, regardless of value — verified against a live
+     * environment; see PR discussion for the backend follow-up.
      *
      * @param resourceId - The resource the client must belong to (format: res_xxxxx)
      * @param clientId - The client ID to update
