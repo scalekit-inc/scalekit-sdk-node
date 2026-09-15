@@ -1,0 +1,6 @@
+{
+  "client_id": "https://raw.githubusercontent.com/scalekit-inc/scalekit-sdk-node/scratch/cimd-metadata-test/cimd-test-metadata.json",
+  "client_name": "CIMD Test Client",
+  "client_description": "Throwaway metadata document for manually testing Scalekit's CIMD (Client ID Metadata Document) flow",
+  "redirect_uris": ["https://example.com/cimd-callback"]
+}
