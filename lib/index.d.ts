@@ -13,3 +13,5 @@ export type { SearchToolsResponse, SearchedTool, ConnectionReadiness, } from './
 export type { ListToolsResponse, Tool, } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 export type { ActionTool, ListToolsResult } from './actions';
 export type { McpConfig, McpConfigConnectionToolMapping, CreateMcpConfigResponse, GetMcpConfigResponse, ListMcpConfigsResponse, UpdateMcpConfigResponse, DeleteMcpConfigResponse, ListMcpConnectedAccountsResponse, CreateMcpSessionTokenResponse, } from './pkg/grpc/scalekit/v1/mcp/mcp_pb';
+export { default as UserScope } from './agent';
+export type { ConnectionState, ReadyTool } from './agent';

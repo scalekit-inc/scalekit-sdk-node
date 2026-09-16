@@ -12,6 +12,7 @@ import WebAuthnClient from './webauthn';
 import TokenClient from './token';
 import M2MClient from './m2mclient';
 import ResourceClient from './resource';
+import UserScope from './agent';
 import McpClient from './mcp';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
@@ -72,6 +73,25 @@ export default class ScalekitClient {
     readonly tools: ToolsClient;
     /** Virtual MCP servers: configurations, connected accounts and session tokens. */
     readonly mcp: McpClient;
+    /**
+     * Binds AgentKit to one end user.
+     *
+     * Returns a small facade over `actions` and `tools` that carries the identifier
+     * for you and exposes the three steps an agent takes: check the connection,
+     * find tools that fit the goal, run one. It adds no capability — every method
+     * composes calls that already exist — and you can drop back to
+     * `actions`/`tools` at any point.
+     *
+     * ```ts
+     * const user = scalekit.forUser('user@example.com');
+     * const state = await user.ensureConnected('github-connect');
+     * const tools = await user.findTools('star a repository');
+     * const result = await user.run(tools[0].name, { owner: 'o', repo: 'r' });
+     * ```
+     *
+     * @param identifier Your application's stable identifier for this user.
+     */
+    forUser(identifier: string): UserScope;
     readonly connectedAccounts: ConnectedAccountsClient;
     readonly actions: ActionsClient;
     readonly events: EventsClient;

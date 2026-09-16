@@ -64,3 +64,21 @@ export type {
   ListMcpConnectedAccountsResponse,
   CreateMcpSessionTokenResponse,
 } from './pkg/grpc/scalekit/v1/mcp/mcp_pb';
+
+// Types surfaced by the public `providers` client (bring-your-own connectors).
+// AuthPattern/AuthField are hand-written rather than generated: auth patterns
+// cross the wire as an untyped google.protobuf.ListValue, so these describe the
+// JSON shape the API expects.
+export type { AuthPattern, AuthField } from './providers';
+export { ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';
+export type {
+  Provider,
+  CreateProviderResponse,
+  UpdateProviderResponse,
+  DeleteProviderResponse,
+  ListProvidersResponse,
+} from './pkg/grpc/scalekit/v1/providers/providers_pb';
+
+// User-scoped facade returned by `scalekit.forIdentifier(...)`.
+export { default as UserScope } from './agent';
+export type { ConnectionState, ReadyTool } from './agent';
