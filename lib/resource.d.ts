@@ -83,8 +83,15 @@ export default class ResourceClient {
      * scopes) — call this first to see what the resource actually allows
      * before creating or updating a resource client with `scopes`.
      *
+     * The returned `resource.scopes` is every scope defined in the
+     * environment, not just the ones this resource allows — each entry
+     * carries an `enabled` flag, and only the ones with `enabled: true` are
+     * actually usable on this resource. Filter on that flag (and read `name`,
+     * not the whole object) to get the actual allowlist:
+     * `resource.resource?.scopes.filter((s) => s.enabled).map((s) => s.name)`.
+     *
      * @param resourceId - The resource to fetch (format: res_xxxxx)
-     * @returns GetResourceResponse with the resource, including its allowed `scopes`
+     * @returns GetResourceResponse with the resource, including every environment scope annotated with `enabled`
      */
     getResource(resourceId: string): Promise<GetResourceResponse>;
     /**
