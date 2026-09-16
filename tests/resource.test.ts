@@ -198,9 +198,10 @@ describe('Resource Client (ResourceClients)', () => {
         expect(response.plainSecret).toBeTruthy();
       } finally {
         if (createdClientId) {
-          await client.resources
-            .deleteResourceClient(TEST_RESOURCE_ID, createdClientId)
-            .catch(() => {});
+          await client.resources.deleteResourceClient(
+            TEST_RESOURCE_ID,
+            createdClientId
+          );
         }
       }
     });
@@ -230,9 +231,7 @@ describe('Resource Client (ResourceClients)', () => {
         expect(fetched.client?.name).toBe('Get Test Client');
         expect(Array.isArray(fetched.consentedUsers)).toBe(true);
       } finally {
-        await client.resources
-          .deleteResourceClient(TEST_RESOURCE_ID, clientId)
-          .catch(() => {});
+        await client.resources.deleteResourceClient(TEST_RESOURCE_ID, clientId);
       }
     });
 
@@ -267,9 +266,7 @@ describe('Resource Client (ResourceClients)', () => {
         const found = list.clients.some((c) => c.clientId === clientId);
         expect(found).toBe(true);
       } finally {
-        await client.resources
-          .deleteResourceClient(TEST_RESOURCE_ID, clientId)
-          .catch(() => {});
+        await client.resources.deleteResourceClient(TEST_RESOURCE_ID, clientId);
       }
     });
 
@@ -298,9 +295,7 @@ describe('Resource Client (ResourceClients)', () => {
         expect(updated.client?.name).toBe('Updated Name');
         expect(updated.client?.description).toBe('Updated description');
       } finally {
-        await client.resources
-          .deleteResourceClient(TEST_RESOURCE_ID, clientId)
-          .catch(() => {});
+        await client.resources.deleteResourceClient(TEST_RESOURCE_ID, clientId);
       }
     });
 
@@ -320,9 +315,7 @@ describe('Resource Client (ResourceClients)', () => {
         );
         expect(updated.client?.scopes).toEqual(['read', 'write']);
       } finally {
-        await client.resources
-          .deleteResourceClient(TEST_RESOURCE_ID, clientId)
-          .catch(() => {});
+        await client.resources.deleteResourceClient(TEST_RESOURCE_ID, clientId);
       }
     });
 
@@ -389,9 +382,7 @@ describe('Resource Client (ResourceClients)', () => {
         );
         expect(stillThere.client?.clientId).toBe(clientId);
       } finally {
-        await client.resources
-          .deleteResourceClient(TEST_RESOURCE_ID, clientId)
-          .catch(() => {});
+        await client.resources.deleteResourceClient(TEST_RESOURCE_ID, clientId);
       }
     });
   });
