@@ -534,7 +534,14 @@ export default class ActionsClient {
   async createConnectedAccount(params: {
     connectionName: string;
     identifier: string;
-    authorizationDetails: CreateConnectedAccount['authorizationDetails'];
+    /**
+     * How the account authenticates. Accepts a plain object, for example
+     * `{ details: { case: 'oauthToken', value: { accessToken } } }`, which is
+     * what `create()` takes when the request is built.
+     */
+    authorizationDetails: MessageInitShape<
+      typeof CreateConnectedAccountSchema
+    >['authorizationDetails'];
     organizationId?: string;
     userId?: string;
     apiConfig?: Record<string, unknown>;
