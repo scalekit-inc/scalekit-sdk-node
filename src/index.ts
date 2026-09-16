@@ -15,6 +15,17 @@ export * from './errors';
 export { ObjectType, Source } from './pkg/grpc/scalekit/v1/events/events_pb';
 export type { EventFilter } from './pkg/grpc/scalekit/v1/events/events_pb';
 
+// Generated enums/types surfaced on every connected account: `status` is a
+// `ConnectorStatus` and `authorizationType` a `ConnectorType`. Both are numeric at
+// runtime, so callers need the named constants to test them — re-export here rather
+// than leaving `connectedAccount.status === 1` as the only option. The internal pb
+// path is not reachable: `exports` in package.json exposes only '.', './express',
+// './next' and './edge', so a deep import fails with ERR_PACKAGE_PATH_NOT_EXPORTED.
+export {
+  ConnectorStatus,
+  ConnectorType,
+} from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+
 // Generated enum/types surfaced in the public `tools.searchTools` API:
 // `ToolReadinessState` appears on each result's `connections[].readinessState` —
 // re-export it so callers can name it (e.g. `readinessState === ToolReadinessState.READY`)

@@ -7,6 +7,7 @@ export * from './types/auth';
 export * from './errors';
 export { ObjectType, Source } from './pkg/grpc/scalekit/v1/events/events_pb';
 export type { EventFilter } from './pkg/grpc/scalekit/v1/events/events_pb';
+export { ConnectorStatus, ConnectorType, } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 export { ToolReadinessState } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 export type { SearchToolsResponse, SearchedTool, ConnectionReadiness, } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 export type { ListToolsResponse, Tool, } from './pkg/grpc/scalekit/v1/tools/tools_pb';
