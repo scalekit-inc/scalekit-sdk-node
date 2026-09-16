@@ -18,6 +18,7 @@ import WebAuthnClient from './webauthn';
 import TokenClient from './token';
 import M2MClient from './m2mclient';
 import ResourceClient from './resource';
+import McpClient from './mcp';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ActionsClient from './actions';
@@ -97,6 +98,8 @@ export default class ScalekitClient {
   readonly m2m: M2MClient;
   readonly resources: ResourceClient;
   readonly tools: ToolsClient;
+  /** Virtual MCP servers: configurations, connected accounts and session tokens. */
+  readonly mcp: McpClient;
   readonly connectedAccounts: ConnectedAccountsClient;
   readonly actions: ActionsClient;
   readonly events: EventsClient;
@@ -138,6 +141,7 @@ export default class ScalekitClient {
     this.m2m = new M2MClient(this.grpcConnect, this.coreClient);
     this.resources = new ResourceClient(this.grpcConnect, this.coreClient);
     this.tools = new ToolsClient(this.grpcConnect, this.coreClient);
+    this.mcp = new McpClient(this.grpcConnect, this.coreClient);
     this.connectedAccounts = new ConnectedAccountsClient(
       this.grpcConnect,
       this.coreClient

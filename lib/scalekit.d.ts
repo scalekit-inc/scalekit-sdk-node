@@ -12,6 +12,7 @@ import WebAuthnClient from './webauthn';
 import TokenClient from './token';
 import M2MClient from './m2mclient';
 import ResourceClient from './resource';
+import McpClient from './mcp';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ActionsClient from './actions';
@@ -69,6 +70,8 @@ export default class ScalekitClient {
     readonly m2m: M2MClient;
     readonly resources: ResourceClient;
     readonly tools: ToolsClient;
+    /** Virtual MCP servers: configurations, connected accounts and session tokens. */
+    readonly mcp: McpClient;
     readonly connectedAccounts: ConnectedAccountsClient;
     readonly actions: ActionsClient;
     readonly events: EventsClient;
