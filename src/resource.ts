@@ -75,7 +75,7 @@ export interface UpdateResourceClientOptions {
   description?: string;
   /** Updated scopes (replaces existing; pass [] to clear) */
   scopes?: string[];
-  /** Not settable on update by design — a resource client's audience is fixed to the resource it was created under, so this is a no-op server-side regardless of value. Present here only to mirror the underlying proto shape. */
+  /** Not settable on update, for any resource type — this is a no-op server-side regardless of value, so whatever audience the client received at creation stays fixed for its lifetime. Present here only to mirror the underlying proto shape. */
   audience?: string[];
   /** Custom claims to set (replaces existing; pass {} to clear) */
   customClaims?: { [key: string]: string };
@@ -227,9 +227,14 @@ export default class ResourceClient {
    * the server only honors that mask for `scopes`, `customClaims` and
    * `redirectUris` — pass an empty value (e.g. `scopes: []`) to clear one of
    * those. `name` and `description` are applied only when non-empty (an empty
-   * string is a no-op, not a clear). `audience` cannot be changed here at all
-   * — a resource client's audience is fixed to the resource it belongs to, by
-   * design, not something this call can widen or repoint.
+   * string is a no-op, not a clear). `audience` cannot be changed via update
+   * for any resource type — this call never touches it, so whatever value
+   * the client received at creation stays fixed for its lifetime. For
+   * MCP_SERVER/MCP_GATEWAY resources that value is always the resource's
+   * own audience (`createResourceClient` ignores caller-supplied audience
+   * for those types); for other resource types it's whichever value create
+   * used — the caller-supplied audience, or the resource's own id if none
+   * was supplied.
    *
    * @param resourceId - The resource the client must belong to (format: res_xxxxx)
    * @param clientId - The client ID to update
