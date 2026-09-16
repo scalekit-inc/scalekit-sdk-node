@@ -9,6 +9,17 @@ export * from './types/auth';
 
 export * from './errors';
 
+// Generated enum surfaced in the public `resources.listResources` API:
+// `resourceType` is a required parameter, so callers need to name it (e.g.
+// `ResourceType.MCP_SERVER`) without reaching into the internal pb path.
+export { ResourceType } from './pkg/grpc/scalekit/v1/clients/clients_pb';
+export type {
+  Resource,
+  Scope,
+  GetResourceResponse,
+  ListResourcesResponse,
+} from './pkg/grpc/scalekit/v1/clients/clients_pb';
+
 // Generated enums/types surfaced in the public `events.listEventsPaginated` API:
 // `ObjectType` appears on the returned `ScalekitEvent.object`, and `Source` on the
 // optional `EventFilter` parameter — re-export them so callers can name them.
