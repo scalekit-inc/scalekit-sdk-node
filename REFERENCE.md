@@ -5748,6 +5748,137 @@ Manage the API clients scoped to a resource (such as an MCP server), and access 
 
 Access via `scalekitClient.resources`.
 
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">getResource</a>(resourceId) -> Promise&lt;GetResourceResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves a single resource by id.
+
+A resource client's `scopes` are only actually granted in an issued token when they also appear in the resource's own `scopes` allowlist (the server intersects requested scopes against the environment's permissions, the resource's allowed scopes, and the client's own scopes) — call this first to see what the resource actually allows before creating or updating a resource client with `scopes`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.resources.getResource('<RESOURCE_ID>');
+console.log(res.resource?.scopes);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource to fetch (format: `res_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">listResources</a>(resourceType, options?) -> Promise&lt;ListResourcesResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists resources of a given type in the environment, with pagination.
+
+`resourceType` is required by the underlying API — there is no way to list every type in one call; list each type separately if needed.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ResourceType } from '@scalekit-sdk/node';
+
+const res = await scalekitClient.resources.listResources(ResourceType.MCP_SERVER, {
+  pageSize: 20,
+});
+
+for (const resource of res.resources) {
+  console.log(resource.id, resource.scopes);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceType:** `ResourceType` - The resource type to filter by (e.g. `ResourceType.MCP_SERVER`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `ListResourcesOptions` - Optional pagination
+- `pageSize?: number` - Page size, max 30
+- `pageToken?: string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">createResourceClient</a>(resourceId, options?) -> Promise&lt;CreateResourceClientResponse&gt;</code></summary>
 <dl>
 <dd>
