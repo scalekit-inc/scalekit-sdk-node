@@ -6102,8 +6102,6 @@ for (const c of res.clients) {
 Updates a resource client.
 
 Only the fields present in `options` are changed. An `update_mask` built from those same fields is sent alongside the partial `client` payload, but the server only honors that mask for `scopes`, `customClaims` and `redirectUris` — pass an empty value (e.g. `scopes: []`) to clear one of those. `name` and `description` are applied only when non-empty (an empty string is a no-op, not a clear).
-
-There is no `audience` option here — a resource client's audience is fixed at creation and can never be changed via update, for any resource type, so this method never offers a way to attempt it.
 </dd>
 </dl>
 </dd>
