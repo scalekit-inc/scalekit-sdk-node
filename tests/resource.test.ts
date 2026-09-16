@@ -428,7 +428,7 @@ describe('Resource Client (ResourceClients)', () => {
       }
     });
 
-    it('should refuse to delete a client\'s only remaining secret', async () => {
+    it("should refuse to delete a client's only remaining secret", async () => {
       const created = await client.resources.createResourceClient(
         TEST_RESOURCE_ID,
         { name: 'Min Secret Limit Client' }
@@ -442,7 +442,8 @@ describe('Resource Client (ResourceClients)', () => {
           clientId
         );
         const onlySecretId = fetched.client?.secrets[0]?.id;
-        if (!onlySecretId) throw new Error('Expected client to start with a secret');
+        if (!onlySecretId)
+          throw new Error('Expected client to start with a secret');
 
         await expect(
           client.resources.deleteResourceClientSecret(
