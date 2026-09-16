@@ -5780,6 +5780,7 @@ A resource client's `scopes` are only actually granted in an issued token when t
 
 ```typescript
 const res = await scalekitClient.resources.getResource('<RESOURCE_ID>');
+console.log(res.resource);
 const allowedScopes = res.resource?.scopes.filter((s) => s.enabled).map((s) => s.name);
 console.log(allowedScopes);
 ```
@@ -5894,11 +5895,9 @@ for (const resource of res.resources) {
 <dl>
 <dd>
 
-Creates a new API client scoped to a resource.
+Creates a resource client.
 
 Returns the created `client` and a `plainSecret` — the plaintext client secret, only available at creation time.
-
-There is no `audience` option — audience is always server-determined and can never be set through this SDK, on create or update, for any resource type.
 </dd>
 </dl>
 </dd>
@@ -5913,14 +5912,19 @@ There is no `audience` option — audience is always server-determined and can n
 <dd>
 
 ```typescript
+const resResource = await scalekitClient.resources.getResource('<RESOURCE_ID>');
+const allowedScopes = resResource.resource?.scopes.filter((s) => s.enabled).map((s) => s.name);
+console.log(allowedScopes);
+
 const res = await scalekitClient.resources.createResourceClient('<RESOURCE_ID>', {
   name: 'My Resource Client',
+  scopes: allowedScopes,
 });
 
 console.log(res.client?.clientId, res.plainSecret);
 ```
 
-`options` also accepts `description`, `scopes`, `customClaims`, `expiry` and `redirectUris` — see Parameters below.
+`options` also accepts `description`, `customClaims`, `expiry` and `redirectUris` — see Parameters below.
 </dd>
 </dl>
 </dd>
@@ -5945,8 +5949,8 @@ console.log(res.client?.clientId, res.plainSecret);
 **options:** `CreateResourceClientOptions` - Optional client properties
 - `name?: string` - Human-readable name for the client. Defaults to "Resource Client" if omitted.
 - `description?: string` - Optional description
-- `scopes?: string[]` - Scopes to grant
-- `customClaims?: { [key: string]: string }` - Custom claims to embed in access tokens
+- `scopes?: string[]` - Scopes to grant. These scopes should be the same or subset of the scopes available for the resource.
+- `customClaims?: { [key: string]: string }` - Custom claims to embed in access tokens. Flat JSON structure only.
 - `expiry?: number` - Access token lifetime in seconds. Defaults to the resource's configured expiry, or one day.
 - `redirectUris?: string[]` - Allowed redirect URIs, for a pre-registered (non-DCR) client
 
@@ -5972,7 +5976,7 @@ console.log(res.client?.clientId, res.plainSecret);
 <dl>
 <dd>
 
-Retrieves a single API client scoped to a resource, along with the end-users who have granted it consent.
+Fetches a single resource client, along with the end-users who have granted it consent.
 </dd>
 </dl>
 </dd>
@@ -5989,7 +5993,7 @@ Retrieves a single API client scoped to a resource, along with the end-users who
 ```typescript
 const res = await scalekitClient.resources.getResourceClient('<RESOURCE_ID>', '<CLIENT_ID>');
 
-console.log(res.client?.name, res.consentedUsers);
+console.log(res.client?.name);
 ```
 </dd>
 </dl>
@@ -6036,7 +6040,7 @@ console.log(res.client?.name, res.consentedUsers);
 <dl>
 <dd>
 
-Lists every API client scoped to a resource.
+Lists resource clients.
 </dd>
 </dl>
 </dd>
@@ -6095,7 +6099,7 @@ for (const c of res.clients) {
 <dl>
 <dd>
 
-Updates an existing API client scoped to a resource.
+Updates a resource client.
 
 Only the fields present in `options` are changed. An `update_mask` built from those same fields is sent alongside the partial `client` payload, but the server only honors that mask for `scopes`, `customClaims` and `redirectUris` — pass an empty value (e.g. `scopes: []`) to clear one of those. `name` and `description` are applied only when non-empty (an empty string is a no-op, not a clear).
 
@@ -6114,9 +6118,13 @@ There is no `audience` option here — a resource client's audience is fixed at 
 <dd>
 
 ```typescript
+const resResource = await scalekitClient.resources.getResource('<RESOURCE_ID>');
+const allowedScopes = resResource.resource?.scopes.filter((s) => s.enabled).map((s) => s.name);
+console.log(allowedScopes);
+
 const res = await scalekitClient.resources.updateResourceClient('<RESOURCE_ID>', '<CLIENT_ID>', {
   name: 'Updated Name',
-  scopes: ['read', 'write'],
+  scopes: [allowedScopes[0]],
 });
 
 console.log(res.client?.name, res.client?.scopes);
@@ -6142,7 +6150,7 @@ console.log(res.client?.name, res.client?.scopes);
 <dl>
 <dd>
 
-**clientId:** `string` - The client ID to update
+**clientId:** `string` - The client ID to update (format: `m2m_...`)
 
 </dd>
 </dl>
@@ -6153,8 +6161,8 @@ console.log(res.client?.name, res.client?.scopes);
 **options:** `UpdateResourceClientOptions` - Fields to update (only fields present are changed)
 - `name?: string` - Updated name. An empty string is a no-op server-side, not a clear.
 - `description?: string` - Updated description. An empty string is a no-op server-side, not a clear.
-- `scopes?: string[]` - Updated scopes (replaces existing; pass `[]` to clear)
-- `customClaims?: { [key: string]: string }` - Custom claims to set (replaces existing; pass `{}` to clear)
+- `scopes?: string[]` - Updated scopes (replaces existing; pass `[]` to clear). These scopes should be the same or subset of the scopes available for the resource.
+- `customClaims?: { [key: string]: string }` - Custom claims to set (replaces existing; pass `{}` to clear). Flat JSON structure only.
 - `expiry?: number` - Updated access token lifetime in seconds
 - `redirectUris?: string[]` - Updated redirect URIs (replaces existing; pass `[]` to clear)
 
@@ -6180,7 +6188,7 @@ console.log(res.client?.name, res.client?.scopes);
 <dl>
 <dd>
 
-Permanently deletes the API client if it belongs to this resource. Throws if the client is missing or scoped to a different resource — see the source for why that check exists on top of the server's own validation.
+Deletes resource clients. Throws if the client is missing or scoped to a different resource.
 </dd>
 </dl>
 </dd>
@@ -6218,7 +6226,7 @@ await scalekitClient.resources.deleteResourceClient('<RESOURCE_ID>', '<CLIENT_ID
 <dl>
 <dd>
 
-**clientId:** `string` - The client ID to delete
+**clientId:** `string` - The client ID to delete (format: `m2m_...`)
 
 </dd>
 </dl>
@@ -6242,9 +6250,9 @@ await scalekitClient.resources.deleteResourceClient('<RESOURCE_ID>', '<CLIENT_ID
 <dl>
 <dd>
 
-Creates a new secret for an API client scoped to a resource. The underlying secret-creation call is keyed by `clientId` alone, so this verifies the client belongs to `resourceId` first, the same ownership check `deleteResourceClient` applies.
+Creates a new secret for resource client. Only 2 client secrets are recommended to exist at a given point in time. If need for more secret creation arises, please use `deleteResourceClientSecret` to delete an existing secret first.
 
-The backend caps how many secrets a client can hold at once (a configurable limit — 5 in Scalekit's own dev environment, verified live; treat the exact number as environment-specific, not a fixed constant). Exceeding it throws (the server rejects it as `INVALID_ARGUMENT`, "only N secrets are allowed") — delete an existing secret first via `deleteResourceClientSecret`. The dashboard itself is more conservative than the server limit: it only shows an "Add new secret" action while a client has fewer than 2 secrets. Match whichever threshold — the actual server limit or the dashboard's stricter 2 — fits your own UX.
+The plaintext client secret, only available at creation time.
 </dd>
 </dl>
 </dd>
@@ -6283,7 +6291,7 @@ console.log(res.plainSecret);
 <dl>
 <dd>
 
-**clientId:** `string` - The client ID to create a secret for
+**clientId:** `string` - The client ID to create a secret for (format: `m2m_...`)
 
 </dd>
 </dl>
@@ -6307,9 +6315,7 @@ console.log(res.plainSecret);
 <dl>
 <dd>
 
-Permanently deletes a secret from an API client scoped to a resource. Like `createResourceClientSecret`, the underlying delete call is keyed by `clientId` alone, so this verifies the client belongs to `resourceId` first.
-
-A client must always keep at least 1 secret. Calling this on a client's last remaining secret throws (the server rejects it as `INVALID_ARGUMENT`, "at least one secret is required"). Mirror the dashboard's own UX: only offer a "Revoke" action on a secret while the client has more than 1.
+Permanently deletes a secret from resource client. A client must always keep at least 1 secret. Calling this on a client's last remaining secret throws an error.
 </dd>
 </dl>
 </dd>
@@ -6347,7 +6353,7 @@ await scalekitClient.resources.deleteResourceClientSecret('<RESOURCE_ID>', '<CLI
 <dl>
 <dd>
 
-**clientId:** `string` - The client ID the secret belongs to
+**clientId:** `string` - The client ID the secret belongs to (format: `m2m_...`)
 
 </dd>
 </dl>
@@ -6355,7 +6361,7 @@ await scalekitClient.resources.deleteResourceClientSecret('<RESOURCE_ID>', '<CLI
 <dl>
 <dd>
 
-**secretId:** `string` - The secret ID to delete
+**secretId:** `string` - The secret ID to delete (format: `sks_...`)
 
 </dd>
 </dl>
