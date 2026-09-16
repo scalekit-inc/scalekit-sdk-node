@@ -5897,6 +5897,8 @@ for (const resource of res.resources) {
 Creates a new API client scoped to a resource.
 
 Returns the created `client` and a `plainSecret` — the plaintext client secret, only available at creation time.
+
+There is no `audience` option — audience is always server-determined and can never be set through this SDK, on create or update, for any resource type.
 </dd>
 </dl>
 </dd>
@@ -5918,7 +5920,7 @@ const res = await scalekitClient.resources.createResourceClient('<RESOURCE_ID>',
 console.log(res.client?.clientId, res.plainSecret);
 ```
 
-`options` also accepts `description`, `scopes`, `audience`, `customClaims`, `expiry` and `redirectUris` — see Parameters below.
+`options` also accepts `description`, `scopes`, `customClaims`, `expiry` and `redirectUris` — see Parameters below.
 </dd>
 </dl>
 </dd>
@@ -5944,7 +5946,6 @@ console.log(res.client?.clientId, res.plainSecret);
 - `name?: string` - Human-readable name for the client. Defaults to "Resource Client" if omitted.
 - `description?: string` - Optional description
 - `scopes?: string[]` - Scopes to grant
-- `audience?: string[]` - Audience values for access tokens. Ignored for MCP server/gateway resources, which get their audience from the resource itself.
 - `customClaims?: { [key: string]: string }` - Custom claims to embed in access tokens
 - `expiry?: number` - Access token lifetime in seconds. Defaults to the resource's configured expiry, or one day.
 - `redirectUris?: string[]` - Allowed redirect URIs, for a pre-registered (non-DCR) client

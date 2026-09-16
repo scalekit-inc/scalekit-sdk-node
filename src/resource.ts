@@ -58,8 +58,6 @@ export interface CreateResourceClientOptions {
   description?: string;
   /** Scopes to grant */
   scopes?: string[];
-  /** Audience values for access tokens. Ignored for MCP server/gateway resources, which get their audience from the resource itself. */
-  audience?: string[];
   /** Custom claims to embed in access tokens (key-value pairs) */
   customClaims?: { [key: string]: string };
   /** Access token lifetime in seconds. Defaults to the resource's configured expiry, or one day. */
@@ -162,8 +160,12 @@ export default class ResourceClient {
    * Returns the created `client` and a `plainSecret` — the plaintext client
    * secret, only available at creation time.
    *
+   * There is no `audience` option here — audience is always server-determined
+   * and can never be set through this SDK, on create or update, for any
+   * resource type.
+   *
    * @param resourceId - The resource to create the client for (format: res_xxxxx)
-   * @param options - Optional client properties (name, description, scopes, audience, customClaims, expiry, redirectUris)
+   * @param options - Optional client properties (name, description, scopes, customClaims, expiry, redirectUris)
    * @returns CreateResourceClientResponse with client metadata and plainSecret
    */
   async createResourceClient(
@@ -177,7 +179,6 @@ export default class ResourceClient {
         ...(options?.name && { name: options.name }),
         ...(options?.description && { description: options.description }),
         ...(options?.scopes && { scopes: options.scopes }),
-        ...(options?.audience && { audience: options.audience }),
         ...(options?.customClaims && {
           customClaims: toCustomClaims(options.customClaims),
         }),
@@ -234,9 +235,9 @@ export default class ResourceClient {
    * those. `name` and `description` are applied only when non-empty (an empty
    * string is a no-op, not a clear).
    *
-   * There is no `audience` option here — a resource client's audience is
-   * fixed at creation and can never be changed via update, for any resource
-   * type, so this method never offers a way to attempt it.
+   * There is no `audience` option here — audience is always server-determined
+   * and can never be set through this SDK, on create or update, for any
+   * resource type.
    *
    * @param resourceId - The resource the client must belong to (format: res_xxxxx)
    * @param clientId - The client ID to update
