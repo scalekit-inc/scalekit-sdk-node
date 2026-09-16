@@ -18,12 +18,24 @@ import {
   UpdateResourceClientResponse,
   ListResourceClientsResponse,
   DeleteResourceClientResponse,
+  Resource,
+  Scope,
+  ResourceType,
+  GetResourceResponse,
+  ListResourcesResponse,
 } from './pkg/grpc/scalekit/v1/clients/clients_pb';
 
 function toCustomClaims(claims: { [key: string]: string }): CustomClaim[] {
   return Object.entries(claims).map(([key, value]) =>
     create(CustomClaimSchema, { key, value })
   );
+}
+
+export interface ListResourcesOptions {
+  /** Page size, max 30. */
+  pageSize?: number;
+  /** Pagination cursor. */
+  pageToken?: string;
 }
 
 export interface ListUserConsentsOptions {
@@ -72,8 +84,8 @@ export interface UpdateResourceClientOptions {
 }
 
 /**
- * Client for managing API clients scoped to a resource, and reading and
- * revoking end-user consents granted against one.
+ * Client for reading resources, managing the API clients scoped to a
+ * resource, and reading and revoking end-user consents granted against one.
  *
  * A resource (for example an MCP server) can have one or more API clients
  * registered against it, each using the client_credentials OAuth flow scoped
@@ -94,6 +106,47 @@ export default class ResourceClient {
     private readonly coreClient: CoreClient
   ) {
     this.client = this.grpcConnect.createClient(ClientService);
+  }
+
+  /**
+   * Retrieves a single resource by id.
+   *
+   * A resource client's `scopes` are only actually granted in an issued
+   * token when they also appear in the resource's own `scopes` allowlist
+   * (the server intersects requested scopes against the environment's
+   * permissions, the resource's allowed scopes, and the client's own
+   * scopes) — call this first to see what the resource actually allows
+   * before creating or updating a resource client with `scopes`.
+   *
+   * @param resourceId - The resource to fetch (format: res_xxxxx)
+   * @returns GetResourceResponse with the resource, including its allowed `scopes`
+   */
+  async getResource(resourceId: string): Promise<GetResourceResponse> {
+    if (!resourceId) throw new Error('resourceId is required');
+    return this.coreClient.connectExec(this.client.getResource, {
+      resourceId,
+    });
+  }
+
+  /**
+   * Lists resources of a given type in the environment, with pagination.
+   *
+   * `resourceType` is required by the underlying API — there is no way to
+   * list every type in one call; list each type separately if needed.
+   *
+   * @param resourceType - The resource type to filter by (e.g. ResourceType.MCP_SERVER)
+   * @param options - Optional pagination options
+   * @returns ListResourcesResponse with resources array and pagination cursors
+   */
+  async listResources(
+    resourceType: ResourceType,
+    options?: ListResourcesOptions
+  ): Promise<ListResourcesResponse> {
+    return this.coreClient.connectExec(this.client.listResources, {
+      resourceType,
+      ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
+      ...(options?.pageToken && { pageToken: options.pageToken }),
+    });
   }
 
   /**
@@ -344,4 +397,9 @@ export {
   UpdateResourceClientResponse,
   ListResourceClientsResponse,
   DeleteResourceClientResponse,
+  Resource,
+  Scope,
+  ResourceType,
+  GetResourceResponse,
+  ListResourcesResponse,
 };

@@ -1,4 +1,5 @@
 import ScalekitClient from '../src/scalekit';
+import { ResourceType } from '../src/resource';
 import { describe, it, expect, beforeAll } from '@jest/globals';
 
 // A real MCP server resource in the test environment. It currently has no
@@ -96,6 +97,68 @@ describe('Resource Client (UserConsents)', () => {
       await expect(
         client.resources.revokeUserConsent('m2m_1234567890', '')
       ).rejects.toThrow('consentId is required');
+    });
+  });
+});
+
+describe('Resource Client (Resources)', () => {
+  let client: ScalekitClient;
+
+  beforeAll(async () => {
+    const envUrl = process.env.SCALEKIT_ENVIRONMENT_URL;
+    const clientId = process.env.SCALEKIT_CLIENT_ID;
+    const clientSecret = process.env.SCALEKIT_CLIENT_SECRET;
+    if (!envUrl || !clientId || !clientSecret) {
+      throw new Error(
+        'SCALEKIT_ENVIRONMENT_URL, SCALEKIT_CLIENT_ID, SCALEKIT_CLIENT_SECRET are required'
+      );
+    }
+    client = global.client;
+  });
+
+  describe('getResource', () => {
+    it('should fetch a resource by id, including its allowed scopes', async () => {
+      const response = await client.resources.getResource(TEST_RESOURCE_ID);
+
+      expect(response.resource).toBeDefined();
+      expect(response.resource?.id).toBe(TEST_RESOURCE_ID);
+      expect(Array.isArray(response.resource?.scopes)).toBe(true);
+    });
+
+    it('should throw when resourceId is empty', async () => {
+      await expect(client.resources.getResource('')).rejects.toThrow(
+        'resourceId is required'
+      );
+    });
+
+    it('should throw for a nonexistent resource', async () => {
+      await expect(
+        client.resources.getResource(OTHER_RESOURCE_ID)
+      ).rejects.toThrow();
+    });
+  });
+
+  describe('listResources', () => {
+    it('should list resources of a given type in the environment', async () => {
+      const response = await client.resources.listResources(
+        ResourceType.MCP_SERVER
+      );
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.resources)).toBe(true);
+      expect(response.resources.some((r) => r.id === TEST_RESOURCE_ID)).toBe(
+        true
+      );
+    });
+
+    it('should accept a page size', async () => {
+      const response = await client.resources.listResources(
+        ResourceType.MCP_SERVER,
+        { pageSize: 1 }
+      );
+
+      expect(response).toBeDefined();
+      expect(response.resources.length).toBeLessThanOrEqual(1);
     });
   });
 });
