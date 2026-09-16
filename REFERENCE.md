@@ -6122,7 +6122,7 @@ console.log(allowedScopes);
 
 const res = await scalekitClient.resources.updateResourceClient('<RESOURCE_ID>', '<CLIENT_ID>', {
   name: 'Updated Name',
-  scopes: [allowedScopes[0]],
+  scopes: allowedScopes,
 });
 
 console.log(res.client?.name, res.client?.scopes);
