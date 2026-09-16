@@ -427,6 +427,65 @@ describe('Resource Client (ResourceClients)', () => {
         await client.resources.deleteResourceClient(TEST_RESOURCE_ID, clientId);
       }
     });
+
+    it('should refuse to delete a client\'s only remaining secret', async () => {
+      const created = await client.resources.createResourceClient(
+        TEST_RESOURCE_ID,
+        { name: 'Min Secret Limit Client' }
+      );
+      if (!created.client?.clientId)
+        throw new Error('Expected created client with clientId');
+      const clientId = created.client.clientId;
+      try {
+        const fetched = await client.resources.getResourceClient(
+          TEST_RESOURCE_ID,
+          clientId
+        );
+        const onlySecretId = fetched.client?.secrets[0]?.id;
+        if (!onlySecretId) throw new Error('Expected client to start with a secret');
+
+        await expect(
+          client.resources.deleteResourceClientSecret(
+            TEST_RESOURCE_ID,
+            clientId,
+            onlySecretId
+          )
+        ).rejects.toThrow();
+      } finally {
+        await client.resources.deleteResourceClient(TEST_RESOURCE_ID, clientId);
+      }
+    });
+
+    it('should refuse to create a secret past the server-enforced per-client limit', async () => {
+      // The exact limit is environment-configurable (verified live: 5 in
+      // Scalekit's own dev environment, not the dashboard's stricter UI-only
+      // threshold of 2) — probe until the server actually refuses rather
+      // than asserting a specific count.
+      const created = await client.resources.createResourceClient(
+        TEST_RESOURCE_ID,
+        { name: 'Max Secret Limit Client' }
+      );
+      if (!created.client?.clientId)
+        throw new Error('Expected created client with clientId');
+      const clientId = created.client.clientId;
+      try {
+        let limitHit = false;
+        for (let i = 0; i < 20; i++) {
+          try {
+            await client.resources.createResourceClientSecret(
+              TEST_RESOURCE_ID,
+              clientId
+            );
+          } catch (e) {
+            limitHit = true;
+            break;
+          }
+        }
+        expect(limitHit).toBe(true);
+      } finally {
+        await client.resources.deleteResourceClient(TEST_RESOURCE_ID, clientId);
+      }
+    });
   });
 
   describe('deleteResourceClient', () => {
