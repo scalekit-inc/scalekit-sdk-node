@@ -18,6 +18,9 @@ import WebAuthnClient from './webauthn';
 import TokenClient from './token';
 import M2MClient from './m2mclient';
 import ResourceClient from './resource';
+import UserScope from './agent';
+import McpClient from './mcp';
+import ProvidersClient from './providers';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ActionsClient from './actions';
@@ -97,6 +100,35 @@ export default class ScalekitClient {
   readonly m2m: M2MClient;
   readonly resources: ResourceClient;
   readonly tools: ToolsClient;
+  /** Virtual MCP servers: configurations, connected accounts and session tokens. */
+  readonly mcp: McpClient;
+  /** Bring-your-own connectors: create, update, list and delete custom connectors. */
+  readonly providers: ProvidersClient;
+
+  /**
+   * Binds AgentKit to one end-user identifier.
+   *
+   * Returns a small facade over `actions` and `tools` that carries the identifier
+   * for you and exposes the three steps an agent takes: check the connection,
+   * find tools that fit the goal, run one. It adds no capability — every method
+   * composes calls that already exist — and you can drop back to
+   * `actions`/`tools` at any point.
+   *
+   * ```ts
+   * const user = scalekit.forIdentifier('usr_8f3a2c');
+   * const state = await user.ensureConnected('github-connect');
+   * const tools = await user.findTools('star a repository');
+   * const result = await user.run(tools[0].name, { owner: 'o', repo: 'r' });
+   * ```
+   *
+   * @param identifier Your application's stable identifier for this user. This is
+   *                   the `identifier` every AgentKit call takes, which is a
+   *                   different field from `userId`.
+   */
+  forIdentifier(identifier: string): UserScope {
+    if (!identifier) throw new Error('identifier is required');
+    return new UserScope(identifier, this.actions, this.tools);
+  }
   readonly connectedAccounts: ConnectedAccountsClient;
   readonly actions: ActionsClient;
   readonly events: EventsClient;
@@ -138,6 +170,8 @@ export default class ScalekitClient {
     this.m2m = new M2MClient(this.grpcConnect, this.coreClient);
     this.resources = new ResourceClient(this.grpcConnect, this.coreClient);
     this.tools = new ToolsClient(this.grpcConnect, this.coreClient);
+    this.mcp = new McpClient(this.grpcConnect, this.coreClient);
+    this.providers = new ProvidersClient(this.grpcConnect, this.coreClient);
     this.connectedAccounts = new ConnectedAccountsClient(
       this.grpcConnect,
       this.coreClient
@@ -146,7 +180,9 @@ export default class ScalekitClient {
       this.tools,
       this.connectedAccounts,
       this.coreClient,
-      this.connection
+      this.connection,
+      this.mcp,
+      this.providers
     );
     this.events = new EventsClient(this.grpcConnect, this.coreClient);
   }

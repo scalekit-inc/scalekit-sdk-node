@@ -1,4 +1,8 @@
-import { create, type JsonObject } from '@bufbuild/protobuf';
+import {
+  create,
+  type JsonObject,
+  type MessageInitShape,
+} from '@bufbuild/protobuf';
 import { AxiosError, AxiosResponse } from 'axios';
 import CoreClient, { assertValidTimeout } from './core';
 import {
@@ -9,12 +13,20 @@ import {
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
+import type McpClient from './mcp';
+import type ProvidersClient from './providers';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
 import {
   ConnectionStatus,
   ConnectionType,
   ListConnection,
 } from './pkg/grpc/scalekit/v1/connections/connections_pb';
+import type {
+  ListAvailableToolsResponse,
+  ListScopedToolsResponse,
+  ScopedToolFilterSchema,
+  SearchToolsResponse,
+} from './pkg/grpc/scalekit/v1/tools/tools_pb';
 
 /**
  * Creation timestamp for an app connection, re-exported as the protobuf
@@ -145,8 +157,65 @@ export default class ActionsClient {
     private readonly tools: ToolsClient,
     private readonly connectedAccounts: ConnectedAccountsClient,
     private readonly coreClient: CoreClient,
-    private readonly connection: ConnectionClient
+    private readonly connection: ConnectionClient,
+    /** Virtual MCP servers. Also reachable as `scalekit.mcp`. */
+    readonly mcp?: McpClient,
+    /** Bring-your-own connectors. Also reachable as `scalekit.providers`. */
+    readonly providers?: ProvidersClient
   ) {}
+
+  /**
+   * Finds tools that fit a goal, ranked by relevance.
+   *
+   * Delegates to `tools.searchTools`. Prefer this over listing a connector:
+   * binding a whole connector to a model is roughly 85k tokens of schema per
+   * request, against about 700 for one search.
+   *
+   * Pass `identifier` and each result's `connections` carries that user's
+   * `readinessState` per connection — check it before executing.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   */
+  async searchTools(
+    query: string,
+    options?: { identifier?: string; topK?: number }
+  ): Promise<SearchToolsResponse> {
+    return this.tools.searchTools(query, options);
+  }
+
+  /**
+   * Lists tools for one identifier, narrowed by an explicit filter.
+   *
+   * Delegates to `tools.listScopedTools`. `options.filter` is required by the
+   * server even though its fields are individually optional.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   */
+  async listScopedTools(
+    identifier: string,
+    options: {
+      filter: MessageInitShape<typeof ScopedToolFilterSchema>;
+      pageSize?: number;
+      pageToken?: string;
+    }
+  ): Promise<ListScopedToolsResponse> {
+    return this.tools.listScopedTools(identifier, options);
+  }
+
+  /**
+   * Lists every tool available to one identifier across their connections.
+   *
+   * Delegates to `tools.listAvailableTools`. Paginated — follow
+   * `nextPageToken` if you need the complete set.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   */
+  async listAvailableTools(
+    identifier: string,
+    options?: { pageSize?: number; pageToken?: string }
+  ): Promise<ListAvailableToolsResponse> {
+    return this.tools.listAvailableTools(identifier, options);
+  }
 
   /**
    * Execute a tool on behalf of a connected account.
@@ -465,7 +534,14 @@ export default class ActionsClient {
   async createConnectedAccount(params: {
     connectionName: string;
     identifier: string;
-    authorizationDetails: CreateConnectedAccount['authorizationDetails'];
+    /**
+     * How the account authenticates. Accepts a plain object, for example
+     * `{ details: { case: 'oauthToken', value: { accessToken } } }`, which is
+     * what `create()` takes when the request is built.
+     */
+    authorizationDetails: MessageInitShape<
+      typeof CreateConnectedAccountSchema
+    >['authorizationDetails'];
     organizationId?: string;
     userId?: string;
     apiConfig?: Record<string, unknown>;
