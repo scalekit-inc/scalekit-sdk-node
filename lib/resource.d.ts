@@ -1,6 +1,8 @@
+import type { MessageShape } from '@bufbuild/protobuf';
+import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { ResourceUserConsent, ResourceUserConsentFilter, ListResourceUserConsentsResponse, RevokeUserConsentResponse, M2MClient, ConsentedUser, CreateResourceClientResponse, GetResourceClientResponse, UpdateResourceClientResponse, ListResourceClientsResponse, DeleteResourceClientResponse, Resource, Scope, ResourceType, GetResourceResponse, ListResourcesResponse } from './pkg/grpc/scalekit/v1/clients/clients_pb';
+import { ResourceUserConsent, ResourceUserConsentFilter, ListResourceUserConsentsResponse, RevokeUserConsentResponse, M2MClient, ConsentedUser, CreateResourceClientResponse, GetResourceClientResponse, UpdateResourceClientResponse, ListResourceClientsResponse, DeleteResourceClientResponse, CreateClientSecretResponse, Resource, Scope, ResourceType, GetResourceResponse, ListResourcesResponse } from './pkg/grpc/scalekit/v1/clients/clients_pb';
 export interface ListResourcesOptions {
     /** Page size, max 30. */
     pageSize?: number;
@@ -160,6 +162,32 @@ export default class ResourceClient {
      */
     deleteResourceClient(resourceId: string, clientId: string): Promise<DeleteResourceClientResponse>;
     /**
+     * Creates a new secret for an API client scoped to a resource.
+     *
+     * The underlying secret-creation call is keyed by `clientId` alone — it has
+     * no notion of a resource — so this fetches the client first and verifies
+     * it belongs to `resourceId` before creating a secret for it, the same
+     * ownership check `deleteResourceClient` applies.
+     *
+     * @param resourceId - The resource the client must belong to (format: res_xxxxx)
+     * @param clientId - The client ID to create a secret for
+     * @returns CreateClientSecretResponse with the new secret's plainSecret and metadata; throws if the client does not belong to resourceId
+     */
+    createResourceClientSecret(resourceId: string, clientId: string): Promise<CreateClientSecretResponse>;
+    /**
+     * Permanently deletes a secret from an API client scoped to a resource.
+     *
+     * Like `createResourceClientSecret`, the underlying delete call is keyed by
+     * `clientId` alone, so this verifies the client belongs to `resourceId`
+     * first rather than trusting the id pair blindly.
+     *
+     * @param resourceId - The resource the client must belong to (format: res_xxxxx)
+     * @param clientId - The client ID the secret belongs to
+     * @param secretId - The secret ID to delete
+     * @returns Empty response on success; throws if the client does not belong to resourceId
+     */
+    deleteResourceClientSecret(resourceId: string, clientId: string, secretId: string): Promise<MessageShape<typeof EmptySchema>>;
+    /**
      * Lists the end-user consents granted against a resource, with pagination.
      *
      * Each returned consent carries `id`, `externalUserId`, `clientId`,
@@ -192,4 +220,4 @@ export default class ResourceClient {
      */
     revokeUserConsent(clientId: string, consentId: string): Promise<RevokeUserConsentResponse>;
 }
-export { ResourceUserConsent, ResourceUserConsentFilter, ListResourceUserConsentsResponse, RevokeUserConsentResponse, M2MClient, ConsentedUser, CreateResourceClientResponse, GetResourceClientResponse, UpdateResourceClientResponse, ListResourceClientsResponse, DeleteResourceClientResponse, Resource, Scope, ResourceType, GetResourceResponse, ListResourcesResponse, };
+export { ResourceUserConsent, ResourceUserConsentFilter, ListResourceUserConsentsResponse, RevokeUserConsentResponse, M2MClient, ConsentedUser, CreateResourceClientResponse, GetResourceClientResponse, UpdateResourceClientResponse, ListResourceClientsResponse, DeleteResourceClientResponse, CreateClientSecretResponse, Resource, Scope, ResourceType, GetResourceResponse, ListResourcesResponse, };

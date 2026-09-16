@@ -332,6 +332,103 @@ describe('Resource Client (ResourceClients)', () => {
     });
   });
 
+  describe('createResourceClientSecret / deleteResourceClientSecret', () => {
+    it('should create and delete a secret for a resource client', async () => {
+      const created = await client.resources.createResourceClient(
+        TEST_RESOURCE_ID,
+        { name: 'Secret Test Client' }
+      );
+      if (!created.client?.clientId)
+        throw new Error('Expected created client with clientId');
+      const clientId = created.client.clientId;
+      try {
+        const newSecret = await client.resources.createResourceClientSecret(
+          TEST_RESOURCE_ID,
+          clientId
+        );
+        expect(newSecret.plainSecret).toBeTruthy();
+        expect(newSecret.secret?.id).toBeTruthy();
+
+        await expect(
+          client.resources.deleteResourceClientSecret(
+            TEST_RESOURCE_ID,
+            clientId,
+            newSecret.secret!.id
+          )
+        ).resolves.not.toThrow();
+      } finally {
+        await client.resources.deleteResourceClient(TEST_RESOURCE_ID, clientId);
+      }
+    });
+
+    it('should refuse to create a secret for a client that does not belong to the given resource', async () => {
+      const created = await client.resources.createResourceClient(
+        TEST_RESOURCE_ID,
+        { name: 'Scoped Secret Client' }
+      );
+      if (!created.client?.clientId)
+        throw new Error('Expected created client with clientId');
+      const clientId = created.client.clientId;
+      try {
+        await expect(
+          client.resources.createResourceClientSecret(
+            OTHER_RESOURCE_ID,
+            clientId
+          )
+        ).rejects.toThrow();
+      } finally {
+        await client.resources.deleteResourceClient(TEST_RESOURCE_ID, clientId);
+      }
+    });
+
+    it('should throw when resourceId is empty', async () => {
+      await expect(
+        client.resources.createResourceClientSecret('', 'm2m_1234567890')
+      ).rejects.toThrow('resourceId is required');
+      await expect(
+        client.resources.deleteResourceClientSecret(
+          '',
+          'm2m_1234567890',
+          'sks_1234567890'
+        )
+      ).rejects.toThrow('resourceId is required');
+    });
+
+    it('should throw when clientId is empty', async () => {
+      await expect(
+        client.resources.createResourceClientSecret(TEST_RESOURCE_ID, '')
+      ).rejects.toThrow('clientId is required');
+      await expect(
+        client.resources.deleteResourceClientSecret(
+          TEST_RESOURCE_ID,
+          '',
+          'sks_1234567890'
+        )
+      ).rejects.toThrow('clientId is required');
+    });
+
+    it('should throw when secretId is empty', async () => {
+      const created = await client.resources.createResourceClient(
+        TEST_RESOURCE_ID,
+        { name: 'Secret Id Required Client' }
+      );
+      if (!created.client?.clientId)
+        throw new Error('Expected created client with clientId');
+      const clientId = created.client.clientId;
+      try {
+        await expect(
+          client.resources.deleteResourceClientSecret(
+            TEST_RESOURCE_ID,
+            clientId,
+            ''
+          )
+        ).rejects.toThrow('secretId is required');
+      } finally {
+        await client.resources.deleteResourceClient(TEST_RESOURCE_ID, clientId);
+      }
+    });
+  });
+
   describe('deleteResourceClient', () => {
     it('should delete a resource client', async () => {
       const created = await client.resources.createResourceClient(

@@ -6225,6 +6225,139 @@ await scalekitClient.resources.deleteResourceClient('<RESOURCE_ID>', '<CLIENT_ID
 </dl>
 </details>
 
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">createResourceClientSecret</a>(resourceId, clientId) -> Promise&lt;CreateClientSecretResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new secret for an API client scoped to a resource. The underlying secret-creation call is keyed by `clientId` alone, so this verifies the client belongs to `resourceId` first, the same ownership check `deleteResourceClient` applies.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.resources.createResourceClientSecret('<RESOURCE_ID>', '<CLIENT_ID>');
+console.log(res.plainSecret);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: `res_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID to create a secret for
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">deleteResourceClientSecret</a>(resourceId, clientId, secretId) -> Promise&lt;Empty&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently deletes a secret from an API client scoped to a resource. Like `createResourceClientSecret`, the underlying delete call is keyed by `clientId` alone, so this verifies the client belongs to `resourceId` first.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.resources.deleteResourceClientSecret('<RESOURCE_ID>', '<CLIENT_ID>', '<SECRET_ID>');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: `res_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID the secret belongs to
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**secretId:** `string` - The secret ID to delete
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">listUserConsents</a>(resourceId, options?) -> Promise&lt;ListResourceUserConsentsResponse&gt;</code></summary>
 <dl>
 <dd>
