@@ -75,8 +75,6 @@ export interface UpdateResourceClientOptions {
   description?: string;
   /** Updated scopes (replaces existing; pass [] to clear) */
   scopes?: string[];
-  /** Not settable on update, for any resource type — this is a no-op server-side regardless of value, so whatever audience the client received at creation stays fixed for its lifetime. Present here only to mirror the underlying proto shape. */
-  audience?: string[];
   /** Custom claims to set (replaces existing; pass {} to clear) */
   customClaims?: { [key: string]: string };
   /** Updated access token lifetime in seconds */
@@ -227,18 +225,15 @@ export default class ResourceClient {
    * the server only honors that mask for `scopes`, `customClaims` and
    * `redirectUris` — pass an empty value (e.g. `scopes: []`) to clear one of
    * those. `name` and `description` are applied only when non-empty (an empty
-   * string is a no-op, not a clear). `audience` cannot be changed via update
-   * for any resource type — this call never touches it, so whatever value
-   * the client received at creation stays fixed for its lifetime. For
-   * MCP_SERVER/MCP_GATEWAY resources that value is always the resource's
-   * own audience (`createResourceClient` ignores caller-supplied audience
-   * for those types); for other resource types it's whichever value create
-   * used — the caller-supplied audience, or the resource's own id if none
-   * was supplied.
+   * string is a no-op, not a clear).
+   *
+   * There is no `audience` option here — a resource client's audience is
+   * fixed at creation and can never be changed via update, for any resource
+   * type, so this method never offers a way to attempt it.
    *
    * @param resourceId - The resource the client must belong to (format: res_xxxxx)
    * @param clientId - The client ID to update
-   * @param options - Fields to update (name, description, scopes, audience, customClaims, expiry, redirectUris)
+   * @param options - Fields to update (name, description, scopes, customClaims, expiry, redirectUris)
    * @returns UpdateResourceClientResponse with updated client metadata
    */
   async updateResourceClient(
@@ -254,7 +249,6 @@ export default class ResourceClient {
       name?: string;
       description?: string;
       scopes?: string[];
-      audience?: string[];
       customClaims?: CustomClaim[];
       expiry?: bigint;
       redirectUris?: string[];
@@ -270,10 +264,6 @@ export default class ResourceClient {
     if (options?.scopes !== undefined) {
       client.scopes = options.scopes;
       paths.push('scopes');
-    }
-    if (options?.audience !== undefined) {
-      client.audience = options.audience;
-      paths.push('audience');
     }
     if (options?.customClaims !== undefined) {
       client.customClaims = toCustomClaims(options.customClaims);

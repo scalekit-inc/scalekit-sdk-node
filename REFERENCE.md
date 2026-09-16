@@ -6093,7 +6093,9 @@ for (const c of res.clients) {
 
 Updates an existing API client scoped to a resource.
 
-Only the fields present in `options` are changed. An `update_mask` built from those same fields is sent alongside the partial `client` payload, but the server only honors that mask for `scopes`, `customClaims` and `redirectUris` — pass an empty value (e.g. `scopes: []`) to clear one of those. `name` and `description` are applied only when non-empty (an empty string is a no-op, not a clear). `audience` cannot be changed via update for any resource type — this call never touches it, so whatever value the client received at creation stays fixed for its lifetime. For MCP_SERVER/MCP_GATEWAY resources that value is always the resource's own audience (`createResourceClient` ignores caller-supplied audience for those types); for other resource types it's whichever value create used — the caller-supplied audience, or the resource's own id if none was supplied.
+Only the fields present in `options` are changed. An `update_mask` built from those same fields is sent alongside the partial `client` payload, but the server only honors that mask for `scopes`, `customClaims` and `redirectUris` — pass an empty value (e.g. `scopes: []`) to clear one of those. `name` and `description` are applied only when non-empty (an empty string is a no-op, not a clear).
+
+There is no `audience` option here — a resource client's audience is fixed at creation and can never be changed via update, for any resource type, so this method never offers a way to attempt it.
 </dd>
 </dl>
 </dd>
@@ -6148,7 +6150,6 @@ console.log(res.client?.name, res.client?.scopes);
 - `name?: string` - Updated name. An empty string is a no-op server-side, not a clear.
 - `description?: string` - Updated description. An empty string is a no-op server-side, not a clear.
 - `scopes?: string[]` - Updated scopes (replaces existing; pass `[]` to clear)
-- `audience?: string[]` - Not settable on update by design — a resource client's audience is fixed to the resource it was created under. Present here only to mirror the underlying proto shape.
 - `customClaims?: { [key: string]: string }` - Custom claims to set (replaces existing; pass `{}` to clear)
 - `expiry?: number` - Updated access token lifetime in seconds
 - `redirectUris?: string[]` - Updated redirect URIs (replaces existing; pass `[]` to clear)
