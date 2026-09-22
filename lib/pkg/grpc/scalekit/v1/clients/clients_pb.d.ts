@@ -76,6 +76,18 @@ export type CreateResource = Message<"scalekit.v1.clients.CreateResource"> & {
      */
     enableCimd: boolean;
     /**
+     * @generated from field: bool xaa_enabled = 14;
+     */
+    xaaEnabled: boolean;
+    /**
+     * @generated from field: repeated scalekit.v1.clients.CimdAllowlistEntry cimd_client_allowlist = 15;
+     */
+    cimdClientAllowlist: CimdAllowlistEntry[];
+    /**
+     * @generated from field: bool cimd_client_allowlist_enabled = 16;
+     */
+    cimdClientAllowlistEnabled: boolean;
+    /**
      *
      * string tos_uri = 10 [
      * (buf.validate.field).string = {max_len: 512},
@@ -93,9 +105,9 @@ export type CreateResource = Message<"scalekit.v1.clients.CreateResource"> & {
      * }
      * ];
      *
-     * @generated from field: bool xaa_enabled = 14;
+     * @generated from field: bool resource_scope_selection_allowed = 17;
      */
-    xaaEnabled: boolean;
+    resourceScopeSelectionAllowed: boolean;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateResource.
@@ -271,6 +283,32 @@ export type Application = Message<"scalekit.v1.clients.Application"> & {
  */
 export declare const ApplicationSchema: GenMessage<Application>;
 /**
+ * CimdAllowlistEntry restricts which CIMD MCP clients may complete OAuth flows against a
+ * resource. The meaning of value depends on type: a predefined vendor identifier (e.g.
+ * "CLAUDE", "CHATGPT", "VSCODE") for type "PREDEFINED", or a CIMD client metadata URL for
+ * type "URL". Predefined identifiers are not a fixed proto enum — the set of valid identifiers
+ * and the real URL/pattern behind each one are resolved live from the
+ * FeatureCimdPredefinedClientCatalog OpenFeature flag, so a vendor addition/change never
+ * requires a proto change or a deploy.
+ *
+ * @generated from message scalekit.v1.clients.CimdAllowlistEntry
+ */
+export type CimdAllowlistEntry = Message<"scalekit.v1.clients.CimdAllowlistEntry"> & {
+    /**
+     * @generated from field: string type = 1;
+     */
+    type: string;
+    /**
+     * @generated from field: string value = 2;
+     */
+    value: string;
+};
+/**
+ * Describes the message scalekit.v1.clients.CimdAllowlistEntry.
+ * Use `create(CimdAllowlistEntrySchema)` to create a new message.
+ */
+export declare const CimdAllowlistEntrySchema: GenMessage<CimdAllowlistEntry>;
+/**
  * @generated from message scalekit.v1.clients.Resource
  */
 export type Resource = Message<"scalekit.v1.clients.Resource"> & {
@@ -358,6 +396,18 @@ export type Resource = Message<"scalekit.v1.clients.Resource"> & {
      * @generated from field: bool xaa_enabled = 21;
      */
     xaaEnabled: boolean;
+    /**
+     * @generated from field: repeated scalekit.v1.clients.CimdAllowlistEntry cimd_client_allowlist = 22;
+     */
+    cimdClientAllowlist: CimdAllowlistEntry[];
+    /**
+     * @generated from field: bool cimd_client_allowlist_enabled = 23;
+     */
+    cimdClientAllowlistEnabled: boolean;
+    /**
+     * @generated from field: bool resource_scope_selection_allowed = 24;
+     */
+    resourceScopeSelectionAllowed: boolean;
 };
 /**
  * Describes the message scalekit.v1.clients.Resource.
@@ -631,6 +681,18 @@ export type UpdateResource = Message<"scalekit.v1.clients.UpdateResource"> & {
      * @generated from field: google.protobuf.BoolValue xaa_enabled = 16;
      */
     xaaEnabled?: boolean | undefined;
+    /**
+     * @generated from field: repeated scalekit.v1.clients.CimdAllowlistEntry cimd_client_allowlist = 17;
+     */
+    cimdClientAllowlist: CimdAllowlistEntry[];
+    /**
+     * @generated from field: google.protobuf.BoolValue cimd_client_allowlist_enabled = 18;
+     */
+    cimdClientAllowlistEnabled?: boolean | undefined;
+    /**
+     * @generated from field: google.protobuf.BoolValue resource_scope_selection_allowed = 19;
+     */
+    resourceScopeSelectionAllowed?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateResource.
