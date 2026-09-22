@@ -163,6 +163,14 @@ export type PortalSettings = Message<"scalekit.v1.auth.PortalSettings"> & {
      * @generated from field: optional bool new_self_serve_sso_scim = 2;
      */
     newSelfServeSsoScim?: boolean | undefined;
+    /**
+     * mcp_consent_screen_v2 indicates whether the MCP consent screen should use the two-column
+     * layout. Rollout-driven (feature flag). Only present when the request carries a consent
+     * cookie, i.e. it is the consent screen asking; every other caller gets the field omitted.
+     *
+     * @generated from field: optional bool mcp_consent_screen_v2 = 3;
+     */
+    mcpConsentScreenV2?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.auth.PortalSettings.
@@ -251,19 +259,19 @@ export type OTPRequest = Message<"scalekit.v1.auth.OTPRequest"> & {
  */
 export declare const OTPRequestSchema: GenMessage<OTPRequest>;
 /**
- * @generated from message scalekit.v1.auth.ResendPasswordlessRequest
+ * @generated from message scalekit.v1.auth.ResendAuthPasswordlessRequest
  */
-export type ResendPasswordlessRequest = Message<"scalekit.v1.auth.ResendPasswordlessRequest"> & {
+export type ResendAuthPasswordlessRequest = Message<"scalekit.v1.auth.ResendAuthPasswordlessRequest"> & {
     /**
      * @generated from field: string g_recaptcha_response = 1;
      */
     gRecaptchaResponse: string;
 };
 /**
- * Describes the message scalekit.v1.auth.ResendPasswordlessRequest.
- * Use `create(ResendPasswordlessRequestSchema)` to create a new message.
+ * Describes the message scalekit.v1.auth.ResendAuthPasswordlessRequest.
+ * Use `create(ResendAuthPasswordlessRequestSchema)` to create a new message.
  */
-export declare const ResendPasswordlessRequestSchema: GenMessage<ResendPasswordlessRequest>;
+export declare const ResendAuthPasswordlessRequestSchema: GenMessage<ResendAuthPasswordlessRequest>;
 /**
  * @generated from message scalekit.v1.auth.ListUserOrganizationsResponse
  */
@@ -713,11 +721,11 @@ export declare const AuthService: GenService<{
         output: typeof VerifyPasswordLessOtpResponseSchema;
     };
     /**
-     * @generated from rpc scalekit.v1.auth.AuthService.ResendPasswordless
+     * @generated from rpc scalekit.v1.auth.AuthService.ResendAuthPasswordless
      */
-    resendPasswordless: {
+    resendAuthPasswordless: {
         methodKind: "unary";
-        input: typeof ResendPasswordlessRequestSchema;
+        input: typeof ResendAuthPasswordlessRequestSchema;
         output: typeof EmptySchema;
     };
     /**
