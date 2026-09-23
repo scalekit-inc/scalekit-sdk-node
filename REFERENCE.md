@@ -5664,7 +5664,7 @@ console.log(response.authRequestId);
 
 Resolves a login request ID into the authorization request it was issued for, the OAuth client that started it, and the resource being accessed.
 
-If you are using Auth for MCP solution of Scalekit in "Bring your own Auth" mode, call this when your own authentication service receives a login request ID on the authorize redirect and needs to know which client is asking, which scopes were requested, and which resource is being accessed — before it collects credentials and calls `updateLoginUserDetails`.
+If you are using Auth for MCP solution of Scalekit in "Bring your own Auth" mode, call this when your own authentication service receives a login request ID on the authorize redirect and needs to know which client is asking, which scopes were requested, and which resource is being accessed.
 
 The login request ID is ephemeral: it is created when the authorization request is handed off to your authentication service and lives for 15 minutes. Once it expires the authorization request has expired too, and this call fails from then on.
 </dd>
@@ -5687,7 +5687,8 @@ const details = await scalekitClient.auth.getLoginRequestDetails(
 
 // Which client is asking, and what it requested
 console.log(details.client?.clientName);
-console.log(details.client?.skClientId); // always m2m_ format, even for CIMD clients
+console.log(details.client?.clientId); // CIMD metadata URL for a CIMD client, otherwise m2m_xxx
+console.log(details.client?.skClientId); // always m2m_xxx, for every client
 console.log(details.authRequest?.scopes);
 
 // The resource being accessed — absent when the request is not scoped to one
@@ -5726,8 +5727,8 @@ console.log(details.resource?.name);
 - `scopes: string[]` - Scopes the client requested
 
 **client:** `AuthRequestClient` - The OAuth client that started the authorization request
-- `clientId: string` - The identifier the client authenticated with. For a CIMD client this is the HTTPS URL of its client ID metadata document; for every other client it matches `skClientId`
-- `skClientId: string` - The identifier Scalekit issued for this client, always in `m2m_` format
+- `clientId: string` - The identifier the client authenticated with. For a CIMD client this is the HTTPS URL of its client ID metadata document; for a non-CIMD client it is in `m2m_xxx` format and matches `skClientId`
+- `skClientId: string` - The Scalekit client identifier, always in `m2m_xxx` format. So for a CIMD client `clientId` is the CIMD URL while `skClientId` is `m2m_xxx`; for a non-CIMD client both are `m2m_xxx`
 - `clientName: string` - Display name of the client, empty when registered without one
 - `isDcr: boolean` - Whether the client registered through Dynamic Client Registration
 - `isCimd: boolean` - Whether the client registered through a Client ID Metadata Document

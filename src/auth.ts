@@ -112,8 +112,7 @@ export default class AuthClient {
    *
    * Call this when your own authentication service receives a login request ID on
    * the authorize redirect and needs to know which client is asking, which scopes
-   * were requested, and which resource is being accessed — before it collects
-   * credentials and calls {@link updateLoginUserDetails}.
+   * were requested, and which resource is being accessed.
    *
    * The login request ID is ephemeral: it is created when the authorization request
    * is handed off to your authentication service and lives for 15 minutes. Once it
@@ -136,6 +135,8 @@ export default class AuthClient {
    *
    * console.log(details.authRequest?.scopes);   // scopes the client requested
    * console.log(details.client?.clientName);    // who is asking
+   * console.log(details.client?.clientId);      // CIMD metadata URL for a CIMD client, otherwise m2m_xxx
+   * console.log(details.client?.skClientId);    // always m2m_xxx, for every client
    * console.log(details.resource?.name);        // may be undefined
    *
    * @see {@link https://docs.scalekit.com/mcp/auth-methods/custom-auth/ | Bring Your Own Auth}
