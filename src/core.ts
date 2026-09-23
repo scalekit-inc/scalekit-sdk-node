@@ -97,6 +97,7 @@ export function assertValidPingInterval(value: number): void {
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
+  private pendingAuthentication: Promise<void> | null = null;
   public axios: Axios;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   public sdkVersion = `Scalekit-Node/${(require('../package.json') as { version: string }).version}`;
@@ -182,6 +183,25 @@ export default class CoreClient {
     );
     // removing token creation at the time of constructor and instead letting the retry functionality handle generating a token whenever required.
     //this.authenticateClient();
+  }
+
+  /**
+   * Fetch a client-credentials token if this client doesn't have one yet.
+   *
+   * gRPC calls get a token lazily: `connectExec` authenticates when a call
+   * returns 401 and retries it. HTTP calls that must not be retried on 401,
+   * such as the actions proxy (a 401 there can come from the third-party API,
+   * and retrying would replay the request), call this first instead.
+   * Concurrent callers share one token request.
+   */
+  async ensureAccessToken(): Promise<void> {
+    if (this.accessToken) return;
+    if (!this.pendingAuthentication) {
+      this.pendingAuthentication = this.authenticateClient().finally(() => {
+        this.pendingAuthentication = null;
+      });
+    }
+    await this.pendingAuthentication;
   }
 
   private async authenticateClient() {

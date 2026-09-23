@@ -273,6 +273,8 @@ describe('ActionsClient.request proxy timeout', () => {
       'client_secret',
       toolTimeoutMs
     );
+    // A token is already cached, so request() goes straight to the proxy call.
+    coreClient.accessToken = 'test-token';
     const grpcConnect = {
       createClient: () => makeFakeToolServiceClient(),
     } as any;
@@ -400,6 +402,8 @@ describe('axios timeouts surface as ScalekitGatewayTimeoutException', () => {
       'client_id',
       'client_secret'
     );
+    // A token is already cached, so request() goes straight to the proxy call.
+    coreClient.accessToken = 'test-token';
     const grpcConnect = {
       createClient: () => makeFakeToolServiceClient(),
     } as any;

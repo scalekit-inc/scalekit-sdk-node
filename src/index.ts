@@ -20,6 +20,12 @@ export type {
   ListResourcesResponse,
 } from './pkg/grpc/scalekit/v1/clients/clients_pb';
 
+// Generated enum surfaced in the public connected-account APIs: `status` on a
+// connected account is a `ConnectorStatus`, so callers can check
+// `status === ConnectorStatus.ACTIVE` without importing the internal pb path
+// (which the package `exports` map blocks).
+export { ConnectorStatus } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+
 // Generated enums/types surfaced in the public `events.listEventsPaginated` API:
 // `ObjectType` appears on the returned `ScalekitEvent.object`, and `Source` on the
 // optional `EventFilter` parameter — re-export them so callers can name them.

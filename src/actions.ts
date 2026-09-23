@@ -657,6 +657,11 @@ export default class ActionsClient {
     };
 
     try {
+      // This call bypasses connectExec, which is what fetches a token on the
+      // first gRPC call, so fetch one here when the client has none yet.
+      // Without it, request() as the client's first call is sent without a
+      // token and fails with 401.
+      await this.coreClient.ensureAccessToken();
       return await this.coreClient.axios.request({
         url,
         method: method.toUpperCase(),
