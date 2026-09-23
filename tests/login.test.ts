@@ -1,5 +1,7 @@
 import ScalekitClient from '../src/scalekit';
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import AuthClient from '../src/auth';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { AuthService } from '../src/pkg/grpc/scalekit/v1/auth/auth_pb';
 
 describe('Auth - updateLoginUserDetails', () => {
   let client: ScalekitClient;
@@ -56,6 +58,36 @@ describe('Auth - updateLoginUserDetails', () => {
       await expect(
         client.auth.getLoginRequestDetails(undefined as unknown as string)
       ).rejects.toThrow('loginRequestId must be a non-empty string');
+    });
+
+    // Deterministic cover for the success path: proves the wrapper is bound to
+    // the AuthService RPC of the same name and puts the caller's ID on the
+    // request, without needing a live login request. The gated test below
+    // exercises the wire; this one catches a mis-wired stub or field.
+    it('should forward the login request id to the RPC and return its response', async () => {
+      const rpc = jest.fn();
+      const response = {} as never;
+      const connectExec =
+        jest.fn<(fn: unknown, request: unknown) => Promise<never>>();
+      connectExec.mockResolvedValue(response);
+      const createClient = jest.fn((_service: unknown) => ({
+        getLoginRequestDetails: rpc,
+      }));
+      const auth = new AuthClient(
+        { createClient } as never,
+        {
+          connectExec,
+        } as never
+      );
+
+      const result = await auth.getLoginRequestDetails('lri_123456789');
+
+      expect(createClient).toHaveBeenCalledWith(AuthService);
+      expect(connectExec).toHaveBeenCalledWith(
+        rpc,
+        expect.objectContaining({ loginRequestId: 'lri_123456789' })
+      );
+      expect(result).toBe(response);
     });
 
     const loginRequestId = process.env.SCALEKIT_TEST_LOGIN_REQUEST_ID;
