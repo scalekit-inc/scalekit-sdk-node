@@ -5690,9 +5690,6 @@ console.log(details.client?.clientName);
 console.log(details.client?.clientId); // CIMD metadata URL for a CIMD client, otherwise m2m_xxx
 console.log(details.client?.skClientId); // always m2m_xxx, for every client
 console.log(details.authRequest?.scopes);
-
-// The resource being accessed — absent when the request is not scoped to one
-console.log(details.resource?.name);
 ```
 </dd>
 </dl>
