@@ -5730,7 +5730,7 @@ console.log(details.authRequest?.scopes);
 - `isDcr: boolean` - Whether the client registered through Dynamic Client Registration
 - `isCimd: boolean` - Whether the client registered through a Client ID Metadata Document
 
-**resource:** `AuthRequestResource | undefined` - The resource the client is requesting access to. Absent when the authorization request is not scoped to a resource
+**resource:** `AuthRequestResource | undefined` - The resource the client is requesting access to.
 - `id: string` - Scalekit identifier of the resource (`res_` format)
 - `name: string` - Display name of the resource
 
