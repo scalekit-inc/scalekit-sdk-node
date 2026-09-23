@@ -40,4 +40,54 @@ describe('Auth - updateLoginUserDetails', () => {
       }
     );
   });
+
+  describe('getLoginRequestDetails', () => {
+    it('should be available on the auth client', () => {
+      expect(typeof client.auth.getLoginRequestDetails).toBe('function');
+    });
+
+    it('should reject an empty login request id', async () => {
+      await expect(client.auth.getLoginRequestDetails('')).rejects.toThrow(
+        'loginRequestId must be a non-empty string'
+      );
+    });
+
+    it('should reject a non-string login request id', async () => {
+      await expect(
+        client.auth.getLoginRequestDetails(undefined as unknown as string)
+      ).rejects.toThrow('loginRequestId must be a non-empty string');
+    });
+
+    const loginRequestId = process.env.SCALEKIT_TEST_LOGIN_REQUEST_ID;
+
+    // Live test only runs when a real login request is provided. Never hardcode a
+    // fake ID — the RPC requires a genuine in-flight login request, and it expires
+    // 15 minutes after the authorization request is handed off.
+    (loginRequestId ? it : it.skip)(
+      'should resolve the auth request, client and resource',
+      async () => {
+        const details = await client.auth.getLoginRequestDetails(
+          loginRequestId!
+        );
+
+        expect(details).toBeDefined();
+
+        // The auth request this login belongs to, with the scopes the client asked for.
+        expect(details.authRequest?.id).toMatch(/^req_/);
+        expect(Array.isArray(details.authRequest?.scopes)).toBe(true);
+
+        // skClientId is always m2m_, even when clientId is a CIMD metadata URL.
+        expect(details.client?.skClientId).toMatch(/^m2m_/);
+
+        // A client registers through exactly one path, so these are never both true.
+        expect(details.client?.isDcr && details.client?.isCimd).toBeFalsy();
+
+        // resource is optional — only assert its shape when the request was scoped to one.
+        if (details.resource) {
+          expect(details.resource.id).toMatch(/^res_/);
+          expect(typeof details.resource.name).toBe('string');
+        }
+      }
+    );
+  });
 });
