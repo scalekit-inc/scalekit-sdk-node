@@ -445,6 +445,108 @@ export type UpdateLoginUserDetailsResponse = Message<"scalekit.v1.auth.UpdateLog
  */
 export declare const UpdateLoginUserDetailsResponseSchema: GenMessage<UpdateLoginUserDetailsResponse>;
 /**
+ * @generated from message scalekit.v1.auth.GetLoginRequestDetailsRequest
+ */
+export type GetLoginRequestDetailsRequest = Message<"scalekit.v1.auth.GetLoginRequestDetailsRequest"> & {
+    /**
+     * @generated from field: string login_request_id = 1;
+     */
+    loginRequestId: string;
+};
+/**
+ * Describes the message scalekit.v1.auth.GetLoginRequestDetailsRequest.
+ * Use `create(GetLoginRequestDetailsRequestSchema)` to create a new message.
+ */
+export declare const GetLoginRequestDetailsRequestSchema: GenMessage<GetLoginRequestDetailsRequest>;
+/**
+ * @generated from message scalekit.v1.auth.GetLoginRequestDetailsResponse
+ */
+export type GetLoginRequestDetailsResponse = Message<"scalekit.v1.auth.GetLoginRequestDetailsResponse"> & {
+    /**
+     * @generated from field: scalekit.v1.auth.AuthRequestDetails auth_request = 1;
+     */
+    authRequest?: AuthRequestDetails | undefined;
+    /**
+     * @generated from field: scalekit.v1.auth.AuthRequestClient client = 2;
+     */
+    client?: AuthRequestClient | undefined;
+    /**
+     * @generated from field: scalekit.v1.auth.AuthRequestResource resource = 3;
+     */
+    resource?: AuthRequestResource | undefined;
+};
+/**
+ * Describes the message scalekit.v1.auth.GetLoginRequestDetailsResponse.
+ * Use `create(GetLoginRequestDetailsResponseSchema)` to create a new message.
+ */
+export declare const GetLoginRequestDetailsResponseSchema: GenMessage<GetLoginRequestDetailsResponse>;
+/**
+ * @generated from message scalekit.v1.auth.AuthRequestDetails
+ */
+export type AuthRequestDetails = Message<"scalekit.v1.auth.AuthRequestDetails"> & {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: repeated string scopes = 2;
+     */
+    scopes: string[];
+};
+/**
+ * Describes the message scalekit.v1.auth.AuthRequestDetails.
+ * Use `create(AuthRequestDetailsSchema)` to create a new message.
+ */
+export declare const AuthRequestDetailsSchema: GenMessage<AuthRequestDetails>;
+/**
+ * @generated from message scalekit.v1.auth.AuthRequestClient
+ */
+export type AuthRequestClient = Message<"scalekit.v1.auth.AuthRequestClient"> & {
+    /**
+     * @generated from field: string client_id = 1;
+     */
+    clientId: string;
+    /**
+     * @generated from field: string sk_client_id = 2;
+     */
+    skClientId: string;
+    /**
+     * @generated from field: string client_name = 3;
+     */
+    clientName: string;
+    /**
+     * @generated from field: bool is_dcr = 4;
+     */
+    isDcr: boolean;
+    /**
+     * @generated from field: bool is_cimd = 5;
+     */
+    isCimd: boolean;
+};
+/**
+ * Describes the message scalekit.v1.auth.AuthRequestClient.
+ * Use `create(AuthRequestClientSchema)` to create a new message.
+ */
+export declare const AuthRequestClientSchema: GenMessage<AuthRequestClient>;
+/**
+ * @generated from message scalekit.v1.auth.AuthRequestResource
+ */
+export type AuthRequestResource = Message<"scalekit.v1.auth.AuthRequestResource"> & {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: string name = 2;
+     */
+    name: string;
+};
+/**
+ * Describes the message scalekit.v1.auth.AuthRequestResource.
+ * Use `create(AuthRequestResourceSchema)` to create a new message.
+ */
+export declare const AuthRequestResourceSchema: GenMessage<AuthRequestResource>;
+/**
  * @generated from message scalekit.v1.auth.User
  */
 export type User = Message<"scalekit.v1.auth.User"> & {
@@ -791,5 +893,13 @@ export declare const AuthService: GenService<{
         methodKind: "unary";
         input: typeof UpdateLoginUserDetailsRequestSchema;
         output: typeof UpdateLoginUserDetailsResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.auth.AuthService.GetLoginRequestDetails
+     */
+    getLoginRequestDetails: {
+        methodKind: "unary";
+        input: typeof GetLoginRequestDetailsRequestSchema;
+        output: typeof GetLoginRequestDetailsResponseSchema;
     };
 }>;
