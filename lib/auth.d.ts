@@ -1,7 +1,7 @@
 import type { JsonObject } from '@bufbuild/protobuf';
 import CoreClient from './core';
 import GrpcConnect from './connect';
-import { type User, type UpdateLoginUserDetailsResponse } from './pkg/grpc/scalekit/v1/auth/auth_pb';
+import { type AuthRequestClient, type AuthRequestDetails, type AuthRequestResource, type GetLoginRequestDetailsResponse, type User, type UpdateLoginUserDetailsResponse } from './pkg/grpc/scalekit/v1/auth/auth_pb';
 /** User input for updateLoginUserDetails; customAttributes is a plain object (proto Struct → JsonObject in v2). */
 type UserInput = Partial<User> & {
     customAttributes?: JsonObject;
@@ -53,5 +53,41 @@ export default class AuthClient {
      * @see {@link https://docs.scalekit.com/apis/#tag/api%20auth | Update Login User Details API}
      */
     updateLoginUserDetails(connectionId: string, loginRequestId: string, user: UserInput): Promise<UpdateLoginUserDetailsResponse>;
+    /**
+     * Resolves a login request ID into the authorization request it was issued for,
+     * the OAuth client that started it, and the resource being accessed.
+     *
+     * Call this when your own authentication service receives a login request ID on
+     * the authorize redirect and needs to know which client is asking, which scopes
+     * were requested, and which resource is being accessed.
+     *
+     * The login request ID is ephemeral: it is created when the authorization request
+     * is handed off to your authentication service and lives for 15 minutes. Once it
+     * expires the authorization request has expired too, and this call fails from then on.
+     *
+     * @param {string} loginRequestId - The login request identifier from the authorize
+     *   redirect, in `lri_` format
+     *
+     * @returns {Promise<GetLoginRequestDetailsResponse>} The authorization request and its
+     *   requested scopes, the client that started it, and the resource it targets.
+     *   `resource` is absent when the authorization request is not scoped to a resource.
+     *
+     * @throws {Error} When loginRequestId is missing or invalid
+     * @throws {ScalekitServerException} If a network or server error occurs, including when
+     *   the login request ID is unknown, expired, or belongs to another environment — all of
+     *   which return the same error, so it cannot be used to probe whether an ID exists.
+     *
+     * @example
+     * const details = await scalekitClient.auth.getLoginRequestDetails('lri_73415099636808061');
+     *
+     * console.log(details.authRequest?.scopes);   // scopes the client requested
+     * console.log(details.client?.clientName);    // who is asking
+     * console.log(details.client?.clientId);      // CIMD metadata URL for a CIMD client, otherwise m2m_xxx
+     * console.log(details.client?.skClientId);    // always m2m_xxx, for every client
+     * console.log(details.resource?.name);        // may be undefined
+     *
+     * @see {@link https://docs.scalekit.com/mcp/auth-methods/custom-auth/ | Bring Your Own Auth}
+     */
+    getLoginRequestDetails(loginRequestId: string): Promise<GetLoginRequestDetailsResponse>;
 }
-export {};
+export type { AuthRequestClient, AuthRequestDetails, AuthRequestResource, GetLoginRequestDetailsResponse, };

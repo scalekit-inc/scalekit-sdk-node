@@ -48,3 +48,14 @@ export type {
 
 // Normalized types surfaced in the public `actions.listTools` API.
 export type { ActionTool, ListToolsResult } from './actions';
+
+// Generated types surfaced in the public `auth.getLoginRequestDetails` API:
+// the response and the three blocks it carries. Re-export them so callers can
+// name the return type — e.g. annotating a handler that receives it — without
+// importing the internal pb path.
+export type {
+  GetLoginRequestDetailsResponse,
+  AuthRequestDetails,
+  AuthRequestClient,
+  AuthRequestResource,
+} from './pkg/grpc/scalekit/v1/auth/auth_pb';

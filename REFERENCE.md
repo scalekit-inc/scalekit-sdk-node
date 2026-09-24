@@ -5650,6 +5650,100 @@ console.log(response.authRequestId);
 </dl>
 </details>
 
+<details><summary><code>client.auth.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/auth.ts">getLoginRequestDetails</a>(loginRequestId) -> Promise&lt;GetLoginRequestDetailsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Resolves a login request ID into the authorization request it was issued for, the OAuth client that started it, and the resource being accessed.
+
+If you are using Auth for MCP solution of Scalekit in "Bring your own Auth" mode, call this when your own authentication service receives a login request ID on the authorize redirect and needs to know which client is asking, which scopes were requested, and which resource is being accessed.
+
+The login request ID is ephemeral: it is created when the authorization request is handed off to your authentication service and lives for 15 minutes. Once it expires the authorization request has expired too, and this call fails from then on.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const details = await scalekitClient.auth.getLoginRequestDetails(
+  'lri_73415099636808061'
+);
+
+// Which client is asking, and what it requested
+console.log(details.client?.clientName);
+console.log(details.client?.clientId); // CIMD metadata URL for a CIMD client, otherwise m2m_xxx
+console.log(details.client?.skClientId); // always m2m_xxx, for every client
+console.log(details.authRequest?.scopes);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**loginRequestId:** `string` - The login request identifier from the authorize redirect, in `lri_` format
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔄 Returns
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**authRequest:** `AuthRequestDetails` - The authorization request the login request ID was issued for
+- `id: string` - Auth request ID (`req_` format), usable to look up the authentication journey via auth logs
+- `scopes: string[]` - Scopes the client requested
+
+**client:** `AuthRequestClient` - The OAuth client that started the authorization request
+- `clientId: string` - The identifier the client authenticated with. For a CIMD client this is the HTTPS URL of its client ID metadata document; for a non-CIMD client it is in `m2m_xxx` format and matches `skClientId`
+- `skClientId: string` - The Scalekit client identifier, always in `m2m_xxx` format. So for a CIMD client `clientId` is the CIMD URL while `skClientId` is `m2m_xxx`; for a non-CIMD client both are `m2m_xxx`
+- `clientName: string` - Display name of the client, empty when registered without one
+- `isDcr: boolean` - Whether the client registered through Dynamic Client Registration
+- `isCimd: boolean` - Whether the client registered through a Client ID Metadata Document
+
+**resource:** `AuthRequestResource | undefined` - The resource the client is requesting access to.
+- `id: string` - Scalekit identifier of the resource (`res_` format)
+- `name: string` - Display name of the resource
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Events
 
 <details><summary><code>client.events.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/events.ts">listEventsPaginated</a>(pageSize?, pageToken?, filter?) -> Promise&lt;ListEventsPaginatedResponse&gt;</code></summary>
