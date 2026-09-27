@@ -151,19 +151,27 @@ export default class ActionsClient {
   /**
    * Execute a tool on behalf of a connected account.
    *
-   * Thin wrapper around ToolsClient.executeTool, reserved for future
-   * pre/post modifier support.
+   * Identify the account with `connector` + `identifier`, or with
+   * `connectedAccountId`. The account must be `ACTIVE`; otherwise the call
+   * fails with `INVALID_ARGUMENT`, so send the user an authorization link first.
    *
    * @throws {ScalekitServerException} If a network or server error occurs.
    * @throws {ScalekitException} If toolName is missing or an unexpected error occurs.
    */
   async executeTool(params: {
+    /** Name of the tool to run, for example `gmail_fetch_mails`. Each connector page lists its tools. */
     toolName: string;
+    /** The tool's input parameters. Their shape depends on the tool. */
     toolInput: Record<string, unknown>;
+    /** Your app's ID for the user, the same value you use when the user connects. Use a stable internal ID, not an email address. */
     identifier?: string;
+    /** ID of the connected account. Use it instead of `connector` + `identifier`. */
     connectedAccountId?: string;
+    /** Connection name, as shown in AgentKit > Connections (for example `gmail`). Pass it with `identifier`, or pass `connectedAccountId` instead. */
     connector?: string;
+    /** Scalekit organization ID. Narrows the lookup when the same identifier exists in more than one organization. */
     organizationId?: string;
+    /** Scalekit user ID. Narrows the lookup when the same identifier exists for more than one user. */
     userId?: string;
   }): Promise<ExecuteToolResponse> {
     const {
@@ -200,16 +208,27 @@ export default class ActionsClient {
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async listTools(params?: {
+    /** Connection name, as shown in AgentKit > Connections (for example `gmail`). */
     connectionName?: string;
+    /** Your app's ID for the user, the same value you use when the user connects. Use a stable internal ID, not an email address. */
     identifier?: string;
+    /** Filter by provider, for example `GMAIL`. */
     provider?: string;
+    /** Only return these tools, by name. */
     toolName?: string[];
+    /** Full-text search over tool names and descriptions, for example `gmail get attachment`. */
     query?: string;
+    /** Scalekit organization ID. Narrows the lookup when the same identifier exists in more than one organization. */
     organizationId?: string;
+    /** Scalekit user ID. Narrows the lookup when the same identifier exists for more than one user. */
     userId?: string;
+    /** ID of the connected account. Use it instead of `connectionName` + `identifier`. */
     connectedAccountId?: string;
+    /** Return only tool names, not full tool definitions. */
     summary?: boolean;
+    /** Maximum number of results per page. */
     pageSize?: number;
+    /** `nextPageToken` from the previous response, to fetch the next page. */
     pageToken?: string;
   }): Promise<ListToolsResult> {
     const {
@@ -252,17 +271,25 @@ export default class ActionsClient {
   }
 
   /**
-   * Get an authorization magic link for a connected account.
+   * Get an authorization link for a connected account. Send it to the user so
+   * they can connect their account, or reconnect it after it expires.
    *
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async getAuthorizationLink(params: {
+    /** Connection name, as shown in AgentKit > Connections (for example `gmail`). */
     connectionName?: string;
+    /** Your app's ID for the user, the same value you use when the user connects. Use a stable internal ID, not an email address. */
     identifier?: string;
+    /** ID of the connected account. Use it instead of `connectionName` + `identifier`. */
     connectedAccountId?: string;
+    /** Scalekit organization ID. Narrows the lookup when the same identifier exists in more than one organization. */
     organizationId?: string;
+    /** Scalekit user ID. Narrows the lookup when the same identifier exists for more than one user. */
     userId?: string;
+    /** Opaque value added to the user verify redirect URL, so your app can check the request when the user returns. */
     state?: string;
+    /** Your app's user verify URL. Scalekit redirects the user here after they authorize, when user verification is on. */
     userVerifyUrl?: string;
   }): Promise<GetMagicLinkForConnectedAccountResponse> {
     const {
@@ -296,7 +323,9 @@ export default class ActionsClient {
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async verifyConnectedAccountUser(params: {
+    /** `auth_request_id` from the user verify redirect URL. */
     authRequestId: string;
+    /** The signed-in user's identifier in your app. It must match the identifier the authorization link was created for. */
     identifier: string;
   }): Promise<VerifyConnectedAccountUserResponse> {
     return this.connectedAccounts.verifyConnectedAccountUser(params);
@@ -308,14 +337,23 @@ export default class ActionsClient {
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async listConnectedAccounts(params?: {
+    /** Connection name, as shown in AgentKit > Connections (for example `gmail`). */
     connectionName?: string;
+    /** Your app's ID for the user, the same value you use when the user connects. Use a stable internal ID, not an email address. */
     identifier?: string;
+    /** Filter by provider, for example `GMAIL`. */
     provider?: string;
+    /** Scalekit organization ID. Narrows the lookup when the same identifier exists in more than one organization. */
     organizationId?: string;
+    /** Scalekit user ID. Narrows the lookup when the same identifier exists for more than one user. */
     userId?: string;
+    /** Maximum number of results per page. */
     pageSize?: number;
+    /** `nextPageToken` from the previous response, to fetch the next page. */
     pageToken?: string;
+    /** Case-insensitive text search over connected accounts, for example by identifier. */
     query?: string;
+    /** Only return accounts in these connections, by exact name. Up to 20. Don't combine with `connectionName`. */
     connectionNames?: string[];
   }): Promise<ListConnectedAccountsResponse> {
     return this.connectedAccounts.listConnectedAccounts({
@@ -373,10 +411,15 @@ export default class ActionsClient {
    * @throws {ScalekitException} If required parameters are missing.
    */
   async deleteConnectedAccount(params: {
+    /** Connection name, as shown in AgentKit > Connections (for example `gmail`). */
     connectionName?: string;
+    /** Your app's ID for the user, the same value you use when the user connects. Use a stable internal ID, not an email address. */
     identifier?: string;
+    /** ID of the connected account. Use it instead of `connectionName` + `identifier`. */
     connectedAccountId?: string;
+    /** Scalekit organization ID. Narrows the lookup when the same identifier exists in more than one organization. */
     organizationId?: string;
+    /** Scalekit user ID. Narrows the lookup when the same identifier exists for more than one user. */
     userId?: string;
   }): Promise<DeleteConnectedAccountResponse> {
     const {
@@ -410,17 +453,22 @@ export default class ActionsClient {
   }
 
   /**
-   * Get connected account authorization details.
+   * Get a connected account, including its credentials and status.
    * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
    *
    * @throws {ScalekitServerException} If a network or server error occurs.
    * @throws {ScalekitException} If required parameters are missing.
    */
   async getConnectedAccount(params: {
+    /** Connection name, as shown in AgentKit > Connections (for example `gmail`). */
     connectionName?: string;
+    /** Your app's ID for the user, the same value you use when the user connects. Use a stable internal ID, not an email address. */
     identifier?: string;
+    /** ID of the connected account. Use it instead of `connectionName` + `identifier`. */
     connectedAccountId?: string;
+    /** Scalekit organization ID. Narrows the lookup when the same identifier exists in more than one organization. */
     organizationId?: string;
+    /** Scalekit user ID. Narrows the lookup when the same identifier exists for more than one user. */
     userId?: string;
   }): Promise<GetConnectedAccountByIdentifierResponse> {
     const {
@@ -463,11 +511,17 @@ export default class ActionsClient {
    * @throws {ScalekitException} If connectionName or identifier is missing.
    */
   async createConnectedAccount(params: {
+    /** Connection name, as shown in AgentKit > Connections (for example `gmail`). */
     connectionName: string;
+    /** Your app's ID for the user, the same value you use when the user connects. Use a stable internal ID, not an email address. */
     identifier: string;
+    /** The user's credentials for the app: OAuth tokens (`oauthToken`) or static credentials such as an API key (`staticAuth`). */
     authorizationDetails: CreateConnectedAccount['authorizationDetails'];
+    /** Scalekit organization ID. Narrows the lookup when the same identifier exists in more than one organization. */
     organizationId?: string;
+    /** Scalekit user ID. Narrows the lookup when the same identifier exists for more than one user. */
     userId?: string;
+    /** Connector-specific settings for this account, as JSON. */
     apiConfig?: Record<string, unknown>;
   }): Promise<CreateConnectedAccountResponse> {
     const {
@@ -509,11 +563,17 @@ export default class ActionsClient {
    * @throws {ScalekitException} If connectionName or identifier is missing.
    */
   async getOrCreateConnectedAccount(params: {
+    /** Connection name, as shown in AgentKit > Connections (for example `gmail`). */
     connectionName: string;
+    /** Your app's ID for the user, the same value you use when the user connects. Use a stable internal ID, not an email address. */
     identifier: string;
+    /** Credentials to store: used to create the account, or to update it when it already exists. */
     authorizationDetails?: CreateConnectedAccount['authorizationDetails'];
+    /** Scalekit organization ID. Narrows the lookup when the same identifier exists in more than one organization. */
     organizationId?: string;
+    /** Scalekit user ID. Narrows the lookup when the same identifier exists for more than one user. */
     userId?: string;
+    /** Connector-specific settings for this account, as JSON. */
     apiConfig?: Record<string, unknown>;
   }): Promise<CreateConnectedAccountResponse> {
     const {
@@ -553,12 +613,19 @@ export default class ActionsClient {
    * @throws {ScalekitException} If required parameters are missing.
    */
   async updateConnectedAccount(params: {
+    /** Connection name, as shown in AgentKit > Connections (for example `gmail`). */
     connectionName?: string;
+    /** Your app's ID for the user, the same value you use when the user connects. Use a stable internal ID, not an email address. */
     identifier?: string;
+    /** New credentials, for example tokens after a refresh. Only the fields you pass change. */
     authorizationDetails?: UpdateConnectedAccount['authorizationDetails'];
+    /** Scalekit organization ID. Narrows the lookup when the same identifier exists in more than one organization. */
     organizationId?: string;
+    /** Scalekit user ID. Narrows the lookup when the same identifier exists for more than one user. */
     userId?: string;
+    /** ID of the connected account. Use it instead of `connectionName` + `identifier`. */
     connectedAccountId?: string;
+    /** Connector-specific settings. Merged with the existing settings: only the fields you pass change. */
     apiConfig?: UpdateConnectedAccount['apiConfig'];
   }): Promise<UpdateConnectedAccountResponse> {
     const {
