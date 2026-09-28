@@ -10,8 +10,7 @@ import { DeleteProviderResponse, Provider as ProviderMessage, ProviderType } fro
 export interface AuthField {
     /**
      * Key the credential is stored under. Use `token` for bearer patterns and
-     * `api_key` for API-key patterns; pass the same key in `staticAuth` details
-     * when you connect an account programmatically.
+     * `api_key` for API-key patterns.
      */
     field_name: string;
     /** Label shown above the input. */
@@ -122,14 +121,23 @@ export default class ProvidersClient {
     /**
      * Updates a custom connector.
      *
-     * `displayName`, `proxyUrl` and `authPatterns` are all required by the server on
-     * every update, even when unchanged — omitting `authPatterns` fails with
-     * `[invalid_argument] Validation error`. Read the current connector with
-     * {@link listProviders} first and send its values back; `provider.authPatterns`
-     * from that response can be passed here as-is. `authPatterns` replaces the
-     * whole list rather than merging into it.
+     * Treat this as a PUT: read the current connector with {@link listProviders}
+     * first, then send back every field you want to keep alongside the ones you
+     * are changing. `provider.authPatterns` and `provider.proxyEnabled` from that
+     * response can be passed here as-is.
+     *
+     * What the server does with each field:
+     * - `displayName`, `proxyUrl` and `authPatterns` are required on every update.
+     *   Omitting `authPatterns` fails with `[invalid_argument] Validation error`, and
+     *   it replaces the whole list rather than merging into it. The pattern's
+     *   `type` and `is_mcp` cannot be changed.
+     * - `metadata` replaces the stored map, so leaving it out clears it.
+     * - `proxyEnabled` is always applied. It defaults to `true` here, so pass the
+     *   current value to keep a connector's proxying switched off.
+     * - `description` and `iconSrc` keep their stored values when left out.
      *
      * @param params.identifier From `provider.identifier` on a create or list response.
+     * @param params.proxyEnabled Whether Scalekit proxies requests. Defaults to true.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     updateCustomProvider(params: {
@@ -138,6 +146,7 @@ export default class ProvidersClient {
         proxyUrl: string;
         /** Required by the server on update, not just on create. */
         authPatterns: AuthPattern[];
+        proxyEnabled?: boolean;
         description?: string;
         iconSrc?: string;
         metadata?: Record<string, string>;

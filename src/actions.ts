@@ -535,9 +535,12 @@ export default class ActionsClient {
     connectionName: string;
     identifier: string;
     /**
-     * How the account authenticates. Accepts a plain object, for example
-     * `{ details: { case: 'oauthToken', value: { accessToken } } }`, which is
-     * what `create()` takes when the request is built.
+     * How the account authenticates, as a plain object (the shape `create()`
+     * takes when the request is built).
+     *
+     * To connect a user's account, prefer {@link getAuthorizationLink}: it
+     * creates the account if needed and the user completes authorization
+     * through the link. OAuth credentials cannot be supplied directly.
      */
     authorizationDetails: MessageInitShape<
       typeof CreateConnectedAccountSchema

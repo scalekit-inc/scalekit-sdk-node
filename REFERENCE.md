@@ -7684,9 +7684,13 @@ console.log(res.provider?.identifier);
 
 Updates a custom connector.
 
-The update replaces the connector rather than patching it. The server requires `displayName`, `proxyUrl` and `authPatterns` on every update, even when they haven't changed; leaving out `authPatterns` fails with `[invalid_argument] Validation error`, and `authPatterns` replaces the whole list rather than merging into it. Any optional field you leave out, such as `metadata`, is cleared.
+Treat this as a PUT: read the current connector with `listProviders` first, then send back every field you want to keep alongside the ones you are changing. `authPatterns` on a response is already decoded into plain `AuthPattern` objects, so `provider.authPatterns` and `provider.proxyEnabled` can be passed back as-is.
 
-Read the current connector with `listProviders` first and send back every field you want to keep. `authPatterns` on a response is already decoded into plain `AuthPattern` objects, so you can pass `provider.authPatterns` back as-is.
+What the server does with each field:
+- `displayName`, `proxyUrl` and `authPatterns` are required on every update. Leaving out `authPatterns` fails with `[invalid_argument] Validation error`, and it replaces the whole list rather than merging into it. A pattern's `type` and `is_mcp` cannot be changed.
+- `metadata` replaces the stored map, so leaving it out clears it.
+- `proxyEnabled` is always applied. It defaults to `true`, so pass the current value to keep a connector's proxying switched off.
+- `description` and `iconSrc` keep their stored values when left out.
 </dd>
 </dl>
 </dd>
@@ -7701,7 +7705,7 @@ Read the current connector with `listProviders` first and send back every field 
 <dd>
 
 ```typescript
-// Read the current state first: the update replaces the whole connector
+// Read the current state first, then send back everything you want to keep
 const { providers } = await scalekitClient.actions.providers.listProviders({
   identifier: '<PROVIDER_IDENTIFIER>',
 });
@@ -7712,6 +7716,7 @@ const res = await scalekitClient.actions.providers.updateCustomProvider({
   displayName: current.displayName,
   proxyUrl: current.proxyUrl,
   authPatterns: current.authPatterns, // already plain AuthPattern objects
+  proxyEnabled: current.proxyEnabled,
   description: 'Internal ticketing API, v2',
   iconSrc: current.iconSrc,
   metadata: { ...current.metadata, updated_by: 'sync-job' },
@@ -7756,24 +7761,32 @@ console.log(res.provider?.description);
 
 </dd>
 </dl>
+
 <dl>
 <dd>
 
-**params.description?:** `string` - Description
+**params.proxyEnabled?:** `boolean` - Whether Scalekit proxies requests. Always sent; defaults to `true`, so pass `current.proxyEnabled` to keep the stored value.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.iconSrc?:** `string` - Icon URL
+**params.description?:** `string` - Description. Keeps the stored value when left out.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.metadata?:** `Record<string, string>` - Arbitrary key-value metadata
+**params.iconSrc?:** `string` - Icon URL. Keeps the stored value when left out.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.metadata?:** `Record<string, string>` - Arbitrary key-value metadata. Replaces the stored map, so leaving it out clears it.
 
 </dd>
 </dl>
