@@ -22,7 +22,7 @@ export interface ReadyTool {
     description: string;
 }
 /**
- * AgentKit bound to one end user. Created by `scalekit.forUser(identifier)`.
+ * AgentKit bound to one end user. Created by `scalekit.forIdentifier(identifier)`.
  *
  * Nothing here is new capability — every method composes calls that already
  * exist on `actions` and `tools`. What it removes is the repetition: carrying

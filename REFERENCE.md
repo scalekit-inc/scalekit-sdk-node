@@ -5650,6 +5650,100 @@ console.log(response.authRequestId);
 </dl>
 </details>
 
+<details><summary><code>client.auth.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/auth.ts">getLoginRequestDetails</a>(loginRequestId) -> Promise&lt;GetLoginRequestDetailsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Resolves a login request ID into the authorization request it was issued for, the OAuth client that started it, and the resource being accessed.
+
+If you are using Auth for MCP solution of Scalekit in "Bring your own Auth" mode, call this when your own authentication service receives a login request ID on the authorize redirect and needs to know which client is asking, which scopes were requested, and which resource is being accessed.
+
+The login request ID is ephemeral: it is created when the authorization request is handed off to your authentication service and lives for 15 minutes. Once it expires the authorization request has expired too, and this call fails from then on.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const details = await scalekitClient.auth.getLoginRequestDetails(
+  'lri_73415099636808061'
+);
+
+// Which client is asking, and what it requested
+console.log(details.client?.clientName);
+console.log(details.client?.clientId); // CIMD metadata URL for a CIMD client, otherwise m2m_xxx
+console.log(details.client?.skClientId); // always m2m_xxx, for every client
+console.log(details.authRequest?.scopes);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**loginRequestId:** `string` - The login request identifier from the authorize redirect, in `lri_` format
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔄 Returns
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**authRequest:** `AuthRequestDetails` - The authorization request the login request ID was issued for
+- `id: string` - Auth request ID (`req_` format), usable to look up the authentication journey via auth logs
+- `scopes: string[]` - Scopes the client requested
+
+**client:** `AuthRequestClient` - The OAuth client that started the authorization request
+- `clientId: string` - The identifier the client authenticated with. For a CIMD client this is the HTTPS URL of its client ID metadata document; for a non-CIMD client it is in `m2m_xxx` format and matches `skClientId`
+- `skClientId: string` - The Scalekit client identifier, always in `m2m_xxx` format. So for a CIMD client `clientId` is the CIMD URL while `skClientId` is `m2m_xxx`; for a non-CIMD client both are `m2m_xxx`
+- `clientName: string` - Display name of the client, empty when registered without one
+- `isDcr: boolean` - Whether the client registered through Dynamic Client Registration
+- `isCimd: boolean` - Whether the client registered through a Client ID Metadata Document
+
+**resource:** `AuthRequestResource | undefined` - The resource the client is requesting access to.
+- `id: string` - Scalekit identifier of the resource (`res_` format)
+- `name: string` - Display name of the resource
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Events
 
 <details><summary><code>client.events.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/events.ts">listEventsPaginated</a>(pageSize?, pageToken?, filter?) -> Promise&lt;ListEventsPaginatedResponse&gt;</code></summary>
@@ -5744,9 +5838,630 @@ console.log(response.nextPageToken, response.prevPageToken);
 
 ## Resources
 
-Access the consents your end users grant against a resource, such as an MCP server. A consent records that one end user allowed a specific API client to act on their behalf. Each consent identifies the user by `externalUserId` — the identifier your application supplied when the consent was granted.
+Manage the API clients scoped to a resource (such as an MCP server), and access the consents your end users grant against one. A consent records that one end user allowed a specific API client to act on their behalf. Each consent identifies the user by `externalUserId` — the identifier your application supplied when the consent was granted.
 
 Access via `scalekitClient.resources`.
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">getResource</a>(resourceId) -> Promise&lt;GetResourceResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves a single resource by id.
+
+A resource client's `scopes` are only actually granted in an issued token when they also appear in the resource's own `scopes` allowlist (the server intersects requested scopes against the environment's permissions, the resource's allowed scopes, and the client's own scopes) — call this first to see what the resource actually allows before creating or updating a resource client with `scopes`.
+
+`resource.scopes` is every scope defined in the environment, not just the ones this resource allows — each entry carries an `enabled` flag, and only the ones with `enabled: true` are actually usable on this resource. Filter on that flag to get the actual allowlist.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.resources.getResource('<RESOURCE_ID>');
+console.log(res.resource);
+const allowedScopes = res.resource?.scopes.filter((s) => s.enabled).map((s) => s.name);
+console.log(allowedScopes);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource to fetch (format: `res_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">listResources</a>(resourceType, options?) -> Promise&lt;ListResourcesResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists resources of a given type in the environment, with pagination.
+
+`resourceType` is required by the underlying API — there is no way to list every type in one call; list each type separately if needed.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ResourceType } from '@scalekit-sdk/node';
+
+const res = await scalekitClient.resources.listResources(ResourceType.MCP_SERVER, {
+  pageSize: 20,
+});
+
+for (const resource of res.resources) {
+  console.log(resource.id, resource.scopes);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceType:** `ResourceType` - The resource type to filter by (e.g. `ResourceType.MCP_SERVER`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `ListResourcesOptions` - Optional pagination
+- `pageSize?: number` - Page size, max 30
+- `pageToken?: string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">createResourceClient</a>(resourceId, options?) -> Promise&lt;CreateResourceClientResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a resource client.
+
+Returns the created `client` and a `plainSecret` — the plaintext client secret, only available at creation time.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const resResource = await scalekitClient.resources.getResource('<RESOURCE_ID>');
+const allowedScopes = resResource.resource?.scopes.filter((s) => s.enabled).map((s) => s.name);
+console.log(allowedScopes);
+
+const res = await scalekitClient.resources.createResourceClient('<RESOURCE_ID>', {
+  name: 'My Resource Client',
+  scopes: allowedScopes,
+});
+
+console.log(res.client?.clientId, res.plainSecret);
+```
+
+`options` also accepts `description`, `customClaims`, `expiry` and `redirectUris` — see Parameters below.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource to create the client for (format: `res_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `CreateResourceClientOptions` - Optional client properties
+- `name?: string` - Human-readable name for the client. Defaults to "Resource Client" if omitted.
+- `description?: string` - Optional description
+- `scopes?: string[]` - Scopes to grant. These scopes should be the same or subset of the scopes available for the resource.
+- `customClaims?: { [key: string]: string }` - Custom claims to embed in access tokens. Flat JSON structure only.
+- `expiry?: number` - Access token lifetime in seconds. Defaults to the resource's configured expiry, or one day.
+- `redirectUris?: string[]` - Allowed redirect URIs, for a pre-registered (non-DCR) client
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">getResourceClient</a>(resourceId, clientId) -> Promise&lt;GetResourceClientResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Fetches a single resource client, along with the end-users who have granted it consent.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.resources.getResourceClient('<RESOURCE_ID>', '<CLIENT_ID>');
+
+console.log(res.client?.name);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: `res_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID (format: `m2m_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">listResourceClients</a>(resourceId) -> Promise&lt;ListResourceClientsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists resource clients.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.resources.listResourceClients('<RESOURCE_ID>');
+
+console.log(res.totalDcrClients, res.totalStaticClients);
+for (const c of res.clients) {
+  console.log(c.clientId, c.name);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource whose clients to list (format: `res_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">updateResourceClient</a>(resourceId, clientId, options?) -> Promise&lt;UpdateResourceClientResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates a resource client.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const resResource = await scalekitClient.resources.getResource('<RESOURCE_ID>');
+const allowedScopes = resResource.resource?.scopes.filter((s) => s.enabled).map((s) => s.name);
+console.log(allowedScopes);
+
+const res = await scalekitClient.resources.updateResourceClient('<RESOURCE_ID>', '<CLIENT_ID>', {
+  name: 'Updated Name',
+  scopes: allowedScopes,
+});
+
+console.log(res.client?.name, res.client?.scopes);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: `res_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID to update (format: `m2m_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**options:** `UpdateResourceClientOptions` - Fields to update (only fields present are changed)
+- `name?: string` - Updated name. An empty string is a no-op server-side, not a clear.
+- `description?: string` - Updated description. An empty string is a no-op server-side, not a clear.
+- `scopes?: string[]` - Updated scopes (replaces existing; pass `[]` to clear). These scopes should be the same or subset of the scopes available for the resource.
+- `customClaims?: { [key: string]: string }` - Custom claims to set (replaces existing; pass `{}` to clear). Flat JSON structure only.
+- `expiry?: number` - Updated access token lifetime in seconds
+- `redirectUris?: string[]` - Updated redirect URIs (replaces existing; pass `[]` to clear)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">deleteResourceClient</a>(resourceId, clientId) -> Promise&lt;DeleteResourceClientResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes resource clients. Throws if the client is missing or scoped to a different resource.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.resources.deleteResourceClient('<RESOURCE_ID>', '<CLIENT_ID>');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: `res_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID to delete (format: `m2m_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">createResourceClientSecret</a>(resourceId, clientId) -> Promise&lt;CreateClientSecretResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a new secret for resource client. Only 2 client secrets are recommended to exist at a given point in time. If need for more secret creation arises, please use `deleteResourceClientSecret` to delete an existing secret first.
+
+The plaintext client secret, only available at creation time.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.resources.createResourceClientSecret('<RESOURCE_ID>', '<CLIENT_ID>');
+console.log(res.plainSecret);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: `res_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID to create a secret for (format: `m2m_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">deleteResourceClientSecret</a>(resourceId, clientId, secretId) -> Promise&lt;Empty&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Permanently deletes a secret from resource client. A client must always keep at least 1 secret. Calling this on a client's last remaining secret throws an error.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.resources.deleteResourceClientSecret('<RESOURCE_ID>', '<CLIENT_ID>', '<SECRET_ID>');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**resourceId:** `string` - The resource the client must belong to (format: `res_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**clientId:** `string` - The client ID the secret belongs to (format: `m2m_...`)
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**secretId:** `string` - The secret ID to delete (format: `sks_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
 
 <details><summary><code>client.resources.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/resource.ts">listUserConsents</a>(resourceId, options?) -> Promise&lt;ListResourceUserConsentsResponse&gt;</code></summary>
 <dl>

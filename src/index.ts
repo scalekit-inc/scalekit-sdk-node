@@ -9,6 +9,17 @@ export * from './types/auth';
 
 export * from './errors';
 
+// Generated enum surfaced in the public `resources.listResources` API:
+// `resourceType` is a required parameter, so callers need to name it (e.g.
+// `ResourceType.MCP_SERVER`) without reaching into the internal pb path.
+export { ResourceType } from './pkg/grpc/scalekit/v1/clients/clients_pb';
+export type {
+  Resource,
+  Scope,
+  GetResourceResponse,
+  ListResourcesResponse,
+} from './pkg/grpc/scalekit/v1/clients/clients_pb';
+
 // Generated enums/types surfaced in the public `events.listEventsPaginated` API:
 // `ObjectType` appears on the returned `ScalekitEvent.object`, and `Source` on the
 // optional `EventFilter` parameter — re-export them so callers can name them.
@@ -82,3 +93,14 @@ export type {
 // User-scoped facade returned by `scalekit.forIdentifier(...)`.
 export { default as UserScope } from './agent';
 export type { ConnectionState, ReadyTool } from './agent';
+
+// Generated types surfaced in the public `auth.getLoginRequestDetails` API:
+// the response and the three blocks it carries. Re-export them so callers can
+// name the return type — e.g. annotating a handler that receives it — without
+// importing the internal pb path.
+export type {
+  GetLoginRequestDetailsResponse,
+  AuthRequestDetails,
+  AuthRequestClient,
+  AuthRequestResource,
+} from './pkg/grpc/scalekit/v1/auth/auth_pb';

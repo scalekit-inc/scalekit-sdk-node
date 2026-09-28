@@ -5,6 +5,8 @@ export default ScalekitClient;
 export * from './types/scalekit';
 export * from './types/auth';
 export * from './errors';
+export { ResourceType } from './pkg/grpc/scalekit/v1/clients/clients_pb';
+export type { Resource, Scope, GetResourceResponse, ListResourcesResponse, } from './pkg/grpc/scalekit/v1/clients/clients_pb';
 export { ObjectType, Source } from './pkg/grpc/scalekit/v1/events/events_pb';
 export type { EventFilter } from './pkg/grpc/scalekit/v1/events/events_pb';
 export { ConnectorStatus, ConnectorType, } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
@@ -13,5 +15,9 @@ export type { SearchToolsResponse, SearchedTool, ConnectionReadiness, } from './
 export type { ListToolsResponse, Tool, } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 export type { ActionTool, ListToolsResult } from './actions';
 export type { McpConfig, McpConfigConnectionToolMapping, CreateMcpConfigResponse, GetMcpConfigResponse, ListMcpConfigsResponse, UpdateMcpConfigResponse, DeleteMcpConfigResponse, ListMcpConnectedAccountsResponse, CreateMcpSessionTokenResponse, } from './pkg/grpc/scalekit/v1/mcp/mcp_pb';
+export type { AuthPattern, AuthField } from './providers';
+export { ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';
+export type { Provider, CreateProviderResponse, UpdateProviderResponse, DeleteProviderResponse, ListProvidersResponse, } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 export { default as UserScope } from './agent';
 export type { ConnectionState, ReadyTool } from './agent';
+export type { GetLoginRequestDetailsResponse, AuthRequestDetails, AuthRequestClient, AuthRequestResource, } from './pkg/grpc/scalekit/v1/auth/auth_pb';

@@ -14,6 +14,7 @@ import M2MClient from './m2mclient';
 import ResourceClient from './resource';
 import UserScope from './agent';
 import McpClient from './mcp';
+import ProvidersClient from './providers';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ActionsClient from './actions';
@@ -73,8 +74,10 @@ export default class ScalekitClient {
     readonly tools: ToolsClient;
     /** Virtual MCP servers: configurations, connected accounts and session tokens. */
     readonly mcp: McpClient;
+    /** Bring-your-own connectors: create, update, list and delete custom connectors. */
+    readonly providers: ProvidersClient;
     /**
-     * Binds AgentKit to one end user.
+     * Binds AgentKit to one end-user identifier.
      *
      * Returns a small facade over `actions` and `tools` that carries the identifier
      * for you and exposes the three steps an agent takes: check the connection,
@@ -83,15 +86,17 @@ export default class ScalekitClient {
      * `actions`/`tools` at any point.
      *
      * ```ts
-     * const user = scalekit.forUser('user@example.com');
+     * const user = scalekit.forIdentifier('usr_8f3a2c');
      * const state = await user.ensureConnected('github-connect');
      * const tools = await user.findTools('star a repository');
      * const result = await user.run(tools[0].name, { owner: 'o', repo: 'r' });
      * ```
      *
-     * @param identifier Your application's stable identifier for this user.
+     * @param identifier Your application's stable identifier for this user. This is
+     *                   the `identifier` every AgentKit call takes, which is a
+     *                   different field from `userId`.
      */
-    forUser(identifier: string): UserScope;
+    forIdentifier(identifier: string): UserScope;
     readonly connectedAccounts: ConnectedAccountsClient;
     readonly actions: ActionsClient;
     readonly events: EventsClient;
