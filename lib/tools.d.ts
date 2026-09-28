@@ -39,8 +39,8 @@ export default class ToolsClient {
     /**
      * Lists tools that are scoped to a specific connected account identifier.
      *
-     * @param identifier Connected account identifier to scope the tools list (for example,
-     *                   a workspace identifier or email).
+     * @param identifier Your app's ID for the user, the same value you use when the user connects.
+     *                   Use a stable internal ID, not an email address.
      * @param options Filter and pagination parameters
      * @param options.filter Filter configuration for scoped tools (providers, tool names, connection names). Required.
      * @param options.pageSize Maximum number of tools to return per page.
@@ -59,8 +59,8 @@ export default class ToolsClient {
      * made available for a given identifier, rather than the tools that are
      * already scoped to it.
      *
-     * @param identifier Connected account identifier to scope the available tools list (for example,
-     *                   a workspace identifier or email).
+     * @param identifier Your app's ID for the user, the same value you use when the user connects.
+     *                   Use a stable internal ID, not an email address.
      * @param options Optional pagination parameters
      * @param options.pageSize Maximum number of tools to return per page.
      * @param options.pageToken Token from a previous `listAvailableTools` response for pagination.
@@ -88,8 +88,9 @@ export default class ToolsClient {
      *
      * @param query Natural-language query or keywords describing the job to be done. 1-256 characters.
      * @param options Optional parameters
-     * @param options.identifier Connected-account identifier (for example, email or workspace ID).
-     *                            When set, each result is annotated with readiness for this identifier's connections.
+     * @param options.identifier Your app's ID for the user, the same value you use when the user connects.
+     *                            Use a stable internal ID, not an email address. When set, each result is
+     *                            annotated with readiness for this user's connections.
      * @param options.topK Maximum number of ranked results to return. Defaults to 10, capped at 50.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
@@ -104,12 +105,17 @@ export default class ToolsClient {
      * - reference the connected account directly via `connectedAccountId`, or
      * - identify it using a combination of `identifier`, `connector`, `organizationId`, and `userId`.
      *
+     * The account must be `ACTIVE`; otherwise the call fails with `INVALID_ARGUMENT`,
+     * so send the user an authorization link first.
+     *
      * @param params Execution configuration
      * @param params.toolName Name of the tool to execute.
-     * @param params.identifier Optional connected account identifier (for example, email or workspace ID).
+     * @param params.identifier Optional. Your app's ID for the user, the same value you use when the user
+     *                          connects. Use a stable internal ID, not an email address.
      * @param params.params JSON parameters required by the tool. These will be sent as a structured payload.
      * @param params.connectedAccountId Optional direct ID of the connected account (`ca_...`).
-     * @param params.connector Optional connector/provider name when using identifier-based lookup.
+     * @param params.connector Optional. Connection name, as shown in AgentKit > Connections (for example
+     *                         `gmail`), when using identifier-based lookup.
      * @param params.organizationId Optional organization ID to scope the connected account lookup.
      * @param params.userId Optional user ID to scope the connected account lookup.
      * @throws {ScalekitServerException} If a network or server error occurs.
