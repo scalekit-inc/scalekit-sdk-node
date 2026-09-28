@@ -1,22 +1,20 @@
-import { create, fromJson, type JsonValue } from '@bufbuild/protobuf';
-import { ListValueSchema } from '@bufbuild/protobuf/wkt';
+import { create, fromJson, toJson, type JsonValue } from '@bufbuild/protobuf';
+import { ListValueSchema, type ListValue } from '@bufbuild/protobuf/wkt';
 import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
 import {
   CreateCustomProviderRequestSchema,
   CreateCustomProviderSchema,
-  CreateProviderResponse,
   DeleteProviderRequestSchema,
   DeleteProviderResponse,
   ListProvidersRequestSchema,
   ListProvidersRequest_FilterSchema,
-  ListProvidersResponse,
+  Provider as ProviderMessage,
   ProviderService,
   ProviderType,
   UpdateCustomProviderRequestSchema,
   UpdateCustomProviderSchema,
-  UpdateProviderResponse,
 } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 
 /**
@@ -76,6 +74,37 @@ export interface AuthPattern {
 }
 
 /**
+ * A connector, built-in or custom, as returned by {@link ProvidersClient}.
+ *
+ * Same fields as the API's provider, except `authPatterns` is decoded into
+ * plain {@link AuthPattern} objects. The API sends it as an untyped
+ * `google.protobuf.ListValue`, so the raw value cannot be passed back to
+ * {@link ProvidersClient.updateCustomProvider}; this shape can, which matches
+ * Python's `Provider.auth_patterns`.
+ */
+export type Provider = Omit<ProviderMessage, '$typeName' | 'authPatterns'> & {
+  authPatterns: AuthPattern[];
+};
+
+/** Response returned by {@link ProvidersClient.createCustomProvider}. */
+export interface CreateProviderResponse {
+  provider?: Provider;
+}
+
+/** Response returned by {@link ProvidersClient.updateCustomProvider}. */
+export interface UpdateProviderResponse {
+  provider?: Provider;
+}
+
+/** Response returned by {@link ProvidersClient.listProviders}. */
+export interface ListProvidersResponse {
+  providers: Provider[];
+  nextPageToken: string;
+  prevPageToken: string;
+  totalSize: number;
+}
+
+/**
  * Client for bring-your-own connectors (custom providers).
  *
  * A custom connector puts a service Scalekit does not ship in front of the same
@@ -129,10 +158,11 @@ export default class ProvidersClient {
       }),
     });
 
-    return this.coreClient.connectExec(
+    const response = await this.coreClient.connectExec(
       this.client.createCustomProvider,
       create(CreateCustomProviderRequestSchema, { provider })
     );
+    return { provider: toProvider(response.provider) };
   }
 
   /**
@@ -141,7 +171,8 @@ export default class ProvidersClient {
    * `displayName`, `proxyUrl` and `authPatterns` are all required by the server on
    * every update, even when unchanged — omitting `authPatterns` fails with
    * `[invalid_argument] Validation error`. Read the current connector with
-   * {@link listProviders} first and echo them back. `authPatterns` replaces the
+   * {@link listProviders} first and send its values back; `provider.authPatterns`
+   * from that response can be passed here as-is. `authPatterns` replaces the
    * whole list rather than merging into it.
    *
    * @param params.identifier From `provider.identifier` on a create or list response.
@@ -168,13 +199,14 @@ export default class ProvidersClient {
       authPatterns: toListValue(params.authPatterns),
     });
 
-    return this.coreClient.connectExec(
+    const response = await this.coreClient.connectExec(
       this.client.updateCustomProvider,
       create(UpdateCustomProviderRequestSchema, {
         identifier: params.identifier,
         provider,
       })
     );
+    return { provider: toProvider(response.provider) };
   }
 
   /**
@@ -218,7 +250,7 @@ export default class ProvidersClient {
     providerType?: ProviderType;
     identifier?: string;
   }): Promise<ListProvidersResponse> {
-    return this.coreClient.connectExec(
+    const response = await this.coreClient.connectExec(
       this.client.listProviders,
       create(ListProvidersRequestSchema, {
         identifier: params?.identifier ?? '',
@@ -231,6 +263,12 @@ export default class ProvidersClient {
         }),
       })
     );
+    return {
+      providers: response.providers.map((p) => toProvider(p)!),
+      nextPageToken: response.nextPageToken,
+      prevPageToken: response.prevPageToken,
+      totalSize: response.totalSize,
+    };
   }
 }
 
@@ -241,4 +279,21 @@ export default class ProvidersClient {
  */
 function toListValue(patterns: AuthPattern[]) {
   return fromJson(ListValueSchema, patterns as JsonValue[]);
+}
+
+/**
+ * Decodes a provider's `authPatterns` from `ListValue` into plain objects, the
+ * reverse of {@link toListValue}. Python does the same via `MessageToDict`.
+ */
+function toProvider(
+  message: ProviderMessage | undefined
+): Provider | undefined {
+  if (!message) return undefined;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { $typeName, authPatterns, ...fields } = message;
+  return { ...fields, authPatterns: fromListValue(authPatterns) };
+}
+
+function fromListValue(value: ListValue | undefined): AuthPattern[] {
+  return value ? (toJson(ListValueSchema, value) as AuthPattern[]) : [];
 }

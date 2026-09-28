@@ -1006,7 +1006,7 @@ try {
 - `ToolReadinessState`: Per-connection readiness on `searchTools` results (`READY`, `NEEDS_CONNECTION`, `NEEDS_REAUTH`)
 - `McpConfig`, `McpConfigConnectionToolMapping`: A Virtual MCP server configuration and its connection-to-tool mappings
 - `ProviderType`: Connector kind filter for `listProviders` (`DEFAULT`, `CUSTOM`, `ALL`)
-- `Provider`: A connector, built-in or custom
+- `Provider`: A connector, built-in or custom. `authPatterns` is decoded into `AuthPattern[]`, so it can be passed back to `updateCustomProvider`
 - `AuthPattern`, `AuthField`: Hand-written types for custom connector `authPatterns`
 
 ## Organizations
@@ -7588,6 +7588,10 @@ const authPatterns: AuthPattern[] = [
 // Other shapes:
 // OAuth, using the upstream server's discovered defaults:
 //   { type: 'OAUTH', display_name: 'OAuth 2.1', description: '...', is_mcp: true, oauth_config: {} }
+// API key sent in a custom header:
+//   { type: 'API_KEY', display_name: 'API Key', description: '...',
+//     fields: [{ field_name: 'api_key', label: 'API Key', input_type: 'password' }],
+//     auth_header_key_override: 'X-API-Key' }
 // Public server, no credentials:
 //   { type: 'NO_AUTH', display_name: 'No Auth', description: '...', fields: [] }
 
@@ -7680,7 +7684,9 @@ console.log(res.provider?.identifier);
 
 Updates a custom connector.
 
-The server requires `displayName`, `proxyUrl` and `authPatterns` on every update, even when they haven't changed. Leaving out `authPatterns` fails with `[invalid_argument] Validation error`. `authPatterns` replaces the whole list rather than merging into it. Read the current connector with `listProviders` first and send those values back.
+The update replaces the connector rather than patching it. The server requires `displayName`, `proxyUrl` and `authPatterns` on every update, even when they haven't changed; leaving out `authPatterns` fails with `[invalid_argument] Validation error`, and `authPatterns` replaces the whole list rather than merging into it. Any optional field you leave out, such as `metadata`, is cleared.
+
+Read the current connector with `listProviders` first and send back every field you want to keep. `authPatterns` on a response is already decoded into plain `AuthPattern` objects, so you can pass `provider.authPatterns` back as-is.
 </dd>
 </dl>
 </dd>
@@ -7695,22 +7701,22 @@ The server requires `displayName`, `proxyUrl` and `authPatterns` on every update
 <dd>
 
 ```typescript
-const res = await scalekitClient.actions.providers.updateCustomProvider({
+// Read the current state first: the update replaces the whole connector
+const { providers } = await scalekitClient.actions.providers.listProviders({
   identifier: '<PROVIDER_IDENTIFIER>',
-  displayName: 'Acme Tickets',
-  proxyUrl: 'https://api.acme.example.com/v2',
-  authPatterns: [
-    {
-      type: 'API_KEY',
-      display_name: 'API Key',
-      description: 'Authenticate with an Acme API key.',
-      fields: [{ field_name: 'api_key', label: 'API Key', input_type: 'password' }],
-      auth_header_key_override: 'X-API-Key',
-    },
-  ],
-  description: 'Internal ticketing API, v2',
 });
-console.log(res.provider?.proxyUrl);
+const current = providers[0];
+
+const res = await scalekitClient.actions.providers.updateCustomProvider({
+  identifier: current.identifier,
+  displayName: current.displayName,
+  proxyUrl: current.proxyUrl,
+  authPatterns: current.authPatterns, // already plain AuthPattern objects
+  description: 'Internal ticketing API, v2',
+  iconSrc: current.iconSrc,
+  metadata: { ...current.metadata, updated_by: 'sync-job' },
+});
+console.log(res.provider?.description);
 ```
 </dd>
 </dl>
@@ -7845,7 +7851,7 @@ await scalekitClient.actions.providers.deleteCustomProvider('<PROVIDER_IDENTIFIE
 <dl>
 <dd>
 
-Lists connectors, built-in and custom. Use it to find a connector's `identifier` before updating or deleting it.
+Lists connectors, built-in and custom. Use it to find a connector's `identifier` before updating or deleting it. Each provider's `authPatterns` comes back as plain `AuthPattern` objects, ready to pass to `updateCustomProvider`.
 
 **Preview:** the underlying `ListProviders` RPC is marked preview in the API and may change.
 </dd>

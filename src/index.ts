@@ -79,16 +79,19 @@ export type {
 // Types surfaced by the public `providers` client (bring-your-own connectors).
 // AuthPattern/AuthField are hand-written rather than generated: auth patterns
 // cross the wire as an untyped google.protobuf.ListValue, so these describe the
-// JSON shape the API expects.
-export type { AuthPattern, AuthField } from './providers';
-export { ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';
+// JSON shape the API expects. Provider and the create/update/list responses are
+// the SDK's own shapes, with authPatterns decoded to AuthPattern[] so a fetched
+// provider's patterns can be passed straight back to updateCustomProvider.
 export type {
+  AuthPattern,
+  AuthField,
   Provider,
   CreateProviderResponse,
   UpdateProviderResponse,
-  DeleteProviderResponse,
   ListProvidersResponse,
-} from './pkg/grpc/scalekit/v1/providers/providers_pb';
+} from './providers';
+export { ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';
+export type { DeleteProviderResponse } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 
 // Generated types surfaced in the public `auth.getLoginRequestDetails` API:
 // the response and the three blocks it carries. Re-export them so callers can

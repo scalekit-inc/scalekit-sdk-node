@@ -15,7 +15,7 @@ export type { SearchToolsResponse, SearchedTool, ConnectionReadiness, } from './
 export type { ListToolsResponse, Tool, } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 export type { ActionTool, ListToolsResult } from './actions';
 export type { McpConfig, McpConfigConnectionToolMapping, CreateMcpConfigResponse, GetMcpConfigResponse, ListMcpConfigsResponse, UpdateMcpConfigResponse, DeleteMcpConfigResponse, ListMcpConnectedAccountsResponse, CreateMcpSessionTokenResponse, } from './pkg/grpc/scalekit/v1/mcp/mcp_pb';
-export type { AuthPattern, AuthField } from './providers';
+export type { AuthPattern, AuthField, Provider, CreateProviderResponse, UpdateProviderResponse, ListProvidersResponse, } from './providers';
 export { ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';
-export type { Provider, CreateProviderResponse, UpdateProviderResponse, DeleteProviderResponse, ListProvidersResponse, } from './pkg/grpc/scalekit/v1/providers/providers_pb';
+export type { DeleteProviderResponse } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 export type { GetLoginRequestDetailsResponse, AuthRequestDetails, AuthRequestClient, AuthRequestResource, } from './pkg/grpc/scalekit/v1/auth/auth_pb';
