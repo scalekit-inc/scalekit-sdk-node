@@ -90,10 +90,6 @@ export type {
   ListProvidersResponse,
 } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 
-// User-scoped facade returned by `scalekit.forIdentifier(...)`.
-export { default as UserScope } from './agent';
-export type { ConnectionState, ReadyTool } from './agent';
-
 // Generated types surfaced in the public `auth.getLoginRequestDetails` API:
 // the response and the three blocks it carries. Re-export them so callers can
 // name the return type — e.g. annotating a handler that receives it — without

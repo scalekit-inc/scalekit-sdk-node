@@ -18,7 +18,6 @@ import WebAuthnClient from './webauthn';
 import TokenClient from './token';
 import M2MClient from './m2mclient';
 import ResourceClient from './resource';
-import UserScope from './agent';
 import McpClient from './mcp';
 import ProvidersClient from './providers';
 import ToolsClient from './tools';
@@ -104,41 +103,6 @@ export default class ScalekitClient {
   readonly mcp: McpClient;
   /** Bring-your-own connectors: create, update, list and delete custom connectors. */
   readonly providers: ProvidersClient;
-
-  /**
-   * Binds AgentKit to one end-user identifier.
-   *
-   * Returns a small facade over `actions` and `tools` that carries the identifier
-   * for you and exposes the three steps an agent takes: check the connection,
-   * find tools that fit the goal, run one. It adds no capability — every method
-   * composes calls that already exist — and you can drop back to
-   * `actions`/`tools` at any point.
-   *
-   * ```ts
-   * const user = scalekit.forIdentifier('usr_8f3a2c');
-   * const state = await user.ensureConnected('github-connect');
-   * if (!state.isActive) {
-   *   // Send the user to authorize, then call ensureConnected again.
-   *   return state.authorizationLink;
-   * }
-   * const tools = await user.findTools('star a repository');
-   * if (tools.length === 0) return;
-   * const result = await user.run(
-   *   tools[0].name,
-   *   { owner: 'o', repo: 'r' },
-   *   { connectedAccountId: tools[0].connectedAccountId }
-   * );
-   * ```
-   *
-   * @param identifier Your application's stable identifier for this user. This is
-   *                   the `identifier` every AgentKit call takes, which is a
-   *                   different field from `userId`.
-   */
-  forIdentifier(identifier: string): UserScope {
-    const trimmed = identifier?.trim();
-    if (!trimmed) throw new Error('identifier is required');
-    return new UserScope(trimmed, this.actions, this.tools);
-  }
   readonly connectedAccounts: ConnectedAccountsClient;
   readonly actions: ActionsClient;
   readonly events: EventsClient;

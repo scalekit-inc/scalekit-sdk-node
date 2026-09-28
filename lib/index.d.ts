@@ -18,6 +18,4 @@ export type { McpConfig, McpConfigConnectionToolMapping, CreateMcpConfigResponse
 export type { AuthPattern, AuthField } from './providers';
 export { ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 export type { Provider, CreateProviderResponse, UpdateProviderResponse, DeleteProviderResponse, ListProvidersResponse, } from './pkg/grpc/scalekit/v1/providers/providers_pb';
-export { default as UserScope } from './agent';
-export type { ConnectionState, ReadyTool } from './agent';
 export type { GetLoginRequestDetailsResponse, AuthRequestDetails, AuthRequestClient, AuthRequestResource, } from './pkg/grpc/scalekit/v1/auth/auth_pb';
