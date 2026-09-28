@@ -15,6 +15,10 @@
 - [Events](#events)
 - [Resources](#resources)
 - [Tools](#tools)
+- [Actions](#actions)
+- [User Scope](#user-scope)
+- [Virtual MCP Servers](#virtual-mcp-servers)
+- [Custom Connectors](#custom-connectors)
 - [WebAuthn](#webauthn)
 - [Error Handling](#error-handling)
 - [Type Definitions](#type-definitions)
@@ -995,6 +999,17 @@ try {
 ### Grant Types
 
 - `GrantType`: OAuth grant types
+
+### AgentKit Types
+
+- `ConnectorStatus`: Numeric status on `connectedAccount.status` (`ACTIVE`, `EXPIRED`, `PENDING_AUTH`, `PENDING_VERIFICATION`, `DISCONNECTED`). Compare against these constants, not raw numbers.
+- `ConnectorType`: Numeric `connectedAccount.authorizationType` (`OAUTH`, `API_KEY`, `BASIC_AUTH`, `BEARER_TOKEN`, `OAUTH_M2M`, and others)
+- `ToolReadinessState`: Per-connection readiness on `searchTools` results (`READY`, `NEEDS_CONNECTION`, `NEEDS_REAUTH`)
+- `UserScope`, `ConnectionState`, `ReadyTool`: Returned by `forIdentifier` and its methods
+- `McpConfig`, `McpConfigConnectionToolMapping`: A Virtual MCP server configuration and its connection-to-tool mappings
+- `ProviderType`: Connector kind filter for `listProviders` (`DEFAULT`, `CUSTOM`, `ALL`)
+- `Provider`: A connector, built-in or custom
+- `AuthPattern`, `AuthField`: Hand-written types for custom connector `authPatterns`
 
 ## Organizations
 
@@ -6682,6 +6697,1470 @@ for (const tool of res.tools) {
 **options:** `object` - Optional search options
 - `identifier?: string` - Connected-account identifier (e.g. the end user's email or ID). When set, each result is annotated with readiness for this identifier's connections.
 - `topK?: number` - Maximum number of ranked results to return. Defaults to 10, capped at 50.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Actions
+
+Connect end users' accounts to third-party services and run tools against them. This section covers tool discovery on `actions` and connected-account creation; tool discovery is also available on `scalekitClient.tools`.
+
+`actions.mcp` and `actions.providers` are the same instances as [`scalekitClient.mcp`](#virtual-mcp-servers) and [`scalekitClient.providers`](#custom-connectors).
+
+Access via `scalekitClient.actions`.
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">searchTools</a>(query, options?) -> Promise&lt;SearchToolsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Finds tools that fit a goal, ranked by relevance. Same behavior as [`tools.searchTools`](#tools).
+
+Pass `options.identifier` and each result's `connections` carries that user's `readinessState` per connection. Only execute against a connection whose `readinessState` is `ToolReadinessState.READY`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ToolReadinessState } from '@scalekit-sdk/node';
+
+const res = await scalekitClient.actions.searchTools('star a github repository', {
+  identifier: 'user_123',
+  topK: 5,
+});
+
+for (const tool of res.tools) {
+  const ready = tool.connections.find(
+    (c) => c.readinessState === ToolReadinessState.READY
+  );
+  console.log(tool.name, tool.score, ready?.connectedAccountId);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**query:** `string` - The job to be done, in plain language. 1-256 characters.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**options:** `object` - Optional search options
+- `identifier?: string` - Your application's identifier for the end user. When set, each result is annotated with readiness for this identifier's connections.
+- `topK?: number` - Maximum number of ranked results. Defaults to 10, capped at 50.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">listScopedTools</a>(identifier, options) -> Promise&lt;ListScopedToolsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists tools for one identifier, narrowed by an explicit filter.
+
+`options.filter` is required by the server even though each of its fields is optional.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.actions.listScopedTools('user_123', {
+  filter: { connectionNames: ['github-connect'] },
+  pageSize: 50,
+});
+console.log(res);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**identifier:** `string` - Your application's identifier for the end user
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**options:** `object`
+- `filter: { providers?: string[]; toolNames?: string[]; connectionNames?: string[] }` - Required. Narrows the result to matching providers, tool names or connection names.
+- `pageSize?: number` - Page size
+- `pageToken?: string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">listAvailableTools</a>(identifier, options?) -> Promise&lt;ListAvailableToolsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists every tool available to one identifier across all of their connections.
+
+Paginated. Follow `nextPageToken` if you need the complete set.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.actions.listAvailableTools('user_123', {
+  pageSize: 100,
+});
+console.log(res);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**identifier:** `string` - Your application's identifier for the end user
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**options:** `object` - Optional pagination
+- `pageSize?: number` - Page size
+- `pageToken?: string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">createConnectedAccount</a>(params) -> Promise&lt;CreateConnectedAccountResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a connected account for one end user on one connection, using credentials you already hold.
+
+`authorizationDetails` takes a plain object. You don't need to build a protobuf message.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ConnectorStatus } from '@scalekit-sdk/node';
+
+// OAuth tokens you already hold
+const res = await scalekitClient.actions.createConnectedAccount({
+  connectionName: 'github-connect',
+  identifier: 'user_123',
+  authorizationDetails: {
+    details: {
+      case: 'oauthToken',
+      value: { accessToken: '<ACCESS_TOKEN>', refreshToken: '<REFRESH_TOKEN>' },
+    },
+  },
+});
+
+// status is numeric at runtime -- compare against the enum
+console.log(res.connectedAccount?.status === ConnectorStatus.ACTIVE);
+
+// Static credentials (API key, bearer token, basic auth)
+await scalekitClient.actions.createConnectedAccount({
+  connectionName: 'my-api-key-connection',
+  identifier: 'user_123',
+  authorizationDetails: {
+    details: { case: 'staticAuth', value: { details: { api_key: '<API_KEY>' } } },
+  },
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.connectionName:** `string` - Connection name as shown in the dashboard. Case-sensitive.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.identifier:** `string` - Your application's identifier for the end user
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.authorizationDetails:** `object` - How the account authenticates. `details.case` is one of `'oauthToken'`, `'staticAuth'`, `'googleDwd'` or `'trustedIdp'`, with the matching `value`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.organizationId?:** `string` - Organization to scope the account to
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.userId?:** `string` - Scalekit user to scope the account to. Not the same field as `identifier`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.apiConfig?:** `Record<string, unknown>` - Connector-specific API configuration
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## User Scope
+
+A small wrapper around `actions` and `tools` that remembers one end user's identifier. It covers the three steps an agent takes: check the connection, find tools that fit a goal, run one. It adds no new capability, and you can mix it freely with direct `actions` and `tools` calls.
+
+Create one with `scalekitClient.forIdentifier(identifier)`.
+
+<details><summary><code>client.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/scalekit.ts">forIdentifier</a>(identifier) -> UserScope</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a `UserScope` bound to one end user. Throws if `identifier` is empty.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const user = scalekitClient.forIdentifier('user_123');
+console.log(user.identifier);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**identifier:** `string` - Your application's stable identifier for this user. This is the `identifier` every AgentKit call takes, and is a different field from `userId`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.forIdentifier(id).<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/agent.ts">ensureConnected</a>(connectionName) -> Promise&lt;ConnectionState&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns this user's state for a connection. Gets or creates the connected account and, when it is not active, also fetches an authorization link. Executes no tool.
+
+`ConnectionState` has `connectionName`, `status` (`ConnectorStatus`), `isActive`, `connectedAccountId?` and `authorizationLink?`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const user = scalekitClient.forIdentifier('user_123');
+
+const state = await user.ensureConnected('github-connect');
+if (!state.isActive) {
+  // Send this to the user, then call ensureConnected again once they finish
+  console.log('Authorize here:', state.authorizationLink);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionName:** `string` - Connection name as shown in the dashboard under **AgentKit > Connections**. Case-sensitive.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.forIdentifier(id).<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/agent.ts">findTools</a>(goal, limit?) -> Promise&lt;ReadyTool[]&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Finds tools that fit a goal and that this user can call right now.
+
+Runs `searchTools` for this identifier and keeps only results with a `READY` connection, each paired with the `connectedAccountId` to execute against. Results that still need a connection or re-authorization are dropped, so call `ensureConnected` first.
+
+`ReadyTool` has `name`, `connectedAccountId`, `connectionName`, `provider`, `score` and `description`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const user = scalekitClient.forIdentifier('user_123');
+
+const tools = await user.findTools('star a github repository', 3);
+for (const tool of tools) {
+  console.log(tool.name, tool.score, tool.connectedAccountId);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**goal:** `string` - The job to be done, in plain language
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**limit?:** `number` - Maximum ranked results to consider. Defaults to 5. Fewer may come back after non-ready results are dropped.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.forIdentifier(id).<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/agent.ts">run</a>(toolName, inputs?, options?) -> Promise&lt;unknown&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Executes a tool for this user and returns its payload.
+
+A list-returning tool comes back from the API wrapped as `{ array: [...] }`; this unwraps it so you get the array directly. Numbers in the payload are floats because of the protobuf `Struct` encoding. Use `actions.executeTool` directly if you also need the execution id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const user = scalekitClient.forIdentifier('user_123');
+
+const [tool] = await user.findTools('star a github repository');
+if (tool) {
+  const result = await user.run(
+    tool.name,
+    { owner: 'scalekit-inc', repo: 'scalekit-sdk-node' },
+    { connectedAccountId: tool.connectedAccountId }
+  );
+  console.log(result);
+}
+
+// Without an account id, the account is resolved from the identifier
+await user.run('github_repo_star', { owner: 'o', repo: 'r' }, {
+  connectionName: 'github-connect',
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**toolName:** `string` - Tool name, for example from `findTools`
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**inputs?:** `Record<string, unknown>` - Tool input. Defaults to `{}`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**options?:** `object`
+- `connectedAccountId?: string` - Account to execute against. Takes precedence when set.
+- `connectionName?: string` - Used with this scope's identifier to resolve the account when `connectedAccountId` is not set
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Virtual MCP Servers
+
+A Virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol, so any MCP-capable agent can call them. Create one configuration per agent role (not per user), and mint a short-lived session token per user per run. The server URL stays the same; the token carries the user's identity.
+
+Only the generally available `McpConfig` API is covered. The older `Mcp` and `McpInstance` families are marked PREVIEW and are not exposed.
+
+Access via `scalekitClient.mcp` (also `scalekitClient.actions.mcp`).
+
+<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">createConfig</a>(params) -> Promise&lt;CreateMcpConfigResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a Virtual MCP server configuration. The response's `config.mcpServerUrl` is the URL every user and session reuses.
+
+`config.mcpServerUrl` comes back as an empty string when the `mcp_config_server_url` feature flag is not enabled for your environment, and the call still succeeds. Check it before you store it.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.mcp.createConfig({
+  name: 'support-agent',
+  description: 'Tools for the support triage agent',
+  connectionToolMappings: [
+    { connectionName: 'github-connect', tools: ['github_issue_create'] },
+    { connectionName: 'slack-connect' }, // omit tools to expose every tool
+  ],
+});
+
+if (!res.config?.mcpServerUrl) {
+  throw new Error('mcpServerUrl is empty -- check the feature flag');
+}
+console.log(res.config.id, res.config.mcpServerUrl);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.name:** `string` - Unique name. 1-100 characters: lowercase letters, digits, hyphens and underscores.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.description?:** `string` - What this server exposes
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Connections to expose and, optionally, which of their tools. Omit `tools` to expose every tool for that connection. Maximum 25 mappings.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">getConfig</a>(configId) -> Promise&lt;GetMcpConfigResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Fetches one MCP configuration by id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.mcp.getConfig('<CONFIG_ID>');
+console.log(res.config?.name, res.config?.mcpServerUrl);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**configId:** `string` - The configuration to fetch
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">listConfigs</a>(options?) -> Promise&lt;ListMcpConfigsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists MCP configurations in the environment, with pagination.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.mcp.listConfigs({ search: 'support', pageSize: 20 });
+for (const config of res.configs) {
+  console.log(config.id, config.name);
+}
+console.log(res.totalSize, res.nextPageToken);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**options:** `object` - Optional
+- `search?: string` - Free-text search across configuration metadata
+- `pageSize?: number` - Page size
+- `pageToken?: string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">updateConfig</a>(params) -> Promise&lt;UpdateMcpConfigResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates a configuration's description and connection-to-tool mappings. The name cannot be changed after creation.
+
+Avoid updating while agent sessions are running, because tools can become unavailable mid-session. For a significant change, create a new configuration and switch to its URL.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.mcp.updateConfig({
+  configId: '<CONFIG_ID>',
+  description: 'Support agent, read-only GitHub',
+  connectionToolMappings: [
+    { connectionName: 'github-connect', tools: ['github_issue_list'] },
+  ],
+});
+console.log(res.config?.connectionToolMappings);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.configId:** `string` - The configuration to update
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.description?:** `string` - New description
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Replacement mappings
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">deleteConfig</a>(configId) -> Promise&lt;DeleteMcpConfigResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes an MCP configuration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.mcp.deleteConfig('<CONFIG_ID>');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**configId:** `string` - The configuration to delete
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">listConnectedAccounts</a>(params) -> Promise&lt;ListMcpConnectedAccountsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the connected accounts behind a configuration for one user.
+
+Call this before minting a session token. OAuth credentials can expire or be revoked, and an agent that starts without an active connection fails on every tool call. For any account whose `connectedAccountStatus` is not `"ACTIVE"`, send the user its `authenticationLink`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.mcp.listConnectedAccounts({
+  configId: '<CONFIG_ID>',
+  identifier: 'user_123',
+  includeAuthLink: true,
+});
+
+const pending = res.connectedAccounts.filter(
+  (a) => a.connectedAccountStatus !== 'ACTIVE'
+);
+for (const account of pending) {
+  console.log(account.connectionName, account.authenticationLink);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.configId:** `string` - The configuration
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.identifier:** `string` - Your application's identifier for the end user
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.includeAuthLink?:** `boolean` - Include authorization links for inactive connections
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">createSessionToken</a>(params) -> Promise&lt;CreateMcpSessionTokenResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Mints a session token for one user against one configuration.
+
+The token carries the user's identity. Mint a fresh one before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { config } = await scalekitClient.mcp.getConfig('<CONFIG_ID>');
+const session = await scalekitClient.mcp.createSessionToken({
+  mcpConfigId: '<CONFIG_ID>',
+  identifier: 'user_123',
+  expirySeconds: 900,
+});
+
+// Hand both to your MCP client
+console.log(config?.mcpServerUrl, session.token, session.expiresAt);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.mcpConfigId:** `string` - The configuration
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.identifier:** `string` - Your application's identifier for the end user
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.expirySeconds?:** `number` - Token lifetime in seconds
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Custom Connectors
+
+A custom connector (custom provider) puts a service Scalekit doesn't ship behind the same flow as a built-in one: users connect an account, you call the service through `actions.request`, and Scalekit injects the credentials.
+
+`authPatterns` are passed to the API as-is, so their keys are snake_case (`auth_type`, `field_name`, `input_type`) rather than the camelCase used elsewhere in this SDK. Exactly one pattern is supported today. Only `bearer` and `api_key` patterns take `fields`; an `oauth` pattern collects its own credentials.
+
+Access via `scalekitClient.providers` (also `scalekitClient.actions.providers`).
+
+<details><summary><code>client.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">createCustomProvider</a>(params) -> Promise&lt;CreateProviderResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a custom connector. The response's `provider.identifier` is the id you pass to `updateCustomProvider` and `deleteCustomProvider`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import type { AuthPattern } from '@scalekit-sdk/node';
+
+const authPatterns: AuthPattern[] = [
+  {
+    auth_type: 'bearer',
+    fields: [
+      { field_name: 'token', label: 'API token', input_type: 'password', required: true },
+    ],
+  },
+];
+
+const res = await scalekitClient.providers.createCustomProvider({
+  displayName: 'Acme Tickets',
+  description: 'Internal ticketing API',
+  proxyUrl: 'https://api.acme.example.com',
+  authPatterns,
+});
+console.log(res.provider?.identifier);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.displayName:** `string` - Letters, digits and spaces only. End it with "MCP" when the connector fronts an MCP server.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.proxyUrl:** `string` - Base HTTPS URL of the upstream service
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.proxyEnabled?:** `boolean` - Whether Scalekit proxies requests. Defaults to `true`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.description?:** `string` - Description
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ auth_type: 'oauth' | 'bearer' | 'api_key'; fields?: AuthField[] }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password'; hint?: string; required?: boolean }`
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.iconSrc?:** `string` - Icon URL
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.metadata?:** `Record<string, string>` - Arbitrary key-value metadata
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">updateCustomProvider</a>(params) -> Promise&lt;UpdateProviderResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates a custom connector.
+
+The server requires `displayName`, `proxyUrl` and `authPatterns` on every update, even when they haven't changed. Leaving out `authPatterns` fails with `[invalid_argument] Validation error`. `authPatterns` replaces the whole list rather than merging into it. Read the current connector with `listProviders` first and send those values back.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.providers.updateCustomProvider({
+  identifier: '<PROVIDER_IDENTIFIER>',
+  displayName: 'Acme Tickets',
+  proxyUrl: 'https://api.acme.example.com/v2',
+  authPatterns: [
+    { auth_type: 'api_key', fields: [{ field_name: 'api_key', input_type: 'password' }] },
+  ],
+  description: 'Internal ticketing API, v2',
+});
+console.log(res.provider?.proxyUrl);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.identifier:** `string` - From `provider.identifier` on a create or list response
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.displayName:** `string` - Required on every update
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.proxyUrl:** `string` - Required on every update
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.authPatterns:** `AuthPattern[]` - Required on every update. Replaces the existing list.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.description?:** `string` - Description
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.iconSrc?:** `string` - Icon URL
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.metadata?:** `Record<string, string>` - Arbitrary key-value metadata
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">deleteCustomProvider</a>(identifier) -> Promise&lt;DeleteProviderResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes a custom connector. Remove its connections and connected accounts first; the server won't delete a connector that is still in use.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.providers.deleteCustomProvider('<PROVIDER_IDENTIFIER>');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**identifier:** `string` - From `provider.identifier` on a create or list response
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">listProviders</a>(params?) -> Promise&lt;ListProvidersResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists connectors, built-in and custom. Use it to find a connector's `identifier` before updating or deleting it.
+
+**Preview:** the underlying `ListProviders` RPC is marked preview in the API and may change.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ProviderType } from '@scalekit-sdk/node';
+
+const res = await scalekitClient.providers.listProviders({
+  providerType: ProviderType.CUSTOM,
+  pageSize: 50,
+});
+for (const provider of res.providers) {
+  console.log(provider.identifier, provider.displayName, provider.isCustom);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object` - Optional
+- `providerType?: ProviderType` - `ProviderType.CUSTOM` for your own connectors, `ProviderType.DEFAULT` for built-ins, `ProviderType.ALL` or omit for both
+- `identifier?: string` - Filter to one connector
+- `pageSize?: number` - Page size
+- `pageToken?: string` - Pagination cursor
 
 </dd>
 </dl>
