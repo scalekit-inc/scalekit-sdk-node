@@ -325,7 +325,7 @@ export default class ActionsClient {
   async verifyConnectedAccountUser(params: {
     /** `auth_request_id` from the user verify redirect URL. */
     authRequestId: string;
-    /** The signed-in user's identifier in your app. It must match the identifier the authorization link was created for. */
+    /** Your app's ID for the signed-in user, the same value you used when you created the authorization link. Use a stable internal ID, not an email address. */
     identifier: string;
   }): Promise<VerifyConnectedAccountUserResponse> {
     return this.connectedAccounts.verifyConnectedAccountUser(params);
