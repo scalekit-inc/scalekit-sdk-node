@@ -158,10 +158,10 @@ export default class ActionsClient {
     private readonly connectedAccounts: ConnectedAccountsClient,
     private readonly coreClient: CoreClient,
     private readonly connection: ConnectionClient,
-    /** Virtual MCP servers. Also reachable as `scalekit.mcp`. */
-    readonly mcp?: McpClient,
-    /** Bring-your-own connectors. Also reachable as `scalekit.providers`. */
-    readonly providers?: ProvidersClient
+    /** Virtual MCP servers: configurations, connected accounts and session tokens. */
+    readonly mcp: McpClient,
+    /** Bring-your-own connectors: create, update, list and delete custom connectors. */
+    readonly providers: ProvidersClient
   ) {}
 
   /**

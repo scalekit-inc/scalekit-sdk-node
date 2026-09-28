@@ -99,10 +99,6 @@ export default class ScalekitClient {
   readonly m2m: M2MClient;
   readonly resources: ResourceClient;
   readonly tools: ToolsClient;
-  /** Virtual MCP servers: configurations, connected accounts and session tokens. */
-  readonly mcp: McpClient;
-  /** Bring-your-own connectors: create, update, list and delete custom connectors. */
-  readonly providers: ProvidersClient;
   readonly connectedAccounts: ConnectedAccountsClient;
   readonly actions: ActionsClient;
   readonly events: EventsClient;
@@ -144,8 +140,6 @@ export default class ScalekitClient {
     this.m2m = new M2MClient(this.grpcConnect, this.coreClient);
     this.resources = new ResourceClient(this.grpcConnect, this.coreClient);
     this.tools = new ToolsClient(this.grpcConnect, this.coreClient);
-    this.mcp = new McpClient(this.grpcConnect, this.coreClient);
-    this.providers = new ProvidersClient(this.grpcConnect, this.coreClient);
     this.connectedAccounts = new ConnectedAccountsClient(
       this.grpcConnect,
       this.coreClient
@@ -155,8 +149,8 @@ export default class ScalekitClient {
       this.connectedAccounts,
       this.coreClient,
       this.connection,
-      this.mcp,
-      this.providers
+      new McpClient(this.grpcConnect, this.coreClient),
+      new ProvidersClient(this.grpcConnect, this.coreClient)
     );
     this.events = new EventsClient(this.grpcConnect, this.coreClient);
   }

@@ -79,10 +79,10 @@ export default class ActionsClient {
     private readonly connectedAccounts;
     private readonly coreClient;
     private readonly connection;
-    /** Virtual MCP servers. Also reachable as `scalekit.mcp`. */
-    readonly mcp?: McpClient | undefined;
-    /** Bring-your-own connectors. Also reachable as `scalekit.providers`. */
-    readonly providers?: ProvidersClient | undefined;
+    /** Virtual MCP servers: configurations, connected accounts and session tokens. */
+    readonly mcp: McpClient;
+    /** Bring-your-own connectors: create, update, list and delete custom connectors. */
+    readonly providers: ProvidersClient;
     /**
      * @param {ToolsClient} tools - Client used to execute tools on behalf of connected accounts.
      * @param {ConnectedAccountsClient} connectedAccounts - Client for connected-account lifecycle operations.
@@ -90,10 +90,10 @@ export default class ActionsClient {
      * @param {ConnectionClient} connection - Client used to list app-level connections.
      */
     constructor(tools: ToolsClient, connectedAccounts: ConnectedAccountsClient, coreClient: CoreClient, connection: ConnectionClient, 
-    /** Virtual MCP servers. Also reachable as `scalekit.mcp`. */
-    mcp?: McpClient | undefined, 
-    /** Bring-your-own connectors. Also reachable as `scalekit.providers`. */
-    providers?: ProvidersClient | undefined);
+    /** Virtual MCP servers: configurations, connected accounts and session tokens. */
+    mcp: McpClient, 
+    /** Bring-your-own connectors: create, update, list and delete custom connectors. */
+    providers: ProvidersClient);
     /**
      * Finds tools that fit a goal, ranked by relevance.
      *

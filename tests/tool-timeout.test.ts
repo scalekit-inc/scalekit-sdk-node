@@ -12,6 +12,8 @@ import ToolsClient from '../src/tools';
 import ActionsClient from '../src/actions';
 import ConnectedAccountsClient from '../src/connected-accounts';
 import ConnectionClient from '../src/connection';
+import McpClient from '../src/mcp';
+import ProvidersClient from '../src/providers';
 import ScalekitClient from '../src/scalekit';
 import { ScalekitGatewayTimeoutException } from '../src/errors';
 
@@ -286,7 +288,9 @@ describe('ActionsClient.request proxy timeout', () => {
       tools,
       connectedAccounts,
       coreClient,
-      connection
+      connection,
+      new McpClient(grpcConnect, coreClient),
+      new ProvidersClient(grpcConnect, coreClient)
     );
     const requestSpy = jest
       .spyOn(coreClient.axios, 'request')
@@ -413,7 +417,9 @@ describe('axios timeouts surface as ScalekitGatewayTimeoutException', () => {
       tools,
       connectedAccounts,
       coreClient,
-      connection
+      connection,
+      new McpClient(grpcConnect, coreClient),
+      new ProvidersClient(grpcConnect, coreClient)
     );
     const requestSpy = jest.spyOn(coreClient.axios, 'request');
     return { actions, requestSpy };

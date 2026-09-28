@@ -6710,7 +6710,7 @@ for (const tool of res.tools) {
 
 Connect end users' accounts to third-party services and run tools against them. This section covers tool discovery on `actions` (also available on `scalekitClient.tools`) and authorizing a connected account. To create or update a connected account, send the user an authorization link with `getAuthorizationLink`.
 
-`actions.mcp` and `actions.providers` are the same instances as [`scalekitClient.mcp`](#virtual-mcp-servers) and [`scalekitClient.providers`](#custom-connectors).
+Virtual MCP servers and custom connectors are also under `actions`, as [`actions.mcp`](#virtual-mcp-servers) and [`actions.providers`](#custom-connectors).
 
 Access via `scalekitClient.actions`.
 
@@ -7047,9 +7047,9 @@ A Virtual MCP server exposes a chosen set of connections and tools over the Mode
 
 Only the generally available `McpConfig` API is covered. The older `Mcp` and `McpInstance` families are marked PREVIEW and are not exposed.
 
-Access via `scalekitClient.mcp` (also `scalekitClient.actions.mcp`).
+Access via `scalekitClient.actions.mcp`.
 
-<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">createConfig</a>(params) -> Promise&lt;CreateMcpConfigResponse&gt;</code></summary>
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">createConfig</a>(params) -> Promise&lt;CreateMcpConfigResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -7078,7 +7078,7 @@ Creates a Virtual MCP server configuration. The response's `config.mcpServerUrl`
 <dd>
 
 ```typescript
-const res = await scalekitClient.mcp.createConfig({
+const res = await scalekitClient.actions.mcp.createConfig({
   name: 'support-agent',
   description: 'Tools for the support triage agent',
   connectionToolMappings: [
@@ -7131,7 +7131,7 @@ console.log(res.config.id, res.config.mcpServerUrl);
 </dl>
 </details>
 
-<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">getConfig</a>(configId) -> Promise&lt;GetMcpConfigResponse&gt;</code></summary>
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">getConfig</a>(configId) -> Promise&lt;GetMcpConfigResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -7158,7 +7158,7 @@ Fetches one MCP configuration by id.
 <dd>
 
 ```typescript
-const res = await scalekitClient.mcp.getConfig('<CONFIG_ID>');
+const res = await scalekitClient.actions.mcp.getConfig('<CONFIG_ID>');
 console.log(res.config?.name, res.config?.mcpServerUrl);
 ```
 </dd>
@@ -7186,7 +7186,7 @@ console.log(res.config?.name, res.config?.mcpServerUrl);
 </dl>
 </details>
 
-<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">listConfigs</a>(options?) -> Promise&lt;ListMcpConfigsResponse&gt;</code></summary>
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">listConfigs</a>(options?) -> Promise&lt;ListMcpConfigsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -7213,7 +7213,7 @@ Lists MCP configurations in the environment, with pagination.
 <dd>
 
 ```typescript
-const res = await scalekitClient.mcp.listConfigs({ search: 'support', pageSize: 20 });
+const res = await scalekitClient.actions.mcp.listConfigs({ search: 'support', pageSize: 20 });
 for (const config of res.configs) {
   console.log(config.id, config.name);
 }
@@ -7247,7 +7247,7 @@ console.log(res.totalSize, res.nextPageToken);
 </dl>
 </details>
 
-<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">updateConfig</a>(params) -> Promise&lt;UpdateMcpConfigResponse&gt;</code></summary>
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">updateConfig</a>(params) -> Promise&lt;UpdateMcpConfigResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -7276,7 +7276,7 @@ Avoid updating while agent sessions are running, because tools can become unavai
 <dd>
 
 ```typescript
-const res = await scalekitClient.mcp.updateConfig({
+const res = await scalekitClient.actions.mcp.updateConfig({
   configId: '<CONFIG_ID>',
   description: 'Support agent, read-only GitHub',
   connectionToolMappings: [
@@ -7324,7 +7324,7 @@ console.log(res.config?.connectionToolMappings);
 </dl>
 </details>
 
-<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">deleteConfig</a>(configId) -> Promise&lt;DeleteMcpConfigResponse&gt;</code></summary>
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">deleteConfig</a>(configId) -> Promise&lt;DeleteMcpConfigResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -7351,7 +7351,7 @@ Deletes an MCP configuration.
 <dd>
 
 ```typescript
-await scalekitClient.mcp.deleteConfig('<CONFIG_ID>');
+await scalekitClient.actions.mcp.deleteConfig('<CONFIG_ID>');
 ```
 </dd>
 </dl>
@@ -7378,7 +7378,7 @@ await scalekitClient.mcp.deleteConfig('<CONFIG_ID>');
 </dl>
 </details>
 
-<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">listConnectedAccounts</a>(params) -> Promise&lt;ListMcpConnectedAccountsResponse&gt;</code></summary>
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">listConnectedAccounts</a>(params) -> Promise&lt;ListMcpConnectedAccountsResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -7407,7 +7407,7 @@ Call this before minting a session token. OAuth credentials can expire or be rev
 <dd>
 
 ```typescript
-const res = await scalekitClient.mcp.listConnectedAccounts({
+const res = await scalekitClient.actions.mcp.listConnectedAccounts({
   configId: '<CONFIG_ID>',
   identifier: 'user_123',
   includeAuthLink: true,
@@ -7459,7 +7459,7 @@ for (const account of pending) {
 </dl>
 </details>
 
-<details><summary><code>client.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">createSessionToken</a>(params) -> Promise&lt;CreateMcpSessionTokenResponse&gt;</code></summary>
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">createSessionToken</a>(params) -> Promise&lt;CreateMcpSessionTokenResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -7488,8 +7488,8 @@ The token carries the user's identity. Mint a fresh one before every agent run, 
 <dd>
 
 ```typescript
-const { config } = await scalekitClient.mcp.getConfig('<CONFIG_ID>');
-const session = await scalekitClient.mcp.createSessionToken({
+const { config } = await scalekitClient.actions.mcp.getConfig('<CONFIG_ID>');
+const session = await scalekitClient.actions.mcp.createSessionToken({
   mcpConfigId: '<CONFIG_ID>',
   identifier: 'user_123',
   expirySeconds: 900,
@@ -7543,9 +7543,9 @@ A custom connector (custom provider) puts a service Scalekit doesn't ship behind
 
 `authPatterns` are passed to the API as-is, so their keys are snake_case (`auth_type`, `field_name`, `input_type`) rather than the camelCase used elsewhere in this SDK. Exactly one pattern is supported today. Only `bearer` and `api_key` patterns take `fields`; an `oauth` pattern collects its own credentials.
 
-Access via `scalekitClient.providers` (also `scalekitClient.actions.providers`).
+Access via `scalekitClient.actions.providers`.
 
-<details><summary><code>client.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">createCustomProvider</a>(params) -> Promise&lt;CreateProviderResponse&gt;</code></summary>
+<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">createCustomProvider</a>(params) -> Promise&lt;CreateProviderResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -7583,7 +7583,7 @@ const authPatterns: AuthPattern[] = [
   },
 ];
 
-const res = await scalekitClient.providers.createCustomProvider({
+const res = await scalekitClient.actions.providers.createCustomProvider({
   displayName: 'Acme Tickets',
   description: 'Internal ticketing API',
   proxyUrl: 'https://api.acme.example.com',
@@ -7658,7 +7658,7 @@ console.log(res.provider?.identifier);
 </dl>
 </details>
 
-<details><summary><code>client.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">updateCustomProvider</a>(params) -> Promise&lt;UpdateProviderResponse&gt;</code></summary>
+<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">updateCustomProvider</a>(params) -> Promise&lt;UpdateProviderResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -7687,7 +7687,7 @@ The server requires `displayName`, `proxyUrl` and `authPatterns` on every update
 <dd>
 
 ```typescript
-const res = await scalekitClient.providers.updateCustomProvider({
+const res = await scalekitClient.actions.providers.updateCustomProvider({
   identifier: '<PROVIDER_IDENTIFIER>',
   displayName: 'Acme Tickets',
   proxyUrl: 'https://api.acme.example.com/v2',
@@ -7765,7 +7765,7 @@ console.log(res.provider?.proxyUrl);
 </dl>
 </details>
 
-<details><summary><code>client.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">deleteCustomProvider</a>(identifier) -> Promise&lt;DeleteProviderResponse&gt;</code></summary>
+<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">deleteCustomProvider</a>(identifier) -> Promise&lt;DeleteProviderResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -7792,7 +7792,7 @@ Deletes a custom connector. Remove its connections and connected accounts first;
 <dd>
 
 ```typescript
-await scalekitClient.providers.deleteCustomProvider('<PROVIDER_IDENTIFIER>');
+await scalekitClient.actions.providers.deleteCustomProvider('<PROVIDER_IDENTIFIER>');
 ```
 </dd>
 </dl>
@@ -7819,7 +7819,7 @@ await scalekitClient.providers.deleteCustomProvider('<PROVIDER_IDENTIFIER>');
 </dl>
 </details>
 
-<details><summary><code>client.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">listProviders</a>(params?) -> Promise&lt;ListProvidersResponse&gt;</code></summary>
+<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">listProviders</a>(params?) -> Promise&lt;ListProvidersResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -7850,7 +7850,7 @@ Lists connectors, built-in and custom. Use it to find a connector's `identifier`
 ```typescript
 import { ProviderType } from '@scalekit-sdk/node';
 
-const res = await scalekitClient.providers.listProviders({
+const res = await scalekitClient.actions.providers.listProviders({
   providerType: ProviderType.CUSTOM,
   pageSize: 50,
 });
