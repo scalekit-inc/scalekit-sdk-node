@@ -7541,7 +7541,7 @@ console.log(config?.mcpServerUrl, session.token, session.expiresAt);
 
 A custom connector (custom provider) puts a service Scalekit doesn't ship behind the same flow as a built-in one: users connect an account, you call the service through `actions.request`, and Scalekit injects the credentials.
 
-`authPatterns` are passed to the API as-is, so their keys are snake_case (`auth_type`, `field_name`, `input_type`) rather than the camelCase used elsewhere in this SDK. Exactly one pattern is supported today. Only `bearer` and `api_key` patterns take `fields`; an `oauth` pattern collects its own credentials.
+`authPatterns` are passed to the API as-is, so their keys are snake_case (`type`, `display_name`, `field_name`, `input_type`) rather than the camelCase used elsewhere in this SDK. Exactly one pattern is supported today. `type` is one of `OAUTH`, `BEARER`, `API_KEY`, `BASIC` or `NO_AUTH`. `BEARER`, `API_KEY` and `BASIC` patterns take `fields`; an `OAUTH` pattern collects its own credentials through `oauth_config`, and `NO_AUTH` takes none.
 
 Access via `scalekitClient.actions.providers`.
 
@@ -7576,12 +7576,20 @@ import type { AuthPattern } from '@scalekit-sdk/node';
 
 const authPatterns: AuthPattern[] = [
   {
-    auth_type: 'bearer',
+    type: 'BEARER',
+    display_name: 'Bearer Token',
+    description: 'Authenticate with an Acme API token.',
     fields: [
-      { field_name: 'token', label: 'API token', input_type: 'password', required: true },
+      { field_name: 'token', label: 'API Token', input_type: 'password' },
     ],
   },
 ];
+
+// Other shapes:
+// OAuth, using the upstream server's discovered defaults:
+//   { type: 'OAUTH', display_name: 'OAuth 2.1', description: '...', is_mcp: true, oauth_config: {} }
+// Public server, no credentials:
+//   { type: 'NO_AUTH', display_name: 'No Auth', description: '...', fields: [] }
 
 const res = await scalekitClient.actions.providers.createCustomProvider({
   displayName: 'Acme Tickets',
@@ -7632,7 +7640,7 @@ console.log(res.provider?.identifier);
 <dl>
 <dd>
 
-**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ auth_type: 'oauth' | 'bearer' | 'api_key'; fields?: AuthField[] }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password'; hint?: string; required?: boolean }`
+**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; is_mcp?: boolean; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select'; hint?: string; required?: boolean }`. Set `is_mcp: true` when the connector fronts an MCP server.
 
 </dd>
 </dl>
@@ -7692,7 +7700,13 @@ const res = await scalekitClient.actions.providers.updateCustomProvider({
   displayName: 'Acme Tickets',
   proxyUrl: 'https://api.acme.example.com/v2',
   authPatterns: [
-    { auth_type: 'api_key', fields: [{ field_name: 'api_key', input_type: 'password' }] },
+    {
+      type: 'API_KEY',
+      display_name: 'API Key',
+      description: 'Authenticate with an Acme API key.',
+      fields: [{ field_name: 'api_key', label: 'API Key', input_type: 'password' }],
+      auth_header_key_override: 'X-API-Key',
+    },
   ],
   description: 'Internal ticketing API, v2',
 });

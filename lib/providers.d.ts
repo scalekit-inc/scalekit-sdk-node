@@ -4,20 +4,21 @@ import { CreateProviderResponse, DeleteProviderResponse, ListProvidersResponse, 
 /**
  * One credential input shown to the user while they connect.
  *
- * Only used with `bearer` and `api_key` patterns — an OAuth flow collects its own
- * credentials, so never attach fields to an `oauth` pattern.
+ * Used with `BEARER`, `API_KEY` and `BASIC` patterns. An `OAUTH` flow collects
+ * its own credentials, and `NO_AUTH` takes none, so leave `fields` empty for those.
  */
 export interface AuthField {
     /**
-     * Machine-readable key the credential is stored under. Use `token` or
-     * `bearer_token` for bearer patterns, `api_key` for API-key patterns.
+     * Key the credential is stored under. Use `token` for bearer patterns and
+     * `api_key` for API-key patterns; pass the same key in `staticAuth` details
+     * when you connect an account programmatically.
      */
     field_name: string;
     /** Label shown above the input. */
     label?: string;
-    /** Use `password` for anything secret so the UI masks it. Defaults to `text`. */
-    input_type?: 'text' | 'password';
-    /** Placeholder or helper text below the input. */
+    /** Use `password` for anything secret so the UI masks it. */
+    input_type?: 'text' | 'password' | 'select';
+    /** Helper text shown with the input. */
     hint?: string;
     /** Whether the user must fill this in before the connection can be saved. */
     required?: boolean;
@@ -25,13 +26,33 @@ export interface AuthField {
 /**
  * One way a user can authenticate against your connector.
  *
- * Passed through to the API as-is, so the keys are snake_case to match the wire
- * format rather than the camelCase used elsewhere in this SDK.
+ * Sent to the API as-is, so the keys are snake_case to match the wire format
+ * rather than the camelCase used elsewhere in this SDK.
  */
 export interface AuthPattern {
-    auth_type: 'oauth' | 'bearer' | 'api_key' | string;
-    /** Required for `bearer` and `api_key`. Leave unset for `oauth`. */
+    /** Authentication method. */
+    type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH' | (string & {});
+    /** Name of this method, shown to the user while they connect. */
+    display_name: string;
+    /** Short explanation of this method, shown to the user. */
+    description?: string;
+    /** Set to `true` when the connector fronts an MCP server. */
+    is_mcp?: boolean;
+    /**
+     * Credential inputs for `BEARER`, `API_KEY` and `BASIC`. Leave empty for
+     * `OAUTH` and `NO_AUTH`.
+     */
     fields?: AuthField[];
+    /**
+     * OAuth settings for an `OAUTH` pattern. Pass `{}` to use the upstream
+     * server's discovered defaults.
+     */
+    oauth_config?: Record<string, unknown>;
+    /**
+     * Header name to send an `API_KEY` credential in, when the upstream expects
+     * something other than the default.
+     */
+    auth_header_key_override?: string;
     [key: string]: unknown;
 }
 /**
