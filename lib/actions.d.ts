@@ -44,7 +44,7 @@ export interface ListAppConnectionsResult {
     prevPageToken: string;
     totalSize: number;
 }
-import { CreateConnectedAccount, CreateConnectedAccountResponse, CreateConnectedAccountSchema, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+import { CreateConnectedAccountResponse, CreateConnectedAccountSchema, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * Normalized, consumer-friendly view of a tool returned by
@@ -297,7 +297,8 @@ export default class ActionsClient {
     getOrCreateConnectedAccount(params: {
         connectionName: string;
         identifier: string;
-        authorizationDetails?: CreateConnectedAccount['authorizationDetails'];
+        /** Same plain-object shape as {@link createConnectedAccount}. */
+        authorizationDetails?: MessageInitShape<typeof CreateConnectedAccountSchema>['authorizationDetails'];
         organizationId?: string;
         userId?: string;
         apiConfig?: Record<string, unknown>;
@@ -306,7 +307,8 @@ export default class ActionsClient {
     upsertConnectedAccount: (params: {
         connectionName: string;
         identifier: string;
-        authorizationDetails?: CreateConnectedAccount["authorizationDetails"];
+        /** Same plain-object shape as {@link createConnectedAccount}. */
+        authorizationDetails?: MessageInitShape<typeof CreateConnectedAccountSchema>["authorizationDetails"];
         organizationId?: string;
         userId?: string;
         apiConfig?: Record<string, unknown>;

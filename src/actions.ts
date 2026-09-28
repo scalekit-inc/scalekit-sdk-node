@@ -587,7 +587,10 @@ export default class ActionsClient {
   async getOrCreateConnectedAccount(params: {
     connectionName: string;
     identifier: string;
-    authorizationDetails?: CreateConnectedAccount['authorizationDetails'];
+    /** Same plain-object shape as {@link createConnectedAccount}. */
+    authorizationDetails?: MessageInitShape<
+      typeof CreateConnectedAccountSchema
+    >['authorizationDetails'];
     organizationId?: string;
     userId?: string;
     apiConfig?: Record<string, unknown>;
