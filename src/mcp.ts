@@ -208,7 +208,8 @@ export default class McpClient {
    *
    * @param params.mcpConfigId ID of the configuration.
    * @param params.identifier Your application's unique identifier for the user.
-   * @param params.expirySeconds Token lifetime in seconds.
+   * @param params.expirySeconds Token lifetime in whole seconds.
+   * @throws {Error} If `expirySeconds` is not a positive integer.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async createSessionToken(params: {
@@ -216,6 +217,15 @@ export default class McpClient {
     identifier: string;
     expirySeconds?: number;
   }): Promise<CreateMcpSessionTokenResponse> {
+    if (
+      params.expirySeconds !== undefined &&
+      !(Number.isInteger(params.expirySeconds) && params.expirySeconds > 0)
+    ) {
+      // BigInt() below would otherwise throw an unhelpful RangeError.
+      throw new Error(
+        `expirySeconds must be a positive integer, got ${params.expirySeconds}`
+      );
+    }
     return this.coreClient.connectExec(
       this.client.createMcpSessionToken,
       create(CreateMcpSessionTokenRequestSchema, {

@@ -184,8 +184,11 @@ export default class ProvidersClient {
    * SDK wraps the same RPC at `actions.providers.list_providers`.
    *
    * @param params.providerType Filter by kind: `ProviderType.CUSTOM` for your own
-   *                            connectors, `ProviderType.DEFAULT` for built-ins.
-   *                            Omit for all.
+   *                            connectors, `ProviderType.ALL` for built-ins and
+   *                            custom together. Omitting it behaves like
+   *                            `ProviderType.DEFAULT` and returns built-ins only,
+   *                            so pass `CUSTOM` or `ALL` to find a custom
+   *                            connector's identifier.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async listProviders(params?: {

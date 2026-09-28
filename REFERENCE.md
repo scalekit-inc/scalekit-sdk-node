@@ -6710,7 +6710,7 @@ for (const tool of res.tools) {
 
 ## Actions
 
-Connect end users' accounts to third-party services and run tools against them. This section covers tool discovery on `actions` and connected-account creation; tool discovery is also available on `scalekitClient.tools`.
+Connect end users' accounts to third-party services and run tools against them. This section covers tool discovery on `actions` (also available on `scalekitClient.tools`) and authorizing a connected account. To create or update a connected account, send the user an authorization link with `getAuthorizationLink`.
 
 `actions.mcp` and `actions.providers` are the same instances as [`scalekitClient.mcp`](#virtual-mcp-servers) and [`scalekitClient.providers`](#custom-connectors).
 
@@ -6931,7 +6931,7 @@ console.log(res);
 </dl>
 </details>
 
-<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">createConnectedAccount</a>(params) -> Promise&lt;CreateConnectedAccountResponse&gt;</code></summary>
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">getAuthorizationLink</a>(params) -> Promise&lt;GetMagicLinkForConnectedAccountResponse&gt;</code></summary>
 <dl>
 <dd>
 
@@ -6943,9 +6943,9 @@ console.log(res);
 <dl>
 <dd>
 
-Creates a connected account for one end user on one connection, using credentials you already hold.
+Generates a time-limited authorization link that the end user opens to connect, or re-authorize, their account on a connection. This is the way to create or update a connected account: if the account doesn't exist yet, it is created in the `PENDING_AUTH` state, and it becomes active once the user completes the flow.
 
-`authorizationDetails` takes a plain object. You don't need to build a protobuf message.
+Send `link` to the user before `expiry`. Generate a fresh link whenever the account needs authorizing again, for example when `connectedAccount.status` is `ConnectorStatus.EXPIRED`.
 </dd>
 </dl>
 </dd>
@@ -6962,29 +6962,19 @@ Creates a connected account for one end user on one connection, using credential
 ```typescript
 import { ConnectorStatus } from '@scalekit-sdk/node';
 
-// OAuth tokens you already hold
-const res = await scalekitClient.actions.createConnectedAccount({
+// Create the account (or re-authorize an existing one) by sending the user a link
+const { link, expiry } = await scalekitClient.actions.getAuthorizationLink({
   connectionName: 'github-connect',
   identifier: 'user_123',
-  authorizationDetails: {
-    details: {
-      case: 'oauthToken',
-      value: { accessToken: '<ACCESS_TOKEN>', refreshToken: '<REFRESH_TOKEN>' },
-    },
-  },
 });
+console.log('Authorize here:', link, 'before', expiry);
 
-// status is numeric at runtime -- compare against the enum
-console.log(res.connectedAccount?.status === ConnectorStatus.ACTIVE);
-
-// Static credentials (API key, bearer token, basic auth)
-await scalekitClient.actions.createConnectedAccount({
-  connectionName: 'my-api-key-connection',
+// Later: check whether the user has finished
+const { connectedAccount } = await scalekitClient.actions.getConnectedAccount({
+  connectionName: 'github-connect',
   identifier: 'user_123',
-  authorizationDetails: {
-    details: { case: 'staticAuth', value: { details: { api_key: '<API_KEY>' } } },
-  },
 });
+console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
 ```
 </dd>
 </dl>
@@ -6999,21 +6989,21 @@ await scalekitClient.actions.createConnectedAccount({
 <dl>
 <dd>
 
-**params.connectionName:** `string` - Connection name as shown in the dashboard. Case-sensitive.
+**params.connectionName?:** `string` - Connection name as shown in the dashboard. Case-sensitive. Use with `identifier`.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.identifier:** `string` - Your application's identifier for the end user
+**params.identifier?:** `string` - Your application's identifier for the end user. Use with `connectionName`.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.authorizationDetails:** `object` - How the account authenticates. `details.case` is one of `'oauthToken'`, `'staticAuth'`, `'googleDwd'` or `'trustedIdp'`, with the matching `value`.
+**params.connectedAccountId?:** `string` - An existing connected account, as an alternative to `connectionName` + `identifier`
 
 </dd>
 </dl>
@@ -7034,7 +7024,14 @@ await scalekitClient.actions.createConnectedAccount({
 <dl>
 <dd>
 
-**params.apiConfig?:** `Record<string, unknown>` - Connector-specific API configuration
+**params.userVerifyUrl?:** `string` - Your app's user-verification redirect URL. When set, the user is sent there after authorizing, and you complete the connection by calling `actions.verifyConnectedAccountUser` with the `authRequestId` from that redirect.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.state?:** `string` - Opaque value added to the `userVerifyUrl` redirect's query parameters, so you can validate the redirect
 
 </dd>
 </dl>
@@ -8157,7 +8154,7 @@ for (const provider of res.providers) {
 <dd>
 
 **params:** `object` - Optional
-- `providerType?: ProviderType` - `ProviderType.CUSTOM` for your own connectors, `ProviderType.DEFAULT` for built-ins, `ProviderType.ALL` or omit for both
+- `providerType?: ProviderType` - `ProviderType.CUSTOM` for your own connectors, `ProviderType.ALL` for built-ins and custom together. Omitting it behaves like `ProviderType.DEFAULT` and returns built-ins only, so pass `CUSTOM` or `ALL` to find a custom connector's `identifier`.
 - `identifier?: string` - Filter to one connector
 - `pageSize?: number` - Page size
 - `pageToken?: string` - Pagination cursor

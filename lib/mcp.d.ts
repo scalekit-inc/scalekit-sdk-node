@@ -115,7 +115,8 @@ export default class McpClient {
      *
      * @param params.mcpConfigId ID of the configuration.
      * @param params.identifier Your application's unique identifier for the user.
-     * @param params.expirySeconds Token lifetime in seconds.
+     * @param params.expirySeconds Token lifetime in whole seconds.
+     * @throws {Error} If `expirySeconds` is not a positive integer.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     createSessionToken(params: {

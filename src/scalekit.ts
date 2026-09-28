@@ -135,8 +135,9 @@ export default class ScalekitClient {
    *                   different field from `userId`.
    */
   forIdentifier(identifier: string): UserScope {
-    if (!identifier) throw new Error('identifier is required');
-    return new UserScope(identifier, this.actions, this.tools);
+    const trimmed = identifier?.trim();
+    if (!trimmed) throw new Error('identifier is required');
+    return new UserScope(trimmed, this.actions, this.tools);
   }
   readonly connectedAccounts: ConnectedAccountsClient;
   readonly actions: ActionsClient;
