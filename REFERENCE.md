@@ -7525,7 +7525,7 @@ console.log(config?.mcpServerUrl, session.token, session.expiresAt);
 <dl>
 <dd>
 
-**params.expirySeconds?:** `number` - Token lifetime in seconds
+**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server enforces the allowed range.
 
 </dd>
 </dl>
