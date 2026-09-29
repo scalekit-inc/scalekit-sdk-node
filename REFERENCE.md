@@ -7705,9 +7705,13 @@ What the server does with each field:
 <dd>
 
 ```typescript
-// Read the current state first, then send back everything you want to keep
+import { ProviderType } from '@scalekit-sdk/node';
+
+// Read the current state first, then send back everything you want to keep.
+// Pass ProviderType.CUSTOM: without it, only built-in connectors are searched.
 const { providers } = await scalekitClient.actions.providers.listProviders({
   identifier: '<PROVIDER_IDENTIFIER>',
+  providerType: ProviderType.CUSTOM,
 });
 const current = providers[0];
 
@@ -7906,7 +7910,7 @@ for (const provider of res.providers) {
 
 **params:** `object` - Optional
 - `providerType?: ProviderType` - `ProviderType.CUSTOM` for your own connectors, `ProviderType.ALL` for built-ins and custom together. Omitting it behaves like `ProviderType.DEFAULT` and returns built-ins only, so pass `CUSTOM` or `ALL` to find a custom connector's `identifier`.
-- `identifier?: string` - Filter to one connector
+- `identifier?: string` - Filter to one connector. For a custom connector, also pass `providerType: ProviderType.CUSTOM` (or `ALL`), or nothing is found.
 - `pageSize?: number` - Page size
 - `pageToken?: string` - Pagination cursor
 
