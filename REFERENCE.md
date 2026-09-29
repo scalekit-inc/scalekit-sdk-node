@@ -721,7 +721,7 @@ const isValid = scalekitClient.verifyInterceptorPayload(secret, headers, payload
 ## Connections
 
 <details>
-<summary><strong>Connections</strong> - Manage SSO connections and identity providers</summary>
+<summary><strong>Connections</strong> - Manage SSO connections, identity providers and environment-scoped (AgentKit app) connections</summary>
 
 Access via `scalekitClient.connection`.
 
@@ -831,6 +831,82 @@ await scalekitClient.connection.disableConnection('conn_123');
 | connectionId | `string` | Yes | Connection ID |
 
 **Returns**: `Promise<MessageShape<typeof EmptySchema>>` - Empty on success.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
+<summary><code>connection.createEnvironmentConnection(connection, flags?) -> Promise&lt;CreateConnectionResponse&gt;</code></summary>
+
+#### 📝 Description
+**Preview.** Creates an environment-scoped connection, such as an AgentKit app connection for a connector. It has no organization. `POST /api/v1/connections`; requires a workspace client and `sso:write`.
+
+#### 🔌 Usage
+```typescript
+import { ConnectionType } from '@scalekit-sdk/node';
+
+const { connection } = await scalekitClient.connection.createEnvironmentConnection(
+  { providerKey: '<CONNECTOR_IDENTIFIER>', type: ConnectionType.OAUTH },
+  { isApp: true }
+);
+const connectionName = connection!.keyId; // pass to the actions methods
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| connection | `CreateConnection` | Yes | `providerKey` (the connector identifier) and `type` |
+| flags | `Flags` | No | Pass `{ isApp: true }` for an AgentKit app connection |
+
+**Returns**: `Promise<CreateConnectionResponse>` - The created connection. Its `keyId` is the connection name.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
+<summary><code>connection.getEnvironmentConnection(connectionId) -> Promise&lt;GetConnectionResponse&gt;</code></summary>
+
+#### 📝 Description
+**Preview.** Retrieves an environment-scoped connection by ID. `GET /api/v1/connections/{connection_id}`; accepts a workspace or actions-portal client and needs `sso:read`.
+
+#### 🔌 Usage
+```typescript
+const { connection } = await scalekitClient.connection.getEnvironmentConnection('conn_123');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| connectionId | `string` | Yes | Connection ID |
+
+**Returns**: `Promise<GetConnectionResponse>` - Connection details.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
+<summary><code>connection.updateEnvironmentConnection(connectionId, connection) -> Promise&lt;UpdateConnectionResponse&gt;</code></summary>
+
+#### 📝 Description
+**Preview.** Updates an environment-scoped connection. `PATCH /api/v1/connections/{connection_id}`; requires a workspace client and `sso:write`.
+
+#### 🔌 Usage
+```typescript
+await scalekitClient.connection.updateEnvironmentConnection('conn_123', {
+  uiButtonTitle: 'Connect Pylon',
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| connectionId | `string` | Yes | Connection ID |
+| connection | `UpdateConnection` | Yes | Fields to update |
+
+**Returns**: `Promise<UpdateConnectionResponse>` - The updated connection.
 
 **Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
 
