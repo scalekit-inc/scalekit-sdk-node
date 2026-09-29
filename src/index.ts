@@ -37,6 +37,25 @@ export {
   ConnectorType,
 } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 
+// Generated enums/types surfaced by the environment-scoped connection methods
+// (`connection.createEnvironmentConnection` and friends). `type`, `provider` and
+// `authMode` on a connection are numeric enums, so callers need the named
+// constants, and the message types let them name what the methods return.
+export {
+  ConnectionType,
+  ConnectionProvider,
+  ConnectionAuthMode,
+} from './pkg/grpc/scalekit/v1/connections/connections_pb';
+export type {
+  Connection,
+  CreateConnection,
+  UpdateConnection,
+  Flags,
+  CreateConnectionResponse,
+  GetConnectionResponse,
+  UpdateConnectionResponse,
+} from './pkg/grpc/scalekit/v1/connections/connections_pb';
+
 // Generated enum/types surfaced in the public `tools.searchTools` API:
 // `ToolReadinessState` appears on each result's `connections[].readinessState` —
 // re-export it so callers can name it (e.g. `readinessState === ToolReadinessState.READY`)

@@ -10,6 +10,8 @@ export type { Resource, Scope, GetResourceResponse, ListResourcesResponse, } fro
 export { ObjectType, Source } from './pkg/grpc/scalekit/v1/events/events_pb';
 export type { EventFilter } from './pkg/grpc/scalekit/v1/events/events_pb';
 export { ConnectorStatus, ConnectorType, } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+export { ConnectionType, ConnectionProvider, ConnectionAuthMode, } from './pkg/grpc/scalekit/v1/connections/connections_pb';
+export type { Connection, CreateConnection, UpdateConnection, Flags, CreateConnectionResponse, GetConnectionResponse, UpdateConnectionResponse, } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 export { ToolReadinessState } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 export type { SearchToolsResponse, SearchedTool, ConnectionReadiness, } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 export type { ListToolsResponse, Tool, } from './pkg/grpc/scalekit/v1/tools/tools_pb';

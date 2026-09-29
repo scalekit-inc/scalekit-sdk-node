@@ -1008,6 +1008,8 @@ try {
 - `ProviderType`: Connector kind filter for `listProviders` (`DEFAULT`, `CUSTOM`, `ALL`)
 - `Provider`: A connector, built-in or custom. `authPatterns` is decoded into `AuthPattern[]`, so it can be passed back to `updateCustomProvider`
 - `AuthPattern`, `AuthField`: Hand-written types for custom connector `authPatterns`
+- `ConnectionType`, `ConnectionProvider`, `ConnectionAuthMode`: Numeric enums on a connection's `type`, `provider` and `authMode`
+- `Connection`, `CreateConnection`, `UpdateConnection`, `Flags`: Environment connection shapes used by `createEnvironmentConnection` and `updateEnvironmentConnection`
 
 ## Organizations
 
@@ -1982,6 +1984,241 @@ console.log('Connection disabled:', !response.connection.enabled);
 <dd>
 
 **id:** `string` - The connection ID to disable
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">createEnvironmentConnection</a>(connection, flags?) -> Promise&lt;CreateConnectionResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates an environment-scoped connection. Unlike `createConnection`, which creates an SSO connection owned by an organization, this connection belongs to the environment itself.
+
+Use it for AgentKit app connections: pass `flags: { isApp: true }` and set `providerKey` to the connector's identifier, such as a custom connector's `provider.identifier`. The returned connection's `keyId` is the connection name that the AgentKit methods on `actions` take.
+
+**Preview:** the underlying `CreateEnvironmentConnection` RPC is marked preview in the API and may change. It maps to `POST /api/v1/connections`, requires a workspace client, and needs the `sso:write` permission.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ConnectionType } from '@scalekit-sdk/node';
+
+// 1. Create a custom OAuth connector (or look one up with listProviders)
+const { provider } = await scalekitClient.actions.providers.createCustomProvider({
+  displayName: 'Custom Pylon MCP',
+  description: 'Pylon integration via MCP',
+  proxyUrl: 'https://mcp.usepylon.com',
+  authPatterns: [
+    {
+      type: 'OAUTH',
+      display_name: 'OAuth 2.1',
+      description: 'Authenticate via browser OAuth.',
+      is_mcp: true,
+      oauth_config: {},
+    },
+  ],
+});
+
+// 2. Create an AgentKit app connection for it
+const created = await scalekitClient.connection.createEnvironmentConnection(
+  { providerKey: provider!.identifier, type: ConnectionType.OAUTH },
+  { isApp: true }
+);
+const connectionId = created.connection!.id;
+
+// 3. Fetch it by id; keyId is the connection name AgentKit uses
+const { connection } =
+  await scalekitClient.connection.getEnvironmentConnection(connectionId);
+const connectionName = connection!.keyId!;
+
+// 4. Send the user an authorization link for that connection
+const { link } = await scalekitClient.actions.getAuthorizationLink({
+  connectionName,
+  identifier: 'user_123',
+});
+console.log(connectionName, link);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connection:** `CreateConnection` - The connection to create, as a plain object:
+- `providerKey: string` - Identifier of the connector the connection is for, e.g. a custom connector's `provider.identifier`
+- `type: ConnectionType` - Authentication type, e.g. `ConnectionType.OAUTH`
+- `keyId?: string` - Connection name; generated when omitted
+- `authMode?: ConnectionAuthMode` - Whether each user connects their own account (`USER`) or shares one (`ORG_WIDE`)
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**flags?:** `Flags` - Optional flags:
+- `isApp?: boolean` - Set to `true` for an AgentKit app connection
+- `isLogin?: boolean` - Leave unset for AgentKit app connections
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">getEnvironmentConnection</a>(connectionId) -> Promise&lt;GetConnectionResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves an environment-scoped connection by id, such as an AgentKit app connection created with `createEnvironmentConnection`. For an organization's SSO connection, use `getConnection` instead.
+
+**Preview:** the underlying `GetEnvironmentConnection` RPC is marked preview in the API and may change. It maps to `GET /api/v1/connections/{connection_id}`, accepts a workspace or actions-portal client, and needs the `sso:read` permission.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { connection } =
+  await scalekitClient.connection.getEnvironmentConnection('conn_abc123');
+
+console.log(connection?.keyId, connection?.providerKey, connection?.enabled);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string` - The connection identifier (format: `conn_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">updateEnvironmentConnection</a>(connectionId, connection) -> Promise&lt;UpdateConnectionResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates an environment-scoped connection created with `createEnvironmentConnection`, such as its OAuth settings or button title. Organization SSO connections are not updated through this method.
+
+**Preview:** the underlying `UpdateEnvironmentConnection` RPC is marked preview in the API and may change. It maps to `PATCH /api/v1/connections/{connection_id}`, requires a workspace client, and needs the `sso:write` permission.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ConnectionType } from '@scalekit-sdk/node';
+
+const { connection } = await scalekitClient.connection.updateEnvironmentConnection(
+  'conn_abc123',
+  { type: ConnectionType.OAUTH, uiButtonTitle: 'Connect Pylon' }
+);
+
+console.log(connection?.uiButtonTitle);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string` - The connection identifier (format: `conn_...`)
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**connection:** `UpdateConnection` - The fields to update, as a plain object, e.g. `type`, `uiButtonTitle` or `settings`
 
 </dd>
 </dl>
