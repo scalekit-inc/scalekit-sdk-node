@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# Only path filters and review instructions are set here. Everything else uses
+# CodeRabbit's defaults.
+reviews:
+  path_filters:
+    # Build output of `npm run build`. Committed with src/, never hand-edited.
+    - "!lib/**"
+    # Generated protobuf/Connect stubs (`make generate`). Never hand-edited.
+    - "!src/pkg/grpc/**"
+  path_instructions:
+    - path: "**"
+      instructions: |
+        Do not comment on generated code (`lib/**`, `src/pkg/grpc/**`). Stubs are regenerated from the proto repo and `lib/` is rebuilt from `src/`, so any fix belongs in the source.
+        House convention. Do not flag an `x-api-version` bump during a proto sync. It is intended.
+    - path: "REFERENCE.md"
+      instructions: |
+        Do not raise Markdown heading-level nits. The heading structure is generated.
