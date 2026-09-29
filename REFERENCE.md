@@ -770,6 +770,31 @@ const response = await scalekitClient.connection.listConnections({ pageSize: 10 
 </details>
 
 <details>
+<summary><code>connection.listAppConnections(params?) -> Promise&lt;ListAppConnectionsResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists the environment's app-level connections, including AgentKit app connections created with `createEnvironmentConnection`. Unlike `listConnections`, these are not scoped to an organization.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.connection.listAppConnections({ pageSize: 30 });
+for (const connection of response.connections) {
+  console.log(connection.id, connection.provider);
+}
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `{ pageSize?: number; pageToken?: string; provider?: string; query?: string }` | No | Pagination and filtering. `pageSize` is capped at 30; a larger value fails with `[invalid_argument] Validation error`. `provider` filters by provider key (case-sensitive) |
+
+**Returns**: `Promise<ListAppConnectionsResponse>` - Paginated app connections, with `nextPageToken`, `prevPageToken` and `totalSize`.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
 <summary><code>connection.listConnectionsByDomain(domain, options?) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
 
 #### 📝 Description
@@ -891,12 +916,26 @@ const { connection } = await scalekitClient.connection.getEnvironmentConnection(
 <summary><code>connection.updateEnvironmentConnection(connectionId, connection) -> Promise&lt;UpdateConnectionResponse&gt;</code></summary>
 
 #### 📝 Description
-**Preview.** Updates an environment-scoped connection. `PATCH /api/v1/connections/{connection_id}`; requires a workspace client and `sso:write`.
+**Preview.** Updates the OAuth settings of an environment-scoped connection. `PATCH /api/v1/connections/{connection_id}`; requires a workspace client and `sso:write`.
+
+Despite the `PATCH` verb, the server requires `type`, `providerKey` and `keyId` on every call, so read the connection first and send them back alongside what you are changing. Fields you leave out keep their stored values. On an app connection `settings` is the only field an update actually changes — every other field is accepted and then discarded.
 
 #### 🔌 Usage
 ```typescript
+import { ConnectionType } from '@scalekit-sdk/node';
+
+const { connection: current } =
+  await scalekitClient.connection.getEnvironmentConnection('conn_123');
+if (current?.settings.case !== 'oauthConfig') throw new Error('not an OAuth connection');
+
 await scalekitClient.connection.updateEnvironmentConnection('conn_123', {
-  uiButtonTitle: 'Connect Pylon',
+  type: ConnectionType.OAUTH,
+  providerKey: current.providerKey,
+  keyId: current.keyId,
+  settings: {
+    case: 'oauthConfig',
+    value: { ...current.settings.value, scopes: ['openid', 'email', 'profile'] },
+  },
 });
 ```
 
@@ -904,7 +943,7 @@ await scalekitClient.connection.updateEnvironmentConnection('conn_123', {
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | connectionId | `string` | Yes | Connection ID |
-| connection | `UpdateConnection` | Yes | Fields to update |
+| connection | `UpdateConnection` | Yes | The connection to store. `type`, `providerKey` and `keyId` are required on every call; `settings` is a oneof taking `{ case, value }` |
 
 **Returns**: `Promise<UpdateConnectionResponse>` - The updated connection.
 
@@ -1872,6 +1911,79 @@ if (response.connections.length > 0) {
 </dl>
 </details>
 
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">listAppConnections</a>(params?) -> Promise&lt;ListAppConnectionsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the app-level connections configured for the environment, including the AgentKit app connections created with `createEnvironmentConnection`. Unlike `listConnections`, which returns an organization's SSO connections, these belong to the environment and have no organization.
+
+Results are paginated. `pageSize` is capped at 30 by the server; a larger value fails with `[invalid_argument] Validation error`, which does not name the field.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+// Find an AgentKit app connection by id, following pagination
+let pageToken: string | undefined;
+do {
+  const response = await scalekitClient.connection.listAppConnections({
+    pageSize: 30,
+    pageToken,
+  });
+  const match = response.connections.find((c) => c.id === 'conn_abc123');
+  if (match) {
+    console.log(match.id, match.provider);
+    break;
+  }
+  pageToken = response.nextPageToken || undefined;
+} while (pageToken);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params?:** `object` - Optional pagination and filtering:
+- `pageSize?: number` - Connections per page (max 30)
+- `pageToken?: string` - Token from a previous response
+- `provider?: string` - Filter by provider key, case-sensitive (e.g. `"GMAIL"`)
+- `query?: string` - Free-text search
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">listConnections</a>(organizationId) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
 <dl>
 <dd>
@@ -2248,7 +2360,15 @@ console.log(connection?.keyId, connection?.providerKey, connection?.enabled);
 <dl>
 <dd>
 
-Updates an environment-scoped connection created with `createEnvironmentConnection`, such as its OAuth settings or button title. Organization SSO connections are not updated through this method.
+Updates the OAuth settings of an environment-scoped connection created with `createEnvironmentConnection`. Organization SSO connections are not updated through this method.
+
+Despite the `PATCH` verb, the server validates the whole connection rather than merging a partial one. Read the connection with `getEnvironmentConnection` first, then send `type`, `providerKey` and `keyId` back alongside what you are changing. Each missing field fails differently, and none of the errors name the method:
+
+- no `keyId` -> `[invalid_argument] keyId is required`
+- no `providerKey` -> `[invalid_argument] Validation error`
+- no `type` -> `[internal] error converting connection`
+
+On an AgentKit app connection `settings` is the only field an update actually changes. `provider`, `uiButtonTitle`, `debugEnabled`, `configurationType` and `attributeMapping` are all accepted and then discarded: the call succeeds and the stored values do not move. Change those from the Scalekit dashboard instead.
 
 **Preview:** the underlying `UpdateEnvironmentConnection` RPC is marked preview in the API and may change. It maps to `PATCH /api/v1/connections/{connection_id}`, requires a workspace client, and needs the `sso:write` permission.
 </dd>
@@ -2265,14 +2385,29 @@ Updates an environment-scoped connection created with `createEnvironmentConnecti
 <dd>
 
 ```typescript
+// Narrow the OAuth scopes on an app connection
 import { ConnectionType } from '@scalekit-sdk/node';
+
+const { connection: current } =
+  await scalekitClient.connection.getEnvironmentConnection('conn_abc123');
+if (current?.settings.case !== 'oauthConfig') {
+  throw new Error('not an OAuth connection');
+}
 
 const { connection } = await scalekitClient.connection.updateEnvironmentConnection(
   'conn_abc123',
-  { type: ConnectionType.OAUTH, uiButtonTitle: 'Connect Pylon' }
+  {
+    type: ConnectionType.OAUTH,
+    providerKey: current.providerKey,
+    keyId: current.keyId,
+    settings: {
+      case: 'oauthConfig',
+      value: { ...current.settings.value, scopes: ['openid', 'email', 'profile'] },
+    },
+  }
 );
 
-console.log(connection?.uiButtonTitle);
+console.log(connection?.settings.value);
 ```
 </dd>
 </dl>
@@ -2294,7 +2429,7 @@ console.log(connection?.uiButtonTitle);
 <dl>
 <dd>
 
-**connection:** `UpdateConnection` - The fields to update, as a plain object, e.g. `type`, `uiButtonTitle` or `settings`
+**connection:** `UpdateConnection` - The connection to store, as a plain object. `type`, `providerKey` and `keyId` are required on every call. `settings` is a protobuf oneof, so it takes `{ case: 'oauthConfig', value: {...} }`
 
 </dd>
 </dl>
@@ -7547,7 +7682,7 @@ console.log(res.totalSize, res.nextPageToken);
 
 **options:** `object` - Optional
 - `search?: string` - Free-text search across configuration metadata
-- `pageSize?: number` - Page size
+- `pageSize?: number` - Page size (max 30; a larger value fails with `[invalid_argument] Validation error`)
 - `pageToken?: string` - Pagination cursor
 
 </dd>
@@ -8127,7 +8262,9 @@ console.log(res.provider?.description);
 <dl>
 <dd>
 
-Deletes a custom connector. Remove its connections and connected accounts first; the server won't delete a connector that is still in use.
+Deletes a custom connector. Remove its connections and connected accounts first; the server won't delete a connector that is still in use, and answers `[invalid_argument] cannot delete custom provider with existing connections`.
+
+Connected accounts come off with `actions.deleteConnectedAccount`. The app connection itself has to go from the Scalekit dashboard: this SDK wraps no delete for an environment-scoped connection, and `connection.deleteConnection` takes an `organizationId`, which an app connection does not have.
 </dd>
 </dl>
 </dd>
