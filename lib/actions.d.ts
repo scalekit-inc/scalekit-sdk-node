@@ -1,10 +1,13 @@
-import { type JsonObject } from '@bufbuild/protobuf';
+import { type JsonObject, type MessageInitShape } from '@bufbuild/protobuf';
 import { AxiosResponse } from 'axios';
 import CoreClient from './core';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
+import type McpClient from './mcp';
+import type ProvidersClient from './providers';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
+import type { ListAvailableToolsResponse, ListScopedToolsResponse, ScopedToolFilterSchema, SearchToolsResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * Creation timestamp for an app connection, re-exported as the protobuf
  * well-known `Timestamp` type. Passed through from the API unchanged
@@ -41,7 +44,7 @@ export interface ListAppConnectionsResult {
     prevPageToken: string;
     totalSize: number;
 }
-import { CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+import { CreateConnectedAccountResponse, CreateConnectedAccountSchema, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * Normalized, consumer-friendly view of a tool returned by
@@ -76,13 +79,62 @@ export default class ActionsClient {
     private readonly connectedAccounts;
     private readonly coreClient;
     private readonly connection;
+    /** Virtual MCP servers: configurations, connected accounts and session tokens. */
+    readonly mcp: McpClient;
+    /** Bring-your-own connectors: create, update, list and delete custom connectors. */
+    readonly providers: ProvidersClient;
     /**
      * @param {ToolsClient} tools - Client used to execute tools on behalf of connected accounts.
      * @param {ConnectedAccountsClient} connectedAccounts - Client for connected-account lifecycle operations.
      * @param {CoreClient} coreClient - Shared core client (auth, HTTP, retries) used for proxied requests.
      * @param {ConnectionClient} connection - Client used to list app-level connections.
      */
-    constructor(tools: ToolsClient, connectedAccounts: ConnectedAccountsClient, coreClient: CoreClient, connection: ConnectionClient);
+    constructor(tools: ToolsClient, connectedAccounts: ConnectedAccountsClient, coreClient: CoreClient, connection: ConnectionClient, 
+    /** Virtual MCP servers: configurations, connected accounts and session tokens. */
+    mcp: McpClient, 
+    /** Bring-your-own connectors: create, update, list and delete custom connectors. */
+    providers: ProvidersClient);
+    /**
+     * Finds tools that fit a goal, ranked by relevance.
+     *
+     * Delegates to `tools.searchTools`. Prefer this over listing a connector:
+     * binding a whole connector to a model is roughly 85k tokens of schema per
+     * request, against about 700 for one search.
+     *
+     * Pass `identifier` and each result's `connections` carries that user's
+     * `readinessState` per connection — check it before executing.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    searchTools(query: string, options?: {
+        identifier?: string;
+        topK?: number;
+    }): Promise<SearchToolsResponse>;
+    /**
+     * Lists tools for one identifier, narrowed by an explicit filter.
+     *
+     * Delegates to `tools.listScopedTools`. `options.filter` is required by the
+     * server even though its fields are individually optional.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    listScopedTools(identifier: string, options: {
+        filter: MessageInitShape<typeof ScopedToolFilterSchema>;
+        pageSize?: number;
+        pageToken?: string;
+    }): Promise<ListScopedToolsResponse>;
+    /**
+     * Lists every tool available to one identifier across their connections.
+     *
+     * Delegates to `tools.listAvailableTools`. Paginated — follow
+     * `nextPageToken` if you need the complete set.
+     *
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    listAvailableTools(identifier: string, options?: {
+        pageSize?: number;
+        pageToken?: string;
+    }): Promise<ListAvailableToolsResponse>;
     /**
      * Execute a tool on behalf of a connected account.
      *
@@ -226,7 +278,15 @@ export default class ActionsClient {
     createConnectedAccount(params: {
         connectionName: string;
         identifier: string;
-        authorizationDetails: CreateConnectedAccount['authorizationDetails'];
+        /**
+         * How the account authenticates, as a plain object (the shape `create()`
+         * takes when the request is built).
+         *
+         * To connect a user's account, prefer {@link getAuthorizationLink}: it
+         * creates the account if needed and the user completes authorization
+         * through the link. OAuth credentials cannot be supplied directly.
+         */
+        authorizationDetails: MessageInitShape<typeof CreateConnectedAccountSchema>['authorizationDetails'];
         organizationId?: string;
         userId?: string;
         apiConfig?: Record<string, unknown>;
@@ -240,7 +300,8 @@ export default class ActionsClient {
     getOrCreateConnectedAccount(params: {
         connectionName: string;
         identifier: string;
-        authorizationDetails?: CreateConnectedAccount['authorizationDetails'];
+        /** Same plain-object shape as {@link createConnectedAccount}. */
+        authorizationDetails?: MessageInitShape<typeof CreateConnectedAccountSchema>['authorizationDetails'];
         organizationId?: string;
         userId?: string;
         apiConfig?: Record<string, unknown>;
@@ -249,7 +310,8 @@ export default class ActionsClient {
     upsertConnectedAccount: (params: {
         connectionName: string;
         identifier: string;
-        authorizationDetails?: CreateConnectedAccount["authorizationDetails"];
+        /** Same plain-object shape as {@link createConnectedAccount}. */
+        authorizationDetails?: MessageInitShape<typeof CreateConnectedAccountSchema>["authorizationDetails"];
         organizationId?: string;
         userId?: string;
         apiConfig?: Record<string, unknown>;

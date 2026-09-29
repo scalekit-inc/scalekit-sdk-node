@@ -15,6 +15,9 @@
 - [Events](#events)
 - [Resources](#resources)
 - [Tools](#tools)
+- [Actions](#actions)
+- [Virtual MCP Servers](#virtual-mcp-servers)
+- [Custom Connectors](#custom-connectors)
 - [WebAuthn](#webauthn)
 - [Error Handling](#error-handling)
 - [Type Definitions](#type-definitions)
@@ -718,7 +721,7 @@ const isValid = scalekitClient.verifyInterceptorPayload(secret, headers, payload
 ## Connections
 
 <details>
-<summary><strong>Connections</strong> - Manage SSO connections and identity providers</summary>
+<summary><strong>Connections</strong> - Manage SSO connections, identity providers and environment-scoped (AgentKit app) connections</summary>
 
 Access via `scalekitClient.connection`.
 
@@ -761,6 +764,31 @@ const response = await scalekitClient.connection.listConnections({ pageSize: 10 
 | options | `{ pageSize?: number; pageToken?: string }` | No | Pagination options |
 
 **Returns**: `Promise<ListConnectionsResponse>` - Paginated connections.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
+<summary><code>connection.listAppConnections(params?) -> Promise&lt;ListAppConnectionsResponse&gt;</code></summary>
+
+#### 📝 Description
+Lists the environment's app-level connections, including AgentKit app connections created with `createEnvironmentConnection`. Unlike `listConnections`, these are not scoped to an organization.
+
+#### 🔌 Usage
+```typescript
+const response = await scalekitClient.connection.listAppConnections({ pageSize: 30 });
+for (const connection of response.connections) {
+  console.log(connection.id, connection.provider);
+}
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| params | `{ pageSize?: number; pageToken?: string; provider?: string; query?: string }` | No | Pagination and filtering. `pageSize` is capped at 30; a larger value fails with `[invalid_argument] Validation error`. `provider` filters by provider key (case-sensitive) |
+
+**Returns**: `Promise<ListAppConnectionsResponse>` - Paginated app connections, with `nextPageToken`, `prevPageToken` and `totalSize`.
 
 **Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
 
@@ -828,6 +856,96 @@ await scalekitClient.connection.disableConnection('conn_123');
 | connectionId | `string` | Yes | Connection ID |
 
 **Returns**: `Promise<MessageShape<typeof EmptySchema>>` - Empty on success.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
+<summary><code>connection.createEnvironmentConnection(connection, flags?) -> Promise&lt;CreateConnectionResponse&gt;</code></summary>
+
+#### 📝 Description
+**Preview.** Creates an environment-scoped connection, such as an AgentKit app connection for a connector. It has no organization. `POST /api/v1/connections`; requires a workspace client and `sso:write`.
+
+#### 🔌 Usage
+```typescript
+import { ConnectionType } from '@scalekit-sdk/node';
+
+const { connection } = await scalekitClient.connection.createEnvironmentConnection(
+  { providerKey: '<CONNECTOR_IDENTIFIER>', type: ConnectionType.OAUTH },
+  { isApp: true }
+);
+const connectionName = connection!.keyId; // pass to the actions methods
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| connection | `CreateConnection` | Yes | `providerKey` (the connector identifier) and `type` |
+| flags | `Flags` | No | Pass `{ isApp: true }` for an AgentKit app connection |
+
+**Returns**: `Promise<CreateConnectionResponse>` - The created connection. Its `keyId` is the connection name.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
+<summary><code>connection.getEnvironmentConnection(connectionId) -> Promise&lt;GetConnectionResponse&gt;</code></summary>
+
+#### 📝 Description
+**Preview.** Retrieves an environment-scoped connection by ID. `GET /api/v1/connections/{connection_id}`; accepts a workspace or actions-portal client and needs `sso:read`.
+
+#### 🔌 Usage
+```typescript
+const { connection } = await scalekitClient.connection.getEnvironmentConnection('conn_123');
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| connectionId | `string` | Yes | Connection ID |
+
+**Returns**: `Promise<GetConnectionResponse>` - Connection details.
+
+**Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
+
+</details>
+
+<details>
+<summary><code>connection.updateEnvironmentConnection(connectionId, connection) -> Promise&lt;UpdateConnectionResponse&gt;</code></summary>
+
+#### 📝 Description
+**Preview.** Updates the OAuth settings of an environment-scoped connection. `PATCH /api/v1/connections/{connection_id}`; requires a workspace client and `sso:write`.
+
+Despite the `PATCH` verb, the server requires `type`, `providerKey` and `keyId` on every call, so read the connection first and send them back alongside what you are changing. Fields you leave out keep their stored values. On an app connection `settings` is the only field an update actually changes — every other field is accepted and then discarded.
+
+#### 🔌 Usage
+```typescript
+import { ConnectionType } from '@scalekit-sdk/node';
+
+const { connection: current } =
+  await scalekitClient.connection.getEnvironmentConnection('conn_123');
+if (current?.settings.case !== 'oauthConfig') throw new Error('not an OAuth connection');
+
+await scalekitClient.connection.updateEnvironmentConnection('conn_123', {
+  type: ConnectionType.OAUTH,
+  providerKey: current.providerKey,
+  keyId: current.keyId,
+  settings: {
+    case: 'oauthConfig',
+    value: { ...current.settings.value, scopes: ['openid', 'email', 'profile'] },
+  },
+});
+```
+
+#### ⚙️ Parameters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| connectionId | `string` | Yes | Connection ID |
+| connection | `UpdateConnection` | Yes | The connection to store. `type`, `providerKey` and `keyId` are required on every call; `settings` is a oneof taking `{ case, value }` |
+
+**Returns**: `Promise<UpdateConnectionResponse>` - The updated connection.
 
 **Source**: [src/connection.ts](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts)
 
@@ -995,6 +1113,18 @@ try {
 ### Grant Types
 
 - `GrantType`: OAuth grant types
+
+### AgentKit Types
+
+- `ConnectorStatus`: Numeric status on `connectedAccount.status` (`ACTIVE`, `EXPIRED`, `PENDING_AUTH`, `PENDING_VERIFICATION`, `DISCONNECTED`). Compare against these constants, not raw numbers.
+- `ConnectorType`: Numeric `connectedAccount.authorizationType` (`OAUTH`, `API_KEY`, `BASIC_AUTH`, `BEARER_TOKEN`, `OAUTH_M2M`, and others)
+- `ToolReadinessState`: Per-connection readiness on `searchTools` results (`READY`, `NEEDS_CONNECTION`, `NEEDS_REAUTH`)
+- `McpConfig`, `McpConfigConnectionToolMapping`: A Virtual MCP server configuration and its connection-to-tool mappings
+- `ProviderType`: Connector kind filter for `listProviders` (`DEFAULT`, `CUSTOM`, `ALL`)
+- `Provider`: A connector, built-in or custom. `authPatterns` is decoded into `AuthPattern[]`, so it can be passed back to `updateCustomProvider`
+- `AuthPattern`, `AuthField`: Hand-written types for custom connector `authPatterns`
+- `ConnectionType`, `ConnectionProvider`, `ConnectionAuthMode`: Numeric enums on a connection's `type`, `provider` and `authMode`
+- `Connection`, `CreateConnection`, `UpdateConnection`, `Flags`: Environment connection shapes used by `createEnvironmentConnection` and `updateEnvironmentConnection`
 
 ## Organizations
 
@@ -1781,6 +1911,79 @@ if (response.connections.length > 0) {
 </dl>
 </details>
 
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">listAppConnections</a>(params?) -> Promise&lt;ListAppConnectionsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the app-level connections configured for the environment, including the AgentKit app connections created with `createEnvironmentConnection`. Unlike `listConnections`, which returns an organization's SSO connections, these belong to the environment and have no organization.
+
+Results are paginated. `pageSize` is capped at 30 by the server; a larger value fails with `[invalid_argument] Validation error`, which does not name the field.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+// Find an AgentKit app connection by id, following pagination
+let pageToken: string | undefined;
+do {
+  const response = await scalekitClient.connection.listAppConnections({
+    pageSize: 30,
+    pageToken,
+  });
+  const match = response.connections.find((c) => c.id === 'conn_abc123');
+  if (match) {
+    console.log(match.id, match.provider);
+    break;
+  }
+  pageToken = response.nextPageToken || undefined;
+} while (pageToken);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params?:** `object` - Optional pagination and filtering:
+- `pageSize?: number` - Connections per page (max 30)
+- `pageToken?: string` - Token from a previous response
+- `provider?: string` - Filter by provider key, case-sensitive (e.g. `"GMAIL"`)
+- `query?: string` - Free-text search
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">listConnections</a>(organizationId) -> Promise&lt;ListConnectionsResponse&gt;</code></summary>
 <dl>
 <dd>
@@ -1969,6 +2172,264 @@ console.log('Connection disabled:', !response.connection.enabled);
 <dd>
 
 **id:** `string` - The connection ID to disable
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">createEnvironmentConnection</a>(connection, flags?) -> Promise&lt;CreateConnectionResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates an environment-scoped connection. Unlike `createConnection`, which creates an SSO connection owned by an organization, this connection belongs to the environment itself.
+
+Use it for AgentKit app connections: pass `flags: { isApp: true }` and set `providerKey` to the connector's identifier, such as a custom connector's `provider.identifier`. The returned connection's `keyId` is the connection name that the AgentKit methods on `actions` take.
+
+**Preview:** the underlying `CreateEnvironmentConnection` RPC is marked preview in the API and may change. It maps to `POST /api/v1/connections`, requires a workspace client, and needs the `sso:write` permission.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ConnectionType } from '@scalekit-sdk/node';
+
+// 1. Create a custom OAuth connector (or look one up with listProviders)
+const { provider } = await scalekitClient.actions.providers.createCustomProvider({
+  displayName: 'Custom Pylon MCP',
+  description: 'Pylon integration via MCP',
+  proxyUrl: 'https://mcp.usepylon.com',
+  authPatterns: [
+    {
+      type: 'OAUTH',
+      display_name: 'OAuth 2.1',
+      description: 'Authenticate via browser OAuth.',
+      is_mcp: true,
+      oauth_config: {},
+    },
+  ],
+});
+
+// 2. Create an AgentKit app connection for it
+const created = await scalekitClient.connection.createEnvironmentConnection(
+  { providerKey: provider!.identifier, type: ConnectionType.OAUTH },
+  { isApp: true }
+);
+const connectionId = created.connection!.id;
+
+// 3. Fetch it by id; keyId is the connection name AgentKit uses
+const { connection } =
+  await scalekitClient.connection.getEnvironmentConnection(connectionId);
+const connectionName = connection!.keyId!;
+
+// 4. Send the user an authorization link for that connection
+const { link } = await scalekitClient.actions.getAuthorizationLink({
+  connectionName,
+  identifier: 'user_123',
+});
+console.log(connectionName, link);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connection:** `CreateConnection` - The connection to create, as a plain object:
+- `providerKey: string` - Identifier of the connector the connection is for, e.g. a custom connector's `provider.identifier`
+- `type: ConnectionType` - Authentication type, e.g. `ConnectionType.OAUTH`
+- `keyId?: string` - Connection name; generated when omitted
+- `authMode?: ConnectionAuthMode` - Whether each user connects their own account (`USER`) or shares one (`ORG_WIDE`)
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**flags?:** `Flags` - Optional flags:
+- `isApp?: boolean` - Set to `true` for an AgentKit app connection
+- `isLogin?: boolean` - Leave unset for AgentKit app connections
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">getEnvironmentConnection</a>(connectionId) -> Promise&lt;GetConnectionResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Retrieves an environment-scoped connection by id, such as an AgentKit app connection created with `createEnvironmentConnection`. For an organization's SSO connection, use `getConnection` instead.
+
+**Preview:** the underlying `GetEnvironmentConnection` RPC is marked preview in the API and may change. It maps to `GET /api/v1/connections/{connection_id}`, accepts a workspace or actions-portal client, and needs the `sso:read` permission.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { connection } =
+  await scalekitClient.connection.getEnvironmentConnection('conn_abc123');
+
+console.log(connection?.keyId, connection?.providerKey, connection?.enabled);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string` - The connection identifier (format: `conn_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.connection.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/connection.ts">updateEnvironmentConnection</a>(connectionId, connection) -> Promise&lt;UpdateConnectionResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates the OAuth settings of an environment-scoped connection created with `createEnvironmentConnection`. Organization SSO connections are not updated through this method.
+
+Despite the `PATCH` verb, the server validates the whole connection rather than merging a partial one. Read the connection with `getEnvironmentConnection` first, then send `type`, `providerKey` and `keyId` back alongside what you are changing. Each missing field fails differently, and none of the errors name the method:
+
+- no `keyId` -> `[invalid_argument] keyId is required`
+- no `providerKey` -> `[invalid_argument] Validation error`
+- no `type` -> `[internal] error converting connection`
+
+On an AgentKit app connection `settings` is the only field an update actually changes. `provider`, `uiButtonTitle`, `debugEnabled`, `configurationType` and `attributeMapping` are all accepted and then discarded: the call succeeds and the stored values do not move. Change those from the Scalekit dashboard instead.
+
+**Preview:** the underlying `UpdateEnvironmentConnection` RPC is marked preview in the API and may change. It maps to `PATCH /api/v1/connections/{connection_id}`, requires a workspace client, and needs the `sso:write` permission.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+// Narrow the OAuth scopes on an app connection
+import { ConnectionType } from '@scalekit-sdk/node';
+
+const { connection: current } =
+  await scalekitClient.connection.getEnvironmentConnection('conn_abc123');
+if (current?.settings.case !== 'oauthConfig') {
+  throw new Error('not an OAuth connection');
+}
+
+const { connection } = await scalekitClient.connection.updateEnvironmentConnection(
+  'conn_abc123',
+  {
+    type: ConnectionType.OAUTH,
+    providerKey: current.providerKey,
+    keyId: current.keyId,
+    settings: {
+      case: 'oauthConfig',
+      value: { ...current.settings.value, scopes: ['openid', 'email', 'profile'] },
+    },
+  }
+);
+
+console.log(connection?.settings.value);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string` - The connection identifier (format: `conn_...`)
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**connection:** `UpdateConnection` - The connection to store, as a plain object. `type`, `providerKey` and `keyId` are required on every call. `settings` is a protobuf oneof, so it takes `{ case: 'oauthConfig', value: {...} }`
 
 </dd>
 </dl>
@@ -6682,6 +7143,1226 @@ for (const tool of res.tools) {
 **options:** `object` - Optional search options
 - `identifier?: string` - Connected-account identifier (e.g. the end user's email or ID). When set, each result is annotated with readiness for this identifier's connections.
 - `topK?: number` - Maximum number of ranked results to return. Defaults to 10, capped at 50.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Actions
+
+Connect end users' accounts to third-party services and run tools against them. This section covers tool discovery on `actions` (also available on `scalekitClient.tools`) and authorizing a connected account. To create or update a connected account, send the user an authorization link with `getAuthorizationLink`.
+
+Virtual MCP servers and custom connectors are also under `actions`, as [`actions.mcp`](#virtual-mcp-servers) and [`actions.providers`](#custom-connectors).
+
+Access via `scalekitClient.actions`.
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">searchTools</a>(query, options?) -> Promise&lt;SearchToolsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Finds tools that fit a goal, ranked by relevance. Same behavior as [`tools.searchTools`](#tools).
+
+Pass `options.identifier` and each result's `connections` carries that user's `readinessState` per connection. Only execute against a connection whose `readinessState` is `ToolReadinessState.READY`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ToolReadinessState } from '@scalekit-sdk/node';
+
+const res = await scalekitClient.actions.searchTools('star a github repository', {
+  identifier: 'user_123',
+  topK: 5,
+});
+
+for (const tool of res.tools) {
+  const ready = tool.connections.find(
+    (c) => c.readinessState === ToolReadinessState.READY
+  );
+  console.log(tool.name, tool.score, ready?.connectedAccountId);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**query:** `string` - The job to be done, in plain language. 1-256 characters.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**options:** `object` - Optional search options
+- `identifier?: string` - Your application's identifier for the end user. When set, each result is annotated with readiness for this identifier's connections.
+- `topK?: number` - Maximum number of ranked results. Defaults to 10, capped at 50.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">listScopedTools</a>(identifier, options) -> Promise&lt;ListScopedToolsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists tools for one identifier, narrowed by an explicit filter.
+
+`options.filter` is required by the server even though each of its fields is optional.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.actions.listScopedTools('user_123', {
+  filter: { connectionNames: ['github-connect'] },
+  pageSize: 50,
+});
+console.log(res);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**identifier:** `string` - Your application's identifier for the end user
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**options:** `object`
+- `filter: { providers?: string[]; toolNames?: string[]; connectionNames?: string[] }` - Required. Narrows the result to matching providers, tool names or connection names.
+- `pageSize?: number` - Page size
+- `pageToken?: string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">listAvailableTools</a>(identifier, options?) -> Promise&lt;ListAvailableToolsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists every tool available to one identifier across all of their connections.
+
+Paginated. Follow `nextPageToken` if you need the complete set.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.actions.listAvailableTools('user_123', {
+  pageSize: 100,
+});
+console.log(res);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**identifier:** `string` - Your application's identifier for the end user
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**options:** `object` - Optional pagination
+- `pageSize?: number` - Page size
+- `pageToken?: string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">getAuthorizationLink</a>(params) -> Promise&lt;GetMagicLinkForConnectedAccountResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generates a time-limited authorization link that the end user opens to connect, or re-authorize, their account on a connection. This is the way to create or update a connected account: if the account doesn't exist yet, it is created in the `PENDING_AUTH` state, and it becomes active once the user completes the flow.
+
+Send `link` to the user before `expiry`. Generate a fresh link whenever the account needs authorizing again, for example when `connectedAccount.status` is `ConnectorStatus.EXPIRED`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ConnectorStatus } from '@scalekit-sdk/node';
+
+// Create the account (or re-authorize an existing one) by sending the user a link
+const { link, expiry } = await scalekitClient.actions.getAuthorizationLink({
+  connectionName: 'github-connect',
+  identifier: 'user_123',
+});
+console.log('Authorize here:', link, 'before', expiry);
+
+// Later: check whether the user has finished
+const { connectedAccount } = await scalekitClient.actions.getConnectedAccount({
+  connectionName: 'github-connect',
+  identifier: 'user_123',
+});
+console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.connectionName?:** `string` - Connection name as shown in the dashboard. Case-sensitive. Use with `identifier`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.identifier?:** `string` - Your application's identifier for the end user. Use with `connectionName`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.connectedAccountId?:** `string` - An existing connected account, as an alternative to `connectionName` + `identifier`
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.organizationId?:** `string` - Organization to scope the account to
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.userId?:** `string` - Scalekit user to scope the account to. Not the same field as `identifier`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.userVerifyUrl?:** `string` - Your app's user-verification redirect URL. When set, the user is sent there after authorizing, and you complete the connection by calling `actions.verifyConnectedAccountUser` with the `authRequestId` from that redirect.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.state?:** `string` - Opaque value added to the `userVerifyUrl` redirect's query parameters, so you can validate the redirect
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Virtual MCP Servers
+
+A Virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol, so any MCP-capable agent can call them. Create one configuration per agent role (not per user), and mint a short-lived session token per user per run. The server URL stays the same; the token carries the user's identity.
+
+Only the generally available `McpConfig` API is covered. The older `Mcp` and `McpInstance` families are marked PREVIEW and are not exposed.
+
+Access via `scalekitClient.actions.mcp`.
+
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">createConfig</a>(params) -> Promise&lt;CreateMcpConfigResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a Virtual MCP server configuration. The response's `config.mcpServerUrl` is the URL every user and session reuses.
+
+`config.mcpServerUrl` comes back as an empty string when the `mcp_config_server_url` feature flag is not enabled for your environment, and the call still succeeds. Check it before you store it.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.actions.mcp.createConfig({
+  name: 'support-agent',
+  description: 'Tools for the support triage agent',
+  connectionToolMappings: [
+    { connectionName: 'github-connect', tools: ['github_issue_create'] },
+    { connectionName: 'slack-connect' }, // omit tools to expose every tool
+  ],
+});
+
+if (!res.config?.mcpServerUrl) {
+  throw new Error('mcpServerUrl is empty -- check the feature flag');
+}
+console.log(res.config.id, res.config.mcpServerUrl);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.name:** `string` - Unique name. 1-100 characters: lowercase letters, digits, hyphens and underscores.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.description?:** `string` - What this server exposes
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Connections to expose and, optionally, which of their tools. Omit `tools` to expose every tool for that connection. Maximum 25 mappings.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">getConfig</a>(configId) -> Promise&lt;GetMcpConfigResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Fetches one MCP configuration by id.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.actions.mcp.getConfig('<CONFIG_ID>');
+console.log(res.config?.name, res.config?.mcpServerUrl);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**configId:** `string` - The configuration to fetch
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">listConfigs</a>(options?) -> Promise&lt;ListMcpConfigsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists MCP configurations in the environment, with pagination.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.actions.mcp.listConfigs({ search: 'support', pageSize: 20 });
+for (const config of res.configs) {
+  console.log(config.id, config.name);
+}
+console.log(res.totalSize, res.nextPageToken);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**options:** `object` - Optional
+- `search?: string` - Free-text search across configuration metadata
+- `pageSize?: number` - Page size (max 30; a larger value fails with `[invalid_argument] Validation error`)
+- `pageToken?: string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">updateConfig</a>(params) -> Promise&lt;UpdateMcpConfigResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates a configuration's description and connection-to-tool mappings. The name cannot be changed after creation.
+
+Avoid updating while agent sessions are running, because tools can become unavailable mid-session. For a significant change, create a new configuration and switch to its URL.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.actions.mcp.updateConfig({
+  configId: '<CONFIG_ID>',
+  description: 'Support agent, read-only GitHub',
+  connectionToolMappings: [
+    { connectionName: 'github-connect', tools: ['github_issue_list'] },
+  ],
+});
+console.log(res.config?.connectionToolMappings);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.configId:** `string` - The configuration to update
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.description?:** `string` - New description
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Replacement mappings
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">deleteConfig</a>(configId) -> Promise&lt;DeleteMcpConfigResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes an MCP configuration.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.actions.mcp.deleteConfig('<CONFIG_ID>');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**configId:** `string` - The configuration to delete
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">listConnectedAccounts</a>(params) -> Promise&lt;ListMcpConnectedAccountsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the connected accounts behind a configuration for one user.
+
+Call this before minting a session token. OAuth credentials can expire or be revoked, and an agent that starts without an active connection fails on every tool call. For any account whose `connectedAccountStatus` is not `"ACTIVE"`, send the user its `authenticationLink`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const res = await scalekitClient.actions.mcp.listConnectedAccounts({
+  configId: '<CONFIG_ID>',
+  identifier: 'user_123',
+  includeAuthLink: true,
+});
+
+const pending = res.connectedAccounts.filter(
+  (a) => a.connectedAccountStatus !== 'ACTIVE'
+);
+for (const account of pending) {
+  console.log(account.connectionName, account.authenticationLink);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.configId:** `string` - The configuration
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.identifier:** `string` - Your application's identifier for the end user
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.includeAuthLink?:** `boolean` - Include authorization links for inactive connections
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.mcp.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/mcp.ts">createSessionToken</a>(params) -> Promise&lt;CreateMcpSessionTokenResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Mints a session token for one user against one configuration.
+
+The token carries the user's identity. Mint a fresh one before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { config } = await scalekitClient.actions.mcp.getConfig('<CONFIG_ID>');
+const session = await scalekitClient.actions.mcp.createSessionToken({
+  mcpConfigId: '<CONFIG_ID>',
+  identifier: 'user_123',
+  expirySeconds: 900,
+});
+
+// Hand both to your MCP client
+console.log(config?.mcpServerUrl, session.token, session.expiresAt);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.mcpConfigId:** `string` - The configuration
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.identifier:** `string` - Your application's identifier for the end user
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server enforces the allowed range.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Custom Connectors
+
+A custom connector (custom provider) puts a service Scalekit doesn't ship behind the same flow as a built-in one: users connect an account, you call the service through `actions.request`, and Scalekit injects the credentials.
+
+`authPatterns` are passed to the API as-is, so their keys are snake_case (`type`, `display_name`, `field_name`, `input_type`) rather than the camelCase used elsewhere in this SDK. Exactly one pattern is supported today. `type` is one of `OAUTH`, `BEARER`, `API_KEY`, `BASIC` or `NO_AUTH`. `BEARER`, `API_KEY` and `BASIC` patterns take `fields`; an `OAUTH` pattern collects its own credentials through `oauth_config`, and `NO_AUTH` takes none.
+
+Access via `scalekitClient.actions.providers`.
+
+<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">createCustomProvider</a>(params) -> Promise&lt;CreateProviderResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a custom connector. The response's `provider.identifier` is the id you pass to `updateCustomProvider` and `deleteCustomProvider`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import type { AuthPattern } from '@scalekit-sdk/node';
+
+const authPatterns: AuthPattern[] = [
+  {
+    type: 'BEARER',
+    display_name: 'Bearer Token',
+    description: 'Authenticate with an Acme API token.',
+    fields: [
+      { field_name: 'token', label: 'API Token', input_type: 'password' },
+    ],
+  },
+];
+
+// Other shapes:
+// OAuth, using the upstream server's discovered defaults:
+//   { type: 'OAUTH', display_name: 'OAuth 2.1', description: '...', is_mcp: true, oauth_config: {} }
+// API key sent in a custom header:
+//   { type: 'API_KEY', display_name: 'API Key', description: '...',
+//     fields: [{ field_name: 'api_key', label: 'API Key', input_type: 'password' }],
+//     auth_header_key_override: 'X-API-Key' }
+// Public server, no credentials:
+//   { type: 'NO_AUTH', display_name: 'No Auth', description: '...', fields: [] }
+
+const res = await scalekitClient.actions.providers.createCustomProvider({
+  displayName: 'Acme Tickets',
+  description: 'Internal ticketing API',
+  proxyUrl: 'https://api.acme.example.com',
+  authPatterns,
+});
+console.log(res.provider?.identifier);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.displayName:** `string` - Letters, digits and spaces only. End it with "MCP" when the connector fronts an MCP server.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.proxyUrl:** `string` - Base HTTPS URL of the upstream service
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.proxyEnabled?:** `boolean` - Whether Scalekit proxies requests. Defaults to `true`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.description?:** `string` - Description
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; is_mcp?: boolean; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select'; hint?: string; required?: boolean }`. Set `is_mcp: true` when the connector fronts an MCP server.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.iconSrc?:** `string` - Icon URL
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.metadata?:** `Record<string, string>` - Arbitrary key-value metadata
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">updateCustomProvider</a>(params) -> Promise&lt;UpdateProviderResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates a custom connector.
+
+Treat this as a PUT: read the current connector with `listProviders` first, then send back every field you want to keep alongside the ones you are changing. `authPatterns` on a response is already decoded into plain `AuthPattern` objects, so `provider.authPatterns` and `provider.proxyEnabled` can be passed back as-is.
+
+What the server does with each field:
+- `displayName`, `proxyUrl` and `authPatterns` are required on every update. Leaving out `authPatterns` fails with `[invalid_argument] Validation error`, and it replaces the whole list rather than merging into it. A pattern's `type` and `is_mcp` cannot be changed.
+- `metadata` replaces the stored map, so leaving it out clears it.
+- `proxyEnabled` is always applied. It defaults to `true`, so pass the current value to keep a connector's proxying switched off.
+- `description` and `iconSrc` keep their stored values when left out.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ProviderType } from '@scalekit-sdk/node';
+
+// Read the current state first, then send back everything you want to keep.
+// Pass ProviderType.CUSTOM: without it, only built-in connectors are searched.
+const { providers } = await scalekitClient.actions.providers.listProviders({
+  identifier: '<PROVIDER_IDENTIFIER>',
+  providerType: ProviderType.CUSTOM,
+});
+const current = providers[0];
+
+const res = await scalekitClient.actions.providers.updateCustomProvider({
+  identifier: current.identifier,
+  displayName: current.displayName,
+  proxyUrl: current.proxyUrl,
+  authPatterns: current.authPatterns, // already plain AuthPattern objects
+  proxyEnabled: current.proxyEnabled,
+  description: 'Internal ticketing API, v2',
+  iconSrc: current.iconSrc,
+  metadata: { ...current.metadata, updated_by: 'sync-job' },
+});
+console.log(res.provider?.description);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.identifier:** `string` - From `provider.identifier` on a create or list response
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.displayName:** `string` - Required on every update
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.proxyUrl:** `string` - Required on every update
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.authPatterns:** `AuthPattern[]` - Required on every update. Replaces the existing list.
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**params.proxyEnabled?:** `boolean` - Whether Scalekit proxies requests. Always sent; defaults to `true`, so pass `current.proxyEnabled` to keep the stored value.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.description?:** `string` - Description. Keeps the stored value when left out.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.iconSrc?:** `string` - Icon URL. Keeps the stored value when left out.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.metadata?:** `Record<string, string>` - Arbitrary key-value metadata. Replaces the stored map, so leaving it out clears it.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">deleteCustomProvider</a>(identifier) -> Promise&lt;DeleteProviderResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes a custom connector. Remove its connections and connected accounts first; the server won't delete a connector that is still in use, and answers `[invalid_argument] cannot delete custom provider with existing connections`.
+
+Connected accounts come off with `actions.deleteConnectedAccount`. The app connection itself has to go from the Scalekit dashboard: this SDK wraps no delete for an environment-scoped connection, and `connection.deleteConnection` takes an `organizationId`, which an app connection does not have.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.actions.providers.deleteCustomProvider('<PROVIDER_IDENTIFIER>');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**identifier:** `string` - From `provider.identifier` on a create or list response
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">listProviders</a>(params?) -> Promise&lt;ListProvidersResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists connectors, built-in and custom. Use it to find a connector's `identifier` before updating or deleting it. Each provider's `authPatterns` comes back as plain `AuthPattern` objects, ready to pass to `updateCustomProvider`.
+
+**Preview:** the underlying `ListProviders` RPC is marked preview in the API and may change.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ProviderType } from '@scalekit-sdk/node';
+
+const res = await scalekitClient.actions.providers.listProviders({
+  providerType: ProviderType.CUSTOM,
+  pageSize: 50,
+});
+for (const provider of res.providers) {
+  console.log(provider.identifier, provider.displayName, provider.isCustom);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object` - Optional
+- `providerType?: ProviderType` - `ProviderType.CUSTOM` for your own connectors, `ProviderType.ALL` for built-ins and custom together. Omitting it behaves like `ProviderType.DEFAULT` and returns built-ins only, so pass `CUSTOM` or `ALL` to find a custom connector's `identifier`.
+- `identifier?: string` - Filter to one connector. For a custom connector, also pass `providerType: ProviderType.CUSTOM` (or `ALL`), or nothing is found.
+- `pageSize?: number` - Page size
+- `pageToken?: string` - Pagination cursor
 
 </dd>
 </dl>

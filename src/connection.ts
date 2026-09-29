@@ -1,4 +1,4 @@
-import { create, MessageShape } from '@bufbuild/protobuf';
+import { create, MessageInitShape, MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
@@ -8,11 +8,18 @@ import {
   CreateConnection,
   CreateConnectionRequestSchema,
   CreateConnectionResponse,
+  CreateConnectionSchema,
+  CreateEnvironmentConnectionRequestSchema,
   DeleteConnectionRequestSchema,
+  FlagsSchema,
   GetConnectionResponse,
+  GetEnvironmentConnectionRequestSchema,
   ToggleConnectionResponse,
   ListConnectionsResponse,
   ListAppConnectionsResponse,
+  UpdateConnectionResponse,
+  UpdateConnectionSchema,
+  UpdateEnvironmentConnectionRequestSchema,
 } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 
 /**
@@ -209,7 +216,8 @@ export default class ConnectionClient {
    * Results are paginated and can optionally be filtered by provider.
    *
    * @param {object} [params] - Optional pagination and filtering parameters
-   * @param {number} [params.pageSize] - Maximum number of connections to return per page
+   * @param {number} [params.pageSize] - Maximum number of connections to return per page (max 30;
+   *   a larger value fails with `[invalid_argument] Validation error`)
    * @param {string} [params.pageToken] - Token identifying the page of results to return
    * @param {string} [params.provider] - Filter results to a specific provider (e.g., "okta", "google")
    *
@@ -365,5 +373,174 @@ export default class ConnectionClient {
       id,
     });
     return this.coreClient.connectExec(this.client.deleteConnection, request);
+  }
+
+  /**
+   * Creates an environment-scoped connection.
+   *
+   * Unlike {@link createConnection}, which creates an SSO connection owned by an
+   * organization, this creates a connection that belongs to the environment itself.
+   * Use it for AgentKit app connections: pass `flags: { isApp: true }` and set
+   * `providerKey` to the connector's identifier, such as a custom connector's
+   * `provider.identifier` from `actions.providers.createCustomProvider`. The
+   * returned connection's `keyId` is the connection name the AgentKit methods on
+   * `actions` take.
+   *
+   * PREVIEW: the underlying `CreateEnvironmentConnection` RPC is marked preview
+   * in the API and may change. It maps to `POST /api/v1/connections`, requires a
+   * workspace client, and needs the `sso:write` permission.
+   *
+   * @param {CreateConnection} connection - The connection to create, as a plain object:
+   *   - providerKey: Identifier of the connector the connection is for
+   *   - type: Authentication type, e.g. `ConnectionType.OAUTH`
+   *   - keyId: Optional connection name; generated when omitted
+   * @param {Flags} [flags] - Optional flags. Set `isApp: true` for an AgentKit app connection.
+   *
+   * @returns {Promise<CreateConnectionResponse>} Response containing the created connection,
+   *   including its `id` and `keyId`
+   *
+   * @throws {ScalekitServerException} If the connection configuration is invalid or the
+   *   client lacks permission
+   *
+   * @example
+   * // Create an AgentKit app connection for a custom OAuth connector
+   * import { ConnectionType } from '@scalekit-sdk/node';
+   *
+   * const { connection } = await scalekitClient.connection.createEnvironmentConnection(
+   *   { providerKey: provider.identifier, type: ConnectionType.OAUTH },
+   *   { isApp: true }
+   * );
+   * console.log(connection?.id, connection?.keyId);
+   *
+   * @see {@link getEnvironmentConnection} - Fetch an environment connection by id
+   * @see {@link updateEnvironmentConnection} - Update an environment connection
+   */
+  createEnvironmentConnection(
+    connection: MessageInitShape<typeof CreateConnectionSchema>,
+    flags?: MessageInitShape<typeof FlagsSchema>
+  ): Promise<CreateConnectionResponse> {
+    const request = create(CreateEnvironmentConnectionRequestSchema, {
+      connection,
+      ...(flags && { flags }),
+    });
+    return this.coreClient.connectExec(
+      this.client.createEnvironmentConnection,
+      request
+    );
+  }
+
+  /**
+   * Retrieves an environment-scoped connection by id.
+   *
+   * Use this to read back a connection created with
+   * {@link createEnvironmentConnection}, for example an AgentKit app connection.
+   * For an organization's SSO connection, use {@link getConnection} instead.
+   *
+   * PREVIEW: the underlying `GetEnvironmentConnection` RPC is marked preview in
+   * the API and may change. It maps to `GET /api/v1/connections/{connection_id}`,
+   * accepts a workspace or actions-portal client, and needs the `sso:read`
+   * permission.
+   *
+   * @param {string} connectionId - The connection identifier (format: "conn_...")
+   *
+   * @returns {Promise<GetConnectionResponse>} Response containing the connection
+   *
+   * @throws {ScalekitServerException} If the connection is not found or the client lacks
+   *   permission
+   *
+   * @example
+   * const { connection } =
+   *   await scalekitClient.connection.getEnvironmentConnection('conn_abc123');
+   * console.log(connection?.keyId, connection?.enabled);
+   *
+   * @see {@link createEnvironmentConnection} - Create an environment connection
+   * @see {@link updateEnvironmentConnection} - Update an environment connection
+   */
+  getEnvironmentConnection(
+    connectionId: string
+  ): Promise<GetConnectionResponse> {
+    const request = create(GetEnvironmentConnectionRequestSchema, {
+      connectionId,
+    });
+    return this.coreClient.connectExec(
+      this.client.getEnvironmentConnection,
+      request
+    );
+  }
+
+  /**
+   * Updates an environment-scoped connection.
+   *
+   * Use this to change the OAuth settings of a connection created with
+   * {@link createEnvironmentConnection}. Organization SSO connections are not
+   * updated through this method.
+   *
+   * Despite the `PATCH` verb, the server validates the whole connection rather
+   * than merging a partial one. Read the connection with
+   * {@link getEnvironmentConnection} first, then send `type`, `providerKey` and
+   * `keyId` back alongside what you are changing. Each missing field fails
+   * differently, and none of the errors name the method:
+   * - no `keyId` -> `[invalid_argument] keyId is required`
+   * - no `providerKey` -> `[invalid_argument] Validation error`
+   * - no `type` -> `[internal] error converting connection`
+   *
+   * On an AgentKit app connection `settings` is the only field an update
+   * actually changes. `provider`, `uiButtonTitle`, `debugEnabled`,
+   * `configurationType` and `attributeMapping` are all accepted and then
+   * discarded: the call succeeds and the stored values do not move. Change
+   * those from the Scalekit dashboard instead.
+   *
+   * PREVIEW: the underlying `UpdateEnvironmentConnection` RPC is marked preview
+   * in the API and may change. It maps to `PATCH /api/v1/connections/{connection_id}`,
+   * requires a workspace client, and needs the `sso:write` permission.
+   *
+   * @param {string} connectionId - The connection identifier (format: "conn_...")
+   * @param {UpdateConnection} connection - The connection to store, as a plain object.
+   *   `type`, `providerKey` and `keyId` are required on every call. `settings` is a
+   *   protobuf oneof, so it takes `{ case: 'oauthConfig', value: {...} }`.
+   *
+   * @returns {Promise<UpdateConnectionResponse>} Response containing the updated connection
+   *
+   * @throws {ScalekitServerException} If the connection is not found, the update is
+   *   invalid, or the client lacks permission
+   *
+   * @example
+   * // Narrow the OAuth scopes on an app connection
+   * import { ConnectionType } from '@scalekit-sdk/node';
+   *
+   * const { connection: current } =
+   *   await scalekitClient.connection.getEnvironmentConnection('conn_abc123');
+   * if (current?.settings.case !== 'oauthConfig') {
+   *   throw new Error('not an OAuth connection');
+   * }
+   *
+   * const { connection } = await scalekitClient.connection.updateEnvironmentConnection(
+   *   'conn_abc123',
+   *   {
+   *     type: ConnectionType.OAUTH,
+   *     providerKey: current.providerKey,
+   *     keyId: current.keyId,
+   *     settings: {
+   *       case: 'oauthConfig',
+   *       value: { ...current.settings.value, scopes: ['openid', 'email', 'profile'] },
+   *     },
+   *   }
+   * );
+   * console.log(connection?.settings.value);
+   *
+   * @see {@link getEnvironmentConnection} - Fetch an environment connection by id
+   */
+  updateEnvironmentConnection(
+    connectionId: string,
+    connection: MessageInitShape<typeof UpdateConnectionSchema>
+  ): Promise<UpdateConnectionResponse> {
+    const request = create(UpdateEnvironmentConnectionRequestSchema, {
+      connectionId,
+      connection,
+    });
+    return this.coreClient.connectExec(
+      this.client.updateEnvironmentConnection,
+      request
+    );
   }
 }

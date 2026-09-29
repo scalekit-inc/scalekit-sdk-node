@@ -18,6 +18,8 @@ import WebAuthnClient from './webauthn';
 import TokenClient from './token';
 import M2MClient from './m2mclient';
 import ResourceClient from './resource';
+import McpClient from './mcp';
+import ProvidersClient from './providers';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ActionsClient from './actions';
@@ -146,7 +148,9 @@ export default class ScalekitClient {
       this.tools,
       this.connectedAccounts,
       this.coreClient,
-      this.connection
+      this.connection,
+      new McpClient(this.grpcConnect, this.coreClient),
+      new ProvidersClient(this.grpcConnect, this.coreClient)
     );
     this.events = new EventsClient(this.grpcConnect, this.coreClient);
   }
