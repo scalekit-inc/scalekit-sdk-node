@@ -134,6 +134,19 @@ describe('multi-issuer token validation', () => {
       });
     });
 
+    it("rejects a non-matching token when issuer is [''] (fails closed, not skipped)", async () => {
+      const token = await signWithIssuer(RESOURCE_ISSUER);
+      await expect(validate(token, [''])).rejects.toThrow();
+    });
+
+    it("ignores blank entries alongside real ones, still exact match", async () => {
+      const token = await signWithIssuer(RESOURCE_ISSUER);
+      await expect(
+        validate(token, ['', RESOURCE_ISSUER])
+      ).resolves.toMatchObject({ sub: 'user_1' });
+      await expect(validate(token, ['', BASE_ISSUER])).rejects.toThrow();
+    });
+
     it('skips the issuer check when issuer is an empty string', async () => {
       const token = await signWithIssuer(RESOURCE_ISSUER);
       await expect(validate(token, '')).resolves.toMatchObject({
