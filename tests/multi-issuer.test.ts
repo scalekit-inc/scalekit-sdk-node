@@ -139,7 +139,7 @@ describe('multi-issuer token validation', () => {
       await expect(validate(token, [''])).rejects.toThrow();
     });
 
-    it("ignores blank entries alongside real ones, still exact match", async () => {
+    it('ignores blank entries alongside real ones, still exact match', async () => {
       const token = await signWithIssuer(RESOURCE_ISSUER);
       await expect(
         validate(token, ['', RESOURCE_ISSUER])
