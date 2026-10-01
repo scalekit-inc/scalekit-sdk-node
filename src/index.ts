@@ -37,6 +37,18 @@ export {
   ConnectorType,
 } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 
+// Generated types surfaced by `actions.searchConnectedAccounts` /
+// `connectedAccounts.searchConnectedAccounts` (the response and the list item it
+// carries) and by `actions.getConnectedAccountDetails` /
+// `connectedAccounts.getConnectedAccountDetails` (the same response type as
+// `getConnectedAccount`). Re-export them so callers can name the return types
+// without importing the internal pb path.
+export type {
+  SearchConnectedAccountsResponse,
+  ConnectedAccountForList,
+  GetConnectedAccountByIdentifierResponse,
+} from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+
 // Generated enums/types surfaced by the environment-scoped connection methods
 // (`connection.createEnvironmentConnection` and friends). `type`, `provider` and
 // `authMode` on a connection are numeric enums, so callers need the named

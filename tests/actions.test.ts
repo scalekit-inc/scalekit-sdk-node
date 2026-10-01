@@ -45,8 +45,150 @@ describe('Actions', () => {
     expect(typeof client.actions.updateConnectedAccount).toBe('function');
     expect(typeof client.actions.deleteConnectedAccount).toBe('function');
     expect(typeof client.actions.getConnectedAccount).toBe('function');
+    expect(typeof client.actions.getConnectedAccountDetails).toBe('function');
+    expect(typeof client.actions.searchConnectedAccounts).toBe('function');
     expect(typeof client.actions.verifyConnectedAccountUser).toBe('function');
     expect(typeof client.actions.listConnections).toBe('function');
+  });
+
+  describe('searchConnectedAccounts', () => {
+    it('should search connected accounts by connection name', async () => {
+      const response = await client.actions.searchConnectedAccounts({
+        query: GMAIL_CONNECTION_NAME,
+      });
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.connectedAccounts)).toBe(true);
+      expect(typeof response.totalSize).toBe('number');
+      expect(typeof response.nextPageToken).toBe('string');
+      expect(typeof response.prevPageToken).toBe('string');
+      for (const account of response.connectedAccounts) {
+        expect(typeof account.id).toBe('string');
+        expect(typeof account.identifier).toBe('string');
+        expect(typeof account.connector).toBe('string');
+      }
+    });
+
+    it('should respect pageSize and follow nextPageToken', async () => {
+      const firstPage = await client.actions.searchConnectedAccounts({
+        query: GMAIL_CONNECTION_NAME,
+        pageSize: 1,
+      });
+
+      expect(firstPage.connectedAccounts.length).toBeLessThanOrEqual(1);
+
+      if (firstPage.nextPageToken) {
+        const secondPage = await client.actions.searchConnectedAccounts({
+          query: GMAIL_CONNECTION_NAME,
+          pageSize: 1,
+          pageToken: firstPage.nextPageToken,
+        });
+        expect(Array.isArray(secondPage.connectedAccounts)).toBe(true);
+      }
+    });
+
+    it('should surface a server error for a query below the minimum length', async () => {
+      const error = await client.actions
+        .searchConnectedAccounts({ query: 'ab' })
+        .catch((e) => e);
+
+      expect(error).toBeInstanceOf(ScalekitServerException);
+    });
+
+    it('should reject a blank query before calling the server', async () => {
+      await expect(
+        client.actions.searchConnectedAccounts({ query: '   ' })
+      ).rejects.toThrow('query is required');
+    });
+  });
+
+  describe('getConnectedAccountDetails', () => {
+    it('should fetch details by connectionName and identifier', async () => {
+      const response = await client.actions.getConnectedAccountDetails({
+        connectionName: GMAIL_CONNECTION_NAME,
+        identifier: GMAIL_IDENTIFIER,
+      });
+
+      expect(response.connectedAccount).toBeDefined();
+      expect(response.connectedAccount!.identifier).toBe(GMAIL_IDENTIFIER);
+    });
+
+    it('should surface a server error for an unknown account', async () => {
+      const error = await client.actions
+        .getConnectedAccountDetails({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier: `missing_${TestDataGenerator.generateUniqueId()}`,
+        })
+        .catch((e) => e);
+
+      expect(error).toBeInstanceOf(ScalekitServerException);
+    });
+
+    it('should validate required parameters', async () => {
+      await expect(
+        client.actions.getConnectedAccountDetails({
+          connectionName: GMAIL_CONNECTION_NAME,
+        })
+      ).rejects.toThrow(
+        'either connectedAccountId or connectionName + identifier is required'
+      );
+    });
+
+    it('should find a new account by search and return its details without credentials', async () => {
+      const identifier = `test_actions_details_${TestDataGenerator.generateUniqueId()}`;
+
+      const authorizationDetails = create(AuthorizationDetailsSchema, {
+        details: {
+          case: 'oauthToken',
+          value: create(OauthTokenSchema, {
+            accessToken: 'test_access_token_details',
+            refreshToken: 'test_refresh_token_details',
+          }),
+        },
+      });
+
+      let created = false;
+      try {
+        const createResponse = await client.actions.createConnectedAccount({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier,
+          authorizationDetails,
+        });
+        created = true;
+        const accountId = createResponse.connectedAccount!.id;
+
+        const searchResponse = await client.actions.searchConnectedAccounts({
+          query: identifier,
+        });
+        expect(
+          searchResponse.connectedAccounts.some((a) => a.id === accountId)
+        ).toBe(true);
+
+        const detailsResponse = await client.actions.getConnectedAccountDetails(
+          { connectedAccountId: accountId }
+        );
+        expect(detailsResponse.connectedAccount).toBeDefined();
+        expect(detailsResponse.connectedAccount!.id).toBe(accountId);
+        expect(detailsResponse.connectedAccount!.identifier).toBe(identifier);
+
+        // The stored tokens must not come back from the details endpoint.
+        const details =
+          detailsResponse.connectedAccount!.authorizationDetails?.details;
+        if (details?.case === 'oauthToken') {
+          expect(details.value.accessToken).toBe('');
+          expect(details.value.refreshToken).toBe('');
+        }
+      } finally {
+        if (created) {
+          await client.actions
+            .deleteConnectedAccount({
+              connectionName: GMAIL_CONNECTION_NAME,
+              identifier,
+            })
+            .catch(() => undefined);
+        }
+      }
+    });
   });
 
   describe('listConnections', () => {

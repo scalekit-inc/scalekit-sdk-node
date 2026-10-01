@@ -133,6 +133,7 @@ await scalekitClient.tools.executeTool({
 <dl><dd>
 
 - `listConnectedAccounts(options?)`
+- `searchConnectedAccounts(options)` — text search over identifier, provider or connector; paginated, optional `connectionId` filter.
 - `createConnectedAccount(params)`
 - `getOrCreateConnectedAccount(params)`
 - `updateConnectedAccount(params)`
@@ -140,6 +141,7 @@ await scalekitClient.tools.executeTool({
 - `getMagicLinkForConnectedAccount(params)`
 - `verifyConnectedAccountUser(params)`
 - `getConnectedAccountByIdentifier(params)` — returns auth details for an account (sensitive).
+- `getConnectedAccountDetails(options)` — returns an account's metadata without its stored credentials.
 
 Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source file for parameter shapes.
 
@@ -157,6 +159,8 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 - `getAuthorizationLink` — magic link for connect / re-auth.
 - `verifyConnectedAccountUser` — completes OAuth user verification.
 - `listConnectedAccounts`, `deleteConnectedAccount`, `getConnectedAccount`
+- `searchConnectedAccounts` — finds accounts whose identifier, provider or connector matches `query`.
+- `getConnectedAccountDetails` — like `getConnectedAccount`, without the stored credentials.
 - `createConnectedAccount`, `getOrCreateConnectedAccount`, `updateConnectedAccount`
 - `request` — proxied HTTP to `{envUrl}/proxy/...` with `connection_name` / `identifier` headers (returns `AxiosResponse`).
 

@@ -21,6 +21,8 @@ import {
   ListConnectedAccountsRequestSchema,
   ListConnectedAccountsResponse,
   OauthTokenSchema,
+  SearchConnectedAccountsRequestSchema,
+  SearchConnectedAccountsResponse,
   UpdateConnectedAccount,
   UpdateConnectedAccountRequestSchema,
   UpdateConnectedAccountResponse,
@@ -34,10 +36,11 @@ import {
  *
  * This mirrors the Python SDK `ConnectedAccountsClient` and exposes a typed,
  * ergonomic API around the `ConnectedAccountService` to:
- * - list connected accounts
+ * - list and search connected accounts
  * - create/update/delete connected accounts
  * - generate magic links for authorization
  * - fetch full authentication details for a connected account
+ * - fetch a connected account's metadata without its credentials
  */
 export default class ConnectedAccountsClient {
   private client: Client<typeof ConnectedAccountService>;
@@ -86,6 +89,68 @@ export default class ConnectedAccountsClient {
         ...(options?.connectionNames?.length && {
           connectionNames: options.connectionNames,
         }),
+      })
+    );
+  }
+
+  /**
+   * Searches the environment's connected accounts by a text query.
+   *
+   * The query matches an account's identifier, provider or connector,
+   * case-insensitively. Results are paginated: pass a response's
+   * `nextPageToken` as `pageToken` to fetch the next page.
+   *
+   * @param options - The search text plus optional paging and connection
+   *   filter (each field is documented on its property).
+   * @returns The matching `connectedAccounts`, the `totalSize` of the result
+   *   set, and `nextPageToken` / `prevPageToken` for paging.
+   * @throws `Error` if `query` is missing or blank, before any request is sent.
+   * @throws {@link ScalekitServerException} If a network or server error occurs.
+   *
+   * @example
+   * ```ts
+   * let pageToken: string | undefined;
+   * do {
+   *   const page = await scalekit.connectedAccounts.searchConnectedAccounts({
+   *     query: 'gmail',
+   *     pageSize: 30,
+   *     pageToken,
+   *   });
+   *   for (const account of page.connectedAccounts) {
+   *     console.log(account.id, account.identifier, account.connector);
+   *   }
+   *   pageToken = page.nextPageToken || undefined;
+   * } while (pageToken);
+   * ```
+   */
+  async searchConnectedAccounts(options: {
+    /**
+     * Text to search for. Required; surrounding whitespace is trimmed. The
+     * server accepts 3 to 200 characters.
+     */
+    query: string;
+    /** Maximum number of accounts per page. The server allows at most 30. */
+    pageSize?: number;
+    /** The `nextPageToken` or `prevPageToken` from a previous response. */
+    pageToken?: string;
+    /** Only return accounts on this connection (`conn_...`). */
+    connectionId?: string;
+  }): Promise<SearchConnectedAccountsResponse> {
+    const query = options?.query?.trim();
+    if (!query) {
+      throw new Error('query is required');
+    }
+    const connectionId = options.connectionId?.trim();
+
+    return this.coreClient.connectExec(
+      this.client.searchConnectedAccounts,
+      create(SearchConnectedAccountsRequestSchema, {
+        query,
+        ...(options.pageSize !== undefined && { pageSize: options.pageSize }),
+        ...(options.pageToken !== undefined && {
+          pageToken: options.pageToken,
+        }),
+        ...(connectionId && { connectionId }),
       })
     );
   }
@@ -409,6 +474,75 @@ export default class ConnectedAccountsClient {
 
     return this.coreClient.connectExec(
       this.client.getConnectedAccountAuth,
+      create(GetConnectedAccountByIdentifierRequestSchema, {
+        ...(connector && { connector }),
+        ...(identifier && { identifier }),
+        ...(organizationId && { organizationId }),
+        ...(userId && { userId }),
+        ...(connectedAccountId && { id: connectedAccountId }),
+      })
+    );
+  }
+
+  /**
+   * Fetches a connected account's metadata without its stored credentials.
+   *
+   * Returns the same `connectedAccount` shape as
+   * {@link ConnectedAccountsClient.getConnectedAccountByIdentifier} (status,
+   * connector, identifier, `apiConfig`, timestamps), but the server leaves out
+   * the access/refresh tokens and static secrets. Prefer this method whenever
+   * you do not need the credentials themselves.
+   *
+   * Identify the account with `connectedAccountId`, or with `connector` and
+   * `identifier` together.
+   *
+   * @param options - Which account to fetch (each field is documented on its
+   *   property).
+   * @returns The connected account, without authorization credentials.
+   * @throws `Error` if neither `connectedAccountId` nor both `connector` and
+   *   `identifier` are given, before any request is sent.
+   * @throws {@link ScalekitNotFoundException} If no matching connected account
+   *   is found.
+   * @throws {@link ScalekitServerException} If a network or server error occurs.
+   *
+   * @example
+   * ```ts
+   * import { ConnectorStatus } from '@scalekit-sdk/node';
+   *
+   * const { connectedAccount } =
+   *   await scalekit.connectedAccounts.getConnectedAccountDetails({
+   *     connector: 'gmail',
+   *     identifier: 'user_123',
+   *   });
+   * console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
+   * ```
+   */
+  async getConnectedAccountDetails(options: {
+    /** Connector (connection name), e.g. `"gmail"`. Use with `identifier`. */
+    connector?: string;
+    /** Your application's identifier for the end user. Use with `connector`. */
+    identifier?: string;
+    /** Organization the account is scoped to. */
+    organizationId?: string;
+    /** Scalekit user the account is scoped to. */
+    userId?: string;
+    /** Connected account ID (`ca_...`), as an alternative to `connector` + `identifier`. */
+    connectedAccountId?: string;
+  }): Promise<GetConnectedAccountByIdentifierResponse> {
+    const connector = options?.connector?.trim();
+    const identifier = options?.identifier?.trim();
+    const connectedAccountId = options?.connectedAccountId?.trim();
+    const organizationId = options?.organizationId;
+    const userId = options?.userId;
+
+    if (!connectedAccountId && !(connector && identifier)) {
+      throw new Error(
+        'either connectedAccountId or connector + identifier is required'
+      );
+    }
+
+    return this.coreClient.connectExec(
+      this.client.getConnectedAccountDetails,
       create(GetConnectedAccountByIdentifierRequestSchema, {
         ...(connector && { connector }),
         ...(identifier && { identifier }),

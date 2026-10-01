@@ -7158,7 +7158,7 @@ for (const tool of res.tools) {
 
 ## Actions
 
-Connect end users' accounts to third-party services and run tools against them. This section covers tool discovery on `actions` (also available on `scalekitClient.tools`) and authorizing a connected account. To create or update a connected account, send the user an authorization link with `getAuthorizationLink`.
+Connect end users' accounts to third-party services and run tools against them. This section covers tool discovery on `actions` (also available on `scalekitClient.tools`), authorizing a connected account, and finding and inspecting connected accounts. To create or update a connected account, send the user an authorization link with `getAuthorizationLink`.
 
 Virtual MCP servers and custom connectors are also under `actions`, as [`actions.mcp`](#virtual-mcp-servers) and [`actions.providers`](#custom-connectors).
 
@@ -7480,6 +7480,196 @@ console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
 <dd>
 
 **params.state?:** `string` - Opaque value added to the `userVerifyUrl` redirect's query parameters, so you can validate the redirect
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">searchConnectedAccounts</a>(params) -> Promise&lt;SearchConnectedAccountsResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Searches the environment's connected accounts by a text query. The query matches an account's identifier, provider or connector, case-insensitively.
+
+Results are paginated: pass `nextPageToken` from a response as `pageToken` to fetch the next page. A missing or blank `query` throws `Error('query is required')` before any request is sent; the server rejects queries shorter than 3 or longer than 200 characters with `ScalekitBadRequestException`.
+
+Also available as `scalekitClient.connectedAccounts.searchConnectedAccounts` with the same parameters.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const page = await scalekitClient.actions.searchConnectedAccounts({
+  query: 'john@example.com',
+  pageSize: 10,
+});
+
+for (const account of page.connectedAccounts) {
+  console.log(account.id, account.connector, account.identifier, account.status);
+}
+
+if (page.nextPageToken) {
+  const next = await scalekitClient.actions.searchConnectedAccounts({
+    query: 'john@example.com',
+    pageSize: 10,
+    pageToken: page.nextPageToken,
+  });
+  console.log(next.connectedAccounts.length);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.query:** `string` - Text to match against identifier, provider or connector. Surrounding whitespace is trimmed. 3-200 characters.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.pageSize?:** `number` - Maximum number of accounts per page. At most 30.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.pageToken?:** `string` - `nextPageToken` or `prevPageToken` from a previous response
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.connectionId?:** `string` - Only return accounts on this connection (`conn_...`)
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">getConnectedAccountDetails</a>(params) -> Promise&lt;GetConnectedAccountByIdentifierResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Fetches a connected account's metadata (status, connector, identifier, `apiConfig`, timestamps) without its stored credentials. It returns the same shape as `getConnectedAccount`, but the access/refresh tokens and static secrets are left out, so prefer it whenever you only need to inspect the account.
+
+Identify the account with `connectedAccountId`, or with `connectionName` and `identifier` together; anything else throws `Error('either connectedAccountId or connectionName + identifier is required')` before any request is sent. An unknown account rejects with `ScalekitNotFoundException`.
+
+Also available as `scalekitClient.connectedAccounts.getConnectedAccountDetails`, which takes `connector` instead of `connectionName`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { ConnectorStatus } from '@scalekit-sdk/node';
+
+const { connectedAccount } = await scalekitClient.actions.getConnectedAccountDetails({
+  connectionName: 'gmail',
+  identifier: 'user_123',
+});
+
+if (connectedAccount?.status !== ConnectorStatus.ACTIVE) {
+  // Send the user a fresh link from getAuthorizationLink
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.connectionName?:** `string` - Connection name as shown in the dashboard. Use with `identifier`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.identifier?:** `string` - Your application's identifier for the end user. Use with `connectionName`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.connectedAccountId?:** `string` - Connected account ID (`ca_...`), as an alternative to `connectionName` + `identifier`
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.organizationId?:** `string` - Organization the account is scoped to
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.userId?:** `string` - Scalekit user the account is scoped to
 
 </dd>
 </dl>

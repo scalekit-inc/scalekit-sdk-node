@@ -446,4 +446,66 @@ describe('Connected Accounts', () => {
       }
     });
   });
+
+  describe('searchConnectedAccounts', () => {
+    it('should expose searchConnectedAccounts', () => {
+      expect(typeof client.connectedAccounts.searchConnectedAccounts).toBe(
+        'function'
+      );
+    });
+
+    it('should search connected accounts', async () => {
+      // The test environment always has at least one gmail connected account.
+      const response = await client.connectedAccounts.searchConnectedAccounts({
+        query: 'gmail',
+        pageSize: 10,
+      });
+
+      expect(response).toBeDefined();
+      expect(Array.isArray(response.connectedAccounts)).toBe(true);
+      expect(response.connectedAccounts.length).toBeLessThanOrEqual(10);
+      expect(typeof response.totalSize).toBe('number');
+      expect(typeof response.nextPageToken).toBe('string');
+    });
+
+    it('should reject a blank query before calling the server', async () => {
+      await expect(
+        client.connectedAccounts.searchConnectedAccounts({ query: '' })
+      ).rejects.toThrow('query is required');
+    });
+  });
+
+  describe('getConnectedAccountDetails', () => {
+    it('should expose getConnectedAccountDetails', () => {
+      expect(typeof client.connectedAccounts.getConnectedAccountDetails).toBe(
+        'function'
+      );
+    });
+
+    it('should handle get connected account details request', async () => {
+      try {
+        const response =
+          await client.connectedAccounts.getConnectedAccountDetails({
+            connector: 'test_connector',
+            identifier: 'test_identifier',
+            organizationId: testOrg,
+          });
+
+        expect(response).toBeDefined();
+        expect(response.connectedAccount?.id).toBeDefined();
+      } catch (error: unknown) {
+        expect(error).toBeInstanceOf(ScalekitServerException);
+      }
+    });
+
+    it('should reject a call without connectedAccountId or connector + identifier', async () => {
+      await expect(
+        client.connectedAccounts.getConnectedAccountDetails({
+          connector: 'test_connector',
+        })
+      ).rejects.toThrow(
+        'either connectedAccountId or connector + identifier is required'
+      );
+    });
+  });
 });
