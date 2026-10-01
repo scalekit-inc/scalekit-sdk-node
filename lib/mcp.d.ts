@@ -108,21 +108,34 @@ export default class McpClient {
         includeAuthLink?: boolean;
     }): Promise<ListMcpConnectedAccountsResponse>;
     /**
-     * Mints a session token for one user against one configuration.
+     * Mints a session token for one user against one MCP server.
      *
      * The server URL is static; this token is what carries user identity. Mint a
      * fresh one before every agent run and never reuse one across runs. Set the
      * expiry longer than the run is expected to take.
      *
-     * @param params.mcpConfigId ID of the configuration.
+     * Pass exactly one target:
+     * - `mcpConfigId` mints a token for the virtual MCP server of an MCP
+     *   configuration — the one created by {@link createConfig}, which exposes
+     *   the connections and tools that configuration selects.
+     * - `keyId` is an AgentKit connection name, such as `'github-connect'`, and
+     *   mints a token for that single connection's MCP server.
+     *
+     * A token is only accepted by the server it was minted for: a `mcpConfigId`
+     * token does not work against a connection's MCP server, and vice versa.
+     *
+     * @param params.mcpConfigId ID of the MCP configuration. Mutually exclusive with `keyId`.
+     * @param params.keyId AgentKit connection name (e.g. `'github-connect'`). Mutually exclusive with `mcpConfigId`.
      * @param params.identifier Your application's unique identifier for the user.
      * @param params.expirySeconds Token lifetime in whole seconds.
+     * @throws {Error} If neither or both of `mcpConfigId` and `keyId` are provided.
      * @throws {Error} If `expirySeconds` is not a positive integer.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     createSessionToken(params: {
-        mcpConfigId: string;
+        mcpConfigId?: string;
         identifier: string;
         expirySeconds?: number;
+        keyId?: string;
     }): Promise<CreateMcpSessionTokenResponse>;
 }

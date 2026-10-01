@@ -298,6 +298,17 @@ export default class ConnectionClient {
      * in the API and may change. It maps to `POST /api/v1/connections`, requires a
      * workspace client, and needs the `sso:write` permission.
      *
+     * Scope selection — `scopeSelectionAllowed`, `requiredScopes` and
+     * `requiredOptionalScopes` on an `oauthConfig`, and `scopeSelectionAllowed`
+     * and `requiredScopes` on a `googleDwdConfig` — applies when your customer is
+     * using the hosted connect widget to connect accounts. It governs what the end
+     * user sees in that widget: set `scopeSelectionAllowed` to let them choose, and
+     * list under `requiredScopes` / `requiredOptionalScopes` the scopes they cannot
+     * turn off. Required scopes are always added by the server, so the selection the
+     * widget sends back (see `connectedAccounts.updateConnectedAccount`'s
+     * `scopeSelection`) never has to repeat them. These fields have no effect when
+     * accounts are connected without the hosted connect widget.
+     *
      * @param {CreateConnection} connection - The connection to create, as a plain object:
      *   - providerKey: Identifier of the connector the connection is for
      *   - type: Authentication type, e.g. `ConnectionType.OAUTH`
@@ -377,6 +388,17 @@ export default class ConnectionClient {
      * PREVIEW: the underlying `UpdateEnvironmentConnection` RPC is marked preview
      * in the API and may change. It maps to `PATCH /api/v1/connections/{connection_id}`,
      * requires a workspace client, and needs the `sso:write` permission.
+     *
+     * Scope selection — `scopeSelectionAllowed`, `requiredScopes` and
+     * `requiredOptionalScopes` on an `oauthConfig`, and `scopeSelectionAllowed`
+     * and `requiredScopes` on a `googleDwdConfig` — applies when your customer is
+     * using the hosted connect widget to connect accounts. It governs what the end
+     * user sees in that widget: set `scopeSelectionAllowed` to let them choose, and
+     * list under `requiredScopes` / `requiredOptionalScopes` the scopes they cannot
+     * turn off. Required scopes are always added by the server, so the selection the
+     * widget sends back (see `connectedAccounts.updateConnectedAccount`'s
+     * `scopeSelection`) never has to repeat them. These fields have no effect when
+     * accounts are connected without the hosted connect widget.
      *
      * @param {string} connectionId - The connection identifier (format: "conn_...")
      * @param {UpdateConnection} connection - The connection to store, as a plain object.
