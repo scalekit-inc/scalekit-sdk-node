@@ -361,6 +361,8 @@ if (isValid) {
 
 **options:** `TokenValidationOptions` - Optional validation options for issuer, audience, and scopes
 
+`options.issuer` accepts a `string` or a `string[]`. With an array, the token is valid if its `iss` claim exactly equals any entry, e.g. `issuer: [envUrl, `${envUrl}/resources/res_123`]`. An unset, empty-string or empty-array issuer skips the issuer check.
+
 </dd>
 </dl>
 </dd>

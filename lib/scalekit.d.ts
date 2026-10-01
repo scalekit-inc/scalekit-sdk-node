@@ -216,7 +216,7 @@ export default class ScalekitClient {
      *
      * @param {string} idpInitiatedLoginToken - The token received in the 'idp_initiated_login' query parameter
      * @param {TokenValidationOptions} [options] - Optional token validation configuration
-     * @param {string} [options.issuer] - Expected token issuer for validation
+     * @param {string | string[]} [options.issuer] - Expected token issuer(s); the token is valid if its `iss` equals any entry
      * @param {string} [options.audience] - Expected token audience for validation
      *
      * @returns {Promise<IdpInitiatedLoginClaims>} Claims containing:

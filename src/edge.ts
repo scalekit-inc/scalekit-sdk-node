@@ -1,6 +1,7 @@
 import * as jose from 'jose';
 import QueryString from 'qs';
 import { IdTokenClaimToUserMap } from './constants/user';
+import { normalizeIssuer } from './issuer';
 import {
   AuthenticationOptions,
   AuthenticationResponse,
@@ -233,8 +234,9 @@ export class ScalekitEdgeClient implements ScalekitAuthClient {
     options?: TokenValidationOptions
   ): Promise<T> {
     try {
+      const issuer = normalizeIssuer(options?.issuer);
       const { payload } = await jose.jwtVerify<T>(token, this.getJwks(), {
-        ...(options?.issuer && { issuer: options.issuer }),
+        ...(issuer && { issuer }),
         ...(options?.audience && { audience: options.audience }),
       });
 
