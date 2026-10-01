@@ -7503,7 +7503,7 @@ console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
 <dl>
 <dd>
 
-Searches the environment's connected accounts by a text query. The query matches an account's identifier, provider or connector, case-insensitively.
+Searches the environment's connected accounts by a text query. The query matches an account's identifier, provider or connector, case-insensitively. If the query is a connected account ID (`ca_...`), the account with that exact ID is also returned, alongside any text matches.
 
 Results are paginated: pass `nextPageToken` from a response as `pageToken` to fetch the next page. A missing or blank `query` throws `Error('query is required')` before any request is sent; the server rejects queries shorter than 3 or longer than 200 characters with `ScalekitBadRequestException`.
 
@@ -7598,9 +7598,9 @@ if (page.nextPageToken) {
 <dl>
 <dd>
 
-Fetches a connected account's metadata (status, connector, identifier, `apiConfig`, timestamps) without its stored credentials. It returns the same shape as `getConnectedAccount`, but the access/refresh tokens and static secrets are left out, so prefer it whenever you only need to inspect the account.
+Fetches a connected account's metadata (status, connector, identifier, `apiConfig`, timestamps) without its stored credentials. It returns the same shape as `getConnectedAccount`, but without the access/refresh tokens or static secrets. Use it when you don't need the tokens.
 
-Identify the account with `connectedAccountId`, or with `connectionName` and `identifier` together; anything else throws `Error('either connectedAccountId or connectionName + identifier is required')` before any request is sent. An unknown account rejects with `ScalekitNotFoundException`.
+Identify the account with `connectedAccountId` alone, with `connectionName` + `identifier`, or with `connectionName` + `organizationId` (optionally + `userId`) for accounts whose identifier is `orgId` or `orgId/userId`. Anything else throws `Error('either connectedAccountId, or connectionName + identifier (or organizationId) is required')` before any request is sent. An unknown connection or account rejects with `ScalekitNotFoundException`.
 
 Also available as `scalekitClient.connectedAccounts.getConnectedAccountDetails`, which takes `connector` instead of `connectionName`.
 </dd>
@@ -7641,7 +7641,7 @@ if (connectedAccount?.status !== ConnectorStatus.ACTIVE) {
 <dl>
 <dd>
 
-**params.connectionName?:** `string` - Connection name as shown in the dashboard. Use with `identifier`.
+**params.connectionName?:** `string` - Connection name as shown in the dashboard. Required unless `connectedAccountId` is given.
 
 </dd>
 </dl>
@@ -7655,21 +7655,21 @@ if (connectedAccount?.status !== ConnectorStatus.ACTIVE) {
 <dl>
 <dd>
 
-**params.connectedAccountId?:** `string` - Connected account ID (`ca_...`), as an alternative to `connectionName` + `identifier`
+**params.connectedAccountId?:** `string` - Connected account ID (`ca_...`). When given, the other fields are not needed.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.organizationId?:** `string` - Organization the account is scoped to
+**params.organizationId?:** `string` - Used to form the account identifier (`orgId`, or `orgId/userId` with `userId`) when `identifier` is omitted. Ignored when `identifier` or `connectedAccountId` is given. Not an access check.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.userId?:** `string` - Scalekit user the account is scoped to
+**params.userId?:** `string` - Appended to `organizationId` to form the account identifier (`orgId/userId`) when `identifier` is omitted. Ignored when `identifier` or `connectedAccountId` is given. Not an access check.
 
 </dd>
 </dl>

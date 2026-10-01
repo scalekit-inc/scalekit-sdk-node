@@ -1,6 +1,6 @@
 kind: added
 body: |
-  `scalekit.actions.searchConnectedAccounts()` searches connected accounts by identifier, provider or connector, with paging and an optional connection filter. `scalekit.actions.getConnectedAccountDetails()` returns a connected account's metadata without its stored credentials. Both are also on `scalekit.connectedAccounts`. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#actions)
+  `scalekit.actions.searchConnectedAccounts()` searches connected accounts by identifier, provider or connector, with paging and an optional connection filter. `scalekit.actions.getConnectedAccountDetails()` returns a connected account's metadata without its stored credentials; look the account up by ID, by connection name and identifier, or by connection name and organization ID. Both are also on `scalekit.connectedAccounts`. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#actions)
 
   ```ts
   const page = await scalekit.actions.searchConnectedAccounts({ query: 'john@example.com', pageSize: 10 });

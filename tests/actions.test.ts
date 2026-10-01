@@ -1,7 +1,10 @@
 import ScalekitClient from '../src/scalekit';
 import { create } from '@bufbuild/protobuf';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { ScalekitServerException } from '../src/errors';
+import {
+  ScalekitNotFoundException,
+  ScalekitServerException,
+} from '../src/errors';
 import { TestDataGenerator, TestOrganizationManager } from './utils/test-data';
 import {
   AuthorizationDetailsSchema,
@@ -113,15 +116,13 @@ describe('Actions', () => {
       expect(response.connectedAccount!.identifier).toBe(GMAIL_IDENTIFIER);
     });
 
-    it('should surface a server error for an unknown account', async () => {
-      const error = await client.actions
-        .getConnectedAccountDetails({
+    it('should reject an unknown account with ScalekitNotFoundException', async () => {
+      await expect(
+        client.actions.getConnectedAccountDetails({
           connectionName: GMAIL_CONNECTION_NAME,
           identifier: `missing_${TestDataGenerator.generateUniqueId()}`,
         })
-        .catch((e) => e);
-
-      expect(error).toBeInstanceOf(ScalekitServerException);
+      ).rejects.toBeInstanceOf(ScalekitNotFoundException);
     });
 
     it('should validate required parameters', async () => {
@@ -130,7 +131,7 @@ describe('Actions', () => {
           connectionName: GMAIL_CONNECTION_NAME,
         })
       ).rejects.toThrow(
-        'either connectedAccountId or connectionName + identifier is required'
+        'either connectedAccountId, or connectionName + identifier (or organizationId) is required'
       );
     });
 

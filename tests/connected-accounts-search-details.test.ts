@@ -216,10 +216,55 @@ describe('connectedAccounts.getConnectedAccountDetails', () => {
     expect(req.userId).toBe('usr_123');
   });
 
+  it('looks up by connector + organizationId + userId when identifier is omitted', async () => {
+    const { connectedAccounts, fake } = makeClients();
+
+    await connectedAccounts.getConnectedAccountDetails({
+      connector: 'gmail',
+      organizationId: ' org_123 ',
+      userId: ' usr_123 ',
+    });
+
+    const req = sentRequest<GetConnectedAccountByIdentifierRequest>(
+      fake.getConnectedAccountDetails
+    );
+    expect(req.connector).toBe('gmail');
+    expect(req.organizationId).toBe('org_123');
+    expect(req.userId).toBe('usr_123');
+    expect(req.identifier).toBeUndefined();
+    expect(req.id).toBeUndefined();
+  });
+
+  it('looks up by connector + organizationId alone', async () => {
+    const { connectedAccounts, fake } = makeClients();
+
+    await connectedAccounts.getConnectedAccountDetails({
+      connector: 'gmail',
+      organizationId: 'org_123',
+    });
+
+    const req = sentRequest<GetConnectedAccountByIdentifierRequest>(
+      fake.getConnectedAccountDetails
+    );
+    expect(req.connector).toBe('gmail');
+    expect(req.organizationId).toBe('org_123');
+    expect(req.userId).toBeUndefined();
+  });
+
   it.each([
     ['nothing', {}],
     ['connector only', { connector: 'gmail' }],
     ['identifier only', { identifier: 'john@example.com' }],
+    ['organizationId only', { organizationId: 'org_123' }],
+    [
+      'organizationId + userId without connector',
+      { organizationId: 'org_123', userId: 'usr_123' },
+    ],
+    ['connector + userId only', { connector: 'gmail', userId: 'usr_123' }],
+    [
+      'connector + whitespace organizationId',
+      { connector: 'gmail', organizationId: '  ' },
+    ],
     ['whitespace connectedAccountId', { connectedAccountId: '   ' }],
     ['whitespace connector + identifier', { connector: ' ', identifier: ' ' }],
   ])('rejects %s before any request is sent', async (_label, options) => {
@@ -228,7 +273,7 @@ describe('connectedAccounts.getConnectedAccountDetails', () => {
     await expect(
       connectedAccounts.getConnectedAccountDetails(options)
     ).rejects.toThrow(
-      'either connectedAccountId or connector + identifier is required'
+      'either connectedAccountId, or connector + identifier (or organizationId) is required'
     );
     expect(fake.getConnectedAccountDetails).not.toHaveBeenCalled();
   });
@@ -331,16 +376,45 @@ describe('actions.getConnectedAccountDetails', () => {
     expect(req.identifier).toBeUndefined();
   });
 
+  it('looks up by connectionName + organizationId + userId when identifier is omitted', async () => {
+    const { actions, fake } = makeClients();
+
+    await actions.getConnectedAccountDetails({
+      connectionName: ' gmail ',
+      organizationId: ' org_123 ',
+      userId: ' usr_123 ',
+    });
+
+    const req = sentRequest<GetConnectedAccountByIdentifierRequest>(
+      fake.getConnectedAccountDetails
+    );
+    expect(req.connector).toBe('gmail');
+    expect(req.organizationId).toBe('org_123');
+    expect(req.userId).toBe('usr_123');
+    expect(req.identifier).toBeUndefined();
+    expect(req.id).toBeUndefined();
+    expect(fake.getConnectedAccountAuth).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['nothing', {}],
     ['connectionName only', { connectionName: 'gmail' }],
     ['identifier only', { identifier: 'john@example.com' }],
+    ['organizationId only', { organizationId: 'org_123' }],
+    [
+      'organizationId + userId without connectionName',
+      { organizationId: 'org_123', userId: 'usr_123' },
+    ],
+    [
+      'connectionName + userId only',
+      { connectionName: 'gmail', userId: 'usr_123' },
+    ],
     ['whitespace connectedAccountId', { connectedAccountId: ' ' }],
   ])('rejects %s before any request is sent', async (_label, params) => {
     const { actions, fake } = makeClients();
 
     await expect(actions.getConnectedAccountDetails(params)).rejects.toThrow(
-      'either connectedAccountId or connectionName + identifier is required'
+      'either connectedAccountId, or connectionName + identifier (or organizationId) is required'
     );
     expect(fake.getConnectedAccountDetails).not.toHaveBeenCalled();
     expect(fake.getConnectedAccountAuth).not.toHaveBeenCalled();

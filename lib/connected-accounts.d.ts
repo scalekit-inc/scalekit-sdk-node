@@ -39,7 +39,9 @@ export default class ConnectedAccountsClient {
      * Searches the environment's connected accounts by a text query.
      *
      * The query matches an account's identifier, provider or connector,
-     * case-insensitively. Results are paginated: pass a response's
+     * case-insensitively. If the query is a connected account ID (`ca_...`),
+     * the account with that exact ID is also returned, alongside any text
+     * matches. Results are paginated: pass a response's
      * `nextPageToken` as `pageToken` to fetch the next page.
      *
      * @param options - The search text plus optional paging and connection
@@ -205,18 +207,21 @@ export default class ConnectedAccountsClient {
      *
      * Returns the same `connectedAccount` shape as
      * {@link ConnectedAccountsClient.getConnectedAccountByIdentifier} (status,
-     * connector, identifier, `apiConfig`, timestamps), but the server leaves out
-     * the access/refresh tokens and static secrets. Prefer this method whenever
-     * you do not need the credentials themselves.
+     * connector, identifier, `apiConfig`, timestamps), but without the
+     * access/refresh tokens or static secrets. Use it when you don't need the
+     * tokens.
      *
-     * Identify the account with `connectedAccountId`, or with `connector` and
-     * `identifier` together.
+     * Identify the account in one of these ways:
+     * - `connectedAccountId` alone;
+     * - `connector` + `identifier`;
+     * - `connector` + `organizationId` (optionally + `userId`), for accounts
+     *   whose identifier is `orgId` or `orgId/userId`.
      *
      * @param options - Which account to fetch (each field is documented on its
      *   property).
      * @returns The connected account, without authorization credentials.
-     * @throws `Error` if neither `connectedAccountId` nor both `connector` and
-     *   `identifier` are given, before any request is sent.
+     * @throws `Error` if none of the combinations above is given, before any
+     *   request is sent.
      * @throws {@link ScalekitNotFoundException} If no matching connected account
      *   is found.
      * @throws {@link ScalekitServerException} If a network or server error occurs.
@@ -234,15 +239,26 @@ export default class ConnectedAccountsClient {
      * ```
      */
     getConnectedAccountDetails(options: {
-        /** Connector (connection name), e.g. `"gmail"`. Use with `identifier`. */
+        /**
+         * Connector (connection name), e.g. `"gmail"`. Required unless
+         * `connectedAccountId` is given.
+         */
         connector?: string;
         /** Your application's identifier for the end user. Use with `connector`. */
         identifier?: string;
-        /** Organization the account is scoped to. */
+        /**
+         * Used to form the account identifier (`orgId`, or `orgId/userId` with
+         * `userId`) when `identifier` is omitted. Ignored when `identifier` or
+         * `connectedAccountId` is given. Not an access check.
+         */
         organizationId?: string;
-        /** Scalekit user the account is scoped to. */
+        /**
+         * Appended to `organizationId` to form the account identifier
+         * (`orgId/userId`) when `identifier` is omitted. Ignored when
+         * `identifier` or `connectedAccountId` is given. Not an access check.
+         */
         userId?: string;
-        /** Connected account ID (`ca_...`), as an alternative to `connector` + `identifier`. */
+        /** Connected account ID (`ca_...`). When given, the other fields are not needed. */
         connectedAccountId?: string;
     }): Promise<GetConnectedAccountByIdentifierResponse>;
 }

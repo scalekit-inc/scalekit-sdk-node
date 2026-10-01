@@ -405,7 +405,9 @@ export default class ActionsClient {
    * Searches the environment's connected accounts by a text query.
    *
    * The query matches an account's identifier, provider or connector,
-   * case-insensitively. Results are paginated: pass a response's
+   * case-insensitively. If the query is a connected account ID (`ca_...`),
+   * the account with that exact ID is also returned, alongside any text
+   * matches. Results are paginated: pass a response's
    * `nextPageToken` as `pageToken` to fetch the next page.
    *
    * @param params - The search text plus optional paging and connection
@@ -587,18 +589,21 @@ export default class ActionsClient {
    *
    * Returns the same `connectedAccount` shape as
    * {@link ActionsClient.getConnectedAccount} (status, connector, identifier,
-   * `apiConfig`, timestamps), but the server leaves out the access/refresh
-   * tokens and static secrets. Prefer this method when you only need to check
-   * an account, for example whether it is `ConnectorStatus.ACTIVE`.
+   * `apiConfig`, timestamps), but without the access/refresh tokens or static
+   * secrets. Use it when you don't need the tokens, for example to check
+   * whether an account is `ConnectorStatus.ACTIVE`.
    *
-   * Identify the account with `connectedAccountId`, or with `connectionName`
-   * and `identifier` together.
+   * Identify the account in one of these ways:
+   * - `connectedAccountId` alone;
+   * - `connectionName` + `identifier`;
+   * - `connectionName` + `organizationId` (optionally + `userId`), for
+   *   accounts whose identifier is `orgId` or `orgId/userId`.
    *
    * @param params - Which account to fetch (each field is documented on its
    *   property).
    * @returns The connected account, without authorization credentials.
-   * @throws `Error` if neither `connectedAccountId` nor both `connectionName`
-   *   and `identifier` are given, before any request is sent.
+   * @throws `Error` if none of the combinations above is given, before any
+   *   request is sent.
    * @throws {@link ScalekitNotFoundException} If no matching connected account
    *   is found.
    * @throws {@link ScalekitServerException} If a network or server error occurs.
@@ -617,15 +622,26 @@ export default class ActionsClient {
    * ```
    */
   async getConnectedAccountDetails(params: {
-    /** Connection name as shown in the dashboard. Use with `identifier`. */
+    /**
+     * Connection name as shown in the dashboard. Required unless
+     * `connectedAccountId` is given.
+     */
     connectionName?: string;
     /** Your application's identifier for the end user. Use with `connectionName`. */
     identifier?: string;
-    /** Connected account ID (`ca_...`), as an alternative to `connectionName` + `identifier`. */
+    /** Connected account ID (`ca_...`). When given, the other fields are not needed. */
     connectedAccountId?: string;
-    /** Organization the account is scoped to. */
+    /**
+     * Used to form the account identifier (`orgId`, or `orgId/userId` with
+     * `userId`) when `identifier` is omitted. Ignored when `identifier` or
+     * `connectedAccountId` is given. Not an access check.
+     */
     organizationId?: string;
-    /** Scalekit user the account is scoped to. */
+    /**
+     * Appended to `organizationId` to form the account identifier
+     * (`orgId/userId`) when `identifier` is omitted. Ignored when
+     * `identifier` or `connectedAccountId` is given. Not an access check.
+     */
     userId?: string;
   }): Promise<GetConnectedAccountByIdentifierResponse> {
     const {
@@ -639,21 +655,23 @@ export default class ActionsClient {
     const trimmedConnectionName = connectionName?.trim();
     const trimmedIdentifier = identifier?.trim();
     const trimmedConnectedAccountId = connectedAccountId?.trim();
+    const trimmedOrganizationId = organizationId?.trim();
+    const trimmedUserId = userId?.trim();
 
     if (
       !trimmedConnectedAccountId &&
-      !(trimmedConnectionName && trimmedIdentifier)
+      !(trimmedConnectionName && (trimmedIdentifier || trimmedOrganizationId))
     ) {
       throw new Error(
-        'either connectedAccountId or connectionName + identifier is required'
+        'either connectedAccountId, or connectionName + identifier (or organizationId) is required'
       );
     }
 
     return this.connectedAccounts.getConnectedAccountDetails({
       connector: trimmedConnectionName,
       identifier: trimmedIdentifier,
-      organizationId,
-      userId,
+      organizationId: trimmedOrganizationId,
+      userId: trimmedUserId,
       connectedAccountId: trimmedConnectedAccountId,
     });
   }

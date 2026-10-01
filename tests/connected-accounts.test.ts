@@ -1,7 +1,10 @@
 import ScalekitClient from '../src/scalekit';
 import { create } from '@bufbuild/protobuf';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { ScalekitServerException } from '../src/errors';
+import {
+  ScalekitNotFoundException,
+  ScalekitServerException,
+} from '../src/errors';
 import { TestOrganizationManager } from './utils/test-data';
 import {
   AuthorizationDetailsSchema,
@@ -482,29 +485,23 @@ describe('Connected Accounts', () => {
       );
     });
 
-    it('should handle get connected account details request', async () => {
-      try {
-        const response =
-          await client.connectedAccounts.getConnectedAccountDetails({
-            connector: 'test_connector',
-            identifier: 'test_identifier',
-            organizationId: testOrg,
-          });
-
-        expect(response).toBeDefined();
-        expect(response.connectedAccount?.id).toBeDefined();
-      } catch (error: unknown) {
-        expect(error).toBeInstanceOf(ScalekitServerException);
-      }
+    it('should reject an unknown account with ScalekitNotFoundException', async () => {
+      await expect(
+        client.connectedAccounts.getConnectedAccountDetails({
+          connector: 'test_connector',
+          identifier: `missing_${Date.now()}`,
+          organizationId: testOrg,
+        })
+      ).rejects.toBeInstanceOf(ScalekitNotFoundException);
     });
 
-    it('should reject a call without connectedAccountId or connector + identifier', async () => {
+    it('should reject a call without connectedAccountId or connector + identifier/organizationId', async () => {
       await expect(
         client.connectedAccounts.getConnectedAccountDetails({
           connector: 'test_connector',
         })
       ).rejects.toThrow(
-        'either connectedAccountId or connector + identifier is required'
+        'either connectedAccountId, or connector + identifier (or organizationId) is required'
       );
     });
   });
