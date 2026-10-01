@@ -40,7 +40,7 @@ export {
 // Generated types surfaced by `actions.searchConnectedAccounts` /
 // `connectedAccounts.searchConnectedAccounts` (the response and the list item it
 // carries) and by `actions.getConnectedAccountDetails` /
-// `connectedAccounts.getConnectedAccountDetails` (the same response type as
+// `connectedAccounts.getConnectedAccountDetailsByIdentifier` (the same response type as
 // `getConnectedAccount`). Re-export them so callers can name the return types
 // without importing the internal pb path.
 export type {

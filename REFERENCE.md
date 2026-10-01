@@ -7505,7 +7505,7 @@ console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
 
 Searches the environment's connected accounts by a text query. The query matches an account's identifier, provider or connector, case-insensitively. If the query is a connected account ID (`ca_...`), the account with that exact ID is also returned, alongside any text matches.
 
-Results are paginated: pass `nextPageToken` from a response as `pageToken` to fetch the next page. A missing or blank `query` throws `Error('query is required')` before any request is sent; the server rejects queries shorter than 3 or longer than 200 characters with `ScalekitBadRequestException`.
+Results are paginated: pass `nextPageToken` from a response as `pageToken` to fetch the next page. A missing or blank `query` throws `Error('query is required')` before any request is sent; the server rejects a query shorter than 3 or longer than 200 characters, or a `pageSize` greater than 30, with `ScalekitBadRequestException`.
 
 Also available as `scalekitClient.connectedAccounts.searchConnectedAccounts` with the same parameters.
 </dd>
@@ -7602,7 +7602,7 @@ Fetches a connected account's metadata (status, connector, identifier, `apiConfi
 
 Identify the account with `connectedAccountId` alone, with `connectionName` + `identifier`, or with `connectionName` + `organizationId` (optionally + `userId`) for accounts whose identifier is `orgId` or `orgId/userId`. Anything else throws `Error('either connectedAccountId, or connectionName + identifier (or organizationId) is required')` before any request is sent. An unknown connection or account rejects with `ScalekitNotFoundException`.
 
-Also available as `scalekitClient.connectedAccounts.getConnectedAccountDetails`, which takes `connector` instead of `connectionName`.
+Also available as `scalekitClient.connectedAccounts.getConnectedAccountDetailsByIdentifier`, which takes `connector` instead of `connectionName`.
 </dd>
 </dl>
 </dd>
@@ -7627,6 +7627,14 @@ const { connectedAccount } = await scalekitClient.actions.getConnectedAccountDet
 if (connectedAccount?.status !== ConnectorStatus.ACTIVE) {
   // Send the user a fresh link from getAuthorizationLink
 }
+
+// An account whose identifier is `orgId/userId`, looked up by its parts
+const { connectedAccount: orgAccount } =
+  await scalekitClient.actions.getConnectedAccountDetails({
+    connectionName: 'gmail',
+    organizationId: 'org_123',
+    userId: 'usr_123', // omit for an account identified by `org_123` alone
+  });
 ```
 </dd>
 </dl>

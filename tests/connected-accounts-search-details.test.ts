@@ -176,11 +176,11 @@ describe('connectedAccounts.searchConnectedAccounts', () => {
   });
 });
 
-describe('connectedAccounts.getConnectedAccountDetails', () => {
+describe('connectedAccounts.getConnectedAccountDetailsByIdentifier', () => {
   it('calls GetConnectedAccountDetails (not GetConnectedAccountAuth) by connector + identifier', async () => {
     const { connectedAccounts, fake } = makeClients();
 
-    const res = await connectedAccounts.getConnectedAccountDetails({
+    const res = await connectedAccounts.getConnectedAccountDetailsByIdentifier({
       connector: ' gmail ',
       identifier: ' john@example.com ',
     });
@@ -200,7 +200,7 @@ describe('connectedAccounts.getConnectedAccountDetails', () => {
   it('sends a trimmed connectedAccountId as id, with organizationId and userId', async () => {
     const { connectedAccounts, fake } = makeClients();
 
-    await connectedAccounts.getConnectedAccountDetails({
+    await connectedAccounts.getConnectedAccountDetailsByIdentifier({
       connectedAccountId: ' ca_123 ',
       organizationId: 'org_123',
       userId: 'usr_123',
@@ -219,7 +219,7 @@ describe('connectedAccounts.getConnectedAccountDetails', () => {
   it('looks up by connector + organizationId + userId when identifier is omitted', async () => {
     const { connectedAccounts, fake } = makeClients();
 
-    await connectedAccounts.getConnectedAccountDetails({
+    await connectedAccounts.getConnectedAccountDetailsByIdentifier({
       connector: 'gmail',
       organizationId: ' org_123 ',
       userId: ' usr_123 ',
@@ -238,7 +238,7 @@ describe('connectedAccounts.getConnectedAccountDetails', () => {
   it('looks up by connector + organizationId alone', async () => {
     const { connectedAccounts, fake } = makeClients();
 
-    await connectedAccounts.getConnectedAccountDetails({
+    await connectedAccounts.getConnectedAccountDetailsByIdentifier({
       connector: 'gmail',
       organizationId: 'org_123',
     });
@@ -271,7 +271,7 @@ describe('connectedAccounts.getConnectedAccountDetails', () => {
     const { connectedAccounts, fake } = makeClients();
 
     await expect(
-      connectedAccounts.getConnectedAccountDetails(options)
+      connectedAccounts.getConnectedAccountDetailsByIdentifier(options)
     ).rejects.toThrow(
       'either connectedAccountId, or connector + identifier (or organizationId) is required'
     );
@@ -285,7 +285,7 @@ describe('connectedAccounts.getConnectedAccountDetails', () => {
     );
 
     await expect(
-      connectedAccounts.getConnectedAccountDetails({
+      connectedAccounts.getConnectedAccountDetailsByIdentifier({
         connectedAccountId: 'ca_missing',
       })
     ).rejects.toBeInstanceOf(ScalekitNotFoundException);

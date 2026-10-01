@@ -478,16 +478,16 @@ describe('Connected Accounts', () => {
     });
   });
 
-  describe('getConnectedAccountDetails', () => {
-    it('should expose getConnectedAccountDetails', () => {
-      expect(typeof client.connectedAccounts.getConnectedAccountDetails).toBe(
-        'function'
-      );
+  describe('getConnectedAccountDetailsByIdentifier', () => {
+    it('should expose getConnectedAccountDetailsByIdentifier', () => {
+      expect(
+        typeof client.connectedAccounts.getConnectedAccountDetailsByIdentifier
+      ).toBe('function');
     });
 
     it('should reject an unknown account with ScalekitNotFoundException', async () => {
       await expect(
-        client.connectedAccounts.getConnectedAccountDetails({
+        client.connectedAccounts.getConnectedAccountDetailsByIdentifier({
           connector: 'test_connector',
           identifier: `missing_${Date.now()}`,
           organizationId: testOrg,
@@ -497,7 +497,7 @@ describe('Connected Accounts', () => {
 
     it('should reject a call without connectedAccountId or connector + identifier/organizationId', async () => {
       await expect(
-        client.connectedAccounts.getConnectedAccountDetails({
+        client.connectedAccounts.getConnectedAccountDetailsByIdentifier({
           connector: 'test_connector',
         })
       ).rejects.toThrow(

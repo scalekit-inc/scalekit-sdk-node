@@ -141,7 +141,7 @@ await scalekitClient.tools.executeTool({
 - `getMagicLinkForConnectedAccount(params)`
 - `verifyConnectedAccountUser(params)`
 - `getConnectedAccountByIdentifier(params)` — returns auth details for an account (sensitive).
-- `getConnectedAccountDetails(options)` — returns an account's metadata without its stored credentials.
+- `getConnectedAccountDetailsByIdentifier(options)` — returns an account's metadata without its stored credentials.
 
 Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source file for parameter shapes.
 

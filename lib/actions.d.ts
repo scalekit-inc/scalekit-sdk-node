@@ -231,6 +231,8 @@ export default class ActionsClient {
      * @returns The matching `connectedAccounts`, the `totalSize` of the result
      *   set, and `nextPageToken` / `prevPageToken` for paging.
      * @throws `Error` if `query` is missing or blank, before any request is sent.
+     * @throws {@link ScalekitBadRequestException} If `query` is outside 3 to 200
+     *   characters or `pageSize` is greater than 30.
      * @throws {@link ScalekitServerException} If a network or server error occurs.
      *
      * @example
@@ -349,6 +351,17 @@ export default class ActionsClient {
      * if (connectedAccount?.status !== ConnectorStatus.ACTIVE) {
      *   // Send the user an authorization link
      * }
+     * ```
+     *
+     * @example
+     * Look up an account whose identifier is `orgId/userId` by its parts:
+     * ```ts
+     * const { connectedAccount } = await scalekit.actions.getConnectedAccountDetails({
+     *   connectionName: 'gmail',
+     *   organizationId: 'org_123',
+     *   userId: 'usr_123', // omit for an account identified by `org_123` alone
+     * });
+     * console.log(connectedAccount?.identifier); // 'org_123/usr_123'
      * ```
      */
     getConnectedAccountDetails(params: {

@@ -49,6 +49,8 @@ export default class ConnectedAccountsClient {
      * @returns The matching `connectedAccounts`, the `totalSize` of the result
      *   set, and `nextPageToken` / `prevPageToken` for paging.
      * @throws `Error` if `query` is missing or blank, before any request is sent.
+     * @throws {@link ScalekitBadRequestException} If `query` is outside 3 to 200
+     *   characters or `pageSize` is greater than 30.
      * @throws {@link ScalekitServerException} If a network or server error occurs.
      *
      * @example
@@ -231,14 +233,14 @@ export default class ConnectedAccountsClient {
      * import { ConnectorStatus } from '@scalekit-sdk/node';
      *
      * const { connectedAccount } =
-     *   await scalekit.connectedAccounts.getConnectedAccountDetails({
+     *   await scalekit.connectedAccounts.getConnectedAccountDetailsByIdentifier({
      *     connector: 'gmail',
      *     identifier: 'user_123',
      *   });
      * console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
      * ```
      */
-    getConnectedAccountDetails(options: {
+    getConnectedAccountDetailsByIdentifier(options: {
         /**
          * Connector (connection name), e.g. `"gmail"`. Required unless
          * `connectedAccountId` is given.

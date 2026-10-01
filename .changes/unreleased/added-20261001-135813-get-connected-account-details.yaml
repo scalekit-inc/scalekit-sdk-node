@@ -1,0 +1,16 @@
+kind: added
+body: |
+  `scalekit.actions.getConnectedAccountDetails()` returns a connected account's metadata (status, connector, identifier, `apiConfig`, timestamps) without its stored tokens or secrets, for when you only need to check the account. Identify it by `connectedAccountId`, by `connectionName` and `identifier`, or by `connectionName` and `organizationId` (optionally with `userId`). `scalekit.connectedAccounts.getConnectedAccountDetailsByIdentifier` takes `connector` in place of `connectionName`. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#actions)
+
+  ```ts
+  const { connectedAccount } = await scalekit.actions.getConnectedAccountDetails({
+    connectionName: 'gmail',
+    identifier: 'user_123',
+  });
+  console.log(connectedAccount?.status);
+  ```
+time: '2026-10-01T13:58:13.346060+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-2118
+  Migration: ''
