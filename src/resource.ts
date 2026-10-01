@@ -82,10 +82,10 @@ export interface UpdateResourceClientOptions {
 }
 
 /**
- * Client for reading resources, managing the API clients scoped to a
+ * Client for reading resources, managing the resource clients scoped to a
  * resource, and reading and revoking end-user consents granted against one.
  *
- * A resource (for example an MCP server) can have one or more API clients
+ * A resource (for example an MCP server) can have one or more resource clients
  * registered against it, each using the client_credentials OAuth flow scoped
  * to that resource. A consent records that one of your end users allowed a
  * specific client to act on their behalf against the resource. Each consent
@@ -155,7 +155,7 @@ export default class ResourceClient {
   }
 
   /**
-   * Creates a new API client scoped to a resource.
+   * Creates a new resource client.
    *
    * Returns the created `client` and a `plainSecret` — the plaintext client
    * secret, only available at creation time.
@@ -191,7 +191,7 @@ export default class ResourceClient {
   }
 
   /**
-   * Retrieves a single API client scoped to a resource, along with the
+   * Retrieves a single resource client, along with the
    * end-users who have granted it consent.
    *
    * @param resourceId - The resource the client must belong to (format: res_xxxxx)
@@ -211,7 +211,7 @@ export default class ResourceClient {
   }
 
   /**
-   * Lists every API client scoped to a resource.
+   * Lists every resource client.
    *
    * @param resourceId - The resource whose clients to list (format: res_xxxxx)
    * @returns ListResourceClientsResponse with clients array and DCR/static client counts
@@ -226,7 +226,7 @@ export default class ResourceClient {
   }
 
   /**
-   * Updates an existing API client scoped to a resource.
+   * Updates an existing resource client.
    *
    * Only the fields present in `options` are changed. An `update_mask` built
    * from those same fields is sent alongside the partial `client` payload, but
@@ -297,7 +297,7 @@ export default class ResourceClient {
   }
 
   /**
-   * Permanently deletes an API client scoped to a resource.
+   * Permanently deletes a resource client.
    *
    * `DeleteResourceClient` shares its underlying delete path with client
    * deletion in general, so nothing forces the given `clientId` to actually
@@ -332,7 +332,7 @@ export default class ResourceClient {
   }
 
   /**
-   * Creates a new secret for an API client scoped to a resource.
+   * Creates a new secret for a resource client.
    *
    * The underlying secret-creation call is keyed by `clientId` alone — it has
    * no notion of a resource — so this fetches the client first and verifies
@@ -373,7 +373,7 @@ export default class ResourceClient {
   }
 
   /**
-   * Permanently deletes a secret from an API client scoped to a resource.
+   * Permanently deletes a secret from a resource client.
    *
    * Like `createResourceClientSecret`, the underlying delete call is keyed by
    * `clientId` alone, so this verifies the client belongs to `resourceId`
@@ -443,14 +443,14 @@ export default class ResourceClient {
   }
 
   /**
-   * Revokes a single end-user consent held by an API client.
+   * Revokes a single end-user consent held by a resource client.
    *
    * Deletes the consent, so the client is prompted for consent again on its
    * next authorization attempt, and revokes every active refresh token issued
    * to that client for the same user. Access tokens already issued stay valid
    * until they expire.
    *
-   * Note that `clientId` is the API client that holds the consent (format:
+   * Note that `clientId` is the resource client that holds the consent (format:
    * m2m_xxxxx), not the resource id.
    *
    * @param clientId - The client holding the consent (format: m2m_xxxxx)
