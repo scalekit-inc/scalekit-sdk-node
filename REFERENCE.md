@@ -7049,7 +7049,7 @@ await scalekitClient.resources.revokeUserConsent('<CLIENT_ID>', '<CONSENT_ID>');
 <dl>
 <dd>
 
-**clientId:** `string` - The client holding the consent (format: `m2m_...`)
+**clientId:** `string` - The resource client holding the consent (format: `m2m_...`)
 
 </dd>
 </dl>
