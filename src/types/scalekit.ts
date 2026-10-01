@@ -25,7 +25,8 @@ export type AuthenticationOptions = {
 };
 
 export type TokenValidationOptions = {
-  issuer?: string;
+  /** Expected issuer. Pass an array to accept a token whose `iss` equals any entry. */
+  issuer?: string | string[];
   audience?: string[];
   requiredScopes?: string[];
 };

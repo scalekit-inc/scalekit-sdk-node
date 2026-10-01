@@ -5,6 +5,7 @@ import GrpcConnect from './connect';
 import ConnectionClient from './connection';
 import { IdTokenClaimToUserMap } from './constants/user';
 import CoreClient from './core';
+import { normalizeIssuer } from './issuer';
 import DirectoryClient from './directory';
 import DomainClient from './domain';
 import AuthClient from './auth';
@@ -365,7 +366,7 @@ export default class ScalekitClient {
    *
    * @param {string} idpInitiatedLoginToken - The token received in the 'idp_initiated_login' query parameter
    * @param {TokenValidationOptions} [options] - Optional token validation configuration
-   * @param {string} [options.issuer] - Expected token issuer for validation
+   * @param {string | string[]} [options.issuer] - Expected token issuer(s); the token is valid if its `iss` equals any entry
    * @param {string} [options.audience] - Expected token audience for validation
    *
    * @returns {Promise<IdpInitiatedLoginClaims>} Claims containing:
@@ -641,8 +642,9 @@ export default class ScalekitClient {
       keys: this.coreClient.keys,
     });
     try {
+      const issuer = normalizeIssuer(options?.issuer);
       const { payload } = await jose.jwtVerify<T>(token, jwks, {
-        ...(options?.issuer && { issuer: options.issuer }),
+        ...(issuer && { issuer }),
         ...(options?.audience && { audience: options.audience }),
       });
 
