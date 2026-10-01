@@ -8,3 +8,8 @@ jest.config.js
 README.md
 REFERENCE.md
 src/pkg/grpc/
+# Release tooling: generated (CHANGELOG.md) or vendored from scalekit-sdks-wrapper
+CHANGELOG.md
+.changes/
+.changie.yaml
+scripts/release/
