@@ -314,66 +314,57 @@ describe('Connected Accounts', () => {
   describe('updateConnectedAccount with scopeSelection', () => {
     // The hosted connect widget sends the end user's chosen scopes back through
     // this parameter. It only means anything on a real OAUTH_M2M / GOOGLE_DWD
-    // connection that allows scope selection, so the account is supplied through
-    // the environment rather than hardcoded here.
-    const scopeConnector = process.env.SCALEKIT_TEST_SCOPE_SELECTION_CONNECTOR;
-    const scopeIdentifier =
-      process.env.SCALEKIT_TEST_SCOPE_SELECTION_IDENTIFIER;
-    const canRun = Boolean(scopeConnector && scopeIdentifier);
+    // connection that allows scope selection, so these are long-lived fixtures in
+    // the SDK test environment; the "no-delete" suffix marks the connection as one
+    // that must not be cleaned up by test teardown.
+    const scopeConnector = 'github-sdk-test-no-delete';
+    const scopeIdentifier = 'john.doe@example.com';
 
-    (canRun ? it : it.skip)(
-      'should send the end-user scope selection on update',
-      async () => {
-        // Re-send the scopes the account already holds, so the selection is a
-        // real one for this connection and the account is left as it was found.
-        const existing =
-          await client.connectedAccounts.getConnectedAccountByIdentifier({
-            connector: scopeConnector!,
-            identifier: scopeIdentifier!,
-          });
-        const details =
-          existing.connectedAccount?.authorizationDetails?.details;
-        const currentScopes =
-          details?.case === 'oauthToken' ? details.value.scopes : [];
-
-        const response = await client.connectedAccounts.updateConnectedAccount({
-          connector: scopeConnector!,
-          identifier: scopeIdentifier!,
-          connectedAccount: create(UpdateConnectedAccountSchema, {}),
-          scopeSelection: { scopes: currentScopes, optionalScopes: [] },
+    it('should send the end-user scope selection on update', async () => {
+      // Re-send the scopes the account already holds, so the selection is a
+      // real one for this connection and the account is left as it was found.
+      const existing =
+        await client.connectedAccounts.getConnectedAccountByIdentifier({
+          connector: scopeConnector,
+          identifier: scopeIdentifier,
         });
+      const details = existing.connectedAccount?.authorizationDetails?.details;
+      const currentScopes =
+        details?.case === 'oauthToken' ? details.value.scopes : [];
 
-        expect(response).toBeDefined();
-        expect(response.connectedAccount).toBeDefined();
-        expect(response.connectedAccount?.identifier).toBe(scopeIdentifier);
-        expect(response.connectedAccount?.connector).toBe(scopeConnector);
-      }
-    );
+      const response = await client.connectedAccounts.updateConnectedAccount({
+        connector: scopeConnector,
+        identifier: scopeIdentifier,
+        connectedAccount: create(UpdateConnectedAccountSchema, {}),
+        scopeSelection: { scopes: currentScopes, optionalScopes: [] },
+      });
 
-    (canRun ? it : it.skip)(
-      'should accept a scope selection through the actions namespace',
-      async () => {
-        const existing =
-          await client.connectedAccounts.getConnectedAccountByIdentifier({
-            connector: scopeConnector!,
-            identifier: scopeIdentifier!,
-          });
-        const details =
-          existing.connectedAccount?.authorizationDetails?.details;
-        const currentScopes =
-          details?.case === 'oauthToken' ? details.value.scopes : [];
+      expect(response).toBeDefined();
+      expect(response.connectedAccount).toBeDefined();
+      expect(response.connectedAccount?.identifier).toBe(scopeIdentifier);
+      expect(response.connectedAccount?.connector).toBe(scopeConnector);
+    });
 
-        const response = await client.actions.updateConnectedAccount({
-          connectionName: scopeConnector!,
-          identifier: scopeIdentifier!,
-          scopeSelection: { scopes: currentScopes, optionalScopes: [] },
+    it('should accept a scope selection through the actions namespace', async () => {
+      const existing =
+        await client.connectedAccounts.getConnectedAccountByIdentifier({
+          connector: scopeConnector,
+          identifier: scopeIdentifier,
         });
+      const details = existing.connectedAccount?.authorizationDetails?.details;
+      const currentScopes =
+        details?.case === 'oauthToken' ? details.value.scopes : [];
 
-        expect(response).toBeDefined();
-        expect(response.connectedAccount).toBeDefined();
-        expect(response.connectedAccount?.identifier).toBe(scopeIdentifier);
-      }
-    );
+      const response = await client.actions.updateConnectedAccount({
+        connectionName: scopeConnector,
+        identifier: scopeIdentifier,
+        scopeSelection: { scopes: currentScopes, optionalScopes: [] },
+      });
+
+      expect(response).toBeDefined();
+      expect(response.connectedAccount).toBeDefined();
+      expect(response.connectedAccount?.identifier).toBe(scopeIdentifier);
+    });
   });
 
   describe('deleteConnectedAccount', () => {

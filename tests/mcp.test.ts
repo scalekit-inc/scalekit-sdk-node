@@ -42,24 +42,21 @@ describe('Virtual MCP Servers', () => {
       ).rejects.toThrow('exactly one of mcpConfigId or keyId is required');
     });
 
-    // Live test only runs when a real AgentKit connection name is supplied.
-    // Never hardcode one — the keyId must exist in the test environment.
-    const keyId = process.env.SCALEKIT_TEST_MCP_CONNECTION_KEY_ID;
+    // Long-lived fixture in the SDK test environment; the "no-delete" suffix marks
+    // it as one that must not be cleaned up by test teardown.
+    const keyId = 'apifymcp-sdk-test-no-delete';
 
-    (keyId ? it : it.skip)(
-      'should mint a session token for an AgentKit connection keyId',
-      async () => {
-        const response = await client.actions.mcp.createSessionToken({
-          keyId: keyId!,
-          identifier: `sdk-node-mcp-test-${Date.now()}`,
-          expirySeconds: 900,
-        });
+    it('should mint a session token for an AgentKit connection keyId', async () => {
+      const response = await client.actions.mcp.createSessionToken({
+        keyId,
+        identifier: `sdk-node-mcp-test-${Date.now()}`,
+        expirySeconds: 900,
+      });
 
-        expect(response).toBeDefined();
-        expect(typeof response.token).toBe('string');
-        expect(response.token.length).toBeGreaterThan(0);
-        expect(response.expiresAt).toBeDefined();
-      }
-    );
+      expect(response).toBeDefined();
+      expect(typeof response.token).toBe('string');
+      expect(response.token.length).toBeGreaterThan(0);
+      expect(response.expiresAt).toBeDefined();
+    });
   });
 });
