@@ -2202,6 +2202,8 @@ Creates an environment-scoped connection. Unlike `createConnection`, which creat
 Use it for AgentKit app connections: pass `flags: { isApp: true }` and set `providerKey` to the connector's identifier, such as a custom connector's `provider.identifier`. The returned connection's `keyId` is the connection name that the AgentKit methods on `actions` take.
 
 **Preview:** the underlying `CreateEnvironmentConnection` RPC is marked preview in the API and may change. It maps to `POST /api/v1/connections`, requires a workspace client, and needs the `sso:write` permission.
+
+**Scope selection in the hosted connect widget:** `scopeSelectionAllowed`, `requiredScopes` and `requiredOptionalScopes` on an `oauthConfig` — and `scopeSelectionAllowed` and `requiredScopes` on a `googleDwdConfig` — apply when your customer is using the hosted connect widget to connect accounts. They govern what the end user sees there: set `scopeSelectionAllowed` to let the user choose, and list under `requiredScopes` / `requiredOptionalScopes` the scopes the user cannot turn off. Required scopes are always added by the server, so the selection the widget sends back (see [`actions.updateConnectedAccount`](#actions)'s `scopeSelection`) never has to repeat them. These fields have no effect when accounts are connected without the hosted connect widget.
 </dd>
 </dl>
 </dd>
@@ -2271,6 +2273,7 @@ console.log(connectionName, link);
 - `type: ConnectionType` - Authentication type, e.g. `ConnectionType.OAUTH`
 - `keyId?: string` - Connection name; generated when omitted
 - `authMode?: ConnectionAuthMode` - Whether each user connects their own account (`USER`) or shares one (`ORG_WIDE`)
+- `settings?: { case: 'oauthConfig' | 'googleDwdConfig', value: {...} }` - Connection configuration. On an `oauthConfig`, `scopeSelectionAllowed?: boolean`, `requiredScopes?: string[]` and `requiredOptionalScopes?: string[]` control scope selection in the hosted connect widget (see above); a `googleDwdConfig` takes `scopeSelectionAllowed?: boolean` and `requiredScopes?: string[]`
 
 </dd>
 </dl>
@@ -2373,6 +2376,8 @@ Despite the `PATCH` verb, the server validates the whole connection rather than 
 On an AgentKit app connection `settings` is the only field an update actually changes. `provider`, `uiButtonTitle`, `debugEnabled`, `configurationType` and `attributeMapping` are all accepted and then discarded: the call succeeds and the stored values do not move. Change those from the Scalekit dashboard instead.
 
 **Preview:** the underlying `UpdateEnvironmentConnection` RPC is marked preview in the API and may change. It maps to `PATCH /api/v1/connections/{connection_id}`, requires a workspace client, and needs the `sso:write` permission.
+
+**Scope selection in the hosted connect widget:** `scopeSelectionAllowed`, `requiredScopes` and `requiredOptionalScopes` on an `oauthConfig` — and `scopeSelectionAllowed` and `requiredScopes` on a `googleDwdConfig` — apply when your customer is using the hosted connect widget to connect accounts. They govern what the end user sees there: set `scopeSelectionAllowed` to let the user choose, and list under `requiredScopes` / `requiredOptionalScopes` the scopes the user cannot turn off. Required scopes are always added by the server, so the selection the widget sends back (see [`actions.updateConnectedAccount`](#actions)'s `scopeSelection`) never has to repeat them. These fields have no effect when accounts are connected without the hosted connect widget.
 </dd>
 </dl>
 </dd>
@@ -2431,7 +2436,7 @@ console.log(connection?.settings.value);
 <dl>
 <dd>
 
-**connection:** `UpdateConnection` - The connection to store, as a plain object. `type`, `providerKey` and `keyId` are required on every call. `settings` is a protobuf oneof, so it takes `{ case: 'oauthConfig', value: {...} }`
+**connection:** `UpdateConnection` - The connection to store, as a plain object. `type`, `providerKey` and `keyId` are required on every call. `settings` is a protobuf oneof, so it takes `{ case: 'oauthConfig', value: {...} }`. On an `oauthConfig`, `scopeSelectionAllowed?: boolean`, `requiredScopes?: string[]` and `requiredOptionalScopes?: string[]` control scope selection in the hosted connect widget (see above); a `googleDwdConfig` takes `scopeSelectionAllowed?: boolean` and `requiredScopes?: string[]`
 
 </dd>
 </dl>
@@ -7491,6 +7496,127 @@ console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
 </dl>
 </details>
 
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">updateConnectedAccount</a>(params) -> Promise&lt;UpdateConnectedAccountResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Updates an existing connected account: its stored credentials, its API configuration, or the scopes the end user selected.
+
+Target the account either by `connectedAccountId` alone, or by `connectionName` + `identifier`. Throws before the request is sent when neither is supplied.
+
+`scopeSelection` applies when your customer is using the hosted connect widget to connect accounts — it is how the widget records what the user chose — and only to OAUTH_M2M and GOOGLE_DWD connections that allow scope selection (see `scopeSelectionAllowed` on the connection's `oauthConfig` / `googleDwdConfig` in [Connections](#connections)). The two lists together are the complete selection: a list left out is the same as an empty one. Scopes the connection marks as required are always added by the server, so they never need to be sent. Omit `scopeSelection` entirely to keep a previously saved selection.
+
+The same parameters are available on `scalekitClient.connectedAccounts.updateConnectedAccount`, which takes `connector` in place of `connectionName` and the `connectedAccount` payload directly.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+// Record the scopes the end user picked in the hosted connect widget
+const { connectedAccount } = await scalekitClient.actions.updateConnectedAccount({
+  connectionName: 'github-connect',
+  identifier: 'user_123',
+  scopeSelection: {
+    scopes: ['repo:status'],
+    optionalScopes: ['gist'],
+  },
+});
+
+console.log(connectedAccount?.status);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.connectionName?:** `string` - Connection name as shown in the dashboard. Case-sensitive. Use with `identifier`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.identifier?:** `string` - Your application's identifier for the end user. Use with `connectionName`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.connectedAccountId?:** `string` - An existing connected account, as an alternative to `connectionName` + `identifier`
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.authorizationDetails?:** `UpdateConnectedAccount['authorizationDetails']` - Credentials to store on the account, such as an OAuth token or static auth
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.apiConfig?:** `UpdateConnectedAccount['apiConfig']` - Connector-specific API configuration
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.organizationId?:** `string` - Organization the account is scoped to
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.userId?:** `string` - Scalekit user the account is scoped to. Not the same field as `identifier`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.scopeSelection?:** `ScopeSelection` - The scopes the end user chose in the hosted connect widget:
+- `scopes?: string[]` - Selected scopes
+- `optionalScopes?: string[]` - Selected optional scopes
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Virtual MCP Servers
 
 A Virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol, so any MCP-capable agent can call them. Create one configuration per agent role (not per user), and mint a short-lived session token per user per run. The server URL stays the same; the token carries the user's identity.
@@ -7921,9 +8047,11 @@ for (const account of pending) {
 <dl>
 <dd>
 
-Mints a session token for one user against one configuration.
+Mints a session token for one user against one MCP server.
 
 The token carries the user's identity. Mint a fresh one before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
+
+Pass exactly one target. `mcpConfigId` mints for the virtual MCP server of an MCP configuration — the one created by `createConfig`, exposing the connections and tools that configuration selects. `keyId` is an AgentKit connection name, such as `'github-connect'`, and mints for that single connection's MCP server. A token is only accepted by the server it was minted for, so a `mcpConfigId` token does not work against a connection's MCP server and vice versa. Passing both, or neither, throws before the request is sent.
 </dd>
 </dl>
 </dd>
@@ -7938,6 +8066,7 @@ The token carries the user's identity. Mint a fresh one before every agent run, 
 <dd>
 
 ```typescript
+// A configuration's virtual MCP server
 const { config } = await scalekitClient.actions.mcp.getConfig('<CONFIG_ID>');
 const session = await scalekitClient.actions.mcp.createSessionToken({
   mcpConfigId: '<CONFIG_ID>',
@@ -7947,6 +8076,14 @@ const session = await scalekitClient.actions.mcp.createSessionToken({
 
 // Hand both to your MCP client
 console.log(config?.mcpServerUrl, session.token, session.expiresAt);
+
+// Or: a single AgentKit connection's MCP server, by connection name
+const connectionSession = await scalekitClient.actions.mcp.createSessionToken({
+  keyId: 'github-connect',
+  identifier: 'user_123',
+  expirySeconds: 900,
+});
+console.log(connectionSession.token);
 ```
 </dd>
 </dl>
@@ -7961,7 +8098,14 @@ console.log(config?.mcpServerUrl, session.token, session.expiresAt);
 <dl>
 <dd>
 
-**params.mcpConfigId:** `string` - The configuration
+**params.mcpConfigId?:** `string` - The MCP configuration to mint for. Mutually exclusive with `keyId`; exactly one of the two is required.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.keyId?:** `string` - AgentKit connection name, e.g. `'github-connect'`, to mint for that connection's MCP server. Mutually exclusive with `mcpConfigId`; exactly one of the two is required.
 
 </dd>
 </dl>

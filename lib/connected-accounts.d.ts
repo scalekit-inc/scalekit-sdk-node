@@ -1,7 +1,7 @@
 import { type MessageInitShape } from '@bufbuild/protobuf';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { AuthorizationDetailsSchema, CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+import { AuthorizationDetailsSchema, CreateConnectedAccount, CreateConnectedAccountResponse, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, ScopeSelectionSchema, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 /**
  * Client for managing connected accounts for third-party integrations.
  *
@@ -86,6 +86,13 @@ export default class ConnectedAccountsClient {
      * You can target the account either by `connectedAccountId` alone, or by the
      * combination of `connector` and `identifier`.
      *
+     * @param params.scopeSelection The scopes the end user picked. Applies when your
+     *   customer is using the hosted connect widget to connect accounts, and only to
+     *   OAUTH_M2M and GOOGLE_DWD connections that allow scope selection. Both lists
+     *   together are the complete selection — a list left out is the same as an empty
+     *   one. Scopes the connection marks as required are always added by the server, so
+     *   they never need to be sent. Omit the whole object to keep a previously saved
+     *   selection.
      * @throws {ScalekitServerException} If a network or server error occurs.
      * @throws {ScalekitException} If required parameters are missing.
      */
@@ -96,6 +103,7 @@ export default class ConnectedAccountsClient {
         organizationId?: string;
         userId?: string;
         connectedAccountId?: string;
+        scopeSelection?: MessageInitShape<typeof ScopeSelectionSchema>;
     }): Promise<UpdateConnectedAccountResponse>;
     /**
      * Deletes a connected account and revokes its credentials.

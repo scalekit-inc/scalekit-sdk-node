@@ -21,6 +21,7 @@ import {
   ListConnectedAccountsRequestSchema,
   ListConnectedAccountsResponse,
   OauthTokenSchema,
+  ScopeSelectionSchema,
   UpdateConnectedAccount,
   UpdateConnectedAccountRequestSchema,
   UpdateConnectedAccountResponse,
@@ -232,6 +233,13 @@ export default class ConnectedAccountsClient {
    * You can target the account either by `connectedAccountId` alone, or by the
    * combination of `connector` and `identifier`.
    *
+   * @param params.scopeSelection The scopes the end user picked. Applies when your
+   *   customer is using the hosted connect widget to connect accounts, and only to
+   *   OAUTH_M2M and GOOGLE_DWD connections that allow scope selection. Both lists
+   *   together are the complete selection — a list left out is the same as an empty
+   *   one. Scopes the connection marks as required are always added by the server, so
+   *   they never need to be sent. Omit the whole object to keep a previously saved
+   *   selection.
    * @throws {ScalekitServerException} If a network or server error occurs.
    * @throws {ScalekitException} If required parameters are missing.
    */
@@ -242,6 +250,7 @@ export default class ConnectedAccountsClient {
     organizationId?: string;
     userId?: string;
     connectedAccountId?: string;
+    scopeSelection?: MessageInitShape<typeof ScopeSelectionSchema>;
   }): Promise<UpdateConnectedAccountResponse> {
     const {
       connector,
@@ -250,6 +259,7 @@ export default class ConnectedAccountsClient {
       organizationId,
       userId,
       connectedAccountId,
+      scopeSelection,
     } = params;
 
     if (!connectedAccountId && !(connector?.trim() && identifier?.trim())) {
@@ -267,6 +277,7 @@ export default class ConnectedAccountsClient {
         ...(organizationId && { organizationId }),
         ...(userId && { userId }),
         ...(connectedAccountId && { id: connectedAccountId }),
+        ...(scopeSelection && { scopeSelection }),
       })
     );
   }

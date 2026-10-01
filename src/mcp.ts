@@ -23,6 +23,13 @@ import {
 } from './pkg/grpc/scalekit/v1/mcp/mcp_pb';
 
 /**
+ * Thrown by `createSessionToken` when the caller does not name exactly one
+ * target server. Kept as a constant so the wording stays in one place.
+ */
+const MCP_SESSION_TOKEN_TARGET_ERROR =
+  'exactly one of mcpConfigId or keyId is required';
+
+/**
  * Client for Virtual MCP servers.
  *
  * A Virtual MCP server exposes a chosen set of connectors and tools over the
@@ -201,23 +208,45 @@ export default class McpClient {
   }
 
   /**
-   * Mints a session token for one user against one configuration.
+   * Mints a session token for one user against one MCP server.
    *
    * The server URL is static; this token is what carries user identity. Mint a
    * fresh one before every agent run and never reuse one across runs. Set the
    * expiry longer than the run is expected to take.
    *
-   * @param params.mcpConfigId ID of the configuration.
+   * Pass exactly one target:
+   * - `mcpConfigId` mints a token for the virtual MCP server of an MCP
+   *   configuration — the one created by {@link createConfig}, which exposes
+   *   the connections and tools that configuration selects.
+   * - `keyId` is an AgentKit connection name, such as `'github-connect'`, and
+   *   mints a token for that single connection's MCP server.
+   *
+   * A token is only accepted by the server it was minted for: a `mcpConfigId`
+   * token does not work against a connection's MCP server, and vice versa.
+   *
+   * @param params.mcpConfigId ID of the MCP configuration. Mutually exclusive with `keyId`.
+   * @param params.keyId AgentKit connection name (e.g. `'github-connect'`). Mutually exclusive with `mcpConfigId`.
    * @param params.identifier Your application's unique identifier for the user.
    * @param params.expirySeconds Token lifetime in whole seconds.
+   * @throws {Error} If neither or both of `mcpConfigId` and `keyId` are provided.
    * @throws {Error} If `expirySeconds` is not a positive integer.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async createSessionToken(params: {
-    mcpConfigId: string;
+    mcpConfigId?: string;
     identifier: string;
     expirySeconds?: number;
+    keyId?: string;
   }): Promise<CreateMcpSessionTokenResponse> {
+    const mcpConfigId = params.mcpConfigId?.trim();
+    const keyId = params.keyId?.trim();
+
+    // The proto enforces exactly one of the two; reject locally so the caller
+    // gets a message that names both fields instead of a server validation error.
+    if (Boolean(mcpConfigId) === Boolean(keyId)) {
+      throw new Error(MCP_SESSION_TOKEN_TARGET_ERROR);
+    }
+
     if (
       params.expirySeconds !== undefined &&
       !(Number.isInteger(params.expirySeconds) && params.expirySeconds > 0)
@@ -230,7 +259,8 @@ export default class McpClient {
     return this.coreClient.connectExec(
       this.client.createMcpSessionToken,
       create(CreateMcpSessionTokenRequestSchema, {
-        mcpConfigId: params.mcpConfigId,
+        ...(mcpConfigId && { mcpConfigId }),
+        ...(keyId && { keyId }),
         identifier: params.identifier,
         ...(params.expirySeconds !== undefined && {
           expiry: create(DurationSchema, {

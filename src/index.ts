@@ -37,6 +37,14 @@ export {
   ConnectorType,
 } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 
+// Generated type surfaced in the public `connectedAccounts.updateConnectedAccount`
+// and `actions.updateConnectedAccount` APIs: `scopeSelection` carries the scopes an
+// end user picked in the hosted connect widget. The schema is exported alongside the
+// type so callers can build one with `create(ScopeSelectionSchema, { ... })` instead
+// of reaching into the internal pb path.
+export { ScopeSelectionSchema } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+export type { ScopeSelection } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+
 // Generated enums/types surfaced by the environment-scoped connection methods
 // (`connection.createEnvironmentConnection` and friends). `type`, `provider` and
 // `authMode` on a connection are numeric enums, so callers need the named

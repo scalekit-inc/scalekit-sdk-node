@@ -826,6 +826,10 @@ export type CreateMcpSessionTokenRequest = Message<"scalekit.v1.mcp.CreateMcpSes
      * @generated from field: google.protobuf.Duration expiry = 3;
      */
     expiry?: Duration | undefined;
+    /**
+     * @generated from field: string key_id = 4;
+     */
+    keyId: string;
 };
 /**
  * Describes the message scalekit.v1.mcp.CreateMcpSessionTokenRequest.

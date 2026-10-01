@@ -44,7 +44,7 @@ export interface ListAppConnectionsResult {
     prevPageToken: string;
     totalSize: number;
 }
-import { CreateConnectedAccountResponse, CreateConnectedAccountSchema, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+import { CreateConnectedAccountResponse, CreateConnectedAccountSchema, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, ScopeSelectionSchema, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * Normalized, consumer-friendly view of a tool returned by
@@ -320,6 +320,13 @@ export default class ActionsClient {
      * Update an existing connected account.
      * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
      *
+     * @param params.scopeSelection The scopes the end user picked. Applies when your
+     *   customer is using the hosted connect widget to connect accounts, and only to
+     *   OAUTH_M2M and GOOGLE_DWD connections that allow scope selection. Both lists
+     *   together are the complete selection — a list left out is the same as an empty
+     *   one. Scopes the connection marks as required are always added by the server, so
+     *   they never need to be sent. Omit the whole object to keep a previously saved
+     *   selection.
      * @throws {ScalekitServerException} If a network or server error occurs.
      * @throws {ScalekitException} If required parameters are missing.
      */
@@ -331,6 +338,7 @@ export default class ActionsClient {
         userId?: string;
         connectedAccountId?: string;
         apiConfig?: UpdateConnectedAccount['apiConfig'];
+        scopeSelection?: MessageInitShape<typeof ScopeSelectionSchema>;
     }): Promise<UpdateConnectedAccountResponse>;
     /**
      * Make a proxied REST API call on behalf of a connected account.
