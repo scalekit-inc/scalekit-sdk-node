@@ -28,15 +28,14 @@ TypeScript 5.x (documentation target; examples mus: Follow standard conventions
 
 <!-- MANUAL ADDITIONS START -->
 
-## Release
+## Release notes and releases
 
-Package: `@scalekit-sdk/node` on npm. Workflow: `.github/workflows/release.yml`.
-
-1. Bump the version in `package.json` and `package-lock.json`. Use a minor or patch bump.
-2. Review the unreleased changes. If proto or generated API files changed, extra generation steps apply. Those steps are not documented yet. Do not invent them. Ask before you regenerate.
-3. Merge the release branch to `main`.
-4. Create a git tag that matches the version (`v2.12.0` for `2.12.0`). Draft a GitHub Release for that tag.
-5. Publishing does not start on its own. Open the Actions run for the release workflow. Any peer can approve it. The `release` environment gates deploy.
-6. After approval, the workflow publishes to npm.
-
-<!-- MANUAL ADDITIONS END -->
+- Releases and cross-SDK changes are driven from scalekit-sdks-wrapper (`/sdk`, `/sdk-release`).
+  Its release tool (`python3 tools/release/release.py --sdk <lang> ...`, run from the wrapper)
+  writes release-notes fragments into `.changes/unreleased/`, bumps the version and renders
+  `CHANGELOG.md`. Notes follow the wrapper's `standards/release-notes.md`.
+- Never hand-edit the SDK version or `CHANGELOG.md` sections.
+- `.github/workflows/release.yml` publishes to npm when a GitHub Release is published. After
+  a release PR merges, Claude (from the wrapper, after `release.py preflight`) or a maintainer
+  creates that Release for the merge commit; publishing then waits for a human approval on
+  the `release` environment from someone other than the person who created it.

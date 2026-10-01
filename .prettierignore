@@ -8,3 +8,6 @@ jest.config.js
 README.md
 REFERENCE.md
 src/pkg/grpc/
+# Release notes: rendered by the wrapper's release tool
+CHANGELOG.md
+.changes/
