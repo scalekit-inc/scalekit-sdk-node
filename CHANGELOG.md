@@ -1,10 +1,16 @@
 # Changelog
 
 All notable changes to this SDK are documented in this file. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) with the layout defined in the
-Scalekit release-notes standard, and versions follow [Semantic Versioning](https://semver.org/).
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
+[Semantic Versioning](https://semver.org/).
 
-Sections up to and including 2.18.0 were imported from [GitHub Releases](https://github.com/scalekit-inc/scalekit-sdk-node/releases). They keep their original wording and predate the release-notes standard.
+Sections up to and including 2.19.0 were imported from [GitHub Releases](https://github.com/scalekit-inc/scalekit-sdk-node/releases). They keep their original wording.
+
+## [2.19.0] - 2026-10-05
+
+### Changes
+
+- feat: accept multiple issuers in token validation (SK-2080) ([#233](https://github.com/scalekit-inc/scalekit-sdk-node/pull/233))
 
 ## [2.18.0] - 2026-09-29
 
@@ -376,6 +382,7 @@ await client.domain.listDomains('org_123456', {
 
 - First Release of the official Scalekit Node SDK
 
+[2.19.0]: https://github.com/scalekit-inc/scalekit-sdk-node/releases/tag/v2.19.0
 [2.18.0]: https://github.com/scalekit-inc/scalekit-sdk-node/releases/tag/v2.18.0
 [2.17.0]: https://github.com/scalekit-inc/scalekit-sdk-node/releases/tag/v2.17.0
 [2.16.1]: https://github.com/scalekit-inc/scalekit-sdk-node/releases/tag/v2.16.1
