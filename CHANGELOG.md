@@ -95,10 +95,12 @@ This release introduces configurable timeouts for management APIs and tool-call 
 - New timeoutMs option — timeout for management API calls (organizations, users, connections, etc.). Default: 20 seconds.
 - New toolTimeoutMs option — timeout for tool-call APIs (tools.*, actions.executeTool, actions.request), which can run longer as they call third-party providers. Default: 60 seconds.
 
+```typescript
 const scalekit = new ScalekitClient(envUrl, clientId, clientSecret, {
   timeoutMs: 20_000,
   toolTimeoutMs: 60_000,
 });
+```
 
 - Calls that exceed the timeout now throw ScalekitGatewayTimeoutException instead of waiting indefinitely.
 - Invalid timeout values (zero or negative) throw an error at client creation.
