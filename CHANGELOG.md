@@ -4,7 +4,7 @@ All notable changes to this SDK are documented in this file. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/).
 
-Sections up to and including 2.19.0 were imported from [GitHub Releases](https://github.com/scalekit-inc/scalekit-sdk-node/releases). They keep their original wording.
+Sections up to and including 2.19.0 were imported from [GitHub Releases](https://github.com/scalekit-inc/scalekit-sdk-node/releases). Their wording is kept, with small corrections.
 
 ## [2.19.0] - 2026-10-05
 
@@ -163,7 +163,7 @@ const scalekit = new ScalekitClient(envUrl, clientId, clientSecret, {
 ### Changes
 
 - Updates for ci ([#152](https://github.com/scalekit-inc/scalekit-sdk-node/pull/152))
-- Added Connection API - Add/Delete by @hrishikesh-p
+- Added Connection API - Add/Delete
 - Release v2.4.0 ([#155](https://github.com/scalekit-inc/scalekit-sdk-node/pull/155))
 
 ## [2.3.0] - 2026-03-10
