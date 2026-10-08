@@ -6,11 +6,12 @@
  *   TEST_AGENTKIT_UPLOAD_IDENTIFIER   identifier of a connected Drive account
  *   TEST_AGENTKIT_UPLOAD_CONNECTION   connection name (default "googledrive")
  *
- * Every file is named sdk-parity-node-<run>-* and deleted after its test. An
+ * Every file is named sdk-upload-test-node-<run>-* and deleted after its test. An
  * upload that fails after Google created the file can leave an "Untitled"
  * file; afterAll deletes those created during this run.
  */
 import { afterAll, describe, expect, it } from '@jest/globals';
+import ScalekitClient from '../src/scalekit';
 import {
   ScalekitUploadHttpException,
   ScalekitUploadSessionExpiredException,
@@ -25,6 +26,14 @@ const enabled = Boolean(
   process.env.SCALEKIT_CLIENT_ID &&
   process.env.SCALEKIT_CLIENT_SECRET &&
   identifier
+);
+
+// Its own client, so this file doesn't depend on the shared test setup. The
+// constructor makes no requests, so placeholders are harmless when skipped.
+const client = new ScalekitClient(
+  process.env.SCALEKIT_ENVIRONMENT_URL || 'https://unset.invalid',
+  process.env.SCALEKIT_CLIENT_ID || 'unset',
+  process.env.SCALEKIT_CLIENT_SECRET || 'unset'
 );
 
 const KIB = 1024;
@@ -85,6 +94,15 @@ function track(file: Record<string, unknown>): string {
       for (const id of [...createdIds]) {
         await deleteFile(id).catch(() => undefined);
       }
+      // Files this run named but did not record (a test failed mid-way).
+      const named = await drive('/drive/v3/files', 'GET', {
+        q: `name contains 'sdk-upload-test-node-${runId}-' and trashed = false`,
+        fields: 'files(id)',
+        pageSize: 100,
+      }).catch(() => undefined);
+      for (const f of (named?.data?.files ?? []) as Array<{ id: string }>) {
+        await deleteFile(f.id).catch(() => undefined);
+      }
       // Orphans from a failed upload: "Untitled" files created during this
       // run whose size matches one of this run's payloads.
       const q = `name = 'Untitled' and createdTime > '${runStartedAt}' and trashed = false`;
@@ -108,7 +126,7 @@ function track(file: Record<string, unknown>): string {
       const data = bytes(600 * KIB);
       payloadSizes.add(data.length);
       const progress: UploadProgress[] = [];
-      const name = `sdk-parity-node-${runId}-known.bin`;
+      const name = `sdk-upload-test-node-${runId}-known.bin`;
 
       const file = await client.actions.uploadResumable(
         {
@@ -150,7 +168,7 @@ function track(file: Record<string, unknown>): string {
           path: '/upload/drive/v3/files',
           data: pieces(data, 64 * KIB),
           contentType: 'application/octet-stream',
-          metadata: { name: `sdk-parity-node-${runId}-stream.bin` },
+          metadata: { name: `sdk-upload-test-node-${runId}-stream.bin` },
           chunkSize: CHUNK,
         },
         { onProgress: (p) => void progress.push(p) }
@@ -181,7 +199,7 @@ function track(file: Record<string, unknown>): string {
           path: '/upload/drive/v3/files',
           data: Buffer.alloc(0),
           contentType: 'text/plain',
-          metadata: { name: `sdk-parity-node-${runId}-empty.txt` },
+          metadata: { name: `sdk-upload-test-node-${runId}-empty.txt` },
         },
         { onProgress: (p) => void progress.push(p) }
       );
@@ -204,7 +222,7 @@ function track(file: Record<string, unknown>): string {
         identifier: identifier as string,
         path: '/upload/drive/v3/files',
         data: original,
-        metadata: { name: `sdk-parity-node-${runId}-patch.bin` },
+        metadata: { name: `sdk-upload-test-node-${runId}-patch.bin` },
       });
       const id = track(created);
       try {

@@ -3,15 +3,16 @@ import type CoreClient from './core';
 export type ResumableUploadMethod = 'POST' | 'PUT' | 'PATCH';
 /** What to upload, and where. Passed to `actions.uploadResumable`. */
 export interface ResumableUploadParams {
-    /** Connection name as shown in the dashboard, e.g. `'googledrive'`. Required. */
+    /** Connection name as shown in the dashboard, e.g. `'googledrive'`. Required; no CR/LF. */
     connectionName: string;
-    /** Your application's identifier for the end user whose account is used. Required. */
+    /** Your application's identifier for the end user whose account is used. Required; no CR/LF. */
     identifier: string;
     /**
      * Provider upload path, e.g. `'/upload/drive/v3/files'`, or
      * `'/upload/drive/v3/files/{fileId}'` with `method: 'PATCH'` to replace a
      * file's content. A leading `/` is added if missing. Must not contain `?`,
-     * `#` or `.`/`..` segments: pass query parameters in `queryParams`.
+     * `#`, spaces, control characters or `.`/`..` segments (also
+     * percent-encoded): pass query parameters in `queryParams`.
      */
     path: string;
     /**
@@ -62,8 +63,8 @@ export interface ResumableUploadOptions {
     /**
      * Retries per chunk after a timeout, a connection error, HTTP 408, 429,
      * 500, 502, 503 or 504, or a 308 that commits no new bytes. Status checks
-     * count too; the count resets whenever
-     * the server confirms more bytes. Defaults to 3. `0` disables retries.
+     * count too; the count resets only when the server confirms bytes beyond
+     * the most it had confirmed before. Defaults to 3. `0` disables retries.
      * The session-start request is never retried.
      */
     maxRetries?: number;
@@ -91,6 +92,13 @@ interface UploadPlan {
     onProgress: ((progress: UploadProgress) => void | Promise<void>) | undefined;
     signal: AbortSignal | undefined;
 }
+/**
+ * Whether `{envUrl}/proxy{path}`, as the URL parser resolves it, stays under
+ * the environment's `/proxy/` (same origin, same path prefix).
+ *
+ * @internal
+ */
+export declare function resolvesInsideProxy(envUrl: string, path: string): boolean;
 /**
  * Checks every argument before any network call.
  *

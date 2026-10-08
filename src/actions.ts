@@ -775,8 +775,10 @@ export default class ActionsClient {
    *
    * The content is sent in chunks (4 MiB by default), one request each, so
    * no single request runs long. After a timeout, a connection error or HTTP
-   * 408/429/5xx, the SDK asks the server how many bytes it has and resumes
-   * from there instead of restarting. The session-start request is never
+   * 408, 429, 500, 502, 503 or 504, the SDK waits, asks the server how many
+   * bytes it has and resumes from there instead of restarting. After a 308
+   * that commits no new bytes, it waits and resends from the offset that 308
+   * reported, without asking first. The session-start request is never
    * retried, because a retry would open a second session.
    *
    * Content can be bytes or a stream. A stream is read one chunk at a time
@@ -796,7 +798,8 @@ export default class ActionsClient {
    * @throws {ScalekitUploadSessionExpiredException} If the upload session
    *   expired or no longer exists (HTTP 404/410 on a chunk). Upload again.
    * @throws {ScalekitUploadHttpException} If the session-start request fails,
-   *   a chunk gets any other 4xx or a 2xx other than 200/201, or a retryable
+   *   a chunk gets any other 4xx or 5xx (such as 403, 501 or 505) or a 2xx
+   *   other than 200/201, or a retryable (408, 429, 500, 502, 503, 504)
    *   status persists after
    *   `maxRetries` retries. `status`, `headers` and `body` describe the response.
    * @throws {ScalekitUploadTimeoutException} If a request times out (a chunk:

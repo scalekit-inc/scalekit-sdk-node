@@ -39,7 +39,11 @@ import {
   type ResumableUploadParams,
   type UploadProgress,
 } from '../src';
-import { backoffDelayMs, retryAfterDelayMs } from '../src/resumable-upload';
+import {
+  backoffDelayMs,
+  resolvesInsideProxy,
+  retryAfterDelayMs,
+} from '../src/resumable-upload';
 
 const KIB = 1024;
 const CHUNK = 256 * KIB;
@@ -846,6 +850,80 @@ describe('actions.uploadResumable', () => {
       expect(ranges(h)).toEqual(['bytes 0-262143/307200', 'bytes */307200']);
     });
 
+    it.each([
+      [
+        'chunk',
+        [[1, { status: 302, headers: { location: 'https://example.com/' } }]],
+        ['bytes 0-9/10'],
+      ],
+      [
+        'status query',
+        [
+          [1, { status: 503 }],
+          [2, { status: 302, headers: { location: 'https://example.com/' } }],
+        ],
+        ['bytes 0-9/10', 'bytes */10'],
+      ],
+    ] as Array<[string, Array<[number, Reply]>, string[]]>)(
+      'raises a protocol error, without retrying, for a 302 on a %s',
+      async (_label, faults, expectedRanges) => {
+        const h = makeHarness();
+        const [first, ...rest] = faults;
+        failNth(h, first[0], first[1], ...rest);
+        const err = await h.client.actions
+          .uploadResumable(params())
+          .catch((e: unknown) => e);
+        expect(err).toBeInstanceOf(ScalekitUploadProtocolException);
+        const e = err as ScalekitUploadProtocolException;
+        expect(e.uploadId).toBe(UPLOAD_ID);
+        expect(e.status).toBe(302);
+        expect(e.headers?.location).toBe('https://example.com/');
+        expect(ranges(h)).toEqual(expectedRanges);
+      }
+    );
+
+    it('runs out of retries when the server bounces between two offsets inside a chunk', async () => {
+      const h = makeHarness();
+      const data = bytes(300 * KIB);
+      // Chunk 2 spans 262144-307199. The server alternates between two
+      // committed offsets in it; only the first visit to each is progress.
+      const offsets = [270_000, 280_000];
+      let n = 0;
+      h.setFault((req, next) => {
+        const range = req.headers['content-range'] ?? '';
+        if (!req.params.upload_id || range.startsWith('bytes 0-')) {
+          return next();
+        }
+        const last = offsets[n++ % 2] - 1;
+        return { status: 308, headers: { range: `bytes=0-${last}` } };
+      });
+      const progress: number[] = [];
+
+      const err = await h.client.actions
+        .uploadResumable(params({ data }), {
+          maxRetries: 2,
+          onProgress: (p) => {
+            progress.push(p.bytesCommitted);
+            // Without a high-water mark this would loop forever.
+            if (progress.length > 10) throw new Error('retries never ran out');
+          },
+        })
+        .catch((e: unknown) => e);
+
+      expect(err).toBeInstanceOf(ScalekitUploadProtocolException);
+      expect((err as ScalekitUploadProtocolException).status).toBe(308);
+      expect(progress).toEqual([262144, 270000, 280000]);
+      // chunk 1, then chunk 2 sent 5 times: two new highs, then 3 failures.
+      expect(ranges(h)).toEqual([
+        'bytes 0-262143/307200',
+        'bytes 262144-307199/307200',
+        'bytes 270000-307199/307200',
+        'bytes 280000-307199/307200',
+        'bytes 270000-307199/307200',
+        'bytes 280000-307199/307200',
+      ]);
+    });
+
     it.each([202, 204])(
       'raises ScalekitUploadHttpException for a %i on a chunk, without retrying',
       async (status) => {
@@ -860,6 +938,25 @@ describe('actions.uploadResumable', () => {
         expect(ranges(h)).toEqual(['bytes 0-9/10']);
       }
     );
+  });
+
+  describe('proxy containment', () => {
+    it('accepts paths that stay under /proxy/', () => {
+      expect(resolvesInsideProxy(ENV_URL, '/upload/drive/v3/files')).toBe(true);
+      expect(resolvesInsideProxy(`${ENV_URL}/`, '/upload/x')).toBe(true);
+      expect(resolvesInsideProxy(`${ENV_URL}/base`, '/upload/x')).toBe(true);
+    });
+
+    it.each([
+      '/upload/.\t./.\t./api/v1/organizations',
+      '/upload/../../api/v1/organizations',
+      '/upload/%2e%2e/%2e%2e/x',
+      '/..',
+      '\\..\\..\\x',
+    ])('rejects %j, which the URL parser resolves outside /proxy/', (p) => {
+      expect(resolvesInsideProxy(ENV_URL, p)).toBe(false);
+      expect(resolvesInsideProxy(`${ENV_URL}/base`, p)).toBe(false);
+    });
   });
 
   describe('errors', () => {
@@ -1099,6 +1196,73 @@ describe('actions.uploadResumable', () => {
     });
   });
 
+  describe('redaction', () => {
+    const MARKER = Buffer.from('SK-SECRET-CONTENT-MARKER-91f3');
+    const secretData = () =>
+      Buffer.concat([bytes(1000), MARKER, bytes(1000), MARKER]);
+
+    function expectClean(err: unknown): void {
+      // Stack source-mapping sorts with Math.random; give it the real one.
+      jest.mocked(Math.random).mockRestore();
+      const views = [
+        inspect(err, { depth: Infinity, showHidden: true }),
+        JSON.stringify(err),
+        String((err as Error).stack),
+      ];
+      for (const text of views) {
+        expect(text).not.toContain(MARKER.toString());
+        expect(text).not.toContain(MARKER.toString('base64'));
+        expect(text).not.toContain('secret-access-token');
+        expect(text).not.toContain('client_secret');
+      }
+    }
+
+    it('keeps the content, the token and the client secret out of a chunk 500 error', async () => {
+      const h = makeHarness({ token: 'secret-access-token' });
+      failNth(h, 1, { status: 500, body: 'oops' });
+      const err = await h.client.actions
+        .uploadResumable(params({ data: secretData() }), { maxRetries: 0 })
+        .catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(ScalekitUploadHttpException);
+      expectClean(err);
+    });
+
+    it('keeps them out of a chunk timeout error', async () => {
+      const h = makeHarness({ token: 'secret-access-token' });
+      failNth(h, 1, { fail: 'timeout' });
+      const err = await h.client.actions
+        .uploadResumable(params({ data: secretData() }), { maxRetries: 0 })
+        .catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(ScalekitUploadTimeoutException);
+      expectClean(err);
+    });
+
+    it('keeps them out of a token-endpoint failure', async () => {
+      const h = makeHarness({ token: null });
+      h.core.axios.defaults.adapter = async (config) => {
+        throw new AxiosError(
+          'Request failed with status code 500',
+          'ERR_BAD_RESPONSE',
+          config,
+          {},
+          {
+            data: 'token endpoint down',
+            status: 500,
+            statusText: '',
+            headers: {},
+            config,
+            request: {},
+          }
+        );
+      };
+      const err = await h.client.actions
+        .uploadResumable(params({ data: secretData() }))
+        .catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(ScalekitServerException);
+      expectClean(err);
+    });
+  });
+
   describe('authentication', () => {
     const scalekit401: Reply = {
       status: 401,
@@ -1279,6 +1443,16 @@ describe('actions.uploadResumable', () => {
       ['path with encoded .', { path: '/upload/%2e/drive' }],
       ['path with half-encoded ..', { path: '/upload/.%2E/admin' }],
       ['path with other half-encoded ..', { path: '/upload/%2e./admin' }],
+      ['path with tab-split .. segments', { path: '/upload/.\t./.\t./x' }],
+      ['path with LF-split ..', { path: '/upload/.\n./x' }],
+      ['path with CR after ..', { path: '/upload/..\r/x' }],
+      ['path with a space', { path: '/upload/drive v3/files' }],
+      ['path with NUL', { path: '/upload/\x00/files' }],
+      ['path with DEL', { path: '/upload/\x7f/files' }],
+      ['connectionName with CR', { connectionName: 'googledrive\rX-Evil: 1' }],
+      ['connectionName with LF', { connectionName: 'googledrive\nX-Evil: 1' }],
+      ['identifier with LF', { identifier: 'user_123\nX-Evil: 1' }],
+      ['identifier with CR', { identifier: 'user_123\r' }],
       ['contentType with CR', { contentType: 'text/plain\rX-Evil: 1' }],
       ['contentType with LF', { contentType: 'text/plain\nX-Evil: 1' }],
       ['path with backslash ..', { path: '/upload\\..\\admin' }],

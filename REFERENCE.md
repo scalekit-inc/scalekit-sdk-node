@@ -7513,7 +7513,7 @@ console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
 
 Uploads a file of any size to a Google API that supports resumable uploads (Drive v3, the Cloud Storage JSON API, YouTube Data API) through a connected account, and returns the created or updated resource from the final response, such as the Drive file object (`{}` when that response has no body).
 
-The content is sent in chunks (4 MiB by default), one request each. After a timeout, a connection error, HTTP 408/429/500/502/503/504, or a `308` that commits no new bytes, the SDK waits (exponential backoff with full jitter, or `Retry-After` on 429/503, at most 30 s), asks the server how many bytes it has and resumes from there instead of restarting. Each chunk gets `maxRetries` retries (default 3); the count resets whenever the server confirms more bytes. The session-start request is never retried, because a retry would open a second upload session.
+The content is sent in chunks (4 MiB by default), one request each. After a timeout, a connection error or HTTP 408/429/500/502/503/504, the SDK waits (exponential backoff with full jitter, or `Retry-After` on 429/503, at most 30 s), asks the server how many bytes it has and resumes from there instead of restarting. After a `308` that commits no new bytes, it waits the same way and resends from the offset that `308` reported, without asking first. Each chunk gets `maxRetries` retries (default 3); the count resets only when the server confirms bytes beyond the most it had confirmed before. The session-start request is never retried, because a retry would open a second upload session.
 
 `data` is bytes (`Buffer`, `Uint8Array`) or any async iterable of bytes, such as `fs.createReadStream(path)`. There is no file-path parameter: pass `fs.createReadStream(path)`. A stream is read one chunk at a time and never buffered whole. The total size is known for bytes and for an unread `fs.createReadStream(path)` without `start`/`end`; otherwise pass `totalBytes`, or let the SDK send the size with the last chunk. A stream that turns out shorter or longer than `totalBytes` fails before its last chunk is sent. Errors thrown while reading the stream propagate unchanged.
 
@@ -7521,7 +7521,7 @@ The content is sent in chunks (4 MiB by default), one request each. After a time
 |---|---|
 | `ScalekitValidationError` | An argument is invalid (nothing is sent), or a stream is shorter or longer than `totalBytes` |
 | `ScalekitUploadSessionExpiredException` | A chunk or status request got 404 or 410: the session expired or no longer exists. The SDK does not start a new session; upload again |
-| `ScalekitUploadHttpException` | The session-start request failed (`uploadId` is `undefined`), a chunk got another 4xx or a 2xx other than 200/201, or a retryable status persisted after `maxRetries` retries. `status`, `headers` and `body` describe the response |
+| `ScalekitUploadHttpException` | The session-start request failed (`uploadId` is `undefined`), a chunk got any other 4xx or 5xx (such as 403, 501 or 505) or a 2xx other than 200/201, or a retryable status (408, 429, 500, 502, 503, 504) persisted after `maxRetries` retries. `status`, `headers` and `body` describe the response |
 | `ScalekitUploadTimeoutException` | A request timed out (a chunk: after `maxRetries` retries). Extends `ScalekitGatewayTimeoutException` |
 | `ScalekitUploadConnectionException` | A request got no response (a chunk: after `maxRetries` retries) |
 | `ScalekitUploadProtocolException` | A response broke the protocol: no `upload_id`, a bad `Range`, the upload completed before the last chunk was sent, a chunk still committed no new bytes after `maxRetries` retries, or the final body is not a JSON object |
@@ -7594,9 +7594,9 @@ await scalekitClient.actions.uploadResumable({
 <dd>
 
 **params:** `ResumableUploadParams` - What to upload and where:
-- `connectionName: string` - Connection name as shown in the dashboard, e.g. `'googledrive'`
-- `identifier: string` - Your application's identifier for the end user whose account is used
-- `path: string` - Provider upload path, e.g. `/upload/drive/v3/files`, `/upload/storage/v1/b/{bucket}/o` or `/upload/youtube/v3/videos`. A leading `/` is added if missing. Must not contain `?`, `#` or `.`/`..` segments (also percent-encoded); pass query parameters in `queryParams`
+- `connectionName: string` - Connection name as shown in the dashboard, e.g. `'googledrive'`. Must not contain CR/LF
+- `identifier: string` - Your application's identifier for the end user whose account is used. Must not contain CR/LF
+- `path: string` - Provider upload path, e.g. `/upload/drive/v3/files`, `/upload/storage/v1/b/{bucket}/o` or `/upload/youtube/v3/videos`. A leading `/` is added if missing. Must not contain `?`, `#`, spaces, control characters or `.`/`..` segments (also percent-encoded); pass query parameters in `queryParams`
 - `data: Uint8Array | AsyncIterable<Uint8Array>` - The content: bytes, or a stream such as `fs.createReadStream(path)`
 - `totalBytes?: number` - Total size in bytes, when the SDK can't know it (see Description)
 - `contentType?: string` - MIME type of the content, sent as `X-Upload-Content-Type` and on each chunk. Defaults to `application/octet-stream`. Must not be empty or contain CR/LF

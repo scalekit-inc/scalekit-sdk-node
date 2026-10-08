@@ -40,15 +40,16 @@ export type ResumableUploadMethod = 'POST' | 'PUT' | 'PATCH';
 
 /** What to upload, and where. Passed to `actions.uploadResumable`. */
 export interface ResumableUploadParams {
-  /** Connection name as shown in the dashboard, e.g. `'googledrive'`. Required. */
+  /** Connection name as shown in the dashboard, e.g. `'googledrive'`. Required; no CR/LF. */
   connectionName: string;
-  /** Your application's identifier for the end user whose account is used. Required. */
+  /** Your application's identifier for the end user whose account is used. Required; no CR/LF. */
   identifier: string;
   /**
    * Provider upload path, e.g. `'/upload/drive/v3/files'`, or
    * `'/upload/drive/v3/files/{fileId}'` with `method: 'PATCH'` to replace a
    * file's content. A leading `/` is added if missing. Must not contain `?`,
-   * `#` or `.`/`..` segments: pass query parameters in `queryParams`.
+   * `#`, spaces, control characters or `.`/`..` segments (also
+   * percent-encoded): pass query parameters in `queryParams`.
    */
   path: string;
   /**
@@ -101,8 +102,8 @@ export interface ResumableUploadOptions {
   /**
    * Retries per chunk after a timeout, a connection error, HTTP 408, 429,
    * 500, 502, 503 or 504, or a 308 that commits no new bytes. Status checks
-   * count too; the count resets whenever
-   * the server confirms more bytes. Defaults to 3. `0` disables retries.
+   * count too; the count resets only when the server confirms bytes beyond
+   * the most it had confirmed before. Defaults to 3. `0` disables retries.
    * The session-start request is never retried.
    */
   maxRetries?: number;
@@ -165,6 +166,17 @@ function requireNonEmptyString(name: string, value: unknown): string {
   return value;
 }
 
+/** A value sent as an HTTP header: non-empty and without CR or LF. */
+function requireHeaderValue(name: string, value: unknown): string {
+  const text = requireNonEmptyString(name, value);
+  if (/[\r\n]/.test(text)) {
+    throw new ScalekitValidationError(
+      `${name} must not contain CR or LF characters`
+    );
+  }
+  return text;
+}
+
 /**
  * Rejects path forms that would change where the request goes: a query
  * string or fragment (the SDK builds the query itself) and dot segments,
@@ -172,6 +184,13 @@ function requireNonEmptyString(name: string, value: unknown): string {
  * dots and backslashes are treated the way the URL parser treats them.
  */
 function validatePath(path: string): string {
+  // The URL parser deletes tab, CR and LF, so ".\t." would become "..".
+  // Reject every control character and space outright.
+  if (/[\x00-\x20\x7f]/.test(path)) {
+    throw new ScalekitValidationError(
+      'path must not contain spaces or control characters'
+    );
+  }
   if (path.includes('?') || path.includes('#')) {
     throw new ScalekitValidationError(
       'path must not contain "?" or "#"; pass query parameters in queryParams'
@@ -187,6 +206,25 @@ function validatePath(path: string): string {
     }
   }
   return normalized;
+}
+
+/**
+ * Whether `{envUrl}/proxy{path}`, as the URL parser resolves it, stays under
+ * the environment's `/proxy/` (same origin, same path prefix).
+ *
+ * @internal
+ */
+export function resolvesInsideProxy(envUrl: string, path: string): boolean {
+  const base = envUrl.replace(/\/$/, '');
+  try {
+    const root = new URL(`${base}/proxy/`);
+    const target = new URL(`${base}/proxy${path}`);
+    return (
+      target.origin === root.origin && target.pathname.startsWith(root.pathname)
+    );
+  } catch {
+    return false;
+  }
 }
 
 function isAsyncIterable(value: unknown): value is AsyncIterable<Uint8Array> {
@@ -211,11 +249,11 @@ export function validateUploadParams(
   if (params === null || typeof params !== 'object') {
     throw new ScalekitValidationError('params is required');
   }
-  const connectionName = requireNonEmptyString(
+  const connectionName = requireHeaderValue(
     'connectionName',
     params.connectionName
   );
-  const identifier = requireNonEmptyString('identifier', params.identifier);
+  const identifier = requireHeaderValue('identifier', params.identifier);
   const path = validatePath(requireNonEmptyString('path', params.path));
 
   const rawMethod = params.method ?? 'POST';
@@ -228,12 +266,7 @@ export function validateUploadParams(
 
   let contentType = DEFAULT_CONTENT_TYPE;
   if (params.contentType !== undefined) {
-    contentType = requireNonEmptyString('contentType', params.contentType);
-    if (/[\r\n]/.test(contentType)) {
-      throw new ScalekitValidationError(
-        'contentType must not contain CR or LF characters'
-      );
-    }
+    contentType = requireHeaderValue('contentType', params.contentType);
   }
 
   let metadataJson: string | undefined;
@@ -652,6 +685,7 @@ class ResumableUpload {
 
   async run(): Promise<Record<string, unknown>> {
     const { plan } = this;
+    this.assertUrlInsideProxy();
     this.checkAbort();
     const declaredTotal =
       plan.totalBytes ?? (await sizeOfFileStream(plan.data));
@@ -680,6 +714,15 @@ class ResumableUpload {
 
   private proxyUrl(): string {
     return `${this.core.envUrl.replace(/\/$/, '')}/proxy${this.plan.path}`;
+  }
+
+  /** Second line of defence behind `validatePath`; see `resolvesInsideProxy`. */
+  private assertUrlInsideProxy(): void {
+    if (!resolvesInsideProxy(this.core.envUrl, this.plan.path)) {
+      throw new ScalekitValidationError(
+        'path must resolve to a location under the proxy'
+      );
+    }
   }
 
   private proxyHeaders(): Record<string, string> {
@@ -764,6 +807,9 @@ class ResumableUpload {
     let failures = 0;
     let needStatusQuery = false;
     let finalChunkSent = false;
+    // Highest offset the server has confirmed. Only a new high counts as
+    // progress, so a server bouncing between offsets still runs out of retries.
+    let highWater = this.committed;
 
     for (;;) {
       this.checkAbort();
@@ -773,15 +819,12 @@ class ResumableUpload {
         continue;
       }
 
-      const isStatusQuery = needStatusQuery;
+      const isStatusQuery: boolean = needStatusQuery;
       const what = isStatusQuery ? 'status request' : 'chunk request';
       if (!isStatusQuery && chunk.final) finalChunkSent = true;
-      const outcome = isStatusQuery
+      const outcome: Exchange = isStatusQuery
         ? await this.sendStatusQuery(source.totalBytes)
         : await this.sendChunk(chunk, source.totalBytes);
-
-      // A 308 to a chunk that commits no new bytes: retried like a failure.
-      let stalled: AxiosResponse | undefined;
 
       if (outcome.kind === 'response') {
         const { response } = outcome;
@@ -812,16 +855,17 @@ class ResumableUpload {
           );
         }
         needStatusQuery = false;
-        if (next > this.committed) {
+        this.committed = next;
+        if (next > highWater) {
+          highWater = next;
           failures = 0;
-          this.committed = next;
           await this.reportProgress(source.totalBytes);
           continue;
         }
-        this.committed = next;
-        // A status query reporting no progress: resend from that offset.
+        // A status query reporting no new bytes: resend from that offset.
         if (isStatusQuery) continue;
-        stalled = response;
+        // A 308 to a chunk that commits no new bytes falls through and is
+        // retried like a failure.
       } else if (outcome.kind === 'http-error') {
         const { status } = outcome.response;
         if (SESSION_GONE_STATUSES.has(status)) {
@@ -841,10 +885,10 @@ class ResumableUpload {
 
       failures += 1;
       if (failures > this.plan.maxRetries) {
-        if (stalled) {
+        if (outcome.kind === 'response') {
           throw this.protocolError(
             `the server committed no new bytes after ${failures} attempts`,
-            stalled
+            outcome.response
           );
         }
         if (outcome.kind === 'http-error') throw this.httpError(outcome, what);
@@ -862,7 +906,7 @@ class ResumableUpload {
           : undefined;
       await this.sleep(retryAfter ?? backoffDelayMs(failures - 1));
       // After a stall the 308 already said where to resume; otherwise ask.
-      needStatusQuery = stalled === undefined;
+      needStatusQuery = outcome.kind !== 'response';
     }
   }
 
