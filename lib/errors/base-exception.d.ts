@@ -4,6 +4,29 @@ import type { ErrorInfo } from '../pkg/grpc/scalekit/v1/errdetails/errdetails_pb
 export declare class ScalekitException extends Error {
     constructor(error: any);
 }
+/**
+ * A method argument is invalid. Thrown before any network call, so nothing
+ * was sent. Fix the argument named in the message; retrying unchanged fails
+ * the same way.
+ */
+export declare class ScalekitValidationError extends ScalekitException {
+    /** Always `false`: the same input fails the same way. */
+    readonly retryable: boolean;
+    /** @internal */
+    constructor(message: string);
+}
+/**
+ * The caller's `AbortSignal` cancelled the call, including during a wait
+ * between retries. `cause` is the signal's `reason`.
+ */
+export declare class ScalekitAbortError extends ScalekitException {
+    /** Always `false`: the caller asked to stop. */
+    readonly retryable: boolean;
+    /** The aborting signal's `reason`. */
+    readonly cause: unknown;
+    /** @internal */
+    constructor(message: string, cause?: unknown);
+}
 export declare class WebhookVerificationError extends ScalekitException {
     constructor(error: any);
 }

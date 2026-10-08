@@ -32,11 +32,22 @@ export default class CoreClient {
     readonly pingTimeoutMs: number;
     keys: JWK[];
     accessToken: string | null;
+    private pendingAuthentication;
     axios: Axios;
     sdkVersion: string;
     apiVersion: string;
     userAgent: string;
     constructor(envUrl: string, clientId: string, clientSecret: string, toolTimeoutMs?: number, timeoutMs?: number, pingIntervalMs?: number, pingTimeoutMs?: number);
+    /**
+     * Fetch a client-credentials token if this client doesn't have one yet.
+     *
+     * gRPC calls get a token lazily: `connectExec` authenticates when a call
+     * returns 401 and retries it. HTTP calls that must not be retried on 401,
+     * such as the actions proxy (a 401 there can come from the third-party API,
+     * and retrying would replay the request), call this first instead.
+     * Concurrent callers share one token request.
+     */
+    ensureAccessToken(): Promise<void>;
     private authenticateClient;
     /**
      * Authenticate with the code
@@ -44,6 +55,18 @@ export default class CoreClient {
      * @returns {Promise<AxiosResponse<TokenResponse>>} Returns access token and id token
      */
     authenticate(data: string): Promise<AxiosResponse<TokenResponse, any>>;
+    /**
+     * Replace an access token the server rejected.
+     *
+     * Pass the token the rejected request was sent with. If another caller has
+     * already replaced it, this returns without a token request; otherwise
+     * concurrent callers share one token request (the same one
+     * `ensureAccessToken` uses). Callers resend only when `accessToken` has
+     * changed afterwards.
+     *
+     * @internal
+     */
+    refreshAccessToken(rejectedToken: string | null): Promise<void>;
     /**
      * Get the JWKS from the server and store it in the client instance
      * @returns {Promise<void>} Returns nothing

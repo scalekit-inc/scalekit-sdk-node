@@ -1060,8 +1060,16 @@ Scalekit SDK uses a typed exception hierarchy rooted at `ScalekitException`:
 
 - `ScalekitException` (base)
   - `ScalekitValidateTokenFailureException` - Token validation failures
+  - `ScalekitValidationError` - An invalid method argument, raised before any request is sent
+  - `ScalekitAbortError` - The caller's `AbortSignal` cancelled the call
   - `ScalekitServerException` - HTTP errors (400-599)
     - Specific subclasses for each status code (400, 401, 403, 404, 409, 422, 429, 500, 502, 503, 504)
+    - `ScalekitGatewayTimeoutException`
+      - `ScalekitUploadTimeoutException` - An `actions.uploadResumable` request timed out
+    - `ScalekitUploadHttpException` - An `actions.uploadResumable` request got an HTTP error
+      - `ScalekitUploadSessionExpiredException` - The upload session expired or no longer exists
+  - `ScalekitUploadConnectionException` - An `actions.uploadResumable` request got no response
+  - `ScalekitUploadProtocolException` - A response broke the resumable-upload protocol
   - `WebhookVerificationError` - Webhook signature verification failures
 
 ### Usage Example
@@ -7480,6 +7488,133 @@ console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
 <dd>
 
 **params.state?:** `string` - Opaque value added to the `userVerifyUrl` redirect's query parameters, so you can validate the redirect
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">uploadResumable</a>(params, options?) -> Promise&lt;Record&lt;string, unknown&gt;&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Uploads a file of any size to a Google API that supports resumable uploads (Drive v3, the Cloud Storage JSON API, YouTube Data API) through a connected account, and returns the created or updated resource from the final response, such as the Drive file object (`{}` when that response has no body).
+
+The content is sent in chunks (4 MiB by default), one request each. After a timeout, a connection error, HTTP 408/429/500/502/503/504, or a `308` that commits no new bytes, the SDK waits (exponential backoff with full jitter, or `Retry-After` on 429/503, at most 30 s), asks the server how many bytes it has and resumes from there instead of restarting. Each chunk gets `maxRetries` retries (default 3); the count resets whenever the server confirms more bytes. The session-start request is never retried, because a retry would open a second upload session.
+
+`data` is bytes (`Buffer`, `Uint8Array`) or any async iterable of bytes, such as `fs.createReadStream(path)`. There is no file-path parameter: pass `fs.createReadStream(path)`. A stream is read one chunk at a time and never buffered whole. The total size is known for bytes and for an unread `fs.createReadStream(path)` without `start`/`end`; otherwise pass `totalBytes`, or let the SDK send the size with the last chunk. A stream that turns out shorter or longer than `totalBytes` fails before its last chunk is sent. Errors thrown while reading the stream propagate unchanged.
+
+| Error | When |
+|---|---|
+| `ScalekitValidationError` | An argument is invalid (nothing is sent), or a stream is shorter or longer than `totalBytes` |
+| `ScalekitUploadSessionExpiredException` | A chunk or status request got 404 or 410: the session expired or no longer exists. The SDK does not start a new session; upload again |
+| `ScalekitUploadHttpException` | The session-start request failed (`uploadId` is `undefined`), a chunk got another 4xx or a 2xx other than 200/201, or a retryable status persisted after `maxRetries` retries. `status`, `headers` and `body` describe the response |
+| `ScalekitUploadTimeoutException` | A request timed out (a chunk: after `maxRetries` retries). Extends `ScalekitGatewayTimeoutException` |
+| `ScalekitUploadConnectionException` | A request got no response (a chunk: after `maxRetries` retries) |
+| `ScalekitUploadProtocolException` | A response broke the protocol: no `upload_id`, a bad `Range`, the upload completed before the last chunk was sent, a chunk still committed no new bytes after `maxRetries` retries, or the final body is not a JSON object |
+| `ScalekitAbortError` | `options.signal` was aborted, including during a wait between retries |
+
+Every upload error carries `uploadId` and `bytesCommitted`, and none carries the access token. A Scalekit `401` (expired access token) is answered by one token refresh and one resend; a `401` from Google is raised as `ScalekitUploadHttpException`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import fs from 'node:fs';
+import { ScalekitUploadSessionExpiredException } from '@scalekit-sdk/node';
+
+try {
+  const file = await scalekitClient.actions.uploadResumable(
+    {
+      connectionName: 'googledrive',
+      identifier: 'user_123',
+      path: '/upload/drive/v3/files',
+      data: fs.createReadStream('video.mp4'),
+      contentType: 'video/mp4',
+      metadata: { name: 'video.mp4', parents: ['folder_123'] },
+      queryParams: { supportsAllDrives: true },
+    },
+    {
+      signal: AbortSignal.timeout(10 * 60_000),
+      onProgress: ({ bytesCommitted, totalBytes }) =>
+        console.log(`${bytesCommitted} / ${totalBytes ?? '?'} bytes`),
+    }
+  );
+  console.log(file.id);
+} catch (err) {
+  if (err instanceof ScalekitUploadSessionExpiredException) {
+    // The session is gone; upload the file again.
+  }
+  throw err;
+}
+
+// Replace an existing Drive file's content
+await scalekitClient.actions.uploadResumable({
+  connectionName: 'googledrive',
+  identifier: 'user_123',
+  path: '/upload/drive/v3/files/file_123',
+  method: 'PATCH',
+  data: Buffer.from('new content'),
+  contentType: 'text/plain',
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `ResumableUploadParams` - What to upload and where:
+- `connectionName: string` - Connection name as shown in the dashboard, e.g. `'googledrive'`
+- `identifier: string` - Your application's identifier for the end user whose account is used
+- `path: string` - Provider upload path, e.g. `/upload/drive/v3/files`, `/upload/storage/v1/b/{bucket}/o` or `/upload/youtube/v3/videos`. A leading `/` is added if missing. Must not contain `?`, `#` or `.`/`..` segments (also percent-encoded); pass query parameters in `queryParams`
+- `data: Uint8Array | AsyncIterable<Uint8Array>` - The content: bytes, or a stream such as `fs.createReadStream(path)`
+- `totalBytes?: number` - Total size in bytes, when the SDK can't know it (see Description)
+- `contentType?: string` - MIME type of the content, sent as `X-Upload-Content-Type` and on each chunk. Defaults to `application/octet-stream`. Must not be empty or contain CR/LF
+- `metadata?: Record<string, unknown>` - Resource metadata, sent as JSON with the session-start request, e.g. `{ name, parents }` for Drive or `{ snippet, status }` for YouTube
+- `queryParams?: Record<string, string | number | boolean>` - Extra query parameters for the session-start request only, e.g. `{ supportsAllDrives: true }` or YouTube's `{ part: 'snippet,status' }`. The SDK always sends `uploadType=resumable`; an `uploadType` key (exact, case-sensitive) is rejected
+- `method?: 'POST' | 'PUT' | 'PATCH'` - Method of the session-start request (case-insensitive). Defaults to `'POST'`; Drive uses `'PATCH'` to replace a file's content
+- `chunkSize?: number` - Bytes per chunk request: a positive multiple of 262144 (256 KiB). Defaults to 4 MiB
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**options:** `ResumableUploadOptions` - Optional per-call options:
+- `signal?: AbortSignal` - Cancels the upload, including a wait between retries
+- `timeoutMs?: number` - Timeout for each HTTP request. Defaults to the client's `toolTimeoutMs` (60000)
+- `maxRetries?: number` - Retries per chunk (see Description). Defaults to 3; `0` disables retries
+- `onProgress?: (progress: UploadProgress) => void | Promise<void>` - Called with `{ bytesCommitted, totalBytes }` each time the server confirms more bytes, and once on completion (a zero-byte upload gets one call with 0/0). `totalBytes` is `undefined` while unknown. The upload waits for a returned promise; an error thrown here stops the upload and is rethrown unchanged
 
 </dd>
 </dl>

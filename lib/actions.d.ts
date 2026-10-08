@@ -7,6 +7,7 @@ import ConnectionClient from './connection';
 import type McpClient from './mcp';
 import type ProvidersClient from './providers';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
+import { type ResumableUploadOptions, type ResumableUploadParams } from './resumable-upload';
 import type { ListAvailableToolsResponse, ListScopedToolsResponse, ScopedToolFilterSchema, SearchToolsResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * Creation timestamp for an app connection, re-exported as the protobuf
@@ -354,4 +355,65 @@ export default class ActionsClient {
         headers?: Record<string, string>;
         timeoutMs?: number;
     }): Promise<AxiosResponse<any>>;
+    /**
+     * Upload a file of any size to a Google API that supports resumable
+     * uploads (Drive v3, the Cloud Storage JSON API, YouTube Data API) through
+     * a connected account.
+     *
+     * The content is sent in chunks (4 MiB by default), one request each, so
+     * no single request runs long. After a timeout, a connection error or HTTP
+     * 408/429/5xx, the SDK asks the server how many bytes it has and resumes
+     * from there instead of restarting. The session-start request is never
+     * retried, because a retry would open a second session.
+     *
+     * Content can be bytes or a stream. A stream is read one chunk at a time
+     * and never buffered whole. Its size is known for an unread
+     * `fs.createReadStream(path)` without `start`/`end`; otherwise pass
+     * `totalBytes`, or let the SDK send the size with the last chunk. Errors
+     * from reading the stream propagate unchanged.
+     *
+     * @param params - What to upload and where. `connectionName`, `identifier`,
+     *   `path` and `data` are required; see {@link ResumableUploadParams}.
+     * @param options - Cancellation, timeout, retries and progress; see
+     *   {@link ResumableUploadOptions}.
+     * @returns The created or updated resource from the final response, such
+     *   as the Drive file object (`{}` when that response has no body).
+     * @throws {ScalekitValidationError} If an argument is invalid (before any
+     *   request is sent), or if a stream is shorter or longer than `totalBytes`.
+     * @throws {ScalekitUploadSessionExpiredException} If the upload session
+     *   expired or no longer exists (HTTP 404/410 on a chunk). Upload again.
+     * @throws {ScalekitUploadHttpException} If the session-start request fails,
+     *   a chunk gets any other 4xx or a 2xx other than 200/201, or a retryable
+     *   status persists after
+     *   `maxRetries` retries. `status`, `headers` and `body` describe the response.
+     * @throws {ScalekitUploadTimeoutException} If a request times out (a chunk:
+     *   after `maxRetries` retries).
+     * @throws {ScalekitUploadConnectionException} If a request gets no response
+     *   (a chunk: after `maxRetries` retries).
+     * @throws {ScalekitUploadProtocolException} If a response breaks the
+     *   resumable protocol: the upload completes before the last chunk is sent,
+     *   a chunk still commits no new bytes after `maxRetries` retries, or the
+     *   final body is not a JSON object.
+     * @throws {ScalekitAbortError} If `options.signal` is aborted.
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     *
+     * @example
+     * ```ts
+     * import fs from 'node:fs';
+     *
+     * const file = await scalekit.actions.uploadResumable(
+     *   {
+     *     connectionName: 'googledrive',
+     *     identifier: 'user_123',
+     *     path: '/upload/drive/v3/files',
+     *     data: fs.createReadStream('video.mp4'),
+     *     contentType: 'video/mp4',
+     *     metadata: { name: 'video.mp4' },
+     *   },
+     *   { onProgress: (p) => console.log(p.bytesCommitted, p.totalBytes) }
+     * );
+     * console.log(file.id);
+     * ```
+     */
+    uploadResumable(params: ResumableUploadParams, options?: ResumableUploadOptions): Promise<Record<string, unknown>>;
 }

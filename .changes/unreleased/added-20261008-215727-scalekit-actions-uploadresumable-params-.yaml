@@ -1,0 +1,25 @@
+kind: added
+body: |
+  `scalekit.actions.uploadResumable(params, options)` uploads a file of any size to Google Drive, Cloud Storage and YouTube through a connected account: the content is sent in chunks (4 MiB by default), a failed chunk resumes instead of restarting, and the call returns the created resource. An expired upload session raises `ScalekitUploadSessionExpiredException`. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#actions)
+
+  ```ts
+  import fs from 'node:fs';
+
+  const file = await scalekit.actions.uploadResumable(
+    {
+      connectionName: 'googledrive',
+      identifier: 'user_123',
+      path: '/upload/drive/v3/files',
+      data: fs.createReadStream('video.mp4'),
+      contentType: 'video/mp4',
+      metadata: { name: 'video.mp4' },
+    },
+    { onProgress: (p) => console.log(p.bytesCommitted, p.totalBytes) }
+  );
+  console.log(file.id);
+  ```
+time: '2026-10-08T21:57:27.645765+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-2296
+  Migration: ''
