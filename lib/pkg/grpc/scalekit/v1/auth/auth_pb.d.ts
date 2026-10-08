@@ -629,6 +629,32 @@ export type User = Message<"scalekit.v1.auth.User"> & {
  */
 export declare const UserSchema: GenMessage<User>;
 /**
+ * Optional hints from the dashboard's "Try login" link. Both fields are optional, and an
+ * unrecognized value is ignored rather than rejected, so the login page always loads.
+ *
+ * @generated from message scalekit.v1.auth.GetAuthStateRequest
+ */
+export type GetAuthStateRequest = Message<"scalekit.v1.auth.GetAuthStateRequest"> & {
+    /**
+     * Organization whose branding the login page shows. Branding only: it never selects a
+     * connection or an organization for the login itself.
+     *
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * "login" or "create" starts a new login even when the browser has an active session.
+     *
+     * @generated from field: string prompt = 2;
+     */
+    prompt: string;
+};
+/**
+ * Describes the message scalekit.v1.auth.GetAuthStateRequest.
+ * Use `create(GetAuthStateRequestSchema)` to create a new message.
+ */
+export declare const GetAuthStateRequestSchema: GenMessage<GetAuthStateRequest>;
+/**
  * @generated from message scalekit.v1.auth.GetAuthStateResponse
  */
 export type GetAuthStateResponse = Message<"scalekit.v1.auth.GetAuthStateResponse"> & {
@@ -851,7 +877,7 @@ export declare const AuthService: GenService<{
      */
     getAuthState: {
         methodKind: "unary";
-        input: typeof EmptySchema;
+        input: typeof GetAuthStateRequestSchema;
         output: typeof GetAuthStateResponseSchema;
     };
     /**
