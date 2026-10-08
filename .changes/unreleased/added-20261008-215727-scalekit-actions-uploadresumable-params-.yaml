@@ -1,6 +1,6 @@
 kind: added
 body: |
-  `scalekit.actions.uploadResumable(params, options)` uploads a file of any size to Google Drive, Cloud Storage and YouTube through a connected account: the content is sent in chunks (4 MiB by default), a failed chunk resumes instead of restarting, and the call returns the created resource. An expired upload session raises `ScalekitUploadSessionExpiredException`. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#actions)
+  `scalekit.actions.uploadResumable(params, options?)` uploads a file of any size to Google Drive, Cloud Storage and YouTube through a connected account: the content is sent in chunks (4 MiB by default), a failed chunk resumes instead of restarting, and the call returns the created resource as an object. `params.data` takes a `Buffer`, a `Uint8Array` or a stream such as `fs.createReadStream(path)`; if the upload session expires, the call throws `ScalekitUploadSessionExpiredException` and does not start a new one. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/v2.20.0/REFERENCE.md#actions)
 
   ```ts
   import fs from 'node:fs';

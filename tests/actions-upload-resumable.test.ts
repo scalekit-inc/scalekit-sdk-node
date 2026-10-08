@@ -1443,6 +1443,20 @@ describe('actions.uploadResumable', () => {
       ['path with encoded .', { path: '/upload/%2e/drive' }],
       ['path with half-encoded ..', { path: '/upload/.%2E/admin' }],
       ['path with other half-encoded ..', { path: '/upload/%2e./admin' }],
+      ['path with .. between encoded slashes', { path: '/upload/a%2f..%2fb' }],
+      [
+        'path with .. between encoded slashes (upper case)',
+        { path: '/upload/a%2F..%2Fb' },
+      ],
+      [
+        'path with encoded .. between encoded slashes',
+        { path: '/upload/a%2F%2E%2e%2Fb' },
+      ],
+      [
+        'path with .. after an encoded backslash',
+        { path: '/upload/a%5c..%5cb' },
+      ],
+      ['path that is an encoded ..', { path: '%2e%2e' }],
       ['path with tab-split .. segments', { path: '/upload/.\t./.\t./x' }],
       ['path with LF-split ..', { path: '/upload/.\n./x' }],
       ['path with CR after ..', { path: '/upload/..\r/x' }],
@@ -1508,6 +1522,21 @@ describe('actions.uploadResumable', () => {
         h.client.actions.uploadResumable(params(), options)
       ).rejects.toBeInstanceOf(ScalekitValidationError);
       expect(h.seen).toHaveLength(0);
+    });
+
+    it('accepts encoded characters that do not form dot segments', async () => {
+      for (const p of [
+        '/upload/storage/v1/b/my-bucket/o',
+        '/upload/drive/v3/files/a%2Fb',
+        '/upload/x/..a/b..',
+        '/upload/x/%2e%2e%2e',
+        '/upload/x/%zz',
+      ]) {
+        const h = makeHarness();
+        await expect(
+          h.client.actions.uploadResumable(params({ path: p }))
+        ).resolves.toBeDefined();
+      }
     });
 
     it('is a ScalekitException and an Error, so existing catch blocks still work', () => {

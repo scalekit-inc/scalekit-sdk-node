@@ -197,9 +197,13 @@ function validatePath(path: string): string {
     );
   }
   const normalized = path.startsWith('/') ? path : `/${path}`;
-  for (const segment of normalized.split(/[\\/]/)) {
-    const decoded = segment.replace(/%2e/gi, '.');
-    if (decoded === '.' || decoded === '..') {
+  // Percent-decode first (so "%2e%2e" and "a%2f..%2fb" are caught), then
+  // split on both separators the URL parser honours.
+  const decoded = normalized.replace(/%([0-9a-f]{2})/gi, (_match, hex) =>
+    String.fromCharCode(parseInt(hex as string, 16))
+  );
+  for (const segment of decoded.split(/[\\/]/)) {
+    if (segment === '.' || segment === '..') {
       throw new ScalekitValidationError(
         'path must not contain "." or ".." segments'
       );
