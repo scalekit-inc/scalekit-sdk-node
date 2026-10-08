@@ -133,7 +133,7 @@ const scalekit = new ScalekitClient(envUrl, clientId, clientSecret, {
 - feat: organization session policy SDK methods ([#177](https://github.com/scalekit-inc/scalekit-sdk-node/pull/177))
 - feat: regenerate protos from v0.1.123.0 and add slug/logoUrl to createOrganization ([#184](https://github.com/scalekit-inc/scalekit-sdk-node/pull/184))
 - feat: add new organization and user SDK methods with external_id support ([#180](https://github.com/scalekit-inc/scalekit-sdk-node/pull/180))
-- Releease tag 2.6.2 ([#185](https://github.com/scalekit-inc/scalekit-sdk-node/pull/185))
+- Release tag 2.6.2 ([#185](https://github.com/scalekit-inc/scalekit-sdk-node/pull/185))
 
 ## [2.6.0] - 2026-04-24
 
@@ -276,7 +276,7 @@ await client.domain.listDomains('org_123456', {
 
 ### Changes
 
-#### Enchancements
+#### Enhancements
 - Add getDomain and deleteDomain methods to DomainClient ([#108](https://github.com/scalekit-inc/scalekit-sdk-node/pull/108))
 - Add role and permission management sdk methods
 
