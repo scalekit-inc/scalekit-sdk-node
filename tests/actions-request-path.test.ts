@@ -538,6 +538,29 @@ describe('proxyRedirectGuard', () => {
     expect(run(href)).toEqual({ 'X-Custom': 'kept' });
   });
 
+  it('removes credential headers when the hop request-target carries a fragment', () => {
+    // Behind an HTTP forward proxy the hop is sent as its full href.
+    const href = 'https://env.example.com/proxy/x#/../../outside';
+    const options: Record<string, unknown> = {
+      href,
+      path: href,
+      headers: credentialHeaders(),
+    };
+    proxyRedirectGuard(env)(options);
+    expect(options.headers).toEqual({ 'X-Custom': 'kept' });
+  });
+
+  it('keeps credential headers when a fragment is not part of the request-target', () => {
+    // Direct connection: only pathname + search is sent.
+    const options: Record<string, unknown> = {
+      href: 'https://env.example.com/proxy/x#/../../outside',
+      path: '/proxy/x',
+      headers: credentialHeaders(),
+    };
+    proxyRedirectGuard(env)(options);
+    expect(options.headers).toEqual(credentialHeaders());
+  });
+
   it('matches header names case-insensitively', () => {
     const options: Record<string, unknown> = {
       href: 'https://env.example.com/outside',
@@ -553,5 +576,162 @@ describe('proxyRedirectGuard', () => {
     ['a query string', 'https://env.example.com/proxy/x?next=/outside'],
   ])('leaves headers untouched for %s', (_name, href) => {
     expect(run(href)).toEqual(credentialHeaders());
+  });
+});
+
+/**
+ * Through an HTTP forward proxy (an `http://` environment URL), axios sends
+ * the absolute URL as the request line. It must be exactly the URL the
+ * containment checks modelled, escapes must still be rejected before
+ * sending, and redirect hops must follow the same credential rules.
+ */
+describe('actions.request through an HTTP forward proxy', () => {
+  const PROXY_ENV_KEYS = [
+    'HTTP_PROXY',
+    'http_proxy',
+    'HTTPS_PROXY',
+    'https_proxy',
+    'ALL_PROXY',
+    'all_proxy',
+    'NO_PROXY',
+    'no_proxy',
+  ];
+  const savedEnv: Record<string, string | undefined> = {};
+  const envUrl = 'http://env.test:8080'; // never resolved: all traffic goes to the proxy
+  type Line = {
+    requestTarget?: string;
+    authorization?: string;
+    connectionName?: string;
+  };
+  const lines: Line[] = [];
+  let proxyServer: http.Server;
+  let proxyPort: number;
+
+  beforeAll(async () => {
+    for (const k of PROXY_ENV_KEYS) savedEnv[k] = process.env[k];
+    // Records the request line and answers itself; `?to=` asks for a redirect.
+    proxyServer = http.createServer((req, res) => {
+      lines.push({
+        requestTarget: req.url,
+        authorization: req.headers.authorization,
+        connectionName: req.headers['connection_name'] as string | undefined,
+      });
+      let to: string | null = null;
+      try {
+        to = new URL(req.url ?? '').searchParams.get('to');
+      } catch {
+        to = null;
+      }
+      if (to !== null) {
+        res.writeHead(302, { location: to });
+        res.end();
+        return;
+      }
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end('{}');
+    });
+    await new Promise<void>((resolve) =>
+      proxyServer.listen(0, '127.0.0.1', () => resolve())
+    );
+    proxyPort = (proxyServer.address() as AddressInfo).port;
+  });
+
+  afterAll(async () => {
+    for (const k of PROXY_ENV_KEYS) {
+      if (savedEnv[k] === undefined) delete process.env[k];
+      else process.env[k] = savedEnv[k];
+    }
+    await new Promise<void>((resolve) => proxyServer.close(() => resolve()));
+  });
+
+  beforeEach(() => {
+    lines.length = 0;
+    for (const k of PROXY_ENV_KEYS) delete process.env[k];
+  });
+
+  const viaProxyConfig = (): ScalekitClient => {
+    const client = makeClient(envUrl);
+    (
+      client as unknown as { coreClient: CoreClient }
+    ).coreClient.axios.defaults.proxy = {
+      protocol: 'http',
+      host: '127.0.0.1',
+      port: proxyPort,
+    };
+    return client;
+  };
+  const viaProxyEnv = (): ScalekitClient => {
+    process.env.HTTP_PROXY = `http://127.0.0.1:${proxyPort}`;
+    return makeClient(envUrl);
+  };
+  const credentialed = {
+    authorization: 'Bearer test-access-token',
+    connectionName: 'googledrive',
+  };
+  const stripped = { authorization: undefined, connectionName: undefined };
+
+  describe.each([
+    ['the proxy config', viaProxyConfig],
+    ['the HTTP_PROXY environment variable', viaProxyEnv],
+  ])('via %s', (_name, makeProxiedClient) => {
+    it.each([
+      ['/drive/v3/files', `${envUrl}/proxy/drive/v3/files`],
+      ['/a b/c', `${envUrl}/proxy/a%20b/c`],
+      ['/a%2Fb/c', `${envUrl}/proxy/a%2Fb/c`],
+      ['/a/../drive', `${envUrl}/proxy/drive`],
+      ['//a/..%2fb', `${envUrl}/proxy//a/..%2fb`],
+    ])(
+      'sends %j as exactly the modelled absolute URL',
+      async (path, requestTarget) => {
+        await call(makeProxiedClient(), path);
+        expect(lines).toEqual([{ requestTarget, ...credentialed }]);
+      }
+    );
+
+    it.each([
+      ['/a%2Fb/%2e%2e/%2e%2e/outside'],
+      ['/a%2Fb/../../outside'],
+      ['/x%2f..%2f..%2foutside'],
+      ['//..%2foutside'],
+    ])('rejects %j before anything reaches the proxy', async (path) => {
+      await expect(call(makeProxiedClient(), path)).rejects.toThrow(
+        'path must resolve under the proxy prefix'
+      );
+      expect(lines).toEqual([]);
+    });
+
+    it.each([
+      ['an in-prefix path', '/proxy/in', `${envUrl}/proxy/in`, credentialed],
+      ['a path outside the prefix', '/outside', `${envUrl}/outside`, stripped],
+      [
+        'encoded dots after an encoded slash',
+        '/proxy/a%2Fb/%2e%2e/%2e%2e/outside',
+        `${envUrl}/outside`,
+        stripped,
+      ],
+      [
+        'an empty segment',
+        '/proxy//..%2foutside',
+        `${envUrl}/proxy//..%2foutside`,
+        stripped,
+      ],
+      [
+        'a fragment carried into the request line',
+        '/proxy/x#/../../outside',
+        `${envUrl}/proxy/x#/../../outside`,
+        stripped,
+      ],
+      [
+        'another host',
+        'http://other.test:8080/proxy/x',
+        'http://other.test:8080/proxy/x',
+        stripped,
+      ],
+    ])('redirect hop to %s', async (_hop, location, requestTarget, headers) => {
+      await call(makeProxiedClient(), '/r', { queryParams: { to: location } });
+      expect(lines).toHaveLength(2);
+      expect(lines[0]).toMatchObject(credentialed);
+      expect(lines[1]).toEqual({ requestTarget, ...headers });
+    });
   });
 });

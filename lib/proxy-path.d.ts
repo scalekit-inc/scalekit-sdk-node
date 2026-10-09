@@ -27,8 +27,10 @@ export declare function assertProxyPathContained(envUrl: string, url: string): v
  * for proxied requests. Each redirect is still followed as before; when a hop
  * targets anything other than `<envUrl base path>/proxy/` on the environment's
  * origin, the `Authorization`, `connection_name` and `identifier` headers are
- * removed before that hop is sent. follow-redirects reuses the same headers
- * object for later hops, so once removed they stay removed.
+ * removed before that hop is sent, as they are when the hop's request-target
+ * would carry a fragment. follow-redirects reuses the same headers object for
+ * later hops, so once removed they stay removed. axios runs its own proxy
+ * hook before this one, so `path` is already the final request-target.
  *
  * @param envUrl - The client's environment URL (may carry a base path).
  * @returns A hook to pass as the axios `beforeRedirect` request option.
