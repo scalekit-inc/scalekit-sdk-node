@@ -1,0 +1,17 @@
+kind: added
+body: |
+  `scalekit.actions.mcp.createConnectionSessionToken(params)` mints a session token for a connection's own MCP server (`/mcp/v3/connections/<connectionName>`), which exposes all of that connection's tools without an MCP configuration. It takes the same `identifier`, `expirySeconds` and `accessLevel` as `createSessionToken`. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#virtual-mcp-servers)
+
+  ```ts
+  const session = await scalekit.actions.mcp.createConnectionSessionToken({
+    connectionName: 'gmail',
+    identifier: 'user_123',
+    expirySeconds: 900,
+    accessLevel: 'READ_ONLY',
+  });
+  ```
+time: '2026-10-09T15:33:01.189094+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-2195
+  Migration: ''

@@ -1,7 +1,10 @@
 import ScalekitClient from '../src/scalekit';
 import { create } from '@bufbuild/protobuf';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { ScalekitServerException } from '../src/errors';
+import {
+  ScalekitNotFoundException,
+  ScalekitServerException,
+} from '../src/errors';
 import { TestDataGenerator, TestOrganizationManager } from './utils/test-data';
 import {
   AuthorizationDetailsSchema,
@@ -182,6 +185,36 @@ describe('Actions', () => {
 
       expect(response).toBeDefined();
       expect(response.tools.length).toBeLessThanOrEqual(1);
+    });
+  });
+
+  describe('mcp.createConnectionSessionToken', () => {
+    it('should expose createConnectionSessionToken', () => {
+      expect(typeof client.actions.mcp.createConnectionSessionToken).toBe(
+        'function'
+      );
+    });
+
+    it('should mint a read-only token for the connection MCP server', async () => {
+      const response = await client.actions.mcp.createConnectionSessionToken({
+        connectionName: GMAIL_CONNECTION_NAME,
+        identifier: GMAIL_IDENTIFIER,
+        expirySeconds: 300,
+        accessLevel: 'READ_ONLY',
+      });
+
+      expect(typeof response.token).toBe('string');
+      expect(response.token.length).toBeGreaterThan(0);
+      expect(response.expiresAt).toBeDefined();
+    });
+
+    it('should reject an unknown connection with ScalekitNotFoundException', async () => {
+      await expect(
+        client.actions.mcp.createConnectionSessionToken({
+          connectionName: `missing-connection-${Date.now()}`,
+          identifier: GMAIL_IDENTIFIER,
+        })
+      ).rejects.toBeInstanceOf(ScalekitNotFoundException);
     });
   });
 
