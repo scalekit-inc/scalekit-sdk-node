@@ -16,6 +16,7 @@ export { ToolReadinessState } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 export type { SearchToolsResponse, SearchedTool, ConnectionReadiness, } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 export type { ListToolsResponse, Tool, } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 export type { ActionTool, ListToolsResult } from './actions';
+export type { ResumableUploadMethod, ResumableUploadParams, ResumableUploadOptions, UploadProgress, } from './resumable-upload';
 export type { McpConfig, McpConfigConnectionToolMapping, CreateMcpConfigResponse, GetMcpConfigResponse, ListMcpConfigsResponse, UpdateMcpConfigResponse, DeleteMcpConfigResponse, ListMcpConnectedAccountsResponse, CreateMcpSessionTokenResponse, } from './pkg/grpc/scalekit/v1/mcp/mcp_pb';
 export type { AuthPattern, AuthField, Provider, CreateProviderResponse, UpdateProviderResponse, ListProvidersResponse, } from './providers';
 export { ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';

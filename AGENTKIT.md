@@ -159,6 +159,7 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 - `listConnectedAccounts`, `deleteConnectedAccount`, `getConnectedAccount`
 - `createConnectedAccount`, `getOrCreateConnectedAccount`, `updateConnectedAccount`
 - `request` — proxied HTTP to `{envUrl}/proxy/...` with `connection_name` / `identifier` headers (returns `AxiosResponse`).
+- `uploadResumable` — uploads a file of any size to Google Drive, Cloud Storage or YouTube with Google's resumable protocol: chunks of 4 MiB by default, a failed chunk resumes instead of restarting, and it returns the created resource. Errors: `ScalekitUploadHttpException`, `ScalekitUploadSessionExpiredException`, `ScalekitUploadProtocolException`, `ScalekitUploadTimeoutException`, `ScalekitUploadConnectionException`.
 
 There is no separate `connect` export on Node; use `actions` for the facade.
 
