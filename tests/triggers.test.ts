@@ -81,6 +81,16 @@ function validEventObject(): Record<string, unknown> {
   return JSON.parse(fixture('valid_account.json').toString('utf8'));
 }
 
+// A recent timestamp whose HMAC contains '+' or '/', so URL-safe re-encoding
+// of the signature really changes it.
+function tsWithPlusOrSlash(body: Uint8Array): number {
+  let ts = nowSeconds();
+  while (!/[+/]/.test(hmac(SIGNING_KEY, MSG_ID, ts, body))) {
+    ts -= 1;
+  }
+  return ts;
+}
+
 function catchError(fn: () => unknown): unknown {
   try {
     fn();
@@ -305,6 +315,11 @@ describe('verifyTriggerEvent', () => {
       ['2026-13-01T00:00:00Z'],
       ['2026-00-10T00:00:00Z'],
       ['2026-10-01T12:34:56+0530'],
+      ['2026-10-01T12:34:56+05:60'],
+      ['0000-01-01T00:00:00Z'],
+      ['0000-06-15T12:00:00+00:00'],
+      ['0001-01-01T00:30:00+01:00'],
+      ['9999-12-31T23:30:00-01:00'],
       ['2026-10-01T12:34:56.Z'],
       ['2026-10-01'],
       ['1759322096'],
@@ -318,6 +333,19 @@ describe('verifyTriggerEvent', () => {
       const error = catchError(() => verifyJson(raw));
       expect(error).toBeInstanceOf(ScalekitTriggerEventParseError);
       expect((error as Error).message).toContain('"occurred_at"');
+    });
+
+    it.each([
+      ['0001-01-01T00:00:00Z', '0001-01-01T00:00:00.000Z'],
+      ['0001-01-01T01:00:00+01:00', '0001-01-01T00:00:00.000Z'],
+      ['9999-12-31T23:59:59.999Z', '9999-12-31T23:59:59.999Z'],
+      ['9999-12-31T22:59:59-01:00', '9999-12-31T23:59:59.000Z'],
+      ['2026-10-01T12:34:56+05:59', '2026-10-01T06:35:56.000Z'],
+    ])('accepts occurred_at %p at the edge of the range', (input, iso) => {
+      const raw = validEventObject();
+      raw.occurred_at = input;
+
+      expect(verifyJson(raw).occurredAt?.toISOString()).toBe(iso);
     });
 
     it.each([
@@ -518,18 +546,21 @@ describe('verifyTriggerEvent', () => {
       );
     });
 
-    it('signs the exact body bytes (a leading BOM is covered by the signature)', () => {
+    it('rejects a correctly signed byte body with a leading BOM as a parse error', () => {
       const body = Buffer.concat([
         Buffer.from([0xef, 0xbb, 0xbf]),
         fixture('valid_account.json'),
       ]);
 
-      const event = verifyTriggerEvent({
-        body,
-        headers: signedHeaders(body),
-        secret: SECRET,
-      });
-      expect(event.dedupeKey).toBe('dk_123');
+      const error = catchError(() =>
+        verifyTriggerEvent({
+          body,
+          headers: signedHeaders(body),
+          secret: SECRET,
+        })
+      );
+      expect(error).toBeInstanceOf(ScalekitTriggerEventParseError);
+      expect((error as Error).message).toContain('not valid JSON');
 
       // Signed without the BOM: must not verify against the BOM-prefixed bytes.
       const withoutBom = signedHeaders(fixture('valid_account.json'));
@@ -575,27 +606,139 @@ describe('verifyTriggerEvent', () => {
       ).toEqual({ title: 'Café ✓ 日本' });
     });
 
-    it('rejects a parsed object passed as the body, pointing at express.raw', () => {
+    it('rejects a parsed object passed as the body with TypeError, pointing at express.raw', () => {
       const body = validEventObject() as unknown as string;
       const headers = signedHeaders(JSON.stringify(body));
 
       const error = catchError(() =>
         verifyTriggerEvent({ body, headers, secret: SECRET })
       );
-      expect(error).toBeInstanceOf(WebhookVerificationError);
+      expect(error).toBeInstanceOf(TypeError);
+      expect(error).not.toBeInstanceOf(WebhookVerificationError);
       expect((error as Error).message).toContain('got object');
       expect((error as Error).message).toContain('express.raw');
     });
 
     it.each([
-      ['a non-string secret', undefined as unknown as string],
-      ['a secret without a prefix', 'nounderscore'],
-    ])('rejects %s', (_label, secret) => {
+      ['a number body', { body: 42 }],
+      ['a null body', { body: null }],
+      ['null headers', { headers: null }],
+      ['string headers', { headers: 'webhook-id: msg_1' }],
+      ['an undefined secret', { secret: undefined }],
+      ['a Buffer secret', { secret: Buffer.from(SECRET) }],
+    ])('rejects %s with TypeError', (_label, override) => {
+      const body = fixture('valid_account.json');
+      const params = {
+        body,
+        headers: signedHeaders(body),
+        secret: SECRET,
+        ...override,
+      } as unknown as Parameters<typeof verifyTriggerEvent>[0];
+
+      const error = catchError(() => verifyTriggerEvent(params));
+      expect(error).toBeInstanceOf(TypeError);
+      expect(error).not.toBeInstanceOf(WebhookVerificationError);
+    });
+
+    it.each([[null], [undefined], ['body']])(
+      'rejects params %p with TypeError',
+      (params) => {
+        expect(() =>
+          verifyTriggerEvent(
+            params as unknown as Parameters<typeof verifyTriggerEvent>[0]
+          )
+        ).toThrow(TypeError);
+      }
+    );
+
+    it('rejects a secret without a prefix', () => {
       const body = fixture('valid_account.json');
 
+      const error = catchError(() =>
+        verifyTriggerEvent({
+          body,
+          headers: signedHeaders(body),
+          secret: 'nounderscore',
+        })
+      );
+      expect(error).toBeInstanceOf(WebhookVerificationError);
+      expect((error as Error).message).toBe('Invalid secret');
+    });
+
+    it.each([
+      ['a lone high surrogate', '\uD800'],
+      ['a lone low surrogate', '\uDC00'],
+      ['reversed surrogates', '\uDC00\uD800'],
+    ])('rejects a string body containing %s', (_label, chars) => {
+      const raw = validEventObject();
+      raw.payload = { title: `x${chars}y` };
+      const text = JSON.stringify(raw).replace(
+        /\\u(d[89a-f][0-9a-f]{2})/gi,
+        (_m, hex: string) => String.fromCharCode(parseInt(hex, 16))
+      );
+      expect(text).toContain(chars);
+      // Node encodes the lone surrogate as U+FFFD, so this is what a sender
+      // signing that string would have produced.
+      const headers = signedHeaders(Buffer.from(text, 'utf8'));
+
+      const error = catchError(() =>
+        verifyTriggerEvent({ body: text, headers, secret: SECRET })
+      );
+      expect(error).toBeInstanceOf(WebhookVerificationError);
+      expect(error).not.toBeInstanceOf(ScalekitTriggerEventParseError);
+      expect((error as Error).message).toBe(
+        'Trigger event body is not valid UTF-8'
+      );
+    });
+
+    it('accepts a string body with a correctly paired surrogate', () => {
+      const raw = validEventObject();
+      raw.payload = { title: 'emoji \u{1F600}' };
+      const text = JSON.stringify(raw);
+      const headers = signedHeaders(Buffer.from(text, 'utf8'));
+
+      expect(
+        verifyTriggerEvent({ body: text, headers, secret: SECRET }).payload
+      ).toEqual({ title: 'emoji \u{1F600}' });
+    });
+
+    it.each([['-1'], ['+1'], ['1.5'], [' 1'], ['1 '], ['1e9'], [''], ['0x10']])(
+      'rejects webhook-timestamp %p as invalid headers',
+      (ts) => {
+        const body = fixture('valid_account.json');
+        const headers = { ...signedHeaders(body), 'webhook-timestamp': ts };
+
+        const error = catchError(() =>
+          verifyTriggerEvent({ body, headers, secret: SECRET })
+        );
+        expect(error).toBeInstanceOf(WebhookVerificationError);
+        expect((error as Error).message).toBe('Invalid Signature Headers');
+      }
+    );
+
+    it('rejects a timestamp with a trailing suffix even when signed over its digits', () => {
+      const body = fixture('valid_account.json');
+      const signed = signedHeaders(body);
+      const headers = {
+        ...signed,
+        'webhook-timestamp': `${signed['webhook-timestamp']}abc`,
+      };
+
       expect(() =>
-        verifyTriggerEvent({ body, headers: signedHeaders(body), secret })
-      ).toThrow('Invalid secret');
+        verifyTriggerEvent({ body, headers, secret: SECRET })
+      ).toThrow('Invalid Signature Headers');
+    });
+
+    it('rejects an empty webhook-timestamp in a Fetch Headers instance', () => {
+      const body = fixture('valid_account.json');
+      const headers = new Headers({
+        ...signedHeaders(body),
+        'webhook-timestamp': '',
+      });
+
+      expect(() =>
+        verifyTriggerEvent({ body, headers, secret: SECRET })
+      ).toThrow('Invalid Signature Headers');
     });
 
     it('skips a short v1 candidate and accepts a later valid one', () => {
@@ -660,6 +803,66 @@ describe('verifyTriggerEvent', () => {
         expect((error as Error).message).toBe('Invalid Signature');
       }
     );
+
+    const MALFORMED_LABELS = [
+      'unpadded',
+      'URL-safe',
+      'URL-safe unpadded',
+      'non-ASCII',
+      'a non-base64 character',
+      'over-padded',
+    ];
+
+    // The valid HMAC, re-encoded in ways a lenient base64 decoder accepts.
+    function malformedVariants(valid: string): Array<[string, string]> {
+      const b64 = valid.slice(3);
+      const unpadded = b64.replace(/=+$/, '');
+      return [
+        ['unpadded', `v1,${unpadded}`],
+        ['URL-safe', `v1,${b64.replace(/\+/g, '-').replace(/\//g, '_')}`],
+        [
+          'URL-safe unpadded',
+          `v1,${unpadded.replace(/\+/g, '-').replace(/\//g, '_')}`,
+        ],
+        ['non-ASCII', `v1,${b64.slice(0, -2)}é=`],
+        ['a non-base64 character', `v1,${b64.slice(0, 4)}.${b64.slice(5)}`],
+        ['over-padded', `v1,${b64}=`],
+      ];
+    }
+
+    it.each(MALFORMED_LABELS)(
+      'skips a %s candidate and accepts a valid one alongside',
+      (name) => {
+        const body = fixture('valid_account.json');
+        const signed = signedHeaders(body, { ts: tsWithPlusOrSlash(body) });
+        const bad = malformedVariants(signed['webhook-signature']).find(
+          ([label]) => label === name
+        )![1];
+        const headers = {
+          ...signed,
+          'webhook-signature': `${bad} ${signed['webhook-signature']}`,
+        };
+
+        expect(
+          verifyTriggerEvent({ body, headers, secret: SECRET }).dedupeKey
+        ).toBe('dk_123');
+      }
+    );
+
+    it.each(MALFORMED_LABELS)('rejects a %s candidate on its own', (name) => {
+      const body = fixture('valid_account.json');
+      const signed = signedHeaders(body, { ts: tsWithPlusOrSlash(body) });
+      const bad = malformedVariants(signed['webhook-signature']).find(
+        ([label]) => label === name
+      )![1];
+      const headers = { ...signed, 'webhook-signature': bad };
+
+      const error = catchError(() =>
+        verifyTriggerEvent({ body, headers, secret: SECRET })
+      );
+      expect(error).toBeInstanceOf(WebhookVerificationError);
+      expect((error as Error).message).toBe('Invalid Signature');
+    });
 
     it('rejects a v2 candidate carrying the right HMAC', () => {
       const body = fixture('valid_account.json');

@@ -128,6 +128,10 @@ export interface TriggerEventVerifyParams {
   secret: string;
 }
 
+// An unpaired high or low surrogate anywhere in a string.
+const LONE_SURROGATE =
+  /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+
 const KNOWN_FIELDS: ReadonlySet<string> = new Set([
   'version',
   'trigger_type',
@@ -166,21 +170,27 @@ const KNOWN_FIELDS: ReadonlySet<string> = new Set([
  *   `Number.MAX_SAFE_INTEGER` (2^53 - 1) lose precision. If you need such
  *   values exactly, parse the raw body again with a parser that preserves them.
  * - Headers are matched case-insensitively. Every `webhook-signature`
- *   candidate is tried and malformed ones are skipped; several different
- *   `webhook-id` or `webhook-timestamp` values are rejected.
+ *   candidate is tried and malformed ones (including any that are not strict
+ *   padded standard base64) are skipped; several different `webhook-id` or
+ *   `webhook-timestamp` values are rejected.
  *
  * @param params - The raw body, the request headers and your signing secret.
  * @returns The verified, parsed event.
  * @throws {@link WebhookVerificationError} when the event is not authentic:
- *   a required header is missing or repeated with different values, the
- *   secret is malformed, the timestamp is more than 5 minutes off, no
- *   signature matches, or the body is not valid UTF-8 (`cause` holds the
- *   underlying error where there is one).
+ *   a required header is missing or repeated with different values,
+ *   `webhook-timestamp` is not decimal digits, the secret is malformed, the
+ *   timestamp is more than 5 minutes off, no signature matches, or the body
+ *   is not valid UTF-8 (including a string body with a lone UTF-16
+ *   surrogate; `cause` holds the underlying error where there is one).
  * @throws {@link ScalekitTriggerEventParseError} (a subclass of
  *   `WebhookVerificationError`) when the signature is valid but the body is
- *   not JSON, not a JSON object, lacks a required field, has a field of the
- *   wrong type, or has an `occurred_at` that is not an RFC 3339 timestamp
- *   with an offset.
+ *   not JSON (a leading byte order mark counts as not JSON), not a JSON
+ *   object, lacks a required field, has a field of the wrong type, or has an
+ *   `occurred_at` that is not an RFC 3339 timestamp with an offset in years
+ *   0001-9999 (after conversion to UTC).
+ * @throws `TypeError` when called with the wrong argument types: `body` is
+ *   not a string, `Buffer` or `Uint8Array`, `headers` is not an object, or
+ *   `secret` is not a string.
  *
  * @example
  * ```ts
@@ -207,26 +217,33 @@ const KNOWN_FIELDS: ReadonlySet<string> = new Set([
 export function verifyTriggerEvent(
   params: TriggerEventVerifyParams
 ): TriggerEvent {
+  // Wrong argument types are programming errors, not unauthentic requests:
+  // they throw TypeError so they are not answered with a 400 and forgotten.
   if (params === null || typeof params !== 'object') {
-    throw new WebhookVerificationError(
-      'verifyTriggerEvent expects { body, headers, secret }'
-    );
+    throw new TypeError('verifyTriggerEvent expects { body, headers, secret }');
   }
   const { body, headers, secret } = params;
 
-  if (typeof secret !== 'string') {
-    throw new WebhookVerificationError('Invalid secret');
-  }
   if (typeof body !== 'string' && !(body instanceof Uint8Array)) {
-    throw new WebhookVerificationError(
+    throw new TypeError(
       `Trigger event body must be the raw request body as a string or Buffer/Uint8Array, got ${describeType(body)}; ` +
         'with Express, use express.raw({ type: "application/json" }) on this route'
     );
   }
   if (headers === null || typeof headers !== 'object') {
-    throw new WebhookVerificationError(
-      'Trigger event headers must be a Headers object or a plain object of header values'
+    throw new TypeError(
+      `Trigger event headers must be a Headers object or a plain object of header values, got ${describeType(headers)}`
     );
+  }
+  if (typeof secret !== 'string') {
+    throw new TypeError(
+      `Trigger event secret must be a string, got ${describeType(secret)}`
+    );
+  }
+  // A string with a lone UTF-16 surrogate has no UTF-8 encoding, so it cannot
+  // be the bytes that were signed (Node would sign U+FFFD in its place).
+  if (typeof body === 'string' && LONE_SURROGATE.test(body)) {
+    throw new WebhookVerificationError('Trigger event body is not valid UTF-8');
   }
 
   const webhookId = singleHeader(headers, 'webhook-id');
@@ -240,7 +257,7 @@ export function verifyTriggerEvent(
       webhookTimestamp,
       webhookSignature,
       body,
-      { keepCause: true, skipMalformedSignatures: true }
+      { keepCause: true, skipMalformedSignatures: true, strictTimestamp: true }
     );
   } catch (error) {
     if (error instanceof WebhookVerificationError) {
@@ -254,7 +271,11 @@ export function verifyTriggerEvent(
     text = body;
   } else {
     try {
-      text = new TextDecoder('utf-8', { fatal: true }).decode(body);
+      // ignoreBOM keeps a leading BOM in the text, so JSON.parse rejects it
+      // as it does for a string body: a BOM-prefixed body is a parse error.
+      text = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(
+        body
+      );
     } catch (error) {
       throw new WebhookVerificationError(
         'Trigger event body is not valid UTF-8',
@@ -287,6 +308,7 @@ export class TriggersClient {
    * @throws {@link WebhookVerificationError} when the event is not authentic.
    * @throws {@link ScalekitTriggerEventParseError} when the signature is valid
    *   but the body is not a readable trigger event.
+   * @throws `TypeError` when called with the wrong argument types.
    *
    * @example
    * ```ts
@@ -334,19 +356,25 @@ function headerValues(headers: TriggerEventHeaders, name: string): string[] {
 /**
  * A header that must have one value. Repeated headers reach us either as
  * separate values or joined with ', ' (Node and Fetch both join duplicates),
- * so values are split on ',' before comparing. IDs and timestamps never
- * contain ','.
+ * so values are split on ',' (and the spaces the join adds) before comparing.
+ * IDs and timestamps never contain ','. Values are otherwise kept verbatim,
+ * so a stray space fails the timestamp grammar instead of being trimmed away.
+ * Returns `undefined` when the header is absent and `''` when it is present
+ * but empty.
  */
 function singleHeader(
   headers: TriggerEventHeaders,
   name: string
 ): string | undefined {
+  const values = headerValues(headers, name);
+  if (values.length === 0) {
+    return undefined;
+  }
   const distinct = new Set<string>();
-  for (const value of headerValues(headers, name)) {
-    for (const part of value.split(',')) {
-      const trimmed = part.trim();
-      if (trimmed !== '') {
-        distinct.add(trimmed);
+  for (const value of values) {
+    for (const part of value.split(/,[ \t]*/)) {
+      if (part !== '') {
+        distinct.add(part);
       }
     }
   }
@@ -355,7 +383,7 @@ function singleHeader(
       `Multiple ${name} headers with different values`
     );
   }
-  return distinct.size === 1 ? [...distinct][0] : undefined;
+  return distinct.size === 1 ? [...distinct][0] : '';
 }
 
 /** `webhook-signature`: every value is a candidate, separated by ' '. */
@@ -483,6 +511,9 @@ function parseRfc3339(value: string): Date | undefined {
     return undefined;
   }
   const year = Number(m[1]);
+  if (year === 0) {
+    return undefined; // RFC 3339 allows 0000, but it is not a valid event time
+  }
   const month = Number(m[2]);
   const day = Number(m[3]);
   const millis =
@@ -504,6 +535,10 @@ function parseRfc3339(value: string): Date | undefined {
     const sign = m[9] === '-' ? -1 : 1;
     const offsetMinutes = Number(m[10]) * 60 + Number(m[11]);
     date.setTime(date.getTime() - sign * offsetMinutes * 60_000);
+  }
+  const utcYear = date.getUTCFullYear();
+  if (utcYear < 1 || utcYear > 9999) {
+    return undefined; // the offset moved it outside years 0001-9999
   }
   return date;
 }

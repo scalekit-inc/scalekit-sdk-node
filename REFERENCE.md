@@ -8404,7 +8404,8 @@ Checks the signature first (HMAC-SHA256 over `webhook-id.webhook-timestamp.body`
 - Branch on `deliveryScope`: `'account'` events are for `connectedAccountId`; `'connection'` events are for the whole connection, and `connectedAccountId` is `''`.
 - When `payloadState` is `'reference'`, `payload` is `null`: fetch the resource identified by `resourceType` and `resourceId`.
 - `payload` is decoded with `JSON.parse`, so integers above `Number.MAX_SAFE_INTEGER` lose precision. Parse the raw body yourself if you need them exactly.
-- Throws `WebhookVerificationError` when the request is not authentic (missing or conflicting headers, stale timestamp, no matching signature, body not UTF-8), and its subclass `ScalekitTriggerEventParseError` when the signature is valid but the body is not a readable trigger event.
+- Header names are matched case-insensitively. Malformed `webhook-signature` candidates (including any that are not padded standard base64) are skipped.
+- Throws `WebhookVerificationError` when the request is not authentic (missing or conflicting headers, a `webhook-timestamp` that is not decimal digits, stale timestamp, no matching signature, body not UTF-8), and its subclass `ScalekitTriggerEventParseError` when the signature is valid but the body is not a readable trigger event (including a body that starts with a byte order mark). Throws `TypeError` when called with arguments of the wrong type.
 </dd>
 </dl>
 </dd>
@@ -8441,16 +8442,22 @@ app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async 
   } catch (err) {
     if (err instanceof WebhookVerificationError) {
       return res.status(400).send('invalid trigger event');
+    } else {
+      throw err; // a bug or a wrong argument, not a bad request
     }
-    throw err;
   }
 
   // Account events are for one connected account; for connection-wide events
   // your app decides which connected accounts act on them.
-  const accountIds =
-    event.deliveryScope === DeliveryScope.ACCOUNT
-      ? [event.connectedAccountId]
-      : await accountsToActFor(event.connectionId);
+  let accountIds: string[];
+  if (event.deliveryScope === DeliveryScope.ACCOUNT) {
+    accountIds = [event.connectedAccountId];
+  } else if (event.deliveryScope === DeliveryScope.CONNECTION) {
+    accountIds = await accountsToActFor(event.connectionId);
+  } else {
+    // A scope this SDK version does not know yet: acknowledge and skip it.
+    return res.sendStatus(200);
+  }
 
   for (const accountId of accountIds) {
     // Delivery is at least once: dedupe on dedupeKey + the account you act as.

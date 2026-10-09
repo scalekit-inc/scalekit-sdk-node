@@ -131,21 +131,27 @@ export interface TriggerEventVerifyParams {
  *   `Number.MAX_SAFE_INTEGER` (2^53 - 1) lose precision. If you need such
  *   values exactly, parse the raw body again with a parser that preserves them.
  * - Headers are matched case-insensitively. Every `webhook-signature`
- *   candidate is tried and malformed ones are skipped; several different
- *   `webhook-id` or `webhook-timestamp` values are rejected.
+ *   candidate is tried and malformed ones (including any that are not strict
+ *   padded standard base64) are skipped; several different `webhook-id` or
+ *   `webhook-timestamp` values are rejected.
  *
  * @param params - The raw body, the request headers and your signing secret.
  * @returns The verified, parsed event.
  * @throws {@link WebhookVerificationError} when the event is not authentic:
- *   a required header is missing or repeated with different values, the
- *   secret is malformed, the timestamp is more than 5 minutes off, no
- *   signature matches, or the body is not valid UTF-8 (`cause` holds the
- *   underlying error where there is one).
+ *   a required header is missing or repeated with different values,
+ *   `webhook-timestamp` is not decimal digits, the secret is malformed, the
+ *   timestamp is more than 5 minutes off, no signature matches, or the body
+ *   is not valid UTF-8 (including a string body with a lone UTF-16
+ *   surrogate; `cause` holds the underlying error where there is one).
  * @throws {@link ScalekitTriggerEventParseError} (a subclass of
  *   `WebhookVerificationError`) when the signature is valid but the body is
- *   not JSON, not a JSON object, lacks a required field, has a field of the
- *   wrong type, or has an `occurred_at` that is not an RFC 3339 timestamp
- *   with an offset.
+ *   not JSON (a leading byte order mark counts as not JSON), not a JSON
+ *   object, lacks a required field, has a field of the wrong type, or has an
+ *   `occurred_at` that is not an RFC 3339 timestamp with an offset in years
+ *   0001-9999 (after conversion to UTC).
+ * @throws `TypeError` when called with the wrong argument types: `body` is
+ *   not a string, `Buffer` or `Uint8Array`, `headers` is not an object, or
+ *   `secret` is not a string.
  *
  * @example
  * ```ts
@@ -191,6 +197,7 @@ export declare class TriggersClient {
      * @throws {@link WebhookVerificationError} when the event is not authentic.
      * @throws {@link ScalekitTriggerEventParseError} when the signature is valid
      *   but the body is not a readable trigger event.
+     * @throws `TypeError` when called with the wrong argument types.
      *
      * @example
      * ```ts

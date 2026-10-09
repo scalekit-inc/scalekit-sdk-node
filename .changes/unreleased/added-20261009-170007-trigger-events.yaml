@@ -1,17 +1,23 @@
 kind: added
 body: |
-  `verifyTriggerEvent({ body, headers, secret })` and `scalekit.actions.triggers.verifyEvent(params)` verify a trigger event delivered to your endpoint (signature first, 5-minute timestamp tolerance) and return it as a typed `TriggerEvent`; the standalone function needs no client. A body that is signed correctly but is not a readable trigger event throws `ScalekitTriggerEventParseError`, which extends `WebhookVerificationError`. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#trigger-events)
+  `verifyTriggerEvent({ body, headers, secret })` and `scalekit.actions.triggers.verifyEvent(...)` verify the signature of a trigger event delivered to your endpoint and return it as a typed `TriggerEvent`; the standalone function needs no client. Any failure throws `WebhookVerificationError`, and a correctly signed body that is not a valid trigger event throws the new subclass `ScalekitTriggerEventParseError`. Header names are matched case-insensitively. Delivery is at least once, so deduplicate on `dedupeKey` plus the connected account. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/v2.20.0/REFERENCE.md#trigger-events)
 
   ```ts
-  import { verifyTriggerEvent, DeliveryScope, WebhookVerificationError } from '@scalekit-sdk/node';
+  import express from 'express';
+  import { verifyTriggerEvent, WebhookVerificationError } from '@scalekit-sdk/node';
 
-  try {
-    const event = verifyTriggerEvent({ body: req.body, headers: req.headers, secret: process.env.SCALEKIT_TRIGGER_SECRET! });
-    const accountId = event.deliveryScope === DeliveryScope.ACCOUNT ? event.connectedAccountId : undefined;
-    // de-duplicate on event.dedupeKey + the connected account you act as
-  } catch (err) {
-    if (err instanceof WebhookVerificationError) res.sendStatus(400);
-  }
+  const app = express();
+  // express.raw keeps req.body as the raw Buffer the signature covers
+  app.post('/triggers', express.raw({ type: 'application/json' }), (req, res) => {
+    try {
+      const event = verifyTriggerEvent({ body: req.body, headers: req.headers, secret: process.env.SCALEKIT_TRIGGER_SECRET! });
+      enqueue(event); // your handler: deduplicate on event.dedupeKey + the connected account
+      res.sendStatus(204);
+    } catch (err) {
+      if (!(err instanceof WebhookVerificationError)) throw err;
+      res.sendStatus(400); // bad signature, stale timestamp or malformed event
+    }
+  });
   ```
 time: '2026-10-09T17:00:07.911404+00:00'
 custom:

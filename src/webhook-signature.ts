@@ -20,12 +20,22 @@ export interface VerifyPayloadSignatureOptions {
    */
   keepCause?: boolean;
   /**
-   * Skip malformed `webhook-signature` candidates (no `,`, or a decoded length
-   * that differs from an HMAC-SHA256) and keep trying the rest. Off for the
-   * legacy methods, where such a candidate ends the check with
-   * "Invalid Signature" as it always has.
+   * Skip malformed `webhook-signature` candidates and keep trying the rest. A
+   * candidate is malformed when it has no `,`, when the part after `v1,` is
+   * not strict padded standard base64 (only `A-Z a-z 0-9 + /`, at most two
+   * trailing `=`, length a multiple of 4; so unpadded, URL-safe and non-ASCII
+   * values are skipped), or when it decodes to a length other than an
+   * HMAC-SHA256. Off for the legacy methods, where such a candidate ends the
+   * check with "Invalid Signature" as it always has.
    */
   skipMalformedSignatures?: boolean;
+  /**
+   * Require `timestamp` to be decimal digits only (`^[0-9]+$`); anything else,
+   * including an empty value, throws "Invalid Signature Headers" instead of
+   * being read with `parseInt`. An absent (`undefined`) timestamp still throws
+   * "Missing required headers". Off for the legacy methods.
+   */
+  strictTimestamp?: boolean;
 }
 
 /**
@@ -52,7 +62,10 @@ export function verifyPayloadSignature(
   payload: string | Uint8Array,
   options?: VerifyPayloadSignatureOptions
 ): boolean {
-  if (!id || !timestamp || !signature) {
+  const timestampMissing = options?.strictTimestamp
+    ? timestamp === undefined
+    : !timestamp;
+  if (!id || timestampMissing || !signature) {
     throw new WebhookVerificationError('Missing required headers');
   }
 
@@ -62,7 +75,10 @@ export function verifyPayloadSignature(
   }
 
   try {
-    const timestampDate = verifyTimestamp(timestamp);
+    const timestampDate = verifyTimestamp(
+      timestamp as string,
+      options?.strictTimestamp === true
+    );
     const signedPrefix = `${id}.${Math.floor(timestampDate.getTime() / 1000)}.`;
     const secretBytes = Buffer.from(secretParts[1], 'base64');
     const computedSignature = computeSignature(
@@ -109,6 +125,12 @@ export function verifyPayloadSignature(
   }
 }
 
+// Strict padded standard base64. Buffer.from(_, 'base64') is lenient (it
+// accepts URL-safe characters, missing padding and ignores junk), so the
+// candidate is checked against the grammar before decoding.
+const STRICT_BASE64 = /^[A-Za-z0-9+/]*={0,2}$/;
+const DIGITS_ONLY = /^[0-9]+$/;
+
 // One `v1,<base64>` candidate. Anything malformed is simply not a match;
 // timingSafeEqual is only reached with equal lengths, so it cannot throw.
 function candidateMatches(candidate: string, expected: Buffer): boolean {
@@ -119,6 +141,9 @@ function candidateMatches(candidate: string, expected: Buffer): boolean {
   if (version !== WEBHOOK_SIGNATURE_VERSION) {
     return false;
   }
+  if (!STRICT_BASE64.test(received) || received.length % 4 !== 0) {
+    return false;
+  }
   const receivedBytes = Buffer.from(received, 'base64');
   if (receivedBytes.length !== expected.length) {
     return false;
@@ -126,7 +151,10 @@ function candidateMatches(candidate: string, expected: Buffer): boolean {
   return crypto.timingSafeEqual(receivedBytes, expected);
 }
 
-function verifyTimestamp(timestampStr: string): Date {
+function verifyTimestamp(timestampStr: string, strict: boolean): Date {
+  if (strict && !DIGITS_ONLY.test(timestampStr)) {
+    throw new WebhookVerificationError('Invalid Signature Headers');
+  }
   const now = Math.floor(Date.now() / 1000);
   const timestamp = parseInt(timestampStr, 10);
   if (isNaN(timestamp)) {
