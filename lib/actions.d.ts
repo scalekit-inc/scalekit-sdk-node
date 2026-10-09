@@ -345,6 +345,11 @@ export default class ActionsClient {
      * @throws {Error} If `path` resolves outside the proxy prefix (`<environment URL>/proxy/`),
      *                 for example through `..` segments, encoded dots or control characters.
      *                 Checked before any network call; every other path is sent unchanged.
+     *
+     * @remarks Redirects returned by the proxied API are followed as before. A redirect
+     * hop that leaves the proxy prefix (another origin, or a same-origin path outside
+     * `<environment URL>/proxy/`) is sent without the client's `Authorization`,
+     * `connection_name` and `identifier` headers.
      */
     request(params: {
         connectionName: string;

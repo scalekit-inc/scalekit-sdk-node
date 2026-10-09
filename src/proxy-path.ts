@@ -5,13 +5,52 @@
  * credentials. The WHATWG URL parser (used by axios and fetch) removes tab,
  * LF and CR and resolves `.`/`..` segments (including `%2e` forms and `\`),
  * and a server may percent-decode the path before routing it. Either step can
- * move a caller-supplied `path` out of the proxy prefix. This module rejects
- * such URLs; it never rewrites them.
+ * move a caller-supplied `path` out of the proxy prefix. A proxied response
+ * can also redirect the client out of it. This module rejects such request
+ * URLs and keeps credentials off such redirects; it never rewrites a URL.
  *
  * @internal Not exported from the package root.
  */
 
 const PROXY_PATH_ERROR = 'path must resolve under the proxy prefix';
+
+/** Headers that carry the client's credentials or select the connected account. */
+const PROXY_CREDENTIAL_HEADERS = new Set([
+  'authorization',
+  'connection_name',
+  'identifier',
+]);
+
+type Containment = 'inside' | 'outside' | 'unparseable';
+
+/**
+ * Classifies `url` against `<envUrl base path>/proxy/` on the environment's
+ * origin. `inside` requires the same origin, and both the path as sent on the
+ * wire and that path as a server may read it (percent-decoded, `\` as `/`,
+ * dot segments removed) to start with the prefix. `<base>/proxy` without the
+ * trailing slash is outside.
+ */
+function proxyContainment(envUrl: string, url: string): Containment {
+  let prefix: URL;
+  let target: URL;
+  try {
+    // The prefix is the URL `request()` builds for `path: '/'`, parsed the
+    // same way, so any base path in envUrl is normalized identically.
+    prefix = new URL(`${envUrl.replace(/\/$/, '')}/proxy/`);
+    target = new URL(url);
+  } catch {
+    return 'unparseable';
+  }
+  if (target.origin !== prefix.origin) {
+    return 'outside';
+  }
+  const sentPrefix = prefix.pathname;
+  const sentPath = target.pathname;
+  return sentPath.startsWith(sentPrefix) &&
+    serverView(sentPath).startsWith(serverView(sentPrefix))
+    ? 'inside'
+    : 'outside';
+}
 
 /**
  * Throws when `url` (as built by `actions.request()`) would resolve outside
@@ -24,25 +63,47 @@ const PROXY_PATH_ERROR = 'path must resolve under the proxy prefix';
  * @internal
  */
 export function assertProxyPathContained(envUrl: string, url: string): void {
-  let sentPrefix: string;
-  let sentPath: string;
-  try {
-    // The prefix is the path `request()` produces for `path: '/'`, parsed the
-    // same way, so any base path in envUrl is normalized identically.
-    sentPrefix = new URL(`${envUrl.replace(/\/$/, '')}/proxy/`).pathname;
-    sentPath = new URL(url).pathname;
-  } catch {
-    // Unparseable URL: the HTTP client uses the same parser and cannot send
-    // it either, so leave the existing failure path unchanged.
-    return;
-  }
-
-  if (
-    !sentPath.startsWith(sentPrefix) ||
-    !serverView(sentPath).startsWith(serverView(sentPrefix))
-  ) {
+  // An unparseable URL cannot be sent either (the HTTP client uses the same
+  // parser), so it is left to the existing failure path.
+  if (proxyContainment(envUrl, url) === 'outside') {
     throw new Error(PROXY_PATH_ERROR);
   }
+}
+
+/**
+ * Builds an axios `beforeRedirect` hook (Node http adapter, follow-redirects)
+ * for proxied requests. Each redirect is still followed as before; when a hop
+ * targets anything other than `<envUrl base path>/proxy/` on the environment's
+ * origin, the `Authorization`, `connection_name` and `identifier` headers are
+ * removed before that hop is sent. follow-redirects reuses the same headers
+ * object for later hops, so once removed they stay removed.
+ *
+ * @param envUrl - The client's environment URL (may carry a base path).
+ * @returns A hook to pass as the axios `beforeRedirect` request option.
+ * @internal
+ */
+export function proxyRedirectGuard(
+  envUrl: string
+): (redirectOptions: Record<string, unknown>) => void {
+  return (redirectOptions) => {
+    const href = redirectOptions.href;
+    if (
+      typeof href === 'string' &&
+      proxyContainment(envUrl, href) === 'inside'
+    ) {
+      return;
+    }
+    const headers = redirectOptions.headers;
+    if (headers === null || typeof headers !== 'object') {
+      return;
+    }
+    const mutable = headers as Record<string, unknown>;
+    for (const name of Object.keys(mutable)) {
+      if (PROXY_CREDENTIAL_HEADERS.has(name.toLowerCase())) {
+        delete mutable[name];
+      }
+    }
+  };
 }
 
 /**

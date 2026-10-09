@@ -5,7 +5,7 @@ import {
 } from '@bufbuild/protobuf';
 import { AxiosError, AxiosResponse } from 'axios';
 import CoreClient, { assertValidTimeout } from './core';
-import { assertProxyPathContained } from './proxy-path';
+import { assertProxyPathContained, proxyRedirectGuard } from './proxy-path';
 import {
   ScalekitException,
   ScalekitGatewayTimeoutException,
@@ -695,6 +695,11 @@ export default class ActionsClient {
    * @throws {Error} If `path` resolves outside the proxy prefix (`<environment URL>/proxy/`),
    *                 for example through `..` segments, encoded dots or control characters.
    *                 Checked before any network call; every other path is sent unchanged.
+   *
+   * @remarks Redirects returned by the proxied API are followed as before. A redirect
+   * hop that leaves the proxy prefix (another origin, or a same-origin path outside
+   * `<environment URL>/proxy/`) is sent without the client's `Authorization`,
+   * `connection_name` and `identifier` headers.
    */
   async request(params: {
     connectionName: string;
@@ -751,6 +756,9 @@ export default class ActionsClient {
         data: body ?? formData,
         headers: proxyHeaders,
         timeout,
+        // Redirects are still followed; credentials are not sent on a hop
+        // that leaves the proxy prefix.
+        beforeRedirect: proxyRedirectGuard(this.coreClient.envUrl),
       });
     } catch (error) {
       if (error instanceof ScalekitException) throw error;

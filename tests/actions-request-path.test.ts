@@ -19,6 +19,7 @@ import http from 'http';
 import { AddressInfo } from 'net';
 import ScalekitClient from '../src/scalekit';
 import CoreClient from '../src/core';
+import { proxyRedirectGuard } from '../src/proxy-path';
 
 type Seen = { method?: string; url?: string; authorization?: string };
 
@@ -207,5 +208,323 @@ describe('actions.request path containment', () => {
         '/base/proxy/drive/v3/files',
       ]);
     });
+  });
+});
+
+/**
+ * A proxied API may answer with a redirect. Redirects are still followed, but a
+ * hop that leaves `<envUrl>/proxy/` (another origin, or a same-origin path
+ * outside the prefix) must not carry the client's Authorization or the
+ * connection headers. Hops that stay under the prefix behave as before.
+ */
+describe('actions.request redirects', () => {
+  type Hop = {
+    server: 'env' | 'other';
+    method?: string;
+    url?: string;
+    host?: string;
+    authorization?: string;
+    connectionName?: string;
+    identifier?: string;
+  };
+
+  let envServer: http.Server;
+  let otherServer: http.Server;
+  let envPort: number;
+  let otherPort: number;
+  let envOrigin: string;
+  const hops: Hop[] = [];
+
+  // Any request carrying `?to=<location>` is answered with that redirect;
+  // everything else returns 200 with the path it was served on.
+  const handler =
+    (server: Hop['server']) =>
+    (req: http.IncomingMessage, res: http.ServerResponse) => {
+      hops.push({
+        server,
+        method: req.method,
+        url: req.url,
+        host: req.headers.host,
+        authorization: req.headers.authorization,
+        connectionName: req.headers['connection_name'] as string | undefined,
+        identifier: req.headers['identifier'] as string | undefined,
+      });
+      const to = new URL(req.url ?? '/', 'http://placeholder').searchParams.get(
+        'to'
+      );
+      const status = Number(
+        new URL(req.url ?? '/', 'http://placeholder').searchParams.get(
+          'status'
+        ) ?? 302
+      );
+      req.resume();
+      req.on('end', () => {
+        if (to !== null) {
+          res.writeHead(status, { location: to });
+          res.end();
+          return;
+        }
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify({ servedPath: req.url }));
+      });
+    };
+
+  // Listen on all interfaces so both 127.0.0.1 and localhost reach the
+  // servers (used for the different-host case).
+  const listen = (s: http.Server) =>
+    new Promise<number>((resolve) =>
+      s.listen(0, () => resolve((s.address() as AddressInfo).port))
+    );
+
+  beforeAll(async () => {
+    envServer = http.createServer(handler('env'));
+    otherServer = http.createServer(handler('other'));
+    envPort = await listen(envServer);
+    otherPort = await listen(otherServer);
+    envOrigin = `http://127.0.0.1:${envPort}`;
+  });
+
+  afterAll(async () => {
+    await new Promise<void>((resolve) => envServer.close(() => resolve()));
+    await new Promise<void>((resolve) => otherServer.close(() => resolve()));
+  });
+
+  beforeEach(() => {
+    hops.length = 0;
+  });
+
+  const redirectVia = (
+    client: ScalekitClient,
+    location: string,
+    extra: { method?: string; body?: unknown; status?: number } = {}
+  ) =>
+    client.actions.request({
+      connectionName: 'googledrive',
+      identifier: 'user_123',
+      path: '/redirect',
+      queryParams: {
+        to: location,
+        ...(extra.status ? { status: extra.status } : {}),
+      },
+      ...(extra.method ? { method: extra.method } : {}),
+      ...(extra.body !== undefined ? { body: extra.body } : {}),
+    });
+
+  const withCredentials = {
+    authorization: 'Bearer test-access-token',
+    connectionName: 'googledrive',
+    identifier: 'user_123',
+  };
+  const withoutCredentials = {
+    authorization: undefined,
+    connectionName: undefined,
+    identifier: undefined,
+  };
+
+  it('follows a same-host redirect outside the prefix without credentials', async () => {
+    const res = await redirectVia(
+      makeClient(envOrigin),
+      '/api/v1/organizations'
+    );
+    expect(res.status).toBe(200);
+    expect(res.data).toEqual({ servedPath: '/api/v1/organizations' });
+    expect(hops).toEqual([
+      {
+        server: 'env',
+        method: 'GET',
+        url: '/proxy/redirect?to=%2Fapi%2Fv1%2Forganizations',
+        host: `127.0.0.1:${envPort}`,
+        ...withCredentials,
+      },
+      {
+        server: 'env',
+        method: 'GET',
+        url: '/api/v1/organizations',
+        host: `127.0.0.1:${envPort}`,
+        ...withoutCredentials,
+      },
+    ]);
+  });
+
+  it('keeps credentials on a redirect to another path under the prefix', async () => {
+    const res = await redirectVia(
+      makeClient(envOrigin),
+      '/proxy/drive/v3/files'
+    );
+    expect(res.status).toBe(200);
+    expect(res.data).toEqual({ servedPath: '/proxy/drive/v3/files' });
+    expect(hops.map((h) => ({ url: h.url, ...withoutUrl(h) }))).toEqual([
+      {
+        url: '/proxy/redirect?to=%2Fproxy%2Fdrive%2Fv3%2Ffiles',
+        ...withCredentials,
+      },
+      { url: '/proxy/drive/v3/files', ...withCredentials },
+    ]);
+  });
+
+  it('keeps credentials on an absolute same-origin redirect under the prefix', async () => {
+    await redirectVia(makeClient(envOrigin), `${envOrigin}/proxy/a?b=1`);
+    expect(hops[1]).toMatchObject({ url: '/proxy/a?b=1', ...withCredentials });
+  });
+
+  it.each([
+    ['dot segments', '/proxy/x/../../api/v1/users', '/api/v1/users'],
+    [
+      'encoded slashes (decoded view)',
+      '/proxy/x%2f..%2f..%2fapi',
+      '/proxy/x%2f..%2f..%2fapi',
+    ],
+    ['the bare /proxy path', '/proxy', '/proxy'],
+  ])(
+    'strips credentials on a same-origin redirect escaping via %s',
+    async (_name, location, received) => {
+      await redirectVia(makeClient(envOrigin), location);
+      expect(hops).toHaveLength(2);
+      expect(hops[1]).toEqual({
+        server: 'env',
+        method: 'GET',
+        url: received,
+        host: `127.0.0.1:${envPort}`,
+        ...withoutCredentials,
+      });
+    }
+  );
+
+  it('strips credentials on a redirect to a different port', async () => {
+    await redirectVia(
+      makeClient(envOrigin),
+      `http://127.0.0.1:${otherPort}/proxy/x`
+    );
+    expect(hops[1]).toEqual({
+      server: 'other',
+      method: 'GET',
+      url: '/proxy/x',
+      host: `127.0.0.1:${otherPort}`,
+      ...withoutCredentials,
+    });
+  });
+
+  it('strips credentials on a redirect to a different host on the same port', async () => {
+    await redirectVia(
+      makeClient(envOrigin),
+      `http://localhost:${envPort}/proxy/x`
+    );
+    expect(hops[1]).toEqual({
+      server: 'env',
+      method: 'GET',
+      url: '/proxy/x',
+      host: `localhost:${envPort}`,
+      ...withoutCredentials,
+    });
+  });
+
+  it('keeps credentials off later hops once a hop left the prefix', async () => {
+    await redirectVia(
+      makeClient(envOrigin),
+      `/api/hop?to=${encodeURIComponent('/proxy/final')}`
+    );
+    expect(hops.map((h) => ({ url: h.url, ...withoutUrl(h) }))).toEqual([
+      {
+        url: '/proxy/redirect?to=%2Fapi%2Fhop%3Fto%3D%252Fproxy%252Ffinal',
+        ...withCredentials,
+      },
+      { url: '/api/hop?to=%2Fproxy%2Ffinal', ...withoutCredentials },
+      { url: '/proxy/final', ...withoutCredentials },
+    ]);
+  });
+
+  it('strips credentials on a 307 that re-sends the body outside the prefix', async () => {
+    await redirectVia(makeClient(envOrigin), '/api/v1/users', {
+      method: 'POST',
+      body: { a: 1 },
+      status: 307,
+    });
+    expect(hops[1]).toMatchObject({
+      method: 'POST',
+      url: '/api/v1/users',
+      ...withoutCredentials,
+    });
+  });
+
+  describe('with a base path in the environment URL', () => {
+    it('strips credentials on a redirect to /proxy outside the base path', async () => {
+      await redirectVia(makeClient(`${envOrigin}/base`), '/proxy/x');
+      expect(hops.map((h) => ({ url: h.url, ...withoutUrl(h) }))).toEqual([
+        { url: '/base/proxy/redirect?to=%2Fproxy%2Fx', ...withCredentials },
+        { url: '/proxy/x', ...withoutCredentials },
+      ]);
+    });
+
+    it('keeps credentials on a redirect under <base>/proxy/', async () => {
+      await redirectVia(makeClient(`${envOrigin}/base/`), '/base/proxy/y');
+      expect(hops[1]).toMatchObject({
+        url: '/base/proxy/y',
+        ...withCredentials,
+      });
+    });
+  });
+
+  function withoutUrl(h: Hop) {
+    return {
+      authorization: h.authorization,
+      connectionName: h.connectionName,
+      identifier: h.identifier,
+    };
+  }
+});
+
+/**
+ * Direct checks of the redirect hook for targets a local server cannot stand
+ * in for (subdomains, scheme changes, malformed locations).
+ */
+describe('proxyRedirectGuard', () => {
+  const env = 'https://env.example.com';
+  const credentialHeaders = () => ({
+    Authorization: 'Bearer t',
+    connection_name: 'googledrive',
+    identifier: 'user_123',
+    'X-Custom': 'kept',
+  });
+  const run = (href: unknown, envUrl = env) => {
+    const options: Record<string, unknown> = {
+      href,
+      headers: credentialHeaders(),
+    };
+    proxyRedirectGuard(envUrl)(options);
+    return options.headers;
+  };
+
+  it.each([
+    [
+      'a subdomain of the environment host',
+      'https://sub.env.example.com/proxy/x',
+    ],
+    ['a scheme downgrade on the same host', 'http://env.example.com/proxy/x'],
+    ['an explicit non-default port', 'https://env.example.com:8443/proxy/x'],
+    [
+      'a same-origin path outside the prefix',
+      'https://env.example.com/api/v1/users',
+    ],
+    ['a missing href', undefined],
+    ['an unparseable href', 'http://[bad'],
+  ])('removes credential headers for %s', (_name, href) => {
+    expect(run(href)).toEqual({ 'X-Custom': 'kept' });
+  });
+
+  it('matches header names case-insensitively', () => {
+    const options: Record<string, unknown> = {
+      href: 'https://env.example.com/api',
+      headers: { authorization: 'a', CONNECTION_NAME: 'c', Identifier: 'i' },
+    };
+    proxyRedirectGuard(env)(options);
+    expect(options.headers).toEqual({});
+  });
+
+  it.each([
+    ['a path under the prefix', 'https://env.example.com/proxy/drive/v3/files'],
+    ['the default port spelled out', 'https://env.example.com:443/proxy/x'],
+    ['a query string', 'https://env.example.com/proxy/x?next=/api'],
+  ])('leaves headers untouched for %s', (_name, href) => {
+    expect(run(href)).toEqual(credentialHeaders());
   });
 });
