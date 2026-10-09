@@ -97,21 +97,22 @@ describe('verifyTriggerEvent', () => {
 
       expect(event).toEqual({
         version: '1',
-        triggerType: 'github.issue.opened',
+        triggerType: 'example.item.created',
         subscriptionId: 'sub_123',
         deliveryScope: 'account',
         connectionId: 'conn_123',
         connectedAccountId: 'ca_123',
-        resourceType: 'issue',
-        resourceId: '42',
-        occurredAt: new Date('2026-10-01T12:34:56.789Z'),
+        resourceType: 'message',
+        resourceId: 'msg_123',
+        // 12:30:45.123+05:30 is 07:00:45.123Z
+        occurredAt: new Date('2026-10-01T07:00:45.123Z'),
         detectionMode: 'webhook',
         payloadState: 'full',
         payload: {
-          number: 42,
-          title: 'Login button does nothing',
-          labels: ['bug'],
-          closed: false,
+          subject: 'Hello',
+          labels: ['INBOX', 'UNREAD'],
+          size: 42,
+          starred: false,
         },
         dedupeKey: 'dk_123',
         correlationId: 'corr_123',
@@ -124,15 +125,16 @@ describe('verifyTriggerEvent', () => {
       expect(Object.isFrozen(event.extra)).toBe(true);
     });
 
-    it('parses a connection-scoped event with an empty connected account and an offset timestamp', () => {
+    it('parses a connection-scoped event with an empty connected account and empty resource_id', () => {
       const event = verifyFixture('valid_connection_empty_account.json');
 
       expect(event.deliveryScope).toBe(DeliveryScope.CONNECTION);
       expect(event.connectedAccountId).toBe('');
       expect(event.resourceId).toBe('');
       expect(event.detectionMode).toBe(DetectionMode.POLL);
-      // 18:04:56+05:30 is 12:34:56Z
-      expect(event.occurredAt?.toISOString()).toBe('2026-10-01T12:34:56.000Z');
+      expect(event.resourceType).toBe('channel');
+      expect(event.payload).toEqual({ channel: 'general' });
+      expect(event.occurredAt?.toISOString()).toBe('2026-10-01T07:00:45.000Z');
     });
 
     it('keeps unrecognised top-level fields in extra under their wire names', () => {
@@ -140,10 +142,10 @@ describe('verifyTriggerEvent', () => {
 
       expect(event.extra).toEqual({
         delivery_attempt: 2,
-        routing: { region: 'eu', tags: ['a', 'b'] },
+        metadata: { region: 'test', tags: ['a', 'b'] },
       });
       expect(Object.keys(event.extra)).not.toContain('trigger_type');
-      expect(event.triggerType).toBe('github.issue.opened');
+      expect(event.triggerType).toBe('example.item.created');
     });
 
     it('passes unknown enum values through unchanged', () => {
@@ -168,16 +170,17 @@ describe('verifyTriggerEvent', () => {
 
       expect(error).toBeInstanceOf(ScalekitTriggerEventParseError);
       expect(error).toBeInstanceOf(WebhookVerificationError);
-      expect((error as Error).message).toContain('"subscription_id"');
+      expect((error as Error).message).toContain('"version"');
       expect((error as Error).message).toContain('number');
     });
 
-    it('maps a reference event with null payload, resource_id and occurred_at', () => {
+    it('maps a reference event with null payload and occurred_at', () => {
       const event = verifyFixture('null_payload_reference.json');
 
       expect(event.payloadState).toBe(PayloadState.REFERENCE);
       expect(event.payload).toBeNull();
-      expect(event.resourceId).toBeUndefined();
+      expect(event.resourceType).toBe('message');
+      expect(event.resourceId).toBe('msg_123');
       expect(event.occurredAt).toBeUndefined();
     });
 
@@ -190,6 +193,13 @@ describe('verifyTriggerEvent', () => {
   });
 
   describe('field mapping', () => {
+    it('maps a null resource_id to undefined', () => {
+      const raw = validEventObject();
+      raw.resource_id = null;
+
+      expect(verifyJson(raw).resourceId).toBeUndefined();
+    });
+
     it('maps an absent payload to null and absent optional fields to undefined', () => {
       const raw = validEventObject();
       delete raw.payload;

@@ -1,18 +1,17 @@
 {
   "version": "1",
-  "trigger_type": "github.issue.opened",
+  "trigger_type": "example.item.created",
   "subscription_id": "sub_123",
   "delivery_scope": "connection",
   "connection_id": "conn_123",
   "connected_account_id": "",
-  "resource_type": "repository",
+  "resource_type": "channel",
   "resource_id": "",
-  "occurred_at": "2026-10-01T18:04:56+05:30",
+  "occurred_at": "2026-10-01T07:00:45Z",
   "detection_mode": "poll",
   "payload_state": "full",
   "payload": {
-    "full_name": "acme/widgets",
-    "stars": 7
+    "channel": "general"
   },
   "dedupe_key": "dk_456",
   "correlation_id": "corr_456"
