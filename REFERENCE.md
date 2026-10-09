@@ -8486,7 +8486,9 @@ app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async 
 - `secret: string` - The signing secret for your trigger endpoint (`whsec_...`)
 
 **Returns:** `TriggerEvent`
-- `version: string`, `triggerType: string`, `subscriptionId: string`, `connectionId: string`, `resourceType: string`, `dedupeKey: string`, `correlationId: string`
+- `version: string`, `triggerType: string` (for example `'example.item.created'`), `subscriptionId: string`, `connectionId: string`, `resourceType: string`
+- `dedupeKey: string` - Stable key for de-duplicating redeliveries
+- `correlationId: string` - Links follow-up work back to the event that caused it
 - `deliveryScope: DeliveryScope` - `'account'` or `'connection'`
 - `connectedAccountId: string` - `''` when `deliveryScope` is `'connection'`
 - `resourceId: string | undefined`

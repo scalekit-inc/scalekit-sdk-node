@@ -49,7 +49,7 @@ export type PayloadState = (typeof PayloadState)[keyof typeof PayloadState] | (s
 export interface TriggerEvent {
     /** Event format version, as sent (not validated, so newer versions still parse). */
     readonly version: string;
-    /** The trigger that fired, for example `'github.issue.opened'`. */
+    /** The trigger that fired, for example `'example.item.created'`. */
     readonly triggerType: string;
     /** The trigger subscription this delivery belongs to. */
     readonly subscriptionId: string;
@@ -82,7 +82,7 @@ export interface TriggerEvent {
     readonly payload: JsonValue;
     /** Stable key for de-duplicating redeliveries of the same event. */
     readonly dedupeKey: string;
-    /** ID that ties this delivery to related deliveries and logs. */
+    /** Links follow-up work back to the event that caused it. */
     readonly correlationId: string;
     /**
      * Top-level fields this SDK version does not recognise, under their wire
@@ -130,9 +130,9 @@ export interface TriggerEventVerifyParams {
  * - `payload` is decoded with `JSON.parse`, so integers larger than
  *   `Number.MAX_SAFE_INTEGER` (2^53 - 1) lose precision. If you need such
  *   values exactly, parse the raw body again with a parser that preserves them.
- * - Headers are matched case-insensitively. Several `webhook-signature`
- *   values are all tried; several different `webhook-id` or
- *   `webhook-timestamp` values are rejected.
+ * - Headers are matched case-insensitively. Every `webhook-signature`
+ *   candidate is tried and malformed ones are skipped; several different
+ *   `webhook-id` or `webhook-timestamp` values are rejected.
  *
  * @param params - The raw body, the request headers and your signing secret.
  * @returns The verified, parsed event.

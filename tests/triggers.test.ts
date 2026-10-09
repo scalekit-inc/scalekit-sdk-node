@@ -598,17 +598,91 @@ describe('verifyTriggerEvent', () => {
       ).toThrow('Invalid secret');
     });
 
-    it('keeps the cause when an unexpected error becomes Invalid Signature', () => {
+    it('skips a short v1 candidate and accepts a later valid one', () => {
       const body = fixture('valid_account.json');
-      const headers = { ...signedHeaders(body), 'webhook-signature': 'v1' };
+      const signed = signedHeaders(body);
+      const headers = {
+        ...signed,
+        'webhook-signature': ['v1,AAAA', signed['webhook-signature']],
+      };
 
-      const error = catchError(() =>
+      expect(
+        verifyTriggerEvent({ body, headers, secret: SECRET }).dedupeKey
+      ).toBe('dk_123');
+    });
+
+    it('skips a candidate without a comma and accepts a later valid one', () => {
+      const body = fixture('valid_account.json');
+      const signed = signedHeaders(body);
+      const headers = {
+        ...signed,
+        'webhook-signature': `v1 ${signed['webhook-signature']}`,
+      };
+
+      expect(
+        verifyTriggerEvent({ body, headers, secret: SECRET }).dedupeKey
+      ).toBe('dk_123');
+    });
+
+    it('skips other versions and accepts a later v1 candidate', () => {
+      const body = fixture('valid_account.json');
+      const signed = signedHeaders(body);
+      const headers = {
+        ...signed,
+        'webhook-signature': `v2,${signed['webhook-signature'].slice(3)} ${signed['webhook-signature']}`,
+      };
+
+      expect(
+        verifyTriggerEvent({ body, headers, secret: SECRET }).dedupeKey
+      ).toBe('dk_123');
+    });
+
+    it.each([
+      ['v1'],
+      ['v1,AAAA'],
+      ['v1,'],
+      ['v1 v1,AAAA garbage'],
+      [['v1,AAAA', 'v1']],
+    ])(
+      'rejects only-malformed signatures %p with WebhookVerificationError',
+      (signature) => {
+        const body = fixture('valid_account.json');
+        const headers = {
+          ...signedHeaders(body),
+          'webhook-signature': signature,
+        };
+
+        const error = catchError(() =>
+          verifyTriggerEvent({ body, headers, secret: SECRET })
+        );
+        expect(error).toBeInstanceOf(WebhookVerificationError);
+        expect(error).not.toBeInstanceOf(ScalekitTriggerEventParseError);
+        expect((error as Error).message).toBe('Invalid Signature');
+      }
+    );
+
+    it('rejects a v2 candidate carrying the right HMAC', () => {
+      const body = fixture('valid_account.json');
+      const signed = signedHeaders(body);
+      const headers = {
+        ...signed,
+        'webhook-signature': `v2,${signed['webhook-signature'].slice(3)}`,
+      };
+
+      expect(() =>
         verifyTriggerEvent({ body, headers, secret: SECRET })
-      ) as WebhookVerificationError;
+      ).toThrow('Invalid Signature');
+    });
 
-      expect(error).toBeInstanceOf(WebhookVerificationError);
-      expect(error.message).toBe('Invalid Signature');
-      expect((error.cause as Error).name).toBe('TypeError');
+    it('rejects a string body that starts with a BOM as not JSON', () => {
+      const text = `\uFEFF${fixture('valid_account.json').toString('utf8')}`;
+      const headers = signedHeaders(Buffer.from(text, 'utf8'));
+
+      expect(
+        catchError(() =>
+          verifyTriggerEvent({ body: text, headers, secret: SECRET })
+        )
+      ).toBeInstanceOf(ScalekitTriggerEventParseError);
     });
 
     it('never puts the body or the secret in error messages or inspected output', () => {
@@ -791,6 +865,31 @@ describe('verifyWebhookPayload / verifyInterceptorPayload (unchanged behaviour)'
     expect(client.verifyWebhookPayload(secret, webhookHeaders(), payload)).toBe(
       true
     );
+  });
+
+  it('still ends the check on a malformed candidate before a valid one', () => {
+    const signed = webhookHeaders();
+    const headers = {
+      ...signed,
+      'webhook-signature': `v1,AAAA ${signed['webhook-signature']}`,
+    };
+
+    expect(() => client.verifyWebhookPayload(SECRET, headers, payload)).toThrow(
+      'Invalid Signature'
+    );
+  });
+
+  it('still signs a non-string payload as its string form', () => {
+    const ts = nowSeconds();
+    const headers = {
+      'webhook-id': MSG_ID,
+      'webhook-timestamp': String(ts),
+      'webhook-signature': `v1,${hmac(SIGNING_KEY, MSG_ID, ts, '12345')}`,
+    };
+
+    expect(
+      client.verifyWebhookPayload(SECRET, headers, 12345 as unknown as string)
+    ).toBe(true);
   });
 
   it('still throws a raw TypeError for a non-string secret', () => {

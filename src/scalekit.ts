@@ -579,7 +579,15 @@ export default class ScalekitClient {
     signature: string,
     payload: string
   ): boolean {
-    return verifyPayloadSignature(secret, id, timestamp, signature, payload);
+    // `${payload}` keeps the string coercion the signed data has always had
+    // for non-string payloads passed from JavaScript.
+    return verifyPayloadSignature(
+      secret,
+      id,
+      timestamp,
+      signature,
+      `${payload}`
+    );
   }
 
   /**

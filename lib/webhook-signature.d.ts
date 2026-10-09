@@ -7,6 +7,13 @@ export interface VerifyPayloadSignatureOptions {
      * Off for the legacy methods so their errors stay exactly as before.
      */
     keepCause?: boolean;
+    /**
+     * Skip malformed `webhook-signature` candidates (no `,`, or a decoded length
+     * that differs from an HMAC-SHA256) and keep trying the rest. Off for the
+     * legacy methods, where such a candidate ends the check with
+     * "Invalid Signature" as it always has.
+     */
+    skipMalformedSignatures?: boolean;
 }
 /**
  * Verifies a `v1` HMAC-SHA256 signature over `${id}.${timestamp}.${payload}`

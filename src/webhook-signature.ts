@@ -19,6 +19,13 @@ export interface VerifyPayloadSignatureOptions {
    * Off for the legacy methods so their errors stay exactly as before.
    */
   keepCause?: boolean;
+  /**
+   * Skip malformed `webhook-signature` candidates (no `,`, or a decoded length
+   * that differs from an HMAC-SHA256) and keep trying the rest. Off for the
+   * legacy methods, where such a candidate ends the check with
+   * "Invalid Signature" as it always has.
+   */
+  skipMalformedSignatures?: boolean;
 }
 
 /**
@@ -65,6 +72,16 @@ export function verifyPayloadSignature(
     );
     const receivedSignatures = signature.split(' ');
 
+    if (options?.skipMalformedSignatures) {
+      const expected = Buffer.from(computedSignature, 'base64');
+      for (const candidate of receivedSignatures) {
+        if (candidateMatches(candidate, expected)) {
+          return true;
+        }
+      }
+      throw new WebhookVerificationError('Invalid Signature');
+    }
+
     for (const versionedSignature of receivedSignatures) {
       const [version, receivedSignature] = versionedSignature.split(',');
       if (version !== WEBHOOK_SIGNATURE_VERSION) {
@@ -90,6 +107,23 @@ export function verifyPayloadSignature(
       options?.keepCause ? { cause: error } : undefined
     );
   }
+}
+
+// One `v1,<base64>` candidate. Anything malformed is simply not a match;
+// timingSafeEqual is only reached with equal lengths, so it cannot throw.
+function candidateMatches(candidate: string, expected: Buffer): boolean {
+  if (!candidate.includes(',')) {
+    return false;
+  }
+  const [version, received] = candidate.split(',');
+  if (version !== WEBHOOK_SIGNATURE_VERSION) {
+    return false;
+  }
+  const receivedBytes = Buffer.from(received, 'base64');
+  if (receivedBytes.length !== expected.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(receivedBytes, expected);
 }
 
 function verifyTimestamp(timestampStr: string): Date {
