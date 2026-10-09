@@ -151,7 +151,9 @@ export interface TriggerEventVerifyParams {
  *   `occurred_at` that is not an RFC 3339 timestamp with an offset in years
  *   0001-9999 (after conversion to UTC).
  * @throws `TypeError` when called with the wrong argument types: `body` is
- *   not a string, `Buffer` or `Uint8Array`, `headers` is not an object, a
+ *   not a string, `Buffer` or `Uint8Array`, `headers` is neither a plain
+ *   object nor an object with a `get(name)` method (an array such as
+ *   `req.rawHeaders`, a `Buffer` or a `Set` is rejected), a
  *   `webhook-id`, `webhook-timestamp` or `webhook-signature` value is not a
  *   string, an array of strings or `undefined`, or `secret` is not a string.
  *
@@ -169,7 +171,7 @@ export interface TriggerEventVerifyParams {
  *       secret: process.env.SCALEKIT_TRIGGER_SECRET!,
  *     });
  *     // enqueue(event) and process it idempotently on event.dedupeKey
- *     res.sendStatus(200);
+ *     res.sendStatus(204);
  *   } catch (err) {
  *     if (err instanceof WebhookVerificationError) return res.sendStatus(400);
  *     throw err;

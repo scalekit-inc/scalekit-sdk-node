@@ -190,7 +190,9 @@ const KNOWN_FIELDS: ReadonlySet<string> = new Set([
  *   `occurred_at` that is not an RFC 3339 timestamp with an offset in years
  *   0001-9999 (after conversion to UTC).
  * @throws `TypeError` when called with the wrong argument types: `body` is
- *   not a string, `Buffer` or `Uint8Array`, `headers` is not an object, a
+ *   not a string, `Buffer` or `Uint8Array`, `headers` is neither a plain
+ *   object nor an object with a `get(name)` method (an array such as
+ *   `req.rawHeaders`, a `Buffer` or a `Set` is rejected), a
  *   `webhook-id`, `webhook-timestamp` or `webhook-signature` value is not a
  *   string, an array of strings or `undefined`, or `secret` is not a string.
  *
@@ -208,7 +210,7 @@ const KNOWN_FIELDS: ReadonlySet<string> = new Set([
  *       secret: process.env.SCALEKIT_TRIGGER_SECRET!,
  *     });
  *     // enqueue(event) and process it idempotently on event.dedupeKey
- *     res.sendStatus(200);
+ *     res.sendStatus(204);
  *   } catch (err) {
  *     if (err instanceof WebhookVerificationError) return res.sendStatus(400);
  *     throw err;
@@ -232,7 +234,7 @@ export function verifyTriggerEvent(
         'with Express, use express.raw({ type: "application/json" }) on this route'
     );
   }
-  if (headers === null || typeof headers !== 'object') {
+  if (!isFetchHeaders(headers) && !isPlainObject(headers)) {
     throw new TypeError(
       `Trigger event headers must be a Headers object or a plain object of header values, got ${describeType(headers)}`
     );
@@ -331,15 +333,61 @@ export class TriggersClient {
   }
 }
 
-function isFetchHeaders(headers: TriggerEventHeaders): headers is Headers {
-  return typeof (headers as { get?: unknown }).get === 'function';
+// Anything with a `get(name)` method: a Fetch `Headers` (from any realm) or a
+// `Map`. It is asked for the lower-case name, as Fetch `Headers` expects.
+function isFetchHeaders(headers: unknown): headers is Headers {
+  return (
+    headers !== null &&
+    typeof headers === 'object' &&
+    !Array.isArray(headers) &&
+    typeof (headers as { get?: unknown }).get === 'function'
+  );
+}
+
+// A plain object such as Node's `IncomingHttpHeaders`: its prototype is null
+// or an `Object.prototype` (from any realm, hence the structural check).
+// Arrays (`req.rawHeaders`), Buffers, Sets and class instances are not.
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (
+    value === null ||
+    typeof value !== 'object' ||
+    Object.prototype.toString.call(value) !== '[object Object]'
+  ) {
+    return false;
+  }
+  const proto: unknown = Object.getPrototypeOf(value);
+  return proto === null || Object.getPrototypeOf(proto) === null;
+}
+
+function headerValueError(name: string, value: unknown): TypeError {
+  // A wrong value type is a programming error; dropping it silently would
+  // turn it into a confusing "Missing required headers".
+  return new TypeError(
+    `Trigger event header "${name}" must be a string, an array of strings or undefined, got ${describeType(value)}`
+  );
+}
+
+function isStringArray(value: unknown): value is readonly string[] {
+  return (
+    Array.isArray(value) &&
+    (value as readonly unknown[]).every((item) => typeof item === 'string')
+  );
 }
 
 /** All values for `name` (lower-case), matched case-insensitively. */
 function headerValues(headers: TriggerEventHeaders, name: string): string[] {
   if (isFetchHeaders(headers)) {
-    const value = headers.get(name);
-    return value === null ? [] : [value];
+    const value: unknown = headers.get(name);
+    if (value === null || value === undefined) {
+      return []; // Fetch Headers returns null and Map undefined when absent
+    }
+    if (typeof value === 'string') {
+      return [value];
+    }
+    if (isStringArray(value)) {
+      return [...value];
+    }
+    throw headerValueError(name, value);
   }
   const values: string[] = [];
   for (const key of Object.keys(headers)) {
@@ -352,17 +400,10 @@ function headerValues(headers: TriggerEventHeaders, name: string): string[] {
     }
     if (typeof value === 'string') {
       values.push(value);
-    } else if (
-      Array.isArray(value) &&
-      (value as readonly unknown[]).every((item) => typeof item === 'string')
-    ) {
-      values.push(...(value as readonly string[]));
+    } else if (isStringArray(value)) {
+      values.push(...value);
     } else {
-      // A wrong value type is a programming error; dropping it silently
-      // would turn it into a confusing "Missing required headers".
-      throw new TypeError(
-        `Trigger event header "${name}" must be a string, an array of strings or undefined, got ${describeType(value)}`
-      );
+      throw headerValueError(name, value);
     }
   }
   return values;

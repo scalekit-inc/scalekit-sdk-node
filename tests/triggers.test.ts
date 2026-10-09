@@ -750,6 +750,88 @@ describe('verifyTriggerEvent', () => {
       expect((error as Error).message).toContain(name);
     });
 
+    it.each([
+      ['req.rawHeaders (a flat array)', 'rawHeaders'],
+      ['an empty array', 'empty'],
+      ['a Set', 'set'],
+      ['a Buffer', 'buffer'],
+      ['a class instance', 'instance'],
+    ])('rejects %s as headers with TypeError', (_label, kind) => {
+      const body = fixture('valid_account.json');
+      const signed = signedHeaders(body);
+      const flat = Object.entries(signed).flat();
+      const candidates: Record<string, unknown> = {
+        rawHeaders: flat,
+        empty: [],
+        set: new Set(flat),
+        buffer: Buffer.from(JSON.stringify(signed)),
+        instance: Object.assign(new (class Hdrs {})(), signed),
+      };
+      const headers = candidates[kind] as TriggerEventHeaders;
+
+      const error = catchError(() =>
+        verifyTriggerEvent({ body, headers, secret: SECRET })
+      );
+      expect(error).toBeInstanceOf(TypeError);
+      expect(error).not.toBeInstanceOf(WebhookVerificationError);
+    });
+
+    it('accepts a null-prototype headers object', () => {
+      const body = fixture('valid_account.json');
+      const headers = Object.assign(Object.create(null), signedHeaders(body));
+
+      expect(
+        verifyTriggerEvent({ body, headers, secret: SECRET }).dedupeKey
+      ).toBe('dk_123');
+    });
+
+    it('accepts a Map with the headers present', () => {
+      const body = fixture('valid_account.json');
+      const headers = new Map(Object.entries(signedHeaders(body)));
+
+      expect(
+        verifyTriggerEvent({
+          body,
+          headers: headers as unknown as TriggerEventHeaders,
+          secret: SECRET,
+        }).dedupeKey
+      ).toBe('dk_123');
+    });
+
+    it('treats a key missing from a Map as an absent header', () => {
+      const body = fixture('valid_account.json');
+      const headers = new Map(Object.entries(signedHeaders(body)));
+      headers.delete('webhook-id');
+
+      const error = catchError(() =>
+        verifyTriggerEvent({
+          body,
+          headers: headers as unknown as TriggerEventHeaders,
+          secret: SECRET,
+        })
+      );
+      expect(error).toBeInstanceOf(WebhookVerificationError);
+      expect((error as Error).message).toBe('Missing required headers');
+    });
+
+    it('rejects a non-string Map value with TypeError naming the header', () => {
+      const body = fixture('valid_account.json');
+      const headers = new Map<string, unknown>(
+        Object.entries(signedHeaders(body))
+      );
+      headers.set('webhook-timestamp', 123);
+
+      const error = catchError(() =>
+        verifyTriggerEvent({
+          body,
+          headers: headers as unknown as TriggerEventHeaders,
+          secret: SECRET,
+        })
+      );
+      expect(error).toBeInstanceOf(TypeError);
+      expect((error as Error).message).toContain('webhook-timestamp');
+    });
+
     it('ignores non-string values of headers it does not read', () => {
       const body = fixture('valid_account.json');
       const headers = {
