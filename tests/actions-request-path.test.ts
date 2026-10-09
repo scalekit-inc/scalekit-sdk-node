@@ -96,6 +96,10 @@ describe('actions.request path containment', () => {
       ['an empty segment then an encoded parent', '//..%2foutside'],
       ['an encoded slash then an encoded parent', '/%2f..%2foutside'],
       ['several empty segments', '///..%2f..%2foutside'],
+      // Out and back in to a sibling of the prefix: only the exact bare
+      // prefix is accepted, never a longer name that starts with it.
+      ['a sibling sharing the prefix name', '/..%2fproxyx'],
+      ['a sibling with a suffix', '/..%2fproxy-other'],
     ];
 
     it.each(escapes)('%s', async (_name, path) => {
@@ -141,6 +145,17 @@ describe('actions.request path containment', () => {
         );
         expect(seen).toEqual([]);
       });
+
+      it.each([
+        ['a sibling sharing the prefix name', '/..%2fproxyx'],
+        ['a sibling with a suffix', '/..%2fproxy-other'],
+      ])('%s (base path with a trailing slash)', async (_name, path) => {
+        const client = makeClient(`${origin}/base/`);
+        await expect(call(client, path)).rejects.toThrow(
+          'path must resolve under the proxy prefix'
+        );
+        expect(seen).toEqual([]);
+      });
     });
   });
 
@@ -176,6 +191,12 @@ describe('actions.request path containment', () => {
       ['an in-prefix LF-split dot segment', '/x/.\n./y', '/proxy/y'],
       ['in-prefix encoded dots', '/x/%2e%2e/y', '/proxy/y'],
       ['the bare proxy root', '/', '/proxy/'],
+      // Cleans to exactly the bare prefix; sent as before.
+      [
+        'out and back in to the bare prefix',
+        '/..%2fproxy',
+        '/proxy/..%2fproxy',
+      ],
       ['an empty segment', '//drive/v3/files', '/proxy//drive/v3/files'],
       [
         'an empty segment and an in-prefix parent',
