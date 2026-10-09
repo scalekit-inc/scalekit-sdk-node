@@ -139,7 +139,7 @@ export default class McpClient {
      * Mints a session token for one user against a connection's MCP server.
      *
      * Every AgentKit connection has its own MCP server at
-     * `<environment URL>/mcp/v3/connections/<connectionName>`, which exposes all
+     * `<environment URL>/mcp/v3/connections/<connection name>`, which exposes all
      * of that connection's tools without an MCP configuration. Use this method
      * to mint a token for that server; use {@link McpClient.createSessionToken}
      * for a Virtual MCP server built from a configuration. A token works only on
@@ -153,10 +153,10 @@ export default class McpClient {
      * than the run is expected to take.
      *
      * @param params.connectionName The connection name: the same value used as
-     * `connectionName` elsewhere in the SDK. Pass it exactly as stored,
-     * including case. The connection is found regardless of case, but the token
-     * is bound to the stored name, so a server URL built with different casing
-     * refuses it.
+     * `connectionName` elsewhere in the SDK. It is matched without regard to
+     * case, and the token is always issued for the server URL built from the
+     * connection's stored name. That URL is case-sensitive, so connect using the
+     * stored name exactly as it appears.
      * @param params.identifier Your application's unique identifier for the user
      * whose connected account the token acts as.
      * @param params.expirySeconds Token lifetime in whole seconds, from 60
@@ -183,6 +183,7 @@ export default class McpClient {
      *   expirySeconds: 900,
      *   accessLevel: 'READ_ONLY',
      * });
+     * // The URL path is case-sensitive: use the connection's stored name.
      * const serverUrl = `${process.env.SCALEKIT_ENVIRONMENT_URL}/mcp/v3/connections/gmail`;
      * // Hand serverUrl and session.token to your MCP client
      * ```

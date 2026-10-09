@@ -8008,7 +8008,7 @@ console.log(config?.mcpServerUrl, session.token, session.expiresAt);
 
 Mints a session token for one user against a connection's MCP server.
 
-Every AgentKit connection has its own MCP server at `<environment URL>/mcp/v3/connections/<connectionName>`, which exposes all of that connection's tools without an MCP configuration. Use this method for that server and `createSessionToken` for a Virtual MCP server built from a configuration; a token works only on the server it was minted for.
+Every AgentKit connection has its own MCP server at `<environment URL>/mcp/v3/connections/<connection name>`, which exposes all of that connection's tools without an MCP configuration. Use this method for that server and `createSessionToken` for a Virtual MCP server built from a configuration; a token works only on the server it was minted for.
 
 The user should have an active connected account on the connection. When they do not, depending on the environment, the call either fails with `ScalekitBadRequestException`, or succeeds after creating a pending connected account, in which case tool calls report the account as not connected. Mint a fresh token before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
 
@@ -8034,7 +8034,7 @@ const session = await scalekitClient.actions.mcp.createConnectionSessionToken({
   accessLevel: 'READ_ONLY',
 });
 
-// Hand both to your MCP client
+// Hand both to your MCP client. The URL path is case-sensitive: use the connection's stored name.
 const serverUrl = `${process.env.SCALEKIT_ENVIRONMENT_URL}/mcp/v3/connections/gmail`;
 console.log(serverUrl, session.token, session.expiresAt);
 ```
@@ -8051,7 +8051,7 @@ console.log(serverUrl, session.token, session.expiresAt);
 <dl>
 <dd>
 
-**params.connectionName:** `string` - The connection name: the same value used as `connectionName` elsewhere in the SDK. Case-sensitive: pass it exactly as stored. The connection is found regardless of case, but the token is bound to the stored name, so a server URL built with different casing refuses it. An empty string throws before the request is sent.
+**params.connectionName:** `string` - The connection name: the same value used as `connectionName` elsewhere in the SDK. It is matched without regard to case, and the token is always issued for the server URL built from the connection's stored name. That URL is case-sensitive, so connect using the stored name exactly as it appears. An empty string throws before the request is sent.
 
 </dd>
 </dl>
