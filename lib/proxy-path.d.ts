@@ -14,7 +14,7 @@
 /**
  * Throws when `url` (as built by `actions.request()`) would resolve outside
  * `<envUrl base path>/proxy/`, either as sent on the wire or as a server sees
- * it after percent-decoding and dot-segment removal.
+ * it after percent-decoding, slash collapsing and dot-segment removal.
  *
  * @param envUrl - The client's environment URL (may carry a base path).
  * @param url - The full request URL, `<envUrl>/proxy<path>`.

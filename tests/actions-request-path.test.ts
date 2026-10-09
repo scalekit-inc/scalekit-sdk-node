@@ -79,18 +79,23 @@ const call = (
 describe('actions.request path containment', () => {
   describe('rejects paths that resolve outside the proxy prefix, before sending', () => {
     const escapes: Array<[string, string]> = [
-      ['dot segments', '/x/../../api/v1/organizations'],
-      ['leading dot segment', '/../api'],
+      ['dot segments', '/x/../../outside'],
+      ['leading dot segment', '/../outside'],
       ['bare parent segment', '/..'],
-      ['tab-split dot segments', '/x/.\t./.\t./api/v1/organizations'],
-      ['LF-split dot segments', '/x/.\n./.\n./api/v1/organizations'],
-      ['CR-split dot segments', '/x/.\r./.\r./api/v1/organizations'],
-      ['percent-encoded dots', '/x/%2e%2e/%2e%2e/api'],
-      ['mixed-case percent-encoded dots', '/x/%2E%2e/.%2E/api'],
-      ['encoded slashes joining dot segments', '/x%2f..%2f..%2fapi'],
-      ['upper-case encoded slashes', '/x%2F..%2F..%2Fapi'],
-      ['backslash separators', '/x\\..\\..\\api'],
-      ['encoded backslash separators', '/x%5c..%5c..%5capi'],
+      ['tab-split dot segments', '/x/.\t./.\t./outside'],
+      ['LF-split dot segments', '/x/.\n./.\n./outside'],
+      ['CR-split dot segments', '/x/.\r./.\r./outside'],
+      ['percent-encoded dots', '/x/%2e%2e/%2e%2e/outside'],
+      ['mixed-case percent-encoded dots', '/x/%2E%2e/.%2E/outside'],
+      ['encoded slashes joining dot segments', '/x%2f..%2f..%2foutside'],
+      ['upper-case encoded slashes', '/x%2F..%2F..%2Foutside'],
+      ['backslash separators', '/x\\..\\..\\outside'],
+      ['encoded backslash separators', '/x%5c..%5c..%5coutside'],
+      // A router that collapses `//` before resolving `..` reads these as
+      // leaving the prefix, even though an RFC 3986 resolver would not.
+      ['an empty segment then an encoded parent', '//..%2foutside'],
+      ['an encoded slash then an encoded parent', '/%2f..%2foutside'],
+      ['several empty segments', '///..%2f..%2foutside'],
     ];
 
     it.each(escapes)('%s', async (_name, path) => {
@@ -104,7 +109,7 @@ describe('actions.request path containment', () => {
     it('rejects an escape on a non-GET call without sending the body', async () => {
       const client = makeClient(origin);
       await expect(
-        call(client, '/x/../../api/v1/users', {
+        call(client, '/x/../../outside', {
           method: 'POST',
           body: { email: 'a@example.com' },
         })
@@ -116,7 +121,7 @@ describe('actions.request path containment', () => {
       const client = makeClient(origin);
       const err = await call(
         client,
-        '/x/../../api/secret-looking-segment'
+        '/x/../../outside/secret-looking-segment'
       ).catch((e: unknown) => e);
       expect(err).toBeInstanceOf(Error);
       expect((err as Error).message).not.toContain('secret-looking-segment');
@@ -125,9 +130,10 @@ describe('actions.request path containment', () => {
     describe('with a base path in the environment URL', () => {
       it.each([
         ['parent of the proxy prefix', '/../x'],
-        ['out of the base path', '/../../api/v1/organizations'],
+        ['out of the base path', '/../../outside'],
         ['to another /proxy outside the base', '/../../proxy/x'],
         ['through encoded dots', '/%2e%2e/x'],
+        ['through an empty segment', '//..%2f..%2fx'],
       ])('%s', async (_name, path) => {
         const client = makeClient(`${origin}/base`);
         await expect(call(client, path)).rejects.toThrow(
@@ -167,13 +173,15 @@ describe('actions.request path containment', () => {
         '/gmail/v1/users/me/profile\n',
         '/proxy/gmail/v1/users/me/profile',
       ],
-      [
-        'an in-prefix LF-split dot segment',
-        '/x/.\n./api/v1/users',
-        '/proxy/api/v1/users',
-      ],
-      ['in-prefix encoded dots', '/x/%2e%2e/api', '/proxy/api'],
+      ['an in-prefix LF-split dot segment', '/x/.\n./y', '/proxy/y'],
+      ['in-prefix encoded dots', '/x/%2e%2e/y', '/proxy/y'],
       ['the bare proxy root', '/', '/proxy/'],
+      ['an empty segment', '//drive/v3/files', '/proxy//drive/v3/files'],
+      [
+        'an empty segment and an in-prefix parent',
+        '//a/..%2fb',
+        '/proxy//a/..%2fb',
+      ],
     ];
 
     it.each(unchanged)('%s', async (_name, path, received) => {
@@ -192,10 +200,10 @@ describe('actions.request path containment', () => {
     it('leaves queryParams unaffected, including values with dot segments', async () => {
       const client = makeClient(origin);
       await call(client, '/drive/v3/about', {
-        queryParams: { fields: 'user', q: '../../api' },
+        queryParams: { fields: 'user', q: '../../outside' },
       });
       expect(seen.map((s) => s.url)).toEqual([
-        '/proxy/drive/v3/about?fields=user&q=..%2F..%2Fapi',
+        '/proxy/drive/v3/about?fields=user&q=..%2F..%2Foutside',
       ]);
     });
 
@@ -322,24 +330,21 @@ describe('actions.request redirects', () => {
   };
 
   it('follows a same-host redirect outside the prefix without credentials', async () => {
-    const res = await redirectVia(
-      makeClient(envOrigin),
-      '/api/v1/organizations'
-    );
+    const res = await redirectVia(makeClient(envOrigin), '/outside');
     expect(res.status).toBe(200);
-    expect(res.data).toEqual({ servedPath: '/api/v1/organizations' });
+    expect(res.data).toEqual({ servedPath: '/outside' });
     expect(hops).toEqual([
       {
         server: 'env',
         method: 'GET',
-        url: '/proxy/redirect?to=%2Fapi%2Fv1%2Forganizations',
+        url: '/proxy/redirect?to=%2Foutside',
         host: `127.0.0.1:${envPort}`,
         ...withCredentials,
       },
       {
         server: 'env',
         method: 'GET',
-        url: '/api/v1/organizations',
+        url: '/outside',
         host: `127.0.0.1:${envPort}`,
         ...withoutCredentials,
       },
@@ -368,13 +373,14 @@ describe('actions.request redirects', () => {
   });
 
   it.each([
-    ['dot segments', '/proxy/x/../../api/v1/users', '/api/v1/users'],
+    ['dot segments', '/proxy/x/../../outside', '/outside'],
     [
       'encoded slashes (decoded view)',
-      '/proxy/x%2f..%2f..%2fapi',
-      '/proxy/x%2f..%2f..%2fapi',
+      '/proxy/x%2f..%2f..%2foutside',
+      '/proxy/x%2f..%2f..%2foutside',
     ],
     ['the bare /proxy path', '/proxy', '/proxy'],
+    ['an empty segment', '/proxy//..%2fx', '/proxy//..%2fx'],
   ])(
     'strips credentials on a same-origin redirect escaping via %s',
     async (_name, location, received) => {
@@ -421,27 +427,27 @@ describe('actions.request redirects', () => {
   it('keeps credentials off later hops once a hop left the prefix', async () => {
     await redirectVia(
       makeClient(envOrigin),
-      `/api/hop?to=${encodeURIComponent('/proxy/final')}`
+      `/outside/hop?to=${encodeURIComponent('/proxy/final')}`
     );
     expect(hops.map((h) => ({ url: h.url, ...withoutUrl(h) }))).toEqual([
       {
-        url: '/proxy/redirect?to=%2Fapi%2Fhop%3Fto%3D%252Fproxy%252Ffinal',
+        url: '/proxy/redirect?to=%2Foutside%2Fhop%3Fto%3D%252Fproxy%252Ffinal',
         ...withCredentials,
       },
-      { url: '/api/hop?to=%2Fproxy%2Ffinal', ...withoutCredentials },
+      { url: '/outside/hop?to=%2Fproxy%2Ffinal', ...withoutCredentials },
       { url: '/proxy/final', ...withoutCredentials },
     ]);
   });
 
   it('strips credentials on a 307 that re-sends the body outside the prefix', async () => {
-    await redirectVia(makeClient(envOrigin), '/api/v1/users', {
+    await redirectVia(makeClient(envOrigin), '/outside', {
       method: 'POST',
       body: { a: 1 },
       status: 307,
     });
     expect(hops[1]).toMatchObject({
       method: 'POST',
-      url: '/api/v1/users',
+      url: '/outside',
       ...withoutCredentials,
     });
   });
@@ -503,7 +509,7 @@ describe('proxyRedirectGuard', () => {
     ['an explicit non-default port', 'https://env.example.com:8443/proxy/x'],
     [
       'a same-origin path outside the prefix',
-      'https://env.example.com/api/v1/users',
+      'https://env.example.com/outside',
     ],
     ['a missing href', undefined],
     ['an unparseable href', 'http://[bad'],
@@ -513,7 +519,7 @@ describe('proxyRedirectGuard', () => {
 
   it('matches header names case-insensitively', () => {
     const options: Record<string, unknown> = {
-      href: 'https://env.example.com/api',
+      href: 'https://env.example.com/outside',
       headers: { authorization: 'a', CONNECTION_NAME: 'c', Identifier: 'i' },
     };
     proxyRedirectGuard(env)(options);
@@ -523,7 +529,7 @@ describe('proxyRedirectGuard', () => {
   it.each([
     ['a path under the prefix', 'https://env.example.com/proxy/drive/v3/files'],
     ['the default port spelled out', 'https://env.example.com:443/proxy/x'],
-    ['a query string', 'https://env.example.com/proxy/x?next=/api'],
+    ['a query string', 'https://env.example.com/proxy/x?next=/outside'],
   ])('leaves headers untouched for %s', (_name, href) => {
     expect(run(href)).toEqual(credentialHeaders());
   });

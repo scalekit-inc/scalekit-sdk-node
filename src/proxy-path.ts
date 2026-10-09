@@ -25,10 +25,11 @@ type Containment = 'inside' | 'outside' | 'unparseable';
 
 /**
  * Classifies `url` against `<envUrl base path>/proxy/` on the environment's
- * origin. `inside` requires the same origin, and both the path as sent on the
- * wire and that path as a server may read it (percent-decoded, `\` as `/`,
- * dot segments removed) to start with the prefix. `<base>/proxy` without the
- * trailing slash is outside.
+ * origin. `inside` requires the same origin, the path as sent on the wire to
+ * start with `<base>/proxy/` (a bare `<base>/proxy` is outside), and that path
+ * as a server may read it (see {@link serverView}) to start with
+ * `<base>/proxy/` or to be exactly `<base>/proxy`, which is what a
+ * `path.Clean`-style cleaner makes of `<base>/proxy/`.
  */
 function proxyContainment(envUrl: string, url: string): Containment {
   let prefix: URL;
@@ -46,8 +47,13 @@ function proxyContainment(envUrl: string, url: string): Containment {
   }
   const sentPrefix = prefix.pathname;
   const sentPath = target.pathname;
-  return sentPath.startsWith(sentPrefix) &&
-    serverView(sentPath).startsWith(serverView(sentPrefix))
+  if (!sentPath.startsWith(sentPrefix)) {
+    return 'outside';
+  }
+  const cleanedPrefix = serverView(sentPrefix);
+  const cleanedPath = serverView(sentPath);
+  return cleanedPath.startsWith(cleanedPrefix) ||
+    cleanedPath === cleanedPrefix.replace(/\/$/, '')
     ? 'inside'
     : 'outside';
 }
@@ -55,7 +61,7 @@ function proxyContainment(envUrl: string, url: string): Containment {
 /**
  * Throws when `url` (as built by `actions.request()`) would resolve outside
  * `<envUrl base path>/proxy/`, either as sent on the wire or as a server sees
- * it after percent-decoding and dot-segment removal.
+ * it after percent-decoding, slash collapsing and dot-segment removal.
  *
  * @param envUrl - The client's environment URL (may carry a base path).
  * @param url - The full request URL, `<envUrl>/proxy<path>`.
@@ -108,10 +114,17 @@ export function proxyRedirectGuard(
 
 /**
  * Models how a server may interpret a request path: percent-decode once,
- * treat `\` as `/`, then remove dot segments (RFC 3986 §5.2.4).
+ * treat `\` as `/`, collapse runs of `/` into one, then remove dot segments
+ * (RFC 3986 §5.2.4). Collapsing first matches routers that clean paths the
+ * way Go's `path.Clean` does, where `/proxy//..` resolves to `/`, not to
+ * `/proxy/`.
  */
 function serverView(path: string): string {
-  return removeDotSegments(percentDecodeBytes(path).replace(/\\/g, '/'));
+  return removeDotSegments(
+    percentDecodeBytes(path)
+      .replace(/\\/g, '/')
+      .replace(/\/{2,}/g, '/')
+  );
 }
 
 /**
