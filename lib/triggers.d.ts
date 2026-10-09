@@ -93,8 +93,13 @@ export interface TriggerEvent {
 /**
  * Request headers as your framework exposes them: a Fetch `Headers` object
  * (Next.js route handlers, Hono, Workers) or a plain object such as Node's
- * `IncomingHttpHeaders` (`req.headers` in Express). Names are matched
- * case-insensitively.
+ * `IncomingHttpHeaders` (`req.headers` in Express).
+ *
+ * In a plain object, names are matched case-insensitively. An object with a
+ * `get(name)` method (Fetch `Headers`, or a `Map`) is queried with the
+ * lower-case names `webhook-id`, `webhook-timestamp` and `webhook-signature`;
+ * Fetch `Headers` is case-insensitive itself, but a `Map` must use lower-case
+ * keys.
  */
 export type TriggerEventHeaders = Headers | Readonly<Record<string, string | readonly string[] | undefined>>;
 /** Parameters for {@link verifyTriggerEvent} and `actions.triggers.verifyEvent`. */

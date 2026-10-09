@@ -107,8 +107,13 @@ export interface TriggerEvent {
 /**
  * Request headers as your framework exposes them: a Fetch `Headers` object
  * (Next.js route handlers, Hono, Workers) or a plain object such as Node's
- * `IncomingHttpHeaders` (`req.headers` in Express). Names are matched
- * case-insensitively.
+ * `IncomingHttpHeaders` (`req.headers` in Express).
+ *
+ * In a plain object, names are matched case-insensitively. An object with a
+ * `get(name)` method (Fetch `Headers`, or a `Map`) is queried with the
+ * lower-case names `webhook-id`, `webhook-timestamp` and `webhook-signature`;
+ * Fetch `Headers` is case-insensitive itself, but a `Map` must use lower-case
+ * keys.
  */
 export type TriggerEventHeaders =
   | Headers
@@ -244,15 +249,15 @@ export function verifyTriggerEvent(
       `Trigger event secret must be a string, got ${describeType(secret)}`
     );
   }
+  const webhookId = singleHeader(headers, 'webhook-id');
+  const webhookTimestamp = singleHeader(headers, 'webhook-timestamp');
+  const webhookSignature = joinedHeader(headers, 'webhook-signature');
+
   // A string with a lone UTF-16 surrogate has no UTF-8 encoding, so it cannot
   // be the bytes that were signed (Node would sign U+FFFD in its place).
   if (typeof body === 'string' && LONE_SURROGATE.test(body)) {
     throw new WebhookVerificationError('Trigger event body is not valid UTF-8');
   }
-
-  const webhookId = singleHeader(headers, 'webhook-id');
-  const webhookTimestamp = singleHeader(headers, 'webhook-timestamp');
-  const webhookSignature = joinedHeader(headers, 'webhook-signature');
 
   try {
     verifyPayloadSignature(

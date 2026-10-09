@@ -870,6 +870,29 @@ describe('verifyTriggerEvent', () => {
       );
     });
 
+    it.each([
+      ['a plain object', false],
+      ['a null-prototype object', true],
+    ])(
+      'reports a wrong header value type in %s before a lone surrogate in the body',
+      (_label, nullProto) => {
+        const text = `{"x":"\uD800"}`;
+        const values = {
+          ...signedHeaders(Buffer.from(text, 'utf8')),
+          'webhook-id': 5,
+        };
+        const headers = (nullProto
+          ? Object.assign(Object.create(null), values)
+          : values) as unknown as TriggerEventHeaders;
+
+        const error = catchError(() =>
+          verifyTriggerEvent({ body: text, headers, secret: SECRET })
+        );
+        expect(error).toBeInstanceOf(TypeError);
+        expect((error as Error).message).toContain('webhook-id');
+      }
+    );
+
     it('accepts a string body with a correctly paired surrogate', () => {
       const raw = validEventObject();
       raw.payload = { title: 'emoji \u{1F600}' };
