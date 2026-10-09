@@ -241,14 +241,16 @@ describe('Actions', () => {
       ).rejects.toBeInstanceOf(ScalekitNotFoundException);
     });
 
-    it('should reject both targets before any request', async () => {
+    it('should use mcpConfigId when both targets are set', async () => {
+      // mcpConfigId wins, as in v2.19.0: an unknown configuration is rejected
+      // by the server even though the connection itself is valid.
       await expect(
         client.actions.mcp.createSessionToken({
-          mcpConfigId: 'cfg_unused',
+          mcpConfigId: `missing-config-${Date.now()}`,
           connectionName: GMAIL_CONNECTION_NAME,
           identifier: GMAIL_IDENTIFIER,
-        } as any)
-      ).rejects.toThrow('Set exactly one of mcpConfigId or connectionName');
+        })
+      ).rejects.toBeInstanceOf(ScalekitServerException);
     });
   });
 

@@ -2,8 +2,9 @@
  * McpClient.createSessionToken targets either an MCP configuration
  * (`mcpConfigId`) or a connection's own MCP server (`connectionName`, sent as
  * `keyId`). The server requires exactly one of the two; the SDK never sets
- * the other field. Only the connectionName form is checked before sending:
- * mcpConfigId calls build the same request they always did, unchecked.
+ * the other field. A non-empty mcpConfigId wins, as it always did; only the
+ * connectionName form is checked before sending, and mcpConfigId calls build
+ * the same request they always did, unchecked.
  *
  * `accessLevel` is sent only when the caller sets it. An omitted access level
  * leaves the field empty on the wire, which the server treats as full access,
@@ -149,43 +150,110 @@ describe('McpClient.createSessionToken connectionName validation', () => {
   // Plain JavaScript callers bypass the union type, so these go through `any`.
   const invalid: Array<[string, Record<string, unknown>, string]> = [
     [
-      'both targets',
-      { mcpConfigId: 'cfg_1', connectionName: 'gmail' },
-      'Set exactly one of mcpConfigId or connectionName, not both',
-    ],
-    [
-      'an empty mcpConfigId alongside connectionName',
-      { mcpConfigId: '', connectionName: 'gmail' },
-      'Set exactly one of mcpConfigId or connectionName, not both',
-    ],
-    [
       'a non-string connectionName',
-      { connectionName: 42 },
+      { connectionName: 42, identifier: 'u1' },
       'connectionName must be a non-empty string',
+    ],
+    [
+      'a non-string connectionName with an empty mcpConfigId',
+      { mcpConfigId: '', connectionName: 42, identifier: 'u1' },
+      'connectionName must be a non-empty string',
+    ],
+    [
+      'a missing identifier',
+      { connectionName: 'gmail' },
+      'identifier is required',
+    ],
+    [
+      'an empty identifier',
+      { connectionName: 'gmail', identifier: '' },
+      'identifier is required',
+    ],
+    [
+      'a blank identifier',
+      { connectionName: 'gmail', identifier: '   ' },
+      'identifier is required',
+    ],
+    [
+      'a non-string identifier',
+      { connectionName: 'gmail', identifier: 7 },
+      'identifier is required',
     ],
   ];
 
   it.each(invalid)(
     'rejects %s before any request',
-    async (_label, target, message) => {
+    async (_label, params, message) => {
       const { mcp, createMcpSessionToken } = makeMcpClient();
-      await expect(
-        mcp.createSessionToken({ ...target, identifier: 'u1' } as any)
-      ).rejects.toThrow(message);
+      await expect(mcp.createSessionToken(params as any)).rejects.toThrow(
+        message
+      );
       expect(createMcpSessionToken).not.toHaveBeenCalled();
     }
   );
 
-  it('treats a null mcpConfigId as absent', async () => {
+  it.each([
+    ['null', null],
+    ['empty', ''],
+  ])(
+    'uses connectionName when mcpConfigId is %s',
+    async (_label, mcpConfigId) => {
+      const { mcp, createMcpSessionToken } = makeMcpClient();
+      await mcp.createSessionToken({
+        mcpConfigId,
+        connectionName: 'gmail',
+        identifier: 'u1',
+      } as any);
+      const req = createMcpSessionToken.mock.calls[0][0];
+      expect(req.keyId).toBe('gmail');
+      expect(req.mcpConfigId).toBe('');
+    }
+  );
+});
+
+describe('McpClient.createSessionToken with both targets', () => {
+  it('uses mcpConfigId for a spread context that carries connectionName', async () => {
+    // Compiled and minted a configuration token in v2.19.0: spread
+    // properties are not excess-checked, so this must keep doing both.
+    const ctx = { connectionName: 'gmail', identifier: 'u1' };
+    const { mcp, createMcpSessionToken } = makeMcpClient();
+    await mcp.createSessionToken({ ...ctx, mcpConfigId: 'cfg_1' });
+    expect(createMcpSessionToken).toHaveBeenCalledTimes(1);
+    const req = createMcpSessionToken.mock.calls[0][0];
+    expect(req).toEqual(
+      create(CreateMcpSessionTokenRequestSchema, {
+        mcpConfigId: 'cfg_1',
+        identifier: 'u1',
+      })
+    );
+    expect(req.keyId).toBe('');
+  });
+
+  it('uses mcpConfigId when both are set and ignores identifier checks', async () => {
     const { mcp, createMcpSessionToken } = makeMcpClient();
     await mcp.createSessionToken({
-      mcpConfigId: null,
+      mcpConfigId: 'cfg_1',
       connectionName: 'gmail',
+      identifier: '',
+      accessLevel: 'READ_ONLY',
+    });
+    const req = createMcpSessionToken.mock.calls[0][0];
+    expect(req.mcpConfigId).toBe('cfg_1');
+    expect(req.keyId).toBe('');
+    expect(req.identifier).toBe('');
+    expect(req.accessLevel).toBe('READ_ONLY');
+  });
+
+  it('ignores a non-string connectionName when mcpConfigId is set', async () => {
+    const { mcp, createMcpSessionToken } = makeMcpClient();
+    await mcp.createSessionToken({
+      mcpConfigId: 'cfg_1',
+      connectionName: 42,
       identifier: 'u1',
     } as any);
     const req = createMcpSessionToken.mock.calls[0][0];
-    expect(req.keyId).toBe('gmail');
-    expect(req.mcpConfigId).toBe('');
+    expect(req.mcpConfigId).toBe('cfg_1');
+    expect(req.keyId).toBe('');
   });
 });
 
@@ -220,6 +288,11 @@ describe('McpClient.createSessionToken mcpConfigId calls are unchecked', () => {
       'cfg_1',
     ],
     ['only an empty connectionName', { connectionName: '' }, undefined],
+    [
+      'a non-string mcpConfigId with connectionName',
+      { mcpConfigId: 42, connectionName: 'gmail' },
+      42,
+    ],
   ])('sends the request for %s', async (_label, target, mcpConfigId) => {
     const { mcp, createMcpSessionToken } = makeMcpClient();
     await mcp.createSessionToken({ ...target, identifier: 'u1' } as any);
@@ -244,9 +317,8 @@ describe('McpClient.createSessionToken mcpConfigId calls are unchecked', () => {
     const { mcp, createMcpSessionToken } = makeMcpClient();
     await expect(
       mcp.createSessionToken({
-        mcpConfigId: 'cfg_1',
-        connectionName: 'gmail',
-        identifier: 'u1',
+        connectionName: 42,
+        identifier: '',
         expirySeconds: 0,
       } as any)
     ).rejects.toThrow('expirySeconds must be a positive integer, got 0');
@@ -290,7 +362,7 @@ describe('CreateMcpSessionTokenParams type', () => {
   // Compile-time checks: ts-jest type-checks this file, so if the union ever
   // accepts an invalid shape below, the unused expect-error directive fails
   // the suite.
-  it('accepts exactly one target', () => {
+  it('requires a target and an identifier', () => {
     const byConfig: CreateMcpSessionTokenParams = {
       mcpConfigId: 'cfg_1',
       identifier: 'u1',
@@ -300,18 +372,37 @@ describe('CreateMcpSessionTokenParams type', () => {
       identifier: 'u1',
       accessLevel: 'READ_ONLY',
     };
-    // @ts-expect-error both targets set
+    // Both targets compile (mcpConfigId wins), as spreads did in v2.19.0.
     const both: CreateMcpSessionTokenParams = {
       mcpConfigId: 'cfg_1',
       connectionName: 'gmail',
       identifier: 'u1',
     };
+    const ctx = { connectionName: 'gmail', identifier: 'u1' };
+    const spread: CreateMcpSessionTokenParams = { ...ctx, mcpConfigId: 'c' };
     // @ts-expect-error neither target set
     const neither: CreateMcpSessionTokenParams = { identifier: 'u1' };
+    // @ts-expect-error neither target set, with only optional fields
+    const neitherOptional: CreateMcpSessionTokenParams = {
+      identifier: 'u1',
+      expirySeconds: 60,
+    };
+
     // @ts-expect-error identifier is required
     const noIdentifier: CreateMcpSessionTokenParams = { connectionName: 'g' };
-    expect([byConfig, byConnection, both, neither, noIdentifier]).toHaveLength(
-      5
-    );
+    // @ts-expect-error identifier is required with mcpConfigId too
+    const noIdentifierConfig: CreateMcpSessionTokenParams = {
+      mcpConfigId: 'c',
+    };
+    expect([
+      byConfig,
+      byConnection,
+      both,
+      spread,
+      neither,
+      neitherOptional,
+      noIdentifier,
+      noIdentifierConfig,
+    ]).toHaveLength(8);
   });
 });

@@ -8,25 +8,27 @@ import { CreateMcpConfigResponse, CreateMcpSessionTokenResponse, DeleteMcpConfig
  */
 export type McpSessionTokenAccessLevel = 'FULL' | 'READ_ONLY';
 /**
- * Parameters for {@link McpClient.createSessionToken}. Set exactly one target:
+ * Parameters for {@link McpClient.createSessionToken}. Set a target:
  * `mcpConfigId` for a Virtual MCP server built from a configuration, or
- * `connectionName` for a connection's own MCP server.
+ * `connectionName` for a connection's own MCP server. If both are set,
+ * `mcpConfigId` is used.
  */
 export type CreateMcpSessionTokenParams = {
     /** Your application's unique identifier for the user, 1 to 255 characters. */
     identifier: string;
-    /** Token lifetime in whole seconds. Omit to use the server default. */
+    /** Token lifetime in whole seconds, 60 to 86400. Defaults to 3600. */
     expirySeconds?: number;
     /** Tools the token can use. Omit for `'FULL'`. */
     accessLevel?: McpSessionTokenAccessLevel;
 } & ({
     /** ID of the MCP configuration whose server the token is for. */
     mcpConfigId: string;
-    connectionName?: never;
+    /** Ignored when `mcpConfigId` is set. */
+    connectionName?: string;
 } | {
     /** Name of the AgentKit connection whose MCP server the token is for. */
     connectionName: string;
-    mcpConfigId?: never;
+    mcpConfigId?: undefined;
 });
 /**
  * Client for Virtual MCP servers.
@@ -137,7 +139,7 @@ export default class McpClient {
      * Mints a session token for one user, for either a Virtual MCP server or a
      * connection's own MCP server.
      *
-     * Pass exactly one target:
+     * Set a target; if both are set, `mcpConfigId` is used:
      *
      * - `mcpConfigId`: the token works on that configuration's
      *   `config.mcpServerUrl` (see {@link McpClient.getConfig}).
@@ -157,27 +159,26 @@ export default class McpClient {
      * connected account and returns a token whose tool calls report the account
      * as not connected, depending on the environment.
      *
-     * @param params.mcpConfigId ID of the configuration. Set this or
-     * `connectionName`, not both. Used when `connectionName` is omitted or
-     * empty.
+     * @param params.mcpConfigId ID of the configuration. If both targets are
+     * set, this one is used and `connectionName` is ignored.
      * @param params.connectionName Name of an AgentKit connection: the same
-     * value used as `connectionName` elsewhere in the SDK. Set this or
-     * `mcpConfigId`, not both.
+     * value used as `connectionName` elsewhere in the SDK. Used when
+     * `mcpConfigId` is omitted or empty.
      * @param params.identifier Your application's unique identifier for the user,
-     * 1 to 255 characters.
-     * @param params.expirySeconds Token lifetime in whole seconds. For a
-     * connection, from 60 (1 minute) to 86400 (24 hours), defaulting to 3600
-     * (1 hour) when omitted.
+     * 1 to 255 characters. For a connection it is checked before the request:
+     * an empty value throws `identifier is required`.
+     * @param params.expirySeconds Token lifetime in whole seconds, from 60
+     * seconds to 24 hours (86400); 1 hour (3600) by default.
      * @param params.accessLevel Tools the token can use. `'READ_ONLY'` limits it
      * to tools annotated read-only: other tools are left out of the tool list
      * and refused when called. `'FULL'`, or omitting it, exposes every tool the
      * configuration or connection exposes.
      * @returns The session `token` and its `expiresAt` time.
-     * @throws {Error} If `expirySeconds` is not a positive integer, or, for the
-     * `connectionName` form only, if `connectionName` is not a string or
-     * `mcpConfigId` is set as well. No request is sent. Calls with
-     * `mcpConfigId` are not checked beyond `expirySeconds` and behave as they
-     * always have: a missing or empty ID is sent and rejected by the server.
+     * @throws {Error} If `expirySeconds` is not a positive integer, or, for a
+     * connection only, if `connectionName` is not a string or `identifier` is
+     * empty. No request is sent. Calls with `mcpConfigId` are not checked
+     * beyond `expirySeconds` and behave as they always have: a missing or empty
+     * ID is sent and rejected by the server.
      * @throws {ScalekitNotFoundException} If `connectionName` matches no active
      * connection.
      * @throws {ScalekitBadRequestException} If the request is otherwise rejected:

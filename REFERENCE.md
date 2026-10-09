@@ -7921,14 +7921,14 @@ for (const account of pending) {
 <dl>
 <dd>
 
-Mints a session token for one user, for either a Virtual MCP server or a connection's own MCP server. Pass exactly one target:
+Mints a session token for one user, for either a Virtual MCP server or a connection's own MCP server. Set a target; if both are set, `mcpConfigId` is used:
 
 - `mcpConfigId`: the token works on that configuration's `config.mcpServerUrl`.
 - `connectionName`: the token works on the connection's own MCP server at `<environment URL>/mcp/v3/connections/<connection name>`, which exposes all of that connection's tools without an MCP configuration. The name is matched without regard to case, but the URL path is case-sensitive: build it from the connection's name exactly as stored.
 
 A token works only on the server it was minted for. The token carries the user's identity. Mint a fresh one before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
 
-TypeScript rejects both targets and neither at compile time. At run time, only the `connectionName` form is checked before the request is sent: a non-string `connectionName`, or `mcpConfigId` set as well, throws. Calls with `mcpConfigId` are unchanged: they are not checked beyond `expirySeconds`, so a missing or empty ID is sent and rejected by the server, and an empty `connectionName` alongside it is ignored.
+TypeScript rejects a call with neither target at compile time. At run time, only the connection form is checked before the request is sent: a non-string `connectionName` throws, and so does an `identifier` that is not a non-empty string (`identifier is required`). Calls with `mcpConfigId` are unchanged: they are not checked beyond `expirySeconds`, so a missing or empty ID is sent and rejected by the server, and `connectionName` is ignored when a non-empty `mcpConfigId` is set.
 
 For a connection, the user should have an active connected account on it. When they do not, depending on the environment, the call either fails with `ScalekitBadRequestException`, or succeeds after creating a pending connected account, in which case tool calls report the account as not connected. The call fails with `ScalekitNotFoundException` when no active connection has that name, and with `ScalekitBadRequestException` when the connection is not an AgentKit connection or the identifier or expiry is rejected.
 </dd>
@@ -7977,7 +7977,7 @@ console.log(serverUrl, session.token, session.expiresAt);
 
 #### ⚙️ Parameters
 
-Type: `CreateMcpSessionTokenParams`. Set exactly one of `mcpConfigId` and `connectionName`.
+Type: `CreateMcpSessionTokenParams`. Set `mcpConfigId` or `connectionName`; if both are set, `mcpConfigId` is used.
 
 <dl>
 <dd>
@@ -7985,28 +7985,28 @@ Type: `CreateMcpSessionTokenParams`. Set exactly one of `mcpConfigId` and `conne
 <dl>
 <dd>
 
-**params.mcpConfigId?:** `string` - The configuration. Set this or `connectionName`. Used when `connectionName` is omitted or empty.
+**params.mcpConfigId?:** `string` - The configuration. If both targets are set, this one is used and `connectionName` is ignored.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.connectionName?:** `string` - The connection name: the same value used as `connectionName` elsewhere in the SDK. Set this or `mcpConfigId`. It is matched without regard to case, and the token is always issued for the server URL built from the connection's stored name. That URL is case-sensitive, so connect using the stored name exactly as it appears.
+**params.connectionName?:** `string` - The connection name: the same value used as `connectionName` elsewhere in the SDK. Used when `mcpConfigId` is omitted or empty. It is matched without regard to case, and the token is always issued for the server URL built from the connection's stored name. That URL is case-sensitive, so connect using the stored name exactly as it appears.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.identifier:** `string` - Your application's identifier for the end user, 1 to 255 characters. For a connection, the user whose connected account the token acts as.
+**params.identifier:** `string` - Your application's identifier for the end user, 1 to 255 characters. For a connection, the user whose connected account the token acts as; required (non-empty) for a connection before the request is sent.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server enforces the allowed range; for a connection it accepts 60 seconds to 24 hours (86400) and defaults to 1 hour (3600) when omitted.
+**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server accepts 60 seconds to 24 hours (86400), 1 hour (3600) by default.
 
 </dd>
 </dl>
