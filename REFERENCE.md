@@ -8058,7 +8058,7 @@ console.log(serverUrl, session.token, session.expiresAt);
 <dl>
 <dd>
 
-**params.identifier:** `string` - Your application's identifier for the end user whose connected account the token acts as
+**params.identifier:** `string` - Your application's identifier for the end user whose connected account the token acts as, 1 to 255 characters
 
 </dd>
 </dl>
