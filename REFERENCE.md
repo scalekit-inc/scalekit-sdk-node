@@ -8010,9 +8010,9 @@ Mints a session token for one user against a connection's MCP server.
 
 Every AgentKit connection has its own MCP server at `<environment URL>/mcp/v3/connections/<connectionName>`, which exposes all of that connection's tools without an MCP configuration. Use this method for that server and `createSessionToken` for a Virtual MCP server built from a configuration; a token works only on the server it was minted for.
 
-The user must have a connected account on the connection. Mint a fresh token before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
+The user should have an active connected account on the connection. When they do not, depending on the environment, the call either fails with `ScalekitBadRequestException`, or succeeds after creating a pending connected account, in which case tool calls report the account as not connected. Mint a fresh token before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
 
-The call fails with `ScalekitNotFoundException` when no active connection has that name, and with `ScalekitBadRequestException` when the connection is not an AgentKit connection, the user has no active connected account on it, or the identifier or expiry is rejected.
+The call fails with `ScalekitNotFoundException` when no active connection has that name, and with `ScalekitBadRequestException` when the connection is not an AgentKit connection or the identifier or expiry is rejected.
 </dd>
 </dl>
 </dd>
@@ -8051,7 +8051,7 @@ console.log(serverUrl, session.token, session.expiresAt);
 <dl>
 <dd>
 
-**params.connectionName:** `string` - Name of the connection, the same value used as `connectionName` elsewhere in the SDK. An empty string throws before the request is sent.
+**params.connectionName:** `string` - The connection name: the same value used as `connectionName` elsewhere in the SDK. Case-sensitive: pass it exactly as stored. The connection is found regardless of case, but the token is bound to the stored name, so a server URL built with different casing refuses it. An empty string throws before the request is sent.
 
 </dd>
 </dl>
@@ -8065,7 +8065,7 @@ console.log(serverUrl, session.token, session.expiresAt);
 <dl>
 <dd>
 
-**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server enforces the allowed range and applies its default when omitted.
+**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server accepts 60 seconds to 24 hours (86400) and defaults to 1 hour (3600) when omitted.
 
 </dd>
 </dl>
