@@ -15,6 +15,7 @@ import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
 import type McpClient from './mcp';
 import type ProvidersClient from './providers';
+import { TriggersClient } from './triggers';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
 import {
   ConnectionStatus,
@@ -147,6 +148,12 @@ function mapTool(tool: Tool): ActionTool {
  * without changing their behavior.
  */
 export default class ActionsClient {
+  /**
+   * Trigger events delivered to your endpoint: verify and parse them with
+   * `triggers.verifyEvent`. Needs no network access.
+   */
+  readonly triggers: TriggersClient = new TriggersClient();
+
   /**
    * @param {ToolsClient} tools - Client used to execute tools on behalf of connected accounts.
    * @param {ConnectedAccountsClient} connectedAccounts - Client for connected-account lifecycle operations.

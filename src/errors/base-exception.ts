@@ -103,9 +103,24 @@ export class ScalekitException extends Error {
 
 // Webhook verification error
 export class WebhookVerificationError extends ScalekitException {
-  constructor(error: any) {
+  /**
+   * The underlying error that caused this one, when there is one (for example
+   * the decoding error behind an invalid request body).
+   */
+  declare cause?: unknown;
+
+  constructor(error: any, options?: { cause?: unknown }) {
     super(error);
     this.name = 'WebhookVerificationError';
+    if (options !== undefined && 'cause' in options) {
+      // Same shape as the ES2022 `Error` `cause` option: an own, non-enumerable property.
+      Object.defineProperty(this, 'cause', {
+        value: options.cause,
+        writable: true,
+        enumerable: false,
+        configurable: true,
+      });
+    }
   }
 }
 

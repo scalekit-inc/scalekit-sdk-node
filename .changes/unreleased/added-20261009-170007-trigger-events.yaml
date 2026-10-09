@@ -1,0 +1,26 @@
+kind: added
+body: |
+  `verifyTriggerEvent({ body, headers, secret })` and `scalekit.actions.triggers.verifyEvent(...)` verify the signature of a trigger event delivered to your endpoint and return it as a typed `TriggerEvent`; the standalone function needs no client. Any verification failure throws `WebhookVerificationError`, and a correctly signed body that is not a valid trigger event throws the new subclass `ScalekitTriggerEventParseError`. Delivery is at least once, so deduplicate on `dedupeKey` plus the connected account. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/v2.20.0/REFERENCE.md#trigger-events)
+
+  ```ts
+  import express from 'express';
+  import { verifyTriggerEvent, WebhookVerificationError } from '@scalekit-sdk/node';
+
+  const app = express();
+  // express.raw keeps req.body as the raw Buffer the signature covers
+  app.post('/triggers', express.raw({ type: 'application/json' }), (req, res) => {
+    try {
+      const event = verifyTriggerEvent({ body: req.body, headers: req.headers, secret: process.env.SCALEKIT_TRIGGER_SECRET! });
+      enqueue(event); // your handler: deduplicate on event.dedupeKey + the connected account
+      res.sendStatus(204);
+    } catch (err) {
+      if (!(err instanceof WebhookVerificationError)) throw err;
+      res.sendStatus(400); // bad signature, stale timestamp or malformed event
+    }
+  });
+  ```
+time: '2026-10-09T17:00:07.911404+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-2311
+  Migration: ''

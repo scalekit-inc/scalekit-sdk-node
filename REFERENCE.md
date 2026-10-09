@@ -18,6 +18,7 @@
 - [Actions](#actions)
 - [Virtual MCP Servers](#virtual-mcp-servers)
 - [Custom Connectors](#custom-connectors)
+- [Trigger Events](#trigger-events)
 - [WebAuthn](#webauthn)
 - [Error Handling](#error-handling)
 - [Type Definitions](#type-definitions)
@@ -1063,6 +1064,7 @@ Scalekit SDK uses a typed exception hierarchy rooted at `ScalekitException`:
   - `ScalekitServerException` - HTTP errors (400-599)
     - Specific subclasses for each status code (400, 401, 403, 404, 409, 422, 429, 500, 502, 503, 504)
   - `WebhookVerificationError` - Webhook signature verification failures
+    - `ScalekitTriggerEventParseError` - A trigger event whose signature is valid but whose body is not a readable trigger event
 
 ### Usage Example
 
@@ -1127,6 +1129,10 @@ try {
 - `AuthPattern`, `AuthField`: Hand-written types for custom connector `authPatterns`
 - `ConnectionType`, `ConnectionProvider`, `ConnectionAuthMode`: Numeric enums on a connection's `type`, `provider` and `authMode`
 - `Connection`, `CreateConnection`, `UpdateConnection`, `Flags`: Environment connection shapes used by `createEnvironmentConnection` and `updateEnvironmentConnection`
+- `TriggerEvent`: A verified trigger event returned by `verifyTriggerEvent` and `actions.triggers.verifyEvent`
+- `DeliveryScope` (`ACCOUNT`, `CONNECTION`), `DetectionMode` (`WEBHOOK`, `POLL`), `PayloadState` (`FULL`, `REFERENCE`): String constants for the matching `TriggerEvent` fields. Values the SDK does not know yet arrive as plain strings
+- `TriggerEventVerifyParams`, `TriggerEventHeaders`: The parameters of `verifyTriggerEvent`
+- `JsonValue`, `JsonObject`: Any JSON value, and a JSON object
 
 ## Organizations
 
@@ -8365,6 +8371,139 @@ for (const provider of res.providers) {
 - `identifier?: string` - Filter to one connector. For a custom connector, also pass `providerType: ProviderType.CUSTOM` (or `ALL`), or nothing is found.
 - `pageSize?: number` - Page size
 - `pageToken?: string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Trigger Events
+
+Scalekit delivers trigger events to your endpoint as signed HTTP requests. Verify and parse each one with `verifyTriggerEvent`, which needs no client, or with the same method on `scalekitClient.actions.triggers`.
+
+<details><summary><code><a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">verifyTriggerEvent</a>({ body, headers, secret }) -> TriggerEvent</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Checks the signature first (HMAC-SHA256 over `webhook-id.webhook-timestamp.body`, a 5-minute timestamp tolerance, constant-time comparison), then parses the body into a `TriggerEvent`. Also available as `scalekitClient.actions.triggers.verifyEvent(params)`, with identical behaviour.
+
+- Delivery is at least once. Make processing idempotent, keyed on `dedupeKey` together with the connected account you act as.
+- Branch on `deliveryScope`: `'account'` events are for `connectedAccountId`; `'connection'` events are for the whole connection, and `connectedAccountId` is `''`.
+- When `payloadState` is `'reference'`, `payload` is `null`: fetch the resource identified by `resourceType` and `resourceId`.
+- `payload` is decoded with `JSON.parse`, so integers above `Number.MAX_SAFE_INTEGER` lose precision. Parse the raw body yourself if you need them exactly.
+- Header names are matched case-insensitively. Malformed `webhook-signature` candidates (including any that are not padded standard base64) are skipped.
+- Throws `WebhookVerificationError` when the request is not authentic (missing or conflicting headers, a malformed secret, a `webhook-timestamp` that is not decimal digits, stale timestamp, no matching signature, body not UTF-8), and its subclass `ScalekitTriggerEventParseError` when the signature is valid but the body is not a readable trigger event (including a body that starts with a byte order mark). Throws `TypeError` when called with arguments of the wrong type.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import express from 'express';
+import {
+  DeliveryScope,
+  PayloadState,
+  verifyTriggerEvent,
+  WebhookVerificationError,
+} from '@scalekit-sdk/node';
+
+const app = express();
+
+// express.raw keeps the body as the exact bytes that were signed.
+app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async (req, res) => {
+  let event;
+  try {
+    event = verifyTriggerEvent({
+      body: req.body,
+      headers: req.headers,
+      secret: process.env.SCALEKIT_TRIGGER_SECRET!,
+    });
+  } catch (err) {
+    if (err instanceof WebhookVerificationError) {
+      return res.status(400).send('invalid trigger event');
+    } else {
+      throw err; // a bug or a wrong argument, not a bad request
+    }
+  }
+
+  // Account events are for one connected account; for connection-wide events
+  // your app decides which connected accounts act on them.
+  let accountIds: string[];
+  if (event.deliveryScope === DeliveryScope.ACCOUNT) {
+    accountIds = [event.connectedAccountId];
+  } else if (event.deliveryScope === DeliveryScope.CONNECTION) {
+    accountIds = await accountsToActFor(event.connectionId);
+  } else {
+    // A scope this SDK version does not know yet: acknowledge and skip it.
+    return res.sendStatus(204);
+  }
+
+  for (const accountId of accountIds) {
+    // Delivery is at least once: dedupe on dedupeKey + the account you act as.
+    if (await alreadyProcessed(event.dedupeKey, accountId)) continue;
+
+    const resource =
+      event.payloadState === PayloadState.REFERENCE
+        ? await fetchResource(accountId, event.resourceType, event.resourceId)
+        : event.payload;
+
+    await handle(event.triggerType, resource, accountId);
+    await markProcessed(event.dedupeKey, accountId);
+  }
+  res.sendStatus(204);
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `TriggerEventVerifyParams`
+- `body: string | Uint8Array` - The raw request body exactly as received. A `Buffer` (for example from `express.raw()`) is preferred; never pass a parsed object
+- `headers: Headers | Record<string, string | string[] | undefined>` - The request headers: a Fetch `Headers` object or Node's `req.headers`. Names are matched case-insensitively
+- `secret: string` - The signing secret for your trigger endpoint (`whsec_...`)
+
+**Returns:** `TriggerEvent`
+- `version: string`, `triggerType: string` (for example `'example.item.created'`), `subscriptionId: string`, `connectionId: string`, `resourceType: string`
+- `dedupeKey: string` - Stable key for de-duplicating redeliveries
+- `correlationId: string` - Links follow-up work back to the event that caused it
+- `deliveryScope: DeliveryScope` - `'account'` or `'connection'`
+- `connectedAccountId: string` - `''` when `deliveryScope` is `'connection'`
+- `resourceId: string | undefined`
+- `occurredAt: Date | undefined`
+- `detectionMode: DetectionMode` - `'webhook'` or `'poll'`
+- `payloadState: PayloadState` - `'full'` or `'reference'`
+- `payload: JsonValue` - `null` when absent, and always for `'reference'`
+- `extra: Record<string, JsonValue>` - Top-level fields this SDK version does not recognise, under their wire (snake_case) names
 
 </dd>
 </dl>
