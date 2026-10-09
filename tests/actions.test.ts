@@ -188,15 +188,9 @@ describe('Actions', () => {
     });
   });
 
-  describe('mcp.createConnectionSessionToken', () => {
-    it('should expose createConnectionSessionToken', () => {
-      expect(typeof client.actions.mcp.createConnectionSessionToken).toBe(
-        'function'
-      );
-    });
-
+  describe('mcp.createSessionToken with connectionName', () => {
     it('should mint a read-only token for the connection MCP server', async () => {
-      const response = await client.actions.mcp.createConnectionSessionToken({
+      const response = await client.actions.mcp.createSessionToken({
         connectionName: GMAIL_CONNECTION_NAME,
         identifier: GMAIL_IDENTIFIER,
         expirySeconds: 300,
@@ -210,11 +204,21 @@ describe('Actions', () => {
 
     it('should reject an unknown connection with ScalekitNotFoundException', async () => {
       await expect(
-        client.actions.mcp.createConnectionSessionToken({
+        client.actions.mcp.createSessionToken({
           connectionName: `missing-connection-${Date.now()}`,
           identifier: GMAIL_IDENTIFIER,
         })
       ).rejects.toBeInstanceOf(ScalekitNotFoundException);
+    });
+
+    it('should reject both targets before any request', async () => {
+      await expect(
+        client.actions.mcp.createSessionToken({
+          mcpConfigId: 'cfg_unused',
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier: GMAIL_IDENTIFIER,
+        } as any)
+      ).rejects.toThrow('Set exactly one of mcpConfigId or connectionName');
     });
   });
 

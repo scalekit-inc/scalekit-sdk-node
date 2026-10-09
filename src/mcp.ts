@@ -29,6 +29,31 @@ import {
 export type McpSessionTokenAccessLevel = 'FULL' | 'READ_ONLY';
 
 /**
+ * Parameters for {@link McpClient.createSessionToken}. Set exactly one target:
+ * `mcpConfigId` for a Virtual MCP server built from a configuration, or
+ * `connectionName` for a connection's own MCP server.
+ */
+export type CreateMcpSessionTokenParams = {
+  /** Your application's unique identifier for the user, 1 to 255 characters. */
+  identifier: string;
+  /** Token lifetime in whole seconds. Omit to use the server default. */
+  expirySeconds?: number;
+  /** Tools the token can use. Omit for `'FULL'`. */
+  accessLevel?: McpSessionTokenAccessLevel;
+} & (
+  | {
+      /** ID of the MCP configuration whose server the token is for. */
+      mcpConfigId: string;
+      connectionName?: never;
+    }
+  | {
+      /** Name of the AgentKit connection whose MCP server the token is for. */
+      connectionName: string;
+      mcpConfigId?: never;
+    }
+);
+
+/**
  * Client for Virtual MCP servers.
  *
  * A Virtual MCP server exposes a chosen set of connectors and tools over the
@@ -207,84 +232,71 @@ export default class McpClient {
   }
 
   /**
-   * Mints a session token for one user against one configuration.
+   * Mints a session token for one user, for either a Virtual MCP server or a
+   * connection's own MCP server.
    *
-   * The server URL is static; this token is what carries user identity. Mint a
-   * fresh one before every agent run and never reuse one across runs. Set the
-   * expiry longer than the run is expected to take.
+   * Pass exactly one target:
    *
-   * @param params.mcpConfigId ID of the configuration.
-   * @param params.identifier Your application's unique identifier for the user.
-   * @param params.expirySeconds Token lifetime in whole seconds.
-   * @param params.accessLevel Tools the token can use. `'READ_ONLY'` limits it
-   * to tools annotated read-only: other tools are left out of the tool list
-   * and refused when called. `'FULL'`, or omitting it, exposes every tool the
-   * configuration exposes.
-   * @throws {Error} If `expirySeconds` is not a positive integer.
-   * @throws {ScalekitServerException} If a network or server error occurs.
-   */
-  async createSessionToken(params: {
-    mcpConfigId: string;
-    identifier: string;
-    expirySeconds?: number;
-    accessLevel?: McpSessionTokenAccessLevel;
-  }): Promise<CreateMcpSessionTokenResponse> {
-    return this.coreClient.connectExec(
-      this.client.createMcpSessionToken,
-      create(CreateMcpSessionTokenRequestSchema, {
-        mcpConfigId: params.mcpConfigId,
-        identifier: params.identifier,
-        ...expiryField(params.expirySeconds),
-        ...(params.accessLevel !== undefined && {
-          accessLevel: params.accessLevel,
-        }),
-      })
-    );
-  }
-
-  /**
-   * Mints a session token for one user against a connection's MCP server.
+   * - `mcpConfigId`: the token works on that configuration's
+   *   `config.mcpServerUrl` (see {@link McpClient.getConfig}).
+   * - `connectionName`: the token works on the connection's own MCP server at
+   *   `<environment URL>/mcp/v3/connections/<connection name>`, which exposes
+   *   all of that connection's tools without an MCP configuration. The name is
+   *   matched without regard to case, but the URL path is case-sensitive:
+   *   build it from the connection's name exactly as stored.
    *
-   * Every AgentKit connection has its own MCP server at
-   * `<environment URL>/mcp/v3/connections/<connection name>`, which exposes all
-   * of that connection's tools without an MCP configuration. Use this method
-   * to mint a token for that server; use {@link McpClient.createSessionToken}
-   * for a Virtual MCP server built from a configuration. A token works only on
-   * the server it was minted for.
-   *
-   * The user should have an active connected account on the connection. When
-   * they do not, the server either rejects the call, or creates a pending
-   * connected account and returns a token whose tool calls report the account
-   * as not connected, depending on the environment. Mint a fresh token before
+   * A token works only on the server it was minted for. The server URL is
+   * static; the token is what carries user identity. Mint a fresh one before
    * every agent run and never reuse one across runs. Set the expiry longer
    * than the run is expected to take.
    *
-   * @param params.connectionName The connection name: the same value used as
-   * `connectionName` elsewhere in the SDK. It is matched without regard to
-   * case, and the token is always issued for the server URL built from the
-   * connection's stored name. That URL is case-sensitive, so connect using the
-   * stored name exactly as it appears.
-   * @param params.identifier Your application's unique identifier for the user
-   * whose connected account the token acts as, 1 to 255 characters.
-   * @param params.expirySeconds Token lifetime in whole seconds, from 60
-   * (1 minute) to 86400 (24 hours). Defaults to 3600 (1 hour) when omitted.
+   * For a connection, the user should have an active connected account on it.
+   * When they do not, the server either rejects the call, or creates a pending
+   * connected account and returns a token whose tool calls report the account
+   * as not connected, depending on the environment.
+   *
+   * @param params.mcpConfigId ID of the configuration. Set this or
+   * `connectionName`, not both.
+   * @param params.connectionName Name of an AgentKit connection: the same
+   * value used as `connectionName` elsewhere in the SDK. Set this or
+   * `mcpConfigId`, not both.
+   * @param params.identifier Your application's unique identifier for the user,
+   * 1 to 255 characters.
+   * @param params.expirySeconds Token lifetime in whole seconds. For a
+   * connection, from 60 (1 minute) to 86400 (24 hours), defaulting to 3600
+   * (1 hour) when omitted.
    * @param params.accessLevel Tools the token can use. `'READ_ONLY'` limits it
    * to tools annotated read-only: other tools are left out of the tool list
    * and refused when called. `'FULL'`, or omitting it, exposes every tool the
-   * connection provides.
+   * configuration or connection exposes.
    * @returns The session `token` and its `expiresAt` time.
-   * @throws {Error} If `connectionName` is empty, or `expirySeconds` is not a
-   * positive integer.
-   * @throws {ScalekitBadRequestException} If the connection is not an AgentKit
-   * connection, the identifier or expiry is rejected, or (in environments that
-   * do not create pending accounts) the user has no active connected account
-   * on it.
-   * @throws {ScalekitNotFoundException} If no active connection has that name.
+   * @throws {Error} If not exactly one of `mcpConfigId` and `connectionName` is
+   * set, the one set is empty, or `expirySeconds` is not a positive integer.
+   * No request is sent.
+   * @throws {ScalekitNotFoundException} If `connectionName` matches no active
+   * connection.
+   * @throws {ScalekitBadRequestException} If the request is otherwise rejected:
+   * for example the connection is not an AgentKit connection, the identifier
+   * or expiry is out of range, or (in environments that do not create pending
+   * accounts) the user has no active connected account on the connection.
    * @throws {ScalekitServerException} If a network or server error occurs.
    *
    * @example
    * ```typescript
-   * const session = await scalekitClient.actions.mcp.createConnectionSessionToken({
+   * // Virtual MCP server built from a configuration
+   * const { config } = await scalekitClient.actions.mcp.getConfig(configId);
+   * const session = await scalekitClient.actions.mcp.createSessionToken({
+   *   mcpConfigId: configId,
+   *   identifier: 'user_123',
+   *   expirySeconds: 900,
+   * });
+   * // Hand config?.mcpServerUrl and session.token to your MCP client
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // A connection's own MCP server
+   * const session = await scalekitClient.actions.mcp.createSessionToken({
    *   connectionName: 'gmail',
    *   identifier: 'user_123',
    *   expirySeconds: 900,
@@ -295,20 +307,13 @@ export default class McpClient {
    * // Hand serverUrl and session.token to your MCP client
    * ```
    */
-  async createConnectionSessionToken(params: {
-    connectionName: string;
-    identifier: string;
-    expirySeconds?: number;
-    accessLevel?: McpSessionTokenAccessLevel;
-  }): Promise<CreateMcpSessionTokenResponse> {
-    if (!params.connectionName) {
-      // An empty name would otherwise reach the server as "no target set".
-      throw new Error('connectionName is required');
-    }
+  async createSessionToken(
+    params: CreateMcpSessionTokenParams
+  ): Promise<CreateMcpSessionTokenResponse> {
     return this.coreClient.connectExec(
       this.client.createMcpSessionToken,
       create(CreateMcpSessionTokenRequestSchema, {
-        keyId: params.connectionName,
+        ...sessionTokenTarget(params),
         identifier: params.identifier,
         ...expiryField(params.expirySeconds),
         ...(params.accessLevel !== undefined && {
@@ -317,6 +322,33 @@ export default class McpClient {
       })
     );
   }
+}
+
+/**
+ * Validates that exactly one session-token target is set and returns the
+ * matching request field: `mcpConfigId` for a configuration, `keyId` for a
+ * connection. The server requires exactly one of the two, so the other is
+ * never set.
+ */
+function sessionTokenTarget(params: {
+  mcpConfigId?: unknown;
+  connectionName?: unknown;
+}): { mcpConfigId: string } | { keyId: string } {
+  // Checked at runtime too: plain JavaScript callers bypass the union type.
+  const hasConfig = params.mcpConfigId != null;
+  const hasConnection = params.connectionName != null;
+  if (hasConfig === hasConnection) {
+    throw new Error(
+      'Set exactly one of mcpConfigId or connectionName, ' +
+        (hasConfig ? 'not both' : 'got neither')
+    );
+  }
+  const name = hasConfig ? 'mcpConfigId' : 'connectionName';
+  const value = hasConfig ? params.mcpConfigId : params.connectionName;
+  if (typeof value !== 'string' || value === '') {
+    throw new Error(`${name} must be a non-empty string`);
+  }
+  return hasConfig ? { mcpConfigId: value } : { keyId: value };
 }
 
 /**
