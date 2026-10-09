@@ -5,6 +5,7 @@ import {
 } from '@bufbuild/protobuf';
 import { AxiosError, AxiosResponse } from 'axios';
 import CoreClient, { assertValidTimeout } from './core';
+import { assertProxyPathContained } from './proxy-path';
 import {
   ScalekitException,
   ScalekitGatewayTimeoutException,
@@ -691,6 +692,9 @@ export default class ActionsClient {
    * @throws {ScalekitGatewayTimeoutException} If the request exceeds the timeout.
    * @throws {ScalekitServerException} If a network or server error occurs.
    * @throws {ScalekitException} If required parameters are missing or an unexpected error occurs.
+   * @throws {Error} If `path` resolves outside the proxy prefix (`<environment URL>/proxy/`),
+   *                 for example through `..` segments, encoded dots or control characters.
+   *                 Checked before any network call; every other path is sent unchanged.
    */
   async request(params: {
     connectionName: string;
@@ -727,6 +731,7 @@ export default class ActionsClient {
 
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
     const url = `${this.coreClient.envUrl.replace(/\/$/, '')}/proxy${normalizedPath}`;
+    assertProxyPathContained(this.coreClient.envUrl, url);
     if (timeoutMs !== undefined) {
       assertValidTimeout('timeoutMs', timeoutMs);
     }

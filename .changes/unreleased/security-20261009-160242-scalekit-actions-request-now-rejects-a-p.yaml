@@ -1,0 +1,12 @@
+kind: security
+body: |
+  `scalekit.actions.request` now rejects a `path` that would resolve outside the proxy prefix (`<environment URL>/proxy/`), throwing an `Error` before any request is sent. Previously, such paths (for example with dot segments, encoded dots or control characters) could reach other endpoints on the environment host with the client's credentials. Every other path is sent unchanged.
+
+  - **Affected versions:** `>=2.5.0 <2.19.1`
+  - **Patched versions:** `2.19.1`
+  - **Action:** upgrade. This matters if you build `path` from untrusted input, such as values supplied by end users or by an AI agent.
+time: '2026-10-09T16:02:42.157876+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-2310
+  Migration: ''
