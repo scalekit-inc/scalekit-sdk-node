@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import * as jose from 'jose';
 import QueryString from 'qs';
 import GrpcConnect from './connect';
@@ -37,17 +36,15 @@ import {
   TokenValidationOptions,
 } from './types/scalekit';
 import {
-  WebhookVerificationError,
   ScalekitValidateTokenFailureException,
   ScalekitException,
   ScalekitServerException,
 } from './errors/base-exception';
 import { AxiosError } from 'axios';
+import { verifyPayloadSignature } from './webhook-signature';
 
 const authorizeEndpoint = 'oauth/authorize';
 const logoutEndpoint = 'oidc/logout';
-const WEBHOOK_TOLERANCE_IN_SECONDS = 5 * 60; // 5 minutes
-const WEBHOOK_SIGNATURE_VERSION = 'v1';
 
 /**
  * Main Scalekit SDK client for interacting with all Scalekit API endpoints.
@@ -582,46 +579,7 @@ export default class ScalekitClient {
     signature: string,
     payload: string
   ): boolean {
-    if (!id || !timestamp || !signature) {
-      throw new WebhookVerificationError('Missing required headers');
-    }
-
-    const secretParts = secret.split('_');
-    if (secretParts.length < 2) {
-      throw new WebhookVerificationError('Invalid secret');
-    }
-
-    try {
-      const timestampDate = this.verifyTimestamp(timestamp);
-      const data = `${id}.${Math.floor(
-        timestampDate.getTime() / 1000
-      )}.${payload}`;
-      const secretBytes = Buffer.from(secretParts[1], 'base64');
-      const computedSignature = this.computeSignature(secretBytes, data);
-      const receivedSignatures = signature.split(' ');
-
-      for (const versionedSignature of receivedSignatures) {
-        const [version, receivedSignature] = versionedSignature.split(',');
-        if (version !== WEBHOOK_SIGNATURE_VERSION) {
-          continue;
-        }
-        if (
-          crypto.timingSafeEqual(
-            Buffer.from(receivedSignature, 'base64'),
-            Buffer.from(computedSignature, 'base64')
-          )
-        ) {
-          return true;
-        }
-      }
-
-      throw new WebhookVerificationError('Invalid Signature');
-    } catch (error) {
-      if (error instanceof WebhookVerificationError) {
-        throw error;
-      }
-      throw new WebhookVerificationError('Invalid Signature');
-    }
+    return verifyPayloadSignature(secret, id, timestamp, signature, payload);
   }
 
   /**
@@ -697,28 +655,6 @@ export default class ScalekitClient {
   }
 
   /**
-   * Verify the timestamp
-   *
-   * @param {string} timestampStr The timestamp string
-   * @return {Date} Returns the timestamp
-   */
-  private verifyTimestamp(timestampStr: string): Date {
-    const now = Math.floor(Date.now() / 1000);
-    const timestamp = parseInt(timestampStr, 10);
-    if (isNaN(timestamp)) {
-      throw new WebhookVerificationError('Invalid Signature Headers');
-    }
-    if (now - timestamp > WEBHOOK_TOLERANCE_IN_SECONDS) {
-      throw new WebhookVerificationError('Message timestamp too old');
-    }
-    if (timestamp > now + WEBHOOK_TOLERANCE_IN_SECONDS) {
-      throw new WebhookVerificationError('Message timestamp too new');
-    }
-
-    return new Date(timestamp * 1000);
-  }
-
-  /**
    * Generates an M2M access token using the client credentials grant for the given clientId and clientSecret.
    *
    * @param {string} clientId - The client ID to authenticate with
@@ -770,20 +706,6 @@ export default class ScalekitClient {
       this.coreClient.clientId,
       this.coreClient.clientSecret
     );
-  }
-
-  /**
-   * Compute the signature
-   *
-   * @param {Buffer} secretBytes The secret bytes
-   * @param {string} data The data to be signed
-   * @return {string} Returns the signature
-   */
-  private computeSignature(secretBytes: Buffer, data: string): string {
-    return crypto
-      .createHmac('sha256', secretBytes)
-      .update(data)
-      .digest('base64');
   }
 
   /**
