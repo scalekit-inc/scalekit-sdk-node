@@ -29,6 +29,33 @@ import {
 export type McpSessionTokenAccessLevel = 'FULL' | 'READ_ONLY';
 
 /**
+ * Parameters for {@link McpClient.createSessionToken}. Set a target:
+ * `mcpConfigId` for a Virtual MCP server built from a configuration, or
+ * `connectionName` for a connection's own MCP server. If both are set,
+ * `mcpConfigId` is used.
+ */
+export type CreateMcpSessionTokenParams = {
+  /** Your application's unique identifier for the user, 1 to 255 characters. */
+  identifier: string;
+  /** Token lifetime in whole seconds, 60 to 86400. Defaults to 3600. */
+  expirySeconds?: number;
+  /** Tools the token can use. Omit for `'FULL'`. */
+  accessLevel?: McpSessionTokenAccessLevel;
+} & (
+  | {
+      /** ID of the MCP configuration whose server the token is for. */
+      mcpConfigId: string;
+      /** Ignored when `mcpConfigId` is set. */
+      connectionName?: string;
+    }
+  | {
+      /** Name of the AgentKit connection whose MCP server the token is for. */
+      connectionName: string;
+      mcpConfigId?: undefined;
+    }
+);
+
+/**
  * Client for Virtual MCP servers.
  *
  * A Virtual MCP server exposes a chosen set of connectors and tools over the
@@ -207,51 +234,156 @@ export default class McpClient {
   }
 
   /**
-   * Mints a session token for one user against one configuration.
+   * Mints a session token for one user, for either a Virtual MCP server or a
+   * connection's own MCP server.
    *
-   * The server URL is static; this token is what carries user identity. Mint a
-   * fresh one before every agent run and never reuse one across runs. Set the
-   * expiry longer than the run is expected to take.
+   * Set a target; if both are set, `mcpConfigId` is used:
    *
-   * @param params.mcpConfigId ID of the configuration.
-   * @param params.identifier Your application's unique identifier for the user.
-   * @param params.expirySeconds Token lifetime in whole seconds.
+   * - `mcpConfigId`: the token works on that configuration's
+   *   `config.mcpServerUrl` (see {@link McpClient.getConfig}).
+   * - `connectionName`: the token works on the connection's own MCP server at
+   *   `<environment URL>/mcp/v3/connections/<connection name>`, which exposes
+   *   all of that connection's tools without an MCP configuration. The name is
+   *   matched without regard to case, but the URL path is case-sensitive:
+   *   build it from the connection's name exactly as stored.
+   *
+   * A token works only on the server it was minted for. The server URL is
+   * static; the token is what carries user identity. Mint a fresh one before
+   * every agent run and never reuse one across runs. Set the expiry longer
+   * than the run is expected to take.
+   *
+   * For a connection, the user should have an active connected account on it.
+   * When they do not, the server either rejects the call, or creates a pending
+   * connected account and returns a token whose tool calls report the account
+   * as not connected, depending on the environment.
+   *
+   * @param params.mcpConfigId ID of the configuration. If both targets are
+   * set, this one is used and `connectionName` is ignored.
+   * @param params.connectionName Name of an AgentKit connection: the same
+   * value used as `connectionName` elsewhere in the SDK. Used when
+   * `mcpConfigId` is omitted or empty.
+   * @param params.identifier Your application's unique identifier for the user,
+   * 1 to 255 characters. For a connection it is checked before the request:
+   * an empty value throws `identifier is required`.
+   * @param params.expirySeconds Token lifetime in whole seconds, from 60
+   * seconds to 24 hours (86400); 1 hour (3600) by default.
    * @param params.accessLevel Tools the token can use. `'READ_ONLY'` limits it
    * to tools annotated read-only: other tools are left out of the tool list
    * and refused when called. `'FULL'`, or omitting it, exposes every tool the
-   * configuration exposes.
-   * @throws {Error} If `expirySeconds` is not a positive integer.
+   * configuration or connection exposes.
+   * @returns The session `token` and its `expiresAt` time.
+   * @throws {Error} If `expirySeconds` is not a positive integer, or, for a
+   * connection only, if `connectionName` is not a string or `identifier` is
+   * empty. No request is sent. Calls with `mcpConfigId` are not checked
+   * beyond `expirySeconds` and behave as they always have: a missing or empty
+   * ID is sent and rejected by the server.
+   * @throws {ScalekitNotFoundException} If `connectionName` matches no active
+   * connection.
+   * @throws {ScalekitBadRequestException} If the request is otherwise rejected:
+   * for example the connection is not an AgentKit connection, the identifier
+   * or expiry is out of range, or (in environments that do not create pending
+   * accounts) the user has no active connected account on the connection.
    * @throws {ScalekitServerException} If a network or server error occurs.
+   *
+   * @example
+   * ```typescript
+   * // Virtual MCP server built from a configuration
+   * const { config } = await scalekitClient.actions.mcp.getConfig(configId);
+   * const session = await scalekitClient.actions.mcp.createSessionToken({
+   *   mcpConfigId: configId,
+   *   identifier: 'user_123',
+   *   expirySeconds: 900,
+   * });
+   * // Hand config?.mcpServerUrl and session.token to your MCP client
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // A connection's own MCP server
+   * const session = await scalekitClient.actions.mcp.createSessionToken({
+   *   connectionName: 'gmail',
+   *   identifier: 'user_123',
+   *   expirySeconds: 900,
+   *   accessLevel: 'READ_ONLY',
+   * });
+   * // The URL path is case-sensitive: use the connection's stored name.
+   * const serverUrl = `${process.env.SCALEKIT_ENVIRONMENT_URL}/mcp/v3/connections/gmail`;
+   * // Hand serverUrl and session.token to your MCP client
+   * ```
    */
-  async createSessionToken(params: {
-    mcpConfigId: string;
-    identifier: string;
-    expirySeconds?: number;
-    accessLevel?: McpSessionTokenAccessLevel;
-  }): Promise<CreateMcpSessionTokenResponse> {
-    if (
-      params.expirySeconds !== undefined &&
-      !(Number.isInteger(params.expirySeconds) && params.expirySeconds > 0)
-    ) {
-      // BigInt() below would otherwise throw an unhelpful RangeError.
-      throw new Error(
-        `expirySeconds must be a positive integer, got ${params.expirySeconds}`
-      );
-    }
+  async createSessionToken(
+    params: CreateMcpSessionTokenParams
+  ): Promise<CreateMcpSessionTokenResponse> {
+    // Expiry first, so mcpConfigId calls fail exactly as they always have.
+    const expiry = expiryField(params.expirySeconds);
+    const target = sessionTokenTarget(params);
     return this.coreClient.connectExec(
       this.client.createMcpSessionToken,
       create(CreateMcpSessionTokenRequestSchema, {
-        mcpConfigId: params.mcpConfigId,
+        ...target,
         identifier: params.identifier,
-        ...(params.expirySeconds !== undefined && {
-          expiry: create(DurationSchema, {
-            seconds: BigInt(params.expirySeconds),
-          }),
-        }),
+        ...expiry,
         ...(params.accessLevel !== undefined && {
           accessLevel: params.accessLevel,
         }),
       })
     );
   }
+}
+
+/**
+ * Returns the request's target field: `mcpConfigId` for a configuration,
+ * `keyId` for a connection. The server requires exactly one of the two, so
+ * the other is never set.
+ *
+ * A non-empty `mcpConfigId` wins, and so does the configuration form when no
+ * non-empty `connectionName` is given: `mcpConfigId` is then passed through
+ * as given, unchecked, so existing callers keep their behaviour (a missing or
+ * empty ID still reaches the server, and `connectionName` is ignored). Only
+ * the connection form is checked here.
+ */
+function sessionTokenTarget(
+  params: CreateMcpSessionTokenParams
+): { mcpConfigId?: string } | { keyId: string } {
+  // Read as unknown: plain JavaScript callers bypass the union type.
+  const { mcpConfigId, connectionName, identifier } = params as {
+    mcpConfigId?: unknown;
+    connectionName?: unknown;
+    identifier?: unknown;
+  };
+  const isConnectionCall =
+    (mcpConfigId == null || mcpConfigId === '') &&
+    connectionName != null &&
+    connectionName !== '';
+  if (!isConnectionCall) {
+    return { mcpConfigId: params.mcpConfigId };
+  }
+  if (typeof connectionName !== 'string') {
+    throw new Error('connectionName must be a non-empty string');
+  }
+  if (typeof identifier !== 'string' || identifier.trim() === '') {
+    throw new Error('identifier is required');
+  }
+  return { keyId: connectionName };
+}
+
+/**
+ * Validates `expirySeconds` and returns the request's `expiry` field, or no
+ * field when it is omitted so the server applies its default.
+ */
+function expiryField(expirySeconds: number | undefined): {
+  expiry?: MessageInitShape<typeof DurationSchema>;
+} {
+  if (expirySeconds === undefined) {
+    return {};
+  }
+  if (!(Number.isInteger(expirySeconds) && expirySeconds > 0)) {
+    // BigInt() below would otherwise throw an unhelpful RangeError.
+    throw new Error(
+      `expirySeconds must be a positive integer, got ${expirySeconds}`
+    );
+  }
+  return {
+    expiry: create(DurationSchema, { seconds: BigInt(expirySeconds) }),
+  };
 }

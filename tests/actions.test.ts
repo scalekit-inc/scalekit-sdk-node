@@ -1,7 +1,10 @@
 import ScalekitClient from '../src/scalekit';
 import { create } from '@bufbuild/protobuf';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { ScalekitServerException } from '../src/errors';
+import {
+  ScalekitNotFoundException,
+  ScalekitServerException,
+} from '../src/errors';
 import { TestDataGenerator, TestOrganizationManager } from './utils/test-data';
 import {
   AuthorizationDetailsSchema,
@@ -182,6 +185,72 @@ describe('Actions', () => {
 
       expect(response).toBeDefined();
       expect(response.tools.length).toBeLessThanOrEqual(1);
+    });
+  });
+
+  describe('mcp.createSessionToken with connectionName', () => {
+    it('should mint a read-only token for the connection MCP server', async () => {
+      // The call uses the shared ACTIVE fixture account, which must survive.
+      // Where the fixture is missing, the server may create a pending
+      // connected account instead; delete only an account this test created.
+      const accountExisted = await client.actions
+        .getConnectedAccount({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier: GMAIL_IDENTIFIER,
+        })
+        .then(
+          () => true,
+          (error: unknown) => {
+            if (error instanceof ScalekitNotFoundException) return false;
+            throw error;
+          }
+        );
+
+      try {
+        const response = await client.actions.mcp.createSessionToken({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier: GMAIL_IDENTIFIER,
+          expirySeconds: 300,
+          accessLevel: 'READ_ONLY',
+        });
+
+        expect(typeof response.token).toBe('string');
+        expect(response.token.length).toBeGreaterThan(0);
+        expect(response.expiresAt).toBeDefined();
+      } finally {
+        if (!accountExisted) {
+          await client.actions
+            .deleteConnectedAccount({
+              connectionName: GMAIL_CONNECTION_NAME,
+              identifier: GMAIL_IDENTIFIER,
+            })
+            .catch((error: unknown) => {
+              // Nothing was created (the call was rejected): nothing to clean.
+              if (!(error instanceof ScalekitNotFoundException)) throw error;
+            });
+        }
+      }
+    });
+
+    it('should reject an unknown connection with ScalekitNotFoundException', async () => {
+      await expect(
+        client.actions.mcp.createSessionToken({
+          connectionName: `missing-connection-${Date.now()}`,
+          identifier: GMAIL_IDENTIFIER,
+        })
+      ).rejects.toBeInstanceOf(ScalekitNotFoundException);
+    });
+
+    it('should use mcpConfigId when both targets are set', async () => {
+      // mcpConfigId wins, as in v2.19.0: an unknown configuration is rejected
+      // by the server even though the connection itself is valid.
+      await expect(
+        client.actions.mcp.createSessionToken({
+          mcpConfigId: `missing-config-${Date.now()}`,
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier: GMAIL_IDENTIFIER,
+        })
+      ).rejects.toBeInstanceOf(ScalekitServerException);
     });
   });
 
