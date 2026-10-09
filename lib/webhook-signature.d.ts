@@ -24,6 +24,14 @@ export interface VerifyPayloadSignatureOptions {
      * "Missing required headers". Off for the legacy methods.
      */
     strictTimestamp?: boolean;
+    /**
+     * Require the key after the first `_` of the secret (`whsec_<key>`) to be
+     * non-empty strict padded standard base64 that decodes to at least one
+     * byte; otherwise throw "Invalid secret". Without it the key is decoded
+     * leniently, so `whsec_`, `whsec_!!!!` or `whsec_====` give an empty HMAC
+     * key. Off for the legacy methods.
+     */
+    strictSecret?: boolean;
 }
 /**
  * Verifies a `v1` HMAC-SHA256 signature over `${id}.${timestamp}.${payload}`

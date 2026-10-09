@@ -8405,7 +8405,7 @@ Checks the signature first (HMAC-SHA256 over `webhook-id.webhook-timestamp.body`
 - When `payloadState` is `'reference'`, `payload` is `null`: fetch the resource identified by `resourceType` and `resourceId`.
 - `payload` is decoded with `JSON.parse`, so integers above `Number.MAX_SAFE_INTEGER` lose precision. Parse the raw body yourself if you need them exactly.
 - Header names are matched case-insensitively. Malformed `webhook-signature` candidates (including any that are not padded standard base64) are skipped.
-- Throws `WebhookVerificationError` when the request is not authentic (missing or conflicting headers, a `webhook-timestamp` that is not decimal digits, stale timestamp, no matching signature, body not UTF-8), and its subclass `ScalekitTriggerEventParseError` when the signature is valid but the body is not a readable trigger event (including a body that starts with a byte order mark). Throws `TypeError` when called with arguments of the wrong type.
+- Throws `WebhookVerificationError` when the request is not authentic (missing or conflicting headers, a malformed secret, a `webhook-timestamp` that is not decimal digits, stale timestamp, no matching signature, body not UTF-8), and its subclass `ScalekitTriggerEventParseError` when the signature is valid but the body is not a readable trigger event (including a body that starts with a byte order mark). Throws `TypeError` when called with arguments of the wrong type.
 </dd>
 </dl>
 </dd>
@@ -8456,7 +8456,7 @@ app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async 
     accountIds = await accountsToActFor(event.connectionId);
   } else {
     // A scope this SDK version does not know yet: acknowledge and skip it.
-    return res.sendStatus(200);
+    return res.sendStatus(204);
   }
 
   for (const accountId of accountIds) {
@@ -8471,7 +8471,7 @@ app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async 
     await handle(event.triggerType, resource, accountId);
     await markProcessed(event.dedupeKey, accountId);
   }
-  res.sendStatus(200);
+  res.sendStatus(204);
 });
 ```
 </dd>

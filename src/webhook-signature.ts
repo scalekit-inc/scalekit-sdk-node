@@ -36,6 +36,14 @@ export interface VerifyPayloadSignatureOptions {
    * "Missing required headers". Off for the legacy methods.
    */
   strictTimestamp?: boolean;
+  /**
+   * Require the key after the first `_` of the secret (`whsec_<key>`) to be
+   * non-empty strict padded standard base64 that decodes to at least one
+   * byte; otherwise throw "Invalid secret". Without it the key is decoded
+   * leniently, so `whsec_`, `whsec_!!!!` or `whsec_====` give an empty HMAC
+   * key. Off for the legacy methods.
+   */
+  strictSecret?: boolean;
 }
 
 /**
@@ -73,6 +81,17 @@ export function verifyPayloadSignature(
   if (secretParts.length < 2) {
     throw new WebhookVerificationError('Invalid secret');
   }
+  let strictKey: Buffer | undefined;
+  if (options?.strictSecret) {
+    // Everything after the first '_': a second '_' is not base64 and fails.
+    const encodedKey = secret.slice(secret.indexOf('_') + 1);
+    strictKey = isStrictBase64(encodedKey)
+      ? Buffer.from(encodedKey, 'base64')
+      : undefined;
+    if (strictKey === undefined || strictKey.length === 0) {
+      throw new WebhookVerificationError('Invalid secret');
+    }
+  }
 
   try {
     const timestampDate = verifyTimestamp(
@@ -80,7 +99,7 @@ export function verifyPayloadSignature(
       options?.strictTimestamp === true
     );
     const signedPrefix = `${id}.${Math.floor(timestampDate.getTime() / 1000)}.`;
-    const secretBytes = Buffer.from(secretParts[1], 'base64');
+    const secretBytes = strictKey ?? Buffer.from(secretParts[1], 'base64');
     const computedSignature = computeSignature(
       secretBytes,
       signedPrefix,
@@ -131,6 +150,10 @@ export function verifyPayloadSignature(
 const STRICT_BASE64 = /^[A-Za-z0-9+/]*={0,2}$/;
 const DIGITS_ONLY = /^[0-9]+$/;
 
+function isStrictBase64(value: string): boolean {
+  return STRICT_BASE64.test(value) && value.length % 4 === 0;
+}
+
 // One `v1,<base64>` candidate. Anything malformed is simply not a match;
 // timingSafeEqual is only reached with equal lengths, so it cannot throw.
 function candidateMatches(candidate: string, expected: Buffer): boolean {
@@ -141,7 +164,7 @@ function candidateMatches(candidate: string, expected: Buffer): boolean {
   if (version !== WEBHOOK_SIGNATURE_VERSION) {
     return false;
   }
-  if (!STRICT_BASE64.test(received) || received.length % 4 !== 0) {
+  if (!isStrictBase64(received)) {
     return false;
   }
   const receivedBytes = Buffer.from(received, 'base64');

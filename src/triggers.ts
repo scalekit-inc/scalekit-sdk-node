@@ -178,7 +178,8 @@ const KNOWN_FIELDS: ReadonlySet<string> = new Set([
  * @returns The verified, parsed event.
  * @throws {@link WebhookVerificationError} when the event is not authentic:
  *   a required header is missing or repeated with different values,
- *   `webhook-timestamp` is not decimal digits, the secret is malformed, the
+ *   `webhook-timestamp` is not decimal digits, the secret is malformed (the
+ *   key after `whsec_` must be non-empty padded standard base64), the
  *   timestamp is more than 5 minutes off, no signature matches, or the body
  *   is not valid UTF-8 (including a string body with a lone UTF-16
  *   surrogate; `cause` holds the underlying error where there is one).
@@ -189,8 +190,9 @@ const KNOWN_FIELDS: ReadonlySet<string> = new Set([
  *   `occurred_at` that is not an RFC 3339 timestamp with an offset in years
  *   0001-9999 (after conversion to UTC).
  * @throws `TypeError` when called with the wrong argument types: `body` is
- *   not a string, `Buffer` or `Uint8Array`, `headers` is not an object, or
- *   `secret` is not a string.
+ *   not a string, `Buffer` or `Uint8Array`, `headers` is not an object, a
+ *   `webhook-id`, `webhook-timestamp` or `webhook-signature` value is not a
+ *   string, an array of strings or `undefined`, or `secret` is not a string.
  *
  * @example
  * ```ts
@@ -257,7 +259,12 @@ export function verifyTriggerEvent(
       webhookTimestamp,
       webhookSignature,
       body,
-      { keepCause: true, skipMalformedSignatures: true, strictTimestamp: true }
+      {
+        keepCause: true,
+        skipMalformedSignatures: true,
+        strictTimestamp: true,
+        strictSecret: true,
+      }
     );
   } catch (error) {
     if (error instanceof WebhookVerificationError) {
@@ -340,14 +347,22 @@ function headerValues(headers: TriggerEventHeaders, name: string): string[] {
       continue;
     }
     const value: unknown = headers[key];
+    if (value === undefined) {
+      continue;
+    }
     if (typeof value === 'string') {
       values.push(value);
-    } else if (Array.isArray(value)) {
-      for (const item of value as readonly unknown[]) {
-        if (typeof item === 'string') {
-          values.push(item);
-        }
-      }
+    } else if (
+      Array.isArray(value) &&
+      (value as readonly unknown[]).every((item) => typeof item === 'string')
+    ) {
+      values.push(...(value as readonly string[]));
+    } else {
+      // A wrong value type is a programming error; dropping it silently
+      // would turn it into a confusing "Missing required headers".
+      throw new TypeError(
+        `Trigger event header "${name}" must be a string, an array of strings or undefined, got ${describeType(value)}`
+      );
     }
   }
   return values;

@@ -665,6 +665,103 @@ describe('verifyTriggerEvent', () => {
       expect((error as Error).message).toBe('Invalid secret');
     });
 
+    // An empty key would let anyone sign with HMAC(key = '').
+    const KEY_31 = Buffer.from('a-thirty-one-byte-signing-key!!');
+    it.each([
+      ['an empty key', 'whsec_', Buffer.alloc(0)],
+      ['a key of only invalid characters', 'whsec_!!!!', Buffer.alloc(0)],
+      ['a key of only padding', 'whsec_====', Buffer.alloc(0)],
+      [
+        'an unpadded key',
+        `whsec_${KEY_31.toString('base64').replace(/=+$/, '')}`,
+        KEY_31,
+      ],
+      ['a URL-safe key', `whsec_${KEY_31.toString('base64url')}=`, KEY_31],
+      [
+        'a key followed by another "_" part',
+        `whsec_${SIGNING_KEY.toString('base64')}_extra`,
+        SIGNING_KEY,
+      ],
+    ])(
+      'rejects %s as an invalid secret even when the signature matches its lenient decoding',
+      (_label, secret, lenientKey) => {
+        const body = fixture('valid_account.json');
+        const headers = signedHeaders(body, { key: lenientKey });
+
+        const error = catchError(() =>
+          verifyTriggerEvent({ body, headers, secret })
+        );
+        expect(error).toBeInstanceOf(WebhookVerificationError);
+        expect((error as Error).message).toBe('Invalid secret');
+      }
+    );
+
+    it('checks missing headers before the secret, and the secret before the timestamp format', () => {
+      const body = fixture('valid_account.json');
+      const { 'webhook-id': _id, ...noId } = signedHeaders(body);
+      expect(() =>
+        verifyTriggerEvent({ body, headers: noId, secret: 'whsec_' })
+      ).toThrow('Missing required headers');
+
+      const badTimestamp = {
+        ...signedHeaders(body),
+        'webhook-timestamp': '1e9',
+      };
+      expect(() =>
+        verifyTriggerEvent({
+          body,
+          headers: badTimestamp,
+          secret: 'whsec_!!!!',
+        })
+      ).toThrow('Invalid secret');
+    });
+
+    it('accepts a padded standard base64 key of 31 bytes', () => {
+      const body = fixture('valid_account.json');
+      const secret = `whsec_${KEY_31.toString('base64')}`;
+      expect(secret.endsWith('=')).toBe(true);
+
+      expect(
+        verifyTriggerEvent({
+          body,
+          headers: signedHeaders(body, { key: KEY_31 }),
+          secret,
+        }).dedupeKey
+      ).toBe('dk_123');
+    });
+
+    it.each([
+      ['a number', 'webhook-id', 123],
+      ['an array with a number', 'webhook-signature', ['v1,AAAA', 1]],
+      ['null', 'webhook-timestamp', null],
+      ['an object', 'webhook-id', { value: 'msg_1' }],
+    ])('rejects %s as a header value with TypeError', (_label, name, value) => {
+      const body = fixture('valid_account.json');
+      const headers = {
+        ...signedHeaders(body),
+        [name]: value,
+      } as unknown as TriggerEventHeaders;
+
+      const error = catchError(() =>
+        verifyTriggerEvent({ body, headers, secret: SECRET })
+      );
+      expect(error).toBeInstanceOf(TypeError);
+      expect(error).not.toBeInstanceOf(WebhookVerificationError);
+      expect((error as Error).message).toContain(name);
+    });
+
+    it('ignores non-string values of headers it does not read', () => {
+      const body = fixture('valid_account.json');
+      const headers = {
+        ...signedHeaders(body),
+        'x-count': 3,
+      } as unknown as TriggerEventHeaders;
+
+      expect(
+        verifyTriggerEvent({ body, headers, secret: SECRET }).dedupeKey
+      ).toBe('dk_123');
+    });
+
     it.each([
       ['a lone high surrogate', '\uD800'],
       ['a lone low surrogate', '\uDC00'],
