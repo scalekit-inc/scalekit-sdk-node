@@ -1,6 +1,6 @@
 kind: security
 body: |
-  `scalekit.actions.request` no longer lets the client's credentials leave the proxy prefix (`<environment URL>/proxy/`). A `path` that would resolve outside the prefix (for example through dot segments, encoded dots or control characters) is now rejected with an `Error` before any request is sent. If a proxied response redirects outside the prefix, the redirect is still followed, but without the client's credentials or connection headers. Previously, both cases could reach other endpoints on the environment host with the client's credentials. Every other path and redirect behaves as before.
+  `scalekit.actions.request` no longer lets the client's credentials leave the proxy prefix (`<environment URL>/proxy/`). A `path` that would resolve outside the prefix (for example through dot segments, encoded dots or control characters) is now rejected with an `Error` before any request is sent. If a proxied response redirects outside the prefix, the redirect is still followed, but without the client's credentials or connection headers; the same applies to a redirect sent through an HTTP forward proxy whose location carries a fragment. Previously, both cases could reach other endpoints on the environment host with the client's credentials. Every other path and redirect behaves as before.
 
   - **Affected versions:** `>=2.5.0 <2.19.1`
   - **Patched versions:** `2.19.1`

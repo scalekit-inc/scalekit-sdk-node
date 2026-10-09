@@ -662,7 +662,13 @@ describe('actions.request through an HTTP forward proxy', () => {
   };
   const viaProxyEnv = (): ScalekitClient => {
     process.env.HTTP_PROXY = `http://127.0.0.1:${proxyPort}`;
-    return makeClient(envUrl);
+    const client = makeClient(envUrl);
+    // A plain agent keeps axios's own env-proxy handling in play even when the
+    // runner enables Node's built-in env proxy (NODE_USE_ENV_PROXY).
+    (
+      client as unknown as { coreClient: CoreClient }
+    ).coreClient.axios.defaults.httpAgent = new http.Agent();
+    return client;
   };
   const credentialed = {
     authorization: 'Bearer test-access-token',

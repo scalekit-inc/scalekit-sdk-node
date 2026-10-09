@@ -349,7 +349,8 @@ export default class ActionsClient {
      * @remarks Redirects returned by the proxied API are followed as before. A redirect
      * hop that leaves the proxy prefix (another origin, or a same-origin path outside
      * `<environment URL>/proxy/`) is sent without the client's `Authorization`,
-     * `connection_name` and `identifier` headers.
+     * `connection_name` and `identifier` headers. So is a hop sent through an HTTP
+     * forward proxy whose redirect location carries a fragment.
      */
     request(params: {
         connectionName: string;
