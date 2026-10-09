@@ -190,16 +190,46 @@ describe('Actions', () => {
 
   describe('mcp.createSessionToken with connectionName', () => {
     it('should mint a read-only token for the connection MCP server', async () => {
-      const response = await client.actions.mcp.createSessionToken({
-        connectionName: GMAIL_CONNECTION_NAME,
-        identifier: GMAIL_IDENTIFIER,
-        expirySeconds: 300,
-        accessLevel: 'READ_ONLY',
-      });
+      // The call uses the shared ACTIVE fixture account, which must survive.
+      // Where the fixture is missing, the server may create a pending
+      // connected account instead; delete only an account this test created.
+      const accountExisted = await client.actions
+        .getConnectedAccount({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier: GMAIL_IDENTIFIER,
+        })
+        .then(
+          () => true,
+          (error: unknown) => {
+            if (error instanceof ScalekitNotFoundException) return false;
+            throw error;
+          }
+        );
 
-      expect(typeof response.token).toBe('string');
-      expect(response.token.length).toBeGreaterThan(0);
-      expect(response.expiresAt).toBeDefined();
+      try {
+        const response = await client.actions.mcp.createSessionToken({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier: GMAIL_IDENTIFIER,
+          expirySeconds: 300,
+          accessLevel: 'READ_ONLY',
+        });
+
+        expect(typeof response.token).toBe('string');
+        expect(response.token.length).toBeGreaterThan(0);
+        expect(response.expiresAt).toBeDefined();
+      } finally {
+        if (!accountExisted) {
+          await client.actions
+            .deleteConnectedAccount({
+              connectionName: GMAIL_CONNECTION_NAME,
+              identifier: GMAIL_IDENTIFIER,
+            })
+            .catch((error: unknown) => {
+              // Nothing was created (the call was rejected): nothing to clean.
+              if (!(error instanceof ScalekitNotFoundException)) throw error;
+            });
+        }
+      }
     });
 
     it('should reject an unknown connection with ScalekitNotFoundException', async () => {

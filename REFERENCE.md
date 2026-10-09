@@ -7928,7 +7928,7 @@ Mints a session token for one user, for either a Virtual MCP server or a connect
 
 A token works only on the server it was minted for. The token carries the user's identity. Mint a fresh one before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
 
-Setting both targets, neither, or an empty one throws before the request is sent; TypeScript rejects both and neither at compile time.
+TypeScript rejects both targets and neither at compile time. At run time, only the `connectionName` form is checked before the request is sent: a non-string `connectionName`, or `mcpConfigId` set as well, throws. Calls with `mcpConfigId` are unchanged: they are not checked beyond `expirySeconds`, so a missing or empty ID is sent and rejected by the server, and an empty `connectionName` alongside it is ignored.
 
 For a connection, the user should have an active connected account on it. When they do not, depending on the environment, the call either fails with `ScalekitBadRequestException`, or succeeds after creating a pending connected account, in which case tool calls report the account as not connected. The call fails with `ScalekitNotFoundException` when no active connection has that name, and with `ScalekitBadRequestException` when the connection is not an AgentKit connection or the identifier or expiry is rejected.
 </dd>
@@ -7985,7 +7985,7 @@ Type: `CreateMcpSessionTokenParams`. Set exactly one of `mcpConfigId` and `conne
 <dl>
 <dd>
 
-**params.mcpConfigId?:** `string` - The configuration. Set this or `connectionName`.
+**params.mcpConfigId?:** `string` - The configuration. Set this or `connectionName`. Used when `connectionName` is omitted or empty.
 
 </dd>
 </dl>

@@ -158,7 +158,8 @@ export default class McpClient {
      * as not connected, depending on the environment.
      *
      * @param params.mcpConfigId ID of the configuration. Set this or
-     * `connectionName`, not both.
+     * `connectionName`, not both. Used when `connectionName` is omitted or
+     * empty.
      * @param params.connectionName Name of an AgentKit connection: the same
      * value used as `connectionName` elsewhere in the SDK. Set this or
      * `mcpConfigId`, not both.
@@ -172,9 +173,11 @@ export default class McpClient {
      * and refused when called. `'FULL'`, or omitting it, exposes every tool the
      * configuration or connection exposes.
      * @returns The session `token` and its `expiresAt` time.
-     * @throws {Error} If not exactly one of `mcpConfigId` and `connectionName` is
-     * set, the one set is empty, or `expirySeconds` is not a positive integer.
-     * No request is sent.
+     * @throws {Error} If `expirySeconds` is not a positive integer, or, for the
+     * `connectionName` form only, if `connectionName` is not a string or
+     * `mcpConfigId` is set as well. No request is sent. Calls with
+     * `mcpConfigId` are not checked beyond `expirySeconds` and behave as they
+     * always have: a missing or empty ID is sent and rejected by the server.
      * @throws {ScalekitNotFoundException} If `connectionName` matches no active
      * connection.
      * @throws {ScalekitBadRequestException} If the request is otherwise rejected:

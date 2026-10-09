@@ -1,6 +1,6 @@
 kind: added
 body: |
-  `scalekit.actions.mcp.createSessionToken({ connectionName, identifier, expirySeconds?, accessLevel? })` mints a session token for a connection's own MCP server (`<environment URL>/mcp/v3/connections/<connection name>`), which serves all of that connection's tools without an MCP configuration. Pass `connectionName` instead of `mcpConfigId` (exactly one of the two; existing `mcpConfigId` calls are unchanged), and `accessLevel: 'READ_ONLY'` limits the token to read-only tools. The URL path is case-sensitive, so connect with the connection's name exactly as stored. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#virtual-mcp-servers)
+  `scalekit.actions.mcp.createSessionToken({ connectionName, identifier, expirySeconds?, accessLevel? })` mints a session token for a connection's own MCP server (`<environment URL>/mcp/v3/connections/<connection name>`), which serves all of that connection's tools without an MCP configuration. Pass `connectionName` instead of `mcpConfigId`; setting both throws before the request is sent. Existing `mcpConfigId` calls are unchanged and get no new checks. Add `accessLevel: 'READ_ONLY'` to limit the token to read-only tools. The URL path is case-sensitive, so connect with the connection's name exactly as stored. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#virtual-mcp-servers)
 
   ```ts
   const session = await scalekit.actions.mcp.createSessionToken({
