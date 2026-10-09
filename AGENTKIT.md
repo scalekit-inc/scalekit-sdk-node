@@ -158,7 +158,7 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 - `verifyConnectedAccountUser` — completes OAuth user verification.
 - `listConnectedAccounts`, `deleteConnectedAccount`, `getConnectedAccount`
 - `createConnectedAccount`, `getOrCreateConnectedAccount`, `updateConnectedAccount`
-- `request` — proxied HTTP to `{envUrl}/proxy/...` with `connection_name` / `identifier` headers (returns `AxiosResponse`).
+- `request` — proxied HTTP to `{envUrl}/proxy/...` with `connection_name` / `identifier` headers (returns `AxiosResponse`). A `path` that would resolve outside `{envUrl}/proxy/` (for example through `..` segments, encoded dots or control characters) is rejected with an `Error` before any request is sent; every other path is sent unchanged. Redirects are followed as before, but a redirect hop outside `{envUrl}/proxy/` (another origin, or a same-origin path outside the prefix) is sent without `Authorization`, `connection_name` and `identifier`.
 
 There is no separate `connect` export on Node; use `actions` for the facade.
 

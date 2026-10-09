@@ -5,6 +5,7 @@ import {
 } from '@bufbuild/protobuf';
 import { AxiosError, AxiosResponse } from 'axios';
 import CoreClient, { assertValidTimeout } from './core';
+import { assertProxyPathContained, proxyRedirectGuard } from './proxy-path';
 import {
   ScalekitException,
   ScalekitGatewayTimeoutException,
@@ -691,6 +692,15 @@ export default class ActionsClient {
    * @throws {ScalekitGatewayTimeoutException} If the request exceeds the timeout.
    * @throws {ScalekitServerException} If a network or server error occurs.
    * @throws {ScalekitException} If required parameters are missing or an unexpected error occurs.
+   * @throws {Error} If `path` resolves outside the proxy prefix (`<environment URL>/proxy/`),
+   *                 for example through `..` segments, encoded dots or control characters.
+   *                 Checked before any network call; every other path is sent unchanged.
+   *
+   * @remarks Redirects returned by the proxied API are followed as before. A redirect
+   * hop that leaves the proxy prefix (another origin, or a same-origin path outside
+   * `<environment URL>/proxy/`) is sent without the client's `Authorization`,
+   * `connection_name` and `identifier` headers. So is a hop sent through an HTTP
+   * forward proxy whose redirect location carries a fragment.
    */
   async request(params: {
     connectionName: string;
@@ -727,6 +737,7 @@ export default class ActionsClient {
 
     const normalizedPath = path.startsWith('/') ? path : `/${path}`;
     const url = `${this.coreClient.envUrl.replace(/\/$/, '')}/proxy${normalizedPath}`;
+    assertProxyPathContained(this.coreClient.envUrl, url);
     if (timeoutMs !== undefined) {
       assertValidTimeout('timeoutMs', timeoutMs);
     }
@@ -746,6 +757,9 @@ export default class ActionsClient {
         data: body ?? formData,
         headers: proxyHeaders,
         timeout,
+        // Redirects are still followed; credentials are not sent on a hop
+        // that leaves the proxy prefix.
+        beforeRedirect: proxyRedirectGuard(this.coreClient.envUrl),
       });
     } catch (error) {
       if (error instanceof ScalekitException) throw error;

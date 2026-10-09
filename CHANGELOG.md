@@ -6,6 +6,16 @@ All notable changes to this SDK are documented in this file. The format follows
 
 Sections up to and including 2.19.0 were imported from [GitHub Releases](https://github.com/scalekit-inc/scalekit-sdk-node/releases). Their wording is kept, with small corrections.
 
+## [2.19.1] - 2026-10-09
+
+### Security
+
+- `scalekit.actions.request(...)` could send the client's bearer token and the `connection_name` and `identifier` headers outside `<environment URL>/proxy/` when `path` resolved outside that prefix or a proxied API redirected outside it. It now rejects with an `Error` before sending anything when `path` would resolve outside the prefix: for example through `..` segments, including percent-encoded or backslash forms, or dots split by a tab or newline. A redirect outside the prefix is still followed, but without those credentials. With an `http://` environment URL, the same applies to a redirect sent through an HTTP forward proxy whose location carries a fragment. Every other path and redirect is sent exactly as before.
+
+  - **Affected versions:** `>=2.5.0 <2.19.1`
+  - **Patched versions:** `2.19.1`
+  - **Action:** upgrade. This matters most if you build `path` from untrusted input, such as values supplied by end users or by an AI agent, or call APIs whose responses you do not control.
+
 ## [2.19.0] - 2026-10-05
 
 ### Changes
@@ -384,6 +394,7 @@ await client.domain.listDomains('org_123456', {
 
 - First Release of the official Scalekit Node SDK
 
+[2.19.1]: https://github.com/scalekit-inc/scalekit-sdk-node/compare/v2.19.0...v2.19.1
 [2.19.0]: https://github.com/scalekit-inc/scalekit-sdk-node/releases/tag/v2.19.0
 [2.18.0]: https://github.com/scalekit-inc/scalekit-sdk-node/releases/tag/v2.18.0
 [2.17.0]: https://github.com/scalekit-inc/scalekit-sdk-node/releases/tag/v2.17.0
