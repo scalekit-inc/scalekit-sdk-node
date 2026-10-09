@@ -7979,6 +7979,13 @@ console.log(config?.mcpServerUrl, session.token, session.expiresAt);
 
 </dd>
 </dl>
+<dl>
+<dd>
+
+**params.accessLevel?:** `'FULL' | 'READ_ONLY'` - Tools the token can use. `'READ_ONLY'` limits the token to tools annotated read-only (`read_only_hint`): other tools are left out of the tool list and refused when called. `'FULL'`, or omitting it, exposes every tool the configuration exposes.
+
+</dd>
+</dl>
 </dd>
 </dl>
 

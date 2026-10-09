@@ -3,6 +3,11 @@ import GrpcConnect from './connect';
 import CoreClient from './core';
 import { CreateMcpConfigResponse, CreateMcpSessionTokenResponse, DeleteMcpConfigResponse, GetMcpConfigResponse, ListMcpConfigsResponse, ListMcpConnectedAccountsResponse, McpConfigSchema, UpdateMcpConfigRequestSchema, UpdateMcpConfigResponse } from './pkg/grpc/scalekit/v1/mcp/mcp_pb';
 /**
+ * Tools an MCP session token can use: `'FULL'` for every tool, `'READ_ONLY'`
+ * for tools annotated read-only only.
+ */
+export type McpSessionTokenAccessLevel = 'FULL' | 'READ_ONLY';
+/**
  * Client for Virtual MCP servers.
  *
  * A Virtual MCP server exposes a chosen set of connectors and tools over the
@@ -117,6 +122,10 @@ export default class McpClient {
      * @param params.mcpConfigId ID of the configuration.
      * @param params.identifier Your application's unique identifier for the user.
      * @param params.expirySeconds Token lifetime in whole seconds.
+     * @param params.accessLevel Tools the token can use. `'READ_ONLY'` limits it
+     * to tools annotated read-only: other tools are left out of the tool list
+     * and refused when called. `'FULL'`, or omitting it, exposes every tool the
+     * configuration exposes.
      * @throws {Error} If `expirySeconds` is not a positive integer.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
@@ -124,5 +133,6 @@ export default class McpClient {
         mcpConfigId: string;
         identifier: string;
         expirySeconds?: number;
+        accessLevel?: McpSessionTokenAccessLevel;
     }): Promise<CreateMcpSessionTokenResponse>;
 }
