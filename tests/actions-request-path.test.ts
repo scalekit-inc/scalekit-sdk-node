@@ -100,6 +100,8 @@ describe('actions.request path containment', () => {
       // prefix is accepted, never a longer name that starts with it.
       ['a sibling sharing the prefix name', '/..%2fproxyx'],
       ['a sibling with a suffix', '/..%2fproxy-other'],
+      // `\` kept as an ordinary character: only the encoded slashes separate.
+      ['an encoded backslash inside a segment', '/a%5Cb%2f..%2f..%2foutside'],
     ];
 
     it.each(escapes)('%s', async (_name, path) => {
@@ -138,6 +140,10 @@ describe('actions.request path containment', () => {
         ['to another /proxy outside the base', '/../../proxy/x'],
         ['through encoded dots', '/%2e%2e/x'],
         ['through an empty segment', '//..%2f..%2fx'],
+        [
+          'through an encoded backslash inside a segment',
+          '/a%5Cb%2f..%2f..%2fx',
+        ],
       ])('%s', async (_name, path) => {
         const client = makeClient(`${origin}/base`);
         await expect(call(client, path)).rejects.toThrow(
@@ -370,6 +376,17 @@ describe('actions.request redirects', () => {
         ...withoutCredentials,
       },
     ]);
+  });
+
+  it('strips credentials on a redirect whose encoded backslash hides a parent segment', async () => {
+    await redirectVia(
+      makeClient(envOrigin),
+      '/proxy/a%5Cb%2f..%2f..%2foutside'
+    );
+    expect(hops[1]).toMatchObject({
+      url: '/proxy/a%5Cb%2f..%2f..%2foutside',
+      ...withoutCredentials,
+    });
   });
 
   it('keeps credentials on a redirect to another path under the prefix', async () => {

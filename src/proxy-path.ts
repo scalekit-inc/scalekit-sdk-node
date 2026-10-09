@@ -26,8 +26,8 @@ type Containment = 'inside' | 'outside' | 'unparseable';
 /**
  * Classifies `url` against `<envUrl base path>/proxy/` on the environment's
  * origin. `inside` requires the same origin, the path as sent on the wire to
- * start with `<base>/proxy/` (a bare `<base>/proxy` is outside), and that path
- * as a server may read it (see {@link serverView}) to start with
+ * start with `<base>/proxy/` (a bare `<base>/proxy` is outside), and every
+ * way a server may read that path (see {@link serverViews}) to start with
  * `<base>/proxy/` or to be exactly `<base>/proxy`.
  *
  * The exact `<base>/proxy` case keeps paths that step out and back in to the
@@ -55,10 +55,15 @@ function proxyContainment(envUrl: string, url: string): Containment {
   if (!sentPath.startsWith(sentPrefix)) {
     return 'outside';
   }
-  const cleanedPrefix = serverView(sentPrefix);
-  const cleanedPath = serverView(sentPath);
-  return cleanedPath.startsWith(cleanedPrefix) ||
-    cleanedPath === cleanedPrefix.replace(/\/$/, '')
+  const cleanedPrefixes = serverViews(sentPrefix);
+  const cleanedPaths = serverViews(sentPath);
+  return cleanedPaths.every((cleanedPath, i) => {
+    const cleanedPrefix = cleanedPrefixes[i];
+    return (
+      cleanedPath.startsWith(cleanedPrefix) ||
+      cleanedPath === cleanedPrefix.replace(/\/$/, '')
+    );
+  })
     ? 'inside'
     : 'outside';
 }
@@ -126,18 +131,19 @@ export function proxyRedirectGuard(
 }
 
 /**
- * Models how a server may interpret a request path: percent-decode once,
- * treat `\` as `/`, collapse runs of `/` into one, then remove dot segments
- * (RFC 3986 §5.2.4). Collapsing first matches routers that clean paths the
- * way Go's `path.Clean` does, where `/proxy//..` resolves to `/`, not to
- * `/proxy/`.
+ * Models the ways a server may interpret a request path: percent-decode once,
+ * collapse runs of `/` into one, then remove dot segments (RFC 3986 §5.2.4),
+ * both with `\` kept as an ordinary character and with `\` read as `/`.
+ * Collapsing first matches routers that clean paths the way Go's
+ * `path.Clean` does, where `/proxy//..` resolves to `/`, not to `/proxy/`.
+ * The two views are returned in a fixed order so a path's views line up with
+ * the prefix's.
  */
-function serverView(path: string): string {
-  return removeDotSegments(
-    percentDecodeBytes(path)
-      .replace(/\\/g, '/')
-      .replace(/\/{2,}/g, '/')
-  );
+function serverViews(path: string): [string, string] {
+  const decoded = percentDecodeBytes(path);
+  const clean = (p: string): string =>
+    removeDotSegments(p.replace(/\/{2,}/g, '/'));
+  return [clean(decoded), clean(decoded.replace(/\\/g, '/'))];
 }
 
 /**
