@@ -8502,6 +8502,7 @@ app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async 
 - `occurredAt: Date | undefined`
 - `detectionMode: DetectionMode` - `'webhook'` or `'poll'`
 - `payloadState: PayloadState` - `'full'` or `'reference'`
+- `deliveryScope`, `detectionMode` and `payloadState` can also hold a value added after this SDK version, as a plain string; handle the values you know and skip the rest
 - `payload: JsonValue` - `null` when absent, and always for `'reference'`
 - `extra: Record<string, JsonValue>` - Top-level fields this SDK version does not recognise, under their wire (snake_case) names
 
