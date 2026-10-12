@@ -4,6 +4,11 @@ import { TestOrganizationManager } from './utils/test-data';
 
 const TEST_LOGO_URL = 'https://logo.debounce.com/microsoft.com';
 
+// Slugs are unique per environment, and CI runs this suite on several Node
+// versions in parallel against the same environment, so never reuse one.
+const uniqueSlug = () =>
+  `acmecorp-${Math.random().toString(36).slice(2, 10).padEnd(8, '0')}`;
+
 describe('Organization Slug and Logo', () => {
   let client: ScalekitClient;
   let testOrg: string;
@@ -29,7 +34,7 @@ describe('Organization Slug and Logo', () => {
   });
 
   it('should create organization with slug', async () => {
-    const slug = 'auth.megasoft.com';
+    const slug = uniqueSlug();
     const result = await client.organization.createOrganization(
       'Acme Corporation Slug Test',
       { slug }
@@ -55,7 +60,7 @@ describe('Organization Slug and Logo', () => {
     });
 
     it('should update organization slug and metadata', async () => {
-      const slug = 'auth.megasoft.com';
+      const slug = uniqueSlug();
       const metadata = { custom_domain: 'auth.megasoft.com' };
       const result = await client.organization.updateOrganization(testOrg, {
         slug,
