@@ -6,6 +6,7 @@ import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
 import type McpClient from './mcp';
 import type ProvidersClient from './providers';
+import { TriggersClient } from './triggers';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
 import type { ListAvailableToolsResponse, ListScopedToolsResponse, ScopedToolFilterSchema, SearchToolsResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
@@ -83,6 +84,11 @@ export default class ActionsClient {
     readonly mcp: McpClient;
     /** Bring-your-own connectors: create, update, list and delete custom connectors. */
     readonly providers: ProvidersClient;
+    /**
+     * Trigger events delivered to your endpoint: verify and parse them with
+     * `triggers.verifyEvent`. Needs no network access.
+     */
+    readonly triggers: TriggersClient;
     /**
      * @param {ToolsClient} tools - Client used to execute tools on behalf of connected accounts.
      * @param {ConnectedAccountsClient} connectedAccounts - Client for connected-account lifecycle operations.
