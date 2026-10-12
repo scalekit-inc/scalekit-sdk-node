@@ -7493,7 +7493,7 @@ console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
 
 ## Virtual MCP Servers
 
-A Virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol, so any MCP-capable agent can call them. Create one configuration per agent role (not per user), and mint a short-lived session token per user per run. The server URL stays the same; the token carries the user's identity.
+A Virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol, so any MCP-capable agent can call them. Create one configuration per agent role (not per user), and mint a short-lived session token per user per run. The server URL stays the same; the token carries the user's identity. Each AgentKit connection also has its own MCP server with all of its tools; mint tokens for it with `createSessionToken({ connectionName, ... })`.
 
 Only the generally available `McpConfig` API is covered. The older `Mcp` and `McpInstance` families are marked PREVIEW and are not exposed.
 
@@ -7921,9 +7921,16 @@ for (const account of pending) {
 <dl>
 <dd>
 
-Mints a session token for one user against one configuration.
+Mints a session token for one user, for either a Virtual MCP server or a connection's own MCP server. Set a target; if both are set, `mcpConfigId` is used:
 
-The token carries the user's identity. Mint a fresh one before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
+- `mcpConfigId`: the token works on that configuration's `config.mcpServerUrl`.
+- `connectionName`: the token works on the connection's own MCP server at `<environment URL>/mcp/v3/connections/<connection name>`, which exposes all of that connection's tools without an MCP configuration. The name is matched without regard to case, but the URL path is case-sensitive: build it from the connection's name exactly as stored.
+
+A token works only on the server it was minted for. The token carries the user's identity. Mint a fresh one before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
+
+TypeScript rejects a call with neither target at compile time. At run time, only the connection form is checked before the request is sent: a non-string `connectionName` throws, and so does an `identifier` that is not a non-empty string (`identifier is required`). Calls with `mcpConfigId` are unchanged: they are not checked beyond `expirySeconds`, so a missing or empty ID is sent and rejected by the server, and `connectionName` is ignored when a non-empty `mcpConfigId` is set.
+
+For a connection, the user should have an active connected account on it. When they do not, depending on the environment, the call either fails with `ScalekitBadRequestException`, or succeeds after creating a pending connected account, in which case tool calls report the account as not connected. The call fails with `ScalekitNotFoundException` when no active connection has that name, and with `ScalekitBadRequestException` when the connection is not an AgentKit connection or the identifier or expiry is rejected.
 </dd>
 </dl>
 </dd>
@@ -7938,6 +7945,7 @@ The token carries the user's identity. Mint a fresh one before every agent run, 
 <dd>
 
 ```typescript
+// Virtual MCP server built from a configuration
 const { config } = await scalekitClient.actions.mcp.getConfig('<CONFIG_ID>');
 const session = await scalekitClient.actions.mcp.createSessionToken({
   mcpConfigId: '<CONFIG_ID>',
@@ -7948,6 +7956,20 @@ const session = await scalekitClient.actions.mcp.createSessionToken({
 // Hand both to your MCP client
 console.log(config?.mcpServerUrl, session.token, session.expiresAt);
 ```
+
+```typescript
+// A connection's own MCP server
+const session = await scalekitClient.actions.mcp.createSessionToken({
+  connectionName: 'gmail',
+  identifier: 'user_123',
+  expirySeconds: 900,
+  accessLevel: 'READ_ONLY',
+});
+
+// Hand both to your MCP client. The URL path is case-sensitive: use the connection's stored name.
+const serverUrl = `${process.env.SCALEKIT_ENVIRONMENT_URL}/mcp/v3/connections/gmail`;
+console.log(serverUrl, session.token, session.expiresAt);
+```
 </dd>
 </dl>
 </dd>
@@ -7955,34 +7977,43 @@ console.log(config?.mcpServerUrl, session.token, session.expiresAt);
 
 #### ⚙️ Parameters
 
-<dl>
-<dd>
+Type: `CreateMcpSessionTokenParams`. Set `mcpConfigId` or `connectionName`; if both are set, `mcpConfigId` is used.
 
 <dl>
 <dd>
 
-**params.mcpConfigId:** `string` - The configuration
+<dl>
+<dd>
+
+**params.mcpConfigId?:** `string` - The configuration. If both targets are set, this one is used and `connectionName` is ignored.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.identifier:** `string` - Your application's identifier for the end user
+**params.connectionName?:** `string` - The connection name: the same value used as `connectionName` elsewhere in the SDK. Used when `mcpConfigId` is omitted or empty. It is matched without regard to case, and the token is always issued for the server URL built from the connection's stored name. That URL is case-sensitive, so connect using the stored name exactly as it appears.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server enforces the allowed range.
+**params.identifier:** `string` - Your application's identifier for the end user, 1 to 255 characters. For a connection, the user whose connected account the token acts as; required (non-empty) for a connection before the request is sent.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.accessLevel?:** `'FULL' | 'READ_ONLY'` - Tools the token can use. `'READ_ONLY'` limits the token to tools annotated read-only (`read_only_hint`): other tools are left out of the tool list and refused when called. `'FULL'`, or omitting it, exposes every tool the configuration exposes.
+**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server accepts 60 seconds to 24 hours (86400), 1 hour (3600) by default.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.accessLevel?:** `'FULL' | 'READ_ONLY'` - Tools the token can use. `'READ_ONLY'` limits the token to tools annotated read-only (`read_only_hint`): other tools are left out of the tool list and refused when called. `'FULL'`, or omitting it, exposes every tool the configuration or connection exposes.
 
 </dd>
 </dl>
