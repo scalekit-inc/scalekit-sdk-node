@@ -95,6 +95,10 @@ export type {
 
 // Normalized types surfaced in the public `actions.listTools` API.
 export type { ActionTool, ListToolsResult } from './actions';
+export type {
+  McpSessionTokenAccessLevel,
+  CreateMcpSessionTokenParams,
+} from './mcp';
 
 // Types surfaced by the public `mcp` client (Virtual MCP servers). Only the
 // generally available McpConfig surface is re-exported; the PREVIEW `Mcp` and
