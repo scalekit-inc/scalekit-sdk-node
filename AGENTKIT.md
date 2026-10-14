@@ -138,6 +138,7 @@ await scalekitClient.tools.executeTool({
 - `updateConnectedAccount(params)`
 - `deleteConnectedAccount(params)`
 - `getMagicLinkForConnectedAccount(params)`
+- `refreshConnectedAccountTokens(params)` — refreshes an account's tokens with its provider (PREVIEW).
 - `verifyConnectedAccountUser(params)`
 - `getConnectedAccountByIdentifier(params)` — returns auth details for an account (sensitive).
 
@@ -157,6 +158,7 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 - `getAuthorizationLink` — magic link for connect / re-auth.
 - `verifyConnectedAccountUser` — completes OAuth user verification.
 - `listConnectedAccounts`, `deleteConnectedAccount`, `getConnectedAccount`
+- `refreshConnectedAccountTokens` — refreshes an account's tokens with its provider (PREVIEW).
 - `createConnectedAccount`, `getOrCreateConnectedAccount`, `updateConnectedAccount`
 - `request` — proxied HTTP to `{envUrl}/proxy/...` with `connection_name` / `identifier` headers (returns `AxiosResponse`).
 

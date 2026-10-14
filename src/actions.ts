@@ -90,6 +90,7 @@ import {
   GetConnectedAccountByIdentifierResponse,
   GetMagicLinkForConnectedAccountResponse,
   ListConnectedAccountsResponse,
+  RefreshConnectedAccountTokensResponse,
   UpdateConnectedAccount,
   UpdateConnectedAccountResponse,
   UpdateConnectedAccountSchema,
@@ -475,6 +476,26 @@ export default class ActionsClient {
       organizationId,
       userId,
       connectedAccountId: trimmedConnectedAccountId,
+    });
+  }
+
+  /**
+   * Refresh a connected account's tokens with its provider (PREVIEW).
+   * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
+   * See `connectedAccounts.refreshConnectedAccountTokens` for behaviour and errors.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If required parameters are missing.
+   */
+  async refreshConnectedAccountTokens(params: {
+    connectionName?: string;
+    identifier?: string;
+    connectedAccountId?: string;
+  }): Promise<RefreshConnectedAccountTokensResponse> {
+    return this.connectedAccounts.refreshConnectedAccountTokens({
+      connectionName: params.connectionName,
+      identifier: params.identifier,
+      connectedAccountId: params.connectedAccountId,
     });
   }
 

@@ -21,6 +21,8 @@ import {
   ListConnectedAccountsRequestSchema,
   ListConnectedAccountsResponse,
   OauthTokenSchema,
+  RefreshConnectedAccountTokensRequestSchema,
+  RefreshConnectedAccountTokensResponse,
   UpdateConnectedAccount,
   UpdateConnectedAccountRequestSchema,
   UpdateConnectedAccountResponse,
@@ -37,6 +39,7 @@ import {
  * - list connected accounts
  * - create/update/delete connected accounts
  * - generate magic links for authorization
+ * - refresh the tokens of a connected account
  * - fetch full authentication details for a connected account
  */
 export default class ConnectedAccountsClient {
@@ -348,6 +351,56 @@ export default class ConnectedAccountsClient {
         ...(state && { state }),
         ...(userVerifyUrl && { userVerifyUrl }),
       })
+    );
+  }
+
+  /**
+   * Refreshes the tokens of a connected account with its provider (PREVIEW).
+   *
+   * Call this when a proxy call to the provider fails with an auth error, then
+   * retry the call. Pass `connectedAccountId`, or `connectionName` plus
+   * `identifier`; if the ID is set, the other two are ignored.
+   *
+   * The response carries account metadata only, no credentials. Read
+   * `connectedAccount.tokenExpiresAt` for the new expiry.
+   *
+   * Supported for OAuth, SMART on FHIR, OAuth M2M, Google DWD and trusted IdP
+   * accounts. API key, bearer, basic and no-auth accounts are rejected with 400.
+   * The account must be ACTIVE or EXPIRED. Needs server-side API credentials,
+   * not an account-bound token.
+   *
+   * Errors:
+   * - 400 REAUTHENTICATION_NEEDED: the provider rejected the refresh; an ACTIVE
+   *   account is marked EXPIRED and the user must re-authorize.
+   * - 400 REFRESH_IN_PROGRESS: another refresh of this account is running.
+   * - 500: provider outage or 5xx; the account status is unchanged.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If required parameters are missing.
+   */
+  async refreshConnectedAccountTokens(params: {
+    connectedAccountId?: string;
+    connectionName?: string;
+    identifier?: string;
+  }): Promise<RefreshConnectedAccountTokensResponse> {
+    const connectedAccountId = params.connectedAccountId?.trim();
+    const connectionName = params.connectionName?.trim();
+    const identifier = params.identifier?.trim();
+
+    if (!connectedAccountId && !(connectionName && identifier)) {
+      throw new Error(
+        'either connectedAccountId or connectionName + identifier is required'
+      );
+    }
+
+    return this.coreClient.connectExec(
+      this.client.refreshConnectedAccountTokens,
+      create(
+        RefreshConnectedAccountTokensRequestSchema,
+        connectedAccountId
+          ? { connectedAccountId }
+          : { connectionName, identifier }
+      )
     );
   }
 
