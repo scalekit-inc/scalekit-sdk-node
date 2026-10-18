@@ -482,7 +482,10 @@ export default class ActionsClient {
   /**
    * Refresh a connected account's tokens with its provider (PREVIEW).
    * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
-   * See `connectedAccounts.refreshConnectedAccountTokens` for behaviour and errors.
+   * Only ACTIVE accounts are refreshed; an EXPIRED account fails with 400
+   * REAUTHENTICATION_NEEDED. Check `error_code` on errors (409 REFRESH_IN_PROGRESS,
+   * 400 REFRESH_NOT_SUPPORTED_FOR_CONNECTOR, 500 INTERNAL_ERROR).
+   * See `connectedAccounts.refreshConnectedAccountTokens` for the full list.
    *
    * @throws {ScalekitServerException} If a network or server error occurs.
    * @throws {ScalekitException} If required parameters are missing.

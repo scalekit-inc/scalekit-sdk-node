@@ -364,16 +364,23 @@ export default class ConnectedAccountsClient {
    * The response carries account metadata only, no credentials. Read
    * `connectedAccount.tokenExpiresAt` for the new expiry.
    *
-   * Supported for OAuth, SMART on FHIR, OAuth M2M, Google DWD and trusted IdP
-   * accounts. API key, bearer, basic and no-auth accounts are rejected with 400.
-   * The account must be ACTIVE or EXPIRED. Needs server-side API credentials,
-   * not an account-bound token.
+   * Works for OAuth, SMART on FHIR, OAuth client credentials, Google
+   * domain-wide delegation and trusted IdP accounts. Only ACTIVE accounts are
+   * refreshed. Needs server-side API credentials: account-bound or portal
+   * tokens get 403.
    *
-   * Errors:
-   * - 400 REAUTHENTICATION_NEEDED: the provider rejected the refresh; an ACTIVE
-   *   account is marked EXPIRED and the user must re-authorize.
-   * - 400 REFRESH_IN_PROGRESS: another refresh of this account is running.
-   * - 500: provider outage or 5xx; the account status is unchanged.
+   * Errors (check `error_code`, not only the HTTP status):
+   * - 400 REAUTHENTICATION_NEEDED: the account is EXPIRED (no provider call
+   *   is made), or the provider rejected the refresh (invalid_grant, revoked,
+   *   no refresh token) and the account is now marked EXPIRED. The user must
+   *   authorize again.
+   * - 400 REFRESH_NOT_SUPPORTED_FOR_CONNECTOR: API key, bearer, basic auth,
+   *   no-auth and Trello OAuth1 accounts cannot be refreshed.
+   * - 404: account not found.
+   * - 409 REFRESH_IN_PROGRESS: a refresh is already running for this account.
+   *   Retry in a few seconds.
+   * - 500 INTERNAL_ERROR: provider outage, network error, 5xx or 429. The
+   *   account stays ACTIVE. Retry later.
    *
    * @throws {ScalekitServerException} If a network or server error occurs.
    * @throws {ScalekitException} If required parameters are missing.

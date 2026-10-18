@@ -1,6 +1,6 @@
 kind: added
 body: |
-  `scalekit.connectedAccounts.refreshConnectedAccountTokens({ connectedAccountId })` (or `{ connectionName, identifier }`) refreshes a connected account's tokens with its provider (PREVIEW). Call it when a proxy call fails with an auth error, then retry. It returns the account metadata, with the new expiry in `connectedAccount.tokenExpiresAt`. If the provider rejects the refresh, the call fails with `REAUTHENTICATION_NEEDED` and an active account is marked expired. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/AGENTKIT.md)
+  `scalekit.connectedAccounts.refreshConnectedAccountTokens({ connectedAccountId })` (or `{ connectionName, identifier }`) refreshes a connected account's tokens with its provider (PREVIEW). Call it when a proxy call fails with an auth error, then retry. It returns the account metadata, with the new expiry in `connectedAccount.tokenExpiresAt`. Only active accounts are refreshed. If the provider rejects the refresh, or the account is already expired, the call fails with 400 `REAUTHENTICATION_NEEDED` and the user must authorize again. A refresh already running returns 409 `REFRESH_IN_PROGRESS`; a provider outage returns 500 and leaves the account active. Check `error_code`, not only the HTTP status. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/AGENTKIT.md)
 
   ```ts
   const { connectedAccount } =

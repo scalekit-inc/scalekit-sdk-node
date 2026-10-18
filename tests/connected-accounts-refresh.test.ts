@@ -81,13 +81,18 @@ describe('ConnectedAccountsClient.refreshConnectedAccountTokens', () => {
     expect(refreshConnectedAccountTokens).not.toHaveBeenCalled();
   });
 
-  it('propagates a server error', async () => {
+  it.each([
+    'REAUTHENTICATION_NEEDED',
+    'REFRESH_IN_PROGRESS',
+    'REFRESH_NOT_SUPPORTED_FOR_CONNECTOR',
+    'INTERNAL_ERROR',
+  ])('propagates a server error: %s', async (code) => {
     const { accounts, refreshConnectedAccountTokens } = makeClient();
-    const boom = new Error('REAUTHENTICATION_NEEDED');
-    refreshConnectedAccountTokens.mockRejectedValueOnce(boom);
+    refreshConnectedAccountTokens.mockRejectedValueOnce(new Error(code));
     await expect(
       accounts.refreshConnectedAccountTokens({ connectedAccountId: 'ca_1' })
-    ).rejects.toThrow('REAUTHENTICATION_NEEDED');
+    ).rejects.toThrow(code);
+    expect(refreshConnectedAccountTokens).toHaveBeenCalledTimes(1);
   });
 
   it('is exposed on actions and forwards the params', async () => {

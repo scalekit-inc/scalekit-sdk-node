@@ -138,7 +138,7 @@ await scalekitClient.tools.executeTool({
 - `updateConnectedAccount(params)`
 - `deleteConnectedAccount(params)`
 - `getMagicLinkForConnectedAccount(params)`
-- `refreshConnectedAccountTokens(params)` — refreshes an account's tokens with its provider (PREVIEW).
+- `refreshConnectedAccountTokens(params)` — refreshes an ACTIVE account's tokens with its provider (PREVIEW). Pass `connectedAccountId` or `connectionName` + `identifier`; the ID wins. Key on `error_code`: 400 `REAUTHENTICATION_NEEDED` (expired or rejected; user must authorize again), 400 `REFRESH_NOT_SUPPORTED_FOR_CONNECTOR`, 409 `REFRESH_IN_PROGRESS` (retry in a few seconds), 500 `INTERNAL_ERROR` (retry later).
 - `verifyConnectedAccountUser(params)`
 - `getConnectedAccountByIdentifier(params)` — returns auth details for an account (sensitive).
 
@@ -158,7 +158,7 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 - `getAuthorizationLink` — magic link for connect / re-auth.
 - `verifyConnectedAccountUser` — completes OAuth user verification.
 - `listConnectedAccounts`, `deleteConnectedAccount`, `getConnectedAccount`
-- `refreshConnectedAccountTokens` — refreshes an account's tokens with its provider (PREVIEW).
+- `refreshConnectedAccountTokens` — refreshes an ACTIVE account's tokens with its provider (PREVIEW); same errors as above.
 - `createConnectedAccount`, `getOrCreateConnectedAccount`, `updateConnectedAccount`
 - `request` — proxied HTTP to `{envUrl}/proxy/...` with `connection_name` / `identifier` headers (returns `AxiosResponse`).
 
