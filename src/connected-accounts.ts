@@ -21,6 +21,8 @@ import {
   ListConnectedAccountsRequestSchema,
   ListConnectedAccountsResponse,
   OauthTokenSchema,
+  RefreshConnectedAccountTokensRequestSchema,
+  RefreshConnectedAccountTokensResponse,
   UpdateConnectedAccount,
   UpdateConnectedAccountRequestSchema,
   UpdateConnectedAccountResponse,
@@ -37,6 +39,7 @@ import {
  * - list connected accounts
  * - create/update/delete connected accounts
  * - generate magic links for authorization
+ * - refresh the tokens of a connected account
  * - fetch full authentication details for a connected account
  */
 export default class ConnectedAccountsClient {
@@ -348,6 +351,63 @@ export default class ConnectedAccountsClient {
         ...(state && { state }),
         ...(userVerifyUrl && { userVerifyUrl }),
       })
+    );
+  }
+
+  /**
+   * Refreshes the tokens of a connected account with its provider (PREVIEW).
+   *
+   * Call this when a proxy call to the provider fails with an auth error, then
+   * retry the call. Pass `connectedAccountId`, or `connectionName` plus
+   * `identifier`; if the ID is set, the other two are ignored.
+   *
+   * The response carries account metadata only, no credentials. Read
+   * `connectedAccount.tokenExpiresAt` for the new expiry.
+   *
+   * Works for OAuth, SMART on FHIR, OAuth client credentials, Google
+   * domain-wide delegation and trusted IdP accounts. Only ACTIVE accounts are
+   * refreshed. Needs server-side API credentials: account-bound or portal
+   * tokens get 403.
+   *
+   * Errors (check `error_code`, not only the HTTP status):
+   * - 400 REAUTHENTICATION_NEEDED: the account is EXPIRED (no provider call
+   *   is made), or the provider rejected the refresh (invalid_grant, revoked,
+   *   no refresh token) and the account is now marked EXPIRED. The user must
+   *   authorize again.
+   * - 400 REFRESH_NOT_SUPPORTED_FOR_CONNECTOR: API key, bearer, basic auth,
+   *   no-auth and Trello OAuth1 accounts cannot be refreshed.
+   * - 404: account not found.
+   * - 409 REFRESH_IN_PROGRESS: a refresh is already running for this account.
+   *   Retry in a few seconds.
+   * - 500 INTERNAL_ERROR: provider outage, network error, 5xx or 429. The
+   *   account stays ACTIVE. Retry later.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If required parameters are missing.
+   */
+  async refreshConnectedAccountTokens(params: {
+    connectedAccountId?: string;
+    connectionName?: string;
+    identifier?: string;
+  }): Promise<RefreshConnectedAccountTokensResponse> {
+    const connectedAccountId = params.connectedAccountId?.trim();
+    const connectionName = params.connectionName?.trim();
+    const identifier = params.identifier?.trim();
+
+    if (!connectedAccountId && !(connectionName && identifier)) {
+      throw new Error(
+        'either connectedAccountId or connectionName + identifier is required'
+      );
+    }
+
+    return this.coreClient.connectExec(
+      this.client.refreshConnectedAccountTokens,
+      create(
+        RefreshConnectedAccountTokensRequestSchema,
+        connectedAccountId
+          ? { connectedAccountId }
+          : { connectionName, identifier }
+      )
     );
   }
 

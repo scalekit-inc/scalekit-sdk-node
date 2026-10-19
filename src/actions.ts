@@ -90,6 +90,7 @@ import {
   GetConnectedAccountByIdentifierResponse,
   GetMagicLinkForConnectedAccountResponse,
   ListConnectedAccountsResponse,
+  RefreshConnectedAccountTokensResponse,
   UpdateConnectedAccount,
   UpdateConnectedAccountResponse,
   UpdateConnectedAccountSchema,
@@ -475,6 +476,29 @@ export default class ActionsClient {
       organizationId,
       userId,
       connectedAccountId: trimmedConnectedAccountId,
+    });
+  }
+
+  /**
+   * Refresh a connected account's tokens with its provider (PREVIEW).
+   * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
+   * Only ACTIVE accounts are refreshed; an EXPIRED account fails with 400
+   * REAUTHENTICATION_NEEDED. Check `error_code` on errors (409 REFRESH_IN_PROGRESS,
+   * 400 REFRESH_NOT_SUPPORTED_FOR_CONNECTOR, 500 INTERNAL_ERROR).
+   * See `connectedAccounts.refreshConnectedAccountTokens` for the full list.
+   *
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   * @throws {ScalekitException} If required parameters are missing.
+   */
+  async refreshConnectedAccountTokens(params: {
+    connectionName?: string;
+    identifier?: string;
+    connectedAccountId?: string;
+  }): Promise<RefreshConnectedAccountTokensResponse> {
+    return this.connectedAccounts.refreshConnectedAccountTokens({
+      connectionName: params.connectionName,
+      identifier: params.identifier,
+      connectedAccountId: params.connectedAccountId,
     });
   }
 
