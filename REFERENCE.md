@@ -2223,12 +2223,12 @@ const { provider } = await scalekitClient.actions.providers.createCustomProvider
   displayName: 'Custom Pylon MCP',
   description: 'Pylon integration via MCP',
   proxyUrl: 'https://mcp.usepylon.com',
+  isMcp: true,
   authPatterns: [
     {
       type: 'OAUTH',
       display_name: 'OAuth 2.1',
       description: 'Authenticate via browser OAuth.',
-      is_mcp: true,
       oauth_config: {},
     },
   ],
@@ -8045,7 +8045,9 @@ Access via `scalekitClient.actions.providers`.
 <dl>
 <dd>
 
-Creates a custom connector. The response's `provider.identifier` is the id you pass to `updateCustomProvider` and `deleteCustomProvider`.
+Creates a custom connector. The response's `provider.identifier` is the id you pass to `updateCustomProvider` and `deleteCustomProvider`, and the `providerKey` when you create a connection for this connector.
+
+Creating a connector whose name normalizes the same as an existing one does not fail: it gets a numbered identifier. Only two creates racing on the same name fail with a conflict; retry.
 </dd>
 </dl>
 </dd>
@@ -8074,8 +8076,9 @@ const authPatterns: AuthPattern[] = [
 ];
 
 // Other shapes:
-// OAuth, using the upstream server's discovered defaults:
-//   { type: 'OAUTH', display_name: 'OAuth 2.1', description: '...', is_mcp: true, oauth_config: {} }
+// OAuth, using the upstream server's discovered defaults (pass isMcp: true to
+// createCustomProvider when the connector fronts an MCP server):
+//   { type: 'OAUTH', display_name: 'OAuth 2.1', description: '...', oauth_config: {} }
 // API key sent in a custom header:
 //   { type: 'API_KEY', display_name: 'API Key', description: '...',
 //     fields: [{ field_name: 'api_key', label: 'API Key', input_type: 'password' }],
@@ -8104,14 +8107,14 @@ console.log(res.provider?.identifier);
 <dl>
 <dd>
 
-**params.displayName:** `string` - Letters, digits and spaces only. End it with "MCP" when the connector fronts an MCP server.
+**params.displayName:** `string` - Letters, digits and spaces only (max 200 characters); symbols such as `_` or `-` are rejected. The identifier is derived from it (`Acme MCP` becomes `ACMEMCP:<environment id>`), and a name that matches a built-in provider is rejected. End it with "MCP" when the connector fronts an MCP server.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.proxyUrl:** `string` - Base HTTPS URL of the upstream service
+**params.proxyUrl:** `string` - HTTPS URL of the external service, and the address Scalekit sends proxied requests to. For an MCP connector it is the MCP server's URL; for an API connector it is the API's base URL.
 
 </dd>
 </dl>
@@ -8132,7 +8135,14 @@ console.log(res.provider?.identifier);
 <dl>
 <dd>
 
-**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; is_mcp?: boolean; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select'; hint?: string; required?: boolean }`. Set `is_mcp: true` when the connector fronts an MCP server.
+**params.authPatterns?:** `AuthPattern[]` - How users authenticate. Required in practice: the server rejects an empty list with `auth patterns cannot be empty`. Exactly one pattern is supported today. An `AuthPattern` is `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; fields?: AuthField[]; account_fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string; allowed_proxy_domains?: string[] }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select' | 'textarea'; hint?: string; required?: boolean; options?: AuthFieldOption[]; is_path_param?: boolean; header_name?: string }`. `is_mcp` on a pattern is deprecated: use `isMcp`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.isMcp?:** `boolean` - `true` creates an MCP connector; otherwise it is an API connector. Use it instead of the deprecated `is_mcp` on the pattern. A value that conflicts with the pattern's `is_mcp` throws.
 
 </dd>
 </dl>
@@ -8172,13 +8182,12 @@ console.log(res.provider?.identifier);
 
 Updates a custom connector.
 
-Treat this as a PUT: read the current connector with `listProviders` first, then send back every field you want to keep alongside the ones you are changing. `authPatterns` on a response is already decoded into plain `AuthPattern` objects, so `provider.authPatterns` and `provider.proxyEnabled` can be passed back as-is.
+Treat this as a PUT: read the current connector with `listProviders` first, then send back every field you want to keep alongside the ones you are changing. `authPatterns` on a response is already decoded into plain `AuthPattern` objects, so `provider.authPatterns` can be passed back as-is.
 
 What the server does with each field:
-- `displayName`, `proxyUrl` and `authPatterns` are required on every update. Leaving out `authPatterns` fails with `[invalid_argument] Validation error`, and it replaces the whole list rather than merging into it. A pattern's `type` and `is_mcp` cannot be changed.
+- `displayName`, `proxyUrl` and `authPatterns` are required on every update. Leaving out `authPatterns` fails with `[invalid_argument] Validation error`, and it replaces the whole list rather than merging into it. A pattern's `type` and `is_mcp` cannot be changed, and an `API_KEY` pattern cannot switch between single-key and multiple-headers mode. Editing the header fields of a multiple-headers connector means its connected accounts must re-authorize.
 - `metadata` replaces the stored map, so leaving it out clears it.
-- `proxyEnabled` is always applied. It defaults to `true`, so pass the current value to keep a connector's proxying switched off.
-- `description` and `iconSrc` keep their stored values when left out.
+- `description` and `iconSrc` keep their stored values when left out. An empty string does not clear them: the server ignores empty values.
 </dd>
 </dl>
 </dd>
@@ -8208,7 +8217,6 @@ const res = await scalekitClient.actions.providers.updateCustomProvider({
   displayName: current.displayName,
   proxyUrl: current.proxyUrl,
   authPatterns: current.authPatterns, // already plain AuthPattern objects
-  proxyEnabled: current.proxyEnabled,
   description: 'Internal ticketing API, v2',
   iconSrc: current.iconSrc,
   metadata: { ...current.metadata, updated_by: 'sync-job' },
@@ -8253,14 +8261,14 @@ console.log(res.provider?.description);
 
 </dd>
 </dl>
-
 <dl>
 <dd>
 
-**params.proxyEnabled?:** `boolean` - Whether Scalekit proxies requests. Always sent; defaults to `true`, so pass `current.proxyEnabled` to keep the stored value.
+**params.isMcp?:** `boolean` - Must match the connector's existing kind: the server rejects changing it between MCP and API. Pass `true` when updating an MCP connector so the pattern stays MCP. Use it instead of the deprecated `is_mcp` on the pattern; a value that conflicts with the pattern's `is_mcp` throws.
 
 </dd>
 </dl>
+
 <dl>
 <dd>
 
@@ -8302,7 +8310,7 @@ console.log(res.provider?.description);
 <dl>
 <dd>
 
-Deletes a custom connector. Remove its connections and connected accounts first; the server won't delete a connector that is still in use, and answers `[invalid_argument] cannot delete custom provider with existing connections`.
+Deletes a custom connector. Remove its connections and connected accounts first; the server won't delete a connector that is still in use, and answers `[invalid_argument] cannot delete custom provider with existing connections`. A connection that still has connected accounts cannot be deleted either (`[invalid_argument] connection has connected accounts, cannot be deleted`), so remove the accounts first, then the connections. Deleting also removes the connector's discovered custom MCP tools.
 
 Connected accounts come off with `actions.deleteConnectedAccount`. The app connection itself has to go from the Scalekit dashboard: this SDK wraps no delete for an environment-scoped connection, and `connection.deleteConnection` takes an `organizationId`, which an app connection does not have.
 </dd>
