@@ -171,21 +171,32 @@ export default class ProvidersClient {
    * not fail: it gets a numbered identifier. Only two creates racing on the same
    * name fail with a conflict; retry.
    *
+   * A request that fails validation (a missing `authPatterns`, a `displayName`
+   * with a symbol, an `http://` `proxyUrl`) throws a `ScalekitBadRequestException`
+   * whose message is only `[invalid_argument] Validation error`. The field and the
+   * reason are on the error:
+   * `error.unpackedDetails[0].validationErrorInfo.fieldViolations`, where each
+   * entry has a `field` (for example `provider.proxy_url`) and a `description`.
+   *
    * @param params.displayName Name shown in the UI. Letters, digits and spaces only
    *                           (max 200 characters); symbols such as `_` or `-` are
    *                           rejected. The identifier is derived from it
-   *                           (`Acme MCP` becomes `ACMEMCP:<environment id>`), and a
-   *                           name that matches a built-in provider is rejected.
-   *                           Suffix it with "MCP" when the connector fronts an MCP server.
+   *                           (`Acme MCP` becomes `ACMEMCP:<environment id>`). The
+   *                           names of the built-in login providers (Github, Google,
+   *                           Gitlab, Microsoft, LinkedIn, Salesforce, Facebook) are
+   *                           rejected; other built-in names such as Gmail are
+   *                           accepted. Suffix it with "MCP" when the connector
+   *                           fronts an MCP server.
    * @param params.proxyUrl HTTPS URL of the external service, and the address
    *                        Scalekit sends proxied requests to. For an MCP connector
    *                        it is the MCP server's URL; for an API connector it is
    *                        the API's base URL.
    * @param params.proxyEnabled Whether Scalekit proxies requests. Defaults to true.
-   * @param params.authPatterns How users authenticate. Required in practice: the
-   *                            server rejects an empty list with `auth patterns
-   *                            cannot be empty`. Exactly one pattern is supported
-   *                            today; the array is for future use.
+   * @param params.authPatterns How users authenticate. Required in practice:
+   *                            leaving it out fails with a validation error on
+   *                            `provider.auth_patterns`, and an empty array fails
+   *                            with `auth patterns cannot be empty`. Exactly one
+   *                            pattern is supported today; the array is for future use.
    * @param params.isMcp `true` creates an MCP connector; otherwise it is an API
    *                     connector. Use it instead of the deprecated `is_mcp` on
    *                     the pattern. A value that conflicts with the pattern's

@@ -8048,6 +8048,8 @@ Access via `scalekitClient.actions.providers`.
 Creates a custom connector. The response's `provider.identifier` is the id you pass to `updateCustomProvider` and `deleteCustomProvider`, and the `providerKey` when you create a connection for this connector.
 
 Creating a connector whose name normalizes the same as an existing one does not fail: it gets a numbered identifier. Only two creates racing on the same name fail with a conflict; retry.
+
+A request that fails validation (a missing `authPatterns`, a `displayName` with a symbol, an `http://` `proxyUrl`) throws a `ScalekitBadRequestException` whose message is only `[invalid_argument] Validation error`. The field and the reason are on the error: `error.unpackedDetails[0].validationErrorInfo.fieldViolations`, where each entry has a `field` (for example `provider.proxy_url`) and a `description`.
 </dd>
 </dl>
 </dd>
@@ -8107,7 +8109,7 @@ console.log(res.provider?.identifier);
 <dl>
 <dd>
 
-**params.displayName:** `string` - Letters, digits and spaces only (max 200 characters); symbols such as `_` or `-` are rejected. The identifier is derived from it (`Acme MCP` becomes `ACMEMCP:<environment id>`), and a name that matches a built-in provider is rejected. End it with "MCP" when the connector fronts an MCP server.
+**params.displayName:** `string` - Letters, digits and spaces only (max 200 characters); symbols such as `_` or `-` are rejected. The identifier is derived from it (`Acme MCP` becomes `ACMEMCP:<environment id>`). The names of the built-in login providers (Github, Google, Gitlab, Microsoft, LinkedIn, Salesforce, Facebook) are rejected; other built-in names such as Gmail are accepted. End it with "MCP" when the connector fronts an MCP server.
 
 </dd>
 </dl>
@@ -8135,7 +8137,7 @@ console.log(res.provider?.identifier);
 <dl>
 <dd>
 
-**params.authPatterns?:** `AuthPattern[]` - How users authenticate. Required in practice: the server rejects an empty list with `auth patterns cannot be empty`. Exactly one pattern is supported today. An `AuthPattern` is `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; fields?: AuthField[]; account_fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string; allowed_proxy_domains?: string[] }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select' | 'textarea'; hint?: string; required?: boolean; options?: AuthFieldOption[]; is_path_param?: boolean; header_name?: string }`. `is_mcp` on a pattern is deprecated: use `isMcp`.
+**params.authPatterns?:** `AuthPattern[]` - How users authenticate. Required in practice: leaving it out fails with a validation error on `provider.auth_patterns`, and an empty array fails with `auth patterns cannot be empty`. Exactly one pattern is supported today. An `AuthPattern` is `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; fields?: AuthField[]; account_fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string; allowed_proxy_domains?: string[] }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select' | 'textarea'; hint?: string; required?: boolean; options?: AuthFieldOption[]; is_path_param?: boolean; header_name?: string }`. `is_mcp` on a pattern is deprecated: use `isMcp`.
 
 </dd>
 </dl>
