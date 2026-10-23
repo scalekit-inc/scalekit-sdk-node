@@ -7379,6 +7379,114 @@ console.log(res);
 </dl>
 </details>
 
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">executeTool</a>(params) -> Promise&lt;ExecuteToolResponse&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Runs a tool on behalf of a connected account and returns the tool's output in `data`, with an `executionId` for the run.
+
+Which connected account is used:
+- `identifier` alone is enough when that user has exactly one account for the tool's own provider. If there is none the call fails with a `ScalekitNotFoundException`, and if there are several it fails with a `ScalekitBadRequestException`: then add `connector`, or pass `connectedAccountId`.
+- `connectedAccountId` picks the account directly.
+- `connector` with `identifier` picks the account on that connection.
+- With none of these the server rejects the call as a bad request. This method does not check that itself; it only throws an `Error` if `toolName` is missing.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { data, executionId } = await scalekitClient.actions.executeTool({
+  toolName: 'slack.chat.postMessage',
+  toolInput: { channel: 'C0123', text: 'hi' },
+  identifier: 'user_123',
+  connector: 'slack-b1fqL2Dr', // the connection name
+});
+console.log(executionId, data);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params.toolName:** `string` - Name of the tool to run, for example `slack.chat.postMessage`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.toolInput:** `Record<string, unknown>` - The tool's arguments. Their shape depends on the tool.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.identifier?:** `string` - The identifier the connected account was created with, usually your end user's ID or email.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.connectedAccountId?:** `string` - Picks the connected account directly.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.connector?:** `string` - The connection name, for example `slack-b1fqL2Dr`, not the provider's name. Use it with `identifier`. The other `actions` methods call this value `connectionName`.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.organizationId?:** `string` - Narrows the account lookup to one organization.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.userId?:** `string` - Narrows the account lookup to one user.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">getAuthorizationLink</a>(params) -> Promise&lt;GetMagicLinkForConnectedAccountResponse&gt;</code></summary>
 <dl>
 <dd>

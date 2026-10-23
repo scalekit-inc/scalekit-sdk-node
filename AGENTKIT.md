@@ -26,6 +26,46 @@ These properties on `scalekitClient` are the AgentKit-related entry points:
 | `connectedAccounts` | List, create, update, delete connected accounts; magic links; verification.                                                                                        |
 | `actions`           | Facade that composes `tools` and `connectedAccounts` with ergonomic names (`connectionName`, etc.). There is no separate `connect` export in Node — use `actions`. |
 
+**Which one to use:** use `actions` for almost everything. `tools` and `connectedAccounts` are the lower layers it wraps. The lower layers (and `actions.executeTool`) call the connection name `connector`; the rest of `actions` calls it `connectionName`.
+
+Two words appear in almost every call:
+
+- **`connectionName`** (`connector` on `executeTool` and the lower layers) is the name of a connection, for example `slack-b1fqL2Dr`, as shown for the connection in the dashboard. It is not the provider's name (`Slack`).
+- **`identifier`** is the identifier a connected account was created with, usually your end user's ID or email. It is yours to choose, and it is how Scalekit finds that user's account.
+
+## How the pieces fit together
+
+To run a tool for one of your users:
+
+1. **Create the connection** for the service in the dashboard. Its name is your `connectionName`.
+2. **Send the user an authorization link.** This is also how a connected account is created:
+
+   ```typescript
+   const { link, expiry } = await scalekitClient.actions.getAuthorizationLink({
+     connectionName: 'slack-b1fqL2Dr',
+     identifier: 'user_123',
+   });
+   // send `link` to the user before `expiry`
+   ```
+
+3. **The user authorizes.** If you passed `userVerifyUrl`, they are redirected there with an `authRequestId`. Confirm the user with `scalekitClient.actions.verifyConnectedAccountUser({ authRequestId, identifier: 'user_123' })`.
+4. **Run the tool:**
+
+   ```typescript
+   const result = await scalekitClient.actions.executeTool({
+     toolName: 'slack.chat.postMessage',
+     toolInput: { channel: 'C0123', text: 'hi' },
+     identifier: 'user_123',
+     connector: 'slack-b1fqL2Dr', // the connection name
+   });
+   ```
+
+   `identifier` alone is enough when that user has exactly one account for the tool's provider. If there is none the call fails as not found, and if there are several it fails as a bad request: then add `connector` or pass `connectedAccountId`.
+
+## Virtual MCP servers
+
+A virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol. Create one configuration per agent role with `actions.mcp.createConfig`, and mint a short-lived session token per user with `actions.mcp.createSessionToken`. Only the generally available configuration API is exposed. See [Virtual MCP Servers](REFERENCE.md#virtual-mcp-servers) in the reference.
+
 OAuth login (`getAuthorizationUrl`, `authenticateWithCode`, …) and MCP **Bring-your-own-auth** (`client.auth.updateLoginUserDetails`) are documented under **Getting Started**, **ScalekitClient**, and **Auth** in [`REFERENCE.md`](REFERENCE.md), not in this AgentKit guide.
 
 ## Tools
@@ -141,7 +181,7 @@ await scalekitClient.tools.executeTool({
 - `verifyConnectedAccountUser(params)`
 - `getConnectedAccountByIdentifier(params)` — returns auth details for an account (sensitive).
 
-Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source file for parameter shapes.
+Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source file for parameter shapes. Parameter shapes and examples for the `actions` versions of `executeTool`, the tool-search methods and `getAuthorizationLink` are in [REFERENCE.md](REFERENCE.md#actions).
 
 </dd></dl>
 </details>
@@ -153,12 +193,14 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 <details><summary>Methods</summary>
 <dl><dd>
 
-- `executeTool` — wraps `tools.executeTool` (`toolInput` maps to tool `params`).
+- `searchTools`, `listScopedTools`, `listAvailableTools`, `listTools` — find which tools exist, optionally for one `identifier`.
+- `executeTool` — runs a tool for a connected account (`toolInput` maps to tool `params`; the connection name is `connector` here). See [`executeTool`](REFERENCE.md#actions) in the reference.
 - `getAuthorizationLink` — magic link for connect / re-auth.
 - `verifyConnectedAccountUser` — completes OAuth user verification.
 - `listConnectedAccounts`, `deleteConnectedAccount`, `getConnectedAccount`
 - `createConnectedAccount`, `getOrCreateConnectedAccount`, `updateConnectedAccount`
 - `request` — proxied HTTP to `{envUrl}/proxy/...` with `connection_name` / `identifier` headers (returns `AxiosResponse`).
+- `listConnections` — lists your app-level connections (not the SSO connections of one organization).
 
 There is no separate `connect` export on Node; use `actions` for the facade.
 
