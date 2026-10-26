@@ -1,6 +1,9 @@
 import { Code, ConnectError } from '@connectrpc/connect';
 import { AxiosError, AxiosResponse } from 'axios';
-import { ScalekitServerException } from './base-exception';
+import {
+  ScalekitServerException,
+  WebhookVerificationError,
+} from './base-exception';
 
 // ---------------------------------------------------------------------------
 // Tool exception interface and hierarchy
@@ -251,5 +254,30 @@ export class ScalekitToolException
     this.toolErrorCode = info.toolErrorCode;
     this.toolErrorMessage = info.toolErrorMessage;
     this.executionId = info.executionId;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Trigger event parsing
+// ---------------------------------------------------------------------------
+
+/**
+ * Thrown by `verifyTriggerEvent` and `scalekit.actions.triggers.verifyEvent`
+ * when a trigger event's signature is valid but its body is not a trigger
+ * event this SDK can read: not JSON, not a JSON object, a required field
+ * missing or of the wrong type, or an `occurred_at` that is not an RFC 3339
+ * timestamp with an offset.
+ *
+ * It extends {@link WebhookVerificationError}, so a handler that answers
+ * `400` on `WebhookVerificationError` covers it too. Catch it separately when
+ * you want to tell "not from Scalekit" apart from "from Scalekit, but
+ * unreadable". The message names the field; it never contains the body or
+ * the secret.
+ */
+export class ScalekitTriggerEventParseError extends WebhookVerificationError {
+  /** @internal */
+  constructor(message: string, options?: { cause?: unknown }) {
+    super(message, options);
+    this.name = 'ScalekitTriggerEventParseError';
   }
 }
