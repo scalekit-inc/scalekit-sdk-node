@@ -28,7 +28,14 @@ export declare class ScalekitAbortError extends ScalekitException {
     constructor(message: string, cause?: unknown);
 }
 export declare class WebhookVerificationError extends ScalekitException {
-    constructor(error: any);
+    /**
+     * The underlying error that caused this one, when there is one (for example
+     * the decoding error behind an invalid request body).
+     */
+    cause?: unknown;
+    constructor(error: any, options?: {
+        cause?: unknown;
+    });
 }
 export declare class ScalekitValidateTokenFailureException extends ScalekitException {
     constructor(error: any);

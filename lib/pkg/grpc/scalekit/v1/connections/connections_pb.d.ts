@@ -959,6 +959,18 @@ export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnec
      * @generated from field: google.protobuf.StringValue googleads_developer_token = 26;
      */
     googleadsDeveloperToken?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.BoolValue scope_selection_allowed = 27;
+     */
+    scopeSelectionAllowed?: boolean | undefined;
+    /**
+     * @generated from field: repeated string required_scopes = 28;
+     */
+    requiredScopes: string[];
+    /**
+     * @generated from field: repeated string required_optional_scopes = 29;
+     */
+    requiredOptionalScopes: string[];
 };
 /**
  * Describes the message scalekit.v1.connections.OAuthConnectionConfig.
@@ -1048,6 +1060,14 @@ export type GoogleDWDConfig = Message<"scalekit.v1.connections.GoogleDWDConfig">
      * @generated from field: google.protobuf.StringValue token_uri = 3;
      */
     tokenUri?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.BoolValue scope_selection_allowed = 4;
+     */
+    scopeSelectionAllowed?: boolean | undefined;
+    /**
+     * @generated from field: repeated string required_scopes = 5;
+     */
+    requiredScopes: string[];
 };
 /**
  * Describes the message scalekit.v1.connections.GoogleDWDConfig.

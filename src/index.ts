@@ -9,6 +9,23 @@ export * from './types/auth';
 
 export * from './errors';
 
+export type { JsonValue, JsonObject } from './types/json';
+
+// Trigger events delivered to your endpoint: `verifyTriggerEvent` (no client
+// needed) and `scalekit.actions.triggers.verifyEvent`.
+export {
+  verifyTriggerEvent,
+  DeliveryScope,
+  DetectionMode,
+  PayloadState,
+} from './triggers';
+export type {
+  TriggerEvent,
+  TriggerEventHeaders,
+  TriggerEventVerifyParams,
+  TriggersClient,
+} from './triggers';
+
 // Generated enum surfaced in the public `resources.listResources` API:
 // `resourceType` is a required parameter, so callers need to name it (e.g.
 // `ResourceType.MCP_SERVER`) without reaching into the internal pb path.
@@ -78,6 +95,10 @@ export type {
 
 // Normalized types surfaced in the public `actions.listTools` API.
 export type { ActionTool, ListToolsResult } from './actions';
+export type {
+  McpSessionTokenAccessLevel,
+  CreateMcpSessionTokenParams,
+} from './mcp';
 
 // Types surfaced in the public `actions.uploadResumable` API. Its error
 // classes are exported from './errors' above.

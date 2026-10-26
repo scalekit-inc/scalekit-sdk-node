@@ -18,6 +18,7 @@
 - [Actions](#actions)
 - [Virtual MCP Servers](#virtual-mcp-servers)
 - [Custom Connectors](#custom-connectors)
+- [Trigger Events](#trigger-events)
 - [WebAuthn](#webauthn)
 - [Error Handling](#error-handling)
 - [Type Definitions](#type-definitions)
@@ -1071,6 +1072,7 @@ Scalekit SDK uses a typed exception hierarchy rooted at `ScalekitException`:
   - `ScalekitUploadConnectionException` - An `actions.uploadResumable` request got no response
   - `ScalekitUploadProtocolException` - A response broke the resumable-upload protocol
   - `WebhookVerificationError` - Webhook signature verification failures
+    - `ScalekitTriggerEventParseError` - A trigger event whose signature is valid but whose body is not a readable trigger event
 
 ### Usage Example
 
@@ -1135,6 +1137,10 @@ try {
 - `AuthPattern`, `AuthField`: Hand-written types for custom connector `authPatterns`
 - `ConnectionType`, `ConnectionProvider`, `ConnectionAuthMode`: Numeric enums on a connection's `type`, `provider` and `authMode`
 - `Connection`, `CreateConnection`, `UpdateConnection`, `Flags`: Environment connection shapes used by `createEnvironmentConnection` and `updateEnvironmentConnection`
+- `TriggerEvent`: A verified trigger event returned by `verifyTriggerEvent` and `actions.triggers.verifyEvent`
+- `DeliveryScope` (`ACCOUNT`, `CONNECTION`), `DetectionMode` (`WEBHOOK`, `POLL`), `PayloadState` (`FULL`, `REFERENCE`): String constants for the matching `TriggerEvent` fields. Values the SDK does not know yet arrive as plain strings
+- `TriggerEventVerifyParams`, `TriggerEventHeaders`: The parameters of `verifyTriggerEvent`
+- `JsonValue`, `JsonObject`: Any JSON value, and a JSON object
 
 ## Organizations
 
@@ -7628,7 +7634,7 @@ await scalekitClient.actions.uploadResumable({
 
 ## Virtual MCP Servers
 
-A Virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol, so any MCP-capable agent can call them. Create one configuration per agent role (not per user), and mint a short-lived session token per user per run. The server URL stays the same; the token carries the user's identity.
+A Virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol, so any MCP-capable agent can call them. Create one configuration per agent role (not per user), and mint a short-lived session token per user per run. The server URL stays the same; the token carries the user's identity. Each AgentKit connection also has its own MCP server with all of its tools; mint tokens for it with `createSessionToken({ connectionName, ... })`.
 
 Only the generally available `McpConfig` API is covered. The older `Mcp` and `McpInstance` families are marked PREVIEW and are not exposed.
 
@@ -8056,9 +8062,16 @@ for (const account of pending) {
 <dl>
 <dd>
 
-Mints a session token for one user against one configuration.
+Mints a session token for one user, for either a Virtual MCP server or a connection's own MCP server. Set a target; if both are set, `mcpConfigId` is used:
 
-The token carries the user's identity. Mint a fresh one before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
+- `mcpConfigId`: the token works on that configuration's `config.mcpServerUrl`.
+- `connectionName`: the token works on the connection's own MCP server at `<environment URL>/mcp/v3/connections/<connection name>`, which exposes all of that connection's tools without an MCP configuration. The name is matched without regard to case, but the URL path is case-sensitive: build it from the connection's name exactly as stored.
+
+A token works only on the server it was minted for. The token carries the user's identity. Mint a fresh one before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
+
+TypeScript rejects a call with neither target at compile time. At run time, only the connection form is checked before the request is sent: a non-string `connectionName` throws, and so does an `identifier` that is not a non-empty string (`identifier is required`). Calls with `mcpConfigId` are unchanged: they are not checked beyond `expirySeconds`, so a missing or empty ID is sent and rejected by the server, and `connectionName` is ignored when a non-empty `mcpConfigId` is set.
+
+For a connection, the user should have an active connected account on it. When they do not, depending on the environment, the call either fails with `ScalekitBadRequestException`, or succeeds after creating a pending connected account, in which case tool calls report the account as not connected. The call fails with `ScalekitNotFoundException` when no active connection has that name, and with `ScalekitBadRequestException` when the connection is not an AgentKit connection or the identifier or expiry is rejected.
 </dd>
 </dl>
 </dd>
@@ -8073,6 +8086,7 @@ The token carries the user's identity. Mint a fresh one before every agent run, 
 <dd>
 
 ```typescript
+// Virtual MCP server built from a configuration
 const { config } = await scalekitClient.actions.mcp.getConfig('<CONFIG_ID>');
 const session = await scalekitClient.actions.mcp.createSessionToken({
   mcpConfigId: '<CONFIG_ID>',
@@ -8083,6 +8097,20 @@ const session = await scalekitClient.actions.mcp.createSessionToken({
 // Hand both to your MCP client
 console.log(config?.mcpServerUrl, session.token, session.expiresAt);
 ```
+
+```typescript
+// A connection's own MCP server
+const session = await scalekitClient.actions.mcp.createSessionToken({
+  connectionName: 'gmail',
+  identifier: 'user_123',
+  expirySeconds: 900,
+  accessLevel: 'READ_ONLY',
+});
+
+// Hand both to your MCP client. The URL path is case-sensitive: use the connection's stored name.
+const serverUrl = `${process.env.SCALEKIT_ENVIRONMENT_URL}/mcp/v3/connections/gmail`;
+console.log(serverUrl, session.token, session.expiresAt);
+```
 </dd>
 </dl>
 </dd>
@@ -8090,27 +8118,43 @@ console.log(config?.mcpServerUrl, session.token, session.expiresAt);
 
 #### ⚙️ Parameters
 
-<dl>
-<dd>
+Type: `CreateMcpSessionTokenParams`. Set `mcpConfigId` or `connectionName`; if both are set, `mcpConfigId` is used.
 
 <dl>
 <dd>
 
-**params.mcpConfigId:** `string` - The configuration
+<dl>
+<dd>
+
+**params.mcpConfigId?:** `string` - The configuration. If both targets are set, this one is used and `connectionName` is ignored.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.identifier:** `string` - Your application's identifier for the end user
+**params.connectionName?:** `string` - The connection name: the same value used as `connectionName` elsewhere in the SDK. Used when `mcpConfigId` is omitted or empty. It is matched without regard to case, and the token is always issued for the server URL built from the connection's stored name. That URL is case-sensitive, so connect using the stored name exactly as it appears.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server enforces the allowed range.
+**params.identifier:** `string` - Your application's identifier for the end user, 1 to 255 characters. For a connection, the user whose connected account the token acts as; required (non-empty) for a connection before the request is sent.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server accepts 60 seconds to 24 hours (86400), 1 hour (3600) by default.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.accessLevel?:** `'FULL' | 'READ_ONLY'` - Tools the token can use. `'READ_ONLY'` limits the token to tools annotated read-only (`read_only_hint`): other tools are left out of the tool list and refused when called. `'FULL'`, or omitting it, exposes every tool the configuration or connection exposes.
 
 </dd>
 </dl>
@@ -8500,6 +8544,159 @@ for (const provider of res.providers) {
 - `identifier?: string` - Filter to one connector. For a custom connector, also pass `providerType: ProviderType.CUSTOM` (or `ALL`), or nothing is found.
 - `pageSize?: number` - Page size
 - `pageToken?: string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Trigger Events
+
+Scalekit delivers trigger events to your endpoint as signed HTTP requests. Verify and parse each one with `verifyTriggerEvent`, which needs no client, or with the same method on `scalekitClient.actions.triggers`.
+
+<details><summary><code><a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">verifyTriggerEvent</a>({ body, headers, secret }) -> TriggerEvent</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Checks the signature first (HMAC-SHA256 over `webhook-id.webhook-timestamp.body`, a 5-minute timestamp tolerance, constant-time comparison), then parses the body into a `TriggerEvent`. Also available as `scalekitClient.actions.triggers.verifyEvent(params)`, with identical behaviour.
+
+- Delivery is at least once, and a redelivery can arrive while the first delivery is still being handled. Make processing idempotent, keyed on `dedupeKey` together with the connected account you act as:
+  - Claim that key atomically before you handle the event, so two concurrent deliveries cannot both handle it. For example, use a row with a unique key on both, inserted with a lease (an expiry time). The claim succeeds only when no row exists, or when the row is unfinished and its lease has expired.
+  - Make the lease longer than handling can take. A claim left by a worker that stopped mid-handling then expires, and a later redelivery can take it, but an active claim is never taken.
+  - Mark the claim finished after handling, so a finished event is never handled again. Release it if handling fails, so a redelivery can retry at once.
+  - Answer `2xx` only once the event is finished, handled, or durably queued. When another delivery still holds an unexpired claim, answer a non-`2xx` status such as `409`, so Scalekit delivers the event again later instead of treating it as done.
+- Branch on `deliveryScope`: `'account'` events are for `connectedAccountId`; `'connection'` events are for the whole connection, and `connectedAccountId` is `''`.
+- When `payloadState` is `'reference'`, `payload` is `null`: fetch the resource identified by `resourceType` and `resourceId`.
+- `payload` is decoded with `JSON.parse`, so integers above `Number.MAX_SAFE_INTEGER` lose precision. Parse the raw body yourself if you need them exactly.
+- Header names are matched case-insensitively. Malformed `webhook-signature` candidates (including any that are not padded standard base64) are skipped.
+- Throws `WebhookVerificationError` when the request is not authentic (missing or conflicting headers, a malformed secret, a `webhook-timestamp` that is not decimal digits, stale timestamp, no matching signature, body not UTF-8), and its subclass `ScalekitTriggerEventParseError` when the signature is valid but the body is not a readable trigger event (including a body that starts with a byte order mark). Throws `TypeError` when called with arguments of the wrong type.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import express from 'express';
+import {
+  DeliveryScope,
+  PayloadState,
+  verifyTriggerEvent,
+  WebhookVerificationError,
+} from '@scalekit-sdk/node';
+
+const app = express();
+
+// express.raw keeps the body as the exact bytes that were signed.
+app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async (req, res) => {
+  let event;
+  try {
+    event = verifyTriggerEvent({
+      body: req.body,
+      headers: req.headers,
+      secret: process.env.SCALEKIT_TRIGGER_SECRET!,
+    });
+  } catch (err) {
+    if (err instanceof WebhookVerificationError) {
+      return res.status(400).send('invalid trigger event');
+    } else {
+      throw err; // a bug or a wrong argument, not a bad request
+    }
+  }
+
+  // Account events are for one connected account; for connection-wide events
+  // your app decides which connected accounts act on them.
+  let accountIds: string[];
+  if (event.deliveryScope === DeliveryScope.ACCOUNT) {
+    accountIds = [event.connectedAccountId];
+  } else if (event.deliveryScope === DeliveryScope.CONNECTION) {
+    accountIds = await accountsToActFor(event.connectionId);
+  } else {
+    // A scope this SDK version does not know yet: acknowledge and skip it.
+    return res.sendStatus(204);
+  }
+
+  let inProgress = false;
+  for (const accountId of accountIds) {
+    // Delivery is at least once, and a redelivery can arrive while the first is
+    // still being handled: claim dedupeKey + the account you act as atomically,
+    // with a lease longer than handling takes. Returns 'claimed', 'finished'
+    // (already handled) or 'in_progress' (another delivery holds an unexpired lease).
+    const claim = await claimDelivery(event.dedupeKey, accountId, { leaseSeconds: 900 });
+    if (claim === 'finished') continue;
+    if (claim === 'in_progress') {
+      inProgress = true;
+      continue;
+    }
+
+    try {
+      const resource =
+        event.payloadState === PayloadState.REFERENCE
+          ? await fetchResource(accountId, event.resourceType, event.resourceId)
+          : event.payload;
+
+      await handle(event.triggerType, resource, accountId);
+    } catch (err) {
+      await releaseDelivery(event.dedupeKey, accountId); // let a redelivery retry
+      throw err;
+    }
+    await finishDelivery(event.dedupeKey, accountId); // never handled again
+  }
+  // Not done yet: a non-2xx answer makes Scalekit deliver the event again later.
+  res.sendStatus(inProgress ? 409 : 204);
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `TriggerEventVerifyParams`
+- `body: string | Uint8Array` - The raw request body exactly as received. A `Buffer` (for example from `express.raw()`) is preferred; never pass a parsed object
+- `headers: Headers | Record<string, string | string[] | undefined>` - The request headers: a Fetch `Headers` object or Node's `req.headers`. Names are matched case-insensitively
+- `secret: string` - The signing secret for your trigger endpoint (`whsec_...`)
+
+**Returns:** `TriggerEvent`
+- `version: string`, `triggerType: string` (for example `'example.item.created'`), `subscriptionId: string`, `connectionId: string`, `resourceType: string`
+- `dedupeKey: string` - Stable key for de-duplicating redeliveries
+- `correlationId: string` - Links follow-up work back to the event that caused it
+- `deliveryScope: DeliveryScope` - `'account'` or `'connection'`
+- `connectedAccountId: string` - `''` when `deliveryScope` is `'connection'`
+- `resourceId: string | undefined`
+- `occurredAt: Date | undefined`
+- `detectionMode: DetectionMode` - `'webhook'` or `'poll'`
+- `payloadState: PayloadState` - `'full'` or `'reference'`
+- `deliveryScope`, `detectionMode` and `payloadState` can also hold a value added after this SDK version, as a plain string; handle the values you know and skip the rest
+- `payload: JsonValue` - `null` when absent, and always for `'reference'`
+- `extra: Record<string, JsonValue>` - Top-level fields this SDK version does not recognise, under their wire (snake_case) names
 
 </dd>
 </dl>

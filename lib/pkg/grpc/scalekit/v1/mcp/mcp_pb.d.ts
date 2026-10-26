@@ -826,6 +826,19 @@ export type CreateMcpSessionTokenRequest = Message<"scalekit.v1.mcp.CreateMcpSes
      * @generated from field: google.protobuf.Duration expiry = 3;
      */
     expiry?: Duration | undefined;
+    /**
+     * @generated from field: string key_id = 4;
+     */
+    keyId: string;
+    /**
+     * Optional tool access level for the token: FULL or READ_ONLY (case-sensitive).
+     * READ_ONLY restricts the token to tools annotated read-only (read_only_hint).
+     * FULL, an empty string, or omitting the field exposes every tool. Any other
+     * value is rejected.
+     *
+     * @generated from field: string access_level = 5;
+     */
+    accessLevel: string;
 };
 /**
  * Describes the message scalekit.v1.mcp.CreateMcpSessionTokenRequest.
