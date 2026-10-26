@@ -37,6 +37,15 @@ export default class CoreClient {
     apiVersion: string;
     userAgent: string;
     constructor(envUrl: string, clientId: string, clientSecret: string, toolTimeoutMs?: number, timeoutMs?: number, pingIntervalMs?: number, pingTimeoutMs?: number);
+    /**
+     * Make sure the client holds an access token, fetching one with the client
+     * credentials if it has none yet. Pass `force` to fetch a new token even when
+     * one is held (for example after a 401 says the held token has expired).
+     *
+     * gRPC calls get their token through `connectExec`; plain HTTP calls that go
+     * straight through `axios` (the actions proxy) call this instead.
+     */
+    ensureAccessToken(force?: boolean): Promise<void>;
     private authenticateClient;
     /**
      * Authenticate with the code

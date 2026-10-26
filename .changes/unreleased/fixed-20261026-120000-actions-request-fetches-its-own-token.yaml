@@ -1,0 +1,8 @@
+kind: fixed
+body: |
+  `scalekit.actions.request` now gets its own access token. Before, a client that had not yet made any other call sent the first proxied request with no `Authorization` header and failed with a 401 ("missing authorization header"), and a token that expired later was never renewed for this method. Now the first call fetches a token, and a 401 on an expired token fetches a new one and retries the request once. Calls on a client that already holds a working token are sent exactly as before, and every other error is reported as before. A call made with wrong client credentials now throws a `ScalekitException` instead of a raw axios error.
+time: '2026-10-26T12:00:00.000000+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: ''
+  Migration: ''

@@ -3,7 +3,7 @@ import {
   type JsonObject,
   type MessageInitShape,
 } from '@bufbuild/protobuf';
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse, HttpStatusCode } from 'axios';
 import CoreClient, { assertValidTimeout } from './core';
 import { assertProxyPathContained, proxyRedirectGuard } from './proxy-path';
 import {
@@ -756,8 +756,8 @@ export default class ActionsClient {
       identifier,
     };
 
-    try {
-      return await this.coreClient.axios.request({
+    const send = () =>
+      this.coreClient.axios.request({
         url,
         method: method.toUpperCase(),
         params: queryParams,
@@ -768,6 +768,24 @@ export default class ActionsClient {
         // that leaves the proxy prefix.
         beforeRedirect: proxyRedirectGuard(this.coreClient.envUrl),
       });
+
+    try {
+      // Unlike the gRPC calls, this goes straight through axios, so it has to
+      // get its own token: fetch one if the client has none yet, and fetch a
+      // new one and retry once if the held token has expired.
+      await this.coreClient.ensureAccessToken();
+      try {
+        return await send();
+      } catch (error) {
+        if (
+          error instanceof AxiosError &&
+          error.response?.status === HttpStatusCode.Unauthorized
+        ) {
+          await this.coreClient.ensureAccessToken(true);
+          return await send();
+        }
+        throw error;
+      }
     } catch (error) {
       if (error instanceof ScalekitException) throw error;
       if (error instanceof AxiosError) {
