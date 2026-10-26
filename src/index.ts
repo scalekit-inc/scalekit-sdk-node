@@ -108,6 +108,7 @@ export type {
 export type {
   AuthPattern,
   AuthField,
+  AuthFieldOption,
   Provider,
   CreateProviderResponse,
   UpdateProviderResponse,

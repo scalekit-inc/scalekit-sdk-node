@@ -17,6 +17,18 @@ import {
   UpdateCustomProviderSchema,
 } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 
+/** One selectable choice on an {@link AuthField} whose `input_type` is `select`. */
+export interface AuthFieldOption {
+  /** Value stored when this choice is selected. */
+  value: string;
+  /** Label shown in the dropdown. */
+  display_name?: string;
+  /** Longer explanation shown as helper text. */
+  description?: string;
+  /** Whether this choice is pre-selected. At most one option is the default. */
+  default?: boolean;
+}
+
 /**
  * One credential input shown to the user while they connect.
  *
@@ -32,11 +44,24 @@ export interface AuthField {
   /** Label shown above the input. */
   label?: string;
   /** Use `password` for anything secret so the UI masks it. */
-  input_type?: 'text' | 'password' | 'select';
+  input_type?: 'text' | 'password' | 'select' | 'textarea' | (string & {});
   /** Helper text shown with the input. */
   hint?: string;
   /** Whether the user must fill this in before the connection can be saved. */
   required?: boolean;
+  /** Choices for a `select` field. Leave empty for every other input type. */
+  options?: AuthFieldOption[];
+  /**
+   * `true` when the value goes into the request path, for connectors whose base
+   * URL embeds a tenant or region, instead of being sent as a credential.
+   */
+  is_path_param?: boolean;
+  /**
+   * On an `API_KEY` pattern, sends this field's value as this exact HTTP header.
+   * Setting it on any field puts the pattern in multiple-headers mode; leave it
+   * unset to use the pattern's `auth_header_key_override` (single-key mode).
+   */
+  header_name?: string;
 }
 
 /**
@@ -52,13 +77,29 @@ export interface AuthPattern {
   display_name: string;
   /** Short explanation of this method, shown to the user. */
   description?: string;
-  /** Set to `true` when the connector fronts an MCP server. */
+  /**
+   * `true` makes this an MCP connector; the default makes it an API connector.
+   *
+   * @deprecated Pass `isMcp` to `createCustomProvider` or `updateCustomProvider`
+   * instead. This still works and is still sent to the server.
+   */
   is_mcp?: boolean;
   /**
    * Credential inputs for `BEARER`, `API_KEY` and `BASIC`. Leave empty for
    * `OAUTH` and `NO_AUTH`.
    */
   fields?: AuthField[];
+  /**
+   * Inputs collected per connected account rather than once per connection, for
+   * connectors that need an account-scoped value such as a workspace or
+   * subdomain. Same shape as `fields`.
+   */
+  account_fields?: AuthField[];
+  /**
+   * Domains this connector's proxied requests may be routed to. Empty means no
+   * restriction beyond the provider's `proxyUrl`.
+   */
+  allowed_proxy_domains?: string[];
   /**
    * OAuth settings for an `OAUTH` pattern. Pass `{}` to use the upstream
    * server's discovered defaults.
@@ -126,14 +167,44 @@ export default class ProvidersClient {
   /**
    * Creates a custom connector.
    *
-   * @param params.displayName Human-readable name. Letters, digits and spaces only.
-   *                           Suffix it with "MCP" when the connector fronts an MCP server.
-   * @param params.proxyUrl Base HTTPS URL of the upstream service.
+   * Creating a connector whose name normalizes the same as an existing one does
+   * not fail: it gets a numbered identifier. Only two creates racing on the same
+   * name fail with a conflict; retry.
+   *
+   * A request that fails validation (a missing `authPatterns`, a `displayName`
+   * with a symbol, an `http://` `proxyUrl`) throws a `ScalekitBadRequestException`
+   * whose message is only `[invalid_argument] Validation error`. The field and the
+   * reason are on the error:
+   * `error.unpackedDetails[0].validationErrorInfo.fieldViolations`, where each
+   * entry has a `field` (for example `provider.proxy_url`) and a `description`.
+   *
+   * @param params.displayName Name shown in the UI. Letters, digits and spaces only
+   *                           (max 200 characters); symbols such as `_` or `-` are
+   *                           rejected. The identifier is derived from it
+   *                           (`Acme MCP` becomes `ACMEMCP:<environment id>`). The
+   *                           names of the built-in login providers (Github, Google,
+   *                           Gitlab, Microsoft, LinkedIn, Salesforce, Facebook) are
+   *                           rejected; other built-in names such as Gmail are
+   *                           accepted. Suffix it with "MCP" when the connector
+   *                           fronts an MCP server.
+   * @param params.proxyUrl HTTPS URL of the external service, and the address
+   *                        Scalekit sends proxied requests to. For an MCP connector
+   *                        it is the MCP server's URL; for an API connector it is
+   *                        the API's base URL.
    * @param params.proxyEnabled Whether Scalekit proxies requests. Defaults to true.
-   * @param params.authPatterns How users authenticate. Exactly one pattern is
-   *                            supported today; the array is for future use.
+   * @param params.authPatterns How users authenticate. Required in practice:
+   *                            leaving it out fails with a validation error on
+   *                            `provider.auth_patterns`, and an empty array fails
+   *                            with `auth patterns cannot be empty`. Exactly one
+   *                            pattern is supported today; the array is for future use.
+   * @param params.isMcp `true` creates an MCP connector; otherwise it is an API
+   *                     connector. Use it instead of the deprecated `is_mcp` on
+   *                     the pattern. A value that conflicts with the pattern's
+   *                     `is_mcp` throws.
    * @returns `provider.identifier` on the response is the id you pass to
-   *          {@link updateCustomProvider} and {@link deleteCustomProvider}.
+   *          {@link updateCustomProvider} and {@link deleteCustomProvider}, and the
+   *          `providerKey` when you create a connection for this connector.
+   * @throws {Error} If `isMcp` conflicts with `is_mcp` on a pattern.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async createCustomProvider(params: {
@@ -142,6 +213,7 @@ export default class ProvidersClient {
     proxyEnabled?: boolean;
     description?: string;
     authPatterns?: AuthPattern[];
+    isMcp?: boolean;
     iconSrc?: string;
     metadata?: Record<string, string>;
   }): Promise<CreateProviderResponse> {
@@ -153,7 +225,9 @@ export default class ProvidersClient {
       ...(params.iconSrc !== undefined && { iconSrc: params.iconSrc }),
       ...(params.metadata && { metadata: params.metadata }),
       ...(params.authPatterns && {
-        authPatterns: toListValue(params.authPatterns),
+        authPatterns: toListValue(
+          applyIsMcp(params.authPatterns, params.isMcp)
+        ),
       }),
     });
 
@@ -169,21 +243,28 @@ export default class ProvidersClient {
    *
    * Treat this as a PUT: read the current connector with {@link listProviders}
    * first, then send back every field you want to keep alongside the ones you
-   * are changing. `provider.authPatterns` and `provider.proxyEnabled` from that
-   * response can be passed here as-is.
+   * are changing. `provider.authPatterns` from that response can be passed here
+   * as-is.
    *
    * What the server does with each field:
    * - `displayName`, `proxyUrl` and `authPatterns` are required on every update.
    *   Omitting `authPatterns` fails with `[invalid_argument] Validation error`, and
    *   it replaces the whole list rather than merging into it. The pattern's
-   *   `type` and `is_mcp` cannot be changed.
+   *   `type` and `is_mcp` cannot be changed, and an `API_KEY` pattern cannot
+   *   switch between single-key and multiple-headers mode. Editing the header
+   *   fields of a multiple-headers connector means its connected accounts must
+   *   re-authorize.
    * - `metadata` replaces the stored map, so leaving it out clears it.
-   * - `proxyEnabled` is always applied. It defaults to `true` here, so pass the
-   *   current value to keep a connector's proxying switched off.
-   * - `description` and `iconSrc` keep their stored values when left out.
+   * - `description` and `iconSrc` keep their stored values when left out. An empty
+   *   string does not clear them: the server ignores empty values.
    *
    * @param params.identifier From `provider.identifier` on a create or list response.
-   * @param params.proxyEnabled Whether Scalekit proxies requests. Defaults to true.
+   * @param params.isMcp Must match the connector's existing kind: the server
+   *                     rejects changing it between MCP and API. Pass `true` when
+   *                     updating an MCP connector so the pattern stays MCP. Use it
+   *                     instead of the deprecated `is_mcp` on the pattern; a value
+   *                     that conflicts with the pattern's `is_mcp` throws.
+   * @throws {Error} If `isMcp` conflicts with `is_mcp` on a pattern.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async updateCustomProvider(params: {
@@ -192,7 +273,7 @@ export default class ProvidersClient {
     proxyUrl: string;
     /** Required by the server on update, not just on create. */
     authPatterns: AuthPattern[];
-    proxyEnabled?: boolean;
+    isMcp?: boolean;
     description?: string;
     iconSrc?: string;
     metadata?: Record<string, string>;
@@ -200,15 +281,14 @@ export default class ProvidersClient {
     const provider = create(UpdateCustomProviderSchema, {
       displayName: params.displayName,
       proxyUrl: params.proxyUrl,
-      // Always sent: the server applies proxy_enabled on every update, so an
-      // unset field would switch proxying off.
-      proxyEnabled: params.proxyEnabled ?? true,
+      // Sent on every update.
+      proxyEnabled: true,
       ...(params.description !== undefined && {
         description: params.description,
       }),
       ...(params.iconSrc !== undefined && { iconSrc: params.iconSrc }),
       ...(params.metadata && { metadata: params.metadata }),
-      authPatterns: toListValue(params.authPatterns),
+      authPatterns: toListValue(applyIsMcp(params.authPatterns, params.isMcp)),
     });
 
     const response = await this.coreClient.connectExec(
@@ -227,6 +307,9 @@ export default class ProvidersClient {
    * Remove the connector's connections and connected accounts first; the server
    * refuses to delete one that is still in use, with
    * `[invalid_argument] cannot delete custom provider with existing connections`.
+   * A connection that still has connected accounts cannot be deleted either
+   * (`[invalid_argument] connection has connected accounts, cannot be deleted`),
+   * so remove the accounts first, then the connections. Deleting also removes the connector's discovered custom MCP tools.
    *
    * Connected accounts come off with `actions.deleteConnectedAccount`. The app
    * connection itself has to go from the Scalekit dashboard: this SDK wraps no
@@ -288,6 +371,33 @@ export default class ProvidersClient {
       totalSize: response.totalSize,
     };
   }
+}
+
+/**
+ * Applies the request-level `isMcp` to the patterns without changing the
+ * caller's objects. A pattern that says the opposite throws, because the two
+ * disagree about the same connector. Mirrors Python's `check_request_is_mcp`.
+ */
+function applyIsMcp(
+  patterns: AuthPattern[],
+  isMcp: boolean | undefined
+): AuthPattern[] {
+  if (isMcp === undefined) return patterns;
+  patterns.forEach((pattern, index) => {
+    if (isMcp === false && pattern.is_mcp === true) {
+      throw new Error(
+        `isMcp: false conflicts with is_mcp: true on authPatterns[${index}]. ` +
+          'is_mcp on a pattern is deprecated: remove it from the pattern and set isMcp only on the request.'
+      );
+    }
+    if (isMcp === true && pattern.is_mcp === false) {
+      throw new Error(
+        `isMcp: true conflicts with is_mcp: false on authPatterns[${index}]. ` +
+          'is_mcp on a pattern is deprecated: remove it from the pattern and set isMcp only on the request.'
+      );
+    }
+  });
+  return isMcp ? patterns.map((p) => ({ ...p, is_mcp: true })) : patterns;
 }
 
 /**
