@@ -2216,14 +2216,14 @@ Use it for AgentKit app connections: pass `flags: { isApp: true }` and set `prov
 <dd>
 
 ```typescript
-import { ConnectionType } from '@scalekit-sdk/node';
+import { ConnectionType, ConnectorSource } from '@scalekit-sdk/node';
 
 // 1. Create a custom OAuth connector (or look one up with listProviders)
 const { provider } = await scalekitClient.actions.providers.createCustomProvider({
   displayName: 'Custom Pylon MCP',
   description: 'Pylon integration via MCP',
   proxyUrl: 'https://mcp.usepylon.com',
-  isMcp: true,
+  source: ConnectorSource.MCP_SERVER,
   authPatterns: [
     {
       type: 'OAUTH',
@@ -8078,8 +8078,8 @@ const authPatterns: AuthPattern[] = [
 ];
 
 // Other shapes:
-// OAuth, using the upstream server's discovered defaults (pass isMcp: true to
-// createCustomProvider when the connector fronts an MCP server):
+// OAuth, using the upstream server's discovered defaults (pass source: ConnectorSource.MCP_SERVER
+// to createCustomProvider when the connector fronts an MCP server):
 //   { type: 'OAUTH', display_name: 'OAuth 2.1', description: '...', oauth_config: {} }
 // API key sent in a custom header:
 //   { type: 'API_KEY', display_name: 'API Key', description: '...',
@@ -8137,14 +8137,14 @@ console.log(res.provider?.identifier);
 <dl>
 <dd>
 
-**params.authPatterns?:** `AuthPattern[]` - How users authenticate. Required in practice: leaving it out fails with a validation error on `provider.auth_patterns`, and an empty array fails with `auth patterns cannot be empty`. Exactly one pattern is supported today. An `AuthPattern` is `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select' | 'textarea'; hint?: string; required?: boolean; options?: AuthFieldOption[]; is_path_param?: boolean; header_name?: string }`. `is_mcp` on a pattern is deprecated: use `isMcp`.
+**params.authPatterns?:** `AuthPattern[]` - How users authenticate. Required in practice: leaving it out fails with a validation error on `provider.auth_patterns`, and an empty array fails with `auth patterns cannot be empty`. Exactly one pattern is supported today. An `AuthPattern` is `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select' | 'textarea'; hint?: string; required?: boolean; options?: AuthFieldOption[]; is_path_param?: boolean; header_name?: string }`. `is_mcp` on a pattern is deprecated: use `source: ConnectorSource.MCP_SERVER`.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.isMcp?:** `boolean` - `true` creates an MCP connector; otherwise it is an API connector. Use it instead of the deprecated `is_mcp` on the pattern. A value that conflicts with the pattern's `is_mcp` throws.
+**params.source?:** `ConnectorSource` - `ConnectorSource.MCP_SERVER` creates an MCP connector; leave it out for an API connector. `MCP_SERVER` is the only value today. Use it instead of the deprecated `is_mcp` on the pattern. A value that conflicts with an explicit `is_mcp: false` on the pattern throws.
 
 </dd>
 </dl>
@@ -8266,7 +8266,7 @@ console.log(res.provider?.description);
 <dl>
 <dd>
 
-**params.isMcp?:** `boolean` - Must match the connector's existing kind: the server rejects changing it between MCP and API. Pass `true` when updating an MCP connector so the pattern stays MCP. Use it instead of the deprecated `is_mcp` on the pattern; a value that conflicts with the pattern's `is_mcp` throws.
+**params.source?:** `ConnectorSource` - Must match the connector's existing kind: the server rejects changing it between MCP and API. Pass `ConnectorSource.MCP_SERVER` when updating an MCP connector so the pattern stays MCP. Use it instead of the deprecated `is_mcp` on the pattern; a value that conflicts with an explicit `is_mcp: false` on the pattern throws.
 
 </dd>
 </dl>

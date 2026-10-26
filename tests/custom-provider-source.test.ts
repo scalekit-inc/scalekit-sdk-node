@@ -1,10 +1,11 @@
 /**
- * `isMcp` on createCustomProvider and updateCustomProvider.
+ * `source` (`ConnectorSource`) on createCustomProvider and updateCustomProvider.
  *
  * `is_mcp` on an AuthPattern is deprecated but still works and is still sent, so
  * existing calls build the same request they always did. A request-level
- * `isMcp` marks the pattern as MCP without changing the caller's object, and a
- * value that contradicts the pattern's throws before any request is made.
+ * `source: ConnectorSource.MCP_SERVER` marks the pattern as MCP without changing
+ * the caller's object, and a value that contradicts the pattern's throws before
+ * any request is made.
  *
  * Offline: the gRPC client is a mock, so no test here needs the network.
  */
@@ -13,6 +14,7 @@ import { toJson } from '@bufbuild/protobuf';
 import { ListValueSchema } from '@bufbuild/protobuf/wkt';
 import CoreClient from '../src/core';
 import ProvidersClient from '../src/providers';
+import { ConnectorSource } from '../src';
 import type { AuthFieldOption, AuthPattern } from '../src';
 
 function makeClient() {
@@ -82,12 +84,12 @@ describe('is_mcp on the pattern still works', () => {
   });
 });
 
-describe('request-level isMcp', () => {
+describe('request-level source', () => {
   it('marks the pattern as MCP on create', async () => {
     const { providers, createCustomProvider } = makeClient();
     await providers.createCustomProvider({
       ...BASE,
-      isMcp: true,
+      source: ConnectorSource.MCP_SERVER,
       authPatterns: [pattern()],
     });
     expect(sentPatterns(createCustomProvider)[0].is_mcp).toBe(true);
@@ -97,7 +99,7 @@ describe('request-level isMcp', () => {
     const { providers, updateCustomProvider } = makeClient();
     await providers.updateCustomProvider({
       ...UPDATE_BASE,
-      isMcp: true,
+      source: ConnectorSource.MCP_SERVER,
       authPatterns: [pattern()],
     });
     expect(sentPatterns(updateCustomProvider)[0].is_mcp).toBe(true);
@@ -108,17 +110,16 @@ describe('request-level isMcp', () => {
     const mine = pattern();
     await providers.createCustomProvider({
       ...BASE,
-      isMcp: true,
+      source: ConnectorSource.MCP_SERVER,
       authPatterns: [mine],
     });
     expect(mine).not.toHaveProperty('is_mcp');
   });
 
-  it('sends no is_mcp key for isMcp: false', async () => {
+  it('sends no is_mcp key when source is left out', async () => {
     const { providers, createCustomProvider } = makeClient();
     await providers.createCustomProvider({
       ...BASE,
-      isMcp: false,
       authPatterns: [pattern()],
     });
     expect(sentPatterns(createCustomProvider)[0]).not.toHaveProperty('is_mcp');
@@ -128,38 +129,40 @@ describe('request-level isMcp', () => {
     const { providers, createCustomProvider } = makeClient();
     await providers.createCustomProvider({
       ...BASE,
-      isMcp: true,
+      source: ConnectorSource.MCP_SERVER,
       authPatterns: [pattern({ is_mcp: true })],
     });
     expect(sentPatterns(createCustomProvider)[0].is_mcp).toBe(true);
   });
+
+  it('has only MCP_SERVER for now', () => {
+    expect(Object.keys(ConnectorSource)).toEqual(['MCP_SERVER']);
+  });
+
+  it('rejects a value that is not a ConnectorSource', async () => {
+    const { providers, createCustomProvider } = makeClient();
+    await expect(
+      providers.createCustomProvider({
+        ...BASE,
+        source: 'OPENAPI_SPEC' as unknown as ConnectorSource,
+        authPatterns: [pattern()],
+      })
+    ).rejects.toThrow('source must be one of: MCP_SERVER');
+    expect(createCustomProvider).not.toHaveBeenCalled();
+  });
 });
 
 describe('conflicting values', () => {
-  it('throws for isMcp: false with is_mcp: true on the pattern', async () => {
+  it('throws for MCP_SERVER with is_mcp: false on the pattern', async () => {
     const { providers, createCustomProvider } = makeClient();
     await expect(
       providers.createCustomProvider({
         ...BASE,
-        isMcp: false,
-        authPatterns: [pattern({ is_mcp: true })],
-      })
-    ).rejects.toThrow(
-      'isMcp: false conflicts with is_mcp: true on authPatterns[0]'
-    );
-    expect(createCustomProvider).not.toHaveBeenCalled();
-  });
-
-  it('throws for isMcp: true with is_mcp: false on the pattern', async () => {
-    const { providers, createCustomProvider } = makeClient();
-    await expect(
-      providers.createCustomProvider({
-        ...BASE,
-        isMcp: true,
+        source: ConnectorSource.MCP_SERVER,
         authPatterns: [pattern({ is_mcp: false })],
       })
     ).rejects.toThrow(
-      'isMcp: true conflicts with is_mcp: false on authPatterns[0]'
+      'source: ConnectorSource.MCP_SERVER conflicts with is_mcp: false on authPatterns[0]'
     );
     expect(createCustomProvider).not.toHaveBeenCalled();
   });
@@ -169,10 +172,10 @@ describe('conflicting values', () => {
     await expect(
       providers.updateCustomProvider({
         ...UPDATE_BASE,
-        isMcp: false,
-        authPatterns: [pattern({ is_mcp: true })],
+        source: ConnectorSource.MCP_SERVER,
+        authPatterns: [pattern({ is_mcp: false })],
       })
-    ).rejects.toThrow('conflicts with is_mcp: true on authPatterns[0]');
+    ).rejects.toThrow('conflicts with is_mcp: false on authPatterns[0]');
     expect(updateCustomProvider).not.toHaveBeenCalled();
   });
 
@@ -181,8 +184,8 @@ describe('conflicting values', () => {
     await expect(
       providers.createCustomProvider({
         ...BASE,
-        isMcp: false,
-        authPatterns: [pattern({ is_mcp: true })],
+        source: ConnectorSource.MCP_SERVER,
+        authPatterns: [pattern({ is_mcp: false })],
       })
     ).rejects.toThrow(/deprecated: remove it from the pattern/);
   });

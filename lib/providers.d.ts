@@ -47,6 +47,16 @@ export interface AuthField {
     header_name?: string;
 }
 /**
+ * What a custom connector fronts. Pass it as `source` to `createCustomProvider`
+ * or `updateCustomProvider`; leave `source` out for an API connector (the
+ * default). `MCP_SERVER` is the only value today, and more values will be added
+ * to this enum.
+ */
+export declare enum ConnectorSource {
+    /** The connector fronts an MCP (Model Context Protocol) server. */
+    MCP_SERVER = "MCP_SERVER"
+}
+/**
  * One way a user can authenticate against your connector.
  *
  * Sent to the API as-is, so the keys are snake_case to match the wire format
@@ -62,8 +72,9 @@ export interface AuthPattern {
     /**
      * `true` makes this an MCP connector; the default makes it an API connector.
      *
-     * @deprecated Pass `isMcp` to `createCustomProvider` or `updateCustomProvider`
-     * instead. This still works and is still sent to the server.
+     * @deprecated Pass `source: ConnectorSource.MCP_SERVER` to
+     * `createCustomProvider` or `updateCustomProvider` instead. This still works
+     * and is still sent to the server.
      */
     is_mcp?: boolean;
     /**
@@ -158,14 +169,14 @@ export default class ProvidersClient {
      *                            `provider.auth_patterns`, and an empty array fails
      *                            with `auth patterns cannot be empty`. Exactly one
      *                            pattern is supported today; the array is for future use.
-     * @param params.isMcp `true` creates an MCP connector; otherwise it is an API
-     *                     connector. Use it instead of the deprecated `is_mcp` on
-     *                     the pattern. A value that conflicts with the pattern's
-     *                     `is_mcp` throws.
+     * @param params.source `ConnectorSource.MCP_SERVER` creates an MCP connector;
+     *                      leave it out for an API connector. Use it instead of the
+     *                      deprecated `is_mcp` on the pattern. A value that conflicts
+     *                      with an explicit `is_mcp: false` on the pattern throws.
      * @returns `provider.identifier` on the response is the id you pass to
      *          {@link updateCustomProvider} and {@link deleteCustomProvider}, and the
      *          `providerKey` when you create a connection for this connector.
-     * @throws {Error} If `isMcp` conflicts with `is_mcp` on a pattern.
+     * @throws {Error} If `source` is not a `ConnectorSource` value, or conflicts with `is_mcp` on a pattern.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     createCustomProvider(params: {
@@ -174,7 +185,7 @@ export default class ProvidersClient {
         proxyEnabled?: boolean;
         description?: string;
         authPatterns?: AuthPattern[];
-        isMcp?: boolean;
+        source?: ConnectorSource;
         iconSrc?: string;
         metadata?: Record<string, string>;
     }): Promise<CreateProviderResponse>;
@@ -199,12 +210,13 @@ export default class ProvidersClient {
      *   string does not clear them: the server ignores empty values.
      *
      * @param params.identifier From `provider.identifier` on a create or list response.
-     * @param params.isMcp Must match the connector's existing kind: the server
-     *                     rejects changing it between MCP and API. Pass `true` when
-     *                     updating an MCP connector so the pattern stays MCP. Use it
-     *                     instead of the deprecated `is_mcp` on the pattern; a value
-     *                     that conflicts with the pattern's `is_mcp` throws.
-     * @throws {Error} If `isMcp` conflicts with `is_mcp` on a pattern.
+     * @param params.source Must match the connector's existing kind: the server
+     *                      rejects changing it between MCP and API. Pass
+     *                      `ConnectorSource.MCP_SERVER` when updating an MCP connector
+     *                      so the pattern stays MCP. Use it instead of the deprecated
+     *                      `is_mcp` on the pattern; a value that conflicts with an
+     *                      explicit `is_mcp: false` on the pattern throws.
+     * @throws {Error} If `source` is not a `ConnectorSource` value, or conflicts with `is_mcp` on a pattern.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     updateCustomProvider(params: {
@@ -213,7 +225,7 @@ export default class ProvidersClient {
         proxyUrl: string;
         /** Required by the server on update, not just on create. */
         authPatterns: AuthPattern[];
-        isMcp?: boolean;
+        source?: ConnectorSource;
         description?: string;
         iconSrc?: string;
         metadata?: Record<string, string>;

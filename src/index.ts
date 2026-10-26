@@ -114,6 +114,7 @@ export type {
   UpdateProviderResponse,
   ListProvidersResponse,
 } from './providers';
+export { ConnectorSource } from './providers';
 export { ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 export type { DeleteProviderResponse } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 
