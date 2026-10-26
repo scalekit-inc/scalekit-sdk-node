@@ -8438,7 +8438,10 @@ Scalekit delivers trigger events to your endpoint as signed HTTP requests. Verif
 
 Checks the signature first (HMAC-SHA256 over `webhook-id.webhook-timestamp.body`, a 5-minute timestamp tolerance, constant-time comparison), then parses the body into a `TriggerEvent`. Also available as `scalekitClient.actions.triggers.verifyEvent(params)`, with identical behaviour.
 
-- Delivery is at least once, and a redelivery can arrive while the first delivery is still being handled. Make processing idempotent, keyed on `dedupeKey` together with the connected account you act as: claim that key atomically before you handle the event (for example an insert into a table with a unique key on both), so two concurrent deliveries cannot both handle it, and release the claim if handling fails, so a redelivery can retry.
+- Delivery is at least once, and a redelivery can arrive while the first delivery is still being handled. Make processing idempotent, keyed on `dedupeKey` together with the connected account you act as:
+  - Claim that key atomically before you handle the event, so two concurrent deliveries cannot both handle it. For example, use a row with a unique key on both, inserted with a lease (an expiry time). The claim succeeds only when no row exists, or when the row is unfinished and its lease has expired.
+  - Make the lease longer than handling can take. A claim left by a worker that stopped mid-handling then expires, and a later redelivery can take it, but an active claim is never taken.
+  - Mark the claim finished after handling, so a finished event is never handled again. Release it if handling fails, so a redelivery can retry at once.
 - Branch on `deliveryScope`: `'account'` events are for `connectedAccountId`; `'connection'` events are for the whole connection, and `connectedAccountId` is `''`.
 - When `payloadState` is `'reference'`, `payload` is `null`: fetch the resource identified by `resourceType` and `resourceId`.
 - `payload` is decoded with `JSON.parse`, so integers above `Number.MAX_SAFE_INTEGER` lose precision. Parse the raw body yourself if you need them exactly.
@@ -8499,10 +8502,10 @@ app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async 
 
   for (const accountId of accountIds) {
     // Delivery is at least once, and a redelivery can arrive while the first is
-    // still being handled: claim dedupeKey + the account you act as atomically
-    // (for example an insert with a unique key on both); false when another
-    // delivery of this event already claimed it.
-    if (!(await claimDelivery(event.dedupeKey, accountId))) continue;
+    // still being handled: claim dedupeKey + the account you act as atomically,
+    // with a lease longer than handling takes. false when this event is finished,
+    // or claimed by another delivery whose lease has not expired.
+    if (!(await claimDelivery(event.dedupeKey, accountId, { leaseSeconds: 900 }))) continue;
 
     try {
       const resource =
@@ -8515,6 +8518,7 @@ app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async 
       await releaseDelivery(event.dedupeKey, accountId); // let a redelivery retry
       throw err;
     }
+    await finishDelivery(event.dedupeKey, accountId); // never handled again
   }
   res.sendStatus(204);
 });
