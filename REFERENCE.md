@@ -8442,6 +8442,7 @@ Checks the signature first (HMAC-SHA256 over `webhook-id.webhook-timestamp.body`
   - Claim that key atomically before you handle the event, so two concurrent deliveries cannot both handle it. For example, use a row with a unique key on both, inserted with a lease (an expiry time). The claim succeeds only when no row exists, or when the row is unfinished and its lease has expired.
   - Make the lease longer than handling can take. A claim left by a worker that stopped mid-handling then expires, and a later redelivery can take it, but an active claim is never taken.
   - Mark the claim finished after handling, so a finished event is never handled again. Release it if handling fails, so a redelivery can retry at once.
+  - Answer `2xx` only once the event is finished, handled, or durably queued. When another delivery still holds an unexpired claim, answer a non-`2xx` status such as `409`, so Scalekit delivers the event again later instead of treating it as done.
 - Branch on `deliveryScope`: `'account'` events are for `connectedAccountId`; `'connection'` events are for the whole connection, and `connectedAccountId` is `''`.
 - When `payloadState` is `'reference'`, `payload` is `null`: fetch the resource identified by `resourceType` and `resourceId`.
 - `payload` is decoded with `JSON.parse`, so integers above `Number.MAX_SAFE_INTEGER` lose precision. Parse the raw body yourself if you need them exactly.
@@ -8500,12 +8501,18 @@ app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async 
     return res.sendStatus(204);
   }
 
+  let inProgress = false;
   for (const accountId of accountIds) {
     // Delivery is at least once, and a redelivery can arrive while the first is
     // still being handled: claim dedupeKey + the account you act as atomically,
-    // with a lease longer than handling takes. false when this event is finished,
-    // or claimed by another delivery whose lease has not expired.
-    if (!(await claimDelivery(event.dedupeKey, accountId, { leaseSeconds: 900 }))) continue;
+    // with a lease longer than handling takes. Returns 'claimed', 'finished'
+    // (already handled) or 'in_progress' (another delivery holds an unexpired lease).
+    const claim = await claimDelivery(event.dedupeKey, accountId, { leaseSeconds: 900 });
+    if (claim === 'finished') continue;
+    if (claim === 'in_progress') {
+      inProgress = true;
+      continue;
+    }
 
     try {
       const resource =
@@ -8520,7 +8527,8 @@ app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async 
     }
     await finishDelivery(event.dedupeKey, accountId); // never handled again
   }
-  res.sendStatus(204);
+  // Not done yet: a non-2xx answer makes Scalekit deliver the event again later.
+  res.sendStatus(inProgress ? 409 : 204);
 });
 ```
 </dd>
