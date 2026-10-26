@@ -1421,6 +1421,43 @@ describe('actions.uploadResumable', () => {
       expect(Date.now() - started).toBeLessThan(5_000);
       expect(ranges(h)).toEqual(['bytes 0-9/10']);
     });
+
+    it('aborts while the caller stream is stalled', async () => {
+      const h = makeHarness();
+      const controller = new AbortController();
+      let released = false;
+      const stalled: AsyncIterable<Uint8Array> = {
+        [Symbol.asyncIterator]() {
+          let sent = false;
+          return {
+            next: () => {
+              if (!sent) {
+                sent = true;
+                return Promise.resolve({ done: false, value: bytes(CHUNK) });
+              }
+              return new Promise<IteratorResult<Uint8Array>>(() => {}); // never yields again
+            },
+            return: async () => {
+              released = true;
+              return { done: true, value: undefined };
+            },
+          };
+        },
+      };
+      setTimeout(() => controller.abort(new Error('user cancelled')), 50);
+      const started = Date.now();
+      const err = await h.client.actions
+        .uploadResumable(params({ data: stalled, totalBytes: CHUNK * 3 }), {
+          signal: controller.signal,
+        })
+        .catch((e: unknown) => e);
+      expect(err).toBeInstanceOf(ScalekitAbortError);
+      expect(((err as ScalekitAbortError).cause as Error).message).toBe(
+        'user cancelled'
+      );
+      expect(Date.now() - started).toBeLessThan(5_000);
+      expect(released).toBe(true);
+    });
   });
 
   describe('validation (before any request)', () => {

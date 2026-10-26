@@ -476,7 +476,8 @@ class ChunkSource {
     private readonly data: Uint8Array | AsyncIterable<Uint8Array>,
     private readonly chunkSize: number,
     private readonly declaredTotal: number | undefined,
-    private readonly checkAbort: () => void
+    private readonly checkAbort: () => void,
+    private readonly signal: AbortSignal | undefined
   ) {}
 
   /** The total size: declared up front, or known once the end was read. */
@@ -536,7 +537,7 @@ class ChunkSource {
       ]();
     }
     while (!this.ended && this.buffered < target) {
-      const result = await this.iterator.next();
+      const result = await this.nextOrAbort(this.iterator);
       this.checkAbort();
       if (result.done) {
         this.ended = true;
@@ -553,6 +554,39 @@ class ChunkSource {
         this.buffered += piece.byteLength;
       }
     }
+  }
+
+  /**
+   * The stream's next piece, or the abort error as soon as the signal fires: a
+   * stream that stops yielding must not keep the upload from being cancelled.
+   * `close()` releases the stream afterwards.
+   */
+  private nextOrAbort(
+    iterator: AsyncIterator<unknown>
+  ): Promise<IteratorResult<unknown>> {
+    const signal = this.signal;
+    if (!signal) return iterator.next();
+    this.checkAbort();
+    return new Promise((resolve, reject) => {
+      const onAbort = () => {
+        try {
+          this.checkAbort();
+        } catch (err) {
+          reject(err);
+        }
+      };
+      signal.addEventListener('abort', onAbort, { once: true });
+      iterator.next().then(
+        (result) => {
+          signal.removeEventListener('abort', onAbort);
+          resolve(result);
+        },
+        (err: unknown) => {
+          signal.removeEventListener('abort', onAbort);
+          reject(err);
+        }
+      );
+    });
   }
 
   private take(count: number): Buffer {
@@ -697,7 +731,8 @@ class ResumableUpload {
       plan.data,
       plan.chunkSize,
       declaredTotal,
-      () => this.checkAbort()
+      () => this.checkAbort(),
+      plan.signal
     );
     try {
       // Read the first chunk before starting the session, so content that

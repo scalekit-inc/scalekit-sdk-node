@@ -22,7 +22,7 @@ export declare class ScalekitUploadHttpException extends ScalekitServerException
     readonly headers: Readonly<Record<string, string>>;
     /** Response body: parsed JSON when it is JSON, otherwise the text. */
     readonly body: unknown;
-    /** Whether a new attempt at the whole upload may succeed (408, 429 and 5xx). */
+    /** Whether a new attempt at the whole upload may succeed (408, 429, 500, 502, 503, 504). */
     readonly retryable: boolean;
     /** The underlying transport error. */
     readonly cause: unknown;
