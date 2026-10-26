@@ -8438,7 +8438,7 @@ Scalekit delivers trigger events to your endpoint as signed HTTP requests. Verif
 
 Checks the signature first (HMAC-SHA256 over `webhook-id.webhook-timestamp.body`, a 5-minute timestamp tolerance, constant-time comparison), then parses the body into a `TriggerEvent`. Also available as `scalekitClient.actions.triggers.verifyEvent(params)`, with identical behaviour.
 
-- Delivery is at least once. Make processing idempotent, keyed on `dedupeKey` together with the connected account you act as.
+- Delivery is at least once, and a redelivery can arrive while the first delivery is still being handled. Make processing idempotent, keyed on `dedupeKey` together with the connected account you act as: claim that key atomically before you handle the event (for example an insert into a table with a unique key on both), so two concurrent deliveries cannot both handle it, and release the claim if handling fails, so a redelivery can retry.
 - Branch on `deliveryScope`: `'account'` events are for `connectedAccountId`; `'connection'` events are for the whole connection, and `connectedAccountId` is `''`.
 - When `payloadState` is `'reference'`, `payload` is `null`: fetch the resource identified by `resourceType` and `resourceId`.
 - `payload` is decoded with `JSON.parse`, so integers above `Number.MAX_SAFE_INTEGER` lose precision. Parse the raw body yourself if you need them exactly.
