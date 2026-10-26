@@ -21,6 +21,16 @@ export default class ConnectedAccountsClient {
      * Lists connected accounts with optional filters and pagination.
      *
      * @param options Optional filtering and pagination parameters
+     * @param options.query Text to search for (up to 100 characters). Matches anywhere in the
+     *                      account identifier, the provider, the connection name and the
+     *                      provider's display name, ignoring case. With `query`, only
+     *                      `connector` and the paging options narrow the search;
+     *                      `identifier`, `provider`, `connectionNames` and
+     *                      `isOrgWideCredential` are not applied, so use those without it.
+     * @param options.isOrgWideCredential For connections that share one credential across the
+     *                      organization: `true` returns only the account that holds that
+     *                      shared credential, `false` returns only the per-user accounts.
+     *                      Leave it out to get both.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     listConnectedAccounts(options?: {
@@ -33,6 +43,7 @@ export default class ConnectedAccountsClient {
         pageToken?: string;
         query?: string;
         connectionNames?: string[];
+        isOrgWideCredential?: boolean;
     }): Promise<ListConnectedAccountsResponse>;
     /**
      * Creates a new connected account.
