@@ -342,6 +342,15 @@ export default class ActionsClient {
      * @throws {ScalekitGatewayTimeoutException} If the request exceeds the timeout.
      * @throws {ScalekitServerException} If a network or server error occurs.
      * @throws {ScalekitException} If required parameters are missing or an unexpected error occurs.
+     * @throws {Error} If `path` resolves outside the proxy prefix (`<environment URL>/proxy/`),
+     *                 for example through `..` segments, encoded dots or control characters.
+     *                 Checked before any network call; every other path is sent unchanged.
+     *
+     * @remarks Redirects returned by the proxied API are followed as before. A redirect
+     * hop that leaves the proxy prefix (another origin, or a same-origin path outside
+     * `<environment URL>/proxy/`) is sent without the client's `Authorization`,
+     * `connection_name` and `identifier` headers. So is a hop sent through an HTTP
+     * forward proxy whose redirect location carries a fragment.
      */
     request(params: {
         connectionName: string;
