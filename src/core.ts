@@ -97,6 +97,7 @@ export function assertValidPingInterval(value: number): void {
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
+  private pendingAuthentication: Promise<void> | null = null;
   public axios: Axios;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   public sdkVersion = `Scalekit-Node/${(require('../package.json') as { version: string }).version}`;
@@ -185,17 +186,22 @@ export default class CoreClient {
   }
 
   /**
-   * Make sure the client holds an access token, fetching one with the client
-   * credentials if it has none yet. Pass `force` to fetch a new token even when
-   * one is held (for example after a 401 says the held token has expired).
+   * Fetch a client-credentials token if this client doesn't have one yet.
    *
-   * gRPC calls get their token through `connectExec`; plain HTTP calls that go
-   * straight through `axios` (the actions proxy) call this instead.
+   * gRPC calls get a token lazily: `connectExec` authenticates when a call
+   * returns 401 and retries it. HTTP calls that must not be retried on 401,
+   * such as the actions proxy (a 401 there can come from the third-party API,
+   * and retrying would replay the request), call this first instead.
+   * Concurrent callers share one token request.
    */
-  async ensureAccessToken(force = false): Promise<void> {
-    if (force || !this.accessToken) {
-      await this.authenticateClient();
+  async ensureAccessToken(): Promise<void> {
+    if (this.accessToken) return;
+    if (!this.pendingAuthentication) {
+      this.pendingAuthentication = this.authenticateClient().finally(() => {
+        this.pendingAuthentication = null;
+      });
     }
+    await this.pendingAuthentication;
   }
 
   private async authenticateClient() {
@@ -221,6 +227,27 @@ export default class CoreClient {
       },
       skipAuth: true,
     });
+  }
+
+  /**
+   * Replace an access token the server rejected.
+   *
+   * Pass the token the rejected request was sent with. If another caller has
+   * already replaced it, this returns without a token request; otherwise
+   * concurrent callers share one token request (the same one
+   * `ensureAccessToken` uses). Callers resend only when `accessToken` has
+   * changed afterwards.
+   *
+   * @internal
+   */
+  async refreshAccessToken(rejectedToken: string | null): Promise<void> {
+    if (this.accessToken !== rejectedToken) return;
+    if (!this.pendingAuthentication) {
+      this.pendingAuthentication = this.authenticateClient().finally(() => {
+        this.pendingAuthentication = null;
+      });
+    }
+    await this.pendingAuthentication;
   }
 
   /**

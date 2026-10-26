@@ -100,6 +100,15 @@ export type {
   CreateMcpSessionTokenParams,
 } from './mcp';
 
+// Types surfaced in the public `actions.uploadResumable` API. Its error
+// classes are exported from './errors' above.
+export type {
+  ResumableUploadMethod,
+  ResumableUploadParams,
+  ResumableUploadOptions,
+  UploadProgress,
+} from './resumable-upload';
+
 // Types surfaced by the public `mcp` client (Virtual MCP servers). Only the
 // generally available McpConfig surface is re-exported; the PREVIEW `Mcp` and
 // `McpInstance` families backing the older /mcp/v1/ and /mcp/v2/ server

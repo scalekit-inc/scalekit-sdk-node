@@ -3,7 +3,7 @@ import {
   type JsonObject,
   type MessageInitShape,
 } from '@bufbuild/protobuf';
-import { AxiosError, AxiosResponse, HttpStatusCode } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import CoreClient, { assertValidTimeout } from './core';
 import { assertProxyPathContained, proxyRedirectGuard } from './proxy-path';
 import {
@@ -18,6 +18,12 @@ import type McpClient from './mcp';
 import type ProvidersClient from './providers';
 import { TriggersClient } from './triggers';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
+import {
+  isScalekitUnauthorized,
+  uploadResumable,
+  type ResumableUploadOptions,
+  type ResumableUploadParams,
+} from './resumable-upload';
 import {
   ConnectionStatus,
   ConnectionType,
@@ -771,18 +777,28 @@ export default class ActionsClient {
 
     try {
       // Unlike the gRPC calls, this goes straight through axios, so it has to
-      // get its own token: fetch one if the client has none yet, and fetch a
-      // new one and retry once if the held token has expired.
+      // get its own token: fetch one if the client has none yet, and replace
+      // one the proxy rejected as expired. Only a 401 sent by Scalekit itself
+      // is retried (once, and only if the token changed): the proxy rejects
+      // that before forwarding, so the resend is safe. A 401 from the
+      // provider is returned as is, never replayed.
       await this.coreClient.ensureAccessToken();
+      const tokenUsed = this.coreClient.accessToken;
       try {
         return await send();
       } catch (error) {
         if (
           error instanceof AxiosError &&
-          error.response?.status === HttpStatusCode.Unauthorized
+          error.response &&
+          isScalekitUnauthorized(error.response)
         ) {
-          await this.coreClient.ensureAccessToken(true);
-          return await send();
+          await this.coreClient.refreshAccessToken(tokenUsed);
+          if (
+            this.coreClient.accessToken &&
+            this.coreClient.accessToken !== tokenUsed
+          ) {
+            return await send();
+          }
         }
         throw error;
       }
@@ -800,5 +816,75 @@ export default class ActionsClient {
       }
       throw new ScalekitException(error);
     }
+  }
+
+  /**
+   * Upload a file of any size to a Google API that supports resumable
+   * uploads (Drive v3, the Cloud Storage JSON API, YouTube Data API) through
+   * a connected account.
+   *
+   * The content is sent in chunks (4 MiB by default), one request each, so
+   * no single request runs long. After a timeout, a connection error or HTTP
+   * 408, 429, 500, 502, 503 or 504, the SDK waits, asks the server how many
+   * bytes it has and resumes from there instead of restarting. After a 308
+   * that commits no new bytes, it waits and resends from the offset that 308
+   * reported, without asking first. The session-start request is never
+   * retried, because a retry would open a second session.
+   *
+   * Content can be bytes or a stream. A stream is read one chunk at a time
+   * and never buffered whole. Its size is known for an unread
+   * `fs.createReadStream(path)` without `start`/`end`; otherwise pass
+   * `totalBytes`, or let the SDK send the size with the last chunk. Errors
+   * from reading the stream propagate unchanged.
+   *
+   * @param params - What to upload and where. `connectionName`, `identifier`,
+   *   `path` and `data` are required; see {@link ResumableUploadParams}.
+   * @param options - Cancellation, timeout, retries and progress; see
+   *   {@link ResumableUploadOptions}.
+   * @returns The created or updated resource from the final response, such
+   *   as the Drive file object (`{}` when that response has no body).
+   * @throws {ScalekitValidationError} If an argument is invalid (before any
+   *   request is sent), or if a stream is shorter or longer than `totalBytes`.
+   * @throws {ScalekitUploadSessionExpiredException} If the upload session
+   *   expired or no longer exists (HTTP 404/410 on a chunk). Upload again.
+   * @throws {ScalekitUploadHttpException} If the session-start request fails,
+   *   a chunk gets any other 4xx or 5xx (such as 403, 501 or 505) or a 2xx
+   *   other than 200/201, or a retryable (408, 429, 500, 502, 503, 504)
+   *   status persists after
+   *   `maxRetries` retries. `status`, `headers` and `body` describe the response.
+   * @throws {ScalekitUploadTimeoutException} If a request times out (a chunk:
+   *   after `maxRetries` retries).
+   * @throws {ScalekitUploadConnectionException} If a request gets no response
+   *   (a chunk: after `maxRetries` retries).
+   * @throws {ScalekitUploadProtocolException} If a response breaks the
+   *   resumable protocol: the upload completes before the last chunk is sent,
+   *   a chunk still commits no new bytes after `maxRetries` retries, or the
+   *   final body is not a JSON object.
+   * @throws {ScalekitAbortError} If `options.signal` is aborted.
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   *
+   * @example
+   * ```ts
+   * import fs from 'node:fs';
+   *
+   * const file = await scalekit.actions.uploadResumable(
+   *   {
+   *     connectionName: 'googledrive',
+   *     identifier: 'user_123',
+   *     path: '/upload/drive/v3/files',
+   *     data: fs.createReadStream('video.mp4'),
+   *     contentType: 'video/mp4',
+   *     metadata: { name: 'video.mp4' },
+   *   },
+   *   { onProgress: (p) => console.log(p.bytesCommitted, p.totalBytes) }
+   * );
+   * console.log(file.id);
+   * ```
+   */
+  async uploadResumable(
+    params: ResumableUploadParams,
+    options?: ResumableUploadOptions
+  ): Promise<Record<string, unknown>> {
+    return uploadResumable(this.coreClient, params, options);
   }
 }
