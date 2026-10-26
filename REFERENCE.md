@@ -8137,7 +8137,7 @@ console.log(res.provider?.identifier);
 <dl>
 <dd>
 
-**params.authPatterns?:** `AuthPattern[]` - How users authenticate. Required in practice: leaving it out fails with a validation error on `provider.auth_patterns`, and an empty array fails with `auth patterns cannot be empty`. Exactly one pattern is supported today. An `AuthPattern` is `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; fields?: AuthField[]; account_fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string; allowed_proxy_domains?: string[] }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select' | 'textarea'; hint?: string; required?: boolean; options?: AuthFieldOption[]; is_path_param?: boolean; header_name?: string }`. `is_mcp` on a pattern is deprecated: use `isMcp`.
+**params.authPatterns?:** `AuthPattern[]` - How users authenticate. Required in practice: leaving it out fails with a validation error on `provider.auth_patterns`, and an empty array fails with `auth patterns cannot be empty`. Exactly one pattern is supported today. An `AuthPattern` is `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select' | 'textarea'; hint?: string; required?: boolean; options?: AuthFieldOption[]; is_path_param?: boolean; header_name?: string }`. `is_mcp` on a pattern is deprecated: use `isMcp`.
 
 </dd>
 </dl>

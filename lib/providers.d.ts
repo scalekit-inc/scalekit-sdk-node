@@ -72,17 +72,6 @@ export interface AuthPattern {
      */
     fields?: AuthField[];
     /**
-     * Inputs collected per connected account rather than once per connection, for
-     * connectors that need an account-scoped value such as a workspace or
-     * subdomain. Same shape as `fields`.
-     */
-    account_fields?: AuthField[];
-    /**
-     * Domains this connector's proxied requests may be routed to. Empty means no
-     * restriction beyond the provider's `proxyUrl`.
-     */
-    allowed_proxy_domains?: string[];
-    /**
      * OAuth settings for an `OAUTH` pattern. Pass `{}` to use the upstream
      * server's discovered defaults.
      */
