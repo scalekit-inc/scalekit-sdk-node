@@ -8498,16 +8498,23 @@ app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async 
   }
 
   for (const accountId of accountIds) {
-    // Delivery is at least once: dedupe on dedupeKey + the account you act as.
-    if (await alreadyProcessed(event.dedupeKey, accountId)) continue;
+    // Delivery is at least once, and a redelivery can arrive while the first is
+    // still being handled: claim dedupeKey + the account you act as atomically
+    // (for example an insert with a unique key on both); false when another
+    // delivery of this event already claimed it.
+    if (!(await claimDelivery(event.dedupeKey, accountId))) continue;
 
-    const resource =
-      event.payloadState === PayloadState.REFERENCE
-        ? await fetchResource(accountId, event.resourceType, event.resourceId)
-        : event.payload;
+    try {
+      const resource =
+        event.payloadState === PayloadState.REFERENCE
+          ? await fetchResource(accountId, event.resourceType, event.resourceId)
+          : event.payload;
 
-    await handle(event.triggerType, resource, accountId);
-    await markProcessed(event.dedupeKey, accountId);
+      await handle(event.triggerType, resource, accountId);
+    } catch (err) {
+      await releaseDelivery(event.dedupeKey, accountId); // let a redelivery retry
+      throw err;
+    }
   }
   res.sendStatus(204);
 });
