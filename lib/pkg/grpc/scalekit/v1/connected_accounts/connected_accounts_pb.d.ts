@@ -320,6 +320,10 @@ export type UpdateConnectedAccountRequest = Message<"scalekit.v1.connected_accou
      * @generated from field: scalekit.v1.connected_accounts.UpdateConnectedAccount connected_account = 5;
      */
     connectedAccount?: UpdateConnectedAccount | undefined;
+    /**
+     * @generated from field: scalekit.v1.connected_accounts.ScopeSelection scope_selection = 7;
+     */
+    scopeSelection?: ScopeSelection | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.UpdateConnectedAccountRequest.
@@ -942,6 +946,43 @@ export type GetRedirectUrlRequest = Message<"scalekit.v1.connected_accounts.GetR
  */
 export declare const GetRedirectUrlRequestSchema: GenMessage<GetRedirectUrlRequest>;
 /**
+ * ScopeSelection is the set of scopes an end user chose in the hosted connect widget.
+ * Both lists together are the complete selection: a list that is left out is the same as
+ * an empty one and means the user chose no scopes in that bucket. Required scopes are
+ * added back by the server, so they never need to be sent.
+ *
+ * @generated from message scalekit.v1.connected_accounts.ScopeSelection
+ */
+export type ScopeSelection = Message<"scalekit.v1.connected_accounts.ScopeSelection"> & {
+    /**
+     * @generated from field: repeated string scopes = 1;
+     */
+    scopes: string[];
+    /**
+     * @generated from field: repeated string optional_scopes = 2;
+     */
+    optionalScopes: string[];
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.ScopeSelection.
+ * Use `create(ScopeSelectionSchema)` to create a new message.
+ */
+export declare const ScopeSelectionSchema: GenMessage<ScopeSelection>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.CreateRedirectUrlRequest
+ */
+export type CreateRedirectUrlRequest = Message<"scalekit.v1.connected_accounts.CreateRedirectUrlRequest"> & {
+    /**
+     * @generated from field: scalekit.v1.connected_accounts.ScopeSelection scope_selection = 1;
+     */
+    scopeSelection?: ScopeSelection | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.CreateRedirectUrlRequest.
+ * Use `create(CreateRedirectUrlRequestSchema)` to create a new message.
+ */
+export declare const CreateRedirectUrlRequestSchema: GenMessage<CreateRedirectUrlRequest>;
+/**
  * @generated from message scalekit.v1.connected_accounts.GetRedirectUrlResponse
  */
 export type GetRedirectUrlResponse = Message<"scalekit.v1.connected_accounts.GetRedirectUrlResponse"> & {
@@ -1193,6 +1234,16 @@ export declare const ConnectedAccountService: GenService<{
     getRedirectUrl: {
         methodKind: "unary";
         input: typeof GetRedirectUrlRequestSchema;
+        output: typeof GetRedirectUrlResponseSchema;
+    };
+    /**
+     * Create Redirect URL for Connected Account Portal, with the end user's scope selection
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.CreateRedirectUrl
+     */
+    createRedirectUrl: {
+        methodKind: "unary";
+        input: typeof CreateRedirectUrlRequestSchema;
         output: typeof GetRedirectUrlResponseSchema;
     };
     /**
