@@ -102,7 +102,7 @@ export default class CoreClient {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   public sdkVersion = `Scalekit-Node/${(require('../package.json') as { version: string }).version}`;
   // YYYYMMDD
-  public apiVersion = '20261012';
+  public apiVersion = '20261027';
   public userAgent = `${this.sdkVersion} Node/${process.version} (${
     process.platform
   }; ${os.arch()})`;
