@@ -7712,7 +7712,7 @@ console.log(res.config.id, res.config.mcpServerUrl);
 <dl>
 <dd>
 
-**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Connections to expose and, optionally, which of their tools. Omit `tools` to expose every tool for that connection. Maximum 25 mappings in `DIRECT` mode.
+**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Connections to expose and, optionally, which of their tools. Omit `tools` to expose every tool for that connection. Maximum 25 connections in `DIRECT` mode.
 
 </dd>
 </dl>
