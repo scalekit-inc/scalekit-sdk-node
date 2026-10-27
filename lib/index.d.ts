@@ -20,8 +20,8 @@ export type { SearchToolsResponse, SearchedTool, ConnectionReadiness, } from './
 export type { ListToolsResponse, Tool, } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 export type { ActionTool, ListToolsResult } from './actions';
 export type { McpSessionTokenAccessLevel, McpToolExposure, CreateMcpSessionTokenParams, } from './mcp';
-export type { AgentKitAuthMode, AgentKitTokenEndpointAuthMethod, AgentKitProviderConfigurations, AgentKitOAuthSettings, AgentKitGoogleDwdSettings, AgentKitStaticSettings, CreateConnectionParams, ListAppConnectionsParams, ConnectionRef, UpdateConnectionParams, } from './agentkit-connections';
-export type { AppConnection, AppConnectionSummary, ListAppConnectionSummariesResponse, } from './pkg/grpc/scalekit/v1/connections/connections_pb';
+export type { AgentKitAuthMode, AgentKitTokenEndpointAuthMethod, AgentKitProviderConfigurations, AgentKitOAuthSettings, AgentKitGoogleDwdSettings, AgentKitStaticSettings, CreateConnectionParams, ListAppConnectionsParams, ListAppConnectionsResponse, ConnectionRef, UpdateConnectionParams, } from './agentkit-connections';
+export type { AppConnection, AppConnectionSummary, } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 export type { ResumableUploadMethod, ResumableUploadParams, ResumableUploadOptions, UploadProgress, } from './resumable-upload';
 export type { McpConfig, McpConfigConnectionToolMapping, CreateMcpConfigResponse, GetMcpConfigResponse, ListMcpConfigsResponse, UpdateMcpConfigResponse, DeleteMcpConfigResponse, ListMcpConnectedAccountsResponse, CreateMcpSessionTokenResponse, } from './pkg/grpc/scalekit/v1/mcp/mcp_pb';
 export type { AuthPattern, AuthField, Provider, CreateProviderResponse, UpdateProviderResponse, ListProvidersResponse, } from './providers';

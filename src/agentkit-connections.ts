@@ -103,6 +103,13 @@ export interface CreateConnectionParams {
   providerDomain?: string;
 }
 
+/**
+ * Response of `scalekit.actions.listAppConnections`: AgentKit connection summaries and the paging
+ * tokens. It is not the older `ListAppConnectionsResponse` that `scalekit.connection.listAppConnections`
+ * returns; that one has a different item shape.
+ */
+export type ListAppConnectionsResponse = ListAppConnectionSummariesResponse;
+
 export interface ListAppConnectionsParams {
   provider?: string;
   /** At least 3 characters; matches name, provider and display name. */
@@ -321,7 +328,7 @@ export class AgentKitConnections {
 
   async list(
     params?: ListAppConnectionsParams
-  ): Promise<ListAppConnectionSummariesResponse> {
+  ): Promise<ListAppConnectionsResponse> {
     if (params?.query !== undefined && params.query.trim().length < 3) {
       throw invalid('query needs at least 3 characters');
     }

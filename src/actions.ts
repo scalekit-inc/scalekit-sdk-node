@@ -20,12 +20,10 @@ import {
   type ConnectionRef,
   type CreateConnectionParams,
   type ListAppConnectionsParams,
+  type ListAppConnectionsResponse,
   type UpdateConnectionParams,
 } from './agentkit-connections';
-import type {
-  AppConnection as AgentKitConnection,
-  ListAppConnectionSummariesResponse,
-} from './pkg/grpc/scalekit/v1/connections/connections_pb';
+import type { AppConnection as AgentKitConnection } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 import type McpClient from './mcp';
 import type ProvidersClient from './providers';
 import { TriggersClient } from './triggers';
@@ -528,7 +526,7 @@ export default class ActionsClient {
    */
   async listAppConnections(
     params?: ListAppConnectionsParams
-  ): Promise<ListAppConnectionSummariesResponse> {
+  ): Promise<ListAppConnectionsResponse> {
     return this.agentKitConnections.list(params);
   }
 

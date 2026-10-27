@@ -76,6 +76,12 @@ export interface CreateConnectionParams {
     /** Required for regional connectors such as MIXPANELMCP and HONEYCOMBMCP; not allowed for others. */
     providerDomain?: string;
 }
+/**
+ * Response of `scalekit.actions.listAppConnections`: AgentKit connection summaries and the paging
+ * tokens. It is not the older `ListAppConnectionsResponse` that `scalekit.connection.listAppConnections`
+ * returns; that one has a different item shape.
+ */
+export type ListAppConnectionsResponse = ListAppConnectionSummariesResponse;
 export interface ListAppConnectionsParams {
     provider?: string;
     /** At least 3 characters; matches name, provider and display name. */
@@ -112,7 +118,7 @@ export declare class AgentKitConnections {
     constructor(connection: ConnectionClient);
     create(params: CreateConnectionParams): Promise<AppConnection>;
     get(ref: ConnectionRef | string): Promise<AppConnection>;
-    list(params?: ListAppConnectionsParams): Promise<ListAppConnectionSummariesResponse>;
+    list(params?: ListAppConnectionsParams): Promise<ListAppConnectionsResponse>;
     update(params: UpdateConnectionParams): Promise<AppConnection>;
     delete(ref: ConnectionRef): Promise<void>;
     private identifierOf;

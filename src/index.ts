@@ -112,13 +112,13 @@ export type {
   AgentKitStaticSettings,
   CreateConnectionParams,
   ListAppConnectionsParams,
+  ListAppConnectionsResponse,
   ConnectionRef,
   UpdateConnectionParams,
 } from './agentkit-connections';
 export type {
   AppConnection,
   AppConnectionSummary,
-  ListAppConnectionSummariesResponse,
 } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 
 // Types surfaced in the public `actions.uploadResumable` API. Its error
