@@ -576,7 +576,11 @@ export declare enum EventTarget {
     /**
      * @generated from enum value: PERMISSION = 11;
      */
-    PERMISSION = 11
+    PERMISSION = 11,
+    /**
+     * @generated from enum value: PROVIDER = 12;
+     */
+    PROVIDER = 12
 }
 /**
  * Describes the enum scalekit.v1.events.EventTarget.

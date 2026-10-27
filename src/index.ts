@@ -97,8 +97,29 @@ export type {
 export type { ActionTool, ListToolsResult } from './actions';
 export type {
   McpSessionTokenAccessLevel,
+  McpToolExposure,
   CreateMcpSessionTokenParams,
 } from './mcp';
+
+// Types surfaced by the AgentKit connection methods on `actions`
+// (createConnection, getConnection, listConnectionSummaries, updateConnection, ...).
+export type {
+  AgentKitAuthMode,
+  AgentKitTokenEndpointAuthMethod,
+  AgentKitProviderConfigurations,
+  AgentKitOAuthSettings,
+  AgentKitGoogleDwdSettings,
+  AgentKitStaticSettings,
+  CreateConnectionParams,
+  ListConnectionsParams,
+  ConnectionRef,
+  UpdateConnectionParams,
+} from './agentkit-connections';
+export type {
+  AppConnection,
+  AppConnectionSummary,
+  ListAppConnectionSummariesResponse,
+} from './pkg/grpc/scalekit/v1/connections/connections_pb';
 
 // Types surfaced in the public `actions.uploadResumable` API. Its error
 // classes are exported from './errors' above.

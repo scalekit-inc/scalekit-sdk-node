@@ -231,6 +231,10 @@ export type ExecuteToolRequest = Message<"scalekit.v1.tools.ExecuteToolRequest">
      * @generated from field: optional string agent_run_id = 8;
      */
     agentRunId?: string | undefined;
+    /**
+     * @generated from field: optional string trigger_correlation_id = 9;
+     */
+    triggerCorrelationId?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.tools.ExecuteToolRequest.

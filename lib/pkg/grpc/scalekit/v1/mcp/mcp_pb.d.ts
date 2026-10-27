@@ -1,4 +1,4 @@
-import type { GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
+import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import type { Duration, Timestamp } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 /**
@@ -222,6 +222,10 @@ export type UpdateMcpConfigRequest = Message<"scalekit.v1.mcp.UpdateMcpConfigReq
      * @generated from field: repeated scalekit.v1.mcp.McpConfigConnectionToolMapping connection_tool_mappings = 3;
      */
     connectionToolMappings: McpConfigConnectionToolMapping[];
+    /**
+     * @generated from field: optional scalekit.v1.mcp.ToolExposure tool_exposure = 4;
+     */
+    toolExposure?: ToolExposure | undefined;
 };
 /**
  * Describes the message scalekit.v1.mcp.UpdateMcpConfigRequest.
@@ -770,6 +774,10 @@ export type McpConfig = Message<"scalekit.v1.mcp.McpConfig"> & {
      * @generated from field: string mcp_server_url = 5;
      */
     mcpServerUrl: string;
+    /**
+     * @generated from field: optional scalekit.v1.mcp.ToolExposure tool_exposure = 6;
+     */
+    toolExposure?: ToolExposure | undefined;
 };
 /**
  * Describes the message scalekit.v1.mcp.McpConfig.
@@ -863,6 +871,35 @@ export type CreateMcpSessionTokenResponse = Message<"scalekit.v1.mcp.CreateMcpSe
  * Use `create(CreateMcpSessionTokenResponseSchema)` to create a new message.
  */
 export declare const CreateMcpSessionTokenResponseSchema: GenMessage<CreateMcpSessionTokenResponse>;
+/**
+ * Tool exposure mode of a virtual MCP server (MCP configuration).
+ *
+ * @generated from enum scalekit.v1.mcp.ToolExposure
+ */
+export declare enum ToolExposure {
+    /**
+     * Unset; resolved by the server
+     *
+     * @generated from enum value: TOOL_EXPOSURE_UNSPECIFIED = 0;
+     */
+    TOOL_EXPOSURE_UNSPECIFIED = 0,
+    /**
+     * Every mapped tool is listed in tools/list
+     *
+     * @generated from enum value: DIRECT = 1;
+     */
+    DIRECT = 1,
+    /**
+     * Five platform tools search, inspect, run and connect the mapped tools
+     *
+     * @generated from enum value: META = 2;
+     */
+    META = 2
+}
+/**
+ * Describes the enum scalekit.v1.mcp.ToolExposure.
+ */
+export declare const ToolExposureSchema: GenEnum<ToolExposure>;
 /**
  * @generated from service scalekit.v1.mcp.McpService
  */

@@ -8,6 +8,15 @@ import { CreateMcpConfigResponse, CreateMcpSessionTokenResponse, DeleteMcpConfig
  */
 export type McpSessionTokenAccessLevel = 'FULL' | 'READ_ONLY';
 /**
+ * How a Virtual MCP server exposes tools. `'DIRECT'` lists every mapped tool in
+ * `tools/list` (at most 25 connections, no overlapping tool names). `'META'`
+ * lists five platform tools (`search_available_tools`, `list_available_tools`,
+ * `get_tool_details`, `execute_tool`, `connect_account`) that reach every tool
+ * of the configuration's connections, with no connection limit. META must be
+ * enabled for your environment.
+ */
+export type McpToolExposure = 'DIRECT' | 'META';
+/**
  * Parameters for {@link McpClient.createSessionToken}. Set a target:
  * `mcpConfigId` for a Virtual MCP server built from a configuration, or
  * `connectionName` for a connection's own MCP server. If both are set,
@@ -58,7 +67,9 @@ export default class McpClient {
      * @param params.description Human-readable summary of what this server exposes.
      * @param params.connectionToolMappings Which connections, and which tools from each, to expose.
      *                                      Omit `tools` on a mapping to expose every tool for that connection.
-     *                                      Maximum 25 mappings.
+     *                                      Maximum 25 mappings when `toolExposure` is `'DIRECT'`.
+     * @param params.toolExposure `'DIRECT'` or `'META'`. Omit it to get `'DIRECT'`; META must be
+     *                            requested explicitly. See {@link McpToolExposure}.
      * @throws {ScalekitServerException} If a network or server error occurs.
      *
      * @remarks
@@ -71,6 +82,7 @@ export default class McpClient {
         name: string;
         description?: string;
         connectionToolMappings?: MessageInitShape<typeof McpConfigSchema>['connectionToolMappings'];
+        toolExposure?: McpToolExposure;
     }): Promise<CreateMcpConfigResponse>;
     /**
      * Fetches a single MCP configuration by ID.
@@ -103,12 +115,16 @@ export default class McpClient {
      * @param params.configId ID of the configuration to update.
      * @param params.description New description.
      * @param params.connectionToolMappings Replacement connection-to-tool mappings.
+     * @param params.toolExposure `'DIRECT'` or `'META'`. Omit it to keep the stored mode.
+     *                            Switching to `'DIRECT'` is refused when the configuration has more than
+     *                            25 connections or overlapping tool names.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     updateConfig(params: {
         configId: string;
         description?: string;
         connectionToolMappings?: MessageInitShape<typeof UpdateMcpConfigRequestSchema>['connectionToolMappings'];
+        toolExposure?: McpToolExposure;
     }): Promise<UpdateMcpConfigResponse>;
     /**
      * Deletes an MCP configuration.

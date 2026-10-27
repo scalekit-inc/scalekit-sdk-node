@@ -7636,6 +7636,8 @@ await scalekitClient.actions.uploadResumable({
 
 A Virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol, so any MCP-capable agent can call them. Create one configuration per agent role (not per user), and mint a short-lived session token per user per run. The server URL stays the same; the token carries the user's identity. Each AgentKit connection also has its own MCP server with all of its tools; mint tokens for it with `createSessionToken({ connectionName, ... })`.
 
+`createConfig` and `updateConfig` take an optional `toolExposure`: `'DIRECT'` (the default) lists every mapped tool and allows at most 25 connections; `'META'` gives agents five search and execute tools with no connection limit and must be enabled for your environment. An update without `toolExposure` keeps the stored mode.
+
 Only the generally available `McpConfig` API is covered. The older `Mcp` and `McpInstance` families are marked PREVIEW and are not exposed.
 
 Access via `scalekitClient.actions.mcp`.

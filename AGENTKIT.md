@@ -165,3 +165,40 @@ There is no separate `connect` export on Node; use `actions` for the facade.
 
 </dd></dl>
 </details>
+
+## Connections
+
+`client.actions` also manages AgentKit connections with the AgentKit-only connection APIs: only AgentKit fields, with `provider`, `connectionName`, `useScalekitCreds` and `providerConfigurations`. The existing `actions.listConnections` is unchanged.
+
+<details><summary>Methods</summary>
+<dl><dd>
+
+- `createConnection({ provider, connectionName?, authMode?, providerDomain? })` — creates a connection. The type comes from the connector (a connector with several auth types is refused). `providerDomain` is only for regional connectors such as `MIXPANELMCP`. Add credentials and options afterwards with `updateConnection`.
+- `getConnection(nameOrId)` — one connection by name (case-insensitive) or by ID (`conn_...`). Also accepts `{ connectionName }` or `{ connectionId }`.
+- `listConnectionSummaries({ provider?, query?, pageSize?, pageToken? })` — summaries, newest first (`pageSize` up to 100, `query` at least 3 characters).
+- `updateConnection({ connectionName | connectionId, oauth | googleDwd | staticConfig, providerConfigurations?, newConnectionName? })` — a partial merge: what you leave out keeps its stored value, and a list or map you pass empty (`scopes: []`, `extraAuthorizeParams: {}`) is cleared. A name costs one extra read to find the ID.
+- `enableConnection`, `disableConnection`, `deleteConnection` — take a name or ID. Enabling needs the client ID and secret (and, for OAuth, the user info URI) to be set.
+
+```typescript
+const connection = await scalekitClient.actions.createConnection({
+  provider: 'GMAIL',
+  connectionName: 'gmail-work',
+});
+await scalekitClient.actions.updateConnection({
+  connectionName: 'gmail-work',
+  oauth: {
+    clientId: '...',
+    clientSecret: '...',
+    scopes: ['https://www.googleapis.com/auth/gmail.readonly'],
+  },
+});
+```
+
+Failures raise `ScalekitAgentKitConnectionError` with a stable `code` (`CONNECTION_NOT_FOUND`, `CONNECTION_NAME_CONFLICT`, `CONNECTION_IN_USE`, `PROVIDER_NOT_FOUND`, `AMBIGUOUS_AUTH_TYPE`, `INVALID_CONFIGURATION`, `NOT_AUTHORIZED`, `OUTCOME_UNKNOWN`, ...), `retryable` and the original server error as `cause`. Invalid arguments raise `ScalekitValidationError` before anything is sent.
+
+</dd></dl>
+</details>
+
+## Virtual MCP tool exposure
+
+`actions.mcp.createConfig({ ..., toolExposure })` and `updateConfig({ ..., toolExposure })` take `'DIRECT'` or `'META'`. `DIRECT` (the default when you leave it out) lists every mapped tool and allows at most 25 connections. `META` gives agents five tools (`search_available_tools`, `list_available_tools`, `get_tool_details`, `execute_tool`, `connect_account`) that reach every tool of the configuration's connections, with no connection limit; it must be enabled for your environment. An update that leaves `toolExposure` out never changes the mode.

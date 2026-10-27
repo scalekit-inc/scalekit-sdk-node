@@ -1,5 +1,5 @@
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import type { ListValue } from "@bufbuild/protobuf/wkt";
+import type { ListValue, Timestamp } from "@bufbuild/protobuf/wkt";
 import type { Message } from "@bufbuild/protobuf";
 /**
  * Describes the file scalekit/v1/providers/providers.proto.
@@ -69,6 +69,10 @@ export type Provider = Message<"scalekit.v1.providers.Provider"> & {
     metadata: {
         [key: string]: string;
     };
+    /**
+     * @generated from field: string openapi_spec_url = 15;
+     */
+    openapiSpecUrl: string;
 };
 /**
  * Describes the message scalekit.v1.providers.Provider.
@@ -175,6 +179,10 @@ export type CreateCustomProvider = Message<"scalekit.v1.providers.CreateCustomPr
     metadata: {
         [key: string]: string;
     };
+    /**
+     * @generated from field: string openapi_spec_url = 12;
+     */
+    openapiSpecUrl: string;
 };
 /**
  * Describes the message scalekit.v1.providers.CreateCustomProvider.
@@ -309,6 +317,10 @@ export type UpdateCustomProvider = Message<"scalekit.v1.providers.UpdateCustomPr
     metadata: {
         [key: string]: string;
     };
+    /**
+     * @generated from field: string openapi_spec_url = 12;
+     */
+    openapiSpecUrl: string;
 };
 /**
  * Describes the message scalekit.v1.providers.UpdateCustomProvider.
@@ -463,6 +475,102 @@ export type DeleteProviderResponse = Message<"scalekit.v1.providers.DeleteProvid
  */
 export declare const DeleteProviderResponseSchema: GenMessage<DeleteProviderResponse>;
 /**
+ * @generated from message scalekit.v1.providers.TriggerToolCollectionRequest
+ */
+export type TriggerToolCollectionRequest = Message<"scalekit.v1.providers.TriggerToolCollectionRequest"> & {
+    /**
+     * @generated from field: string provider_identifier = 1;
+     */
+    providerIdentifier: string;
+};
+/**
+ * Describes the message scalekit.v1.providers.TriggerToolCollectionRequest.
+ * Use `create(TriggerToolCollectionRequestSchema)` to create a new message.
+ */
+export declare const TriggerToolCollectionRequestSchema: GenMessage<TriggerToolCollectionRequest>;
+/**
+ * @generated from message scalekit.v1.providers.GetToolCollectionRunRequest
+ */
+export type GetToolCollectionRunRequest = Message<"scalekit.v1.providers.GetToolCollectionRunRequest"> & {
+    /**
+     * @generated from field: string provider_identifier = 1;
+     */
+    providerIdentifier: string;
+    /**
+     * run_id, or the literal string "latest". Omit (or pass "latest") for the most recent run.
+     *
+     * @generated from field: string run_id = 2;
+     */
+    runId: string;
+};
+/**
+ * Describes the message scalekit.v1.providers.GetToolCollectionRunRequest.
+ * Use `create(GetToolCollectionRunRequestSchema)` to create a new message.
+ */
+export declare const GetToolCollectionRunRequestSchema: GenMessage<GetToolCollectionRunRequest>;
+/**
+ * Mirrors db.ToolCollectionRun (db/tool_collection_runs.go) — see there for field rationale.
+ *
+ * @generated from message scalekit.v1.providers.ToolCollectionRun
+ */
+export type ToolCollectionRun = Message<"scalekit.v1.providers.ToolCollectionRun"> & {
+    /**
+     * @generated from field: string run_id = 1;
+     */
+    runId: string;
+    /**
+     * @generated from field: string provider_identifier = 2;
+     */
+    providerIdentifier: string;
+    /**
+     * @generated from field: string status = 3;
+     */
+    status: string;
+    /**
+     * @generated from field: int32 total_endpoints = 4;
+     */
+    totalEndpoints: number;
+    /**
+     * @generated from field: int32 tools_created = 5;
+     */
+    toolsCreated: number;
+    /**
+     * @generated from field: int32 tools_updated = 6;
+     */
+    toolsUpdated: number;
+    /**
+     * @generated from field: int32 tools_deleted = 7;
+     */
+    toolsDeleted: number;
+    /**
+     * JSON-encoded []SkippedTool; not a repeated message yet, to avoid duplicating db.SkippedTool before it's settled.
+     *
+     * @generated from field: string skipped_tools_json = 8;
+     */
+    skippedToolsJson: string;
+    /**
+     * @generated from field: string error_message = 9;
+     */
+    errorMessage: string;
+    /**
+     * @generated from field: google.protobuf.Timestamp created_at = 10;
+     */
+    createdAt?: Timestamp | undefined;
+    /**
+     * @generated from field: google.protobuf.Timestamp started_at = 11;
+     */
+    startedAt?: Timestamp | undefined;
+    /**
+     * @generated from field: google.protobuf.Timestamp finished_at = 12;
+     */
+    finishedAt?: Timestamp | undefined;
+};
+/**
+ * Describes the message scalekit.v1.providers.ToolCollectionRun.
+ * Use `create(ToolCollectionRunSchema)` to create a new message.
+ */
+export declare const ToolCollectionRunSchema: GenMessage<ToolCollectionRun>;
+/**
  * @generated from enum scalekit.v1.providers.ProviderType
  */
 export declare enum ProviderType {
@@ -536,6 +644,24 @@ export declare const ProviderService: GenService<{
         methodKind: "unary";
         input: typeof DeleteProviderRequestSchema;
         output: typeof DeleteProviderResponseSchema;
+    };
+    /**
+     * Queues an async ToolCollectionRun and returns immediately; poll GetToolCollectionRun for progress.
+     *
+     * @generated from rpc scalekit.v1.providers.ProviderService.TriggerToolCollection
+     */
+    triggerToolCollection: {
+        methodKind: "unary";
+        input: typeof TriggerToolCollectionRequestSchema;
+        output: typeof ToolCollectionRunSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.providers.ProviderService.GetToolCollectionRun
+     */
+    getToolCollectionRun: {
+        methodKind: "unary";
+        input: typeof GetToolCollectionRunRequestSchema;
+        output: typeof ToolCollectionRunSchema;
     };
     /**
      * @generated from rpc scalekit.v1.providers.ProviderService.ListProviders

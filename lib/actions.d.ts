@@ -4,6 +4,8 @@ import CoreClient from './core';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
+import { type ConnectionRef, type CreateConnectionParams, type ListConnectionsParams, type UpdateConnectionParams } from './agentkit-connections';
+import type { AppConnection as AgentKitConnection, ListAppConnectionSummariesResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 import type McpClient from './mcp';
 import type ProvidersClient from './providers';
 import { TriggersClient } from './triggers';
@@ -254,6 +256,76 @@ export default class ActionsClient {
         pageToken?: string;
         provider?: string;
     }): Promise<ListAppConnectionsResult>;
+    private agentKitConnectionsImpl?;
+    private get agentKitConnections();
+    /**
+     * Creates an AgentKit connection.
+     *
+     * The connection type comes from the connector, so there is no `type`. The server fills in the
+     * connector's URLs, PKCE setting and default scopes. Add credentials and options afterwards with
+     * {@link ActionsClient.updateConnection}.
+     *
+     * @param params.provider Connector identifier, for example `'GMAIL'` (case-insensitive), or a custom connector's identifier.
+     * @param params.connectionName Letters, digits and hyphens, unique per environment. Generated when omitted.
+     * @param params.authMode `'USER'` (default) or `'ORG_WIDE'`. Cannot be changed later.
+     * @param params.providerDomain Only for regional connectors such as MIXPANELMCP. Create only; never returned.
+     * @returns The created connection. Secrets are masked.
+     * @throws {ScalekitValidationError} If an argument is invalid; nothing is sent.
+     * @throws {ScalekitAgentKitConnectionError} If the server refuses or fails the request. On
+     *   `OUTCOME_UNKNOWN`, check {@link ActionsClient.listConnectionSummaries} before creating again.
+     *
+     * @remarks A temporary `UNAVAILABLE` response is retried by the SDK like any other call, so a create
+     * whose first attempt succeeded can come back as `CONNECTION_NAME_CONFLICT` when you pass a
+     * `connectionName`. Read the connection to confirm.
+     */
+    createConnection(params: CreateConnectionParams): Promise<AgentKitConnection>;
+    /**
+     * Gets one AgentKit connection by name (case-insensitive) or by ID (`conn_...`).
+     *
+     * @param connection The name or ID as a string, or `{ connectionName }` / `{ connectionId }`.
+     * @throws {ScalekitAgentKitConnectionError} `CONNECTION_NOT_FOUND` if no AgentKit connection matches.
+     */
+    getConnection(connection: string | ConnectionRef): Promise<AgentKitConnection>;
+    /**
+     * Lists AgentKit connections, newest first, as summaries (`id`, `connectionName`, `provider`,
+     * `type`, `authMode`, `createTime`). Use {@link ActionsClient.getConnection} for the settings.
+     *
+     * Unlike {@link ActionsClient.listConnections}, which is unchanged, this supports `query`
+     * and page sizes up to 100.
+     *
+     * @throws {ScalekitValidationError} If `query` is shorter than 3 characters.
+     */
+    listConnectionSummaries(params?: ListConnectionsParams): Promise<ListAppConnectionSummariesResponse>;
+    /**
+     * Changes the settings of an AgentKit connection.
+     *
+     * Identify it with `connectionName` or `connectionId`; a name costs one extra read to find the ID.
+     * Pass exactly one of `oauth`, `googleDwd` or `staticConfig`, optionally with
+     * `providerConfigurations`. It is a true partial merge: a field you leave out keeps its stored value,
+     * a masked secret sent back is ignored, and a list or map you pass empty (`scopes: []`,
+     * `extraAuthorizeParams: {}`) is cleared. Sending your own `clientId` or `clientSecret` turns
+     * `useScalekitCreds` off unless you set it. `providerDomain` cannot be changed.
+     *
+     * @throws {ScalekitValidationError} If the arguments are invalid; nothing is sent.
+     * @throws {ScalekitAgentKitConnectionError} If the server refuses or fails the update.
+     */
+    updateConnection(params: UpdateConnectionParams): Promise<AgentKitConnection>;
+    /**
+     * Enables a connection and returns its new enabled state. The server checks the configuration
+     * (client ID, secret and, for OAuth, the user info URI) and refuses some connection types.
+     *
+     * @throws {ScalekitAgentKitConnectionError} `INVALID_CONFIGURATION` if the connection cannot be enabled.
+     */
+    enableConnection(connection: string | ConnectionRef): Promise<boolean>;
+    /** Disables a connection and returns its new enabled state (`false`). */
+    disableConnection(connection: string | ConnectionRef): Promise<boolean>;
+    /**
+     * Deletes a connection.
+     *
+     * @throws {ScalekitAgentKitConnectionError} `CONNECTION_IN_USE` while connected accounts or MCP
+     *   configurations still use it.
+     */
+    deleteConnection(connection: string | ConnectionRef): Promise<void>;
     /**
      * Delete a connected account.
      * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
