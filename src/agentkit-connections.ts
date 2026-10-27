@@ -103,7 +103,7 @@ export interface CreateConnectionParams {
   providerDomain?: string;
 }
 
-export interface ListConnectionsParams {
+export interface ListAppConnectionsParams {
   provider?: string;
   /** At least 3 characters; matches name, provider and display name. */
   query?: string;
@@ -320,7 +320,7 @@ export class AgentKitConnections {
   }
 
   async list(
-    params?: ListConnectionsParams
+    params?: ListAppConnectionsParams
   ): Promise<ListAppConnectionSummariesResponse> {
     if (params?.query !== undefined && params.query.trim().length < 3) {
       throw invalid('query needs at least 3 characters');

@@ -99,7 +99,7 @@ describe('createConnection', () => {
   });
 });
 
-describe('getConnection and listConnectionSummaries', () => {
+describe('getConnection and listAppConnections', () => {
   it('gets by name or id through one identifier', async () => {
     const { rpc, actions } = setup();
     await actions.getConnection('Gmail-Work');
@@ -115,7 +115,7 @@ describe('getConnection and listConnectionSummaries', () => {
 
   it('lists with filters and checks the query length', async () => {
     const { rpc, actions } = setup();
-    await actions.listConnectionSummaries({
+    await actions.listAppConnections({
       provider: 'GMAIL',
       query: 'work',
       pageSize: 50,
@@ -128,7 +128,7 @@ describe('getConnection and listConnectionSummaries', () => {
       pageToken: 'next',
     });
     await expect(
-      actions.listConnectionSummaries({ query: 'ab' })
+      actions.listAppConnections({ query: 'ab' })
     ).rejects.toBeInstanceOf(ScalekitValidationError);
   });
 });

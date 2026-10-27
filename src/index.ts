@@ -102,7 +102,7 @@ export type {
 } from './mcp';
 
 // Types surfaced by the AgentKit connection methods on `actions`
-// (createConnection, getConnection, listConnectionSummaries, updateConnection, ...).
+// (createConnection, getConnection, listAppConnections, updateConnection, ...).
 export type {
   AgentKitAuthMode,
   AgentKitTokenEndpointAuthMethod,
@@ -111,7 +111,7 @@ export type {
   AgentKitGoogleDwdSettings,
   AgentKitStaticSettings,
   CreateConnectionParams,
-  ListConnectionsParams,
+  ListAppConnectionsParams,
   ConnectionRef,
   UpdateConnectionParams,
 } from './agentkit-connections';

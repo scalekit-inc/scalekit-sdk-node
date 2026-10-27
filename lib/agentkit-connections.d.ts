@@ -76,7 +76,7 @@ export interface CreateConnectionParams {
     /** Required for regional connectors such as MIXPANELMCP and HONEYCOMBMCP; not allowed for others. */
     providerDomain?: string;
 }
-export interface ListConnectionsParams {
+export interface ListAppConnectionsParams {
     provider?: string;
     /** At least 3 characters; matches name, provider and display name. */
     query?: string;
@@ -112,7 +112,7 @@ export declare class AgentKitConnections {
     constructor(connection: ConnectionClient);
     create(params: CreateConnectionParams): Promise<AppConnection>;
     get(ref: ConnectionRef | string): Promise<AppConnection>;
-    list(params?: ListConnectionsParams): Promise<ListAppConnectionSummariesResponse>;
+    list(params?: ListAppConnectionsParams): Promise<ListAppConnectionSummariesResponse>;
     update(params: UpdateConnectionParams): Promise<AppConnection>;
     delete(ref: ConnectionRef): Promise<void>;
     private identifierOf;

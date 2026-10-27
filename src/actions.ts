@@ -19,7 +19,7 @@ import {
   toRef,
   type ConnectionRef,
   type CreateConnectionParams,
-  type ListConnectionsParams,
+  type ListAppConnectionsParams,
   type UpdateConnectionParams,
 } from './agentkit-connections';
 import type {
@@ -56,7 +56,7 @@ export type AppConnectionTimestamp = Timestamp;
 
 /**
  * Normalized, consumer-friendly view of an app connection returned by
- * {@link ActionsClient.listAppConnections}. Internal proto fields
+ * {@link ActionsClient.listConnections}. Internal proto fields
  * (`provider` enum, `organizationId`, `uiButtonTitle`, `organizationName`,
  * `domains`, `$typeName`) are omitted, and enum fields are decoded to their
  * string names.
@@ -78,7 +78,7 @@ export interface AppConnection {
   createdAt?: AppConnectionTimestamp;
 }
 
-/** Normalized response returned by {@link ActionsClient.listAppConnections}. */
+/** Normalized response returned by {@link ActionsClient.listConnections}. */
 export interface ListAppConnectionsResult {
   connections: AppConnection[];
   nextPageToken: string;
@@ -490,7 +490,7 @@ export default class ActionsClient {
    * @returns The created connection. Secrets are masked.
    * @throws {ScalekitValidationError} If an argument is invalid; nothing is sent.
    * @throws {ScalekitAgentKitConnectionError} If the server refuses or fails the request. On
-   *   `OUTCOME_UNKNOWN`, check {@link ActionsClient.listConnectionSummaries} before creating again.
+   *   `OUTCOME_UNKNOWN`, check {@link ActionsClient.listAppConnections} before creating again.
    *
    * @remarks A temporary `UNAVAILABLE` response is retried by the SDK like any other call, so a create
    * whose first attempt succeeded can come back as `CONNECTION_NAME_CONFLICT` when you pass a
@@ -518,13 +518,16 @@ export default class ActionsClient {
    * Lists AgentKit connections, newest first, as summaries (`id`, `connectionName`, `provider`,
    * `type`, `authMode`, `createTime`). Use {@link ActionsClient.getConnection} for the settings.
    *
-   * Unlike {@link ActionsClient.listConnections}, which is unchanged, this supports `query`
-   * and page sizes up to 100.
+   * This uses the AgentKit-only connection API and returns summaries only (no settings, no enabled
+   * flag). It is not the same as {@link ActionsClient.listConnections} or
+   * {@link ConnectionClient.listAppConnections} (`scalekit.connection.listAppConnections`), which use
+   * the older API and are unchanged: this one matches `provider` case-insensitively, supports `query`,
+   * and allows page sizes up to 100.
    *
    * @throws {ScalekitValidationError} If `query` is shorter than 3 characters.
    */
-  async listConnectionSummaries(
-    params?: ListConnectionsParams
+  async listAppConnections(
+    params?: ListAppConnectionsParams
   ): Promise<ListAppConnectionSummariesResponse> {
     return this.agentKitConnections.list(params);
   }
