@@ -318,6 +318,24 @@ describe('errors', () => {
     expect(err.retryable).toBe(true);
   });
 
+  it.each(['toString', 'constructor', '__proto__'])(
+    'rejects the inherited name %s as an authMode or token auth method before any request',
+    async (name) => {
+      const { rpc, actions } = setup();
+      await expect(
+        actions.createConnection({ provider: 'gmail', authMode: name as any })
+      ).rejects.toThrow(ScalekitValidationError);
+      await expect(
+        actions.updateConnection({
+          connectionId: 'conn_1',
+          oauth: { tokenEndpointAuthMethod: name as any },
+        })
+      ).rejects.toThrow(ScalekitValidationError);
+      expect(rpc.createAppConnection).not.toHaveBeenCalled();
+      expect(rpc.updateAppConnection).not.toHaveBeenCalled();
+    }
+  );
+
   it('adds the field violations to a generic validation error', () => {
     const info = create(ErrorInfoSchema, {
       errorCode: 'INVALID_ARGUMENT',

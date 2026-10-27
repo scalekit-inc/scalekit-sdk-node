@@ -129,6 +129,10 @@ export interface UpdateConnectionParams extends ConnectionRef {
   providerConfigurations?: AgentKitProviderConfigurations;
 }
 
+/** Own-property check, so inherited names such as 'toString' or 'constructor' are not accepted as enum values. */
+const hasOwn = (obj: object, key: PropertyKey): boolean =>
+  Object.prototype.hasOwnProperty.call(obj, key);
+
 const AUTH_MODES: Record<AgentKitAuthMode, ConnectionAuthMode> = {
   USER: ConnectionAuthMode.USER,
   ORG_WIDE: ConnectionAuthMode.ORG_WIDE,
@@ -196,7 +200,7 @@ function oauthConfig(settings: AgentKitOAuthSettings, cleared: string[]) {
     requiredOptionalScopes,
   } = settings;
   if (tokenEndpointAuthMethod !== undefined) {
-    if (!(tokenEndpointAuthMethod in TOKEN_AUTH_METHODS)) {
+    if (!hasOwn(TOKEN_AUTH_METHODS, tokenEndpointAuthMethod)) {
       throw invalid(
         'tokenEndpointAuthMethod must be one of NONE, BASIC_AUTH, REQUEST_BODY or DEFAULT'
       );
@@ -278,7 +282,7 @@ export class AgentKitConnections {
     if (!provider) {
       throw invalid("provider is required, for example 'GMAIL'.");
     }
-    if (params.authMode !== undefined && !(params.authMode in AUTH_MODES)) {
+    if (params.authMode !== undefined && !hasOwn(AUTH_MODES, params.authMode)) {
       throw invalid("authMode must be 'USER' or 'ORG_WIDE'");
     }
     const request = create(CreateAppConnectionRequestSchema, {

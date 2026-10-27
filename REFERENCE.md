@@ -7712,7 +7712,14 @@ console.log(res.config.id, res.config.mcpServerUrl);
 <dl>
 <dd>
 
-**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Connections to expose and, optionally, which of their tools. Omit `tools` to expose every tool for that connection. Maximum 25 mappings.
+**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Connections to expose and, optionally, which of their tools. Omit `tools` to expose every tool for that connection. Maximum 25 mappings in `DIRECT` mode.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.toolExposure?:** `'DIRECT' | 'META'` - `'DIRECT'` is the default and exposes every mapped tool. `'META'` exposes five search and execute tools, has no connection limit, and must be enabled for the environment.
 
 </dd>
 </dl>
@@ -7906,6 +7913,13 @@ console.log(res.config?.connectionToolMappings);
 <dd>
 
 **params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Replacement mappings
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.toolExposure?:** `'DIRECT' | 'META'` - New exposure mode. Omit it to keep the stored mode. Switching to `'DIRECT'` is refused above 25 connections or when tools overlap, and `'META'` must be enabled for the environment.
 
 </dd>
 </dl>
