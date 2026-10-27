@@ -11,7 +11,6 @@ import {
   GetAppConnectionRequestSchema,
   GetAppConnectionResponse,
   ListAppConnectionSummariesResponse,
-  ToggleEnvironmentConnectionRequestSchema,
   UpdateAppConnectionRequest,
   UpdateAppConnectionResponse,
   CreateConnection,
@@ -605,26 +604,6 @@ export default class ConnectionClient {
   ): Promise<UpdateAppConnectionResponse> {
     return this.coreClient.connectExec(
       this.client.updateAppConnection,
-      request
-    );
-  }
-
-  /**
-   * Enables or disables an AgentKit connection by ID. Prefer `scalekit.actions.enableConnection`
-   * and `disableConnection`.
-   * @internal
-   */
-  async toggleEnvironmentConnection(
-    connectionId: string,
-    enabled: boolean
-  ): Promise<ToggleConnectionResponse> {
-    const request = create(ToggleEnvironmentConnectionRequestSchema, {
-      connectionId,
-    });
-    return this.coreClient.connectExec(
-      enabled
-        ? this.client.enableEnvironmentConnection
-        : this.client.disableEnvironmentConnection,
       request
     );
   }

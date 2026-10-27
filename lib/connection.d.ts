@@ -441,12 +441,6 @@ export default class ConnectionClient {
      */
     updateAppConnection(request: UpdateAppConnectionRequest): Promise<UpdateAppConnectionResponse>;
     /**
-     * Enables or disables an AgentKit connection by ID. Prefer `scalekit.actions.enableConnection`
-     * and `disableConnection`.
-     * @internal
-     */
-    toggleEnvironmentConnection(connectionId: string, enabled: boolean): Promise<ToggleConnectionResponse>;
-    /**
      * Deletes an AgentKit connection by ID. Prefer `scalekit.actions.deleteConnection`.
      * @internal
      */

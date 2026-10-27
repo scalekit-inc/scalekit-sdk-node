@@ -114,8 +114,6 @@ export declare class AgentKitConnections {
     get(ref: ConnectionRef | string): Promise<AppConnection>;
     list(params?: ListConnectionsParams): Promise<ListAppConnectionSummariesResponse>;
     update(params: UpdateConnectionParams): Promise<AppConnection>;
-    /** Enables or disables a connection and returns the new enabled state. */
-    setEnabled(ref: ConnectionRef, enabled: boolean): Promise<boolean>;
     delete(ref: ConnectionRef): Promise<void>;
     private identifierOf;
     /** The connection ID: validated when given, resolved with one read when only a name is given. */

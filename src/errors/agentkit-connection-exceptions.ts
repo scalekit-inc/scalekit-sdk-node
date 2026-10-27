@@ -26,7 +26,7 @@ export type AgentKitConnectionErrorCode =
 /**
  * Raised by the AgentKit connection methods on `scalekit.actions`
  * (`createConnection`, `getConnection`, `listConnections`, `updateConnection`,
- * `enableConnection`, `disableConnection`, `deleteConnection`).
+ * `deleteConnection`).
  *
  * `code` says what went wrong, `retryable` whether the same call can succeed
  * later, and `cause` is the original {@link ScalekitServerException} with the

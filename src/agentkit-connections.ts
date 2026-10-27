@@ -386,20 +386,6 @@ export class AgentKitConnections {
     }
   }
 
-  /** Enables or disables a connection and returns the new enabled state. */
-  async setEnabled(ref: ConnectionRef, enabled: boolean): Promise<boolean> {
-    const connectionId = await this.idOf(ref);
-    try {
-      const response = await this.connection.toggleEnvironmentConnection(
-        connectionId,
-        enabled
-      );
-      return response.enabled;
-    } catch (error) {
-      throw toAgentKitConnectionError(error, 'write');
-    }
-  }
-
   async delete(ref: ConnectionRef): Promise<void> {
     const connectionId = await this.idOf(ref);
     try {

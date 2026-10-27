@@ -549,23 +549,6 @@ export default class ActionsClient {
   }
 
   /**
-   * Enables a connection and returns its new enabled state. The server checks the configuration
-   * (client ID, secret and, for OAuth, the user info URI) and refuses some connection types.
-   *
-   * @throws {ScalekitAgentKitConnectionError} `INVALID_CONFIGURATION` if the connection cannot be enabled.
-   */
-  async enableConnection(connection: string | ConnectionRef): Promise<boolean> {
-    return this.agentKitConnections.setEnabled(toRef(connection), true);
-  }
-
-  /** Disables a connection and returns its new enabled state (`false`). */
-  async disableConnection(
-    connection: string | ConnectionRef
-  ): Promise<boolean> {
-    return this.agentKitConnections.setEnabled(toRef(connection), false);
-  }
-
-  /**
    * Deletes a connection.
    *
    * @throws {ScalekitAgentKitConnectionError} `CONNECTION_IN_USE` while connected accounts or MCP

@@ -40,12 +40,6 @@ function setup() {
     updateAppConnection: jest.fn(async (_r: any) => ({
       connection: { id: 'conn_42' },
     })),
-    enableEnvironmentConnection: jest.fn(async (_r: any) => ({
-      enabled: true,
-    })),
-    disableEnvironmentConnection: jest.fn(async (_r: any) => ({
-      enabled: false,
-    })),
     deleteEnvironmentConnection: jest.fn(async (_r: any) => ({})),
   };
   const connection = new ConnectionClient(
@@ -245,24 +239,39 @@ describe('updateConnection', () => {
   });
 });
 
-describe('enable, disable and delete', () => {
-  it('uses an id as given and resolves a name first', async () => {
+describe('deleteConnection', () => {
+  it('takes a name or an id, and only a name costs a lookup', async () => {
     const { rpc, actions } = setup();
-    expect(await actions.enableConnection('conn_7')).toBe(true);
-    expect(lastCall(rpc.enableEnvironmentConnection).connectionId).toBe(
+
+    await actions.deleteConnection('conn_7');
+    expect(lastCall(rpc.deleteEnvironmentConnection).connectionId).toBe(
       'conn_7'
+    );
+    await actions.deleteConnection({ connectionId: 'conn_8' });
+    expect(lastCall(rpc.deleteEnvironmentConnection).connectionId).toBe(
+      'conn_8'
     );
     expect(rpc.getAppConnection).not.toHaveBeenCalled();
 
-    expect(await actions.disableConnection('gmail-work')).toBe(false);
-    expect(lastCall(rpc.disableEnvironmentConnection).connectionId).toBe(
+    await actions.deleteConnection('gmail-work');
+    expect(lastCall(rpc.getAppConnection).connectionIdentifier).toBe(
+      'gmail-work'
+    );
+    expect(lastCall(rpc.deleteEnvironmentConnection).connectionId).toBe(
       'conn_42'
     );
-
     await actions.deleteConnection({ connectionName: 'gmail-work' });
     expect(lastCall(rpc.deleteEnvironmentConnection).connectionId).toBe(
       'conn_42'
     );
+  });
+
+  it('rejects a malformed connectionId before sending', async () => {
+    const { rpc, actions } = setup();
+    await expect(
+      actions.deleteConnection({ connectionId: 'gmail' })
+    ).rejects.toBeInstanceOf(ScalekitValidationError);
+    expect(rpc.deleteEnvironmentConnection).not.toHaveBeenCalled();
   });
 });
 
