@@ -6,7 +6,8 @@ module.exports = {
   setupFilesAfterEnv: ['./tests/setup.ts'],
   transform: {
     '^.+\\.ts?$': 'ts-jest',
-    '^.+\\.js$': ['ts-jest', { diagnostics: false, tsconfig: { allowJs: true } }],
+    // ESM-only dependencies (jose): convert to CommonJS without lowering syntax.
+    '^.+\\.js$': '<rootDir>/tests/esm-to-cjs-transform.js',
   },
   transformIgnorePatterns: ['/node_modules/(?!(jose)/)'],
   moduleNameMapper: {

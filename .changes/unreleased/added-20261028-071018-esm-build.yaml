@@ -1,0 +1,8 @@
+kind: added
+body: |
+  The package now ships an ES module build next to the CommonJS one: `import` loads ES modules and `require()` loads CommonJS, for the main entry point and for `@scalekit-sdk/node/express`, `/next` and `/edge`. A default import from native ES modules now returns `ScalekitClient` itself; `.default` and the named exports stay available on it, so `new Scalekit.default(...)` keeps working. [Module formats](https://github.com/scalekit-inc/scalekit-sdk-node/blob/v2.21.0/README.md#module-formats)
+time: '2026-10-28T07:10:18.829328+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: ''
+  Migration: ''

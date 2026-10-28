@@ -313,9 +313,9 @@ export default class TokenClient {
 }
 
 export {
-  Token,
-  CreateTokenResponse,
-  ValidateTokenResponse,
-  ListTokensResponse,
-  UpdateTokenResponse,
+  type Token,
+  type CreateTokenResponse,
+  type ValidateTokenResponse,
+  type ListTokensResponse,
+  type UpdateTokenResponse,
 };

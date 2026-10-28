@@ -1,16 +1,8 @@
-import type { NextRequest } from 'next/server';
-import { cookies } from 'next/headers';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-let NextResponse: typeof import('next/server').NextResponse;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  ({ NextResponse } = require('next/server'));
-} catch {
-  throw new Error(
-    "Next.js integration requires the 'next' package: npm install next"
-  );
-}
+// Explicit `.js`: `next` has no package.json "exports", so native Node ESM (an app that
+// lists this SDK in serverExternalPackages) cannot resolve the extensionless subpath.
+import { NextResponse } from 'next/server.js';
+import type { NextRequest } from 'next/server.js';
+import { cookies } from 'next/headers.js';
 
 import { AuthorizationUrlOptions, LogoutUrlOptions } from '../types/scalekit';
 import {

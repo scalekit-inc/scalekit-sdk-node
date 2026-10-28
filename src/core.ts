@@ -1,3 +1,4 @@
+import { version } from '../package.json';
 import { Code, ConnectError, type CallOptions } from '@connectrpc/connect';
 import axios, {
   Axios,
@@ -99,8 +100,7 @@ export default class CoreClient {
   public accessToken: string | null = null;
   private pendingAuthentication: Promise<void> | null = null;
   public axios: Axios;
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  public sdkVersion = `Scalekit-Node/${(require('../package.json') as { version: string }).version}`;
+  public sdkVersion = `Scalekit-Node/${version}`;
   // YYYYMMDD
   public apiVersion = '20261012';
   public userAgent = `${this.sdkVersion} Node/${process.version} (${

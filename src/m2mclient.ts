@@ -239,10 +239,10 @@ export default class M2MClient {
 }
 
 export {
-  OrganizationClient,
-  CreateOrganizationClientResponse,
-  GetOrganizationClientResponse,
-  UpdateOrganizationClientResponse,
-  CreateOrganizationClientSecretResponse,
-  ListOrganizationClientsResponse,
+  type OrganizationClient,
+  type CreateOrganizationClientResponse,
+  type GetOrganizationClientResponse,
+  type UpdateOrganizationClientResponse,
+  type CreateOrganizationClientSecretResponse,
+  type ListOrganizationClientsResponse,
 };

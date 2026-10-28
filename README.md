@@ -40,8 +40,10 @@ This Node.js SDK enables both traditional B2B authentication and cutting-edge ag
 ---
 ### Getting started
 #### Prerequisites
-- **Node.js** ≥ 18.14.1
+- **Node.js** ≥ 20
 - [Scalekit account](https://scalekit.com) with `env_url`, `client_id`, and `client_secret`
+#### Module formats
+The package ships CommonJS and ES modules. `require()` loads the CommonJS build and `import` loads the ES module build, for the main entry point and for `@scalekit-sdk/node/express`, `@scalekit-sdk/node/next` and `@scalekit-sdk/node/edge`. Both builds work on every supported Node.js version and need no bundler configuration (such as Next.js `transpilePackages`). Prefer named imports: `import { ScalekitClient } from "@scalekit-sdk/node"`.
 #### installation
 ```sh
 npm install @scalekit-sdk/node

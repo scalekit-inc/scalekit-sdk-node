@@ -1,15 +1,5 @@
+import express from 'express';
 import type { NextFunction, Request, Response, Router } from 'express';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-let express: typeof import('express');
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  express = require('express');
-} catch {
-  throw new Error(
-    "Express integration requires the 'express' package: npm install express"
-  );
-}
 
 import ScalekitClient from '../scalekit';
 import { AuthorizationUrlOptions, LogoutUrlOptions } from '../types/scalekit';

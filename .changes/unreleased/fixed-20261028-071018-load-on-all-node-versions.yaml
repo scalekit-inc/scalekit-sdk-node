@@ -1,0 +1,8 @@
+kind: fixed
+body: |
+  `@scalekit-sdk/node` now loads on every supported Node.js version. From 2.6.3 to 2.20.0 it called `require("jose")`, and `jose` is published only as an ES module, so loading the SDK failed with `ERR_REQUIRE_ESM` on Node.js 20.0–20.18 and 22.0–22.11, and wherever Node.js loads it unbundled, such as a Next.js app listing it in `serverExternalPackages`. `jose` 6.2.13 is now bundled into the SDK instead of installed as a dependency. `engines` now reads `>=20`: no release since 2.6.3 loaded on Node.js 18.
+time: '2026-10-28T07:10:18.723138+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: ''
+  Migration: ''
