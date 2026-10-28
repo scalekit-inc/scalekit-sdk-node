@@ -1,0 +1,8 @@
+kind: added
+body: |
+  `listConnectedAccounts` (on `actions` and `connectedAccounts`) now takes `isOrgWideCredential`. For connections that share one credential across the organization, `true` returns only the account that holds that shared credential, and `false` returns only the per-user accounts. Leave it out to get both, as before. When `query` is given, only the connection name and the paging options narrow the search, so use `isOrgWideCredential`, `identifier`, `provider` and `connectionNames` without it. The option is optional, so existing calls are unchanged.
+time: '2026-10-26T16:00:00.000000+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: ''
+  Migration: ''

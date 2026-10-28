@@ -21,7 +21,7 @@ Authentication, authorization, and tool-calling for human-in-the-loop and autono
 
 ---
 
-This is the official Node.js SDK for [Scalekit](https://scalekit.com). Scalekit provides auth and actions on behalf of users, with 500+ connectors and 20,000+ tools. Build secure AI products faster with authentication for humans (SSO, passwordless, full-stack auth) and agents (MCP/APIs, delegated actions), all unified on one platform.
+This is the official Node.js SDK for [Scalekit](https://scalekit.com). Scalekit provides auth and actions on behalf of users, with 600+ connectors and 35,000+ tools. Build secure AI products faster with authentication for humans (SSO, passwordless, full-stack auth) and agents (MCP/APIs, delegated actions), all unified on one platform.
 This Node.js SDK enables both traditional B2B authentication and cutting-edge agentic workflows.
 #### Agent-First Features
 - **Agent Identity** — Agents as first-class actors with human ownership and org context

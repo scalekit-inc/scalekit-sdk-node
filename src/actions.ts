@@ -388,6 +388,14 @@ export default class ActionsClient {
   /**
    * List connected accounts with optional filters.
    *
+   * @param params.query Text to search for (up to 100 characters), ignoring case. With
+   *                     `query`, only `connectionName` and the paging options narrow the
+   *                     search; `identifier`, `provider`, `connectionNames` and
+   *                     `isOrgWideCredential` are not applied, so use those without it.
+   * @param params.isOrgWideCredential For connections that share one credential across the
+   *                     organization: `true` returns only the account that holds that
+   *                     shared credential, `false` returns only the per-user accounts.
+   *                     Leave it out to get both.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async listConnectedAccounts(params?: {
@@ -400,6 +408,7 @@ export default class ActionsClient {
     pageToken?: string;
     query?: string;
     connectionNames?: string[];
+    isOrgWideCredential?: boolean;
   }): Promise<ListConnectedAccountsResponse> {
     return this.connectedAccounts.listConnectedAccounts({
       organizationId: params?.organizationId,
@@ -411,6 +420,7 @@ export default class ActionsClient {
       pageToken: params?.pageToken,
       query: params?.query,
       connectionNames: params?.connectionNames,
+      isOrgWideCredential: params?.isOrgWideCredential,
     });
   }
 
