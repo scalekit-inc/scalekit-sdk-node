@@ -123,7 +123,7 @@ export interface ConnectionRef {
 export interface UpdateConnectionParams extends ConnectionRef {
   /** Renames the connection. Same rules as at creation. */
   newConnectionName?: string;
-  /** Send exactly one of `oauth` or `googleDwd`. */
+  /** Send at most one of `oauth` or `googleDwd`. A rename or a `providerConfigurations` change needs neither. */
   oauth?: AgentKitOAuthSettings;
   googleDwd?: AgentKitGoogleDwdSettings;
   /** Only valid together with `oauth`, or on its own for connector-specific settings. */
@@ -334,16 +334,17 @@ export class AgentKitConnections {
   }
 
   async update(params: UpdateConnectionParams): Promise<AppConnection> {
+    // null counts as not provided, like None in the Python SDK; it never reaches the request.
     const groups = [params.oauth, params.googleDwd].filter(
-      (group) => group !== undefined
+      (group) => group != null
     );
     if (groups.length > 1) {
       throw invalid('send only one of oauth or googleDwd');
     }
     if (
       groups.length === 0 &&
-      params.providerConfigurations === undefined &&
-      params.newConnectionName === undefined
+      params.providerConfigurations == null &&
+      params.newConnectionName == null
     ) {
       throw invalid(
         'nothing to update: pass oauth, googleDwd, providerConfigurations or newConnectionName'

@@ -534,8 +534,8 @@ export default class ActionsClient {
    * Changes the settings of an AgentKit connection.
    *
    * Identify it with `connectionName` or `connectionId`; a name costs one extra read to find the ID.
-   * Pass exactly one of `oauth` or `googleDwd`, optionally with
-   * `providerConfigurations`. It is a true partial merge: a field you leave out keeps its stored value,
+   * Pass at most one of `oauth` or `googleDwd`, optionally with
+   * `providerConfigurations`; you can also rename, or change `providerConfigurations`, on its own. It is a true partial merge: a field you leave out keeps its stored value,
    * a masked secret sent back is ignored, and a list or map you pass empty (`scopes: []`,
    * `extraAuthorizeParams: {}`) is cleared. Sending your own `clientId` or `clientSecret` turns
    * `useScalekitCreds` off unless you set it. `providerDomain` cannot be changed.

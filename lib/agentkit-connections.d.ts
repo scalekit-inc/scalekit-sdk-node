@@ -95,7 +95,7 @@ export interface ConnectionRef {
 export interface UpdateConnectionParams extends ConnectionRef {
     /** Renames the connection. Same rules as at creation. */
     newConnectionName?: string;
-    /** Send exactly one of `oauth` or `googleDwd`. */
+    /** Send at most one of `oauth` or `googleDwd`. A rename or a `providerConfigurations` change needs neither. */
     oauth?: AgentKitOAuthSettings;
     googleDwd?: AgentKitGoogleDwdSettings;
     /** Only valid together with `oauth`, or on its own for connector-specific settings. */

@@ -239,6 +239,37 @@ describe('updateConnection', () => {
   });
 });
 
+describe('updateConnection with null settings', () => {
+  it('treats null like an omitted setting and sends nothing', async () => {
+    const { rpc, actions } = setup();
+    await expect(
+      actions.updateConnection({ connectionId: 'conn_42', oauth: null as any })
+    ).rejects.toBeInstanceOf(ScalekitValidationError);
+    await expect(
+      actions.updateConnection({
+        connectionId: 'conn_42',
+        oauth: null as any,
+        googleDwd: null as any,
+        providerConfigurations: null as any,
+        newConnectionName: null as any,
+      })
+    ).rejects.toBeInstanceOf(ScalekitValidationError);
+    expect(rpc.updateAppConnection).not.toHaveBeenCalled();
+  });
+
+  it('still sends the other settings when one group is null', async () => {
+    const { rpc, actions } = setup();
+    await actions.updateConnection({
+      connectionId: 'conn_42',
+      oauth: null as any,
+      newConnectionName: 'renamed',
+    });
+    const request = lastCall(rpc.updateAppConnection);
+    expect(request.connection.connectionName).toBe('renamed');
+    expect(request.connection.oauthConfig).toBeUndefined();
+  });
+});
+
 describe('deleteConnection', () => {
   it('takes a name or an id, and only a name costs a lookup', async () => {
     const { rpc, actions } = setup();
