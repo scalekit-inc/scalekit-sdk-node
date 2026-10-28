@@ -7636,6 +7636,8 @@ await scalekitClient.actions.uploadResumable({
 
 A Virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol, so any MCP-capable agent can call them. Create one configuration per agent role (not per user), and mint a short-lived session token per user per run. The server URL stays the same; the token carries the user's identity. Each AgentKit connection also has its own MCP server with all of its tools; mint tokens for it with `createSessionToken({ connectionName, ... })`.
 
+`createConfig` and `updateConfig` take an optional `toolExposure`: `'DIRECT'` (the default) lists every mapped tool and allows at most 25 connections; `'META'` gives agents five search and execute tools with no connection limit and must be enabled for your environment. An update without `toolExposure` keeps the stored mode.
+
 Only the generally available `McpConfig` API is covered. The older `Mcp` and `McpInstance` families are marked PREVIEW and are not exposed.
 
 Access via `scalekitClient.actions.mcp`.
@@ -7710,7 +7712,14 @@ console.log(res.config.id, res.config.mcpServerUrl);
 <dl>
 <dd>
 
-**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Connections to expose and, optionally, which of their tools. Omit `tools` to expose every tool for that connection. Maximum 25 mappings.
+**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Connections to expose and, optionally, which of their tools. Omit `tools` to expose every tool for that connection. Maximum 25 connections in `DIRECT` mode.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.toolExposure?:** `'DIRECT' | 'META'` - `'DIRECT'` is the default and exposes every mapped tool. `'META'` exposes five search and execute tools, has no connection limit, and must be enabled for the environment.
 
 </dd>
 </dl>
@@ -7904,6 +7913,13 @@ console.log(res.config?.connectionToolMappings);
 <dd>
 
 **params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Replacement mappings
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.toolExposure?:** `'DIRECT' | 'META'` - New exposure mode. Omit it to keep the stored mode. Switching to `'DIRECT'` is refused above 25 connections or when tools overlap, and `'META'` must be enabled for the environment.
 
 </dd>
 </dl>

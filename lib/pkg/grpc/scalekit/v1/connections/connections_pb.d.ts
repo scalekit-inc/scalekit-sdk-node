@@ -1,5 +1,5 @@
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
-import type { Duration, EmptySchema, Timestamp } from "@bufbuild/protobuf/wkt";
+import type { Duration, EmptySchema, FieldMask, Timestamp } from "@bufbuild/protobuf/wkt";
 import type { Domain } from "../domains/domains_pb";
 import type { JsonObject, Message } from "@bufbuild/protobuf";
 /**
@@ -105,6 +105,496 @@ export type CreateEnvironmentConnectionRequest = Message<"scalekit.v1.connection
  * Use `create(CreateEnvironmentConnectionRequestSchema)` to create a new message.
  */
 export declare const CreateEnvironmentConnectionRequestSchema: GenMessage<CreateEnvironmentConnectionRequest>;
+/**
+ * @generated from message scalekit.v1.connections.CreateAppConnectionRequest
+ */
+export type CreateAppConnectionRequest = Message<"scalekit.v1.connections.CreateAppConnectionRequest"> & {
+    /**
+     * @generated from field: scalekit.v1.connections.CreateAppConnection connection = 1;
+     */
+    connection?: CreateAppConnection | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connections.CreateAppConnectionRequest.
+ * Use `create(CreateAppConnectionRequestSchema)` to create a new message.
+ */
+export declare const CreateAppConnectionRequestSchema: GenMessage<CreateAppConnectionRequest>;
+/**
+ * @generated from message scalekit.v1.connections.CreateAppConnection
+ */
+export type CreateAppConnection = Message<"scalekit.v1.connections.CreateAppConnection"> & {
+    /**
+     * @generated from field: string provider = 1;
+     */
+    provider: string;
+    /**
+     * @generated from field: optional string connection_name = 3;
+     */
+    connectionName?: string | undefined;
+    /**
+     * @generated from field: optional scalekit.v1.connections.ConnectionAuthMode auth_mode = 4;
+     */
+    authMode?: ConnectionAuthMode | undefined;
+    /**
+     * @generated from field: optional scalekit.v1.connections.AppProviderConfigurations provider_configurations = 6;
+     */
+    providerConfigurations?: AppProviderConfigurations | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connections.CreateAppConnection.
+ * Use `create(CreateAppConnectionSchema)` to create a new message.
+ */
+export declare const CreateAppConnectionSchema: GenMessage<CreateAppConnection>;
+/**
+ * Response of CreateAppConnection. It carries only the AgentKit view of a connection: none of the
+ * login (SaaSKit) fields such as status, ui_button_title, attribute_mapping, domains or the SSO configs.
+ *
+ * @generated from message scalekit.v1.connections.CreateAppConnectionResponse
+ */
+export type CreateAppConnectionResponse = Message<"scalekit.v1.connections.CreateAppConnectionResponse"> & {
+    /**
+     * @generated from field: scalekit.v1.connections.AppConnection connection = 1;
+     */
+    connection?: AppConnection | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connections.CreateAppConnectionResponse.
+ * Use `create(CreateAppConnectionResponseSchema)` to create a new message.
+ */
+export declare const CreateAppConnectionResponseSchema: GenMessage<CreateAppConnectionResponse>;
+/**
+ * AgentKit view of a connection. Field numbers match Connection; provider_key and key_id are named
+ * provider and connection_name here.
+ *
+ * @generated from message scalekit.v1.connections.AppConnection
+ */
+export type AppConnection = Message<"scalekit.v1.connections.AppConnection"> & {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionType type = 3;
+     */
+    type: ConnectionType;
+    /**
+     * @generated from field: google.protobuf.Timestamp create_time = 16;
+     */
+    createTime?: Timestamp | undefined;
+    /**
+     * @generated from field: google.protobuf.Timestamp update_time = 17;
+     */
+    updateTime?: Timestamp | undefined;
+    /**
+     * @generated from field: string provider = 23;
+     */
+    provider: string;
+    /**
+     * @generated from field: optional string connection_name = 25;
+     */
+    connectionName?: string | undefined;
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionAuthMode auth_mode = 31;
+     */
+    authMode: ConnectionAuthMode;
+    /**
+     * @generated from field: optional string connection_mcp_url = 29;
+     */
+    connectionMcpUrl?: string | undefined;
+    /**
+     * @generated from field: optional scalekit.v1.connections.AppProviderConfigurations provider_configurations = 32;
+     */
+    providerConfigurations?: AppProviderConfigurations | undefined;
+    /**
+     * @generated from oneof scalekit.v1.connections.AppConnection.settings
+     */
+    settings: {
+        /**
+         * @generated from field: scalekit.v1.connections.AppOAuthConfig oauth_config = 20;
+         */
+        value: AppOAuthConfig;
+        case: "oauthConfig";
+    } | {
+        /**
+         * @generated from field: scalekit.v1.connections.GoogleDWDConfig google_dwd_config = 28;
+         */
+        value: GoogleDWDConfig;
+        case: "googleDwdConfig";
+    } | {
+        /**
+         * @generated from field: scalekit.v1.connections.StaticAuthConfig static_config = 26;
+         */
+        value: StaticAuthConfig;
+        case: "staticConfig";
+    } | {
+        case: undefined;
+        value?: undefined;
+    };
+};
+/**
+ * Describes the message scalekit.v1.connections.AppConnection.
+ * Use `create(AppConnectionSchema)` to create a new message.
+ */
+export declare const AppConnectionSchema: GenMessage<AppConnection>;
+/**
+ * OAuth settings of an AgentKit app connection. Same field numbers and types as OAuthConnectionConfig,
+ * so the two convert to each other as protobuf bytes, with two differences: use_platform_creds is named
+ * use_scalekit_creds here, and sync_user_profile_on_login (a login setting) is not part of this message.
+ *
+ * @generated from message scalekit.v1.connections.AppOAuthConfig
+ */
+export type AppOAuthConfig = Message<"scalekit.v1.connections.AppOAuthConfig"> & {
+    /**
+     * @generated from field: google.protobuf.StringValue authorize_uri = 3;
+     */
+    authorizeUri?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.StringValue token_uri = 4;
+     */
+    tokenUri?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.StringValue user_info_uri = 5;
+     */
+    userInfoUri?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.StringValue client_id = 8;
+     */
+    clientId?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.StringValue client_secret = 9;
+     */
+    clientSecret?: string | undefined;
+    /**
+     * @generated from field: repeated string scopes = 10;
+     */
+    scopes: string[];
+    /**
+     * @generated from field: string redirect_uri = 12;
+     */
+    redirectUri: string;
+    /**
+     * @generated from field: google.protobuf.BoolValue pkce_enabled = 13;
+     */
+    pkceEnabled?: boolean | undefined;
+    /**
+     * @generated from field: google.protobuf.StringValue prompt = 14;
+     */
+    prompt?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.BoolValue use_scalekit_creds = 15;
+     */
+    useScalekitCreds?: boolean | undefined;
+    /**
+     * @generated from field: google.protobuf.StringValue access_type = 16;
+     */
+    accessType?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.StringValue token_access_type = 19;
+     */
+    tokenAccessType?: string | undefined;
+    /**
+     * @generated from field: google.protobuf.BoolValue is_cimd = 21;
+     */
+    isCimd?: boolean | undefined;
+    /**
+     * @generated from field: optional scalekit.v1.connections.OptionalScopes optional_scopes = 23;
+     */
+    optionalScopes?: OptionalScopes | undefined;
+    /**
+     * @generated from field: map<string, string> extra_authorize_params = 30;
+     */
+    extraAuthorizeParams: {
+        [key: string]: string;
+    };
+    /**
+     * @generated from field: optional scalekit.v1.connections.AppOAuthConfig.TokenEndpointAuthMethod token_endpoint_auth_method = 40;
+     */
+    tokenEndpointAuthMethod?: AppOAuthConfig_TokenEndpointAuthMethod | undefined;
+    /**
+     * @generated from field: google.protobuf.BoolValue scope_selection_allowed = 27;
+     */
+    scopeSelectionAllowed?: boolean | undefined;
+    /**
+     * @generated from field: repeated string required_scopes = 28;
+     */
+    requiredScopes: string[];
+    /**
+     * @generated from field: repeated string required_optional_scopes = 29;
+     */
+    requiredOptionalScopes: string[];
+};
+/**
+ * Describes the message scalekit.v1.connections.AppOAuthConfig.
+ * Use `create(AppOAuthConfigSchema)` to create a new message.
+ */
+export declare const AppOAuthConfigSchema: GenMessage<AppOAuthConfig>;
+/**
+ * The stored config keeps this setting as a text value (field 25); the app view shows it as an enum, so the
+ * conversion maps it by hand and the number is not reused. The field is optional so that a missing field (keep
+ * the stored value) can be told apart from one that was sent.
+ *
+ * @generated from enum scalekit.v1.connections.AppOAuthConfig.TokenEndpointAuthMethod
+ */
+export declare enum AppOAuthConfig_TokenEndpointAuthMethod {
+    /**
+     * on update: no change, the stored value is kept
+     *
+     * @generated from enum value: TOKEN_ENDPOINT_AUTH_METHOD_UNSPECIFIED = 0;
+     */
+    TOKEN_ENDPOINT_AUTH_METHOD_UNSPECIFIED = 0,
+    /**
+     * only client_id is sent, no client secret
+     *
+     * @generated from enum value: NONE = 1;
+     */
+    NONE = 1,
+    /**
+     * @generated from enum value: BASIC_AUTH = 2;
+     */
+    BASIC_AUTH = 2,
+    /**
+     * @generated from enum value: REQUEST_BODY = 3;
+     */
+    REQUEST_BODY = 3,
+    /**
+     * stored as an empty value: the platform makes a best-effort match on the method for each request
+     *
+     * @generated from enum value: DEFAULT = 4;
+     */
+    DEFAULT = 4
+}
+/**
+ * Describes the enum scalekit.v1.connections.AppOAuthConfig.TokenEndpointAuthMethod.
+ */
+export declare const AppOAuthConfig_TokenEndpointAuthMethodSchema: GenEnum<AppOAuthConfig_TokenEndpointAuthMethod>;
+/**
+ * Settings of an AgentKit app connection that apply to some connectors only. Settings a connector does not
+ * use are rejected where the connector is known, so a setting is never accepted and then ignored.
+ *
+ * @generated from message scalekit.v1.connections.AppProviderConfigurations
+ */
+export type AppProviderConfigurations = Message<"scalekit.v1.connections.AppProviderConfigurations"> & {
+    /**
+     * @generated from field: optional string provider_domain = 1;
+     */
+    providerDomain?: string | undefined;
+    /**
+     * @generated from field: optional string slack_connection_type = 2;
+     */
+    slackConnectionType?: string | undefined;
+    /**
+     * @generated from field: optional string googleads_developer_token = 3;
+     */
+    googleadsDeveloperToken?: string | undefined;
+    /**
+     * @generated from field: optional string microsoft_tenant_id = 4;
+     */
+    microsoftTenantId?: string | undefined;
+    /**
+     * @generated from field: optional string trello_app_name = 7;
+     */
+    trelloAppName?: string | undefined;
+    /**
+     * @generated from field: optional string smart_fhir_aud = 8;
+     */
+    smartFhirAud?: string | undefined;
+    /**
+     * @generated from field: optional string smart_fhir_domain = 9;
+     */
+    smartFhirDomain?: string | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connections.AppProviderConfigurations.
+ * Use `create(AppProviderConfigurationsSchema)` to create a new message.
+ */
+export declare const AppProviderConfigurationsSchema: GenMessage<AppProviderConfigurations>;
+/**
+ * @generated from message scalekit.v1.connections.GetAppConnectionRequest
+ */
+export type GetAppConnectionRequest = Message<"scalekit.v1.connections.GetAppConnectionRequest"> & {
+    /**
+     * @generated from field: string connection_identifier = 1;
+     */
+    connectionIdentifier: string;
+};
+/**
+ * Describes the message scalekit.v1.connections.GetAppConnectionRequest.
+ * Use `create(GetAppConnectionRequestSchema)` to create a new message.
+ */
+export declare const GetAppConnectionRequestSchema: GenMessage<GetAppConnectionRequest>;
+/**
+ * @generated from message scalekit.v1.connections.GetAppConnectionResponse
+ */
+export type GetAppConnectionResponse = Message<"scalekit.v1.connections.GetAppConnectionResponse"> & {
+    /**
+     * @generated from field: scalekit.v1.connections.AppConnection connection = 1;
+     */
+    connection?: AppConnection | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connections.GetAppConnectionResponse.
+ * Use `create(GetAppConnectionResponseSchema)` to create a new message.
+ */
+export declare const GetAppConnectionResponseSchema: GenMessage<GetAppConnectionResponse>;
+/**
+ * @generated from message scalekit.v1.connections.UpdateAppConnectionRequest
+ */
+export type UpdateAppConnectionRequest = Message<"scalekit.v1.connections.UpdateAppConnectionRequest"> & {
+    /**
+     * @generated from field: string connection_id = 1;
+     */
+    connectionId: string;
+    /**
+     * @generated from field: scalekit.v1.connections.AppConnectionUpdate connection = 2;
+     */
+    connection?: AppConnectionUpdate | undefined;
+    /**
+     * Filled in by the gateway from the keys present in the request body, so callers never send it. A gRPC client may
+     * set it to name the fields it clears; paths are relative to `connection`, for example `oauth_config.scopes`.
+     *
+     * @generated from field: google.protobuf.FieldMask update_mask = 99;
+     */
+    updateMask?: FieldMask | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connections.UpdateAppConnectionRequest.
+ * Use `create(UpdateAppConnectionRequestSchema)` to create a new message.
+ */
+export declare const UpdateAppConnectionRequestSchema: GenMessage<UpdateAppConnectionRequest>;
+/**
+ * AppConnectionUpdate is the request body of UpdateAppConnection: the settings of one kind to change.
+ *
+ * @generated from message scalekit.v1.connections.AppConnectionUpdate
+ */
+export type AppConnectionUpdate = Message<"scalekit.v1.connections.AppConnectionUpdate"> & {
+    /**
+     * @generated from field: optional scalekit.v1.connections.AppOAuthConfig oauth_config = 1;
+     */
+    oauthConfig?: AppOAuthConfig | undefined;
+    /**
+     * @generated from field: optional scalekit.v1.connections.GoogleDWDConfig google_dwd_config = 2;
+     */
+    googleDwdConfig?: GoogleDWDConfig | undefined;
+    /**
+     * @generated from field: optional scalekit.v1.connections.StaticAuthConfig static_config = 3;
+     */
+    staticConfig?: StaticAuthConfig | undefined;
+    /**
+     * @generated from field: optional scalekit.v1.connections.AppProviderConfigurations provider_configurations = 4;
+     */
+    providerConfigurations?: AppProviderConfigurations | undefined;
+    /**
+     * @generated from field: optional string connection_name = 5;
+     */
+    connectionName?: string | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connections.AppConnectionUpdate.
+ * Use `create(AppConnectionUpdateSchema)` to create a new message.
+ */
+export declare const AppConnectionUpdateSchema: GenMessage<AppConnectionUpdate>;
+/**
+ * @generated from message scalekit.v1.connections.UpdateAppConnectionResponse
+ */
+export type UpdateAppConnectionResponse = Message<"scalekit.v1.connections.UpdateAppConnectionResponse"> & {
+    /**
+     * @generated from field: scalekit.v1.connections.AppConnection connection = 1;
+     */
+    connection?: AppConnection | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connections.UpdateAppConnectionResponse.
+ * Use `create(UpdateAppConnectionResponseSchema)` to create a new message.
+ */
+export declare const UpdateAppConnectionResponseSchema: GenMessage<UpdateAppConnectionResponse>;
+/**
+ * @generated from message scalekit.v1.connections.ListAppConnectionSummariesRequest
+ */
+export type ListAppConnectionSummariesRequest = Message<"scalekit.v1.connections.ListAppConnectionSummariesRequest"> & {
+    /**
+     * @generated from field: uint32 page_size = 1;
+     */
+    pageSize: number;
+    /**
+     * @generated from field: string page_token = 2;
+     */
+    pageToken: string;
+    /**
+     * @generated from field: optional string provider = 3;
+     */
+    provider?: string | undefined;
+    /**
+     * @generated from field: optional string query = 4;
+     */
+    query?: string | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connections.ListAppConnectionSummariesRequest.
+ * Use `create(ListAppConnectionSummariesRequestSchema)` to create a new message.
+ */
+export declare const ListAppConnectionSummariesRequestSchema: GenMessage<ListAppConnectionSummariesRequest>;
+/**
+ * @generated from message scalekit.v1.connections.ListAppConnectionSummariesResponse
+ */
+export type ListAppConnectionSummariesResponse = Message<"scalekit.v1.connections.ListAppConnectionSummariesResponse"> & {
+    /**
+     * @generated from field: repeated scalekit.v1.connections.AppConnectionSummary connections = 1;
+     */
+    connections: AppConnectionSummary[];
+    /**
+     * @generated from field: string next_page_token = 2;
+     */
+    nextPageToken: string;
+    /**
+     * @generated from field: string prev_page_token = 3;
+     */
+    prevPageToken: string;
+    /**
+     * @generated from field: uint32 total_size = 4;
+     */
+    totalSize: number;
+};
+/**
+ * Describes the message scalekit.v1.connections.ListAppConnectionSummariesResponse.
+ * Use `create(ListAppConnectionSummariesResponseSchema)` to create a new message.
+ */
+export declare const ListAppConnectionSummariesResponseSchema: GenMessage<ListAppConnectionSummariesResponse>;
+/**
+ * Short form of an app connection for lists: no settings and no secrets.
+ *
+ * @generated from message scalekit.v1.connections.AppConnectionSummary
+ */
+export type AppConnectionSummary = Message<"scalekit.v1.connections.AppConnectionSummary"> & {
+    /**
+     * @generated from field: string id = 1;
+     */
+    id: string;
+    /**
+     * @generated from field: string connection_name = 2;
+     */
+    connectionName: string;
+    /**
+     * @generated from field: string provider = 3;
+     */
+    provider: string;
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionType type = 4;
+     */
+    type: ConnectionType;
+    /**
+     * @generated from field: scalekit.v1.connections.ConnectionAuthMode auth_mode = 5;
+     */
+    authMode: ConnectionAuthMode;
+    /**
+     * @generated from field: google.protobuf.Timestamp create_time = 7;
+     */
+    createTime?: Timestamp | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connections.AppConnectionSummary.
+ * Use `create(AppConnectionSummarySchema)` to create a new message.
+ */
+export declare const AppConnectionSummarySchema: GenMessage<AppConnectionSummary>;
 /**
  * @generated from message scalekit.v1.connections.CreateConnectionRequest
  */
@@ -952,7 +1442,8 @@ export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnec
      */
     extensions?: OauthExtensions | undefined;
     /**
-     * @generated from field: google.protobuf.StringValue token_endpoint_auth_method = 25;
+     * @generated from field: google.protobuf.StringValue token_endpoint_auth_method = 25 [deprecated = true];
+     * @deprecated
      */
     tokenEndpointAuthMethod?: string | undefined;
     /**
@@ -971,6 +1462,10 @@ export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnec
      * @generated from field: repeated string required_optional_scopes = 29;
      */
     requiredOptionalScopes: string[];
+    /**
+     * @generated from field: optional scalekit.v1.connections.TokenAuthType token_endpoint_auth_type = 30;
+     */
+    tokenEndpointAuthType?: TokenAuthType | undefined;
 };
 /**
  * Describes the message scalekit.v1.connections.OAuthConnectionConfig.
@@ -2081,7 +2576,13 @@ export declare enum TokenAuthType {
     /**
      * @generated from enum value: BASIC_AUTH = 2;
      */
-    BASIC_AUTH = 2
+    BASIC_AUTH = 2,
+    /**
+     * no client secret sent to the token endpoint (client_id still is — public/PKCE clients); OidcCommonConfig rejects this value, it's OAuth-only
+     *
+     * @generated from enum value: NONE = 3;
+     */
+    NONE = 3
 }
 /**
  * Describes the enum scalekit.v1.connections.TokenAuthType.
@@ -2318,7 +2819,11 @@ export declare enum ConnectionProvider {
     /**
      * @generated from enum value: ADFS = 16;
      */
-    ADFS = 16
+    ADFS = 16,
+    /**
+     * @generated from enum value: FACEBOOK = 17;
+     */
+    FACEBOOK = 17
 }
 /**
  * Describes the enum scalekit.v1.connections.ConnectionProvider.
@@ -2487,5 +2992,37 @@ export declare const ConnectionService: GenService<{
         methodKind: "unary";
         input: typeof UpdateConnectionContextRequestSchema;
         output: typeof EmptySchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.CreateAppConnection
+     */
+    createAppConnection: {
+        methodKind: "unary";
+        input: typeof CreateAppConnectionRequestSchema;
+        output: typeof CreateAppConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.GetAppConnection
+     */
+    getAppConnection: {
+        methodKind: "unary";
+        input: typeof GetAppConnectionRequestSchema;
+        output: typeof GetAppConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.UpdateAppConnection
+     */
+    updateAppConnection: {
+        methodKind: "unary";
+        input: typeof UpdateAppConnectionRequestSchema;
+        output: typeof UpdateAppConnectionResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.connections.ConnectionService.ListAppConnectionSummaries
+     */
+    listAppConnectionSummaries: {
+        methodKind: "unary";
+        input: typeof ListAppConnectionSummariesRequestSchema;
+        output: typeof ListAppConnectionSummariesResponseSchema;
     };
 }>;

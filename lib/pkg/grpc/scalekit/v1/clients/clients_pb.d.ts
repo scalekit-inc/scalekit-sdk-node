@@ -88,6 +88,10 @@ export type CreateResource = Message<"scalekit.v1.clients.CreateResource"> & {
      */
     cimdClientAllowlistEnabled: boolean;
     /**
+     * @generated from field: bool resource_scope_selection_allowed = 17;
+     */
+    resourceScopeSelectionAllowed: boolean;
+    /**
      *
      * string tos_uri = 10 [
      * (buf.validate.field).string = {max_len: 512},
@@ -105,9 +109,9 @@ export type CreateResource = Message<"scalekit.v1.clients.CreateResource"> & {
      * }
      * ];
      *
-     * @generated from field: bool resource_scope_selection_allowed = 17;
+     * @generated from field: bool resource_scoped_issuer_enabled = 18;
      */
-    resourceScopeSelectionAllowed: boolean;
+    resourceScopedIssuerEnabled: boolean;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateResource.
@@ -408,6 +412,10 @@ export type Resource = Message<"scalekit.v1.clients.Resource"> & {
      * @generated from field: bool resource_scope_selection_allowed = 24;
      */
     resourceScopeSelectionAllowed: boolean;
+    /**
+     * @generated from field: bool resource_scoped_issuer_enabled = 25;
+     */
+    resourceScopedIssuerEnabled: boolean;
 };
 /**
  * Describes the message scalekit.v1.clients.Resource.
@@ -693,6 +701,10 @@ export type UpdateResource = Message<"scalekit.v1.clients.UpdateResource"> & {
      * @generated from field: google.protobuf.BoolValue resource_scope_selection_allowed = 19;
      */
     resourceScopeSelectionAllowed?: boolean | undefined;
+    /**
+     * @generated from field: google.protobuf.BoolValue resource_scoped_issuer_enabled = 20;
+     */
+    resourceScopedIssuerEnabled?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateResource.

@@ -385,7 +385,11 @@ export declare enum IdentityProviderType {
     /**
      * @generated from enum value: ADFS = 16;
      */
-    ADFS = 16
+    ADFS = 16,
+    /**
+     * @generated from enum value: FACEBOOK = 17;
+     */
+    FACEBOOK = 17
 }
 /**
  * Describes the enum scalekit.v1.commons.IdentityProviderType.

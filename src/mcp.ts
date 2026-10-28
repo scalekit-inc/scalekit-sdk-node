@@ -3,6 +3,7 @@ import { DurationSchema } from '@bufbuild/protobuf/wkt';
 import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
+import { ScalekitValidationError } from './errors';
 import {
   CreateMcpConfigRequestSchema,
   CreateMcpConfigResponse,
@@ -18,6 +19,7 @@ import {
   ListMcpConnectedAccountsResponse,
   McpConfigSchema,
   McpService,
+  ToolExposure,
   UpdateMcpConfigRequestSchema,
   UpdateMcpConfigResponse,
 } from './pkg/grpc/scalekit/v1/mcp/mcp_pb';
@@ -27,6 +29,24 @@ import {
  * for tools annotated read-only only.
  */
 export type McpSessionTokenAccessLevel = 'FULL' | 'READ_ONLY';
+
+/**
+ * How a Virtual MCP server exposes tools. `'DIRECT'` lists every mapped tool in
+ * `tools/list` (at most 25 connections, no overlapping tool names). `'META'`
+ * lists five platform tools (`search_available_tools`, `list_available_tools`,
+ * `get_tool_details`, `execute_tool`, `connect_account`) that reach every tool
+ * of the configuration's connections, with no connection limit. META must be
+ * enabled for your environment.
+ */
+export type McpToolExposure = 'DIRECT' | 'META';
+
+/** Converts a {@link McpToolExposure} to the proto enum, rejecting anything else before a request is sent. */
+function toToolExposure(value: McpToolExposure): ToolExposure {
+  const mode = typeof value === 'string' ? value.trim().toUpperCase() : value;
+  if (mode === 'DIRECT') return ToolExposure.DIRECT;
+  if (mode === 'META') return ToolExposure.META;
+  throw new ScalekitValidationError(`toolExposure must be one of DIRECT, META`);
+}
 
 /**
  * Parameters for {@link McpClient.createSessionToken}. Set a target:
@@ -88,7 +108,9 @@ export default class McpClient {
    * @param params.description Human-readable summary of what this server exposes.
    * @param params.connectionToolMappings Which connections, and which tools from each, to expose.
    *                                      Omit `tools` on a mapping to expose every tool for that connection.
-   *                                      Maximum 25 mappings.
+   *                                      Maximum 25 connections when `toolExposure` is `'DIRECT'`.
+   * @param params.toolExposure `'DIRECT'` or `'META'`. Omit it to get `'DIRECT'`; META must be
+   *                            requested explicitly. See {@link McpToolExposure}.
    * @throws {ScalekitServerException} If a network or server error occurs.
    *
    * @remarks
@@ -103,6 +125,7 @@ export default class McpClient {
     connectionToolMappings?: MessageInitShape<
       typeof McpConfigSchema
     >['connectionToolMappings'];
+    toolExposure?: McpToolExposure;
   }): Promise<CreateMcpConfigResponse> {
     return this.coreClient.connectExec(
       this.client.createMcpConfig,
@@ -114,6 +137,9 @@ export default class McpClient {
           }),
           ...(params.connectionToolMappings && {
             connectionToolMappings: params.connectionToolMappings,
+          }),
+          ...(params.toolExposure !== undefined && {
+            toolExposure: toToolExposure(params.toolExposure),
           }),
         }),
       })
@@ -167,6 +193,9 @@ export default class McpClient {
    * @param params.configId ID of the configuration to update.
    * @param params.description New description.
    * @param params.connectionToolMappings Replacement connection-to-tool mappings.
+   * @param params.toolExposure `'DIRECT'` or `'META'`. Omit it to keep the stored mode.
+   *                            Switching to `'DIRECT'` is refused when the configuration has more than
+   *                            25 connections or overlapping tool names.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async updateConfig(params: {
@@ -175,6 +204,7 @@ export default class McpClient {
     connectionToolMappings?: MessageInitShape<
       typeof UpdateMcpConfigRequestSchema
     >['connectionToolMappings'];
+    toolExposure?: McpToolExposure;
   }): Promise<UpdateMcpConfigResponse> {
     return this.coreClient.connectExec(
       this.client.updateMcpConfig,
@@ -185,6 +215,9 @@ export default class McpClient {
         }),
         ...(params.connectionToolMappings && {
           connectionToolMappings: params.connectionToolMappings,
+        }),
+        ...(params.toolExposure !== undefined && {
+          toolExposure: toToolExposure(params.toolExposure),
         }),
       })
     );

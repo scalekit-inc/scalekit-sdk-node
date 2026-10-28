@@ -14,6 +14,16 @@ import {
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
+import {
+  AgentKitConnections,
+  toRef,
+  type ConnectionRef,
+  type CreateConnectionParams,
+  type ListAppConnectionsParams,
+  type ListAppConnectionsResponse,
+  type UpdateConnectionParams,
+} from './agentkit-connections';
+import type { AppConnection as AgentKitConnection } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 import type McpClient from './mcp';
 import type ProvidersClient from './providers';
 import { TriggersClient } from './triggers';
@@ -44,7 +54,7 @@ export type AppConnectionTimestamp = Timestamp;
 
 /**
  * Normalized, consumer-friendly view of an app connection returned by
- * {@link ActionsClient.listAppConnections}. Internal proto fields
+ * {@link ActionsClient.listConnections}. Internal proto fields
  * (`provider` enum, `organizationId`, `uiButtonTitle`, `organizationName`,
  * `domains`, `$typeName`) are omitted, and enum fields are decoded to their
  * string names.
@@ -66,7 +76,7 @@ export interface AppConnection {
   createdAt?: AppConnectionTimestamp;
 }
 
-/** Normalized response returned by {@link ActionsClient.listAppConnections}. */
+/** Normalized response returned by {@link ActionsClient.listConnections}. */
 export interface ListAppConnectionsResult {
   connections: AppConnection[];
   nextPageToken: string;
@@ -455,6 +465,98 @@ export default class ActionsClient {
       prevPageToken: response.prevPageToken,
       totalSize: response.totalSize,
     };
+  }
+
+  private agentKitConnectionsImpl?: AgentKitConnections;
+
+  private get agentKitConnections(): AgentKitConnections {
+    this.agentKitConnectionsImpl ??= new AgentKitConnections(this.connection);
+    return this.agentKitConnectionsImpl;
+  }
+
+  /**
+   * Creates an AgentKit connection.
+   *
+   * The connection type comes from the connector, so there is no `type`. The server fills in the
+   * connector's URLs, PKCE setting and default scopes. Add credentials and options afterwards with
+   * {@link ActionsClient.updateConnection}.
+   *
+   * @param params.provider Connector identifier, for example `'GMAIL'` (case-insensitive), or a custom connector's identifier.
+   * @param params.connectionName Letters, digits and hyphens, unique per environment. Generated when omitted.
+   * @param params.authMode `'USER'` (default) or `'ORG_WIDE'`. Cannot be changed later.
+   * @param params.providerDomain Only for regional connectors such as MIXPANELMCP. Create only; never returned.
+   * @returns The created connection. Secrets are masked.
+   * @throws {ScalekitValidationError} If an argument is invalid; nothing is sent.
+   * @throws {ScalekitAgentKitConnectionError} If the server refuses or fails the request. On
+   *   `OUTCOME_UNKNOWN`, check {@link ActionsClient.listAppConnections} before creating again.
+   *
+   * @remarks A temporary `UNAVAILABLE` response is retried by the SDK like any other call, so a create
+   * whose first attempt succeeded can come back as `CONNECTION_NAME_CONFLICT` when you pass a
+   * `connectionName`. Read the connection to confirm.
+   */
+  async createConnection(
+    params: CreateConnectionParams
+  ): Promise<AgentKitConnection> {
+    return this.agentKitConnections.create(params);
+  }
+
+  /**
+   * Gets one AgentKit connection by name (case-insensitive) or by ID (`conn_...`).
+   *
+   * @param connection The name or ID as a string, or `{ connectionName }` / `{ connectionId }`.
+   * @throws {ScalekitAgentKitConnectionError} `CONNECTION_NOT_FOUND` if no AgentKit connection matches.
+   */
+  async getConnection(
+    connection: string | ConnectionRef
+  ): Promise<AgentKitConnection> {
+    return this.agentKitConnections.get(connection);
+  }
+
+  /**
+   * Lists AgentKit connections, newest first, as summaries (`id`, `connectionName`, `provider`,
+   * `type`, `authMode`, `createTime`). Use {@link ActionsClient.getConnection} for the settings.
+   *
+   * This uses the AgentKit-only connection API and returns summaries only (no settings, no enabled
+   * flag). It is not the same as {@link ActionsClient.listConnections} or
+   * {@link ConnectionClient.listAppConnections} (`scalekit.connection.listAppConnections`), which use
+   * the older API and are unchanged: this one matches `provider` case-insensitively, supports `query`,
+   * and allows page sizes up to 100.
+   *
+   * @throws {ScalekitValidationError} If `query` is shorter than 3 characters.
+   */
+  async listAppConnections(
+    params?: ListAppConnectionsParams
+  ): Promise<ListAppConnectionsResponse> {
+    return this.agentKitConnections.list(params);
+  }
+
+  /**
+   * Changes the settings of an AgentKit connection.
+   *
+   * Identify it with `connectionName` or `connectionId`; a name costs one extra read to find the ID.
+   * Pass at most one of `oauth` or `googleDwd`. `providerConfigurations` goes with `oauth` or on its own,
+   * never with `googleDwd`; you can also rename on its own. It is a true partial merge: a field you leave out keeps its stored value,
+   * a masked secret sent back is ignored, and a list or map you pass empty (`scopes: []`,
+   * `extraAuthorizeParams: {}`) is cleared. Sending your own `clientId` or `clientSecret` turns
+   * `useScalekitCreds` off unless you set it. `providerDomain` cannot be changed.
+   *
+   * @throws {ScalekitValidationError} If the arguments are invalid; nothing is sent.
+   * @throws {ScalekitAgentKitConnectionError} If the server refuses or fails the update.
+   */
+  async updateConnection(
+    params: UpdateConnectionParams
+  ): Promise<AgentKitConnection> {
+    return this.agentKitConnections.update(params);
+  }
+
+  /**
+   * Deletes a connection.
+   *
+   * @throws {ScalekitAgentKitConnectionError} `CONNECTION_IN_USE` while connected accounts or MCP
+   *   configurations still use it.
+   */
+  async deleteConnection(connection: string | ConnectionRef): Promise<void> {
+    return this.agentKitConnections.delete(toRef(connection));
   }
 
   /**
