@@ -19,6 +19,7 @@ import type ProvidersClient from './providers';
 import { TriggersClient } from './triggers';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
 import {
+  isScalekitUnauthorized,
   uploadResumable,
   type ResumableUploadOptions,
   type ResumableUploadParams,
@@ -771,8 +772,8 @@ export default class ActionsClient {
       identifier,
     };
 
-    try {
-      return await this.coreClient.axios.request({
+    const send = () =>
+      this.coreClient.axios.request({
         url,
         method: method.toUpperCase(),
         params: queryParams,
@@ -783,6 +784,34 @@ export default class ActionsClient {
         // that leaves the proxy prefix.
         beforeRedirect: proxyRedirectGuard(this.coreClient.envUrl),
       });
+
+    try {
+      // Unlike the gRPC calls, this goes straight through axios, so it has to
+      // get its own token: fetch one if the client has none yet, and replace
+      // one the proxy rejected as expired. Only a 401 sent by Scalekit itself
+      // is retried (once, and only if the token changed): the proxy rejects
+      // that before forwarding, so the resend is safe. A 401 from the
+      // provider is returned as is, never replayed.
+      await this.coreClient.ensureAccessToken();
+      const tokenUsed = this.coreClient.accessToken;
+      try {
+        return await send();
+      } catch (error) {
+        if (
+          error instanceof AxiosError &&
+          error.response &&
+          isScalekitUnauthorized(error.response)
+        ) {
+          await this.coreClient.refreshAccessToken(tokenUsed);
+          if (
+            this.coreClient.accessToken &&
+            this.coreClient.accessToken !== tokenUsed
+          ) {
+            return await send();
+          }
+        }
+        throw error;
+      }
     } catch (error) {
       if (error instanceof ScalekitException) throw error;
       if (error instanceof AxiosError) {

@@ -275,6 +275,9 @@ describe('ActionsClient.request proxy timeout', () => {
       'client_secret',
       toolTimeoutMs
     );
+    // These tests are about the timeout, not authentication: a client that
+    // already holds a token sends the proxy call without fetching one first.
+    coreClient.accessToken = 'test-access-token';
     const grpcConnect = {
       createClient: () => makeFakeToolServiceClient(),
     } as any;
@@ -404,6 +407,8 @@ describe('axios timeouts surface as ScalekitGatewayTimeoutException', () => {
       'client_id',
       'client_secret'
     );
+    // See above: a client that already holds a token.
+    coreClient.accessToken = 'test-access-token';
     const grpcConnect = {
       createClient: () => makeFakeToolServiceClient(),
     } as any;

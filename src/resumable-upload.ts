@@ -671,7 +671,7 @@ function errorBody(response: AxiosResponse): unknown {
  * (JSON `{ "detail": ..., "code": "UNAUTHORIZED" }`), as opposed to a 401 from
  * the provider. Only this kind is safe to resend after a token refresh.
  */
-function isScalekitUnauthorized(response: AxiosResponse): boolean {
+export function isScalekitUnauthorized(response: AxiosResponse): boolean {
   if (response.status !== 401) return false;
   if (!isJsonContentType(headerRecord(response.headers))) return false;
   const body = errorBody(response);
