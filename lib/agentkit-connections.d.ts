@@ -1,6 +1,5 @@
 import type ConnectionClient from './connection';
 import { AppConnection, ListAppConnectionSummariesResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
-import type { JsonObject } from '@bufbuild/protobuf';
 /** How end users authorize a connection. Chosen at creation; it cannot be changed afterwards. */
 export type AgentKitAuthMode = 'USER' | 'ORG_WIDE';
 /** Token endpoint client authentication. `'DEFAULT'` clears the stored value so the platform picks. */
@@ -64,8 +63,6 @@ export interface AgentKitGoogleDwdSettings {
     scopeSelectionAllowed?: boolean;
     requiredScopes?: string[];
 }
-/** Static auth settings (API key, bearer and similar), as a JSON object. */
-export type AgentKitStaticSettings = JsonObject;
 export interface CreateConnectionParams {
     /** Connector identifier, for example `'GMAIL'` (case-insensitive), or a custom connector's identifier. */
     provider: string;
@@ -98,10 +95,9 @@ export interface ConnectionRef {
 export interface UpdateConnectionParams extends ConnectionRef {
     /** Renames the connection. Same rules as at creation. */
     newConnectionName?: string;
-    /** Send exactly one of `oauth`, `googleDwd` or `staticConfig`. */
+    /** Send exactly one of `oauth` or `googleDwd`. */
     oauth?: AgentKitOAuthSettings;
     googleDwd?: AgentKitGoogleDwdSettings;
-    staticConfig?: AgentKitStaticSettings;
     /** Only valid together with `oauth`, or on its own for connector-specific settings. */
     providerConfigurations?: AgentKitProviderConfigurations;
 }

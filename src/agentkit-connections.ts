@@ -15,10 +15,8 @@ import {
   GoogleDWDConfigSchema,
   ListAppConnectionSummariesResponse,
   OptionalScopesSchema,
-  StaticAuthConfigSchema,
   UpdateAppConnectionRequestSchema,
 } from './pkg/grpc/scalekit/v1/connections/connections_pb';
-import type { JsonObject } from '@bufbuild/protobuf';
 
 /** How end users authorize a connection. Chosen at creation; it cannot be changed afterwards. */
 export type AgentKitAuthMode = 'USER' | 'ORG_WIDE';
@@ -89,9 +87,6 @@ export interface AgentKitGoogleDwdSettings {
   requiredScopes?: string[];
 }
 
-/** Static auth settings (API key, bearer and similar), as a JSON object. */
-export type AgentKitStaticSettings = JsonObject;
-
 export interface CreateConnectionParams {
   /** Connector identifier, for example `'GMAIL'` (case-insensitive), or a custom connector's identifier. */
   provider: string;
@@ -128,10 +123,9 @@ export interface ConnectionRef {
 export interface UpdateConnectionParams extends ConnectionRef {
   /** Renames the connection. Same rules as at creation. */
   newConnectionName?: string;
-  /** Send exactly one of `oauth`, `googleDwd` or `staticConfig`. */
+  /** Send exactly one of `oauth` or `googleDwd`. */
   oauth?: AgentKitOAuthSettings;
   googleDwd?: AgentKitGoogleDwdSettings;
-  staticConfig?: AgentKitStaticSettings;
   /** Only valid together with `oauth`, or on its own for connector-specific settings. */
   providerConfigurations?: AgentKitProviderConfigurations;
 }
@@ -340,11 +334,11 @@ export class AgentKitConnections {
   }
 
   async update(params: UpdateConnectionParams): Promise<AppConnection> {
-    const groups = [params.oauth, params.googleDwd, params.staticConfig].filter(
+    const groups = [params.oauth, params.googleDwd].filter(
       (group) => group !== undefined
     );
     if (groups.length > 1) {
-      throw invalid('send only one of oauth, googleDwd or staticConfig');
+      throw invalid('send only one of oauth or googleDwd');
     }
     if (
       groups.length === 0 &&
@@ -352,7 +346,7 @@ export class AgentKitConnections {
       params.newConnectionName === undefined
     ) {
       throw invalid(
-        'nothing to update: pass oauth, googleDwd, staticConfig, providerConfigurations or newConnectionName'
+        'nothing to update: pass oauth, googleDwd, providerConfigurations or newConnectionName'
       );
     }
     const cleared: string[] = [];
@@ -360,11 +354,6 @@ export class AgentKitConnections {
       ...(params.oauth && { oauthConfig: oauthConfig(params.oauth, cleared) }),
       ...(params.googleDwd && {
         googleDwdConfig: googleDwdConfig(params.googleDwd, cleared),
-      }),
-      ...(params.staticConfig && {
-        staticConfig: create(StaticAuthConfigSchema, {
-          staticConfig: params.staticConfig,
-        }),
       }),
       ...(params.providerConfigurations && {
         providerConfigurations: providerConfigurations(

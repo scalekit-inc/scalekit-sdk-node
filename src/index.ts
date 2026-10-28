@@ -109,7 +109,6 @@ export type {
   AgentKitProviderConfigurations,
   AgentKitOAuthSettings,
   AgentKitGoogleDwdSettings,
-  AgentKitStaticSettings,
   CreateConnectionParams,
   ListAppConnectionsParams,
   ListAppConnectionsResponse,
