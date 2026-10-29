@@ -2,9 +2,10 @@
  * Live tests for scalekit.actions.triggers against a real environment. The
  * whole file is skipped unless SCALEKIT_ENVIRONMENT_URL, SCALEKIT_CLIENT_ID
  * and SCALEKIT_CLIENT_SECRET hold real values (placeholders such as "dummy"
- * or an `.invalid` host count as unset). The environment must have
- * triggers available. getActivity, getUsage and the not-found cases need
- * nothing else; the other cases also skip unless their fixture is set:
+ * or an `.invalid` host count as unset). Every case first checks, once,
+ * that triggers are available for the environment, and skips at run time
+ * (with a warning) where they are not. getActivity, getUsage and the
+ * not-found cases need nothing else; the other cases also skip unless their fixture is set:
  *
  *   SCALEKIT_TEST_TRIGGER_CONNECTION_ID       a connection whose provider
  *                                             publishes webhook triggers and
@@ -128,9 +129,44 @@ function skipAtRunTime(reason: string): void {
   console.warn(`skipped: ${reason}`);
 }
 
-const withConnection = connectionId ? it : it.skip;
-const withPoll = hasPoll ? it : it.skip;
-const withEndpoint = endpointId ? it : it.skip;
+let availability: Promise<boolean> | undefined;
+
+/**
+ * Whether triggers are available for this environment, asked once. An
+ * environment without them answers every trigger call with 404
+ * RESOURCE_NOT_FOUND, and getActivity takes no IDs, so that answer from it
+ * can only mean triggers are not available. Any other error fails the case.
+ */
+function triggersAvailable(): Promise<boolean> {
+  availability ??= triggers.getActivity().then(
+    () => true,
+    (error: unknown) => {
+      if (
+        error instanceof ScalekitNotFoundException &&
+        error.errorCode === 'RESOURCE_NOT_FOUND'
+      ) {
+        return false;
+      }
+      throw error;
+    }
+  );
+  return availability;
+}
+
+/** A live case that runs only where triggers are available for the environment. */
+function liveIt(name: string, fn: () => Promise<void>): void {
+  it(name, async () => {
+    if (!(await triggersAvailable())) {
+      skipAtRunTime('triggers are not available for this environment');
+      return;
+    }
+    await fn();
+  });
+}
+
+const withConnection = connectionId ? liveIt : it.skip;
+const withPoll = hasPoll ? liveIt : it.skip;
+const withEndpoint = endpointId ? liveIt : it.skip;
 
 (enabled ? describe : describe.skip)('actions.triggers (live)', () => {
   afterAll(async () => {
@@ -139,7 +175,7 @@ const withEndpoint = endpointId ? it : it.skip;
     }
   });
 
-  it('an unknown connection is not found', async () => {
+  liveIt('an unknown connection is not found', async () => {
     await expect(
       triggers.listAvailable(MISSING_CONNECTION)
     ).rejects.toBeInstanceOf(ScalekitNotFoundException);
@@ -154,27 +190,30 @@ const withEndpoint = endpointId ? it : it.skip;
     }
   });
 
-  it('getUsage for 24h returns hourly usage, or reports usage as not metered', async () => {
-    let usage;
-    try {
-      usage = await triggers.getUsage({ period: '24h' });
-    } catch (error) {
-      expect(error).toBeInstanceOf(ScalekitNotFoundException);
-      expect((error as ScalekitNotFoundException).errorCode).toBe(
-        'TRIGGER_USAGE_NOT_METERED'
-      );
-      return;
+  liveIt(
+    'getUsage for 24h returns hourly usage, or reports usage as not metered',
+    async () => {
+      let usage;
+      try {
+        usage = await triggers.getUsage({ period: '24h' });
+      } catch (error) {
+        expect(error).toBeInstanceOf(ScalekitNotFoundException);
+        expect((error as ScalekitNotFoundException).errorCode).toBe(
+          'TRIGGER_USAGE_NOT_METERED'
+        );
+        return;
+      }
+      expect(usage.period).toBe('24h');
+      expect(usage.bucket).toBe('HOUR');
+      expect(usage.days).toEqual([]);
+      expect(usage.today).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(usage.currentHour).toBeInstanceOf(Date);
+      for (const h of usage.hours) {
+        expect(h.start).toBeInstanceOf(Date);
+        expect(Number.isSafeInteger(h.units)).toBe(true);
+      }
     }
-    expect(usage.period).toBe('24h');
-    expect(usage.bucket).toBe('HOUR');
-    expect(usage.days).toEqual([]);
-    expect(usage.today).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    expect(usage.currentHour).toBeInstanceOf(Date);
-    for (const h of usage.hours) {
-      expect(h.start).toBeInstanceOf(Date);
-      expect(Number.isSafeInteger(h.units)).toBe(true);
-    }
-  });
+  );
 
   withConnection(
     'generateSigningSecret is refused for a provider that signs its own events',
@@ -218,7 +257,7 @@ const withEndpoint = endpointId ? it : it.skip;
     }
   );
 
-  it('getActivity returns counts as numbers', async () => {
+  liveIt('getActivity returns counts as numbers', async () => {
     const activity = await triggers.getActivity();
     expect(activity.windowSeconds).toBeGreaterThan(0);
     for (const value of Object.values(activity.counts)) {
@@ -390,7 +429,7 @@ const withEndpoint = endpointId ? it : it.skip;
     expect(batch.results.map((r) => r.outcome)).toEqual(['FOUND', 'NOT_FOUND']);
   });
 
-  it('an unknown delivery is not found', async () => {
+  liveIt('an unknown delivery is not found', async () => {
     const error = await triggers
       .lookupDelivery(MISSING_DELIVERY)
       .catch((e: unknown) => e);
