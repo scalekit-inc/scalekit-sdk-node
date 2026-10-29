@@ -340,6 +340,8 @@ export declare class TriggersClient {
      * @throws {@link ScalekitNotFoundException} If the connection, trigger or connected account does not exist.
      * @throws {@link ScalekitBadRequestException} If the server refuses the subscription; the message names the remedy.
      * @throws {@link ScalekitValidationError} If `connectionId` or `triggerName` is empty, `intervalSeconds` is not a whole number, or a `config` value is not a string.
+     * @throws {@link ScalekitServiceUnavailableException} If the service is unavailable; the subscription may or may not have been created, so check `listSubscriptions` before calling again.
+     * @throws {@link ScalekitGatewayTimeoutException} If the deadline passes; the subscription may still have been created, so check `listSubscriptions` before calling again.
      * @throws {@link ScalekitAbortError} If `options.signal` aborts.
      * @see {@link https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#triggers | REFERENCE.md}
      *
