@@ -25,3 +25,4 @@ types:
     - scalekit.v1.connected_accounts
     - scalekit.v1.mcp
     - scalekit.v1.providers
+    - scalekit.v1.triggers
