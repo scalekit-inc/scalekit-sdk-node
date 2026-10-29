@@ -113,13 +113,32 @@ function track(sub: TriggerSubscription | undefined): void {
   if (sub) created.set(sub.id, sub.connectionId);
 }
 
+/** Every subscription to `triggerName` on the connection, across all pages. */
+async function allSubscriptions(
+  connectionId: string,
+  triggerName: string
+): Promise<TriggerSubscription[]> {
+  const all: TriggerSubscription[] = [];
+  let pageToken: string | undefined;
+  do {
+    const page = await triggers.listSubscriptions(connectionId, {
+      triggerName,
+      pageSize: 100,
+      pageToken,
+    });
+    all.push(...page.subscriptions);
+    pageToken = page.nextPageToken;
+  } while (pageToken);
+  return all;
+}
+
 /** The fixture account's subscriptions to the fixture trigger, other than those this run created. */
 async function foreignFixtureSubscriptions(): Promise<TriggerSubscription[]> {
-  const page = await triggers.listSubscriptions(pollConnectionId as string, {
-    triggerName: pollTrigger as string,
-    pageSize: 100,
-  });
-  return page.subscriptions.filter(
+  const subs = await allSubscriptions(
+    pollConnectionId as string,
+    pollTrigger as string
+  );
+  return subs.filter(
     (s) => s.connectedAccountId === pollAccountId && !created.has(s.id)
   );
 }
@@ -291,13 +310,22 @@ const withEndpoint = endpointId ? liveIt : it.skip;
   );
 
   withPoll('listEligibleAccounts lists the fixture account', async () => {
-    const page = await triggers.listEligibleAccounts(
+    let page = await triggers.listEligibleAccounts(
       pollConnectionId as string,
       pollTrigger as string,
       { pageSize: 100 }
     );
     expect(page.totalSize).toBeGreaterThan(0);
-    expect(page.accounts.map((a) => a.id)).toContain(pollAccountId);
+    const ids = page.accounts.map((a) => a.id);
+    while (page.nextPageToken && !ids.includes(pollAccountId as string)) {
+      page = await triggers.listEligibleAccounts(
+        pollConnectionId as string,
+        pollTrigger as string,
+        { pageSize: 100, pageToken: page.nextPageToken }
+      );
+      ids.push(...page.accounts.map((a) => a.id));
+    }
+    expect(ids).toContain(pollAccountId);
   });
 
   withPoll(
@@ -334,16 +362,21 @@ const withEndpoint = endpointId ? liveIt : it.skip;
         triggerName: trigger,
         pageSize: 100,
       });
-      expect(page.subscriptions.map((s) => s.id)).toContain(sub.id);
       expect(Object.values(page.statusCounts).every(Number.isInteger)).toBe(
         true
       );
+      expect(
+        (await allSubscriptions(conn, trigger)).map((s) => s.id)
+      ).toContain(sub.id);
 
       const batch = await triggers.batchCreateSubscriptions(conn, trigger, {
         connectedAccountIds: [pollAccountId as string, MISSING_ACCOUNT],
         config,
       });
-      for (const r of batch.results) track(r.subscription);
+      // ALREADY_SUBSCRIBED returns a subscription that may predate this run; track only new ones.
+      for (const r of batch.results) {
+        if (r.outcome === 'CREATED') track(r.subscription);
+      }
       expect(batch.results).toHaveLength(2);
       expect(batch.results[0].outcome).toBe('ALREADY_SUBSCRIBED');
       expect(batch.results[1].connectedAccountId).toBe(MISSING_ACCOUNT);
