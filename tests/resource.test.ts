@@ -1,5 +1,6 @@
 import ScalekitClient from '../src/scalekit';
 import { ResourceType } from '../src/resource';
+import { Code } from '@connectrpc/connect';
 import { describe, it, expect, beforeAll } from '@jest/globals';
 
 // A real MCP server resource in the test environment. It currently has no
@@ -77,6 +78,65 @@ describe('Resource Client (UserConsents)', () => {
 
       expect(response).toBeDefined();
       expect(Array.isArray(response.consents)).toBe(true);
+    });
+
+    it('should return only the consent matching a consentIds filter', async () => {
+      const all = await client.resources.listUserConsents(TEST_RESOURCE_ID, {
+        pageSize: 30,
+      });
+      if (all.consents.length === 0) return; // nothing to filter on this resource
+      const consentId = all.consents[0].id;
+
+      const response = await client.resources.listUserConsents(
+        TEST_RESOURCE_ID,
+        { consentIds: [consentId] }
+      );
+
+      expect(response.consents.map((c) => c.id)).toEqual([consentId]);
+    });
+
+    it('should return an empty list for an unknown consent id', async () => {
+      const response = await client.resources.listUserConsents(
+        TEST_RESOURCE_ID,
+        { consentIds: ['usrcnst_999999999999999999'] }
+      );
+
+      expect(response.consents).toHaveLength(0);
+    });
+
+    it('should let consentIds take precedence over userIds', async () => {
+      // userIds alone would match nothing, so a result means consentIds won.
+      const all = await client.resources.listUserConsents(TEST_RESOURCE_ID, {
+        pageSize: 30,
+      });
+      if (all.consents.length === 0) return;
+      const consentId = all.consents[0].id;
+
+      const response = await client.resources.listUserConsents(
+        TEST_RESOURCE_ID,
+        { consentIds: [consentId], userIds: ['usr_does_not_exist'] }
+      );
+
+      expect(response.consents.map((c) => c.id)).toEqual([consentId]);
+    });
+
+    it('should reject a malformed consent id', async () => {
+      await expect(
+        client.resources.listUserConsents(TEST_RESOURCE_ID, {
+          consentIds: ['149633942432021190'],
+        })
+      ).rejects.toMatchObject({ grpcStatus: Code.InvalidArgument });
+    });
+
+    it('should reject more than 25 consent ids', async () => {
+      const consentIds = Array.from(
+        { length: 26 },
+        (_, i) => `usrcnst_${i + 1}`
+      );
+
+      await expect(
+        client.resources.listUserConsents(TEST_RESOURCE_ID, { consentIds })
+      ).rejects.toMatchObject({ grpcStatus: Code.InvalidArgument });
     });
 
     it('should throw when resourceId is empty', async () => {

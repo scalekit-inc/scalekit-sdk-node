@@ -10,14 +10,19 @@ export interface ListResourcesOptions {
     pageToken?: string;
 }
 export interface ListUserConsentsOptions {
-    /** Case-insensitive substring match on external user IDs. Ignored when userIds is set. */
+    /** Case-insensitive substring match on external user IDs. Ignored when consentIds or userIds is set. */
     search?: string;
     /** Page size, max 30. */
     pageSize?: number;
     /** Pagination cursor. */
     pageToken?: string;
-    /** Exact match on external user IDs, max 25. Takes precedence over search. */
+    /** Exact match on external user IDs, max 25. Ignored when consentIds is set; takes precedence over search. */
     userIds?: string[];
+    /**
+     * Exact match on consent IDs (format: usrcnst_xxxxx), max 25 distinct. Takes precedence over
+     * userIds and search. IDs that do not exist or belong to another resource are omitted from the result.
+     */
+    consentIds?: string[];
 }
 export interface CreateResourceClientOptions {
     /** Human-readable name for the client. Defaults to "Resource Client" if omitted. */
@@ -218,9 +223,10 @@ export default class ResourceClient {
      * `clientName`, `scopes` and `grantedAt`. The response also carries
      * `totalSize` plus `nextPageToken` / `prevPageToken` cursors.
      *
-     * Pass `userIds` to match specific users exactly, or `search` for a
-     * case-insensitive substring match. When both are given, `userIds` wins and
-     * `search` is ignored.
+     * Pass `consentIds` to fetch specific consents by ID, `userIds` to match
+     * specific users exactly, or `search` for a case-insensitive substring match.
+     * Priority is `consentIds`, then `userIds`, then `search`; lower-priority
+     * filters are ignored without an error.
      *
      * @param resourceId - The resource whose consents to list (format: res_xxxxx)
      * @param options - Optional filter, search and pagination options
