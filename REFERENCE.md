@@ -19,6 +19,7 @@
 - [Virtual MCP Servers](#virtual-mcp-servers)
 - [Custom Connectors](#custom-connectors)
 - [Trigger Events](#trigger-events)
+- [Triggers](#triggers)
 - [WebAuthn](#webauthn)
 - [Error Handling](#error-handling)
 - [Type Definitions](#type-definitions)
@@ -1140,6 +1141,10 @@ try {
 - `TriggerEvent`: A verified trigger event returned by `verifyTriggerEvent` and `actions.triggers.verifyEvent`
 - `DeliveryScope` (`ACCOUNT`, `CONNECTION`), `DetectionMode` (`WEBHOOK`, `POLL`), `PayloadState` (`FULL`, `REFERENCE`): String constants for the matching `TriggerEvent` fields. Values the SDK does not know yet arrive as plain strings
 - `TriggerEventVerifyParams`, `TriggerEventHeaders`: The parameters of `verifyTriggerEvent`
+- `RequestOptions`: Per-call `signal` and `timeoutMs`, taken last by the `actions.triggers` management methods
+- `TriggerSubscriptionStatus`, `TriggerPollErrorCode`, `AccountHealthState`, `AccountHealthAction`, `TriggerPlatformCredentials`, `TriggerRefusalCode`, `TriggerSubscribeOutcome`, `TriggerSubscriptionDeleteOutcome`, `TriggerUsageBucket`, `TriggerDeliveryStatus`, `TriggerDeliveryLookupOutcome`, `TriggerDeliveryResendOutcome`, `TriggerDeliveryAttemptTriggerType`, `TriggerDeliveryAttemptStatus`: String constants for the trigger management enums. Unset values are `undefined`; values the SDK does not know yet arrive as plain strings
+- `TriggerCatalog`, `AvailableTrigger`, `TriggerRequiredScope`, `TriggerConfigField`, `TriggerEligibleAccountList`, `EligibleAccount`, `AccountHealth`, `TriggerSubscription`, `TriggerPollState`, `TriggerSubscriptionList`, `TriggerSubscriptionBatchCreateResult`, `TriggerSubscriptionBatchCreateItem`, `TriggerSubscriptionBatchDeleteResult`, `TriggerSubscriptionBatchDeleteItem`, `TriggerActivity`, `TriggerUsage`, `TriggerUsageDay`, `TriggerUsageHour`, `TriggerIngressEndpoint`, `GeneratedTriggerSigningSecret`, `TriggerDeliveryAttemptList`, `TriggerDeliveryAttempt`, `TriggerDeliveryList`, `TriggerDelivery`, `TriggerMessageAttemptList`, `TriggerDeliveryDetails`, `TriggerDeliveryBatchLookupResult`, `TriggerDeliveryBatchLookupItem`, `TriggerDeliveryBatchResendResult`, `TriggerDeliveryBatchResendItem`, `TriggerDeliveryRecovery`: Results of the `actions.triggers` management methods
+- `TriggerEligibleAccountListParams`, `TriggerSubscriptionListParams`, `TriggerSubscriptionCreateParams`, `TriggerSubscriptionBatchCreateParams`, `TriggerSubscriptionBatchDeleteParams`, `TriggerUsageGetParams`, `TriggerUsagePeriod`, `TriggerSigningSecretSetParams`, `TriggerSigningSecretRotationConfirmParams`, `TriggerDeliveryAttemptListParams`, `TriggerDeliveryListParams`, `TriggerDeliveryBatchLookupParams`, `TriggerDeliveryBatchResendParams`, `TriggerDeliveryResendTarget`, `TriggerDeliveryRecoverParams`, `TriggerDeliveryRecoveryStatus`: Parameters of the `actions.triggers` management methods
 - `JsonValue`, `JsonObject`: Any JSON value, and a JSON object
 
 ## Organizations
@@ -8713,6 +8718,1356 @@ app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async 
 - `deliveryScope`, `detectionMode` and `payloadState` can also hold a value added after this SDK version, as a plain string; handle the values you know and skip the rest
 - `payload: JsonValue` - `null` when absent, and always for `'reference'`
 - `extra: Record<string, JsonValue>` - Top-level fields this SDK version does not recognise, under their wire (snake_case) names
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Triggers
+
+Manage AgentKit triggers: find what a connection's provider can send, subscribe connected accounts, set up the connection's webhook URL and signing secret, and inspect activity, usage and deliveries. Verifying the events delivered to your endpoint is covered in [Trigger Events](#trigger-events).
+
+Access via `scalekitClient.actions.triggers`. Every networked method takes an optional `RequestOptions` last (`signal`, `timeoutMs`).
+
+- Invalid arguments (an empty ID, an unknown enum name, an invalid date, a non-integral interval) throw `ScalekitValidationError` before any request. ID formats, list sizes and selector rules are left to the server.
+- Server errors reject with the `ScalekitServerException` subclass for the status: 400 `ScalekitBadRequestException`, 404 `ScalekitNotFoundException`, 409 `ScalekitConflictException`, 429 `ScalekitTooManyRequestsException`, 500 `ScalekitInternalServerException`, 503 `ScalekitServiceUnavailableException`. Branch on `errorCode` for the reason.
+- Calls that are safe to repeat are retried when the service is briefly unavailable. `createSubscription`, `setSigningSecret`, `generateSigningSecret`, `batchResendDeliveries` and `recoverDeliveries` are not.
+- Batch methods report each item's outcome in `results` and never throw for one item.
+- Enum fields are open string unions (for example `TriggerSubscriptionStatus`): an unset value is `undefined`, and a value newer than this SDK arrives as a plain string. Times are `Date`; durations are numbers with the unit in the name (`intervalSeconds`, `windowSeconds`, `responseDurationMs`); empty page tokens are `undefined`.
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">listAvailable</a>(connectionId, options?) -> Promise&lt;TriggerCatalog&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists every trigger the connection's provider publishes, each marked as available or not on this connection. An unavailable trigger is still listed, with `available: false`, a `reason`, a `remedy` and, where one applies, a `refusalCode`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { triggers, connectionUsesSharedApp } =
+  await scalekitClient.actions.triggers.listAvailable('conn_123');
+for (const t of triggers.filter((t) => t.available)) {
+  console.log(t.name, t.mode, t.configFields.map((f) => f.key));
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string` - The connection (`conn_...`)
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerCatalog` - `triggers: AvailableTrigger[]` (`name`, `displayName`, `description`, `provider`, `mode`, `requiredScopes`, `minIntervalSeconds?`, `defaultIntervalSeconds?`, `configFields`, `available`, `reason`, `remedy`, `deliveryScope`, `platformCredentials`, `refusalCode`, `requiresSigningSecret`, `registerHint`, `secretHint`, `providesBearerSecret`) and `connectionUsesSharedApp`. Unknown connection: `ScalekitNotFoundException`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">listEligibleAccounts</a>(connectionId, triggerName, params?, options?) -> Promise&lt;TriggerEligibleAccountList&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the connection's connected accounts, each marked as eligible or not for one trigger, with a `reason`, a `remedy` and the account's `health`. Returns one page.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const page = await scalekitClient.actions.triggers.listEligibleAccounts(
+  'conn_123',
+  'example.item.created',
+  { query: 'acme', pageSize: 50 }
+);
+const eligible = page.accounts.filter((a) => a.eligible).map((a) => a.id);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string` - The connection (`conn_...`)
+
+**triggerName:** `string` - A trigger `name` from `listAvailable`
+
+**params?:** `TriggerEligibleAccountListParams`
+- `query?: string` - Only identifiers containing this text, case-insensitively
+- `pageSize?: number` - Default 10; the server caps larger values at 100
+- `pageToken?: string` - `nextPageToken` or `prevPageToken` from a previous page
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerEligibleAccountList` - `accounts: EligibleAccount[]`, `nextPageToken?`, `prevPageToken?` (`undefined` when there is no such page), `totalSize`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">listSubscriptions</a>(connectionId, params?, options?) -> Promise&lt;TriggerSubscriptionList&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the connection's trigger subscriptions, newest first, with per-status totals across every page. Polled subscriptions include their requested and effective intervals and their poll state.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import { TriggerSubscriptionStatus } from '@scalekit-sdk/node';
+
+const page = await scalekitClient.actions.triggers.listSubscriptions('conn_123', {
+  triggerName: 'example.item.created',
+  statuses: [TriggerSubscriptionStatus.PAUSED_CREDENTIAL],
+});
+console.log(page.statusCounts.ACTIVE ?? 0, 'active');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string` - The connection (`conn_...`)
+
+**params?:** `TriggerSubscriptionListParams`
+- `triggerName?: string` - Only this trigger's subscriptions
+- `statuses?: TriggerSubscriptionStatus[]` - At most 4; does not affect `statusCounts`. A value newer than this SDK can be passed as its number in a string
+- `pageSize?: number` - Default 10; capped at 100 by the server
+- `pageToken?: string`
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerSubscriptionList` - `subscriptions: TriggerSubscription[]`, `nextPageToken?`, `prevPageToken?`, `totalSize`, `statusCounts: Record<string, number>` keyed by status name.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">createSubscription</a>(connectionId, triggerName, params?, options?) -> Promise&lt;TriggerSubscription&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Subscribes one connected account, or the whole connection, to a trigger. Pass `connectedAccountId` for an account-scoped trigger; omit it for a connection-scoped one. A refusal is a `ScalekitBadRequestException` whose message names the remedy; the same subscription twice is a `ScalekitConflictException`. Not retried when the service is briefly unavailable; use `batchCreateSubscriptions` for a call that is safe to retry.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const sub = await scalekitClient.actions.triggers.createSubscription(
+  'conn_123',
+  'example.item.created',
+  { connectedAccountId: 'ca_123', config: { channel: 'C123' } }
+);
+console.log(sub.id, sub.status, sub.effectiveIntervalSeconds);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string` - The connection (`conn_...`)
+
+**triggerName:** `string` - A trigger `name` from `listAvailable`
+
+**params?:** `TriggerSubscriptionCreateParams`
+- `connectedAccountId?: string` - Required for an account-scoped trigger
+- `intervalSeconds?: number` - Polling interval in whole seconds; omit for the trigger's default. Below the minimum is refused, not rounded
+- `config?: Record<string, string>` - Filter values keyed as the trigger's `configFields`
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerSubscription` - `id`, `connectedAccountId`, `connectionId`, `provider`, `triggerName`, `status`, `requestedIntervalSeconds?`, `effectiveIntervalSeconds?`, `config`, `deliveryScope`, `connectedAccountIdentifier`, `createdAt?: Date`, `pollState?`, `accountHealth?`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">batchCreateSubscriptions</a>(connectionId, triggerName, params?, options?) -> Promise&lt;TriggerSubscriptionBatchCreateResult&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Subscribes many connected accounts to one trigger with one filter. Best effort: each result has its own `outcome` (`CREATED`, `ALREADY_SUBSCRIBED`, `REFUSED`, `NOT_FOUND`, `FAILED`) and a refused account never throws. Safe to retry. For a connection-scoped trigger, omit `connectedAccountIds`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { results, createdCount } =
+  await scalekitClient.actions.triggers.batchCreateSubscriptions(
+    'conn_123',
+    'example.item.created',
+    { connectedAccountIds: ['ca_1', 'ca_2'] }
+  );
+for (const r of results) {
+  if (r.outcome === 'REFUSED') console.log(r.connectedAccountId, r.reason);
+}
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string`
+
+**triggerName:** `string`
+
+**params?:** `TriggerSubscriptionBatchCreateParams`
+- `connectedAccountIds?: string[]` - At most 100, no duplicates; empty for a connection-scoped trigger
+- `intervalSeconds?: number`
+- `config?: Record<string, string>`
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerSubscriptionBatchCreateResult` - `results` (`connectedAccountId`, `outcome`, `subscription?`, `reason`) in request order, and `createdCount`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">deleteSubscription</a>(connectionId, subscriptionId, options?) -> Promise&lt;void&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes one subscription. Permanent. A missing subscription is a `ScalekitNotFoundException`; after a transport retry this can mean the first attempt already deleted it.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.actions.triggers.deleteSubscription('conn_123', 'trgs_123');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string`
+
+**subscriptionId:** `string` - The subscription (`trgs_...`)
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">batchDeleteSubscriptions</a>(connectionId, params, options?) -> Promise&lt;TriggerSubscriptionBatchDeleteResult&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes many subscriptions on one connection. Use exactly one selector: `subscriptionIds`, or `triggerName` with `connectedAccountIds`; the server refuses anything else. Best effort and safe to retry: treat `DELETED` and `NOT_FOUND` alike as gone, and send `NOT_ATTEMPTED` items again.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { results, deletedCount } =
+  await scalekitClient.actions.triggers.batchDeleteSubscriptions('conn_123', {
+    triggerName: 'example.item.created',
+    connectedAccountIds: ['ca_1', 'ca_2'],
+  });
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string`
+
+**params:** `TriggerSubscriptionBatchDeleteParams`
+- `subscriptionIds?: string[]` - At most 100
+- `triggerName?: string` - With `connectedAccountIds`
+- `connectedAccountIds?: string[]` - With `triggerName`, at most 100
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerSubscriptionBatchDeleteResult` - `results` (`subscriptionId`, `connectedAccountId`, `outcome`, `reason`) and `deletedCount`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">getActivity</a>(options?) -> Promise&lt;TriggerActivity&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Counts what happened to the environment's trigger events over the last day, by outcome, across every connection. Use it to diagnose a trigger that did not fire; individual events are not stored.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const activity = await scalekitClient.actions.triggers.getActivity();
+if (activity.signatureBanner) console.warn('check the signing secret');
+console.log(activity.counts.delivered, 'delivered in', activity.windowSeconds, 's');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerActivity` - `counts: Record<string, number>` (`received`, `filtered`, `unresolved`, `delivered`, `delivery_failed`, `duplicate`, `signature_failed`, `discarded`), `windowSeconds`, `signatureBanner`, `degraded`, `explainsIndividualEvents` (always `false`), `deliveryDetailsPath`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">getUsage</a>(params, options?) -> Promise&lt;TriggerUsage&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns metered trigger deliveries: hourly for `period: '24h'`, daily otherwise. Hours and days with none are absent, not zero. A range reaching outside the readable window (today and the 30 days before it) is clamped, and the range read comes back as `from` and `to`. Not metered for the environment: `ScalekitNotFoundException` with `errorCode` `TRIGGER_USAGE_NOT_METERED`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const hourly = await scalekitClient.actions.triggers.getUsage({ period: '24h' });
+for (const h of hourly.hours) console.log(h.start.toISOString(), h.units);
+
+const daily = await scalekitClient.actions.triggers.getUsage({
+  from: '2026-10-01',
+  to: '2026-10-28',
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `TriggerUsageGetParams` - Either `{ period: '24h' | '7d' | '30d' }` (exact, lowercase) or `{ from: string; to: string }` (`'YYYY-MM-DD'` UTC dates, inclusive); a `from` or `to` that is not a real `YYYY-MM-DD` date throws `ScalekitValidationError`
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerUsage` - `from?`, `to?`, `today?` (`'YYYY-MM-DD'` strings), `period?`, `bucket?` (`HOUR` or `DAY`; `undefined` for a date range), `days: { date?: string; units: number }[]`, `hours: { start?: Date; units: number }[]`, `currentHour?: Date`. A value the server leaves empty, or an instant it sends unreadable, is `undefined`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">getIngressEndpoint</a>(connectionId, options?) -> Promise&lt;TriggerIngressEndpoint&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns the connection's webhook URL and the state of its signing secret. Never creates a URL: with none yet, it rejects with `ScalekitNotFoundException` (`errorCode` `TRIGGER_INGRESS_ENDPOINT_NOT_CREATED`).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const endpoint = await scalekitClient.actions.triggers.getIngressEndpoint('conn_123');
+console.log(endpoint.url, endpoint.signingSecretConfigured, endpoint.rotationInProgress);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string`
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerIngressEndpoint` - `id`, `connectionId`, `url` (treat it as confidential: it carries the endpoint's token; `console.log` shows it as `[redacted]`), `signingSecretConfigured`, `maskedSigningSecret`, `rotationInProgress`, `previousSigningSecretExpiresAt?: Date`, `signingSecretRotationId: number` (0 when no rotation has started).
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">createIngressEndpoint</a>(connectionId, options?) -> Promise&lt;TriggerIngressEndpoint&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates the connection's webhook URL to register in the provider's app configuration. Treat the URL as confidential: it carries the endpoint's token, so anyone holding it can send events to the connection. Idempotent: an existing URL comes back unchanged. A provider without a webhook trigger is refused with `ScalekitBadRequestException` (`errorCode` `TRIGGER_INGRESS_NOT_APPLICABLE`).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { url } = await scalekitClient.actions.triggers.createIngressEndpoint('conn_123');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string`
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerIngressEndpoint`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">setSigningSecret</a>(connectionId, params, options?) -> Promise&lt;TriggerIngressEndpoint&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Stores the secret the provider signs its webhook events with. Setting a different secret later starts a rotation: both are accepted until `confirmSigningSecretRotation`, or for at most 24 hours. A second rotation while one is open is a `ScalekitConflictException`; a provider that takes a generated secret is refused (`errorCode` `TRIGGER_SIGNING_SECRET_GENERATED_ONLY`). Not retried when the service is briefly unavailable.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const endpoint = await scalekitClient.actions.triggers.setSigningSecret('conn_123', {
+  signingSecret: process.env.PROVIDER_SIGNING_SECRET!,
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string`
+
+**params:** `TriggerSigningSecretSetParams`
+- `signingSecret: string` - From the provider's app configuration; the server trims surrounding whitespace
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerIngressEndpoint` with the masked secret and rotation state.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">confirmSigningSecretRotation</a>(connectionId, params?, options?) -> Promise&lt;TriggerIngressEndpoint&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Ends a rotation by retiring the previous secret. Pass the `signingSecretRotationId` from the endpoint you last read, so only that rotation is confirmed; a stale ID is refused. Succeeds and changes nothing when no rotation is in progress.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const current = await scalekitClient.actions.triggers.getIngressEndpoint('conn_123');
+await scalekitClient.actions.triggers.confirmSigningSecretRotation('conn_123', {
+  signingSecretRotationId: current.signingSecretRotationId,
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string`
+
+**params?:** `TriggerSigningSecretRotationConfirmParams`
+- `signingSecretRotationId?: number` - Required while a rotation is in progress
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerIngressEndpoint`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">generateSigningSecret</a>(connectionId, options?) -> Promise&lt;GeneratedTriggerSigningSecret&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Generates and stores a random secret for a provider that sends no signature of its own (its triggers report `providesBearerSecret`). The plain-text secret is returned only here. `console.log` and `util.inspect` show `signingSecret` and `urlWithSecret` as `[redacted]`; reading them, spreading the result or `JSON.stringify` gives the real values. Not retried when the service is briefly unavailable.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const generated = await scalekitClient.actions.triggers.generateSigningSecret('conn_123');
+await saveSecret(generated.signingSecret); // your own secret store
+console.log(generated.endpoint?.url);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**connectionId:** `string`
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `GeneratedTriggerSigningSecret` - `endpoint?`, `signingSecret`, `urlWithSecret`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">listDeliveryAttemptsByEndpoint</a>(endpointId, params?, options?) -> Promise&lt;TriggerDeliveryAttemptList&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the most recent attempts to deliver trigger events to one of your delivery endpoints, newest first. There is no page token. An endpoint unknown in this environment is a `ScalekitBadRequestException` (400) here, unlike `recoverDeliveries` (404).
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { attempts } =
+  await scalekitClient.actions.triggers.listDeliveryAttemptsByEndpoint('ep_123', {
+    pageSize: 50,
+  });
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**endpointId:** `string` - The delivery endpoint
+
+**params?:** `TriggerDeliveryAttemptListParams`
+- `pageSize?: number` - Default 20; capped at 100
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerDeliveryAttemptList` - `attempts: TriggerDeliveryAttempt[]` (`id`, `endpointId`, `msgId`, `status`, `responseStatusCode`, `response`, `timestamp?`, `responseDurationMs`, `triggerType`, `responseTruncated`, `endpointUrl`).
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">listDeliveries</a>(endpointId, params?, options?) -> Promise&lt;TriggerDeliveryList&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists one page of the trigger events delivered to one delivery endpoint, newest first, one entry per event. Deliveries are kept for 90 days. Pass `nextPageToken` back with the same filters for older ones.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const page = await scalekitClient.actions.triggers.listDeliveries('ep_123', {
+  status: 'FAILED',
+  after: new Date(Date.now() - 24 * 60 * 60 * 1000),
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**endpointId:** `string`
+
+**params?:** `TriggerDeliveryListParams`
+- `pageSize?: number` - Default 20; capped at 100
+- `pageToken?: string`
+- `status?: TriggerDeliveryStatus` - `DELIVERED`, `PENDING`, `FAILED` or `RETRYING`
+- `channel?: string` - A connection (`conn_...`) or subscription (`trgs_...`) ID
+- `after?: Date | string`, `before?: Date | string` - A string must be an ISO 8601 date-time with `Z` or an offset (`2026-10-28T10:00:00Z`); one without is refused, since it would be read in local time
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerDeliveryList` - `deliveries: TriggerDelivery[]` (`msgId`, `eventId`, `messageTimestamp?`, `status`, `nextAttemptAt?`, `subscriptionId`, `triggerName`, `triggerMode`, `connectionId`, `connectionProvider`, `connectionKeyId`, `endpointId`) and `nextPageToken?`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">listDeliveryAttemptsByMessage</a>(endpointId, msgId, options?) -> Promise&lt;TriggerMessageAttemptList&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists every attempt to deliver one event to one endpoint, oldest first. At most the newest 50; `truncated` says when there are more.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { attempts, truncated } =
+  await scalekitClient.actions.triggers.listDeliveryAttemptsByMessage('ep_123', 'msg_123');
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**endpointId:** `string`
+
+**msgId:** `string` - The message (`msg_...`)
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerMessageAttemptList` - `attempts`, `truncated`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">lookupDelivery</a>(deliveryId, options?) -> Promise&lt;TriggerDeliveryDetails&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Finds one event by its message ID (the `webhook-id` header your endpoint received) or its event ID (the payload's `dedupe_key`), with its attempts across every delivery endpoint. Not found: `ScalekitNotFoundException` with `errorCode` `NOT_FOUND`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const delivery = await scalekitClient.actions.triggers.lookupDelivery('msg_123');
+console.log(delivery.triggerName, delivery.attempts.length);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**deliveryId:** `string` - A message ID (`msg_...`) or an event ID. Attempt IDs are refused
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerDeliveryDetails` - `msgId`, `eventId`, `messageTimestamp?`, `subscriptionId`, `triggerName`, `triggerMode`, `connectionId`, `connectionProvider`, `connectionKeyId`, `attempts`, `truncated`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">batchLookupDeliveries</a>(params, options?) -> Promise&lt;TriggerDeliveryBatchLookupResult&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Looks up as many as 25 events at once, as `lookupDelivery` does for one. Each ID has its own `outcome` (`FOUND`, `NOT_FOUND`, `RATE_LIMITED`, `FAILED`, `NOT_ATTEMPTED`) and never throws. Attempts carry no response bodies here. Read only and safe to retry.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { results, foundCount } =
+  await scalekitClient.actions.triggers.batchLookupDeliveries({
+    deliveryIds: ['msg_1', 'evt_2'],
+  });
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `TriggerDeliveryBatchLookupParams`
+- `deliveryIds: string[]` - 1 to 25 message or event IDs
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerDeliveryBatchLookupResult` - `results` (`id`, `outcome`, `reason`, `delivery?`) in the order sent, and `foundCount`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">batchResendDeliveries</a>(params, options?) -> Promise&lt;TriggerDeliveryBatchResendResult&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Queues a new attempt for up to 50 events, each to one endpoint. `QUEUED` means accepted, not delivered. Not idempotent: each call queues one more attempt per target, so after a partial failure resend only the targets that came back `RATE_LIMITED`, `FAILED` or `NOT_ATTEMPTED`. Not retried when the service is briefly unavailable.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const { results, queuedCount } =
+  await scalekitClient.actions.triggers.batchResendDeliveries({
+    targets: [{ msgId: 'msg_123', endpointId: 'ep_123' }],
+  });
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `TriggerDeliveryBatchResendParams`
+- `targets: { msgId: string; endpointId: string }[]` - 1 to 50
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerDeliveryBatchResendResult` - `results` (`msgId`, `endpointId`, `outcome`, `reason`) and `queuedCount`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.triggers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">recoverDeliveries</a>(endpointId, params, options?) -> Promise&lt;TriggerDeliveryRecovery&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Starts a background recovery that resends every event whose delivery to one endpoint failed in a window of at most 14 days. The response confirms the start, not delivery. An unknown endpoint is a `ScalekitNotFoundException` here. Not retried when the service is briefly unavailable; a `ScalekitInternalServerException` can mean the recovery started anyway, so check deliveries before calling again.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const recovery = await scalekitClient.actions.triggers.recoverDeliveries('ep_123', {
+  since: new Date(Date.now() - 6 * 60 * 60 * 1000),
+});
+console.log(recovery.taskId, recovery.status);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**endpointId:** `string` - The delivery endpoint (`ep_...`)
+
+**params:** `TriggerDeliveryRecoverParams`
+- `since: Date | string` - Start of the window (inclusive)
+- `until?: Date | string` - End (exclusive); omit for now
+- Strings must be ISO 8601 date-times with `Z` or an offset
+
+**options?:** `RequestOptions` - `signal?: AbortSignal` cancels the call (rejects with `ScalekitAbortError`); `timeoutMs?: number` sets the per-attempt deadline
+
+**Returns:** `TriggerDeliveryRecovery` - `taskId`, `status` (`'running'` or `'finished'`).
 
 </dd>
 </dl>

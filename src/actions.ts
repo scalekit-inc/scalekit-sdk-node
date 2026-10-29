@@ -165,16 +165,20 @@ function mapTool(tool: Tool): ActionTool {
  */
 export default class ActionsClient {
   /**
-   * Trigger events delivered to your endpoint: verify and parse them with
-   * `triggers.verifyEvent`. Needs no network access.
+   * AgentKit triggers: list a connection's triggers, manage subscriptions,
+   * set up the webhook URL and its signing secret, read activity, usage and
+   * deliveries, and verify delivered events with `triggers.verifyEvent`
+   * (which needs no network access).
    */
-  readonly triggers: TriggersClient = new TriggersClient();
+  readonly triggers: TriggersClient;
 
   /**
    * @param {ToolsClient} tools - Client used to execute tools on behalf of connected accounts.
    * @param {ConnectedAccountsClient} connectedAccounts - Client for connected-account lifecycle operations.
    * @param {CoreClient} coreClient - Shared core client (auth, HTTP, retries) used for proxied requests.
    * @param {ConnectionClient} connection - Client used to list app-level connections.
+   * @param {TriggersClient} [triggers] - Trigger management client. When omitted, only
+   *   `triggers.verifyEvent` works; the networked trigger methods reject.
    */
   constructor(
     private readonly tools: ToolsClient,
@@ -184,8 +188,11 @@ export default class ActionsClient {
     /** Virtual MCP servers: configurations, connected accounts and session tokens. */
     readonly mcp: McpClient,
     /** Bring-your-own connectors: create, update, list and delete custom connectors. */
-    readonly providers: ProvidersClient
-  ) {}
+    readonly providers: ProvidersClient,
+    triggers?: TriggersClient
+  ) {
+    this.triggers = triggers ?? new TriggersClient();
+  }
 
   /**
    * Finds tools that fit a goal, ranked by relevance.

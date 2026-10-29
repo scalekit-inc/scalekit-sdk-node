@@ -23,6 +23,7 @@ import ProvidersClient from './providers';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ActionsClient from './actions';
+import { TriggersClient } from './triggers';
 import EventsClient from './events';
 import { IdpInitiatedLoginClaims, IdTokenClaim, User } from './types/auth';
 import {
@@ -148,7 +149,8 @@ export default class ScalekitClient {
       this.coreClient,
       this.connection,
       new McpClient(this.grpcConnect, this.coreClient),
-      new ProvidersClient(this.grpcConnect, this.coreClient)
+      new ProvidersClient(this.grpcConnect, this.coreClient),
+      new TriggersClient(this.grpcConnect, this.coreClient)
     );
     this.events = new EventsClient(this.grpcConnect, this.coreClient);
   }
