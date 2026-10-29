@@ -365,8 +365,13 @@ export interface AccountHealth {
 }
 /** A connected account, with whether it can receive one trigger. */
 export interface EligibleAccount {
-    /** Connected account ID (`ca_...`). */
+    /** Connected account ID (`ca_...`). Pass it as `connectedAccountId` when you create a subscription. */
     readonly id: string;
+    /**
+     * The identifier the connected account was created with, such as your app's user ID or
+     * the user's email address; the connected account ID when it has none. Not accepted by
+     * `createSubscription`.
+     */
     readonly identifier: string;
     readonly eligible: boolean;
     /** Why the account is ineligible; empty when it is eligible. */
