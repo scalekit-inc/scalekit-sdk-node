@@ -8815,7 +8815,7 @@ for (const t of triggers.filter((t) => t.available)) {
 <dl>
 <dd>
 
-Lists the connection's connected accounts, each marked as eligible or not for one trigger, with a `reason`, a `remedy` and the account's `health`. Each account's `id` is the connected account ID (`ca_...`) to pass as `connectedAccountId` when you subscribe; its `identifier` is the identifier the account was created with (such as your app's user ID or the user's email address). Returns one page.
+Lists the connection's connected accounts, each marked as eligible or not for one trigger, with a `reason`, a `remedy` and the account's `health`. Each account's `id` is the connected account ID (`ca_...`) to pass as `connectedAccountId` when you subscribe; its `identifier` is the identifier the account was created with (such as your app's user ID or the user's email address), or the connected account ID when it has none. Returns one page.
 </dd>
 </dl>
 </dd>
