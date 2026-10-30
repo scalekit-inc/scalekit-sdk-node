@@ -8,7 +8,7 @@ declare module 'axios' {
         skipAuth?: boolean;
     }
 }
-import { JWK } from 'jose';
+import { JWK } from './vendor/jose';
 import { TokenResponse } from './types/auth';
 export declare const headers: {
     'user-agent': string;
