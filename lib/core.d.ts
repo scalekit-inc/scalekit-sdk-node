@@ -3,15 +3,9 @@ import { Axios, AxiosResponse } from 'axios';
 declare module 'axios' {
     interface InternalAxiosRequestConfig {
         skipAuth?: boolean;
-        /** @internal The access token this request was sent with. */
-        sentWithToken?: string | null;
-        /** @internal Set on the one resend after a token refresh. */
-        authRetried?: boolean;
     }
     interface AxiosRequestConfig {
         skipAuth?: boolean;
-        /** @internal Set on the one resend after a token refresh. */
-        authRetried?: boolean;
     }
 }
 import { JWK } from 'jose';
@@ -28,6 +22,8 @@ export declare const DEFAULT_PING_TIMEOUT_MS = 5000;
 export declare const MIN_PING_INTERVAL_MS = 60000;
 export declare function assertValidTimeout(name: string, value: number): void;
 export declare function assertValidPingInterval(value: number): void;
+/** A stream body is consumed by the first send, so it can't be resent. */
+export declare function isStream(data: unknown): boolean;
 export default class CoreClient {
     readonly envUrl: string;
     readonly clientId: string;
@@ -72,6 +68,19 @@ export default class CoreClient {
      * @internal
      */
     refreshAccessToken(rejectedToken: string | null): Promise<void>;
+    /**
+     * Run an HTTP request through `this.axios`, and if Scalekit rejects its
+     * access token (expired or revoked), fetch a new one and send it once more,
+     * as `connectExec` does for gRPC calls.
+     *
+     * Only a 401 the Scalekit proxy sent itself is retried: the proxy rejects
+     * it before forwarding, so the resend is safe. A 401 from the provider is
+     * returned as is, never replayed. `send` must be safe to call twice, so a
+     * request with a stream body must not use this.
+     *
+     * @internal
+     */
+    withTokenRefresh<T>(send: () => Promise<T>): Promise<T>;
     /**
      * Get the JWKS from the server and store it in the client instance
      * @returns {Promise<void>} Returns nothing

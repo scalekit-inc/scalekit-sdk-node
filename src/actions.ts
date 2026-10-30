@@ -4,7 +4,7 @@ import {
   type MessageInitShape,
 } from '@bufbuild/protobuf';
 import { AxiosError, AxiosResponse } from 'axios';
-import CoreClient, { assertValidTimeout } from './core';
+import CoreClient, { assertValidTimeout, isStream } from './core';
 import { assertProxyPathContained, proxyRedirectGuard } from './proxy-path';
 import {
   ScalekitException,
@@ -873,18 +873,25 @@ export default class ActionsClient {
       identifier,
     };
 
-    try {
-      return await this.coreClient.axios.request({
+    const data = body ?? formData;
+    const send = () =>
+      this.coreClient.axios.request({
         url,
         method: method.toUpperCase(),
         params: queryParams,
-        data: body ?? formData,
+        data,
         headers: proxyHeaders,
         timeout,
         // Redirects are still followed; credentials are not sent on a hop
         // that leaves the proxy prefix.
         beforeRedirect: proxyRedirectGuard(this.coreClient.envUrl),
       });
+
+    try {
+      // A stream body is consumed by the first send, so it is never resent.
+      return await (isStream(data)
+        ? send()
+        : this.coreClient.withTokenRefresh(send));
     } catch (error) {
       if (error instanceof ScalekitException) throw error;
       if (error instanceof AxiosError) {

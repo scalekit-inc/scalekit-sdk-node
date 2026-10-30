@@ -10,15 +10,9 @@ import axios, {
 declare module 'axios' {
   interface InternalAxiosRequestConfig {
     skipAuth?: boolean;
-    /** @internal The access token this request was sent with. */
-    sentWithToken?: string | null;
-    /** @internal Set on the one resend after a token refresh. */
-    authRetried?: boolean;
   }
   interface AxiosRequestConfig {
     skipAuth?: boolean;
-    /** @internal Set on the one resend after a token refresh. */
-    authRetried?: boolean;
   }
 }
 import { JWK } from 'jose';
@@ -102,7 +96,7 @@ export function assertValidPingInterval(value: number): void {
 }
 
 /** A stream body is consumed by the first send, so it can't be resent. */
-function isStream(data: unknown): boolean {
+export function isStream(data: unknown): boolean {
   return typeof (data as { pipe?: unknown } | null)?.pipe === 'function';
 }
 
@@ -167,42 +161,12 @@ export default class CoreClient {
             throw tokenRequestError(error);
           }
         }
-        config.sentWithToken = this.accessToken;
         if (this.accessToken) {
           config.headers[headers.authorization] = `Bearer ${this.accessToken}`;
         }
       }
 
       return config;
-    });
-    // A token Scalekit rejected (expired or revoked) is replaced and the
-    // request resent once, as `connectExec` does for gRPC calls. Only a 401
-    // the Scalekit proxy sent itself qualifies: the proxy rejects it before
-    // forwarding, so the resend is safe. A 401 from the provider is returned
-    // as is, never replayed. Registered before the interceptor below, which
-    // strips the request copy this resend needs.
-    this.axios.interceptors.response.use(undefined, async (error) => {
-      const config = error instanceof AxiosError ? error.config : undefined;
-      if (
-        !config ||
-        config.skipAuth ||
-        config.authRetried ||
-        !error.response ||
-        !isScalekitUnauthorized(error.response) ||
-        isStream(config.data)
-      ) {
-        throw error;
-      }
-      const rejectedToken = config.sentWithToken ?? null;
-      try {
-        await this.refreshAccessToken(rejectedToken);
-      } catch (refreshError) {
-        throw tokenRequestError(refreshError);
-      }
-      if (!this.accessToken || this.accessToken === rejectedToken) {
-        throw error;
-      }
-      return this.axios.request({ ...config, authRetried: true });
     });
     // On failure, axios attaches copies of the outgoing request to the error
     // that carry two credentials: the plaintext client_secret in the token
@@ -226,11 +190,9 @@ export default class CoreClient {
             const config = error.config as {
               data?: unknown;
               headers?: unknown;
-              sentWithToken?: unknown;
             };
             delete config.data;
             delete config.headers;
-            delete config.sentWithToken;
           }
           delete (error as { request?: unknown }).request;
           if (error.response) {
@@ -306,6 +268,47 @@ export default class CoreClient {
       });
     }
     await this.pendingAuthentication;
+  }
+
+  /**
+   * Run an HTTP request through `this.axios`, and if Scalekit rejects its
+   * access token (expired or revoked), fetch a new one and send it once more,
+   * as `connectExec` does for gRPC calls.
+   *
+   * Only a 401 the Scalekit proxy sent itself is retried: the proxy rejects
+   * it before forwarding, so the resend is safe. A 401 from the provider is
+   * returned as is, never replayed. `send` must be safe to call twice, so a
+   * request with a stream body must not use this.
+   *
+   * @internal
+   */
+  async withTokenRefresh<T>(send: () => Promise<T>): Promise<T> {
+    // Fetched here, not only in the request interceptor, so `tokenUsed` is
+    // the token this request carries.
+    try {
+      await this.ensureAccessToken();
+    } catch (error) {
+      throw tokenRequestError(error);
+    }
+    const tokenUsed = this.accessToken;
+    try {
+      return await send();
+    } catch (error) {
+      if (
+        !(error instanceof AxiosError) ||
+        !error.response ||
+        !isScalekitUnauthorized(error.response)
+      ) {
+        throw error;
+      }
+      try {
+        await this.refreshAccessToken(tokenUsed);
+      } catch (refreshError) {
+        throw tokenRequestError(refreshError);
+      }
+      if (!this.accessToken || this.accessToken === tokenUsed) throw error;
+      return send();
+    }
   }
 
   /**

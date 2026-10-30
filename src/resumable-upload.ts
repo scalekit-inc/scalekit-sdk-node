@@ -987,22 +987,24 @@ class ResumableUpload {
   }
 
   /**
-   * Sends one request. `CoreClient` fetches the access token, and replaces
-   * one Scalekit rejected with one resend.
+   * Sends one request. A Scalekit 401 (rejected access token) is answered by
+   * one token refresh and one resend (`CoreClient.withTokenRefresh`).
    */
   private async send(config: AxiosRequestConfig): Promise<Exchange> {
     const { plan } = this;
     try {
-      const response = await this.core.axios.request({
-        ...config,
-        timeout: plan.timeoutMs ?? this.core.toolTimeoutMs,
-        ...(plan.signal !== undefined && { signal: plan.signal }),
-        maxRedirects: 0,
-        maxBodyLength: Infinity,
-        responseType: 'text',
-        validateStatus: (status) =>
-          (status >= 200 && status < 300) || status === 308,
-      });
+      const response = await this.core.withTokenRefresh(() =>
+        this.core.axios.request({
+          ...config,
+          timeout: plan.timeoutMs ?? this.core.toolTimeoutMs,
+          ...(plan.signal !== undefined && { signal: plan.signal }),
+          maxRedirects: 0,
+          maxBodyLength: Infinity,
+          responseType: 'text',
+          validateStatus: (status) =>
+            (status >= 200 && status < 300) || status === 308,
+        })
+      );
       return { kind: 'response', response };
     } catch (error) {
       if (isCancel(error) || plan.signal?.aborted) {
