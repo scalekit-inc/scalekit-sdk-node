@@ -120,20 +120,13 @@ describe('Resource Client (UserConsents)', () => {
       expect(response.consents.map((c) => c.id)).toEqual([consentId]);
     });
 
-    // An older backend ignores filter.consent_id, so skip the validation tests there.
-    async function backendValidatesConsentIds(): Promise<boolean> {
-      try {
-        await client.resources.listUserConsents(TEST_RESOURCE_ID, {
-          consentIds: ['not-an-id'],
-        });
-        return false;
-      } catch {
-        return true;
-      }
-    }
+    // Set SCALEKIT_SKIP_CONSENT_ID_VALIDATION_TESTS=true on a backend that predates filter.consent_id validation.
+    const itIfConsentIdValidated =
+      process.env.SCALEKIT_SKIP_CONSENT_ID_VALIDATION_TESTS === 'true'
+        ? it.skip
+        : it;
 
-    it('should reject a malformed consent id', async () => {
-      if (!(await backendValidatesConsentIds())) return;
+    itIfConsentIdValidated('should reject a malformed consent id', async () => {
       await expect(
         client.resources.listUserConsents(TEST_RESOURCE_ID, {
           consentIds: ['149633942432021190'],
@@ -141,17 +134,19 @@ describe('Resource Client (UserConsents)', () => {
       ).rejects.toMatchObject({ grpcStatus: Code.InvalidArgument });
     });
 
-    it('should reject more than 25 consent ids', async () => {
-      if (!(await backendValidatesConsentIds())) return;
-      const consentIds = Array.from(
-        { length: 26 },
-        (_, i) => `usrcnst_${i + 1}`
-      );
+    itIfConsentIdValidated(
+      'should reject more than 25 consent ids',
+      async () => {
+        const consentIds = Array.from(
+          { length: 26 },
+          (_, i) => `usrcnst_${i + 1}`
+        );
 
-      await expect(
-        client.resources.listUserConsents(TEST_RESOURCE_ID, { consentIds })
-      ).rejects.toMatchObject({ grpcStatus: Code.InvalidArgument });
-    });
+        await expect(
+          client.resources.listUserConsents(TEST_RESOURCE_ID, { consentIds })
+        ).rejects.toMatchObject({ grpcStatus: Code.InvalidArgument });
+      }
+    );
 
     it('should throw when resourceId is empty', async () => {
       await expect(client.resources.listUserConsents('')).rejects.toThrow(
