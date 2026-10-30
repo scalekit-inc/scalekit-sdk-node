@@ -1,39 +1,30 @@
 /**
  * Loads `jose` for the CommonJS build.
  *
- * `jose` ships only as an ES module. Node.js can `require()` an ES module
- * from 20.19 and 22.12 onwards; older releases throw `ERR_REQUIRE_ESM`. The
- * installed `jose` is used whenever it can be required, so callers share one
- * `jose` instance with the SDK. Only when `require()` of ES modules is
- * unavailable does the SDK fall back to the CommonJS copy of `jose` generated
- * when the SDK is built (`jose.bundle.js`, next to this file).
+ * `jose` ships only as an ES module. Where Node.js can `require()` an ES
+ * module, the installed `jose` is used, so callers share one `jose` instance
+ * with the SDK. Where it cannot (Node.js 18, 20 before 20.19, 22 before 22.12,
+ * and runtimes that start Node.js with `--no-experimental-require-module`,
+ * such as AWS Lambda), `require('jose')` throws `ERR_REQUIRE_ESM` and the SDK
+ * falls back to the CommonJS copy of `jose` generated when the SDK is built
+ * (`jose.bundle.js`, next to this file).
  */
 import type * as Jose from 'jose';
 
-export type { JWK, JWTPayload, JWTVerifyResult } from 'jose';
-
-function isRequireEsmError(error: unknown): boolean {
-  return (
-    typeof error === 'object' &&
-    error !== null &&
-    (error as { code?: unknown }).code === 'ERR_REQUIRE_ESM'
-  );
-}
-
-function loadJose(): typeof Jose {
+let jose: Pick<typeof Jose, 'createLocalJWKSet' | 'jwtVerify' | 'decodeJwt'>;
+try {
+  jose = require('jose');
+} catch (error) {
+  if ((error as { code?: unknown } | null)?.code !== 'ERR_REQUIRE_ESM') {
+    throw error;
+  }
   try {
-    return require('jose');
-  } catch (error) {
-    if (isRequireEsmError(error)) {
-      return require('./jose.bundle');
-    }
+    jose = require('./jose.bundle');
+  } catch (bundleError) {
+    // Report the original failure; a missing bundle is secondary to it.
+    (error as { cause?: unknown }).cause = bundleError;
     throw error;
   }
 }
 
-const jose = loadJose();
-
-export const createLocalJWKSet: typeof Jose.createLocalJWKSet =
-  jose.createLocalJWKSet;
-export const jwtVerify: typeof Jose.jwtVerify = jose.jwtVerify;
-export const decodeJwt: typeof Jose.decodeJwt = jose.decodeJwt;
+export const { createLocalJWKSet, jwtVerify, decodeJwt } = jose;

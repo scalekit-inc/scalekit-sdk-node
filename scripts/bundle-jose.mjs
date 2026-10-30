@@ -1,6 +1,9 @@
-// Writes lib/vendor/jose.bundle.js: a CommonJS build of the installed `jose`.
-// `jose` is published only as an ES module; lib/vendor/jose.js loads this
-// file on Node.js versions that cannot require() ES modules.
+// Writes lib/vendor/jose.bundle.js: a CommonJS build of the parts of the
+// installed `jose` that the SDK uses. `jose` is published only as an ES module;
+// lib/vendor/jose.js loads this file where Node.js cannot require() ES modules.
+//
+// The bundle holds the `jose` version installed at build time, so a `jose`
+// version change also changes lib/: run `npm run build` and commit lib/vendor/.
 import { build } from 'esbuild';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -20,30 +23,28 @@ const license = readFileSync(join(joseDir, 'LICENSE.md'), 'utf8')
   .join('\n');
 
 // The license is shipped with the bundled copy, as its MIT terms require.
-const banner = `/*!\n * jose ${version} (${homepage})\n *\n${license}\n */`;
+// Node.js 18 scripts have no global `crypto`, so the bundle defines its own.
+const banner = [
+  `/*!\n * jose ${version} (${homepage})\n *\n${license}\n */`,
+  // Strict mode, as jose runs when loaded as an ES module.
+  '"use strict";',
+  "const crypto = require('node:crypto').webcrypto;",
+].join('\n');
 
-try {
-  await build({
-    stdin: {
-      contents: "module.exports = require('jose');",
-      resolveDir: root,
-      sourcefile: 'jose.bundle.cjs',
-      loader: 'js',
-    },
-    outfile: join(root, 'lib', 'vendor', 'jose.bundle.js'),
-    bundle: true,
-    platform: 'node',
-    format: 'cjs',
-    target: 'node18',
-    minify: true,
-    // jose sets error.name from the class name (e.g. JWTInvalid).
-    keepNames: true,
-    legalComments: 'inline',
-    inject: [join(root, 'scripts', 'jose-webcrypto.mjs')],
-    banner: { js: banner },
-    logLevel: 'warning',
-  });
-} catch {
-  // esbuild has already printed the build errors.
-  process.exitCode = 1;
-}
+await build({
+  stdin: {
+    contents: "export { createLocalJWKSet, jwtVerify, decodeJwt } from 'jose';",
+    resolveDir: root,
+    sourcefile: 'jose.bundle.cjs',
+    loader: 'js',
+  },
+  outfile: join(root, 'lib', 'vendor', 'jose.bundle.js'),
+  bundle: true,
+  platform: 'node',
+  format: 'cjs',
+  target: 'node18',
+  minify: true,
+  // jose sets error.name from the class name (e.g. JWTInvalid).
+  keepNames: true,
+  banner: { js: banner },
+});

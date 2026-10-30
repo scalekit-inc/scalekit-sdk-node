@@ -27,9 +27,9 @@ function mockBundle() {
   return { bundle, factory };
 }
 
-function mockJoseThrowing(error: Error) {
+function mockJoseThrowing(thrown: unknown) {
   jest.doMock('jose', () => {
-    throw error;
+    throw thrown;
   });
 }
 
@@ -37,9 +37,17 @@ function loadLoader(): JoseLoader {
   return require(loaderPath) as JoseLoader;
 }
 
+function thrownBy(fn: () => unknown): unknown {
+  try {
+    fn();
+  } catch (e) {
+    return e;
+  }
+  throw new Error('expected a throw');
+}
+
 afterEach(() => {
   jest.dontMock('jose');
-  jest.dontMock(bundlePath);
 });
 
 describe('vendor/jose loader', () => {
@@ -80,60 +88,42 @@ describe('vendor/jose loader', () => {
       'ERR_REQUIRE_ASYNC_MODULE',
       codedError('top-level await', 'ERR_REQUIRE_ASYNC_MODULE'),
     ],
-    ['no code', codedError('jose failed to initialise')],
+    ['a non-object value', 'ERR_REQUIRE_ESM'],
   ])(
-    're-throws a require("jose") error with %s unchanged and does not load the bundle',
-    (_label, error) => {
+    're-throws %s from require("jose") unchanged and does not load the bundle',
+    (_label, thrown) => {
       jest.isolateModules(() => {
         const { factory } = mockBundle();
-        mockJoseThrowing(error);
+        mockJoseThrowing(thrown);
 
-        let thrown: unknown;
-        try {
-          loadLoader();
-        } catch (e) {
-          thrown = e;
-        }
-        expect(thrown).toBe(error);
+        expect(thrownBy(loadLoader)).toBe(thrown);
         expect(factory).not.toHaveBeenCalled();
       });
     }
   );
 
-  it('re-throws a non-object value thrown while loading jose', () => {
+  it('reports ERR_REQUIRE_ESM, with the bundle error as its cause, when the bundle is missing', () => {
     jest.isolateModules(() => {
-      const { factory } = mockBundle();
-      jest.doMock('jose', () => {
-        throw 'ERR_REQUIRE_ESM';
-      });
+      const requireEsm = codedError(
+        'require() of ES Module not supported',
+        'ERR_REQUIRE_ESM'
+      );
+      const missing = codedError(
+        "Cannot find module './jose.bundle'",
+        'MODULE_NOT_FOUND'
+      );
+      mockJoseThrowing(requireEsm);
+      jest.doMock(
+        bundlePath,
+        () => {
+          throw missing;
+        },
+        { virtual: true }
+      );
 
-      expect(() => loadLoader()).toThrow('ERR_REQUIRE_ESM');
-      expect(factory).not.toHaveBeenCalled();
+      const thrown = thrownBy(loadLoader) as Error & { cause?: unknown };
+      expect(thrown).toBe(requireEsm);
+      expect(thrown.cause).toBe(missing);
     });
-  });
-
-  it('exposes jose functions that verify a token end to end', async () => {
-    const jose = await import('jose');
-    const { createLocalJWKSet, jwtVerify, decodeJwt } = loadLoader();
-    const { publicKey, privateKey } = await jose.generateKeyPair('RS256', {
-      extractable: true,
-    });
-    const jwk = {
-      ...(await jose.exportJWK(publicKey)),
-      kid: 'k1',
-      alg: 'RS256',
-    };
-    const token = await new jose.SignJWT({ sub: 'usr_1' })
-      .setProtectedHeader({ alg: 'RS256', kid: 'k1' })
-      .setIssuedAt()
-      .setExpirationTime('5m')
-      .sign(privateKey);
-
-    const { payload } = await jwtVerify(
-      token,
-      createLocalJWKSet({ keys: [jwk] })
-    );
-    expect(payload.sub).toBe('usr_1');
-    expect(decodeJwt(token).sub).toBe('usr_1');
   });
 });

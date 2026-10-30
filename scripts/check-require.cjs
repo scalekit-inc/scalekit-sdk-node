@@ -6,27 +6,20 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
 const pkg = require(path.join(root, 'package.json'));
 
-function errorCode(error) {
-  return typeof error === 'object' && error !== null ? error.code : undefined;
-}
-
-// Whether this Node.js version can require() the installed (ES module) jose.
+// Whether this Node.js can require() the installed (ES module) jose.
 let installedJose;
 try {
   installedJose = require('jose');
 } catch (error) {
-  if (errorCode(error) !== 'ERR_REQUIRE_ESM') throw error;
+  if (error?.code !== 'ERR_REQUIRE_ESM') throw error;
 }
 const requireEsm = installedJose !== undefined;
-
-// `./edge` imports jose directly: it targets runtimes that always bundle it
-// (Edge Runtime, middleware), so it is loaded only where require(esm) works.
-const needsRequireEsm = new Set(['./edge']);
 
 async function main() {
   console.log(
@@ -34,7 +27,9 @@ async function main() {
   );
 
   for (const [entry, target] of Object.entries(pkg.exports)) {
-    if (!requireEsm && needsRequireEsm.has(entry)) {
+    // `./edge` imports jose directly: it targets runtimes that always bundle
+    // it (Edge Runtime, middleware), so it loads only where require(esm) works.
+    if (!requireEsm && entry === './edge') {
       console.log(`skip ${entry} (loads jose directly; bundled runtimes only)`);
       continue;
     }
@@ -70,27 +65,34 @@ async function main() {
   }
   console.log('ok   jose errors keep their names');
 
-  // Sign a token, then validate it through the SDK client with the public key.
-  const signer = installedJose || bundled;
-  const { publicKey, privateKey } = await signer.generateKeyPair('RS256', {
-    extractable: true,
+  // Sign a token with node:crypto (no jose needed, so it works on every
+  // Node.js version), then validate it through the SDK client.
+  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+    modulusLength: 2048,
   });
   const jwk = {
-    ...(await signer.exportJWK(publicKey)),
+    ...publicKey.export({ format: 'jwk' }),
     kid: 'k1',
     alg: 'RS256',
   };
   const issuer = 'https://example.scalekit.dev';
-  const token = await new signer.SignJWT({
-    scopes: ['read', 'write'],
-    sub: 'usr_1',
-  })
-    .setProtectedHeader({ alg: 'RS256', kid: 'k1' })
-    .setIssuer(issuer)
-    .setAudience('aud_1')
-    .setIssuedAt()
-    .setExpirationTime('5m')
-    .sign(privateKey);
+  const now = Math.floor(Date.now() / 1000);
+  const encode = (value) =>
+    Buffer.from(JSON.stringify(value)).toString('base64url');
+  const signingInput = `${encode({ alg: 'RS256', kid: 'k1', typ: 'JWT' })}.${encode(
+    {
+      scopes: ['read', 'write'],
+      sub: 'usr_1',
+      iss: issuer,
+      aud: 'aud_1',
+      iat: now,
+      exp: now + 300,
+    }
+  )}`;
+  const signature = crypto
+    .sign('RSA-SHA256', Buffer.from(signingInput), privateKey)
+    .toString('base64url');
+  const token = `${signingInput}.${signature}`;
 
   const { ScalekitClient } = require(root);
   const client = new ScalekitClient(issuer, 'skc_1', 'secret');

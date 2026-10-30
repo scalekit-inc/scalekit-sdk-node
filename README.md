@@ -258,6 +258,9 @@ export const auth = new ScalekitAuthNext({
 ```
 
 See [`examples/nextjs-edge`](./examples/nextjs-edge) for a complete, runnable version, including the `runtime: 'experimental-edge'` middleware config this requires.
+
+`@scalekit-sdk/node/edge` loads `jose` as an ES module, so it needs a bundler (as Edge Runtime always uses) wherever Node.js cannot `require()` ES modules: Node.js 18, 20 before 20.19, 22 before 22.12, and runtimes such as AWS Lambda that start Node.js with `--no-experimental-require-module`. In Node.js API routes on those runtimes, use the main `@scalekit-sdk/node` entry instead.
+
 ---
 ### Helpful links
 #### Quickstart Guides
