@@ -61,6 +61,15 @@ async function main() {
     `ok   lib/vendor/jose uses the ${requireEsm ? 'installed' : 'bundled'} jose`
   );
 
+  // jose errors keep their class names in the bundled copy too.
+  for (const jose of [loaded, bundled]) {
+    assert.throws(() => jose.decodeJwt('not-a-jwt'), {
+      name: 'JWTInvalid',
+      code: 'ERR_JWT_INVALID',
+    });
+  }
+  console.log('ok   jose errors keep their names');
+
   // Sign a token, then validate it through the SDK client with the public key.
   const signer = installedJose || bundled;
   const { publicKey, privateKey } = await signer.generateKeyPair('RS256', {

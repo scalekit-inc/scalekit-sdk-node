@@ -36,6 +36,8 @@ try {
     format: 'cjs',
     target: 'node18',
     minify: true,
+    // jose sets error.name from the class name (e.g. JWTInvalid).
+    keepNames: true,
     legalComments: 'inline',
     inject: [join(root, 'scripts', 'jose-webcrypto.mjs')],
     banner: { js: banner },
