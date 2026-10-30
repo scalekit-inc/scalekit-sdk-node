@@ -20,7 +20,8 @@ export interface ListUserConsentsOptions {
     userIds?: string[];
     /**
      * Exact match on consent IDs (format: usrcnst_xxxxx), max 25 distinct. Takes precedence over
-     * userIds and search. IDs that do not exist or belong to another resource are omitted from the result.
+     * userIds and search; blank-only values are ignored. IDs that do not exist or belong to another resource
+     * are omitted. An older server ignores this filter, so confirm each returned id is one you asked for before revoking.
      */
     consentIds?: string[];
 }
@@ -226,7 +227,9 @@ export default class ResourceClient {
      * Pass `consentIds` to fetch specific consents by ID, `userIds` to match
      * specific users exactly, or `search` for a case-insensitive substring match.
      * Priority is `consentIds`, then `userIds`, then `search`; lower-priority
-     * filters are ignored without an error.
+     * filters are ignored without an error. Blank-only `consentIds` are ignored.
+     * An older server ignores `consentIds`, so confirm each returned `id` is one
+     * you asked for before revoking.
      *
      * @param resourceId - The resource whose consents to list (format: res_xxxxx)
      * @param options - Optional filter, search and pagination options

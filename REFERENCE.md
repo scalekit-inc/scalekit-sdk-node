@@ -6956,7 +6956,7 @@ Lists the end-user consents granted against a resource, with pagination.
 
 Each returned consent carries `id`, `externalUserId`, `clientId`, `clientName`, `scopes` and `grantedAt`. The response also carries `totalSize` plus `nextPageToken` / `prevPageToken` cursors.
 
-Filter in one of three ways. Pass `consentIds` to fetch specific consents by ID, for example to find the `clientId` you need to revoke a consent you already hold the ID of. Pass `userIds` to match specific external user IDs exactly and case-sensitively. Pass `search` for a case-insensitive substring match. When you give more than one, the priority is `consentIds`, then `userIds`, then `search`, and the lower-priority ones are ignored without an error.
+Filter in one of three ways. Pass `consentIds` to fetch specific consents by ID, for example to find the `clientId` you need to revoke a consent you already hold the ID of. Pass `userIds` to match specific external user IDs exactly and case-sensitively. Pass `search` for a case-insensitive substring match. When you give more than one, the priority is `consentIds`, then `userIds`, then `search`, and the lower-priority ones are ignored without an error. Blank-only `consentIds` values are ignored, so the next filter applies instead.
 
 When you filter by `consentIds`, check that every returned `id` is one you asked for before you revoke anything. A server that predates this filter ignores it and returns the unfiltered first page. Do not combine `consentIds` with `userIds` as an ownership check, because `consentIds` overrides `userIds`. Compare `externalUserId` on the returned consent instead.
 </dd>
