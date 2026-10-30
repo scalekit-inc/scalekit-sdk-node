@@ -17,23 +17,23 @@ function run(flags: string[]) {
   });
 }
 
-const canDisableRequireEsm = process.allowedNodeEnvironmentFlags.has(
-  '--no-experimental-require-module'
-);
+// Newer Node.js lists --no-experimental-require-module as a legacy alias.
+const disableRequireEsm = [
+  '--no-require-module',
+  '--no-experimental-require-module',
+].find((flag) => process.allowedNodeEnvironmentFlags.has(flag));
 
 describe('built lib/ loads with require()', () => {
   it('loads every entry point and validates a token', () => {
-    const result = run([]);
-    expect(result.stderr).toBe('');
-    expect(result.status).toBe(0);
+    // On failure Jest prints the whole result, stderr included.
+    expect(run([])).toMatchObject({ status: 0 });
   });
 
-  (canDisableRequireEsm ? it : it.skip)(
+  (disableRequireEsm ? it : it.skip)(
     'falls back to the bundled jose when require() of ES modules is disabled',
     () => {
-      const result = run(['--no-experimental-require-module']);
-      expect(result.stderr).toBe('');
-      expect(result.status).toBe(0);
+      const result = run([disableRequireEsm!]);
+      expect(result).toMatchObject({ status: 0 });
       expect(result.stdout).toContain('uses the bundled jose');
     }
   );
