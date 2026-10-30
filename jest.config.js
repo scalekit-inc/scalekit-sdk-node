@@ -6,7 +6,7 @@ module.exports = {
   setupFilesAfterEnv: ['./tests/setup.ts'],
   transform: {
     '^.+\\.ts?$': 'ts-jest',
-    '^.+\\.js$': ['ts-jest', { diagnostics: false, tsconfig: { allowJs: true } }],
+    '^.+\\.js$': '<rootDir>/tests/transform-esm-js.cjs',
   },
   transformIgnorePatterns: ['/node_modules/(?!(jose)/)'],
   moduleNameMapper: {
