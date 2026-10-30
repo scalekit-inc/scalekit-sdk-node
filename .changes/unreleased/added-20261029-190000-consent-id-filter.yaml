@@ -1,6 +1,6 @@
 kind: added
 body: |
-  `scalekit.resources.listUserConsents(resourceId, { consentIds })` fetches specific consents by ID, for example to find the `clientId` you need to revoke a consent you already hold the ID of. `consentIds` takes up to 25 distinct IDs in the `usrcnst_<number>` format and takes precedence over `userIds` and `search`; IDs that do not exist or belong to another resource are omitted from the result. Existing calls are unchanged. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#resources)
+  `scalekit.resources.listUserConsents(resourceId, { consentIds })` fetches specific consents by ID, for example to find the `clientId` you need to revoke a consent you already hold the ID of. `consentIds` takes up to 25 distinct IDs in the `usrcnst_<positive integer>` format and takes precedence over `userIds` and `search`; IDs that do not exist or belong to another resource are omitted from the result. Existing calls are unchanged. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#resources)
 
   ```ts
   const res = await scalekit.resources.listUserConsents('<RESOURCE_ID>', {
