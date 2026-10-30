@@ -4,6 +4,10 @@
 // are not down-levelled: jose's error constructors (`super(...), this.x = ...`)
 // break when they are. ts-jest is not used here because it shares one compiler
 // configuration between all of its transform entries.
+//
+// jest.config.js maps every `.js` file to this transform, but only jose reaches
+// it: tests/ has no `.js` files, and transformIgnorePatterns admits only jose
+// from node_modules. Revisit this file if either changes.
 'use strict';
 
 const ts = require('typescript');
@@ -17,6 +21,9 @@ const compilerOptions = {
   inlineSources: true,
 };
 
+// Part of every cache key, so editing the options invalidates Jest's cache.
+const cacheKeyPrefix = `${ts.version}\0${JSON.stringify(compilerOptions)}`;
+
 module.exports = {
   process(sourceText, sourcePath) {
     const { outputText } = ts.transpileModule(sourceText, {
@@ -26,6 +33,6 @@ module.exports = {
     return { code: outputText };
   },
   getCacheKey(sourceText, sourcePath) {
-    return `${ts.version}\0${sourcePath}\0${sourceText}`;
+    return `${cacheKeyPrefix}\0${sourcePath}\0${sourceText}`;
   },
 };
