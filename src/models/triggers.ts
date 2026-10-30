@@ -499,7 +499,10 @@ export interface TriggerPollState {
 export interface TriggerSubscription {
   /** Subscription ID (`trgs_...`). */
   readonly id: string;
-  /** Empty for a connection-scoped subscription. */
+  /**
+   * Connected account ID (`ca_...`), the value you pass as `connectedAccountId`.
+   * Empty for a connection-scoped subscription.
+   */
   readonly connectedAccountId: string;
   readonly connectionId: string;
   readonly provider: string;
@@ -513,6 +516,12 @@ export interface TriggerSubscription {
   readonly config: Readonly<Record<string, string>>;
   /** `'account'` or `'connection'`; `undefined` when the server does not say. */
   readonly deliveryScope: DeliveryScope | undefined;
+  /**
+   * The identifier the connected account was created with, such as your app's user ID
+   * or the user's email address, for labelling the subscription. Not accepted where a
+   * connected account ID is expected. Empty for a connection-scoped subscription, and
+   * when the account has none: show `connectedAccountId` then.
+   */
   readonly connectedAccountIdentifier: string;
   readonly createdAt: Date | undefined;
   /** Set for polled subscriptions only. */
