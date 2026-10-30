@@ -213,89 +213,94 @@ Failures raise `ScalekitAgentKitConnectionError` with a stable `code` (`CONNECTI
 ### Subscribe accounts to a trigger
 
 ```typescript
-const triggers = scalekitClient.actions.triggers;
-
 // 1. What can this connection send, and what does each trigger need?
-const { triggers: catalog } = await triggers.listAvailable('conn_123');
+const { triggers: catalog } =
+  await scalekitClient.actions.triggers.listAvailable('conn_123');
 const trigger = catalog.find(
   (t) => t.available && t.name === 'example.item.created'
 );
 
 // 2. Which connected accounts can receive it?
-const page = await triggers.listEligibleAccounts(
+const page = await scalekitClient.actions.triggers.listEligibleAccounts(
   'conn_123',
   'example.item.created'
 );
 const ids = page.accounts.filter((a) => a.eligible).map((a) => a.id);
 
 // 3. Subscribe them. Each account gets its own outcome; retrying is safe.
-const { results } = await triggers.batchCreateSubscriptions(
-  'conn_123',
-  'example.item.created',
-  {
-    connectedAccountIds: ids,
-    config: { channel: 'C123' }, // keys from trigger.configFields
-  }
-);
+const { results } =
+  await scalekitClient.actions.triggers.batchCreateSubscriptions(
+    'conn_123',
+    'example.item.created',
+    {
+      connectedAccountIds: ids,
+      config: { channel: 'C123' }, // keys from trigger.configFields
+    }
+  );
 for (const r of results.filter((r) => r.outcome === 'REFUSED')) {
   console.log(r.connectedAccountId, r.reason);
 }
 ```
 
-`createSubscription(connectionId, triggerName, params?)` subscribes one account, or the whole connection for a connection-scoped trigger (omit `connectedAccountId`). It is not retried when the service is briefly unavailable, and the same subscription twice is a `ScalekitConflictException`. `listSubscriptions` shows each subscription's `status`, its intervals and, for polled triggers, its `pollState`; `statusCounts` totals every status across every page.
+`actions.triggers.createSubscription(connectionId, triggerName, params?)` subscribes one account, or the whole connection for a connection-scoped trigger (omit `connectedAccountId`). It is not retried when the service is briefly unavailable, and the same subscription twice is a `ScalekitConflictException`. `actions.triggers.listSubscriptions` shows each subscription's `status`, its intervals and, for polled triggers, its `pollState`; `statusCounts` totals every status across every page.
 
 ### Webhook URL and signing secret
 
 A webhook trigger needs the connection's webhook URL registered with the provider, and the secret the provider signs with stored in Scalekit:
 
 ```typescript
-const endpoint = await triggers.createIngressEndpoint('conn_123'); // idempotent
+const endpoint =
+  await scalekitClient.actions.triggers.createIngressEndpoint('conn_123'); // idempotent
 // Register endpoint.url in the provider's app configuration (keep it confidential:
 // it carries the endpoint's token), then:
-await triggers.setSigningSecret('conn_123', {
+await scalekitClient.actions.triggers.setSigningSecret('conn_123', {
   signingSecret: process.env.PROVIDER_SIGNING_SECRET!,
 });
 ```
 
-For a provider that sends no signature of its own (its triggers report `providesBearerSecret`), call `generateSigningSecret('conn_123')` instead and store the returned `signingSecret`; it is returned only once. `console.log` shows it as `[redacted]`, but `JSON.stringify` and spreading the result keep the real value, so treat any serialised copy as a secret.
+For a provider that sends no signature of its own (its triggers report `providesBearerSecret`), call `actions.triggers.generateSigningSecret('conn_123')` instead and store the returned `signingSecret`; it is returned only once. `console.log` shows it as `[redacted]`, but `JSON.stringify` and spreading the result keep the real value, so treat any serialised copy as a secret.
 
 Rotating: setting (or generating) a different secret starts a rotation, and both secrets are accepted until you confirm it, or for at most 24 hours. Confirm once the provider uses the new secret:
 
 ```typescript
-const current = await triggers.getIngressEndpoint('conn_123');
+const current =
+  await scalekitClient.actions.triggers.getIngressEndpoint('conn_123');
 if (current.rotationInProgress) {
-  await triggers.confirmSigningSecretRotation('conn_123', {
-    signingSecretRotationId: current.signingSecretRotationId,
-  });
+  await scalekitClient.actions.triggers.confirmSigningSecretRotation(
+    'conn_123',
+    {
+      signingSecretRotationId: current.signingSecretRotationId,
+    }
+  );
 }
 ```
 
 ### Activity, usage and deliveries
 
-- `getActivity()` counts what happened to the environment's events over the last day (`received`, `filtered`, `delivered`, `signature_failed`, …). `signatureBanner` means most arrivals failed signature verification: check the signing secret.
-- `getUsage({ period: '24h' })` or `getUsage({ from: '2026-10-01', to: '2026-10-28' })` returns metered deliveries by hour or by UTC day; hours and days with none are absent.
-- `listDeliveries(endpointId, { status: 'FAILED' })`, `listDeliveryAttemptsByMessage(endpointId, msgId)` and `listDeliveryAttemptsByEndpoint(endpointId)` show what reached your delivery endpoint. `lookupDelivery(id)` and `batchLookupDeliveries({ deliveryIds })` find an event by the `webhook-id` header you received or by its `dedupe_key`.
-- `batchResendDeliveries({ targets })` queues a new attempt per target and is not idempotent: after a partial failure, resend only the targets that came back `RATE_LIMITED`, `FAILED` or `NOT_ATTEMPTED`. `recoverDeliveries(endpointId, { since })` resends every failed delivery in a window of up to 14 days, in the background.
+- `actions.triggers.getActivity()` counts what happened to the environment's events over the last day (`received`, `filtered`, `delivered`, `signature_failed`, …). `signatureBanner` means most arrivals failed signature verification: check the signing secret.
+- `actions.triggers.getUsage({ period: '24h' })` or `actions.triggers.getUsage({ from: '2026-10-01', to: '2026-10-28' })` returns metered deliveries by hour or by UTC day; hours and days with none are absent.
+- `actions.triggers.listDeliveries(endpointId, { status: 'FAILED' })`, `actions.triggers.listDeliveryAttemptsByMessage(endpointId, msgId)` and `actions.triggers.listDeliveryAttemptsByEndpoint(endpointId)` show what reached your delivery endpoint. `actions.triggers.lookupDelivery(id)` and `actions.triggers.batchLookupDeliveries({ deliveryIds })` find an event by the `webhook-id` header you received or by its `dedupe_key`.
+- `actions.triggers.batchResendDeliveries({ targets })` queues a new attempt per target and is not idempotent: after a partial failure, resend only the targets that came back `RATE_LIMITED`, `FAILED` or `NOT_ATTEMPTED`. `actions.triggers.recoverDeliveries(endpointId, { since })` resends every failed delivery in a window of up to 14 days, in the background.
 
 ### Errors
 
 Server errors reject with a `ScalekitServerException` subclass; branch on the class and on `errorCode`:
 
-| Class                                 | `errorCode`                               | Meaning                                                                                                                                                                                                                                                                                                                |
-| ------------------------------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ScalekitNotFoundException`           | `RESOURCE_NOT_FOUND`                      | The connection, trigger, account or subscription does not exist in this environment, or triggers are not available for the environment.                                                                                                                                                                                |
-| `ScalekitNotFoundException`           | `TRIGGER_INGRESS_ENDPOINT_NOT_CREATED`    | The connection has no webhook URL yet; call `createIngressEndpoint`.                                                                                                                                                                                                                                                   |
-| `ScalekitNotFoundException`           | `TRIGGER_USAGE_NOT_METERED`               | Usage is not metered for this environment.                                                                                                                                                                                                                                                                             |
-| `ScalekitNotFoundException`           | `NOT_FOUND`                               | `lookupDelivery` found no such event.                                                                                                                                                                                                                                                                                  |
-| `ScalekitBadRequestException`         | `TRIGGER_INGRESS_NOT_APPLICABLE`          | The provider has no webhook trigger, so the connection takes no webhook URL.                                                                                                                                                                                                                                           |
-| `ScalekitBadRequestException`         | `TRIGGER_INGRESS_DEFINITIONS_UNAVAILABLE` | The provider's trigger definitions cannot be read right now.                                                                                                                                                                                                                                                           |
-| `ScalekitBadRequestException`         | `TRIGGER_SIGNING_SECRET_GENERATED_ONLY`   | Use `generateSigningSecret` for this provider.                                                                                                                                                                                                                                                                         |
-| `ScalekitBadRequestException`         | `TRIGGER_SIGNING_SECRET_NOT_GENERATABLE`  | The provider signs its own events; use `setSigningSecret`.                                                                                                                                                                                                                                                             |
-| `ScalekitBadRequestException`         | `INVALID_ARGUMENT`                        | A refused value; the message says what to change. The delivery list methods also answer this for an unknown delivery endpoint (`recoverDeliveries` answers 404).                                                                                                                                                       |
-| `ScalekitConflictException`           | `RESOURCE_ALREADY_EXISTS`                 | The subscription already exists, or a secret rotation is already in progress.                                                                                                                                                                                                                                          |
-| `ScalekitTooManyRequestsException`    | `RATE_LIMITED`                            | Too many batch, resend or recover calls; wait and try again. Not retried by the SDK.                                                                                                                                                                                                                                   |
-| `ScalekitServiceUnavailableException` | (none)                                    | The service, or a dependency such as usage reporting, is briefly unavailable. Calls that are safe to repeat were already retried. `createSubscription`, `setSigningSecret`, `generateSigningSecret`, `batchResendDeliveries` and `recoverDeliveries` are never repeated, so check the result before sending one again. |
-| `ScalekitGatewayTimeoutException`     | (none)                                    | The deadline (`timeoutMs`) passed. For `createSubscription`, `setSigningSecret`, `generateSigningSecret`, `batchResendDeliveries` and `recoverDeliveries` the request may still have taken effect: check before calling again.                                                                                         |
-| `ScalekitInternalServerException`     | `INTERNAL_ERROR`                          | On `recoverDeliveries`, the recovery may have started anyway: check deliveries before calling again.                                                                                                                                                                                                                   |
+| Class                                 | `errorCode`                               | Meaning                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ScalekitNotFoundException`           | `RESOURCE_NOT_FOUND`                      | The connection, trigger, account or subscription does not exist in this environment, or triggers are not available for the environment.                                                                                                                                                                                                                                                                     |
+| `ScalekitNotFoundException`           | `TRIGGER_INGRESS_ENDPOINT_NOT_CREATED`    | The connection has no webhook URL yet; call `actions.triggers.createIngressEndpoint`.                                                                                                                                                                                                                                                                                                                       |
+| `ScalekitNotFoundException`           | `TRIGGER_USAGE_NOT_METERED`               | Usage is not metered for this environment.                                                                                                                                                                                                                                                                                                                                                                  |
+| `ScalekitNotFoundException`           | `NOT_FOUND`                               | `actions.triggers.lookupDelivery` found no such event.                                                                                                                                                                                                                                                                                                                                                      |
+| `ScalekitBadRequestException`         | `TRIGGER_INGRESS_NOT_APPLICABLE`          | The provider has no webhook trigger, so the connection takes no webhook URL.                                                                                                                                                                                                                                                                                                                                |
+| `ScalekitBadRequestException`         | `TRIGGER_INGRESS_DEFINITIONS_UNAVAILABLE` | The provider's trigger definitions cannot be read right now.                                                                                                                                                                                                                                                                                                                                                |
+| `ScalekitBadRequestException`         | `TRIGGER_SIGNING_SECRET_GENERATED_ONLY`   | Use `actions.triggers.generateSigningSecret` for this provider.                                                                                                                                                                                                                                                                                                                                             |
+| `ScalekitBadRequestException`         | `TRIGGER_SIGNING_SECRET_NOT_GENERATABLE`  | The provider signs its own events; use `actions.triggers.setSigningSecret`.                                                                                                                                                                                                                                                                                                                                 |
+| `ScalekitBadRequestException`         | `INVALID_ARGUMENT`                        | A refused value; the message says what to change. The delivery list methods also answer this for an unknown delivery endpoint (`actions.triggers.recoverDeliveries` answers 404).                                                                                                                                                                                                                           |
+| `ScalekitConflictException`           | `RESOURCE_ALREADY_EXISTS`                 | The subscription already exists, or a secret rotation is already in progress.                                                                                                                                                                                                                                                                                                                               |
+| `ScalekitTooManyRequestsException`    | `RATE_LIMITED`                            | Too many batch, resend or recover calls; wait and try again. Not retried by the SDK.                                                                                                                                                                                                                                                                                                                        |
+| `ScalekitServiceUnavailableException` | (none)                                    | The service, or a dependency such as usage reporting, is briefly unavailable. Calls that are safe to repeat were already retried. `actions.triggers.createSubscription`, `actions.triggers.setSigningSecret`, `actions.triggers.generateSigningSecret`, `actions.triggers.batchResendDeliveries` and `actions.triggers.recoverDeliveries` are never repeated, so check the result before sending one again. |
+| `ScalekitGatewayTimeoutException`     | (none)                                    | The deadline (`timeoutMs`) passed. For `actions.triggers.createSubscription`, `actions.triggers.setSigningSecret`, `actions.triggers.generateSigningSecret`, `actions.triggers.batchResendDeliveries` and `actions.triggers.recoverDeliveries` the request may still have taken effect: check before calling again.                                                                                         |
+| `ScalekitInternalServerException`     | `INTERNAL_ERROR`                          | On `actions.triggers.recoverDeliveries`, the recovery may have started anyway: check deliveries before calling again.                                                                                                                                                                                                                                                                                       |
 
 Invalid arguments (an empty ID, an unknown enum name, an invalid date, or a date-time string without `Z` or an offset) throw `ScalekitValidationError` before any request, and an aborted `signal` rejects with `ScalekitAbortError`. Batch methods never throw for a single item: read each result's `outcome`.

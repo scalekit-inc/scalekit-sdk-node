@@ -152,7 +152,7 @@ export type TriggerDeliveryAttemptStatus = (typeof TriggerDeliveryAttemptStatus)
 export type TriggerUsagePeriod = '24h' | '7d' | '30d' | (string & {});
 /** The state of a delivery recovery when the call returned. */
 export type TriggerDeliveryRecoveryStatus = 'running' | 'finished' | (string & {});
-/** Optional parameters for `triggers.listEligibleAccounts`. */
+/** Optional parameters for `actions.triggers.listEligibleAccounts`. */
 export interface TriggerEligibleAccountListParams {
     /** Only accounts whose identifier contains this text, case-insensitively. */
     query?: string;
@@ -161,7 +161,7 @@ export interface TriggerEligibleAccountListParams {
     /** `nextPageToken` or `prevPageToken` from a previous page. */
     pageToken?: string;
 }
-/** Optional parameters for `triggers.listSubscriptions`. */
+/** Optional parameters for `actions.triggers.listSubscriptions`. */
 export interface TriggerSubscriptionListParams {
     /** Only this trigger's subscriptions. */
     triggerName?: string;
@@ -175,7 +175,7 @@ export interface TriggerSubscriptionListParams {
     /** `nextPageToken` or `prevPageToken` from a previous page. */
     pageToken?: string;
 }
-/** Optional parameters for `triggers.createSubscription`. */
+/** Optional parameters for `actions.triggers.createSubscription`. */
 export interface TriggerSubscriptionCreateParams {
     /**
      * The connected account to subscribe (`ca_...`). Required for an
@@ -191,7 +191,7 @@ export interface TriggerSubscriptionCreateParams {
     /** Filter values, keyed exactly as the trigger's `configFields` declare them. */
     config?: Readonly<Record<string, string>>;
 }
-/** Optional parameters for `triggers.batchCreateSubscriptions`. */
+/** Optional parameters for `actions.triggers.batchCreateSubscriptions`. */
 export interface TriggerSubscriptionBatchCreateParams {
     /**
      * The connected accounts to subscribe (at most 100, no duplicates). Leave
@@ -204,7 +204,7 @@ export interface TriggerSubscriptionBatchCreateParams {
     config?: Readonly<Record<string, string>>;
 }
 /**
- * Which subscriptions `triggers.batchDeleteSubscriptions` deletes. Use
+ * Which subscriptions `actions.triggers.batchDeleteSubscriptions` deletes. Use
  * exactly one selector: `subscriptionIds`, or `triggerName` together with
  * `connectedAccountIds`. The server refuses anything else.
  */
@@ -217,7 +217,7 @@ export interface TriggerSubscriptionBatchDeleteParams {
     connectedAccountIds?: readonly string[];
 }
 /**
- * The range `triggers.getUsage` reads: a preset `period` ending now, or
+ * The range `actions.triggers.getUsage` reads: a preset `period` ending now, or
  * `from` and `to` UTC calendar dates (`'YYYY-MM-DD'`, both inclusive). A
  * `from` or `to` that is not a real date in that form is refused before the
  * request.
@@ -231,7 +231,7 @@ export type TriggerUsageGetParams = {
     to: string;
     period?: never;
 };
-/** Parameters for `triggers.setSigningSecret`. */
+/** Parameters for `actions.triggers.setSigningSecret`. */
 export interface TriggerSigningSecretSetParams {
     /**
      * The secret the provider signs its webhook events with, copied from the
@@ -240,7 +240,7 @@ export interface TriggerSigningSecretSetParams {
      */
     signingSecret: string;
 }
-/** Optional parameters for `triggers.confirmSigningSecretRotation`. */
+/** Optional parameters for `actions.triggers.confirmSigningSecretRotation`. */
 export interface TriggerSigningSecretRotationConfirmParams {
     /**
      * `signingSecretRotationId` from the latest endpoint you read. Required
@@ -248,12 +248,12 @@ export interface TriggerSigningSecretRotationConfirmParams {
      */
     signingSecretRotationId?: number;
 }
-/** Optional parameters for `triggers.listDeliveryAttemptsByEndpoint`. */
+/** Optional parameters for `actions.triggers.listDeliveryAttemptsByEndpoint`. */
 export interface TriggerDeliveryAttemptListParams {
     /** Attempts to return. The server defaults to 20 and caps larger values at 100. */
     pageSize?: number;
 }
-/** Optional parameters for `triggers.listDeliveries`. */
+/** Optional parameters for `actions.triggers.listDeliveries`. */
 export interface TriggerDeliveryListParams {
     /** Deliveries per page. The server defaults to 20 and caps larger values at 100. */
     pageSize?: number;
@@ -268,7 +268,7 @@ export interface TriggerDeliveryListParams {
     /** Only deliveries before this instant. A `Date`, or an ISO 8601 date-time with `Z` or an offset. */
     before?: Date | string;
 }
-/** Parameters for `triggers.batchLookupDeliveries`. */
+/** Parameters for `actions.triggers.batchLookupDeliveries`. */
 export interface TriggerDeliveryBatchLookupParams {
     /** Message IDs (`msg_...`) or event IDs, in any mix (1 to 25). */
     deliveryIds: readonly string[];
@@ -280,12 +280,12 @@ export interface TriggerDeliveryResendTarget {
     /** The delivery endpoint ID (`ep_...`). */
     endpointId: string;
 }
-/** Parameters for `triggers.batchResendDeliveries`. */
+/** Parameters for `actions.triggers.batchResendDeliveries`. */
 export interface TriggerDeliveryBatchResendParams {
     /** The events to resend (1 to 50), each to one endpoint. */
     targets: readonly TriggerDeliveryResendTarget[];
 }
-/** Parameters for `triggers.recoverDeliveries`. */
+/** Parameters for `actions.triggers.recoverDeliveries`. */
 export interface TriggerDeliveryRecoverParams {
     /** Start of the window (inclusive). A `Date`, or an ISO 8601 date-time with `Z` or an offset. */
     since: Date | string;
@@ -346,7 +346,7 @@ export interface AvailableTrigger {
     /** `true` when the provider sends no signature: use `generateSigningSecret`. */
     readonly providesBearerSecret: boolean;
 }
-/** Returned by `triggers.listAvailable`. */
+/** Returned by `actions.triggers.listAvailable`. */
 export interface TriggerCatalog {
     readonly triggers: readonly AvailableTrigger[];
     /** Whether the connection uses Scalekit's shared provider app. */
@@ -380,7 +380,7 @@ export interface EligibleAccount {
     readonly remedy: string;
     readonly health: AccountHealth | undefined;
 }
-/** One page returned by `triggers.listEligibleAccounts`. */
+/** One page returned by `actions.triggers.listEligibleAccounts`. */
 export interface TriggerEligibleAccountList {
     readonly accounts: readonly EligibleAccount[];
     /** Pass as `pageToken` for the next page; `undefined` on the last page. */
@@ -427,7 +427,7 @@ export interface TriggerSubscription {
     /** The subscribed account's health; `undefined` when not reported. */
     readonly accountHealth: AccountHealthState | undefined;
 }
-/** One page returned by `triggers.listSubscriptions`. */
+/** One page returned by `actions.triggers.listSubscriptions`. */
 export interface TriggerSubscriptionList {
     /** Newest first. */
     readonly subscriptions: readonly TriggerSubscription[];
@@ -443,7 +443,7 @@ export interface TriggerSubscriptionList {
      */
     readonly statusCounts: Readonly<Record<string, number>>;
 }
-/** What happened to one account in `triggers.batchCreateSubscriptions`. */
+/** What happened to one account in `actions.triggers.batchCreateSubscriptions`. */
 export interface TriggerSubscriptionBatchCreateItem {
     /** Empty for a connection-scoped trigger. */
     readonly connectedAccountId: string;
@@ -452,27 +452,27 @@ export interface TriggerSubscriptionBatchCreateItem {
     readonly subscription: TriggerSubscription | undefined;
     readonly reason: string;
 }
-/** Returned by `triggers.batchCreateSubscriptions`. */
+/** Returned by `actions.triggers.batchCreateSubscriptions`. */
 export interface TriggerSubscriptionBatchCreateResult {
     /** One result per requested account, in request order. */
     readonly results: readonly TriggerSubscriptionBatchCreateItem[];
     /** How many subscriptions this call created. */
     readonly createdCount: number;
 }
-/** What happened to one subscription in `triggers.batchDeleteSubscriptions`. */
+/** What happened to one subscription in `actions.triggers.batchDeleteSubscriptions`. */
 export interface TriggerSubscriptionBatchDeleteItem {
     readonly subscriptionId: string;
     readonly connectedAccountId: string;
     readonly outcome: TriggerSubscriptionDeleteOutcome | undefined;
     readonly reason: string;
 }
-/** Returned by `triggers.batchDeleteSubscriptions`. */
+/** Returned by `actions.triggers.batchDeleteSubscriptions`. */
 export interface TriggerSubscriptionBatchDeleteResult {
     readonly results: readonly TriggerSubscriptionBatchDeleteItem[];
     /** How many subscriptions this call deleted. */
     readonly deletedCount: number;
 }
-/** Returned by `triggers.getActivity`: what happened to the environment's trigger events. */
+/** Returned by `actions.triggers.getActivity`: what happened to the environment's trigger events. */
 export interface TriggerActivity {
     /**
      * Event counts over the window, keyed by outcome (`received`, `filtered`,
@@ -503,7 +503,7 @@ export interface TriggerUsageHour {
     readonly start: Date | undefined;
     readonly units: number;
 }
-/** Returned by `triggers.getUsage`. Hours and days with no units are absent. */
+/** Returned by `actions.triggers.getUsage`. Hours and days with no units are absent. */
 export interface TriggerUsage {
     /**
      * First UTC date of the range read, `'YYYY-MM-DD'` (may differ from the
@@ -553,7 +553,7 @@ export interface TriggerIngressEndpoint {
     readonly signingSecretRotationId: number;
 }
 /**
- * Returned by `triggers.generateSigningSecret`. `console.log` and
+ * Returned by `actions.triggers.generateSigningSecret`. `console.log` and
  * `util.inspect` show `signingSecret` and `urlWithSecret` as `[redacted]`.
  * They are ordinary enumerable properties otherwise, so reading them,
  * spreading the result and `JSON.stringify` keep the real values: treat any
@@ -582,7 +582,7 @@ export interface TriggerDeliveryAttempt {
     readonly responseTruncated: boolean;
     readonly endpointUrl: string;
 }
-/** Returned by `triggers.listDeliveryAttemptsByEndpoint`: the most recent attempts, newest first. */
+/** Returned by `actions.triggers.listDeliveryAttemptsByEndpoint`: the most recent attempts, newest first. */
 export interface TriggerDeliveryAttemptList {
     readonly attempts: readonly TriggerDeliveryAttempt[];
 }
@@ -604,13 +604,13 @@ export interface TriggerDelivery {
     readonly connectionKeyId: string;
     readonly endpointId: string;
 }
-/** One page returned by `triggers.listDeliveries`, newest first. */
+/** One page returned by `actions.triggers.listDeliveries`, newest first. */
 export interface TriggerDeliveryList {
     readonly deliveries: readonly TriggerDelivery[];
     /** Pass as `pageToken` for older deliveries; `undefined` on the last page. */
     readonly nextPageToken: string | undefined;
 }
-/** Returned by `triggers.listDeliveryAttemptsByMessage`: attempts, oldest first. */
+/** Returned by `actions.triggers.listDeliveryAttemptsByMessage`: attempts, oldest first. */
 export interface TriggerMessageAttemptList {
     readonly attempts: readonly TriggerDeliveryAttempt[];
     /** `true` when there are more than the 50 attempts returned. */
@@ -632,7 +632,7 @@ export interface TriggerDeliveryDetails {
     /** `true` when the event has more attempts than those returned. */
     readonly truncated: boolean;
 }
-/** What happened to one ID in `triggers.batchLookupDeliveries`. */
+/** What happened to one ID in `actions.triggers.batchLookupDeliveries`. */
 export interface TriggerDeliveryBatchLookupItem {
     readonly id: string;
     readonly outcome: TriggerDeliveryLookupOutcome | undefined;
@@ -640,27 +640,27 @@ export interface TriggerDeliveryBatchLookupItem {
     /** Set when the outcome is `FOUND`. Attempts carry no response body here. */
     readonly delivery: TriggerDeliveryDetails | undefined;
 }
-/** Returned by `triggers.batchLookupDeliveries`. */
+/** Returned by `actions.triggers.batchLookupDeliveries`. */
 export interface TriggerDeliveryBatchLookupResult {
     /** One result per ID, in the order sent. */
     readonly results: readonly TriggerDeliveryBatchLookupItem[];
     readonly foundCount: number;
 }
-/** What happened to one target in `triggers.batchResendDeliveries`. */
+/** What happened to one target in `actions.triggers.batchResendDeliveries`. */
 export interface TriggerDeliveryBatchResendItem {
     readonly msgId: string;
     readonly endpointId: string;
     readonly outcome: TriggerDeliveryResendOutcome | undefined;
     readonly reason: string;
 }
-/** Returned by `triggers.batchResendDeliveries`. */
+/** Returned by `actions.triggers.batchResendDeliveries`. */
 export interface TriggerDeliveryBatchResendResult {
     /** One result per target, in the order sent. */
     readonly results: readonly TriggerDeliveryBatchResendItem[];
     /** How many new attempts this call queued. */
     readonly queuedCount: number;
 }
-/** Returned by `triggers.recoverDeliveries`: the recovery started and runs in the background. */
+/** Returned by `actions.triggers.recoverDeliveries`: the recovery started and runs in the background. */
 export interface TriggerDeliveryRecovery {
     /** Empty in the rare case the recovery was accepted without an ID; it still runs. */
     readonly taskId: string;
