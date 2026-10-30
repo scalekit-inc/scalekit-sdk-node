@@ -897,6 +897,10 @@ export type ResourceUserConsentFilter = Message<"scalekit.v1.clients.ResourceUse
      * @generated from field: repeated string external_user_id = 1;
      */
     externalUserId: string[];
+    /**
+     * @generated from field: repeated string consent_id = 2;
+     */
+    consentId: string[];
 };
 /**
  * Describes the message scalekit.v1.clients.ResourceUserConsentFilter.
