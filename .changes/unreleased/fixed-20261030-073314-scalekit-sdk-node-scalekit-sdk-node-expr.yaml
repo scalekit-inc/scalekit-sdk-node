@@ -1,6 +1,6 @@
 kind: fixed
 body: |
-  `@scalekit-sdk/node`, `@scalekit-sdk/node/express` and `@scalekit-sdk/node/next` now load on Node.js versions that cannot `require()` ES modules (18, 20 before 20.19, and 22 before 22.12), including when a bundler leaves the SDK external, such as Next.js Pages Router API routes without `transpilePackages`. Previously, loading the SDK there failed with `ERR_REQUIRE_ESM` from its `jose` dependency. Nothing changes where the SDK already loaded.
+  `@scalekit-sdk/node` and `@scalekit-sdk/node/express` now load with `require()` on Node.js versions that cannot `require()` ES modules (18, 20 before 20.19, and 22 before 22.12), including when a bundler leaves the SDK external, such as Next.js Pages Router API routes without `transpilePackages`. Previously they failed at startup with `ERR_REQUIRE_ESM` from the `jose` dependency. On those versions, `@scalekit-sdk/node/edge` still needs a bundler. Nothing changes where the SDK already loaded.
 time: '2026-10-30T07:33:14.708688+00:00'
 custom:
   Breaking: 'No'
