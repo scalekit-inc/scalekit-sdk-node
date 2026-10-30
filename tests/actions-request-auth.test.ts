@@ -37,6 +37,12 @@ let proxyAuth: Array<string | undefined>;
 let tokenEndpointStatus: number;
 let proxyAlwaysUnauthorized: boolean;
 let providerUnauthorized: boolean;
+// Token endpoint behaviour: `expires_in` (omitted when undefined), a fixed
+// token instead of a new one each time, an answer with no token, a delay.
+let tokenExpiresIn: number | undefined;
+let tokenFixed: string | undefined;
+let tokenEmpty: boolean;
+let tokenDelayMs: number;
 let jwksAuth: Array<string | undefined>;
 let signingKey: jose.CryptoKey;
 let publicJwk: jose.JWK;
@@ -54,17 +60,25 @@ beforeAll(async () => {
     }
     if (req.url?.includes('/oauth/token')) {
       tokenCalls += 1;
-      res.writeHead(tokenEndpointStatus, {
-        'content-type': 'application/json',
-      });
-      res.end(
-        tokenEndpointStatus === 200
-          ? JSON.stringify({
-              access_token: issued(tokenCalls),
-              token_type: 'Bearer',
-            })
-          : JSON.stringify({ error: 'invalid_client' })
-      );
+      const n = tokenCalls;
+      setTimeout(() => {
+        res.writeHead(tokenEndpointStatus, {
+          'content-type': 'application/json',
+        });
+        res.end(
+          tokenEndpointStatus !== 200
+            ? JSON.stringify({ error: 'invalid_client' })
+            : tokenEmpty
+              ? JSON.stringify({ token_type: 'Bearer' })
+              : JSON.stringify({
+                  access_token: tokenFixed ?? issued(n),
+                  token_type: 'Bearer',
+                  ...(tokenExpiresIn !== undefined && {
+                    expires_in: tokenExpiresIn,
+                  }),
+                })
+        );
+      }, tokenDelayMs);
       return;
     }
     proxyAuth.push(req.headers.authorization);
@@ -104,6 +118,10 @@ beforeEach(() => {
   tokenEndpointStatus = 200;
   proxyAlwaysUnauthorized = false;
   providerUnauthorized = false;
+  tokenExpiresIn = undefined;
+  tokenFixed = undefined;
+  tokenEmpty = false;
+  tokenDelayMs = 0;
   jwksAuth = [];
 });
 
@@ -245,5 +263,130 @@ describe('actions.request authentication', () => {
 
     expect(error).toBeInstanceOf(ScalekitException);
     expect(proxyAuth).toHaveLength(0);
+  });
+
+  it('surfaces a token response without an access_token as a ScalekitException', async () => {
+    tokenEmpty = true;
+
+    const error = await call(makeClient()).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ScalekitException);
+    expect((error as Error).message).toMatch(/without an access_token/);
+    // Nothing sent unauthenticated, and no second token request.
+    expect(proxyAuth).toHaveLength(0);
+    expect(tokenCalls).toBe(1);
+  });
+
+  it('refreshes once when two concurrent calls hold the same expired token', async () => {
+    const client = makeClient('expired-token');
+
+    const responses = await Promise.all([call(client), call(client)]);
+
+    expect(responses.map((r) => r.status)).toEqual([200, 200]);
+    expect(tokenCalls).toBe(1);
+    expect([...proxyAuth].sort()).toEqual([
+      'Bearer expired-token',
+      'Bearer expired-token',
+      `Bearer ${issued(1)}`,
+      `Bearer ${issued(1)}`,
+    ]);
+  });
+
+  it('does not resend when the refreshed token is unchanged', async () => {
+    tokenFixed = 'expired-token'; // the token endpoint hands back the same one
+
+    await expect(call(makeClient('expired-token'))).rejects.toBeInstanceOf(
+      ScalekitUnauthorizedException
+    );
+    expect(tokenCalls).toBe(1);
+    expect(proxyAuth).toEqual(['Bearer expired-token']);
+  });
+});
+
+describe('access token lifetime', () => {
+  it('keeps a token while it has more than 10 seconds left', async () => {
+    tokenExpiresIn = 3600;
+    const client = makeClient();
+
+    await call(client);
+    await call(client);
+
+    expect(tokenCalls).toBe(1);
+  });
+
+  it('replaces a token about to expire before sending, with no 401', async () => {
+    // A 1 s token is renewed after half its lifetime.
+    tokenExpiresIn = 1;
+    const client = makeClient();
+
+    await call(client);
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    await call(client);
+
+    expect(tokenCalls).toBe(2);
+    expect(proxyAuth).toEqual([`Bearer ${issued(1)}`, `Bearer ${issued(2)}`]);
+  });
+
+  it('spends one token request per token, not per call, on a connected account that keeps failing', async () => {
+    // The proxy answers every token with its 401, as it does when the
+    // connected account's own credentials fail.
+    tokenExpiresIn = 3600;
+    proxyAlwaysUnauthorized = true;
+    const client = makeClient();
+
+    for (let i = 0; i < 3; i += 1) {
+      await expect(call(client)).rejects.toBeInstanceOf(
+        ScalekitUnauthorizedException
+      );
+    }
+
+    // Call 1: token 1 → 401 → token 2 → 401, so the token isn't the cause.
+    // Calls 2 and 3: token 2 → 401, returned with no token request.
+    expect(tokenCalls).toBe(2);
+    expect(proxyAuth).toEqual([
+      `Bearer ${issued(1)}`,
+      `Bearer ${issued(2)}`,
+      `Bearer ${issued(2)}`,
+      `Bearer ${issued(2)}`,
+    ]);
+  });
+
+  it('keeps refreshing on every Scalekit 401 when the token lifetime is unknown', async () => {
+    // No expires_in and not a JWT: the token is never renewed ahead of time,
+    // so a 401 must stay able to replace it.
+    proxyAlwaysUnauthorized = true;
+    const client = makeClient();
+
+    await expect(call(client)).rejects.toBeInstanceOf(
+      ScalekitUnauthorizedException
+    );
+    await expect(call(client)).rejects.toBeInstanceOf(
+      ScalekitUnauthorizedException
+    );
+
+    expect(tokenCalls).toBe(3);
+    expect(proxyAuth).toHaveLength(4);
+  });
+
+  it('stops waiting for a token request when the signal aborts', async () => {
+    tokenDelayMs = 2000;
+    const core = (makeClient() as unknown as { coreClient: CoreClient })
+      .coreClient;
+    const controller = new AbortController();
+    const reason = new Error('stop');
+    let sent = false;
+
+    const started = Date.now();
+    const pending = core.withAccessToken(
+      async () => {
+        sent = true;
+      },
+      { signal: controller.signal }
+    );
+    setTimeout(() => controller.abort(reason), 50);
+
+    await expect(pending).rejects.toBe(reason);
+    expect(Date.now() - started).toBeLessThan(1000);
+    expect(sent).toBe(false);
   });
 });

@@ -3,14 +3,10 @@ import {
   type JsonObject,
   type MessageInitShape,
 } from '@bufbuild/protobuf';
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import CoreClient, { assertValidTimeout, isStream } from './core';
 import { assertProxyPathContained, proxyRedirectGuard } from './proxy-path';
-import {
-  ScalekitException,
-  ScalekitGatewayTimeoutException,
-  ScalekitServerException,
-} from './errors';
+import { toScalekitException } from './http-errors';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
@@ -893,18 +889,7 @@ export default class ActionsClient {
         resend: !isStream(data),
       });
     } catch (error) {
-      if (error instanceof ScalekitException) throw error;
-      if (error instanceof AxiosError) {
-        if (error.response)
-          throw ScalekitServerException.promote(error.response);
-        // Same exception type as a gRPC deadline expiry, so callers handle
-        // both timeout paths uniformly.
-        if (ScalekitGatewayTimeoutException.isAxiosTimeout(error)) {
-          throw ScalekitGatewayTimeoutException.fromAxiosTimeout(error);
-        }
-        throw new ScalekitException(error);
-      }
-      throw new ScalekitException(error);
+      throw toScalekitException(error);
     }
   }
 

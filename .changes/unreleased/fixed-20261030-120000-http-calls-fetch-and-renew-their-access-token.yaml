@@ -1,6 +1,6 @@
 kind: fixed
 body: |
-  `scalekit.actions.request` now works as the first call on a client, and keeps working after the client's access token expires. Before, a client that had not yet made any other call sent the first proxied request with no `Authorization` header and failed with a 401 ("missing authorization header"), and a token that expired later was never renewed for this method. The client now fetches its access token before the first request that needs one, and if Scalekit rejects an expired token it fetches a new one and resends the request once, as API calls already did. A 401 that comes from the provider is returned as it is and is never resent. A request whose body is a stream is never resent either, but its expired token is still replaced, so the next call works. Creating a client and validating tokens (`validateToken`, `validateAccessToken`) still never fetch an access token. A call made with wrong client credentials now throws a `ScalekitException` instead of a raw axios error.
+  `scalekit.actions.request` no longer fails with a 401 ("missing authorization header") when it is a client's first call, or after the client's access token expires: the client now fetches its token before the first request and renews it shortly before it expires. If Scalekit still rejects the token, the request is sent once more with a new one; a 401 from the provider is never resent.
 time: '2026-10-30T12:00:00.000000+00:00'
 custom:
   Breaking: 'No'

@@ -34,6 +34,8 @@ export default class CoreClient {
     readonly pingTimeoutMs: number;
     keys: JWK[];
     accessToken: string | null;
+    private accessTokenRenewAt;
+    private tokenNotTheCause;
     private pendingAuthentication;
     axios: Axios;
     sdkVersion: string;
@@ -41,7 +43,8 @@ export default class CoreClient {
     userAgent: string;
     constructor(envUrl: string, clientId: string, clientSecret: string, toolTimeoutMs?: number, timeoutMs?: number, pingIntervalMs?: number, pingTimeoutMs?: number);
     /**
-     * Fetch a client-credentials token if this client doesn't have one yet.
+     * Fetch a client-credentials token if this client has none, or if the one
+     * it holds expires within 10 seconds.
      *
      * gRPC calls get a token lazily: `connectExec` authenticates when a call
      * returns 401 and retries it. HTTP calls that need one call this through
@@ -49,6 +52,8 @@ export default class CoreClient {
      * request.
      */
     ensureAccessToken(): Promise<void>;
+    /** One token request at a time; concurrent callers share it. */
+    private fetchAccessToken;
     private authenticateClient;
     /**
      * Authenticate with the code
@@ -69,21 +74,29 @@ export default class CoreClient {
      */
     refreshAccessToken(rejectedToken: string | null): Promise<void>;
     /**
-     * Run an authenticated HTTP request through `this.axios`: fetch a token
-     * first if this client has none, and if Scalekit rejects it (expired or
-     * revoked), fetch a new one and send the request once more, as
-     * `connectExec` does for gRPC calls.
+     * Run an authenticated HTTP request through `this.axios`, with a token that
+     * isn't about to expire: fetch one first if needed (`ensureAccessToken`).
      *
-     * Only a 401 the Scalekit proxy sent itself counts: the proxy rejects it
-     * before forwarding, so the resend is safe. A 401 from the provider is
-     * returned as is, never replayed. Pass `resend: false` when `send` can't
-     * run twice (a stream body): the token is still renewed, so the next call
-     * works, and the 401 is returned.
+     * If Scalekit still rejects the token (revoked, a rotated signing key, or
+     * clock skew), fetch a new one and send the request once more, as
+     * `connectExec` does for gRPC calls. Only a 401 the Scalekit proxy sent
+     * itself counts: the proxy rejects it before forwarding, so the resend is
+     * safe. A 401 from the provider is returned as is, never replayed.
+     *
+     * The proxy sends that same 401 when a connected account's own credentials
+     * fail. When a freshly fetched token gets it too, the token isn't the
+     * cause, so further 401s on that token are returned without another token
+     * request or resend.
+     *
+     * Pass `resend: false` when `send` can't run twice (a stream body): the
+     * token is still renewed, so the next call works, and the 401 is returned.
+     * Pass `signal` to stop waiting for a token request when it aborts.
      *
      * @internal
      */
-    withAccessToken<T>(send: () => Promise<T>, { resend }?: {
+    withAccessToken<T>(send: () => Promise<T>, { resend, signal }?: {
         resend?: boolean;
+        signal?: AbortSignal;
     }): Promise<T>;
     /**
      * Get the JWKS from the server and store it in the client instance

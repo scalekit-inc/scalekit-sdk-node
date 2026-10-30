@@ -1,6 +1,4 @@
-import { type AxiosResponse } from 'axios';
 import type CoreClient from './core';
-import { ScalekitException } from './errors/base-exception';
 /** HTTP method that starts an upload session. */
 export type ResumableUploadMethod = 'POST' | 'PUT' | 'PATCH';
 /** What to upload, and where. Passed to `actions.uploadResumable`. */
@@ -121,14 +119,6 @@ export declare function backoffDelayMs(retry: number, random?: () => number): nu
  * @internal
  */
 export declare function retryAfterDelayMs(value: string | undefined, now?: number): number | undefined;
-/**
- * A 401 the Scalekit proxy itself sent because the access token was rejected
- * (JSON `{ "detail": ..., "code": "UNAUTHORIZED" }`), as opposed to a 401 from
- * the provider. Only this kind is safe to resend after a token refresh.
- */
-export declare function isScalekitUnauthorized(response: AxiosResponse): boolean;
-/** Maps a failed token request the same way `actions.request` maps failures. */
-export declare function tokenRequestError(error: unknown): ScalekitException;
 /**
  * Uploads content with Google's resumable protocol through the Scalekit
  * proxy. See `ActionsClient.uploadResumable` for the contract.
