@@ -192,20 +192,36 @@ describe('actions.request authentication', () => {
     expect(tokenCalls).toBe(0);
   });
 
-  it('does not resend a stream body, which the first send consumed', async () => {
+  const postStream = (client: ScalekitClient) =>
+    client.actions.request({
+      connectionName: 'notes-oauth',
+      identifier: 'user_123',
+      path: '/notes',
+      method: 'POST',
+      body: Readable.from(['note']),
+    });
+
+  it('sends a stream body with a token on a fresh client', async () => {
+    const response = await postStream(makeClient());
+
+    expect(response.status).toBe(200);
+    expect(tokenCalls).toBe(1);
+    expect(proxyAuth).toEqual([`Bearer ${issued(1)}`]);
+  });
+
+  it('renews an expired token for a stream body but does not resend it', async () => {
     const client = makeClient('expired-token');
 
-    await expect(
-      client.actions.request({
-        connectionName: 'notes-oauth',
-        identifier: 'user_123',
-        path: '/notes',
-        method: 'POST',
-        body: Readable.from(['note']),
-      })
-    ).rejects.toBeInstanceOf(ScalekitUnauthorizedException);
+    await expect(postStream(client)).rejects.toBeInstanceOf(
+      ScalekitUnauthorizedException
+    );
+    // The first send consumed the stream: no resend, but the token is
+    // replaced, so the caller's next call goes out with a working one.
     expect(proxyAuth).toEqual(['Bearer expired-token']);
-    expect(tokenCalls).toBe(0);
+    expect(tokenCalls).toBe(1);
+
+    await call(client);
+    expect(proxyAuth).toEqual(['Bearer expired-token', `Bearer ${issued(1)}`]);
   });
 
   it('shares one token request between concurrent first calls', async () => {

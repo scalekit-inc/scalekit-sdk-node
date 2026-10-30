@@ -143,27 +143,15 @@ export default class CoreClient {
     // budget (the actions proxy) set a per-request timeout, which overrides
     // this default.
     this.axios = axios.create({ baseURL: envUrl, timeout: this.timeoutMs });
-    // Authenticated HTTP calls get their token here, so no caller has to:
-    // it is fetched before the first such request (never when the client is
-    // created, so a client used only to validate tokens never fetches one),
-    // and concurrent first requests share one token request.
-    this.axios.interceptors.request.use(async (config) => {
+    // Attaches the token this client holds; never fetches one. Calls that
+    // need a token get it through `withAccessToken` (HTTP) or `connectExec`
+    // (gRPC), so creating a client or validating a token never fetches one.
+    this.axios.interceptors.request.use((config) => {
       config.headers[headers['user-agent']] = this.userAgent;
       config.headers[headers['x-sdk-version']] = this.sdkVersion;
       config.headers[headers['x-api-version']] = this.apiVersion;
-      if (!config.skipAuth) {
-        // An aborted request is cancelled by axios right after this; don't
-        // fetch a token for it.
-        if (!config.signal?.aborted) {
-          try {
-            await this.ensureAccessToken();
-          } catch (error) {
-            throw tokenRequestError(error);
-          }
-        }
-        if (this.accessToken) {
-          config.headers[headers.authorization] = `Bearer ${this.accessToken}`;
-        }
+      if (this.accessToken && !config.skipAuth) {
+        config.headers[headers.authorization] = `Bearer ${this.accessToken}`;
       }
 
       return config;
@@ -210,9 +198,9 @@ export default class CoreClient {
    * Fetch a client-credentials token if this client doesn't have one yet.
    *
    * gRPC calls get a token lazily: `connectExec` authenticates when a call
-   * returns 401 and retries it. HTTP calls through `this.axios` get one from
-   * its request interceptor, which calls this before every authenticated
-   * request. Concurrent callers share one token request.
+   * returns 401 and retries it. HTTP calls that need one call this through
+   * `withAccessToken` before sending. Concurrent callers share one token
+   * request.
    */
   async ensureAccessToken(): Promise<void> {
     if (this.accessToken) return;
@@ -271,20 +259,23 @@ export default class CoreClient {
   }
 
   /**
-   * Run an HTTP request through `this.axios`, and if Scalekit rejects its
-   * access token (expired or revoked), fetch a new one and send it once more,
-   * as `connectExec` does for gRPC calls.
+   * Run an authenticated HTTP request through `this.axios`: fetch a token
+   * first if this client has none, and if Scalekit rejects it (expired or
+   * revoked), fetch a new one and send the request once more, as
+   * `connectExec` does for gRPC calls.
    *
-   * Only a 401 the Scalekit proxy sent itself is retried: the proxy rejects
-   * it before forwarding, so the resend is safe. A 401 from the provider is
-   * returned as is, never replayed. `send` must be safe to call twice, so a
-   * request with a stream body must not use this.
+   * Only a 401 the Scalekit proxy sent itself counts: the proxy rejects it
+   * before forwarding, so the resend is safe. A 401 from the provider is
+   * returned as is, never replayed. Pass `resend: false` when `send` can't
+   * run twice (a stream body): the token is still renewed, so the next call
+   * works, and the 401 is returned.
    *
    * @internal
    */
-  async withTokenRefresh<T>(send: () => Promise<T>): Promise<T> {
-    // Fetched here, not only in the request interceptor, so `tokenUsed` is
-    // the token this request carries.
+  async withAccessToken<T>(
+    send: () => Promise<T>,
+    { resend = true }: { resend?: boolean } = {}
+  ): Promise<T> {
     try {
       await this.ensureAccessToken();
     } catch (error) {
@@ -306,7 +297,9 @@ export default class CoreClient {
       } catch (refreshError) {
         throw tokenRequestError(refreshError);
       }
-      if (!this.accessToken || this.accessToken === tokenUsed) throw error;
+      if (!resend || !this.accessToken || this.accessToken === tokenUsed) {
+        throw error;
+      }
       return send();
     }
   }
@@ -321,10 +314,7 @@ export default class CoreClient {
     }
     const {
       data: { keys },
-    } = await this.axios.get<{ keys: JWK[] }>(jwksEndpoint, {
-      // Public keys: validating a token must not fetch an access token.
-      skipAuth: true,
-    });
+    } = await this.axios.get<{ keys: JWK[] }>(jwksEndpoint);
     this.keys = keys;
   }
 

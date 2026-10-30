@@ -889,9 +889,9 @@ export default class ActionsClient {
 
     try {
       // A stream body is consumed by the first send, so it is never resent.
-      return await (isStream(data)
-        ? send()
-        : this.coreClient.withTokenRefresh(send));
+      return await this.coreClient.withAccessToken(send, {
+        resend: !isStream(data),
+      });
     } catch (error) {
       if (error instanceof ScalekitException) throw error;
       if (error instanceof AxiosError) {

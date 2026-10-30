@@ -44,9 +44,9 @@ export default class CoreClient {
      * Fetch a client-credentials token if this client doesn't have one yet.
      *
      * gRPC calls get a token lazily: `connectExec` authenticates when a call
-     * returns 401 and retries it. HTTP calls through `this.axios` get one from
-     * its request interceptor, which calls this before every authenticated
-     * request. Concurrent callers share one token request.
+     * returns 401 and retries it. HTTP calls that need one call this through
+     * `withAccessToken` before sending. Concurrent callers share one token
+     * request.
      */
     ensureAccessToken(): Promise<void>;
     private authenticateClient;
@@ -69,18 +69,22 @@ export default class CoreClient {
      */
     refreshAccessToken(rejectedToken: string | null): Promise<void>;
     /**
-     * Run an HTTP request through `this.axios`, and if Scalekit rejects its
-     * access token (expired or revoked), fetch a new one and send it once more,
-     * as `connectExec` does for gRPC calls.
+     * Run an authenticated HTTP request through `this.axios`: fetch a token
+     * first if this client has none, and if Scalekit rejects it (expired or
+     * revoked), fetch a new one and send the request once more, as
+     * `connectExec` does for gRPC calls.
      *
-     * Only a 401 the Scalekit proxy sent itself is retried: the proxy rejects
-     * it before forwarding, so the resend is safe. A 401 from the provider is
-     * returned as is, never replayed. `send` must be safe to call twice, so a
-     * request with a stream body must not use this.
+     * Only a 401 the Scalekit proxy sent itself counts: the proxy rejects it
+     * before forwarding, so the resend is safe. A 401 from the provider is
+     * returned as is, never replayed. Pass `resend: false` when `send` can't
+     * run twice (a stream body): the token is still renewed, so the next call
+     * works, and the 401 is returned.
      *
      * @internal
      */
-    withTokenRefresh<T>(send: () => Promise<T>): Promise<T>;
+    withAccessToken<T>(send: () => Promise<T>, { resend }?: {
+        resend?: boolean;
+    }): Promise<T>;
     /**
      * Get the JWKS from the server and store it in the client instance
      * @returns {Promise<void>} Returns nothing
