@@ -9297,7 +9297,7 @@ Returns metered trigger deliveries: hourly for `period: '24h'`, daily otherwise.
 
 ```typescript
 const hourly = await scalekitClient.actions.triggers.getUsage({ period: '24h' });
-for (const h of hourly.hours) console.log(h.start.toISOString(), h.units);
+for (const h of hourly.hours) console.log(h.start?.toISOString(), h.units);
 
 const daily = await scalekitClient.actions.triggers.getUsage({
   from: '2026-10-01',

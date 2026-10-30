@@ -883,7 +883,7 @@ export class TriggersClient {
    * @example
    * ```ts
    * const usage = await scalekit.actions.triggers.getUsage({ period: '24h' });
-   * for (const h of usage.hours) console.log(h.start.toISOString(), h.units);
+   * for (const h of usage.hours) console.log(h.start?.toISOString(), h.units);
    * ```
    */
   async getUsage(
