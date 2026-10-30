@@ -1,6 +1,6 @@
 kind: fixed
 body: |
-  `@scalekit-sdk/node` and `@scalekit-sdk/node/express` now load with `require()` where Node.js cannot `require()` ES modules: Node.js 18, 20 before 20.19 and 22 before 22.12, and runtimes that start Node.js with `--no-experimental-require-module`, such as AWS Lambda's Node.js 20, 22 and 24 runtimes. This includes apps whose bundler leaves the SDK external, such as Next.js Pages Router API routes without `transpilePackages`. Previously the SDK failed at startup with `ERR_REQUIRE_ESM` from its `jose` dependency. On those runtimes, `@scalekit-sdk/node/edge` still needs a bundler. Nothing changes where the SDK already loaded.
+  `@scalekit-sdk/node` and `@scalekit-sdk/node/express` now load with `require()` where Node.js cannot `require()` ES modules: Node.js 18, 20 before 20.19 and 22 before 22.12, and runtimes that start Node.js with `--no-experimental-require-module`, such as AWS Lambda's Node.js 20, 22 and 24 runtimes. This includes apps whose bundler leaves the SDK external, such as Next.js Pages Router API routes without `transpilePackages`. Previously the SDK failed at startup with `ERR_REQUIRE_ESM` from its `jose` dependency. On those runtimes, `@scalekit-sdk/node/edge` still needs a bundler. Nothing changes where the SDK already loaded. The SDK now depends on an exact `jose` version, so the installed `jose` always matches the copy bundled for those runtimes and `npm audit` reports the SDK's `jose` accurately; a `jose` update ships in an SDK release.
 time: '2026-10-30T07:33:14.708688+00:00'
 custom:
   Breaking: 'No'
