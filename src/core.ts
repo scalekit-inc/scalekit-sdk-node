@@ -21,6 +21,7 @@ import QueryString from 'qs';
 import { GrantType } from './types/scalekit';
 import { TokenResponse } from './types/auth';
 import {
+  ScalekitAbortError,
   ScalekitException,
   ScalekitServerException,
 } from './errors/base-exception';
@@ -92,6 +93,24 @@ export function assertValidPingInterval(value: number): void {
         `and enough strikes GOAWAYs the connection mid-call.`
     );
   }
+}
+
+/**
+ * Per-call options for {@link CoreClient.connectExec}: the gRPC call options
+ * forwarded to the call, plus the SDK's own retry switch.
+ *
+ * @internal
+ */
+export interface ConnectExecOptions extends CallOptions {
+  /**
+   * `false` turns off the retry on `Unavailable`, for calls that must not be
+   * sent twice. Defaults to `true`.
+   */
+  retryOnUnavailable?: boolean;
+}
+
+function callAbortedError(signal: AbortSignal): ScalekitAbortError {
+  return new ScalekitAbortError('The call was aborted', signal.reason);
 }
 
 export default class CoreClient {
@@ -264,8 +283,29 @@ export default class CoreClient {
     this.keys = keys;
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  /**
+   * Waits `ms` milliseconds. With a `signal`, the wait ends early when the
+   * signal aborts, rejecting with {@link ScalekitAbortError}.
+   */
+  private sleep(ms: number, signal?: AbortSignal): Promise<void> {
+    if (!signal) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+    return new Promise((resolve, reject) => {
+      if (signal.aborted) {
+        reject(callAbortedError(signal));
+        return;
+      }
+      const onAbort = () => {
+        clearTimeout(timer);
+        reject(callAbortedError(signal));
+      };
+      const timer = setTimeout(() => {
+        signal.removeEventListener('abort', onAbort);
+        resolve();
+      }, ms);
+      signal.addEventListener('abort', onAbort, { once: true });
+    });
   }
 
   /**
@@ -273,16 +313,30 @@ export default class CoreClient {
    *
    * @param fn Function to execute
    * @param data Data to pass to the function
-   * @param options Optional per-call gRPC options (e.g. `timeoutMs`), forwarded to `fn` as-is.
-   *                Omit to use the transport's default deadline.
+   * @param options Optional per-call options. The gRPC call options (e.g.
+   *                `timeoutMs`, `signal`) are forwarded to `fn`; omit
+   *                `timeoutMs` to use the transport's default deadline.
+   *                `retryOnUnavailable: false` turns off the retry on
+   *                `Unavailable` for calls that must not be sent twice (the
+   *                single token refresh on `Unauthenticated` is kept). When
+   *                `signal` aborts, before the call, during it or while
+   *                waiting to retry, the call rejects with
+   *                {@link ScalekitAbortError}.
    * @returns {Promise<TResponse>} Returns the response
    */
   async connectExec<TRequest, TResponse>(
     fn: (request: TRequest, options?: CallOptions) => Promise<TResponse>,
     data: TRequest,
-    options?: CallOptions
+    options?: ConnectExecOptions
   ): Promise<TResponse> {
-    return this._connectExec(fn, data, 3, 0, options);
+    let callOptions: CallOptions | undefined;
+    let retryOnUnavailable = true;
+    if (options !== undefined) {
+      const { retryOnUnavailable: retryFlag, ...rest } = options;
+      callOptions = rest;
+      retryOnUnavailable = retryFlag !== false;
+    }
+    return this._connectExec(fn, data, 3, 0, callOptions, retryOnUnavailable);
   }
 
   private async _connectExec<TRequest, TResponse>(
@@ -290,11 +344,21 @@ export default class CoreClient {
     data: TRequest,
     retryLeft: number,
     attempt: number,
-    options?: CallOptions
+    options?: CallOptions,
+    retryOnUnavailable: boolean = true
   ): Promise<TResponse> {
+    const signal = options?.signal;
+    if (signal?.aborted) {
+      throw callAbortedError(signal);
+    }
     try {
       return await fn(data, options);
     } catch (error) {
+      // The caller's signal fired: whatever the transport reported (usually
+      // Code.Canceled), the caller asked to stop.
+      if (signal?.aborted) {
+        throw callAbortedError(signal);
+      }
       // Handle gRPC Connect errors
       if (error instanceof ConnectError) {
         // If the error originated from an upstream tool provider (errorCode == "TOOL_ERROR"),
@@ -313,22 +377,26 @@ export default class CoreClient {
               data,
               retryLeft - 1,
               attempt + 1,
-              options
+              options,
+              retryOnUnavailable
             );
           }
           // Retry transient infrastructure errors (Unavailable) with backoff.
           // This covers the Connect transport mapping HTTP 429 → Code.Unavailable.
           // Scalekit ResourceExhausted (429) is NOT retried — surfaces immediately.
-          if (error.code === Code.Unavailable) {
+          // Calls that are not safe to send twice opt out: an Unavailable can
+          // arrive after the server already applied the request.
+          if (error.code === Code.Unavailable && retryOnUnavailable) {
             const baseBackoff = Math.min(1000 * 2 ** attempt, 30000);
             const backoffMs = baseBackoff * (0.5 + Math.random() * 0.5);
-            await this.sleep(backoffMs);
+            await this.sleep(backoffMs, signal);
             return this._connectExec(
               fn,
               data,
               retryLeft - 1,
               attempt + 1,
-              options
+              options,
+              retryOnUnavailable
             );
           }
         }
@@ -345,7 +413,8 @@ export default class CoreClient {
                 data,
                 retryLeft - 1,
                 attempt + 1,
-                options
+                options,
+                retryOnUnavailable
               );
             }
             // NOTE: HTTP 429 responses are surfaced immediately — no backoff retry.

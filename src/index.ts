@@ -26,6 +26,79 @@ export type {
   TriggersClient,
 } from './triggers';
 
+// Per-call options (`signal`, `timeoutMs`) taken by the trigger management
+// methods on `scalekit.actions.triggers`.
+export type { RequestOptions } from './types/request-options';
+
+// Enums and types surfaced by the trigger management methods on
+// `scalekit.actions.triggers`. The enums are open string unions; the types
+// are the SDK's own shapes (no generated protobuf types).
+export {
+  TriggerSubscriptionStatus,
+  TriggerPollErrorCode,
+  AccountHealthState,
+  AccountHealthAction,
+  TriggerPlatformCredentials,
+  TriggerRefusalCode,
+  TriggerSubscribeOutcome,
+  TriggerSubscriptionDeleteOutcome,
+  TriggerUsageBucket,
+  TriggerDeliveryStatus,
+  TriggerDeliveryLookupOutcome,
+  TriggerDeliveryResendOutcome,
+  TriggerDeliveryAttemptTriggerType,
+  TriggerDeliveryAttemptStatus,
+} from './models/triggers';
+export type {
+  TriggerUsagePeriod,
+  TriggerDeliveryRecoveryStatus,
+  TriggerEligibleAccountListParams,
+  TriggerSubscriptionListParams,
+  TriggerSubscriptionCreateParams,
+  TriggerSubscriptionBatchCreateParams,
+  TriggerSubscriptionBatchDeleteParams,
+  TriggerUsageGetParams,
+  TriggerSigningSecretSetParams,
+  TriggerSigningSecretRotationConfirmParams,
+  TriggerDeliveryAttemptListParams,
+  TriggerDeliveryListParams,
+  TriggerDeliveryBatchLookupParams,
+  TriggerDeliveryResendTarget,
+  TriggerDeliveryBatchResendParams,
+  TriggerDeliveryRecoverParams,
+  TriggerRequiredScope,
+  TriggerConfigField,
+  AvailableTrigger,
+  TriggerCatalog,
+  AccountHealth,
+  EligibleAccount,
+  TriggerEligibleAccountList,
+  TriggerPollState,
+  TriggerSubscription,
+  TriggerSubscriptionList,
+  TriggerSubscriptionBatchCreateItem,
+  TriggerSubscriptionBatchCreateResult,
+  TriggerSubscriptionBatchDeleteItem,
+  TriggerSubscriptionBatchDeleteResult,
+  TriggerActivity,
+  TriggerUsageDay,
+  TriggerUsageHour,
+  TriggerUsage,
+  TriggerIngressEndpoint,
+  GeneratedTriggerSigningSecret,
+  TriggerDeliveryAttempt,
+  TriggerDeliveryAttemptList,
+  TriggerDelivery,
+  TriggerDeliveryList,
+  TriggerMessageAttemptList,
+  TriggerDeliveryDetails,
+  TriggerDeliveryBatchLookupItem,
+  TriggerDeliveryBatchLookupResult,
+  TriggerDeliveryBatchResendItem,
+  TriggerDeliveryBatchResendResult,
+  TriggerDeliveryRecovery,
+} from './models/triggers';
+
 // Generated enum surfaced in the public `resources.listResources` API:
 // `resourceType` is a required parameter, so callers need to name it (e.g.
 // `ResourceType.MCP_SERVER`) without reaching into the internal pb path.

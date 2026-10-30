@@ -22,6 +22,19 @@ export declare const DEFAULT_PING_TIMEOUT_MS = 5000;
 export declare const MIN_PING_INTERVAL_MS = 60000;
 export declare function assertValidTimeout(name: string, value: number): void;
 export declare function assertValidPingInterval(value: number): void;
+/**
+ * Per-call options for {@link CoreClient.connectExec}: the gRPC call options
+ * forwarded to the call, plus the SDK's own retry switch.
+ *
+ * @internal
+ */
+export interface ConnectExecOptions extends CallOptions {
+    /**
+     * `false` turns off the retry on `Unavailable`, for calls that must not be
+     * sent twice. Defaults to `true`.
+     */
+    retryOnUnavailable?: boolean;
+}
 export default class CoreClient {
     readonly envUrl: string;
     readonly clientId: string;
@@ -72,16 +85,27 @@ export default class CoreClient {
      * @returns {Promise<void>} Returns nothing
      */
     getJwks(): Promise<void>;
+    /**
+     * Waits `ms` milliseconds. With a `signal`, the wait ends early when the
+     * signal aborts, rejecting with {@link ScalekitAbortError}.
+     */
     private sleep;
     /**
      * Execute a function with error handling and retry logic.
      *
      * @param fn Function to execute
      * @param data Data to pass to the function
-     * @param options Optional per-call gRPC options (e.g. `timeoutMs`), forwarded to `fn` as-is.
-     *                Omit to use the transport's default deadline.
+     * @param options Optional per-call options. The gRPC call options (e.g.
+     *                `timeoutMs`, `signal`) are forwarded to `fn`; omit
+     *                `timeoutMs` to use the transport's default deadline.
+     *                `retryOnUnavailable: false` turns off the retry on
+     *                `Unavailable` for calls that must not be sent twice (the
+     *                single token refresh on `Unauthenticated` is kept). When
+     *                `signal` aborts, before the call, during it or while
+     *                waiting to retry, the call rejects with
+     *                {@link ScalekitAbortError}.
      * @returns {Promise<TResponse>} Returns the response
      */
-    connectExec<TRequest, TResponse>(fn: (request: TRequest, options?: CallOptions) => Promise<TResponse>, data: TRequest, options?: CallOptions): Promise<TResponse>;
+    connectExec<TRequest, TResponse>(fn: (request: TRequest, options?: CallOptions) => Promise<TResponse>, data: TRequest, options?: ConnectExecOptions): Promise<TResponse>;
     private _connectExec;
 }

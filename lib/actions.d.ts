@@ -88,8 +88,10 @@ export default class ActionsClient {
     /** Bring-your-own connectors: create, update, list and delete custom connectors. */
     readonly providers: ProvidersClient;
     /**
-     * Trigger events delivered to your endpoint: verify and parse them with
-     * `triggers.verifyEvent`. Needs no network access.
+     * AgentKit triggers: list a connection's triggers, manage subscriptions,
+     * set up the webhook URL and its signing secret, read activity, usage and
+     * deliveries, and verify delivered events with `triggers.verifyEvent`
+     * (which needs no network access).
      */
     readonly triggers: TriggersClient;
     /**
@@ -97,12 +99,14 @@ export default class ActionsClient {
      * @param {ConnectedAccountsClient} connectedAccounts - Client for connected-account lifecycle operations.
      * @param {CoreClient} coreClient - Shared core client (auth, HTTP, retries) used for proxied requests.
      * @param {ConnectionClient} connection - Client used to list app-level connections.
+     * @param {TriggersClient} [triggers] - Trigger management client. When omitted, only
+     *   `triggers.verifyEvent` works; the networked trigger methods reject.
      */
     constructor(tools: ToolsClient, connectedAccounts: ConnectedAccountsClient, coreClient: CoreClient, connection: ConnectionClient, 
     /** Virtual MCP servers: configurations, connected accounts and session tokens. */
     mcp: McpClient, 
     /** Bring-your-own connectors: create, update, list and delete custom connectors. */
-    providers: ProvidersClient);
+    providers: ProvidersClient, triggers?: TriggersClient);
     /**
      * Finds tools that fit a goal, ranked by relevance.
      *
