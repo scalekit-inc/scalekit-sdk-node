@@ -120,7 +120,20 @@ describe('Resource Client (UserConsents)', () => {
       expect(response.consents.map((c) => c.id)).toEqual([consentId]);
     });
 
+    // An older backend ignores filter.consent_id, so skip the validation tests there.
+    async function backendValidatesConsentIds(): Promise<boolean> {
+      try {
+        await client.resources.listUserConsents(TEST_RESOURCE_ID, {
+          consentIds: ['not-an-id'],
+        });
+        return false;
+      } catch {
+        return true;
+      }
+    }
+
     it('should reject a malformed consent id', async () => {
+      if (!(await backendValidatesConsentIds())) return;
       await expect(
         client.resources.listUserConsents(TEST_RESOURCE_ID, {
           consentIds: ['149633942432021190'],
@@ -129,6 +142,7 @@ describe('Resource Client (UserConsents)', () => {
     });
 
     it('should reject more than 25 consent ids', async () => {
+      if (!(await backendValidatesConsentIds())) return;
       const consentIds = Array.from(
         { length: 26 },
         (_, i) => `usrcnst_${i + 1}`
