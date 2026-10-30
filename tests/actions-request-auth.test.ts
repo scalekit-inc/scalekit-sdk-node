@@ -37,6 +37,8 @@ let proxyAuth: Array<string | undefined>;
 let tokenEndpointStatus: number;
 let proxyAlwaysUnauthorized: boolean;
 let providerUnauthorized: boolean;
+// When set, the proxy answers every request with this 401.
+let proxy401: { headers: Record<string, string>; body: unknown } | undefined;
 // Token endpoint behaviour: `expires_in` (omitted when undefined), a fixed
 // token instead of a new one each time, an answer with no token, a delay.
 let tokenExpiresIn: number | undefined;
@@ -82,6 +84,11 @@ beforeAll(async () => {
       return;
     }
     proxyAuth.push(req.headers.authorization);
+    if (proxy401) {
+      res.writeHead(401, proxy401.headers);
+      res.end(JSON.stringify(proxy401.body));
+      return;
+    }
     if (providerUnauthorized) {
       // A 401 forwarded from the provider, not one the Scalekit proxy sent.
       res.writeHead(401, { 'content-type': 'application/json' });
@@ -118,6 +125,7 @@ beforeEach(() => {
   tokenEndpointStatus = 200;
   proxyAlwaysUnauthorized = false;
   providerUnauthorized = false;
+  proxy401 = undefined;
   tokenExpiresIn = undefined;
   tokenFixed = undefined;
   tokenEmpty = false;
@@ -240,6 +248,36 @@ describe('actions.request authentication', () => {
 
     await call(client);
     expect(proxyAuth).toEqual(['Bearer expired-token', `Bearer ${issued(1)}`]);
+  });
+
+  it.each([
+    [
+      "relayed from the provider, even with Scalekit's body shape",
+      {
+        'content-type': 'application/json',
+        'x-scalekit-upstream': 'true',
+      },
+      { detail: 'expired', code: 'UNAUTHORIZED' },
+    ],
+    [
+      'a connected account credential failure (TOOL_ERROR)',
+      { 'content-type': 'application/json; charset=utf-8' },
+      { detail: 'token expired', code: 'TOOL_ERROR' },
+    ],
+  ])('does not refresh or resend a 401 %s', async (_label, headers, body) => {
+    proxy401 = { headers, body };
+    tokenExpiresIn = 3600;
+    const client = makeClient();
+
+    for (let i = 0; i < 2; i += 1) {
+      await expect(call(client)).rejects.toBeInstanceOf(
+        ScalekitUnauthorizedException
+      );
+    }
+
+    // Only the first call's own token request; no refresh, no resend.
+    expect(tokenCalls).toBe(1);
+    expect(proxyAuth).toEqual([`Bearer ${issued(1)}`, `Bearer ${issued(1)}`]);
   });
 
   it('shares one token request between concurrent first calls', async () => {

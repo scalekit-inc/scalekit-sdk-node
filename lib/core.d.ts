@@ -83,10 +83,12 @@ export default class CoreClient {
      * itself counts: the proxy rejects it before forwarding, so the resend is
      * safe. A 401 from the provider is returned as is, never replayed.
      *
-     * The proxy sends that same 401 when a connected account's own credentials
-     * fail. When a freshly fetched token gets it too, the token isn't the
-     * cause, so further 401s on that token are returned without another token
-     * request or resend.
+     * A connected account's own credential failure (code `TOOL_ERROR`) and
+     * anything relayed from the provider (`X-Scalekit-Upstream`) are never
+     * resent. Proxies deployed before that sent connected-account failures as
+     * `UNAUTHORIZED` too; when a freshly fetched token still gets that 401, the
+     * token isn't the cause, so further 401s on that token are returned
+     * without another token request or resend.
      *
      * Pass `resend: false` when `send` can't run twice (a stream body): the
      * token is still renewed, so the next call works, and the 401 is returned.
