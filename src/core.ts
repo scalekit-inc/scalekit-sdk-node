@@ -10,9 +10,15 @@ import axios, {
 declare module 'axios' {
   interface InternalAxiosRequestConfig {
     skipAuth?: boolean;
+    /** @internal The access token this request was sent with. */
+    sentWithToken?: string | null;
+    /** @internal Set on the one resend after a token refresh. */
+    authRetried?: boolean;
   }
   interface AxiosRequestConfig {
     skipAuth?: boolean;
+    /** @internal Set on the one resend after a token refresh. */
+    authRetried?: boolean;
   }
 }
 import { JWK } from 'jose';
@@ -26,6 +32,7 @@ import {
 } from './errors/base-exception';
 import { ScalekitGatewayTimeoutException } from './errors/specific-exceptions';
 import { ErrorInfoSchema } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
+import { isScalekitUnauthorized, tokenRequestError } from './resumable-upload';
 
 export const headers = {
   'user-agent': 'user-agent',
@@ -94,6 +101,11 @@ export function assertValidPingInterval(value: number): void {
   }
 }
 
+/** A stream body is consumed by the first send, so it can't be resent. */
+function isStream(data: unknown): boolean {
+  return typeof (data as { pipe?: unknown } | null)?.pipe === 'function';
+}
+
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
@@ -137,15 +149,60 @@ export default class CoreClient {
     // budget (the actions proxy) set a per-request timeout, which overrides
     // this default.
     this.axios = axios.create({ baseURL: envUrl, timeout: this.timeoutMs });
-    this.axios.interceptors.request.use((config) => {
+    // Authenticated HTTP calls get their token here, so no caller has to:
+    // it is fetched before the first such request (never when the client is
+    // created, so a client used only to validate tokens never fetches one),
+    // and concurrent first requests share one token request.
+    this.axios.interceptors.request.use(async (config) => {
       config.headers[headers['user-agent']] = this.userAgent;
       config.headers[headers['x-sdk-version']] = this.sdkVersion;
       config.headers[headers['x-api-version']] = this.apiVersion;
-      if (this.accessToken && !config.skipAuth) {
-        config.headers[headers.authorization] = `Bearer ${this.accessToken}`;
+      if (!config.skipAuth) {
+        // An aborted request is cancelled by axios right after this; don't
+        // fetch a token for it.
+        if (!config.signal?.aborted) {
+          try {
+            await this.ensureAccessToken();
+          } catch (error) {
+            throw tokenRequestError(error);
+          }
+        }
+        config.sentWithToken = this.accessToken;
+        if (this.accessToken) {
+          config.headers[headers.authorization] = `Bearer ${this.accessToken}`;
+        }
       }
 
       return config;
+    });
+    // A token Scalekit rejected (expired or revoked) is replaced and the
+    // request resent once, as `connectExec` does for gRPC calls. Only a 401
+    // the Scalekit proxy sent itself qualifies: the proxy rejects it before
+    // forwarding, so the resend is safe. A 401 from the provider is returned
+    // as is, never replayed. Registered before the interceptor below, which
+    // strips the request copy this resend needs.
+    this.axios.interceptors.response.use(undefined, async (error) => {
+      const config = error instanceof AxiosError ? error.config : undefined;
+      if (
+        !config ||
+        config.skipAuth ||
+        config.authRetried ||
+        !error.response ||
+        !isScalekitUnauthorized(error.response) ||
+        isStream(config.data)
+      ) {
+        throw error;
+      }
+      const rejectedToken = config.sentWithToken ?? null;
+      try {
+        await this.refreshAccessToken(rejectedToken);
+      } catch (refreshError) {
+        throw tokenRequestError(refreshError);
+      }
+      if (!this.accessToken || this.accessToken === rejectedToken) {
+        throw error;
+      }
+      return this.axios.request({ ...config, authRetried: true });
     });
     // On failure, axios attaches copies of the outgoing request to the error
     // that carry two credentials: the plaintext client_secret in the token
@@ -169,9 +226,11 @@ export default class CoreClient {
             const config = error.config as {
               data?: unknown;
               headers?: unknown;
+              sentWithToken?: unknown;
             };
             delete config.data;
             delete config.headers;
+            delete config.sentWithToken;
           }
           delete (error as { request?: unknown }).request;
           if (error.response) {
@@ -189,10 +248,9 @@ export default class CoreClient {
    * Fetch a client-credentials token if this client doesn't have one yet.
    *
    * gRPC calls get a token lazily: `connectExec` authenticates when a call
-   * returns 401 and retries it. HTTP calls that must not be retried on 401,
-   * such as the actions proxy (a 401 there can come from the third-party API,
-   * and retrying would replay the request), call this first instead.
-   * Concurrent callers share one token request.
+   * returns 401 and retries it. HTTP calls through `this.axios` get one from
+   * its request interceptor, which calls this before every authenticated
+   * request. Concurrent callers share one token request.
    */
   async ensureAccessToken(): Promise<void> {
     if (this.accessToken) return;
@@ -260,7 +318,10 @@ export default class CoreClient {
     }
     const {
       data: { keys },
-    } = await this.axios.get<{ keys: JWK[] }>(jwksEndpoint);
+    } = await this.axios.get<{ keys: JWK[] }>(jwksEndpoint, {
+      // Public keys: validating a token must not fetch an access token.
+      skipAuth: true,
+    });
     this.keys = keys;
   }
 

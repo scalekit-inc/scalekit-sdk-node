@@ -671,7 +671,7 @@ function errorBody(response: AxiosResponse): unknown {
  * (JSON `{ "detail": ..., "code": "UNAUTHORIZED" }`), as opposed to a 401 from
  * the provider. Only this kind is safe to resend after a token refresh.
  */
-function isScalekitUnauthorized(response: AxiosResponse): boolean {
+export function isScalekitUnauthorized(response: AxiosResponse): boolean {
   if (response.status !== 401) return false;
   if (!isJsonContentType(headerRecord(response.headers))) return false;
   const body = errorBody(response);
@@ -696,7 +696,7 @@ function setCause<T extends Error>(error: T, cause: unknown): T {
 }
 
 /** Maps a failed token request the same way `actions.request` maps failures. */
-function tokenRequestError(error: unknown): ScalekitException {
+export function tokenRequestError(error: unknown): ScalekitException {
   if (error instanceof ScalekitException) return error;
   if (error instanceof AxiosError) {
     if (error.response) {
@@ -738,11 +738,6 @@ class ResumableUpload {
       // Read the first chunk before starting the session, so content that
       // fits in one chunk has a known size for X-Upload-Content-Length.
       let chunk = await source.next();
-      try {
-        await this.core.ensureAccessToken();
-      } catch (error) {
-        throw tokenRequestError(error);
-      }
       this.checkAbort();
       this.uploadId = await this.startSession(source.totalBytes);
       return await this.transfer(source, chunk);
@@ -785,7 +780,7 @@ class ResumableUpload {
       headers['Content-Type'] = 'application/json; charset=UTF-8';
       body = Buffer.from(plan.metadataJson, 'utf8');
     }
-    const outcome = await this.exchange({
+    const outcome = await this.send({
       url: this.proxyUrl(),
       method: plan.method,
       params: { uploadType: 'resumable', ...plan.queryParams },
@@ -964,7 +959,7 @@ class ResumableUpload {
       body.length === 0
         ? `bytes */${totalField}`
         : `bytes ${offset}-${offset + body.length - 1}/${totalField}`;
-    return this.exchange({
+    return this.send({
       url: this.proxyUrl(),
       method: 'PUT',
       params: { uploadType: 'resumable', upload_id: this.uploadId },
@@ -978,7 +973,7 @@ class ResumableUpload {
   }
 
   private sendStatusQuery(total: number | undefined): Promise<Exchange> {
-    return this.exchange({
+    return this.send({
       url: this.proxyUrl(),
       method: 'PUT',
       params: { uploadType: 'resumable', upload_id: this.uploadId },
@@ -992,30 +987,9 @@ class ResumableUpload {
   }
 
   /**
-   * Sends one request. A Scalekit 401 (rejected access token) is answered by
-   * one token refresh and one resend, and only when the token changed; the
-   * proxy rejects such a request before forwarding it, so the resend is safe.
+   * Sends one request. `CoreClient` fetches the access token, and replaces
+   * one Scalekit rejected with one resend.
    */
-  private async exchange(config: AxiosRequestConfig): Promise<Exchange> {
-    const tokenUsed = this.core.accessToken;
-    const outcome = await this.send(config);
-    if (
-      outcome.kind === 'http-error' &&
-      isScalekitUnauthorized(outcome.response)
-    ) {
-      try {
-        await this.core.refreshAccessToken(tokenUsed);
-      } catch (error) {
-        throw tokenRequestError(error);
-      }
-      this.checkAbort();
-      if (this.core.accessToken && this.core.accessToken !== tokenUsed) {
-        return this.send(config);
-      }
-    }
-    return outcome;
-  }
-
   private async send(config: AxiosRequestConfig): Promise<Exchange> {
     const { plan } = this;
     try {
@@ -1034,6 +1008,9 @@ class ResumableUpload {
       if (isCancel(error) || plan.signal?.aborted) {
         throw this.abortError();
       }
+      // A failed token request, already mapped by `CoreClient`: not a
+      // response to this upload request, so never retried as one.
+      if (error instanceof ScalekitException) throw error;
       if (error instanceof AxiosError) {
         if (error.response) {
           return { kind: 'http-error', response: error.response, error };

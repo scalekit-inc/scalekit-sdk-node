@@ -3,9 +3,15 @@ import { Axios, AxiosResponse } from 'axios';
 declare module 'axios' {
     interface InternalAxiosRequestConfig {
         skipAuth?: boolean;
+        /** @internal The access token this request was sent with. */
+        sentWithToken?: string | null;
+        /** @internal Set on the one resend after a token refresh. */
+        authRetried?: boolean;
     }
     interface AxiosRequestConfig {
         skipAuth?: boolean;
+        /** @internal Set on the one resend after a token refresh. */
+        authRetried?: boolean;
     }
 }
 import { JWK } from 'jose';
@@ -42,10 +48,9 @@ export default class CoreClient {
      * Fetch a client-credentials token if this client doesn't have one yet.
      *
      * gRPC calls get a token lazily: `connectExec` authenticates when a call
-     * returns 401 and retries it. HTTP calls that must not be retried on 401,
-     * such as the actions proxy (a 401 there can come from the third-party API,
-     * and retrying would replay the request), call this first instead.
-     * Concurrent callers share one token request.
+     * returns 401 and retries it. HTTP calls through `this.axios` get one from
+     * its request interceptor, which calls this before every authenticated
+     * request. Concurrent callers share one token request.
      */
     ensureAccessToken(): Promise<void>;
     private authenticateClient;
