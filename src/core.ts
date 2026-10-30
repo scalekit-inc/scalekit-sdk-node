@@ -26,6 +26,7 @@ import {
 } from './errors/base-exception';
 import { ScalekitGatewayTimeoutException } from './errors/specific-exceptions';
 import { ErrorInfoSchema } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
+import { isScalekitUnauthorized, toScalekitException } from './http-errors';
 
 export const headers = {
   'user-agent': 'user-agent',
@@ -94,9 +95,66 @@ export function assertValidPingInterval(value: number): void {
   }
 }
 
+/** A stream body is consumed by the first send, so it can't be resent. */
+export function isStream(data: unknown): boolean {
+  return typeof (data as { pipe?: unknown } | null)?.pipe === 'function';
+}
+
+// A token is replaced this long before it expires (at most half its
+// lifetime), so a request never goes out with one about to lapse.
+const TOKEN_RENEW_BEFORE_EXPIRY_MS = 10_000;
+
+/** Milliseconds until a JWT's `exp`, or null when it is not a JWT with one. */
+function jwtLifetimeMs(token: string): number | null {
+  const payload = token.split('.')[1];
+  if (!payload) return null;
+  try {
+    const { exp } = JSON.parse(
+      Buffer.from(payload, 'base64url').toString('utf8')
+    ) as { exp?: unknown };
+    return typeof exp === 'number' ? exp * 1000 - Date.now() : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Settles with `promise`, or rejects as soon as `signal` aborts. */
+function untilAborted<T>(
+  promise: Promise<T>,
+  signal?: AbortSignal
+): Promise<T> {
+  if (!signal) return promise;
+  if (signal.aborted) return Promise.reject(signal.reason);
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(signal.reason);
+    signal.addEventListener('abort', onAbort, { once: true });
+    promise
+      .then(resolve, reject)
+      .finally(() => signal.removeEventListener('abort', onAbort));
+  });
+}
+
+/** A 401 the Scalekit proxy sent itself (see `isScalekitUnauthorized`). */
+function isProxyUnauthorized(error: unknown): boolean {
+  return (
+    error instanceof AxiosError &&
+    error.response !== undefined &&
+    isScalekitUnauthorized(error.response)
+  );
+}
+
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
+  // When `accessToken` should be replaced (ms since epoch), from the token
+  // response's lifetime; null when the response gave none.
+  private accessTokenRenewAt: number | null = null;
+  // A token fetched to replace a rejected one that the proxy still answered
+  // with its 401: the cause is the connected account, not this token, so its
+  // 401s don't trigger another token request. It is replaced as usual when
+  // it nears expiry. Only needed against proxies that send connected-account
+  // failures as UNAUTHORIZED rather than TOOL_ERROR.
+  private tokenNotTheCause: string | null = null;
   private pendingAuthentication: Promise<void> | null = null;
   public axios: Axios;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -137,6 +195,9 @@ export default class CoreClient {
     // budget (the actions proxy) set a per-request timeout, which overrides
     // this default.
     this.axios = axios.create({ baseURL: envUrl, timeout: this.timeoutMs });
+    // Attaches the token this client holds; never fetches one. Calls that
+    // need a token get it through `withAccessToken` (HTTP) or `connectExec`
+    // (gRPC), so creating a client or validating a token never fetches one.
     this.axios.interceptors.request.use((config) => {
       config.headers[headers['user-agent']] = this.userAgent;
       config.headers[headers['x-sdk-version']] = this.sdkVersion;
@@ -186,22 +247,32 @@ export default class CoreClient {
   }
 
   /**
-   * Fetch a client-credentials token if this client doesn't have one yet.
+   * Fetch a client-credentials token if this client has none, or if the one
+   * it holds expires within 10 seconds.
    *
    * gRPC calls get a token lazily: `connectExec` authenticates when a call
-   * returns 401 and retries it. HTTP calls that must not be retried on 401,
-   * such as the actions proxy (a 401 there can come from the third-party API,
-   * and retrying would replay the request), call this first instead.
-   * Concurrent callers share one token request.
+   * returns 401 and retries it. HTTP calls that need one call this through
+   * `withAccessToken` before sending. Concurrent callers share one token
+   * request.
    */
   async ensureAccessToken(): Promise<void> {
-    if (this.accessToken) return;
+    if (
+      this.accessToken &&
+      (this.accessTokenRenewAt === null || Date.now() < this.accessTokenRenewAt)
+    ) {
+      return;
+    }
+    await this.fetchAccessToken();
+  }
+
+  /** One token request at a time; concurrent callers share it. */
+  private fetchAccessToken(): Promise<void> {
     if (!this.pendingAuthentication) {
       this.pendingAuthentication = this.authenticateClient().finally(() => {
         this.pendingAuthentication = null;
       });
     }
-    await this.pendingAuthentication;
+    return this.pendingAuthentication;
   }
 
   private async authenticateClient() {
@@ -213,7 +284,26 @@ export default class CoreClient {
       })
     );
 
-    this.accessToken = res.data.access_token;
+    const { access_token: token, expires_in: expiresIn } = (res.data ??
+      {}) as Partial<TokenResponse>;
+    // Storing an empty token would send every call out unauthenticated, and
+    // each would request another token.
+    if (typeof token !== 'string' || token === '') {
+      throw new ScalekitException(
+        'The token endpoint answered without an access_token.'
+      );
+    }
+    const lifetimeMs =
+      typeof expiresIn === 'number' && expiresIn > 0
+        ? expiresIn * 1000
+        : jwtLifetimeMs(token);
+    this.accessToken = token;
+    this.accessTokenRenewAt =
+      lifetimeMs === null
+        ? null
+        : Date.now() +
+          lifetimeMs -
+          Math.min(TOKEN_RENEW_BEFORE_EXPIRY_MS, lifetimeMs / 2);
   }
   /**
    * Authenticate with the code
@@ -242,12 +332,70 @@ export default class CoreClient {
    */
   async refreshAccessToken(rejectedToken: string | null): Promise<void> {
     if (this.accessToken !== rejectedToken) return;
-    if (!this.pendingAuthentication) {
-      this.pendingAuthentication = this.authenticateClient().finally(() => {
-        this.pendingAuthentication = null;
-      });
+    await this.fetchAccessToken();
+  }
+
+  /**
+   * Run an authenticated HTTP request through `this.axios`, with a token that
+   * isn't about to expire: fetch one first if needed (`ensureAccessToken`).
+   *
+   * If Scalekit still rejects the token (revoked, a rotated signing key, or
+   * clock skew), fetch a new one and send the request once more, as
+   * `connectExec` does for gRPC calls. Only a 401 the Scalekit proxy sent
+   * itself counts: the proxy rejects it before forwarding, so the resend is
+   * safe. A 401 from the provider is returned as is, never replayed.
+   *
+   * A connected account's own credential failure (code `TOOL_ERROR`) and
+   * anything relayed from the provider (`X-Scalekit-Upstream`) are never
+   * resent. Proxies deployed before that sent connected-account failures as
+   * `UNAUTHORIZED` too; when a freshly fetched token still gets that 401, the
+   * token isn't the cause, so further 401s on that token are returned
+   * without another token request or resend.
+   *
+   * Pass `resend: false` when `send` can't run twice (a stream body): the
+   * token is still renewed, so the next call works, and the 401 is returned.
+   * Pass `signal` to stop waiting for a token request when it aborts.
+   *
+   * @internal
+   */
+  async withAccessToken<T>(
+    send: () => Promise<T>,
+    { resend = true, signal }: { resend?: boolean; signal?: AbortSignal } = {}
+  ): Promise<T> {
+    const tokenRequest = (request: Promise<void>) =>
+      untilAborted(
+        request.catch((error: unknown) => {
+          throw toScalekitException(error);
+        }),
+        signal
+      );
+
+    await tokenRequest(this.ensureAccessToken());
+    const tokenUsed = this.accessToken;
+    try {
+      return await send();
+    } catch (error) {
+      if (!isProxyUnauthorized(error) || tokenUsed === this.tokenNotTheCause) {
+        throw error;
+      }
+      await tokenRequest(this.refreshAccessToken(tokenUsed));
+      const freshToken = this.accessToken;
+      if (!resend || !freshToken || freshToken === tokenUsed) throw error;
+      try {
+        return await send();
+      } catch (retryError) {
+        // Only when the token's expiry is known: one without it is never
+        // renewed ahead of time, so it must stay refreshable on a 401.
+        if (
+          isProxyUnauthorized(retryError) &&
+          this.accessToken === freshToken &&
+          this.accessTokenRenewAt !== null
+        ) {
+          this.tokenNotTheCause = freshToken;
+        }
+        throw retryError;
+      }
     }
-    await this.pendingAuthentication;
   }
 
   /**

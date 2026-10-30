@@ -22,6 +22,8 @@ export declare const DEFAULT_PING_TIMEOUT_MS = 5000;
 export declare const MIN_PING_INTERVAL_MS = 60000;
 export declare function assertValidTimeout(name: string, value: number): void;
 export declare function assertValidPingInterval(value: number): void;
+/** A stream body is consumed by the first send, so it can't be resent. */
+export declare function isStream(data: unknown): boolean;
 export default class CoreClient {
     readonly envUrl: string;
     readonly clientId: string;
@@ -32,6 +34,8 @@ export default class CoreClient {
     readonly pingTimeoutMs: number;
     keys: JWK[];
     accessToken: string | null;
+    private accessTokenRenewAt;
+    private tokenNotTheCause;
     private pendingAuthentication;
     axios: Axios;
     sdkVersion: string;
@@ -39,15 +43,17 @@ export default class CoreClient {
     userAgent: string;
     constructor(envUrl: string, clientId: string, clientSecret: string, toolTimeoutMs?: number, timeoutMs?: number, pingIntervalMs?: number, pingTimeoutMs?: number);
     /**
-     * Fetch a client-credentials token if this client doesn't have one yet.
+     * Fetch a client-credentials token if this client has none, or if the one
+     * it holds expires within 10 seconds.
      *
      * gRPC calls get a token lazily: `connectExec` authenticates when a call
-     * returns 401 and retries it. HTTP calls that must not be retried on 401,
-     * such as the actions proxy (a 401 there can come from the third-party API,
-     * and retrying would replay the request), call this first instead.
-     * Concurrent callers share one token request.
+     * returns 401 and retries it. HTTP calls that need one call this through
+     * `withAccessToken` before sending. Concurrent callers share one token
+     * request.
      */
     ensureAccessToken(): Promise<void>;
+    /** One token request at a time; concurrent callers share it. */
+    private fetchAccessToken;
     private authenticateClient;
     /**
      * Authenticate with the code
@@ -67,6 +73,33 @@ export default class CoreClient {
      * @internal
      */
     refreshAccessToken(rejectedToken: string | null): Promise<void>;
+    /**
+     * Run an authenticated HTTP request through `this.axios`, with a token that
+     * isn't about to expire: fetch one first if needed (`ensureAccessToken`).
+     *
+     * If Scalekit still rejects the token (revoked, a rotated signing key, or
+     * clock skew), fetch a new one and send the request once more, as
+     * `connectExec` does for gRPC calls. Only a 401 the Scalekit proxy sent
+     * itself counts: the proxy rejects it before forwarding, so the resend is
+     * safe. A 401 from the provider is returned as is, never replayed.
+     *
+     * A connected account's own credential failure (code `TOOL_ERROR`) and
+     * anything relayed from the provider (`X-Scalekit-Upstream`) are never
+     * resent. Proxies deployed before that sent connected-account failures as
+     * `UNAUTHORIZED` too; when a freshly fetched token still gets that 401, the
+     * token isn't the cause, so further 401s on that token are returned
+     * without another token request or resend.
+     *
+     * Pass `resend: false` when `send` can't run twice (a stream body): the
+     * token is still renewed, so the next call works, and the 401 is returned.
+     * Pass `signal` to stop waiting for a token request when it aborts.
+     *
+     * @internal
+     */
+    withAccessToken<T>(send: () => Promise<T>, { resend, signal }?: {
+        resend?: boolean;
+        signal?: AbortSignal;
+    }): Promise<T>;
     /**
      * Get the JWKS from the server and store it in the client instance
      * @returns {Promise<void>} Returns nothing
