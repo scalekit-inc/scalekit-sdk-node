@@ -4,9 +4,6 @@
 //
 // The bundle holds the `jose` version installed at build time, so a `jose`
 // version change also changes lib/: run `npm run build` and commit lib/vendor/.
-// package.json pins `jose` to an exact version for the same reason: the
-// installed copy then always matches this bundle, so `npm audit` in a
-// consumer's app reports the `jose` the SDK really runs on every runtime.
 import { build } from 'esbuild';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
