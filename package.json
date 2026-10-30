@@ -55,7 +55,7 @@
     "@connectrpc/connect": "^2.1.1",
     "@connectrpc/connect-node": "^2.1.1",
     "axios": "^1.19.0",
-    "jose": "^6.2.3",
+    "jose": "^6.2.14",
     "qs": "^6.15.2"
   },
   "devDependencies": {
