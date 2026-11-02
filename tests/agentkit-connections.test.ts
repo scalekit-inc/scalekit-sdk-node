@@ -22,8 +22,17 @@ import {
 } from '../src/pkg/grpc/scalekit/v1/connections/connections_pb';
 import { ToolExposure } from '../src/pkg/grpc/scalekit/v1/mcp/mcp_pb';
 
-const core = () =>
-  new CoreClient('https://test.scalekit.dev', 'client_id', 'client_secret');
+// Holds a token, as a client does after its first call: `connectExec` would
+// otherwise fetch one from the token endpoint first.
+const core = () => {
+  const client = new CoreClient(
+    'https://test.scalekit.dev',
+    'client_id',
+    'client_secret'
+  );
+  client.accessToken = 'test-access-token';
+  return client;
+};
 
 function setup() {
   const rpc = {

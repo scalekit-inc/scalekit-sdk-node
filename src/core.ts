@@ -203,6 +203,7 @@ export default class CoreClient {
     // Attaches the token this client holds; never fetches one. Calls that
     // need a token get it through `withAccessToken` (HTTP) or `connectExec`
     // (gRPC), so creating a client or validating a token never fetches one.
+    // The gRPC transport (`connect.ts`) attaches it the same way.
     this.axios.interceptors.request.use((config) => {
       config.headers[headers['user-agent']] = this.userAgent;
       config.headers[headers['x-sdk-version']] = this.sdkVersion;
@@ -247,18 +248,15 @@ export default class CoreClient {
         return Promise.reject(error);
       }
     );
-    // removing token creation at the time of constructor and instead letting the retry functionality handle generating a token whenever required.
-    //this.authenticateClient();
   }
 
   /**
    * Fetch a client-credentials token if this client has none, or if the one
    * it holds expires within 10 seconds.
    *
-   * gRPC calls get a token lazily: `connectExec` authenticates when a call
-   * returns 401 and retries it. HTTP calls that need one call this through
-   * `withAccessToken` before sending. Concurrent callers share one token
-   * request.
+   * Every call that needs a token runs this before sending: gRPC calls in
+   * `connectExec`, HTTP calls through `withAccessToken`. Concurrent callers
+   * share one token request.
    */
   async ensureAccessToken(): Promise<void> {
     if (
@@ -426,18 +424,49 @@ export default class CoreClient {
   /**
    * Execute a function with error handling and retry logic.
    *
+   * The token is fetched before the first call and renewed shortly before it
+   * expires (`ensureAccessToken`), the same as for HTTP calls. If Scalekit
+   * still rejects it (401 without `TOOL_ERROR`: revoked, a rotated signing
+   * key, clock skew), one new token is fetched, shared with concurrent
+   * callers, and the call is sent once more. A second rejection is returned:
+   * another token would not fix it.
+   *
    * @param fn Function to execute
    * @param data Data to pass to the function
    * @param options Optional per-call gRPC options (e.g. `timeoutMs`), forwarded to `fn` as-is.
    *                Omit to use the transport's default deadline.
    * @returns {Promise<TResponse>} Returns the response
+   * @throws The token endpoint's own error (an `AxiosError`, not mapped) when
+   *         Scalekit rejects the token and fetching a new one fails, as in
+   *         earlier releases.
    */
   async connectExec<TRequest, TResponse>(
     fn: (request: TRequest, options?: CallOptions) => Promise<TResponse>,
     data: TRequest,
     options?: CallOptions
   ): Promise<TResponse> {
-    return this._connectExec(fn, data, 3, 0, options);
+    if (!options?.signal?.aborted) {
+      // Intentional fallback: if this up-front token request fails, send the
+      // call anyway, with the token held (possibly still valid) or none. It
+      // then fails, or succeeds, exactly as it did before tokens were
+      // fetched up front: Scalekit unreachable → Unavailable retries and
+      // `ScalekitServiceUnavailableException`; only the token endpoint
+      // failing → a 401, whose refresh throws the token endpoint's error.
+      await this.ensureAccessToken().catch(() => undefined);
+    }
+    return this._connectExec(fn, data, 3, 0, false, options);
+  }
+
+  /**
+   * After Scalekit rejected `tokenUsed`, fetch a new token (skipped when a
+   * concurrent call already replaced it). True when the client now holds a
+   * different token, so a resend can succeed.
+   */
+  private async replaceRejectedToken(
+    tokenUsed: string | null
+  ): Promise<boolean> {
+    await this.refreshAccessToken(tokenUsed);
+    return this.accessToken !== null && this.accessToken !== tokenUsed;
   }
 
   private async _connectExec<TRequest, TResponse>(
@@ -445,8 +474,10 @@ export default class CoreClient {
     data: TRequest,
     retryLeft: number,
     attempt: number,
+    tokenRefreshed: boolean,
     options?: CallOptions
   ): Promise<TResponse> {
+    const tokenUsed = this.accessToken;
     try {
       return await fn(data, options);
     } catch (error) {
@@ -461,13 +492,17 @@ export default class CoreClient {
           .some((d) => d.errorCode === 'TOOL_ERROR');
 
         if (!isToolError && retryLeft > 0) {
-          if (error.code === Code.Unauthenticated) {
-            await this.authenticateClient();
+          if (
+            error.code === Code.Unauthenticated &&
+            !tokenRefreshed &&
+            (await this.replaceRejectedToken(tokenUsed))
+          ) {
             return this._connectExec(
               fn,
               data,
               retryLeft - 1,
               attempt + 1,
+              true,
               options
             );
           }
@@ -483,6 +518,7 @@ export default class CoreClient {
               data,
               retryLeft - 1,
               attempt + 1,
+              tokenRefreshed,
               options
             );
           }
@@ -493,13 +529,17 @@ export default class CoreClient {
       if (error instanceof AxiosError) {
         if (error.response) {
           if (retryLeft > 0) {
-            if (error.response.status === HttpStatusCode.Unauthorized) {
-              await this.authenticateClient();
+            if (
+              error.response.status === HttpStatusCode.Unauthorized &&
+              !tokenRefreshed &&
+              (await this.replaceRejectedToken(tokenUsed))
+            ) {
               return this._connectExec(
                 fn,
                 data,
                 retryLeft - 1,
                 attempt + 1,
+                true,
                 options
               );
             }
