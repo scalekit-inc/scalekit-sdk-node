@@ -248,8 +248,6 @@ export default class CoreClient {
         return Promise.reject(error);
       }
     );
-    // removing token creation at the time of constructor and instead letting the retry functionality handle generating a token whenever required.
-    //this.authenticateClient();
   }
 
   /**
@@ -438,15 +436,24 @@ export default class CoreClient {
    * @param options Optional per-call gRPC options (e.g. `timeoutMs`), forwarded to `fn` as-is.
    *                Omit to use the transport's default deadline.
    * @returns {Promise<TResponse>} Returns the response
+   * @throws The token endpoint's own error (an `AxiosError`, not mapped) when
+   *         Scalekit rejects the token and fetching a new one fails, as in
+   *         earlier releases.
    */
   async connectExec<TRequest, TResponse>(
     fn: (request: TRequest, options?: CallOptions) => Promise<TResponse>,
     data: TRequest,
     options?: CallOptions
   ): Promise<TResponse> {
-    // A failed token request throws what it always has here (no mapping), so
-    // callers that match on it see no change.
-    await this.ensureAccessToken();
+    if (!options?.signal?.aborted) {
+      // Intentional fallback: if this up-front token request fails, send the
+      // call anyway, with the token held (possibly still valid) or none. It
+      // then fails, or succeeds, exactly as it did before tokens were
+      // fetched up front: Scalekit unreachable → Unavailable retries and
+      // `ScalekitServiceUnavailableException`; only the token endpoint
+      // failing → a 401, whose refresh throws the token endpoint's error.
+      await this.ensureAccessToken().catch(() => undefined);
+    }
     return this._connectExec(fn, data, 3, 0, false, options);
   }
 

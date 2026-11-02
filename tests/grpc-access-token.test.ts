@@ -27,6 +27,7 @@ import { Code, ConnectError, type ConnectRouter } from '@connectrpc/connect';
 import { connectNodeAdapter } from '@connectrpc/connect-node';
 import { AxiosError } from 'axios';
 import ScalekitClient from '../src/scalekit';
+import { ScalekitServerException } from '../src/errors/base-exception';
 import CoreClient from '../src/core';
 import {
   ScalekitToolUnauthorizedException,
@@ -59,6 +60,10 @@ let tokenFixed: string | undefined;
 let grpcAuth: Array<string | null>;
 let rejectedTokens: Set<string>;
 let script: Outcome[];
+// Runs once, inside the next gRPC request, before it is answered.
+let duringNextRequest: (() => Promise<void>) | undefined;
+// HTTP/1 `/proxy` route: the Authorization header of each request.
+let proxyAuth: Array<string | undefined>;
 
 function toolError(): ConnectError {
   return new ConnectError('provider token expired', Code.Unauthenticated, {}, [
@@ -78,9 +83,12 @@ function toolError(): ConnectError {
 
 function routes(router: ConnectRouter) {
   router.service(OrganizationService, {
-    listOrganization(_req, ctx) {
+    async listOrganization(_req, ctx) {
       const auth = ctx.requestHeader.get('authorization');
       grpcAuth.push(auth);
+      const hook = duringNextRequest;
+      duringNextRequest = undefined;
+      await hook?.();
       const token = auth?.replace(/^Bearer /, '') ?? '';
       const outcome =
         script.shift() ??
@@ -101,6 +109,20 @@ function routes(router: ConnectRouter) {
 
 beforeAll(async () => {
   tokenServer = http.createServer((req, res) => {
+    if (req.url?.startsWith('/proxy')) {
+      // The Scalekit proxy: its own 401 for a missing or rejected token.
+      proxyAuth.push(req.headers.authorization);
+      const token = (req.headers.authorization ?? '').replace(/^Bearer /, '');
+      const ok = token !== '' && !rejectedTokens.has(token);
+      req.resume();
+      res.writeHead(ok ? 200 : 401, { 'content-type': 'application/json' });
+      res.end(
+        JSON.stringify(
+          ok ? {} : { detail: 'token rejected', code: 'UNAUTHORIZED' }
+        )
+      );
+      return;
+    }
     tokenCalls += 1;
     const n = tokenCalls;
     req.resume();
@@ -144,6 +166,8 @@ beforeEach(() => {
   grpcAuth = [];
   rejectedTokens = new Set();
   script = [];
+  duringNextRequest = undefined;
+  proxyAuth = [];
 });
 
 afterEach(() => {
@@ -307,7 +331,7 @@ describe('gRPC access token', () => {
     expect(grpcAuth).toHaveLength(3);
   });
 
-  it('sends nothing when the token request fails, and throws the same error as before', async () => {
+  it('when the token endpoint fails, sends the call as earlier releases did and throws the token error', async () => {
     tokenStatus = 401;
     const { client } = makeClient();
 
@@ -315,11 +339,131 @@ describe('gRPC access token', () => {
       .listOrganization()
       .catch((e: unknown) => e);
 
-    // Unchanged from earlier releases (the token request failed after the
-    // first call's 401 then): callers may match on the axios error.
+    // As in earlier releases: the call goes out without a token, gets a 401,
+    // and the token request that follows throws the axios error callers may
+    // match on.
     expect(error).toBeInstanceOf(AxiosError);
     expect((error as AxiosError).response?.status).toBe(401);
-    expect(tokenCalls).toBe(1);
-    expect(grpcAuth).toEqual([]);
+    expect(tokenCalls).toBe(2);
+    expect(grpcAuth).toEqual([null]);
+  });
+
+  it('keeps a still-valid token when renewing it fails', async () => {
+    tokenExpiresIn = 60;
+    const { client } = makeClient();
+    await client.organization.listOrganization();
+
+    // 5 s left: renewal is due, but the token endpoint is down.
+    const now = Date.now();
+    jest.spyOn(Date, 'now').mockReturnValue(now + 55_000);
+    tokenStatus = 503;
+    await client.organization.listOrganization();
+
+    expect(tokenCalls).toBe(2);
+    expect(grpcAuth).toEqual(['Bearer fresh-1', 'Bearer fresh-1']);
+  });
+
+  it('resends with a token another call already fetched, with no extra token request', async () => {
+    const { client, core } = makeClient();
+    await client.organization.listOrganization();
+    rejectedTokens.add('fresh-1');
+    // While this call is in flight on fresh-1, another call replaces it.
+    duringNextRequest = () => core.refreshAccessToken('fresh-1');
+
+    await client.organization.listOrganization();
+
+    expect(tokenCalls).toBe(2);
+    expect(grpcAuth).toEqual([
+      'Bearer fresh-1',
+      'Bearer fresh-1',
+      'Bearer fresh-2',
+    ]);
+  });
+
+  it('shares one token request between a gRPC call and an HTTP call rejected on the same token', async () => {
+    const { client, core } = makeClient();
+    await client.organization.listOrganization();
+    rejectedTokens.add('fresh-1');
+
+    await Promise.all([
+      client.organization.listOrganization(),
+      core.withAccessToken(() => core.axios.get('/proxy/notes')),
+    ]);
+
+    expect(tokenCalls).toBe(2);
+    expect(grpcAuth.slice(1)).toEqual(['Bearer fresh-1', 'Bearer fresh-2']);
+    expect(proxyAuth).toEqual(['Bearer fresh-1', 'Bearer fresh-2']);
+  });
+});
+
+describe('gRPC call when Scalekit is unreachable', () => {
+  it('fails as a gRPC call, not with the up-front token request error', async () => {
+    // A port nothing listens on, for both the gRPC call and the token request.
+    const closed = http.createServer();
+    await new Promise<void>((r) => closed.listen(0, '127.0.0.1', () => r()));
+    const port = (closed.address() as AddressInfo).port;
+    await new Promise<void>((r) => closed.close(() => r()));
+    const client = new ScalekitClient(
+      `http://127.0.0.1:${port}`,
+      'client_id',
+      'secret',
+      { pingIntervalMs: 0 }
+    );
+    const core = (client as unknown as { coreClient: CoreClient }).coreClient;
+    jest
+      .spyOn(core as unknown as { sleep: () => Promise<void> }, 'sleep')
+      .mockResolvedValue(undefined);
+
+    const error = await client.organization
+      .listOrganization()
+      .catch((e: unknown) => e);
+
+    // The same exception earlier releases threw (the call went out first
+    // then). Under jest the transport reports the refused connection as
+    // Internal; from the built SDK it is `ScalekitServiceUnavailableException`
+    // after the Unavailable retries, before and after this change.
+    expect(error).toBeInstanceOf(ScalekitServerException);
+    expect(error).not.toBeInstanceOf(AxiosError);
+  });
+});
+
+describe('connectExec with an HTTP call (axios 401)', () => {
+  function unauthorized(): AxiosError {
+    return new AxiosError('401', 'ERR_BAD_REQUEST', undefined, undefined, {
+      status: 401,
+      statusText: 'Unauthorized',
+      data: {},
+      headers: {},
+      config: { headers: {} } as never,
+    });
+  }
+
+  function makeCore(): CoreClient {
+    return new CoreClient(tokenOrigin, 'client_id', 'secret');
+  }
+
+  it('fetches one new token and sends once more', async () => {
+    const core = makeCore();
+    const fn = jest
+      .fn<(req: void) => Promise<string>>()
+      .mockRejectedValueOnce(unauthorized())
+      .mockResolvedValue('ok');
+
+    await expect(core.connectExec(fn, undefined)).resolves.toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
+    expect(tokenCalls).toBe(2);
+  });
+
+  it('returns a second 401 without another token request', async () => {
+    const core = makeCore();
+    const fn = jest
+      .fn<(req: void) => Promise<string>>()
+      .mockRejectedValue(unauthorized());
+
+    await expect(core.connectExec(fn, undefined)).rejects.toBeInstanceOf(
+      ScalekitUnauthorizedException
+    );
+    expect(fn).toHaveBeenCalledTimes(2);
+    expect(tokenCalls).toBe(2);
   });
 });

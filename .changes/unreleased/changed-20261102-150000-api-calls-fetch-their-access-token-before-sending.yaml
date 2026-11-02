@@ -1,6 +1,6 @@
 kind: changed
 body: |
-  `ScalekitClient` API calls (organizations, users, connections and the other service clients) now fetch the access token before a client's first call and renew it shortly before it expires, instead of sending without one and retrying after a 401. If Scalekit still rejects the token, the client fetches one new token, shared by concurrent calls, and retries the call once; previously it retried up to three times.
+  Service calls such as `scalekit.organization.listOrganization` and `scalekit.user.getUser` now fetch the client's access token before its first call and renew it shortly before it expires, instead of sending without one and retrying after a 401. If Scalekit still rejects the token, the client fetches one new token, shared by concurrent calls, and retries the call once; previously it retried up to three times. [Reference](https://docs.scalekit.com/apis)
 time: '2026-11-02T15:00:00.000000+00:00'
 custom:
   Breaking: 'No'

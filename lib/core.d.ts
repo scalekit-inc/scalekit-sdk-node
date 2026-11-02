@@ -119,6 +119,9 @@ export default class CoreClient {
      * @param options Optional per-call gRPC options (e.g. `timeoutMs`), forwarded to `fn` as-is.
      *                Omit to use the transport's default deadline.
      * @returns {Promise<TResponse>} Returns the response
+     * @throws The token endpoint's own error (an `AxiosError`, not mapped) when
+     *         Scalekit rejects the token and fetching a new one fails, as in
+     *         earlier releases.
      */
     connectExec<TRequest, TResponse>(fn: (request: TRequest, options?: CallOptions) => Promise<TResponse>, data: TRequest, options?: CallOptions): Promise<TResponse>;
     /**
