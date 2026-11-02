@@ -14,8 +14,8 @@ export declare function errorBody(response: AxiosResponse): unknown;
  * a request before forwarding it, so a resend is safe.
  *
  * Proxies deployed before `TOOL_ERROR` was used here sent connected-account
- * failures as `UNAUTHORIZED` too; `CoreClient.withAccessToken` limits the
- * refreshes those cost.
+ * failures as `UNAUTHORIZED` too; against those, `CoreClient.withAccessToken`
+ * spends one token request and one resend per call.
  */
 export declare function isScalekitUnauthorized(response: AxiosResponse): boolean;
 export declare function setCause<T extends Error>(error: T, cause: unknown): T;

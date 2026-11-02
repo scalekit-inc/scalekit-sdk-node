@@ -35,7 +35,6 @@ export default class CoreClient {
     keys: JWK[];
     accessToken: string | null;
     private accessTokenRenewAt;
-    private tokenNotTheCause;
     private pendingAuthentication;
     axios: Axios;
     sdkVersion: string;
@@ -83,10 +82,11 @@ export default class CoreClient {
      * safe. A 401 from the provider is returned as is, never replayed.
      *
      * A connected account's own credential failure (code `TOOL_ERROR`) is
-     * never resent. Proxies deployed before that sent connected-account failures as
-     * `UNAUTHORIZED` too; when a freshly fetched token still gets that 401, the
-     * token isn't the cause, so further 401s on that token are returned
-     * without another token request or resend.
+     * never resent. A proxy deployed before it sent `TOOL_ERROR` answers those
+     * with `UNAUTHORIZED`, which costs one token request and one resend per
+     * call, the same bound as a gRPC call. No call carries over a decision that
+     * a token is not the cause: a token that is later revoked must stay
+     * replaceable on its next 401.
      *
      * Pass `resend: false` when `send` can't run twice (a stream body): the
      * token is still renewed, so the next call works, and the 401 is returned.
