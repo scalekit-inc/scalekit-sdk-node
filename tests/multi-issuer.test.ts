@@ -4,12 +4,12 @@ import {
   expect,
   beforeAll,
   beforeEach,
-  afterEach,
-  jest as jestGlobal,
+  afterAll,
 } from '@jest/globals';
 import * as jose from 'jose';
 import ScalekitClient from '../src/scalekit';
 import { ScalekitEdgeClient } from '../src/edge';
+import { startJwksServer, type JwksServer } from './utils/jwks-server';
 
 const ENV_URL = 'https://acme.scalekit.cloud';
 const BASE_ISSUER = ENV_URL;
@@ -22,6 +22,7 @@ describe('multi-issuer token validation', () => {
   let publicJwk: jose.JWK;
   let client: ScalekitClient;
   let edgeClient: ScalekitEdgeClient;
+  let jwksServer: JwksServer;
 
   beforeAll(async () => {
     const { publicKey, privateKey: priv } = await jose.generateKeyPair('RS256');
@@ -30,6 +31,15 @@ describe('multi-issuer token validation', () => {
     publicJwk.kid = 'test-key-1';
     publicJwk.alg = 'RS256';
     publicJwk.use = 'sig';
+    // The edge client fetches the JWKS itself; serve it locally so the test
+    // works with whichever transport jose uses on this runtime.
+    jwksServer = await startJwksServer(() => ({
+      body: JSON.stringify({ keys: [publicJwk] }),
+    }));
+  });
+
+  afterAll(async () => {
+    await jwksServer.close();
   });
 
   beforeEach(() => {
@@ -39,17 +49,8 @@ describe('multi-issuer token validation', () => {
       client as unknown as { coreClient: { keys: jose.JWK[] } }
     ).coreClient.keys = [publicJwk];
 
-    edgeClient = new ScalekitEdgeClient(ENV_URL, 'skc_123', 'secret');
-    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
-      ok: true,
-      status: 200,
-      headers: new Headers({ 'content-type': 'application/json' }),
-      json: async () => ({ keys: [publicJwk] }),
-    } as Response);
-  });
-
-  afterEach(() => {
-    jestGlobal.restoreAllMocks();
+    // The issuer under test is set per call, independently of the JWKS host.
+    edgeClient = new ScalekitEdgeClient(jwksServer.url, 'skc_123', 'secret');
   });
 
   const signWithIssuer = (iss: string) =>

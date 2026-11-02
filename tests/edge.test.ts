@@ -1,3 +1,11 @@
+/**
+ * @jest-environment-options {"customExportConditions": ["edge-light", "worker"]}
+ */
+// ScalekitEdgeClient targets edge runtimes, where bundlers resolve `jose` to
+// its fetch-based build (the `worker`/`browser` export). The conditions above
+// make Jest resolve the same build, so the JWKS request goes through the
+// `fetch` stubs in this file. On Node.js the same client fetches the JWKS
+// with node:http(s) instead; tests/edge-node-jwks.test.ts covers that path.
 import {
   describe,
   it,
@@ -372,7 +380,7 @@ describe('ScalekitEdgeClient.validateToken', () => {
   }
 
   it('verifies a real RS256 token against a mocked JWKS endpoint', async () => {
-    jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
+    const fetchSpy = jestGlobal.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
       status: 200,
       headers: new Headers({ 'content-type': 'application/json' }),
@@ -383,6 +391,11 @@ describe('ScalekitEdgeClient.validateToken', () => {
     const payload = await client.validateToken<{ email: string }>(token);
 
     expect(payload.email).toBe('user@example.com');
+    // The JWKS came from the stub, not from the network.
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(String(fetchSpy.mock.calls[0][0])).toBe(
+      'https://acme.scalekit.cloud/keys'
+    );
   });
 
   it('rejects a token signed by an unrelated key', async () => {
