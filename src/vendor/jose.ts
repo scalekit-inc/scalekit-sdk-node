@@ -7,9 +7,11 @@
  * bundlers. The SDK then shares that module instance with the application,
  * so its error classes are the ones callers match with `instanceof`.
  *
- * Where `require()` cannot load ES modules (older Node.js 20 and 22, Jest
- * without a transform for `jose`), it falls back to a CommonJS bundle of the
- * same exports, built from the installed `jose` by `scripts/bundle-jose.js`.
+ * Where `require()` cannot load ES modules (older Node.js 20 and 22; Jest 30.5
+ * and later without a transform for `jose`), it falls back to a CommonJS
+ * bundle of the same exports, built from the installed `jose` by
+ * `scripts/bundle-jose.js`. Older Jest versions fail with a `SyntaxError`
+ * that carries no code, which is deliberately not treated as a fallback.
  *
  * Types from this module must not appear in public declarations: they would
  * import `jose` from CommonJS declaration files.
@@ -25,7 +27,8 @@ export type JoseApi = Pick<typeof Jose, (typeof JOSE_EXPORTS)[number]>;
  * Errors that mean `require()` cannot load `jose` synchronously on this
  * runtime, so the bundled copy is used instead:
  * - `ERR_REQUIRE_ESM`: `require()` of an ES module is unsupported or disabled
- *   (Node.js without `require(esm)`; Jest also uses this code).
+ *   (Node.js without `require(esm)`; Jest 30.5 and later also use this
+ *   code).
  * - `ERR_REQUIRE_ASYNC_MODULE`: `require(esm)` reached top-level `await`.
  *
  * Anything else, including `MODULE_NOT_FOUND`, is rethrown: `jose` is a
