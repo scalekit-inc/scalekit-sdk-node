@@ -124,7 +124,11 @@ function untilAborted<T>(
   signal?: AbortSignal
 ): Promise<T> {
   if (!signal) return promise;
-  if (signal.aborted) return Promise.reject(signal.reason);
+  if (signal.aborted) {
+    // The caller stops waiting for `promise`; keep its rejection from going unhandled.
+    promise.catch(() => undefined);
+    return Promise.reject(signal.reason);
+  }
   return new Promise<T>((resolve, reject) => {
     const onAbort = () => reject(signal.reason);
     signal.addEventListener('abort', onAbort, { once: true });
@@ -362,15 +366,18 @@ export default class CoreClient {
     send: () => Promise<T>,
     { resend = true, signal }: { resend?: boolean; signal?: AbortSignal } = {}
   ): Promise<T> {
-    const tokenRequest = (request: Promise<void>) =>
-      untilAborted(
-        request.catch((error: unknown) => {
-          throw toScalekitException(error);
-        }),
-        signal
-      );
+    // An aborted call doesn't start a token request it would not wait for.
+    const tokenRequest = (start: () => Promise<void>) =>
+      signal?.aborted
+        ? Promise.reject(signal.reason)
+        : untilAborted(
+            start().catch((error: unknown) => {
+              throw toScalekitException(error);
+            }),
+            signal
+          );
 
-    await tokenRequest(this.ensureAccessToken());
+    await tokenRequest(() => this.ensureAccessToken());
     const tokenUsed = this.accessToken;
     try {
       return await send();
@@ -378,7 +385,7 @@ export default class CoreClient {
       if (!isProxyUnauthorized(error) || tokenUsed === this.tokenNotTheCause) {
         throw error;
       }
-      await tokenRequest(this.refreshAccessToken(tokenUsed));
+      await tokenRequest(() => this.refreshAccessToken(tokenUsed));
       const freshToken = this.accessToken;
       if (!resend || !freshToken || freshToken === tokenUsed) throw error;
       try {

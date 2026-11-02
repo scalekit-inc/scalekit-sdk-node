@@ -417,4 +417,36 @@ describe('access token lifetime', () => {
     expect(Date.now() - started).toBeLessThan(1000);
     expect(sent).toBe(false);
   });
+
+  it('rejects at once, with no token request and no unhandled rejection, when the signal is already aborted', async () => {
+    tokenEndpointStatus = 500; // a token request, if one started, would fail
+    const core = (makeClient() as unknown as { coreClient: CoreClient })
+      .coreClient;
+    const controller = new AbortController();
+    const reason = new Error('stop');
+    controller.abort(reason);
+    const unhandled: unknown[] = [];
+    const onUnhandled = (error: unknown) => unhandled.push(error);
+    process.on('unhandledRejection', onUnhandled);
+    let sent = false;
+
+    try {
+      await expect(
+        core.withAccessToken(
+          async () => {
+            sent = true;
+          },
+          { signal: controller.signal }
+        )
+      ).rejects.toBe(reason);
+      // Give any stray rejection time to surface.
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    } finally {
+      process.off('unhandledRejection', onUnhandled);
+    }
+
+    expect(tokenCalls).toBe(0);
+    expect(sent).toBe(false);
+    expect(unhandled).toEqual([]);
+  });
 });
