@@ -1,13 +1,14 @@
-// The package is compiled to CommonJS and bundles `jose` (ES modules only)
-// into lib/vendor/jose.js. These tests check the built lib/ (run
-// `npm run build` first): it must load with require() where require() cannot
-// load ES modules, require only declared dependencies, ship the jose version
-// that is installed, and keep `jose` out of the published declarations.
+// The package is compiled to CommonJS. It loads the installed `jose` (ES
+// modules only) where require() can load ES modules, and otherwise a bundled
+// copy (lib/vendor/jose-bundle.js); see src/vendor/jose.ts. These tests check
+// the built lib/ (run `npm run build` first) in child Node.js processes, with
+// require(esm) on and off.
 import { describe, it, expect } from '@jest/globals';
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import { builtinModules } from 'node:module';
 import path from 'node:path';
+import { JOSE_EXPORTS } from '../src/vendor/jose-exports';
 
 const ROOT = path.resolve(__dirname, '..');
 const LIB = path.join(ROOT, 'lib');
@@ -23,14 +24,20 @@ const DISABLE_REQUIRE_ESM = [
   '--no-experimental-require-module',
 ].find((flag) => process.allowedNodeEnvironmentFlags.has(flag));
 
-function runNode(script: string): {
+function runNode(
+  script: string,
+  { requireEsm }: { requireEsm: boolean }
+): {
   status: number | null;
   stdout: string;
   stderr: string;
 } {
   const env = { ...process.env };
   delete env.NODE_OPTIONS;
-  const args = [...(DISABLE_REQUIRE_ESM ? [DISABLE_REQUIRE_ESM] : []), '-e'];
+  const args = [
+    ...(!requireEsm && DISABLE_REQUIRE_ESM ? [DISABLE_REQUIRE_ESM] : []),
+    '-e',
+  ];
   const result = spawnSync(process.execPath, [...args, script], {
     cwd: ROOT,
     env,
@@ -78,11 +85,12 @@ process.stdout.write(JSON.stringify(deps.map((name) => {
 `;
 
 // Loads every public entry point with require(), then validates tokens with
-// both clients so the bundled jose is exercised: ScalekitClient with local
-// keys, ScalekitEdgeClient against a local JWKS endpoint over real HTTP.
-// Tokens are signed with node:crypto because jose itself cannot be
-// require()d here.
-const LOAD_ENTRY_POINTS = `
+// both clients: ScalekitClient with local keys, ScalekitEdgeClient against
+// local JWKS endpoints over real HTTP (one valid, one malformed). Reports
+// which jose the SDK loaded and whether a rethrown jose error is an instance
+// of the caller's jose error class. Tokens are signed with node:crypto
+// because jose itself cannot be require()d when require(esm) is off.
+const SCENARIO = `
 const crypto = require('node:crypto');
 const http = require('node:http');
 const sdk = require('@scalekit-sdk/node');
@@ -95,54 +103,88 @@ for (const [name, value] of Object.entries({
 })) {
   if (typeof value !== 'function') throw new Error(name + ' is not exported');
 }
+const sdkJose = require('./lib/vendor/jose.js').jose;
+let callerJose = null;
+try { callerJose = require('jose'); } catch (e) { if (e.code !== 'ERR_REQUIRE_ESM') throw e; }
+const bundle = require('./lib/vendor/jose-bundle.js');
 const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
 const jwk = { ...publicKey.export({ format: 'jwk' }), kid: 'k1', alg: 'RS256', use: 'sig' };
 const b64 = (s) => Buffer.from(s).toString('base64url');
 const token = b64(JSON.stringify({ alg: 'RS256', kid: 'k1' })) + '.' +
   b64(JSON.stringify({ sub: 'user_1', exp: Math.floor(Date.now() / 1000) + 300 }));
 const jwt = token + '.' + crypto.sign('sha256', Buffer.from(token), privateKey).toString('base64url');
-const tampered = jwt + '=';
 const outcome = (p) => p.then(
   (v) => 'accepted:' + v.sub,
   (e) => 'rejected:' + e.constructor.name + (e.statusCode ? ':' + e.statusCode : ''),
 );
+const serve = async (body) => {
+  const server = http.createServer((req, res) => res.end(body));
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  return server;
+};
 (async () => {
   const client = new sdk.ScalekitClient('https://example.invalid', 'id', 'secret');
   client.coreClient.keys = [jwk];
-  const server = http.createServer((req, res) => res.end(JSON.stringify({ keys: [jwk] })));
-  await new Promise((r) => server.listen(0, '127.0.0.1', r));
-  const edge = new ScalekitEdgeClient('http://127.0.0.1:' + server.address().port, 'id', 'secret');
+  const good = await serve(JSON.stringify({ keys: [jwk] }));
+  const bad = await serve(JSON.stringify({ not: 'a jwks' }));
+  const edge = new ScalekitEdgeClient('http://127.0.0.1:' + good.address().port, 'id', 'secret');
+  const edgeBad = new ScalekitEdgeClient('http://127.0.0.1:' + bad.address().port, 'id', 'secret');
+  const jwksError = await edgeBad.validateToken(jwt).then(() => null, (e) => e);
   const result = {
     requireModule: process.features.require_module ?? null,
+    jose: sdkJose === bundle ? 'bundled' : callerJose && sdkJose === callerJose ? 'installed' : 'other',
     client: await outcome(client.validateToken(jwt)),
-    clientTampered: await outcome(client.validateToken(tampered)),
+    clientTampered: await outcome(client.validateToken(jwt + '=')),
     edge: await outcome(edge.validateToken(jwt)),
-    edgeTampered: await outcome(edge.validateToken(tampered)),
+    edgeTampered: await outcome(edge.validateToken(jwt + '=')),
+    jwksErrorCode: jwksError && jwksError.code,
+    jwksErrorIsCallerClass: !!callerJose && jwksError instanceof callerJose.errors.JWKSInvalid,
+    jwksErrorIsBundleClass: jwksError instanceof bundle.errors.JWKSInvalid,
   };
-  server.close();
+  good.close();
+  bad.close();
   process.stdout.write(JSON.stringify(result));
 })().catch((err) => { console.error(err); process.exit(1); });
 `;
 
+const VALIDATION = {
+  client: 'accepted:user_1',
+  clientTampered: 'rejected:ScalekitValidateTokenFailureException',
+  edge: 'accepted:user_1',
+  edgeTampered: 'rejected:ScalekitEdgeError:401',
+  jwksErrorCode: 'ERR_JWKS_INVALID',
+};
+
+const JOSE_REQUIRE = /require\(["']jose["']\)/;
+
 describe('CommonJS consumers', () => {
-  it('every runtime dependency resolves to a CommonJS file under require()', () => {
-    const { status, stdout, stderr } = runNode(RESOLVE_DEPENDENCIES);
+  it('every runtime dependency but jose resolves to a CommonJS file under require()', () => {
+    const { status, stdout, stderr } = runNode(RESOLVE_DEPENDENCIES, {
+      requireEsm: false,
+    });
     expect({ status, stderr }).toEqual({ status: 0, stderr: '' });
 
     const resolved: Array<{ name: string; file: string; format: string }> =
       JSON.parse(stdout);
-    expect(resolved.length).toBeGreaterThan(0);
-    expect(resolved.filter((d) => d.format !== 'commonjs')).toEqual([]);
+    expect(resolved.map((d) => d.name)).toContain('jose');
+    // jose ships only ES modules; lib/vendor/jose.js falls back to the
+    // bundled copy where require() cannot load it.
+    expect(
+      resolved.filter((d) => d.name !== 'jose' && d.format !== 'commonjs')
+    ).toEqual([]);
   });
 
-  it('lib/ requires only declared dependencies, Node.js built-ins, and never jose', () => {
+  it('lib/ requires only declared dependencies and built-ins, and jose only from lib/vendor/jose.js', () => {
     const allowed = new Set([
       ...Object.keys(pkg.dependencies ?? {}),
       ...Object.keys(pkg.peerDependencies ?? {}),
     ]);
     const undeclared = new Set<string>();
+    const joseRequirers: string[] = [];
     for (const file of filesUnder(LIB, '.js')) {
       const source = fs.readFileSync(file, 'utf8');
+      if (JOSE_REQUIRE.test(source))
+        joseRequirers.push(path.relative(LIB, file));
       for (const [, spec] of source.matchAll(
         /require\(["']([^"'.][^"']*)["']\)/g
       )) {
@@ -157,54 +199,77 @@ describe('CommonJS consumers', () => {
       }
     }
     expect([...undeclared]).toEqual([]);
-    expect(allowed.has('jose')).toBe(false);
+    expect(joseRequirers).toEqual([path.join('vendor', 'jose.js')]);
   });
 
-  it('the bundled jose is the jose version installed for the build', () => {
-    const bundle = fs.readFileSync(path.join(LIB, 'vendor', 'jose.js'), 'utf8');
-    const bundled = /Bundled copy of jose@([^\s(]+)/.exec(bundle)?.[1];
+  it('the bundled jose is the installed jose version, with exactly the exports the SDK uses', () => {
+    const file = path.join(LIB, 'vendor', 'jose-bundle.js');
+    const source = fs.readFileSync(file, 'utf8');
+    const bundled = /Bundled copy of jose@([^\s(]+)/.exec(source)?.[1];
     const installed = JSON.parse(
       fs.readFileSync(require.resolve('jose/package.json'), 'utf8')
     ).version;
     expect(bundled).toBe(installed);
-    expect(bundle).toContain('The MIT License (MIT)');
+    expect(source).toContain('The MIT License (MIT)');
+    expect(JOSE_REQUIRE.test(source)).toBe(false);
+    expect(Object.keys(require(file)).sort()).toEqual([...JOSE_EXPORTS].sort());
   });
 
-  it('no published declaration file imports jose', () => {
+  it('no published declaration file references jose or the jose loader', () => {
     const offenders = filesUnder(LIB, '.d.ts').filter((file) =>
-      /(from\s+|import\(\s*|require\(\s*)["']jose["']/.test(
+      /(from\s+|import\(\s*|require\(\s*|import\s+)["'](jose|[./]+(vendor\/)?jose)["']/.test(
         fs.readFileSync(file, 'utf8')
       )
     );
     expect(offenders.map((f) => path.relative(ROOT, f))).toEqual([]);
+    expect(fs.existsSync(path.join(LIB, 'vendor', 'jose.d.ts'))).toBe(false);
   });
 
-  const requireEsmAlwaysOn =
-    !DISABLE_REQUIRE_ESM &&
-    (process.features as { require_module?: boolean }).require_module === true;
+  // Asked of a child process: Jest's sandboxed `process` does not expose
+  // `process.features.require_module`.
+  const requireEsmByDefault =
+    spawnSync(
+      process.execPath,
+      ['-p', 'process.features.require_module === true'],
+      { encoding: 'utf8' }
+    ).stdout.trim() === 'true';
 
-  it(
-    DISABLE_REQUIRE_ESM
-      ? `loads every entry point and validates tokens with require(esm) disabled (${DISABLE_REQUIRE_ESM})`
-      : requireEsmAlwaysOn
-        ? 'loads every entry point and validates tokens (require(esm) cannot be disabled on this Node.js; the checks above guard CommonJS consumers)'
-        : 'loads every entry point and validates tokens on a Node.js without require(esm)',
+  (requireEsmByDefault ? it : it.skip)(
+    'with require(esm): uses the installed jose, so callers share its error classes',
     () => {
-      const { status, stdout, stderr } = runNode(LOAD_ENTRY_POINTS);
-      expect({ status, stderr }).toEqual({ status: 0, stderr: '' });
-
-      const result = JSON.parse(stdout);
-      expect(result).toMatchObject({
-        client: 'accepted:user_1',
-        clientTampered: 'rejected:ScalekitValidateTokenFailureException',
-        edge: 'accepted:user_1',
-        edgeTampered: 'rejected:ScalekitEdgeError:401',
+      const { status, stdout, stderr } = runNode(SCENARIO, {
+        requireEsm: true,
       });
-      if (DISABLE_REQUIRE_ESM) {
-        // The child really ran without require(esm); otherwise this test
-        // would pass even if an ES module were still require()d.
-        expect(result.requireModule).toBe(false);
-      }
+      expect({ status, stderr }).toEqual({ status: 0, stderr: '' });
+      expect(JSON.parse(stdout)).toEqual({
+        ...VALIDATION,
+        requireModule: true,
+        jose: 'installed',
+        jwksErrorIsCallerClass: true,
+        jwksErrorIsBundleClass: false,
+      });
+    }
+  );
+
+  const requireEsmAlwaysOn = requireEsmByDefault && !DISABLE_REQUIRE_ESM;
+
+  (requireEsmAlwaysOn ? it.skip : it)(
+    DISABLE_REQUIRE_ESM
+      ? `without require(esm) (${DISABLE_REQUIRE_ESM}): loads every entry point on the bundled jose and validates tokens`
+      : 'without require(esm): loads every entry point on the bundled jose and validates tokens',
+    () => {
+      const { status, stdout, stderr } = runNode(SCENARIO, {
+        requireEsm: false,
+      });
+      expect({ status, stderr }).toEqual({ status: 0, stderr: '' });
+      const result = JSON.parse(stdout);
+      expect(result).toEqual({
+        ...VALIDATION,
+        requireModule: result.requireModule === null ? null : false,
+        jose: 'bundled',
+        jwksErrorIsCallerClass: false,
+        jwksErrorIsBundleClass: true,
+      });
     }
   );
 });

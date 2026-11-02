@@ -1,7 +1,6 @@
-// A token that differs from a validly signed one only in its encoding must be
-// rejected: a signature segment with characters outside the base64url
-// alphabet or invalid padding, or a claims set that is not valid UTF-8.
-// Accepting such variants lets one signed token take several string forms.
+// Both clients reject these variants of a validly signed token: a signature
+// with a trailing "=", a signature with "!" inserted, and a token whose
+// claims are not valid UTF-8 (rejected by jose 6.2.5 and later).
 import {
   describe,
   it,

@@ -95,8 +95,8 @@ export function assertValidPingInterval(value: number): void {
 
 /**
  * A JSON Web Key from the environment's JWKS endpoint (RFC 7517). Declared
- * here rather than imported from `jose` so the published declarations do not
- * depend on `jose`, which is bundled into the build and not installed.
+ * here rather than imported from `jose` so the published declarations never
+ * import `jose`, an ES module that CommonJS declaration files cannot load.
  */
 export interface JWK {
   kty?: string;

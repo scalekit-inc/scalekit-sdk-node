@@ -7,7 +7,7 @@ module.exports = {
   transform: {
     '^.+\\.ts?$': 'ts-jest',
     // jose ships only ES modules; tests that import src/ load it through
-    // this transform. The published build bundles jose instead.
+    // this transform (see tests/utils/esm-transform.js).
     '^.+\\.js$': '<rootDir>/tests/utils/esm-transform.js',
   },
   transformIgnorePatterns: ['/node_modules/(?!(jose)/)'],

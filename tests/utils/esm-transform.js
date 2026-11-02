@@ -1,9 +1,9 @@
 'use strict';
-// Jest transform for the ES-module-only `jose` package, which tests load from
-// src/ (the published build bundles it instead; see scripts/bundle-jose.js).
-// It converts ES modules to CommonJS with an ES2022 target: downlevelling
-// class fields breaks jose's error classes. ts-jest is not used here because
-// it applies the TypeScript config (target ES6) to every file it transforms.
+// Jest transform for the ES-module-only `jose` package, so tests that import
+// src/ load the installed jose (src/vendor/jose.ts) as they would under
+// require(esm). It converts ES modules to CommonJS with an ES2022 target:
+// downlevelling class fields breaks jose's error classes. ts-jest is not used
+// here because it applies the TypeScript config (target ES6) to every file.
 const crypto = require('node:crypto');
 const fs = require('node:fs');
 const ts = require('typescript');
