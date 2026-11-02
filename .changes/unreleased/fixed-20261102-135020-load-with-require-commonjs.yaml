@@ -1,8 +1,0 @@
-kind: fixed
-body: |
-  Loading the SDK with `require()` (the package root and its `/edge`, `/express` and `/next` entry points) no longer throws `ERR_REQUIRE_ESM` where `require()` cannot load ES modules: Node.js 18, 20 before 20.19, 22 before 22.12, and Next.js apps that load the SDK as an external CommonJS package. Affected versions: 2.6.3 to 2.21.0. The SDK depends on `jose` 5.x again, which ships a CommonJS build. Token validation results and error classes are unchanged, except that on Node.js a `ScalekitEdgeClient` that cannot reach the signing-key endpoint now rejects with a Node.js network error (such as `ECONNREFUSED`) instead of `TypeError: fetch failed`.
-time: '2026-11-02T13:50:20.687679+00:00'
-custom:
-  Breaking: 'No'
-  Ticket: SK-3011
-  Migration: ''

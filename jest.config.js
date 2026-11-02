@@ -6,7 +6,9 @@ module.exports = {
   setupFilesAfterEnv: ['./tests/setup.ts'],
   transform: {
     '^.+\\.ts?$': 'ts-jest',
-    '^.+\\.js$': ['ts-jest', { diagnostics: false, tsconfig: { allowJs: true } }],
+    // jose ships only ES modules; tests that import src/ load it through
+    // this transform. The published build bundles jose instead.
+    '^.+\\.js$': '<rootDir>/tests/utils/esm-transform.js',
   },
   transformIgnorePatterns: ['/node_modules/(?!(jose)/)'],
   moduleNameMapper: {

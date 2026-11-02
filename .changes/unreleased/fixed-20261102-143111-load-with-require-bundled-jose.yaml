@@ -1,0 +1,8 @@
+kind: fixed
+body: |
+  Loading the SDK with `require()` no longer throws `ERR_REQUIRE_ESM` where `require()` cannot load ES modules: Node.js 20 before 20.19, Node.js 22 before 22.12, Jest test suites that do not transform `node_modules`, and Next.js apps that load the SDK as an external CommonJS package. Affected versions: 2.6.3 to 2.21.0. The SDK now bundles `jose` 6.2.15, its JSON Web Token library, so `jose` is no longer installed as a dependency of the SDK; if your app imports `jose` itself, list it in your own dependencies. With this `jose` version, `validateToken`, `validateAccessToken` and `ScalekitEdgeClient.validateToken` also reject tokens whose signature contains characters outside the base64url alphabet or whose claims are not valid UTF-8.
+time: '2026-11-02T14:31:11.970005+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-3011
+  Migration: ''

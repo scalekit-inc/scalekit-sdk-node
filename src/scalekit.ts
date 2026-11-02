@@ -1,4 +1,4 @@
-import * as jose from 'jose';
+import * as jose from './vendor/jose';
 import QueryString from 'qs';
 import GrpcConnect from './connect';
 import ConnectionClient from './connection';

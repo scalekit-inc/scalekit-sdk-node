@@ -8,7 +8,6 @@ declare module 'axios' {
         skipAuth?: boolean;
     }
 }
-import { JWK } from 'jose';
 import { TokenResponse } from './types/auth';
 export declare const headers: {
     'user-agent': string;
@@ -22,6 +21,37 @@ export declare const DEFAULT_PING_TIMEOUT_MS = 5000;
 export declare const MIN_PING_INTERVAL_MS = 60000;
 export declare function assertValidTimeout(name: string, value: number): void;
 export declare function assertValidPingInterval(value: number): void;
+/**
+ * A JSON Web Key from the environment's JWKS endpoint (RFC 7517). Declared
+ * here rather than imported from `jose` so the published declarations do not
+ * depend on `jose`, which is bundled into the build and not installed.
+ */
+export interface JWK {
+    kty?: string;
+    alg?: string;
+    key_ops?: string[];
+    ext?: boolean;
+    use?: string;
+    x5c?: string[];
+    x5t?: string;
+    'x5t#S256'?: string;
+    x5u?: string;
+    kid?: string;
+    crv?: string;
+    d?: string;
+    dp?: string;
+    dq?: string;
+    e?: string;
+    k?: string;
+    n?: string;
+    p?: string;
+    q?: string;
+    qi?: string;
+    x?: string;
+    y?: string;
+    pub?: string;
+    priv?: string;
+}
 export default class CoreClient {
     readonly envUrl: string;
     readonly clientId: string;

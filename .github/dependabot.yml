@@ -8,10 +8,3 @@ updates:
       timezone: "Asia/Kolkata"
     reviewers:
       - "dhawani"
-    ignore:
-      # jose 6 and later ship only an ES module build. This package is
-      # CommonJS and require()s jose, which fails on runtimes that cannot
-      # require() ES modules. Take a jose major only once no supported
-      # runtime has that limitation.
-      - dependency-name: "jose"
-        update-types: ["version-update:semver-major"]
