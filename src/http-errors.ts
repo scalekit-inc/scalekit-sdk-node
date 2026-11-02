@@ -65,18 +65,12 @@ export function errorBody(response: AxiosResponse): unknown {
 }
 
 /**
- * The Scalekit proxy marks every response it relays from the provider with
- * this header (any value), and never one it wrote itself.
- */
-export const UPSTREAM_RESPONSE_HEADER = 'x-scalekit-upstream';
-
-/**
  * A 401 the Scalekit proxy itself sent because it rejected the access token
- * (JSON `{ "detail": ..., "code": "UNAUTHORIZED" }`), the one 401 a token
- * refresh can fix. Never one relayed from the provider (it carries
- * `X-Scalekit-Upstream`), and never a connected account's own credential
- * failure, which the proxy sends with code `TOOL_ERROR`. The proxy rejects
- * such a request before forwarding it, so a resend is safe.
+ * (JSON `{ "detail": ..., "code": "UNAUTHORIZED" }`, exactly), the one 401 a
+ * token refresh can fix. Not a connected account's own credential failure,
+ * which the proxy sends with code `TOOL_ERROR`, and not a provider's 401,
+ * which the proxy relays with the provider's own body. The proxy rejects such
+ * a request before forwarding it, so a resend is safe.
  *
  * Proxies deployed before `TOOL_ERROR` was used here sent connected-account
  * failures as `UNAUTHORIZED` too; `CoreClient.withAccessToken` limits the
@@ -84,9 +78,7 @@ export const UPSTREAM_RESPONSE_HEADER = 'x-scalekit-upstream';
  */
 export function isScalekitUnauthorized(response: AxiosResponse): boolean {
   if (response.status !== 401) return false;
-  const headers = headerRecord(response.headers);
-  if (UPSTREAM_RESPONSE_HEADER in headers) return false;
-  if (!isJsonContentType(headers)) return false;
+  if (!isJsonContentType(headerRecord(response.headers))) return false;
   const body = errorBody(response);
   if (!isPlainObject(body)) return false;
   const keys = Object.keys(body).sort();

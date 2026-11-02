@@ -250,22 +250,12 @@ describe('actions.request authentication', () => {
     expect(proxyAuth).toEqual(['Bearer expired-token', `Bearer ${issued(1)}`]);
   });
 
-  it.each([
-    [
-      "relayed from the provider, even with Scalekit's body shape",
-      {
-        'content-type': 'application/json',
-        'x-scalekit-upstream': 'true',
-      },
-      { detail: 'expired', code: 'UNAUTHORIZED' },
-    ],
-    [
-      'a connected account credential failure (TOOL_ERROR)',
-      { 'content-type': 'application/json; charset=utf-8' },
-      { detail: 'token expired', code: 'TOOL_ERROR' },
-    ],
-  ])('does not refresh or resend a 401 %s', async (_label, headers, body) => {
-    proxy401 = { headers, body };
+  it('does not refresh or resend a connected account credential failure (TOOL_ERROR)', async () => {
+    // What the proxy sends when the connected account's own credentials fail.
+    proxy401 = {
+      headers: { 'content-type': 'application/json; charset=utf-8' },
+      body: { detail: 'token expired', code: 'TOOL_ERROR' },
+    };
     tokenExpiresIn = 3600;
     const client = makeClient();
 

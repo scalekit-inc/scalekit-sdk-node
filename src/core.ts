@@ -152,8 +152,9 @@ export default class CoreClient {
   // A token fetched to replace a rejected one that the proxy still answered
   // with its 401: the cause is the connected account, not this token, so its
   // 401s don't trigger another token request. It is replaced as usual when
-  // it nears expiry. Only needed against proxies that send connected-account
-  // failures as UNAUTHORIZED rather than TOOL_ERROR.
+  // it nears expiry. Needed against proxies that send connected-account
+  // failures as UNAUTHORIZED rather than TOOL_ERROR, and for a provider 401
+  // that copies the proxy's body exactly.
   private tokenNotTheCause: string | null = null;
   private pendingAuthentication: Promise<void> | null = null;
   public axios: Axios;
@@ -345,9 +346,8 @@ export default class CoreClient {
    * itself counts: the proxy rejects it before forwarding, so the resend is
    * safe. A 401 from the provider is returned as is, never replayed.
    *
-   * A connected account's own credential failure (code `TOOL_ERROR`) and
-   * anything relayed from the provider (`X-Scalekit-Upstream`) are never
-   * resent. Proxies deployed before that sent connected-account failures as
+   * A connected account's own credential failure (code `TOOL_ERROR`) is
+   * never resent. Proxies deployed before that sent connected-account failures as
    * `UNAUTHORIZED` too; when a freshly fetched token still gets that 401, the
    * token isn't the cause, so further 401s on that token are returned
    * without another token request or resend.
