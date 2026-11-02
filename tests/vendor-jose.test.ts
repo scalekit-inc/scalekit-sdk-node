@@ -79,6 +79,24 @@ describe('vendor/jose loader', () => {
     });
   });
 
+  // Jest 29 loads ES modules as CommonJS and reports one of these instead.
+  it.each([
+    'Cannot use import statement outside a module',
+    "Unexpected token 'export'",
+  ])(
+    'falls back to the bundle when require("jose") throws SyntaxError: %s',
+    (message) => {
+      jest.isolateModules(() => {
+        const { bundle, factory } = mockBundle();
+        mockJoseThrowing(new SyntaxError(message));
+        const loaded = loadLoader();
+
+        expect(factory).toHaveBeenCalledTimes(1);
+        expect(loaded.jwtVerify).toBe(bundle.jwtVerify);
+      });
+    }
+  );
+
   it.each([
     [
       'MODULE_NOT_FOUND',
@@ -88,6 +106,7 @@ describe('vendor/jose loader', () => {
       'ERR_REQUIRE_ASYNC_MODULE',
       codedError('top-level await', 'ERR_REQUIRE_ASYNC_MODULE'),
     ],
+    ['an unrelated SyntaxError', new SyntaxError("Unexpected token '}'")],
     ['a non-object value', 'ERR_REQUIRE_ESM'],
   ])(
     're-throws %s from require("jose") unchanged and does not load the bundle',

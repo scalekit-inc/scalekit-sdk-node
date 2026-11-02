@@ -7,7 +7,9 @@
  * and runtimes that start Node.js with `--no-experimental-require-module`,
  * such as AWS Lambda), `require('jose')` throws `ERR_REQUIRE_ESM` and the SDK
  * falls back to the CommonJS copy of `jose` generated when the SDK is built
- * (`jose.bundle.js`, next to this file).
+ * (`jose.bundle.js`, next to this file). Test runners that load ES modules as
+ * CommonJS, such as Jest 29, report a `SyntaxError` instead; the SDK falls
+ * back on that too, but only for the messages an ES module produces there.
  */
 import type * as Jose from 'jose';
 export declare const createLocalJWKSet: typeof Jose.createLocalJWKSet, jwtVerify: typeof Jose.jwtVerify, decodeJwt: typeof Jose.decodeJwt;
