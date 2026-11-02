@@ -42,6 +42,7 @@ function makeToolsClient(toolTimeoutMs?: number) {
     'client_secret',
     toolTimeoutMs
   );
+  coreClient.accessToken = 'test-access-token';
   const fakeClient = makeFakeToolServiceClient();
   const grpcConnect = { createClient: () => fakeClient } as any;
   return {
@@ -204,9 +205,12 @@ describe('CoreClient.connectExec forwards CallOptions through retries', () => {
       'client_id',
       'client_secret'
     );
+    client.accessToken = 'test-access-token';
     jest
       .spyOn(client as any, 'authenticateClient')
-      .mockResolvedValue(undefined);
+      .mockImplementation(async () => {
+        client.accessToken = 'renewed-token';
+      });
 
     let callCount = 0;
     const fn = jest.fn(async (_req: void, _options?: unknown) => {
@@ -232,6 +236,7 @@ describe('CoreClient.connectExec forwards CallOptions through retries', () => {
       'client_id',
       'client_secret'
     );
+    client.accessToken = 'test-access-token';
     jest.spyOn(client as any, 'sleep').mockResolvedValue(undefined);
 
     let callCount = 0;
@@ -258,6 +263,7 @@ describe('CoreClient.connectExec forwards CallOptions through retries', () => {
       'client_id',
       'client_secret'
     );
+    client.accessToken = 'test-access-token';
     const fn = jest.fn(async (_req: void, _options?: unknown) => 'ok');
 
     const result = await client.connectExec(fn, undefined as any);
@@ -363,6 +369,7 @@ describe('axios timeouts surface as ScalekitGatewayTimeoutException', () => {
       'client_id',
       'client_secret'
     );
+    client.accessToken = 'test-access-token';
     const fn = jest.fn(async (_req: void, _options?: unknown) => {
       throw axiosTimeoutError();
     });
@@ -392,6 +399,7 @@ describe('axios timeouts surface as ScalekitGatewayTimeoutException', () => {
       'client_id',
       'client_secret'
     );
+    client.accessToken = 'test-access-token';
     const fn = jest.fn(async (_req: void, _options?: unknown) => {
       throw new (require('axios').AxiosError)('socket hang up', 'ECONNRESET');
     });

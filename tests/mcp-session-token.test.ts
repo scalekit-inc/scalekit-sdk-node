@@ -25,6 +25,9 @@ function makeMcpClient() {
     'client_id',
     'client_secret'
   );
+  // Holds a token, as a client does after its first call: `connectExec`
+  // would otherwise fetch one from the token endpoint first.
+  coreClient.accessToken = 'test-access-token';
   const createMcpSessionToken = jest.fn(
     async (_req: any, _options?: unknown) => ({ token: 'tok' })
   );

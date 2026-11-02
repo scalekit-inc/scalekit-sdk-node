@@ -46,10 +46,9 @@ export default class CoreClient {
      * Fetch a client-credentials token if this client has none, or if the one
      * it holds expires within 10 seconds.
      *
-     * gRPC calls get a token lazily: `connectExec` authenticates when a call
-     * returns 401 and retries it. HTTP calls that need one call this through
-     * `withAccessToken` before sending. Concurrent callers share one token
-     * request.
+     * Every call that needs a token runs this before sending: gRPC calls in
+     * `connectExec`, HTTP calls through `withAccessToken`. Concurrent callers
+     * share one token request.
      */
     ensureAccessToken(): Promise<void>;
     /** One token request at a time; concurrent callers share it. */
@@ -108,6 +107,13 @@ export default class CoreClient {
     /**
      * Execute a function with error handling and retry logic.
      *
+     * The token is fetched before the first call and renewed shortly before it
+     * expires (`ensureAccessToken`), the same as for HTTP calls. If Scalekit
+     * still rejects it (401 without `TOOL_ERROR`: revoked, a rotated signing
+     * key, clock skew), one new token is fetched, shared with concurrent
+     * callers, and the call is sent once more. A second rejection is returned:
+     * another token would not fix it.
+     *
      * @param fn Function to execute
      * @param data Data to pass to the function
      * @param options Optional per-call gRPC options (e.g. `timeoutMs`), forwarded to `fn` as-is.
@@ -115,5 +121,11 @@ export default class CoreClient {
      * @returns {Promise<TResponse>} Returns the response
      */
     connectExec<TRequest, TResponse>(fn: (request: TRequest, options?: CallOptions) => Promise<TResponse>, data: TRequest, options?: CallOptions): Promise<TResponse>;
+    /**
+     * After Scalekit rejected `tokenUsed`, fetch a new token (skipped when a
+     * concurrent call already replaced it). True when the client now holds a
+     * different token, so a resend can succeed.
+     */
+    private replaceRejectedToken;
     private _connectExec;
 }
