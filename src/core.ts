@@ -373,7 +373,17 @@ export default class CoreClient {
             signal
           );
 
-    await tokenRequest(() => this.ensureAccessToken());
+    try {
+      await tokenRequest(() => this.ensureAccessToken());
+    } catch (error) {
+      // Intentional fallback, as in connectExec: when renewing ahead of expiry
+      // fails (the token endpoint is down) but the client still holds a token,
+      // send with it. A still-valid token succeeds, as in earlier releases; an
+      // expired one gets the proxy's own 401 before anything is forwarded, and
+      // the refresh below throws the token endpoint's error. An aborted call,
+      // or a client with no token, gets the error now.
+      if (signal?.aborted || !this.accessToken) throw error;
+    }
     const tokenUsed = this.accessToken;
     try {
       return await send();

@@ -15,6 +15,7 @@ import {
   describe,
   expect,
   it,
+  jest,
 } from '@jest/globals';
 import http from 'http';
 import * as jose from 'jose';
@@ -22,7 +23,10 @@ import { AddressInfo } from 'net';
 import { Readable } from 'stream';
 import ScalekitClient from '../src/scalekit';
 import CoreClient from '../src/core';
-import { ScalekitException } from '../src/errors/base-exception';
+import {
+  ScalekitException,
+  ScalekitServerException,
+} from '../src/errors/base-exception';
 import { ScalekitUnauthorizedException } from '../src/errors/specific-exceptions';
 
 // A token the server accepts. Every token the server issues is accepted too,
@@ -358,6 +362,52 @@ describe('access token lifetime', () => {
 
     expect(tokenCalls).toBe(2);
     expect(proxyAuth).toEqual([`Bearer ${issued(1)}`, `Bearer ${issued(2)}`]);
+  });
+
+  it('sends with the held token when renewing it fails and it is still valid', async () => {
+    tokenExpiresIn = 60;
+    const client = makeClient();
+    await call(client);
+
+    // 5 s left: renewal is due, but the token endpoint is down.
+    const now = Date.now();
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(now + 55_000);
+    tokenEndpointStatus = 503;
+    try {
+      const res = await call(client);
+      expect(res.status).toBe(200);
+    } finally {
+      clock.mockRestore();
+    }
+
+    // The initial token, then one failed renewal; the call used token 1.
+    expect(tokenCalls).toBe(2);
+    expect(proxyAuth).toEqual([`Bearer ${issued(1)}`, `Bearer ${issued(1)}`]);
+  });
+
+  it('throws the token endpoint error when renewal fails and the held token has expired', async () => {
+    tokenExpiresIn = 60;
+    const client = makeClient();
+    await call(client);
+
+    // Past expiry: the proxy rejects token 1, and the token endpoint is down.
+    const now = Date.now();
+    const clock = jest.spyOn(Date, 'now').mockReturnValue(now + 70_000);
+    tokenEndpointStatus = 503;
+    revokedTokens.add(issued(1));
+    let error: unknown;
+    try {
+      error = await call(client).catch((e: unknown) => e);
+    } finally {
+      clock.mockRestore();
+    }
+
+    expect(error).toBeInstanceOf(ScalekitServerException);
+    expect((error as ScalekitServerException).httpStatus).not.toBe(401);
+    // Sent once with the held token (rejected before forwarding), never
+    // resent; the renewal and the refresh after the 401 both failed.
+    expect(proxyAuth).toEqual([`Bearer ${issued(1)}`, `Bearer ${issued(1)}`]);
+    expect(tokenCalls).toBe(3);
   });
 
   it('spends one token request and one resend per call on a 401 that a new token does not fix', async () => {
