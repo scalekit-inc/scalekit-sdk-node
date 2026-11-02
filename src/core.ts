@@ -26,7 +26,11 @@ import {
 } from './errors/base-exception';
 import { ScalekitGatewayTimeoutException } from './errors/specific-exceptions';
 import { ErrorInfoSchema } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
-import { isScalekitUnauthorized, toScalekitException } from './http-errors';
+import {
+  isScalekitUnauthorized,
+  toScalekitException,
+  toScalekitTokenError,
+} from './http-errors';
 
 export const headers = {
   'user-agent': 'user-agent',
@@ -169,7 +173,9 @@ export default class CoreClient {
     readonly toolTimeoutMs: number = DEFAULT_TOOL_TIMEOUT_MS,
     readonly timeoutMs: number = DEFAULT_TIMEOUT_MS,
     readonly pingIntervalMs: number = DEFAULT_PING_INTERVAL_MS,
-    readonly pingTimeoutMs: number = DEFAULT_PING_TIMEOUT_MS
+    readonly pingTimeoutMs: number = DEFAULT_PING_TIMEOUT_MS,
+    // See ScalekitOptions.scalekitTokenErrors.
+    readonly scalekitTokenErrors: boolean = false
   ) {
     assertValidTimeout('toolTimeoutMs', toolTimeoutMs);
     assertValidTimeout('timeoutMs', timeoutMs);
@@ -444,7 +450,13 @@ export default class CoreClient {
   private async replaceRejectedToken(
     tokenUsed: string | null
   ): Promise<boolean> {
-    await this.refreshAccessToken(tokenUsed);
+    try {
+      await this.refreshAccessToken(tokenUsed);
+    } catch (error) {
+      // Earlier releases threw the token request's raw error here; keep that
+      // unless the caller opted in (ScalekitOptions.scalekitTokenErrors).
+      throw this.scalekitTokenErrors ? toScalekitTokenError(error) : error;
+    }
     return this.accessToken !== null && this.accessToken !== tokenUsed;
   }
 

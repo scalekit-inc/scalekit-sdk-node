@@ -26,3 +26,11 @@ export declare function setCause<T extends Error>(error: T, cause: unknown): T;
  * anything else to `ScalekitException`. Scalekit exceptions pass through.
  */
 export declare function toScalekitException(error: unknown): ScalekitException;
+/**
+ * A failed access-token request as a `ScalekitException` (see
+ * `toScalekitException`) that still carries the `AxiosError` fields callers
+ * could read before, as non-enumerable properties, so `axios.isAxiosError()`,
+ * `error.response.status` and `error.code` keep working. Used for gRPC calls
+ * when `ScalekitOptions.scalekitTokenErrors` is on.
+ */
+export declare function toScalekitTokenError(error: unknown): ScalekitException;

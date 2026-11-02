@@ -25,9 +25,13 @@ import { AddressInfo } from 'net';
 import { create } from '@bufbuild/protobuf';
 import { Code, ConnectError, type ConnectRouter } from '@connectrpc/connect';
 import { connectNodeAdapter } from '@connectrpc/connect-node';
-import { AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
+import util from 'util';
 import ScalekitClient from '../src/scalekit';
-import { ScalekitServerException } from '../src/errors/base-exception';
+import {
+  ScalekitException,
+  ScalekitServerException,
+} from '../src/errors/base-exception';
 import CoreClient from '../src/core';
 import {
   ScalekitToolUnauthorizedException,
@@ -174,10 +178,15 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-function makeClient(): { client: ScalekitClient; core: CoreClient } {
-  const client = new ScalekitClient(grpcOrigin, 'client_id', 'secret', {
-    pingIntervalMs: 0,
-  });
+function makeClient(
+  options: { scalekitTokenErrors?: boolean; secret?: string } = {}
+): { client: ScalekitClient; core: CoreClient } {
+  const client = new ScalekitClient(
+    grpcOrigin,
+    'client_id',
+    options.secret ?? 'secret',
+    { pingIntervalMs: 0, scalekitTokenErrors: options.scalekitTokenErrors }
+  );
   const core = (client as unknown as { coreClient: CoreClient }).coreClient;
   // gRPC goes to the HTTP/2 server; the token endpoint is on the HTTP/1 one.
   core.axios.defaults.baseURL = tokenOrigin;
@@ -465,5 +474,112 @@ describe('connectExec with an HTTP call (axios 401)', () => {
     );
     expect(fn).toHaveBeenCalledTimes(2);
     expect(tokenCalls).toBe(2);
+  });
+});
+
+describe('scalekitTokenErrors: a failed token request on a gRPC call', () => {
+  // Fields an AxiosError carries that callers of earlier releases could read.
+  function expectAxiosFields(error: unknown, status: number | undefined) {
+    expect(axios.isAxiosError(error)).toBe(true);
+    expect((error as AxiosError).response?.status).toBe(status);
+    expect((error as AxiosError).status).toBe(status);
+    expect(typeof (error as AxiosError).code).toBe('string');
+    expect((error as { cause?: unknown }).cause).toBeInstanceOf(AxiosError);
+    // Non-enumerable, so logging the exception does not dump the response.
+    expect(Object.keys(error as object)).not.toContain('response');
+  }
+
+  it('is off by default: the raw AxiosError, as before', () => {
+    const { core } = makeClient();
+    expect(core.scalekitTokenErrors).toBe(false);
+  });
+
+  it('on: a wrong secret throws ScalekitUnauthorizedException that keeps the axios fields and not the secret', async () => {
+    tokenStatus = 401;
+    const secret = 'sk-test-wrong-secret-7f3a';
+    const { client } = makeClient({ scalekitTokenErrors: true, secret });
+
+    const error = await client.organization
+      .listOrganization()
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ScalekitUnauthorizedException);
+    expect(error).toBeInstanceOf(ScalekitException);
+    expect(error).not.toBeInstanceOf(AxiosError);
+    expect((error as ScalekitServerException).httpStatus).toBe(401);
+    expectAxiosFields(error, 401);
+    expect(util.inspect(error, { showHidden: true, depth: 8 })).not.toContain(
+      secret
+    );
+    // The call itself is unchanged: sent once, then one token request failed.
+    expect(grpcAuth).toEqual([null]);
+    expect(tokenCalls).toBe(2);
+  });
+
+  it('on: a token endpoint 503 during the refresh after a 401 throws a ScalekitServerException whose response has status 503', async () => {
+    const { client } = makeClient({ scalekitTokenErrors: true });
+    await client.organization.listOrganization();
+    rejectedTokens.add('fresh-1');
+    tokenStatus = 503;
+
+    const error = await client.organization
+      .listOrganization()
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ScalekitServerException);
+    // httpStatus is not asserted: ScalekitServerException maps a multi-word
+    // status text ("Service Unavailable") to 500, as on main.
+    expectAxiosFields(error, 503);
+  });
+
+  it('on: an unreachable token endpoint during the refresh throws a ScalekitException with the network error code', async () => {
+    const { client, core } = makeClient({ scalekitTokenErrors: true });
+    await client.organization.listOrganization();
+    rejectedTokens.add('fresh-1');
+    const closed = http.createServer();
+    await new Promise<void>((r) => closed.listen(0, '127.0.0.1', () => r()));
+    const port = (closed.address() as AddressInfo).port;
+    await new Promise<void>((r) => closed.close(() => r()));
+    core.axios.defaults.baseURL = `http://127.0.0.1:${port}`;
+
+    const error = await client.organization
+      .listOrganization()
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ScalekitException);
+    expect(error).not.toBeInstanceOf(AxiosError);
+    expect(axios.isAxiosError(error)).toBe(true);
+    expect((error as AxiosError).code).toBe('ECONNREFUSED');
+    expect((error as AxiosError).response).toBeUndefined();
+  });
+
+  it('off: the same unreachable token endpoint still throws the raw AxiosError', async () => {
+    const { client, core } = makeClient();
+    await client.organization.listOrganization();
+    rejectedTokens.add('fresh-1');
+    const closed = http.createServer();
+    await new Promise<void>((r) => closed.listen(0, '127.0.0.1', () => r()));
+    const port = (closed.address() as AddressInfo).port;
+    await new Promise<void>((r) => closed.close(() => r()));
+    core.axios.defaults.baseURL = `http://127.0.0.1:${port}`;
+
+    const error = await client.organization
+      .listOrganization()
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(AxiosError);
+    expect((error as AxiosError).code).toBe('ECONNREFUSED');
+  });
+
+  it('does not change the HTTP path: actions-style calls through withAccessToken already throw a ScalekitException', async () => {
+    tokenStatus = 401;
+    const { core } = makeClient();
+
+    const error = await core
+      .withAccessToken(() => core.axios.get('/proxy/notes'))
+      .catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(ScalekitUnauthorizedException);
+    expect(axios.isAxiosError(error)).toBe(false);
   });
 });
