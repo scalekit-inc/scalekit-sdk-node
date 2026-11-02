@@ -1,0 +1,8 @@
+kind: changed
+body: |
+  A failed access-token request during a service call such as `scalekit.organization.listOrganization` (a wrong client secret, an unreachable token endpoint) now throws a `ScalekitException`, the same subclass `scalekit.actions.request` throws (for example `ScalekitUnauthorizedException`), instead of a raw `AxiosError`. The exception keeps the axios fields `isAxiosError`, `response`, `code`, `status` and `config`, and the original error as `cause`, so `axios.isAxiosError(error)` and `error.response.status` keep working; `error instanceof AxiosError` no longer matches. [Reference](https://docs.scalekit.com/apis)
+time: '2026-11-02T16:00:00.000000+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-3010
+  Migration: ''

@@ -113,8 +113,7 @@ export default class ScalekitClient {
       options?.toolTimeoutMs,
       options?.timeoutMs,
       options?.pingIntervalMs,
-      options?.pingTimeoutMs,
-      options?.scalekitTokenErrors
+      options?.pingTimeoutMs
     );
     this.grpcConnect = new GrpcConnect(this.coreClient);
 

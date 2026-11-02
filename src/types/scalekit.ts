@@ -106,27 +106,4 @@ export interface ScalekitOptions {
    * (5 s).
    */
   pingTimeoutMs?: number;
-
-  /**
-   * How a failed access-token request surfaces from a gRPC call (organizations,
-   * users, connections and the other service clients), for example a wrong
-   * client secret or an unreachable token endpoint.
-   *
-   * - `false` (default): the raw `AxiosError`, as in earlier releases.
-   * - `true`: a `ScalekitException`, the same subclass HTTP calls such as
-   *   `actions.request` throw (e.g. `ScalekitUnauthorizedException` for a
-   *   wrong secret). It keeps the axios fields `isAxiosError`, `response`,
-   *   `code`, `status` and `config`, and the original error as `cause`, so
-   *   `axios.isAxiosError(error)` and `error.response.status` keep working;
-   *   only `error instanceof AxiosError` no longer matches.
-   *
-   * Set it to `true` to handle every SDK failure as a `ScalekitException`.
-   * The next major release makes `true` the only behaviour.
-   *
-   * @example
-   * const scalekit = new ScalekitClient(envUrl, clientId, clientSecret, {
-   *   scalekitTokenErrors: true,
-   * });
-   */
-  scalekitTokenErrors?: boolean;
 }

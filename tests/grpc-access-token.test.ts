@@ -178,14 +178,15 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-function makeClient(
-  options: { scalekitTokenErrors?: boolean; secret?: string } = {}
-): { client: ScalekitClient; core: CoreClient } {
+function makeClient(options: { secret?: string } = {}): {
+  client: ScalekitClient;
+  core: CoreClient;
+} {
   const client = new ScalekitClient(
     grpcOrigin,
     'client_id',
     options.secret ?? 'secret',
-    { pingIntervalMs: 0, scalekitTokenErrors: options.scalekitTokenErrors }
+    { pingIntervalMs: 0 }
   );
   const core = (client as unknown as { coreClient: CoreClient }).coreClient;
   // gRPC goes to the HTTP/2 server; the token endpoint is on the HTTP/1 one.
@@ -340,7 +341,7 @@ describe('gRPC access token', () => {
     expect(grpcAuth).toHaveLength(3);
   });
 
-  it('when the token endpoint fails, sends the call as earlier releases did and throws the token error', async () => {
+  it('when the token endpoint fails, sends the call as earlier releases did and throws the token error as a ScalekitException', async () => {
     tokenStatus = 401;
     const { client } = makeClient();
 
@@ -348,10 +349,9 @@ describe('gRPC access token', () => {
       .listOrganization()
       .catch((e: unknown) => e);
 
-    // As in earlier releases: the call goes out without a token, gets a 401,
-    // and the token request that follows throws the axios error callers may
-    // match on.
-    expect(error).toBeInstanceOf(AxiosError);
+    // As in earlier releases, the call goes out without a token and gets a
+    // 401; the token request that follows fails, now as a ScalekitException.
+    expect(error).toBeInstanceOf(ScalekitUnauthorizedException);
     expect((error as AxiosError).response?.status).toBe(401);
     expect(tokenCalls).toBe(2);
     expect(grpcAuth).toEqual([null]);
@@ -477,7 +477,7 @@ describe('connectExec with an HTTP call (axios 401)', () => {
   });
 });
 
-describe('scalekitTokenErrors: a failed token request on a gRPC call', () => {
+describe('a failed token request on a gRPC call throws a ScalekitException', () => {
   // Fields an AxiosError carries that callers of earlier releases could read.
   function expectAxiosFields(error: unknown, status: number | undefined) {
     expect(axios.isAxiosError(error)).toBe(true);
@@ -489,15 +489,10 @@ describe('scalekitTokenErrors: a failed token request on a gRPC call', () => {
     expect(Object.keys(error as object)).not.toContain('response');
   }
 
-  it('is off by default: the raw AxiosError, as before', () => {
-    const { core } = makeClient();
-    expect(core.scalekitTokenErrors).toBe(false);
-  });
-
-  it('on: a wrong secret throws ScalekitUnauthorizedException that keeps the axios fields and not the secret', async () => {
+  it('a wrong secret throws ScalekitUnauthorizedException that keeps the axios fields and not the secret', async () => {
     tokenStatus = 401;
     const secret = 'sk-test-wrong-secret-7f3a';
-    const { client } = makeClient({ scalekitTokenErrors: true, secret });
+    const { client } = makeClient({ secret });
 
     const error = await client.organization
       .listOrganization()
@@ -516,8 +511,8 @@ describe('scalekitTokenErrors: a failed token request on a gRPC call', () => {
     expect(tokenCalls).toBe(2);
   });
 
-  it('on: a token endpoint 503 during the refresh after a 401 throws a ScalekitServerException whose response has status 503', async () => {
-    const { client } = makeClient({ scalekitTokenErrors: true });
+  it('a token endpoint 503 during the refresh after a 401 throws a ScalekitServerException whose response has status 503', async () => {
+    const { client } = makeClient();
     await client.organization.listOrganization();
     rejectedTokens.add('fresh-1');
     tokenStatus = 503;
@@ -532,8 +527,8 @@ describe('scalekitTokenErrors: a failed token request on a gRPC call', () => {
     expectAxiosFields(error, 503);
   });
 
-  it('on: an unreachable token endpoint during the refresh throws a ScalekitException with the network error code', async () => {
-    const { client, core } = makeClient({ scalekitTokenErrors: true });
+  it('an unreachable token endpoint during the refresh throws a ScalekitException with the network error code', async () => {
+    const { client, core } = makeClient();
     await client.organization.listOrganization();
     rejectedTokens.add('fresh-1');
     const closed = http.createServer();
@@ -551,24 +546,6 @@ describe('scalekitTokenErrors: a failed token request on a gRPC call', () => {
     expect(axios.isAxiosError(error)).toBe(true);
     expect((error as AxiosError).code).toBe('ECONNREFUSED');
     expect((error as AxiosError).response).toBeUndefined();
-  });
-
-  it('off: the same unreachable token endpoint still throws the raw AxiosError', async () => {
-    const { client, core } = makeClient();
-    await client.organization.listOrganization();
-    rejectedTokens.add('fresh-1');
-    const closed = http.createServer();
-    await new Promise<void>((r) => closed.listen(0, '127.0.0.1', () => r()));
-    const port = (closed.address() as AddressInfo).port;
-    await new Promise<void>((r) => closed.close(() => r()));
-    core.axios.defaults.baseURL = `http://127.0.0.1:${port}`;
-
-    const error = await client.organization
-      .listOrganization()
-      .catch((e: unknown) => e);
-
-    expect(error).toBeInstanceOf(AxiosError);
-    expect((error as AxiosError).code).toBe('ECONNREFUSED');
   });
 
   it('does not change the HTTP path: actions-style calls through withAccessToken already throw a ScalekitException', async () => {

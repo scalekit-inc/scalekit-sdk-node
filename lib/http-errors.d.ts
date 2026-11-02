@@ -30,7 +30,7 @@ export declare function toScalekitException(error: unknown): ScalekitException;
  * A failed access-token request as a `ScalekitException` (see
  * `toScalekitException`) that still carries the `AxiosError` fields callers
  * could read before, as non-enumerable properties, so `axios.isAxiosError()`,
- * `error.response.status` and `error.code` keep working. Used for gRPC calls
- * when `ScalekitOptions.scalekitTokenErrors` is on.
+ * `error.response.status` and `error.code` keep working. Used for gRPC calls,
+ * which threw the raw `AxiosError` in earlier releases.
  */
 export declare function toScalekitTokenError(error: unknown): ScalekitException;

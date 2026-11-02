@@ -32,7 +32,6 @@ export default class CoreClient {
     readonly timeoutMs: number;
     readonly pingIntervalMs: number;
     readonly pingTimeoutMs: number;
-    readonly scalekitTokenErrors: boolean;
     keys: JWK[];
     accessToken: string | null;
     private accessTokenRenewAt;
@@ -41,7 +40,7 @@ export default class CoreClient {
     sdkVersion: string;
     apiVersion: string;
     userAgent: string;
-    constructor(envUrl: string, clientId: string, clientSecret: string, toolTimeoutMs?: number, timeoutMs?: number, pingIntervalMs?: number, pingTimeoutMs?: number, scalekitTokenErrors?: boolean);
+    constructor(envUrl: string, clientId: string, clientSecret: string, toolTimeoutMs?: number, timeoutMs?: number, pingIntervalMs?: number, pingTimeoutMs?: number);
     /**
      * Fetch a client-credentials token if this client has none, or if the one
      * it holds expires within 10 seconds.

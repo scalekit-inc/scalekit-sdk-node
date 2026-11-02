@@ -173,9 +173,7 @@ export default class CoreClient {
     readonly toolTimeoutMs: number = DEFAULT_TOOL_TIMEOUT_MS,
     readonly timeoutMs: number = DEFAULT_TIMEOUT_MS,
     readonly pingIntervalMs: number = DEFAULT_PING_INTERVAL_MS,
-    readonly pingTimeoutMs: number = DEFAULT_PING_TIMEOUT_MS,
-    // See ScalekitOptions.scalekitTokenErrors.
-    readonly scalekitTokenErrors: boolean = false
+    readonly pingTimeoutMs: number = DEFAULT_PING_TIMEOUT_MS
   ) {
     assertValidTimeout('toolTimeoutMs', toolTimeoutMs);
     assertValidTimeout('timeoutMs', timeoutMs);
@@ -453,9 +451,10 @@ export default class CoreClient {
     try {
       await this.refreshAccessToken(tokenUsed);
     } catch (error) {
-      // Earlier releases threw the token request's raw error here; keep that
-      // unless the caller opted in (ScalekitOptions.scalekitTokenErrors).
-      throw this.scalekitTokenErrors ? toScalekitTokenError(error) : error;
+      // A ScalekitException, as HTTP calls throw. Earlier releases threw the
+      // raw AxiosError here, so it keeps that error's fields (see
+      // toScalekitTokenError).
+      throw toScalekitTokenError(error);
     }
     return this.accessToken !== null && this.accessToken !== tokenUsed;
   }
