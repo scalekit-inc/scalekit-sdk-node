@@ -8,7 +8,6 @@ declare module 'axios' {
         skipAuth?: boolean;
     }
 }
-import { JWK } from 'jose';
 import { TokenResponse } from './types/auth';
 export declare const headers: {
     'user-agent': string;
@@ -24,6 +23,37 @@ export declare function assertValidTimeout(name: string, value: number): void;
 export declare function assertValidPingInterval(value: number): void;
 /** A stream body is consumed by the first send, so it can't be resent. */
 export declare function isStream(data: unknown): boolean;
+/**
+ * A JSON Web Key from the environment's JWKS endpoint (RFC 7517). Declared
+ * here rather than imported from `jose` so the published declarations never
+ * import `jose`, an ES module that CommonJS declaration files cannot load.
+ */
+export interface JWK {
+    kty?: string;
+    alg?: string;
+    key_ops?: string[];
+    ext?: boolean;
+    use?: string;
+    x5c?: string[];
+    x5t?: string;
+    'x5t#S256'?: string;
+    x5u?: string;
+    kid?: string;
+    crv?: string;
+    d?: string;
+    dp?: string;
+    dq?: string;
+    e?: string;
+    k?: string;
+    n?: string;
+    p?: string;
+    q?: string;
+    qi?: string;
+    x?: string;
+    y?: string;
+    pub?: string;
+    priv?: string;
+}
 export default class CoreClient {
     readonly envUrl: string;
     readonly clientId: string;
