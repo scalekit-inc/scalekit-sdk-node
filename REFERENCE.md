@@ -8237,6 +8237,13 @@ const authPatterns: AuthPattern[] = [
 //   { type: 'API_KEY', display_name: 'API Key', description: '...',
 //     fields: [{ field_name: 'api_key', label: 'API Key', input_type: 'password' }],
 //     auth_header_key_override: 'X-API-Key' }
+// Several API keys, each sent as its own header (multiple-headers mode). Set
+// `header_name` on every credential field; `auth_header_key_override` does not apply:
+//   { type: 'API_KEY', display_name: 'API Key', description: '...',
+//     fields: [
+//       { field_name: 'key_id', header_name: 'X-Key-Id', label: 'Key ID', input_type: 'text', required: true },
+//       { field_name: 'secret', header_name: 'X-Secret', label: 'Secret', input_type: 'password', required: true },
+//     ] }
 // Public server, no credentials:
 //   { type: 'NO_AUTH', display_name: 'No Auth', description: '...', fields: [] }
 
@@ -8248,6 +8255,23 @@ const res = await scalekitClient.actions.providers.createCustomProvider({
 });
 console.log(res.provider?.identifier);
 ```
+
+**Connecting an account to a multi-header connector.** Supply one credential per header, keyed by the field's `field_name` (or its `header_name`), under `staticAuth.details`. Pass the generated message shape below; a snake_case `{ static_auth: { ... } }` object is silently ignored.
+
+```ts
+await scalekitClient.actions.createConnectedAccount({
+  connectionName: 'my-connection', // a connection created on this connector
+  identifier: 'user_123',
+  authorizationDetails: {
+    details: {
+      case: 'staticAuth',
+      value: { details: { key_id: 'abc', secret: 'xyz' } },
+    },
+  },
+});
+```
+
+Unknown keys are rejected with `UNKNOWN_HEADER_FIELD`, and a missing required header with `MISSING_REQUIRED_HEADER`. Creating a multi-header provider needs the `api_key_multi_header` feature enabled for the environment, otherwise the call fails with `FEATURE_NOT_ENABLED`.
 </dd>
 </dl>
 </dd>
@@ -8289,7 +8313,7 @@ console.log(res.provider?.identifier);
 <dl>
 <dd>
 
-**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; is_mcp?: boolean; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select'; hint?: string; required?: boolean }`. Set `is_mcp: true` when the connector fronts an MCP server.
+**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; is_mcp?: boolean; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select'; hint?: string; required?: boolean; header_name?: string }`. On an `API_KEY` pattern, `header_name` sends that field's value as its own HTTP header (case preserved); setting it on any field puts the pattern in multiple-headers mode. Leave it unset for single-key mode, which uses `auth_header_key_override`. Set `is_mcp: true` when the connector fronts an MCP server.
 
 </dd>
 </dl>

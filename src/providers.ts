@@ -37,6 +37,13 @@ export interface AuthField {
   hint?: string;
   /** Whether the user must fill this in before the connection can be saved. */
   required?: boolean;
+  /**
+   * On an `API_KEY` pattern, sends this field's value as this exact HTTP header
+   * (case preserved). Setting it on any field puts the pattern in multiple-headers
+   * mode, so each field is sent as its own header. Leave it unset for single-key
+   * mode, which uses the pattern's `auth_header_key_override`.
+   */
+  header_name?: string;
 }
 
 /**
