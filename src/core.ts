@@ -15,7 +15,6 @@ declare module 'axios' {
     skipAuth?: boolean;
   }
 }
-import { JWK } from 'jose';
 import os from 'os';
 import QueryString from 'qs';
 import { GrantType } from './types/scalekit';
@@ -92,6 +91,38 @@ export function assertValidPingInterval(value: number): void {
         `and enough strikes GOAWAYs the connection mid-call.`
     );
   }
+}
+
+/**
+ * A JSON Web Key from the environment's JWKS endpoint (RFC 7517). Declared
+ * here rather than imported from `jose` so the published declarations never
+ * import `jose`, an ES module that CommonJS declaration files cannot load.
+ */
+export interface JWK {
+  kty?: string;
+  alg?: string;
+  key_ops?: string[];
+  ext?: boolean;
+  use?: string;
+  x5c?: string[];
+  x5t?: string;
+  'x5t#S256'?: string;
+  x5u?: string;
+  kid?: string;
+  crv?: string;
+  d?: string;
+  dp?: string;
+  dq?: string;
+  e?: string;
+  k?: string;
+  n?: string;
+  p?: string;
+  q?: string;
+  qi?: string;
+  x?: string;
+  y?: string;
+  pub?: string;
+  priv?: string;
 }
 
 export default class CoreClient {
