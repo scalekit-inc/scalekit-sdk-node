@@ -1,6 +1,6 @@
 kind: fixed
 body: |
-  `scalekit.actions.request` no longer fails with a 401 ("missing authorization header") when it is a client's first call, or after the client's access token expires: the client now fetches its token before the first request and renews it shortly before it expires. If Scalekit still rejects the token, the request is sent once more with a new one; a 401 from the provider is never resent.
+  `scalekit.actions.request` no longer fails with a 401 ("missing authorization header") when it is a client's first call, or after the client's access token expires: the client now fetches its token before the first request and renews it shortly before it expires. If Scalekit still rejects the token, the 401 is thrown and the client fetches a new token for the next call; the request is never sent twice.
 time: '2026-10-30T12:00:00.000000+00:00'
 custom:
   Breaking: 'No'

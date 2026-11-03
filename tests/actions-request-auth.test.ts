@@ -198,22 +198,28 @@ describe('actions.request authentication', () => {
     expect(proxyAuth).toEqual([`Bearer ${GOOD}`, `Bearer ${GOOD}`]);
   });
 
-  it('fetches a new token and retries once when the held token has expired', async () => {
-    const response = await call(makeClient('expired-token'));
+  it('returns the proxy 401 for a rejected token without resending, and the next call uses a new token', async () => {
+    const client = makeClient('expired-token');
 
-    expect(response.status).toBe(200);
+    await expect(call(client)).rejects.toBeInstanceOf(
+      ScalekitUnauthorizedException
+    );
     expect(tokenCalls).toBe(1);
+    expect(proxyAuth).toEqual(['Bearer expired-token']);
+
+    const response = await call(client);
+    expect(response.status).toBe(200);
     expect(proxyAuth).toEqual(['Bearer expired-token', `Bearer ${issued(1)}`]);
   });
 
-  it('retries only once when the proxy keeps answering 401', async () => {
+  it('never resends a request after a proxy 401', async () => {
     proxyAlwaysUnauthorized = true;
 
     await expect(call(makeClient(GOOD))).rejects.toBeInstanceOf(
       ScalekitUnauthorizedException
     );
     expect(tokenCalls).toBe(1);
-    expect(proxyAuth).toHaveLength(2);
+    expect(proxyAuth).toHaveLength(1);
   });
 
   it('does not replay a 401 that came from the provider', async () => {
@@ -259,8 +265,8 @@ describe('actions.request authentication', () => {
     expect(proxyAuth).toEqual(['Bearer expired-token', `Bearer ${issued(1)}`]);
   });
 
-  it('does not refresh or resend a connected account credential failure (TOOL_ERROR)', async () => {
-    // What the proxy sends when the connected account's own credentials fail.
+  it('does not fetch a token for a proxy 401 with another code', async () => {
+    // Only the proxy's own {"detail","code":"UNAUTHORIZED"} 401 renews the token.
     proxy401 = {
       headers: { 'content-type': 'application/json; charset=utf-8' },
       body: { detail: 'token expired', code: 'TOOL_ERROR' },
@@ -274,7 +280,7 @@ describe('actions.request authentication', () => {
       );
     }
 
-    // Only the first call's own token request; no refresh, no resend.
+    // Only the first call's own token request; no renewal, no resend.
     expect(tokenCalls).toBe(1);
     expect(proxyAuth).toEqual([`Bearer ${issued(1)}`, `Bearer ${issued(1)}`]);
   });
@@ -314,29 +320,17 @@ describe('actions.request authentication', () => {
     expect(tokenCalls).toBe(1);
   });
 
-  it('refreshes once when two concurrent calls hold the same expired token', async () => {
+  it('renews once when two concurrent calls hold the same rejected token', async () => {
     const client = makeClient('expired-token');
 
-    const responses = await Promise.all([call(client), call(client)]);
+    const results = await Promise.allSettled([call(client), call(client)]);
 
-    expect(responses.map((r) => r.status)).toEqual([200, 200]);
+    expect(results.map((r) => r.status)).toEqual(['rejected', 'rejected']);
     expect(tokenCalls).toBe(1);
-    expect([...proxyAuth].sort()).toEqual([
-      'Bearer expired-token',
-      'Bearer expired-token',
-      `Bearer ${issued(1)}`,
-      `Bearer ${issued(1)}`,
-    ]);
-  });
+    expect(proxyAuth).toEqual(['Bearer expired-token', 'Bearer expired-token']);
 
-  it('does not resend when the refreshed token is unchanged', async () => {
-    tokenFixed = 'expired-token'; // the token endpoint hands back the same one
-
-    await expect(call(makeClient('expired-token'))).rejects.toBeInstanceOf(
-      ScalekitUnauthorizedException
-    );
-    expect(tokenCalls).toBe(1);
-    expect(proxyAuth).toEqual(['Bearer expired-token']);
+    await call(client);
+    expect(proxyAuth.slice(2)).toEqual([`Bearer ${issued(1)}`]);
   });
 });
 
@@ -385,7 +379,7 @@ describe('access token lifetime', () => {
     expect(proxyAuth).toEqual([`Bearer ${issued(1)}`, `Bearer ${issued(1)}`]);
   });
 
-  it('throws the token endpoint error when renewal fails and the held token has expired', async () => {
+  it('returns the proxy 401 when renewal fails and the held token has expired', async () => {
     tokenExpiresIn = 60;
     const client = makeClient();
     await call(client);
@@ -402,17 +396,17 @@ describe('access token lifetime', () => {
       clock.mockRestore();
     }
 
-    expect(error).toBeInstanceOf(ScalekitServerException);
-    expect((error as ScalekitServerException).httpStatus).not.toBe(401);
+    expect(error).toBeInstanceOf(ScalekitUnauthorizedException);
+    expect((error as ScalekitServerException).httpStatus).toBe(401);
     // Sent once with the held token (rejected before forwarding), never
-    // resent; the renewal and the refresh after the 401 both failed.
+    // resent; the renewal and the renewal after the 401 both failed.
     expect(proxyAuth).toEqual([`Bearer ${issued(1)}`, `Bearer ${issued(1)}`]);
     expect(tokenCalls).toBe(3);
   });
 
-  it('spends one token request and one resend per call on a 401 that a new token does not fix', async () => {
-    // The proxy answers every token with its 401, as a proxy without
-    // TOOL_ERROR does when the connected account's own credentials fail.
+  it('spends one token request and no resend per call on a 401 that a new token does not fix', async () => {
+    // The proxy answers every token with its 401, as it does when the
+    // connected account's own credentials fail.
     tokenExpiresIn = 3600;
     proxyAlwaysUnauthorized = true;
     const client = makeClient();
@@ -424,18 +418,13 @@ describe('access token lifetime', () => {
     }
 
     expect(tokenCalls).toBe(3);
-    expect(proxyAuth).toEqual([
-      `Bearer ${issued(1)}`,
-      `Bearer ${issued(2)}`,
-      `Bearer ${issued(2)}`,
-      `Bearer ${issued(3)}`,
-    ]);
+    expect(proxyAuth).toEqual([`Bearer ${issued(1)}`, `Bearer ${issued(2)}`]);
   });
 
   it('replaces a token on its next 401 even after earlier 401s that a new token did not fix', async () => {
-    // A proxy without TOOL_ERROR answers a failing connected account with its
-    // 401, so a new token doesn't help. Then that token is revoked: the next
-    // call must still replace it, not wait for its renewal an hour later.
+    // The proxy answers a failing connected account with its 401, so a new
+    // token doesn't help. Then that token is revoked: the next call must
+    // still replace it, not wait for its renewal an hour later.
     tokenExpiresIn = 3600;
     proxyAlwaysUnauthorized = true;
     const client = makeClient();
@@ -445,10 +434,13 @@ describe('access token lifetime', () => {
 
     proxyAlwaysUnauthorized = false;
     revokedTokens.add(issued(2));
+    await expect(call(client)).rejects.toBeInstanceOf(
+      ScalekitUnauthorizedException
+    );
     const res = await call(client);
 
     expect(res.status).toBe(200);
-    expect(proxyAuth.slice(2)).toEqual([
+    expect(proxyAuth.slice(1)).toEqual([
       `Bearer ${issued(2)}`,
       `Bearer ${issued(3)}`,
     ]);
@@ -468,7 +460,7 @@ describe('access token lifetime', () => {
     );
 
     expect(tokenCalls).toBe(3);
-    expect(proxyAuth).toHaveLength(4);
+    expect(proxyAuth).toHaveLength(2);
   });
 
   it('stops waiting for a token request when the signal aborts', async () => {

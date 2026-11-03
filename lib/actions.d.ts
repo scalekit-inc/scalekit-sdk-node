@@ -433,6 +433,13 @@ export default class ActionsClient {
      * `<environment URL>/proxy/`) is sent without the client's `Authorization`,
      * `connection_name` and `identifier` headers. So is a hop sent through an HTTP
      * forward proxy whose redirect location carries a fragment.
+     *
+     * The client fetches its access token before the first request and renews it
+     * shortly before it expires. A request is never sent twice: when Scalekit
+     * answers 401, the client fetches a new token for later calls and the 401
+     * is thrown, so call `request` again if a new token can fix it. The same 401
+     * is also used when the connected account's own credentials fail, which
+     * needs the user to reconnect the account instead.
      */
     request(params: {
         connectionName: string;

@@ -4,7 +4,7 @@ import {
   type MessageInitShape,
 } from '@bufbuild/protobuf';
 import { AxiosResponse } from 'axios';
-import CoreClient, { assertValidTimeout, isStream } from './core';
+import CoreClient, { assertValidTimeout } from './core';
 import { assertProxyPathContained, proxyRedirectGuard } from './proxy-path';
 import { toScalekitException } from './http-errors';
 import ToolsClient from './tools';
@@ -821,6 +821,13 @@ export default class ActionsClient {
    * `<environment URL>/proxy/`) is sent without the client's `Authorization`,
    * `connection_name` and `identifier` headers. So is a hop sent through an HTTP
    * forward proxy whose redirect location carries a fragment.
+   *
+   * The client fetches its access token before the first request and renews it
+   * shortly before it expires. A request is never sent twice: when Scalekit
+   * answers 401, the client fetches a new token for later calls and the 401
+   * is thrown, so call `request` again if a new token can fix it. The same 401
+   * is also used when the connected account's own credentials fail, which
+   * needs the user to reconnect the account instead.
    */
   async request(params: {
     connectionName: string;
@@ -884,10 +891,9 @@ export default class ActionsClient {
       });
 
     try {
-      // A stream body is consumed by the first send, so it is never resent.
-      return await this.coreClient.withAccessToken(send, {
-        resend: !isStream(data),
-      });
+      // Never resent: the proxy's 401 can be a connected account's own
+      // credential failure, which a new Scalekit token does not fix.
+      return await this.coreClient.withAccessToken(send, { resend: false });
     } catch (error) {
       throw toScalekitException(error);
     }

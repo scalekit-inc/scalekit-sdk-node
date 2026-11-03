@@ -21,8 +21,6 @@ export declare const DEFAULT_PING_TIMEOUT_MS = 5000;
 export declare const MIN_PING_INTERVAL_MS = 60000;
 export declare function assertValidTimeout(name: string, value: number): void;
 export declare function assertValidPingInterval(value: number): void;
-/** A stream body is consumed by the first send, so it can't be resent. */
-export declare function isStream(data: unknown): boolean;
 /**
  * A JSON Web Key from the environment's JWKS endpoint (RFC 7517). Declared
  * here rather than imported from `jose` so the published declarations never
@@ -105,21 +103,18 @@ export default class CoreClient {
      * Run an authenticated HTTP request through `this.axios`, with a token that
      * isn't about to expire: fetch one first if needed (`ensureAccessToken`).
      *
-     * If Scalekit still rejects the token (revoked, a rotated signing key, or
-     * clock skew), fetch a new one and send the request once more, as
-     * `connectExec` does for gRPC calls. Only a 401 the Scalekit proxy sent
-     * itself counts: the proxy rejects it before forwarding, so the resend is
-     * safe. A 401 from the provider is returned as is, never replayed.
+     * On a 401 in the Scalekit proxy's own shape (`isScalekitUnauthorized`),
+     * fetch a new token so later calls use it. A 401 from the provider is
+     * returned as is and never triggers a token request.
      *
-     * A connected account's own credential failure (code `TOOL_ERROR`) is
-     * never resent. A proxy deployed before it sent `TOOL_ERROR` answers those
-     * with `UNAUTHORIZED`, which costs one token request and one resend per
-     * call, the same bound as a gRPC call. No call carries over a decision that
-     * a token is not the cause: a token that is later revoked must stay
-     * replaceable on its next 401.
+     * With `resend: false` the request is not sent again and the proxy's 401
+     * is returned, even if fetching the new token fails. `actions.request`
+     * uses this for every request: the proxy answers a rejected Scalekit token
+     * and a connected account's own credential failure with the same 401, and
+     * resending the latter would repeat it at the provider. With `resend: true`
+     * (resumable uploads, as in earlier releases) the request is sent once more
+     * with the new token.
      *
-     * Pass `resend: false` when `send` can't run twice (a stream body): the
-     * token is still renewed, so the next call works, and the 401 is returned.
      * Pass `signal` to stop waiting for a token request when it aborts.
      *
      * @internal

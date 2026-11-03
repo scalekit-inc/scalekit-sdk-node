@@ -98,28 +98,9 @@ export function assertValidPingInterval(value: number): void {
   }
 }
 
-/** A stream body is consumed by the first send, so it can't be resent. */
-export function isStream(data: unknown): boolean {
-  return typeof (data as { pipe?: unknown } | null)?.pipe === 'function';
-}
-
 // A token is replaced this long before it expires (at most half its
 // lifetime), so a request never goes out with one about to lapse.
 const TOKEN_RENEW_BEFORE_EXPIRY_MS = 10_000;
-
-/** Milliseconds until a JWT's `exp`, or null when it is not a JWT with one. */
-function jwtLifetimeMs(token: string): number | null {
-  const payload = token.split('.')[1];
-  if (!payload) return null;
-  try {
-    const { exp } = JSON.parse(
-      Buffer.from(payload, 'base64url').toString('utf8')
-    ) as { exp?: unknown };
-    return typeof exp === 'number' ? exp * 1000 - Date.now() : null;
-  } catch {
-    return null;
-  }
-}
 
 /** Settles with `promise`, or rejects as soon as `signal` aborts. */
 function untilAborted<T>(
@@ -324,10 +305,10 @@ export default class CoreClient {
         'The token endpoint answered without an access_token.'
       );
     }
+    // Without `expires_in` the lifetime is unknown: the token is not renewed
+    // ahead of time, only after Scalekit rejects it.
     const lifetimeMs =
-      typeof expiresIn === 'number' && expiresIn > 0
-        ? expiresIn * 1000
-        : jwtLifetimeMs(token);
+      typeof expiresIn === 'number' && expiresIn > 0 ? expiresIn * 1000 : null;
     this.accessToken = token;
     this.accessTokenRenewAt =
       lifetimeMs === null
@@ -370,21 +351,18 @@ export default class CoreClient {
    * Run an authenticated HTTP request through `this.axios`, with a token that
    * isn't about to expire: fetch one first if needed (`ensureAccessToken`).
    *
-   * If Scalekit still rejects the token (revoked, a rotated signing key, or
-   * clock skew), fetch a new one and send the request once more, as
-   * `connectExec` does for gRPC calls. Only a 401 the Scalekit proxy sent
-   * itself counts: the proxy rejects it before forwarding, so the resend is
-   * safe. A 401 from the provider is returned as is, never replayed.
+   * On a 401 in the Scalekit proxy's own shape (`isScalekitUnauthorized`),
+   * fetch a new token so later calls use it. A 401 from the provider is
+   * returned as is and never triggers a token request.
    *
-   * A connected account's own credential failure (code `TOOL_ERROR`) is
-   * never resent. A proxy deployed before it sent `TOOL_ERROR` answers those
-   * with `UNAUTHORIZED`, which costs one token request and one resend per
-   * call, the same bound as a gRPC call. No call carries over a decision that
-   * a token is not the cause: a token that is later revoked must stay
-   * replaceable on its next 401.
+   * With `resend: false` the request is not sent again and the proxy's 401
+   * is returned, even if fetching the new token fails. `actions.request`
+   * uses this for every request: the proxy answers a rejected Scalekit token
+   * and a connected account's own credential failure with the same 401, and
+   * resending the latter would repeat it at the provider. With `resend: true`
+   * (resumable uploads, as in earlier releases) the request is sent once more
+   * with the new token.
    *
-   * Pass `resend: false` when `send` can't run twice (a stream body): the
-   * token is still renewed, so the next call works, and the 401 is returned.
    * Pass `signal` to stop waiting for a token request when it aborts.
    *
    * @internal
@@ -410,9 +388,8 @@ export default class CoreClient {
       // Intentional fallback, as in connectExec: when renewing ahead of expiry
       // fails (the token endpoint is down) but the client still holds a token,
       // send with it. A still-valid token succeeds, as in earlier releases; an
-      // expired one gets the proxy's own 401 before anything is forwarded, and
-      // the refresh below throws the token endpoint's error. An aborted call,
-      // or a client with no token, gets the error now.
+      // expired one gets the proxy's own 401 before anything is forwarded. An
+      // aborted call, or a client with no token, gets the error now.
       if (signal?.aborted || !this.accessToken) throw error;
     }
     const tokenUsed = this.accessToken;
@@ -420,9 +397,17 @@ export default class CoreClient {
       return await send();
     } catch (error) {
       if (!isProxyUnauthorized(error)) throw error;
+      if (!resend) {
+        // Intentional: the new token is only for later calls, so failing to
+        // fetch it must not replace this call's 401 with the token error.
+        await tokenRequest(() => this.refreshAccessToken(tokenUsed)).catch(
+          () => undefined
+        );
+        throw error;
+      }
       await tokenRequest(() => this.refreshAccessToken(tokenUsed));
       const freshToken = this.accessToken;
-      if (!resend || !freshToken || freshToken === tokenUsed) throw error;
+      if (!freshToken || freshToken === tokenUsed) throw error;
       return send();
     }
   }
