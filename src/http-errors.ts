@@ -116,37 +116,3 @@ export function toScalekitException(error: unknown): ScalekitException {
   }
   return setCause(new ScalekitException(error), error);
 }
-
-// The AxiosError fields callers of earlier releases could read on a failed
-// token request. `request` is not among them: the client's response
-// interceptor removes it, since it carries the credentials.
-const AXIOS_ERROR_FIELDS = [
-  'isAxiosError',
-  'code',
-  'status',
-  'response',
-  'config',
-] as const;
-
-/**
- * A failed access-token request as a `ScalekitException` (see
- * `toScalekitException`) that still carries the `AxiosError` fields callers
- * could read before, as non-enumerable properties, so `axios.isAxiosError()`,
- * `error.response.status` and `error.code` keep working. Used for gRPC calls,
- * which threw the raw `AxiosError` in earlier releases.
- */
-export function toScalekitTokenError(error: unknown): ScalekitException {
-  const mapped = toScalekitException(error);
-  if (error instanceof AxiosError && mapped !== error) {
-    for (const field of AXIOS_ERROR_FIELDS) {
-      if (error[field] === undefined) continue;
-      Object.defineProperty(mapped, field, {
-        value: error[field],
-        writable: true,
-        configurable: true,
-        enumerable: false,
-      });
-    }
-  }
-  return mapped;
-}

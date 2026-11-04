@@ -25,11 +25,7 @@ import {
 } from './errors/base-exception';
 import { ScalekitGatewayTimeoutException } from './errors/specific-exceptions';
 import { ErrorInfoSchema } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
-import {
-  isScalekitUnauthorized,
-  toScalekitException,
-  toScalekitTokenError,
-} from './http-errors';
+import { isScalekitUnauthorized, toScalekitException } from './http-errors';
 
 export const headers = {
   'user-agent': 'user-agent',
@@ -474,14 +470,9 @@ export default class CoreClient {
   private async replaceRejectedToken(
     tokenUsed: string | null
   ): Promise<boolean> {
-    try {
-      await this.refreshAccessToken(tokenUsed);
-    } catch (error) {
-      // A ScalekitException, as HTTP calls throw. Earlier releases threw the
-      // raw AxiosError here, so it keeps that error's fields (see
-      // toScalekitTokenError).
-      throw toScalekitTokenError(error);
-    }
+    // A failed token request throws its own error (an `AxiosError`), unmapped,
+    // as in earlier releases.
+    await this.refreshAccessToken(tokenUsed);
     return this.accessToken !== null && this.accessToken !== tokenUsed;
   }
 

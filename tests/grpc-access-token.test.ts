@@ -28,10 +28,7 @@ import { connectNodeAdapter } from '@connectrpc/connect-node';
 import axios, { AxiosError } from 'axios';
 import util from 'util';
 import ScalekitClient from '../src/scalekit';
-import {
-  ScalekitException,
-  ScalekitServerException,
-} from '../src/errors/base-exception';
+import { ScalekitServerException } from '../src/errors/base-exception';
 import CoreClient from '../src/core';
 import {
   ScalekitToolUnauthorizedException,
@@ -341,7 +338,7 @@ describe('gRPC access token', () => {
     expect(grpcAuth).toHaveLength(3);
   });
 
-  it('when the token endpoint fails, sends the call as earlier releases did and throws the token error as a ScalekitException', async () => {
+  it('when the token endpoint fails, sends the call as earlier releases did and throws the token error', async () => {
     tokenStatus = 401;
     const { client } = makeClient();
 
@@ -349,9 +346,9 @@ describe('gRPC access token', () => {
       .listOrganization()
       .catch((e: unknown) => e);
 
-    // As in earlier releases, the call goes out without a token and gets a
-    // 401; the token request that follows fails, now as a ScalekitException.
-    expect(error).toBeInstanceOf(ScalekitUnauthorizedException);
+    // As in earlier releases: the call goes out without a token, gets a 401,
+    // and the token request that follows throws its own AxiosError.
+    expect(error).toBeInstanceOf(AxiosError);
     expect((error as AxiosError).response?.status).toBe(401);
     expect(tokenCalls).toBe(2);
     expect(grpcAuth).toEqual([null]);
@@ -477,19 +474,8 @@ describe('connectExec with an HTTP call (axios 401)', () => {
   });
 });
 
-describe('a failed token request on a gRPC call throws a ScalekitException', () => {
-  // Fields an AxiosError carries that callers of earlier releases could read.
-  function expectAxiosFields(error: unknown, status: number | undefined) {
-    expect(axios.isAxiosError(error)).toBe(true);
-    expect((error as AxiosError).response?.status).toBe(status);
-    expect((error as AxiosError).status).toBe(status);
-    expect(typeof (error as AxiosError).code).toBe('string');
-    expect((error as { cause?: unknown }).cause).toBeInstanceOf(AxiosError);
-    // Non-enumerable, so logging the exception does not dump the response.
-    expect(Object.keys(error as object)).not.toContain('response');
-  }
-
-  it('a wrong secret throws ScalekitUnauthorizedException that keeps the axios fields and not the secret', async () => {
+describe('a failed token request on a gRPC call throws its AxiosError, as in earlier releases', () => {
+  it('a wrong secret throws the AxiosError, without the secret', async () => {
     tokenStatus = 401;
     const secret = 'sk-test-wrong-secret-7f3a';
     const { client } = makeClient({ secret });
@@ -498,11 +484,11 @@ describe('a failed token request on a gRPC call throws a ScalekitException', () 
       .listOrganization()
       .catch((e: unknown) => e);
 
-    expect(error).toBeInstanceOf(ScalekitUnauthorizedException);
-    expect(error).toBeInstanceOf(ScalekitException);
-    expect(error).not.toBeInstanceOf(AxiosError);
-    expect((error as ScalekitServerException).httpStatus).toBe(401);
-    expectAxiosFields(error, 401);
+    expect(error).toBeInstanceOf(AxiosError);
+    expect((error as AxiosError).response?.status).toBe(401);
+    expect((error as AxiosError).message).toBe(
+      'Request failed with status code 401'
+    );
     expect(util.inspect(error, { showHidden: true, depth: 8 })).not.toContain(
       secret
     );
@@ -511,7 +497,7 @@ describe('a failed token request on a gRPC call throws a ScalekitException', () 
     expect(tokenCalls).toBe(2);
   });
 
-  it('a token endpoint 503 during the refresh after a 401 throws a ScalekitServerException whose response has status 503', async () => {
+  it('a token endpoint 503 during the refresh after a 401 throws the AxiosError with status 503', async () => {
     const { client } = makeClient();
     await client.organization.listOrganization();
     rejectedTokens.add('fresh-1');
@@ -521,13 +507,11 @@ describe('a failed token request on a gRPC call throws a ScalekitException', () 
       .listOrganization()
       .catch((e: unknown) => e);
 
-    expect(error).toBeInstanceOf(ScalekitServerException);
-    // httpStatus is not asserted: ScalekitServerException maps a multi-word
-    // status text ("Service Unavailable") to 500, as on main.
-    expectAxiosFields(error, 503);
+    expect(error).toBeInstanceOf(AxiosError);
+    expect((error as AxiosError).response?.status).toBe(503);
   });
 
-  it('an unreachable token endpoint during the refresh throws a ScalekitException with the network error code', async () => {
+  it('an unreachable token endpoint during the refresh throws the AxiosError with the network error code', async () => {
     const { client, core } = makeClient();
     await client.organization.listOrganization();
     rejectedTokens.add('fresh-1');
@@ -541,11 +525,8 @@ describe('a failed token request on a gRPC call throws a ScalekitException', () 
       .listOrganization()
       .catch((e: unknown) => e);
 
-    expect(error).toBeInstanceOf(ScalekitException);
-    expect(error).not.toBeInstanceOf(AxiosError);
-    expect(axios.isAxiosError(error)).toBe(true);
+    expect(error).toBeInstanceOf(AxiosError);
     expect((error as AxiosError).code).toBe('ECONNREFUSED');
-    expect((error as AxiosError).response).toBeUndefined();
   });
 
   it('does not change the HTTP path: actions-style calls through withAccessToken already throw a ScalekitException', async () => {
