@@ -3,14 +3,10 @@ import {
   type JsonObject,
   type MessageInitShape,
 } from '@bufbuild/protobuf';
-import { AxiosError, AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
 import CoreClient, { assertValidTimeout } from './core';
 import { assertProxyPathContained, proxyRedirectGuard } from './proxy-path';
-import {
-  ScalekitException,
-  ScalekitGatewayTimeoutException,
-  ScalekitServerException,
-} from './errors';
+import { toScalekitException } from './http-errors';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
@@ -825,6 +821,13 @@ export default class ActionsClient {
    * `<environment URL>/proxy/`) is sent without the client's `Authorization`,
    * `connection_name` and `identifier` headers. So is a hop sent through an HTTP
    * forward proxy whose redirect location carries a fragment.
+   *
+   * The client fetches its access token before the first request and renews it
+   * shortly before it expires. A request is never sent twice: when Scalekit
+   * answers 401, the client fetches a new token for later calls and the 401
+   * is thrown, so call `request` again if a new token can fix it. The same 401
+   * is also used when the connected account's own credentials fail, which
+   * needs the user to reconnect the account instead.
    */
   async request(params: {
     connectionName: string;
@@ -873,31 +876,26 @@ export default class ActionsClient {
       identifier,
     };
 
-    try {
-      return await this.coreClient.axios.request({
+    const data = body ?? formData;
+    const send = () =>
+      this.coreClient.axios.request({
         url,
         method: method.toUpperCase(),
         params: queryParams,
-        data: body ?? formData,
+        data,
         headers: proxyHeaders,
         timeout,
         // Redirects are still followed; credentials are not sent on a hop
         // that leaves the proxy prefix.
         beforeRedirect: proxyRedirectGuard(this.coreClient.envUrl),
       });
+
+    try {
+      // Never resent: the proxy's 401 can be a connected account's own
+      // credential failure, which a new Scalekit token does not fix.
+      return await this.coreClient.withAccessToken(send, { resend: false });
     } catch (error) {
-      if (error instanceof ScalekitException) throw error;
-      if (error instanceof AxiosError) {
-        if (error.response)
-          throw ScalekitServerException.promote(error.response);
-        // Same exception type as a gRPC deadline expiry, so callers handle
-        // both timeout paths uniformly.
-        if (ScalekitGatewayTimeoutException.isAxiosTimeout(error)) {
-          throw ScalekitGatewayTimeoutException.fromAxiosTimeout(error);
-        }
-        throw new ScalekitException(error);
-      }
-      throw new ScalekitException(error);
+      throw toScalekitException(error);
     }
   }
 

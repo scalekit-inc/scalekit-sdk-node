@@ -1,7 +1,6 @@
 import { ReadStream, promises as fsPromises } from 'fs';
 import {
   AxiosError,
-  AxiosHeaders,
   isCancel,
   type AxiosRequestConfig,
   type AxiosResponse,
@@ -10,7 +9,6 @@ import type CoreClient from './core';
 import {
   ScalekitAbortError,
   ScalekitException,
-  ScalekitServerException,
   ScalekitValidationError,
 } from './errors/base-exception';
 import { ScalekitGatewayTimeoutException } from './errors/specific-exceptions';
@@ -21,6 +19,13 @@ import {
   ScalekitUploadSessionExpiredException,
   ScalekitUploadTimeoutException,
 } from './errors/upload-exceptions';
+import {
+  bodyText,
+  errorBody,
+  headerRecord,
+  isPlainObject,
+  setCause,
+} from './http-errors';
 
 // Google's resumable upload protocol (Drive v3, the Cloud Storage JSON API,
 // YouTube Data API), sent through the Scalekit proxy:
@@ -147,12 +152,6 @@ interface UploadPlan {
   maxRetries: number;
   onProgress: ((progress: UploadProgress) => void | Promise<void>) | undefined;
   signal: AbortSignal | undefined;
-}
-
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  if (value === null || typeof value !== 'object') return false;
-  const proto = Object.getPrototypeOf(value);
-  return proto === Object.prototype || proto === null;
 }
 
 function isNonNegativeSafeInteger(value: unknown): value is number {
@@ -619,99 +618,6 @@ type Exchange =
   | { kind: 'timeout'; error: unknown }
   | { kind: 'network'; error: unknown };
 
-function headerRecord(headers: unknown): Record<string, string> {
-  const record: Record<string, string> = {};
-  if (!headers || typeof headers !== 'object') return record;
-  const plain =
-    headers instanceof AxiosHeaders
-      ? (headers.toJSON() as Record<string, unknown>)
-      : (headers as Record<string, unknown>);
-  for (const [name, value] of Object.entries(plain)) {
-    if (value === undefined || value === null) continue;
-    record[name.toLowerCase()] = Array.isArray(value)
-      ? value.map(String).join(', ')
-      : String(value);
-  }
-  return record;
-}
-
-function bodyText(data: unknown): string {
-  if (data === undefined || data === null) return '';
-  if (typeof data === 'string') return data;
-  if (data instanceof Uint8Array) return Buffer.from(data).toString('utf8');
-  return JSON.stringify(data);
-}
-
-function isJsonContentType(headers: Record<string, string>): boolean {
-  const [mime = ''] = (headers['content-type'] ?? '').split(';');
-  const type = mime.trim().toLowerCase();
-  return type === 'application/json' || type.endsWith('+json');
-}
-
-/** Error body for callers: parsed JSON when it is JSON, otherwise the text. */
-function errorBody(response: AxiosResponse): unknown {
-  if (
-    response.data !== null &&
-    typeof response.data === 'object' &&
-    !(response.data instanceof Uint8Array)
-  ) {
-    return response.data;
-  }
-  const text = bodyText(response.data);
-  if (text.trim() === '') return text;
-  try {
-    return JSON.parse(text) as unknown;
-  } catch {
-    return text;
-  }
-}
-
-/**
- * A 401 the Scalekit proxy itself sent because the access token was rejected
- * (JSON `{ "detail": ..., "code": "UNAUTHORIZED" }`), as opposed to a 401 from
- * the provider. Only this kind is safe to resend after a token refresh.
- */
-function isScalekitUnauthorized(response: AxiosResponse): boolean {
-  if (response.status !== 401) return false;
-  if (!isJsonContentType(headerRecord(response.headers))) return false;
-  const body = errorBody(response);
-  if (!isPlainObject(body)) return false;
-  const keys = Object.keys(body).sort();
-  return (
-    keys.length === 2 &&
-    keys[0] === 'code' &&
-    keys[1] === 'detail' &&
-    body.code === 'UNAUTHORIZED'
-  );
-}
-
-function setCause<T extends Error>(error: T, cause: unknown): T {
-  Object.defineProperty(error, 'cause', {
-    value: cause,
-    writable: true,
-    configurable: true,
-    enumerable: false,
-  });
-  return error;
-}
-
-/** Maps a failed token request the same way `actions.request` maps failures. */
-function tokenRequestError(error: unknown): ScalekitException {
-  if (error instanceof ScalekitException) return error;
-  if (error instanceof AxiosError) {
-    if (error.response) {
-      return setCause(ScalekitServerException.promote(error.response), error);
-    }
-    if (ScalekitGatewayTimeoutException.isAxiosTimeout(error)) {
-      return setCause(
-        ScalekitGatewayTimeoutException.fromAxiosTimeout(error),
-        error
-      );
-    }
-  }
-  return setCause(new ScalekitException(error), error);
-}
-
 class ResumableUpload {
   private uploadId: string | undefined;
   private committed = 0;
@@ -738,11 +644,6 @@ class ResumableUpload {
       // Read the first chunk before starting the session, so content that
       // fits in one chunk has a known size for X-Upload-Content-Length.
       let chunk = await source.next();
-      try {
-        await this.core.ensureAccessToken();
-      } catch (error) {
-        throw tokenRequestError(error);
-      }
       this.checkAbort();
       this.uploadId = await this.startSession(source.totalBytes);
       return await this.transfer(source, chunk);
@@ -785,7 +686,7 @@ class ResumableUpload {
       headers['Content-Type'] = 'application/json; charset=UTF-8';
       body = Buffer.from(plan.metadataJson, 'utf8');
     }
-    const outcome = await this.exchange({
+    const outcome = await this.send({
       url: this.proxyUrl(),
       method: plan.method,
       params: { uploadType: 'resumable', ...plan.queryParams },
@@ -964,7 +865,7 @@ class ResumableUpload {
       body.length === 0
         ? `bytes */${totalField}`
         : `bytes ${offset}-${offset + body.length - 1}/${totalField}`;
-    return this.exchange({
+    return this.send({
       url: this.proxyUrl(),
       method: 'PUT',
       params: { uploadType: 'resumable', upload_id: this.uploadId },
@@ -978,7 +879,7 @@ class ResumableUpload {
   }
 
   private sendStatusQuery(total: number | undefined): Promise<Exchange> {
-    return this.exchange({
+    return this.send({
       url: this.proxyUrl(),
       method: 'PUT',
       params: { uploadType: 'resumable', upload_id: this.uploadId },
@@ -992,48 +893,35 @@ class ResumableUpload {
   }
 
   /**
-   * Sends one request. A Scalekit 401 (rejected access token) is answered by
-   * one token refresh and one resend, and only when the token changed; the
-   * proxy rejects such a request before forwarding it, so the resend is safe.
+   * Sends one request with a current access token. A Scalekit 401 (rejected
+   * access token) is answered by one token refresh and one resend
+   * (`CoreClient.withAccessToken`); an abort stops the wait for a token.
    */
-  private async exchange(config: AxiosRequestConfig): Promise<Exchange> {
-    const tokenUsed = this.core.accessToken;
-    const outcome = await this.send(config);
-    if (
-      outcome.kind === 'http-error' &&
-      isScalekitUnauthorized(outcome.response)
-    ) {
-      try {
-        await this.core.refreshAccessToken(tokenUsed);
-      } catch (error) {
-        throw tokenRequestError(error);
-      }
-      this.checkAbort();
-      if (this.core.accessToken && this.core.accessToken !== tokenUsed) {
-        return this.send(config);
-      }
-    }
-    return outcome;
-  }
-
   private async send(config: AxiosRequestConfig): Promise<Exchange> {
     const { plan } = this;
     try {
-      const response = await this.core.axios.request({
-        ...config,
-        timeout: plan.timeoutMs ?? this.core.toolTimeoutMs,
-        ...(plan.signal !== undefined && { signal: plan.signal }),
-        maxRedirects: 0,
-        maxBodyLength: Infinity,
-        responseType: 'text',
-        validateStatus: (status) =>
-          (status >= 200 && status < 300) || status === 308,
-      });
+      const response = await this.core.withAccessToken(
+        () =>
+          this.core.axios.request({
+            ...config,
+            timeout: plan.timeoutMs ?? this.core.toolTimeoutMs,
+            ...(plan.signal !== undefined && { signal: plan.signal }),
+            maxRedirects: 0,
+            maxBodyLength: Infinity,
+            responseType: 'text',
+            validateStatus: (status) =>
+              (status >= 200 && status < 300) || status === 308,
+          }),
+        { signal: plan.signal }
+      );
       return { kind: 'response', response };
     } catch (error) {
       if (isCancel(error) || plan.signal?.aborted) {
         throw this.abortError();
       }
+      // A failed token request, already mapped by `CoreClient`: not a
+      // response to this upload request, so never retried as one.
+      if (error instanceof ScalekitException) throw error;
       if (error instanceof AxiosError) {
         if (error.response) {
           return { kind: 'http-error', response: error.response, error };

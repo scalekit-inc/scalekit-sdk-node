@@ -25,6 +25,7 @@ import {
 } from './errors/base-exception';
 import { ScalekitGatewayTimeoutException } from './errors/specific-exceptions';
 import { ErrorInfoSchema } from './pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
+import { isScalekitUnauthorized, toScalekitException } from './http-errors';
 
 export const headers = {
   'user-agent': 'user-agent',
@@ -93,6 +94,39 @@ export function assertValidPingInterval(value: number): void {
   }
 }
 
+// A token is replaced this long before it expires (at most half its
+// lifetime), so a request never goes out with one about to lapse.
+const TOKEN_RENEW_BEFORE_EXPIRY_MS = 10_000;
+
+/** Settles with `promise`, or rejects as soon as `signal` aborts. */
+function untilAborted<T>(
+  promise: Promise<T>,
+  signal?: AbortSignal
+): Promise<T> {
+  if (!signal) return promise;
+  if (signal.aborted) {
+    // The caller stops waiting for `promise`; keep its rejection from going unhandled.
+    promise.catch(() => undefined);
+    return Promise.reject(signal.reason);
+  }
+  return new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(signal.reason);
+    signal.addEventListener('abort', onAbort, { once: true });
+    promise
+      .then(resolve, reject)
+      .finally(() => signal.removeEventListener('abort', onAbort));
+  });
+}
+
+/** A 401 the Scalekit proxy sent itself (see `isScalekitUnauthorized`). */
+function isProxyUnauthorized(error: unknown): boolean {
+  return (
+    error instanceof AxiosError &&
+    error.response !== undefined &&
+    isScalekitUnauthorized(error.response)
+  );
+}
+
 /**
  * A JSON Web Key from the environment's JWKS endpoint (RFC 7517). Declared
  * here rather than imported from `jose` so the published declarations never
@@ -128,6 +162,9 @@ export interface JWK {
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
+  // When `accessToken` should be replaced (ms since epoch), from the token
+  // response's lifetime; null when the response gave none.
+  private accessTokenRenewAt: number | null = null;
   private pendingAuthentication: Promise<void> | null = null;
   public axios: Axios;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -168,6 +205,10 @@ export default class CoreClient {
     // budget (the actions proxy) set a per-request timeout, which overrides
     // this default.
     this.axios = axios.create({ baseURL: envUrl, timeout: this.timeoutMs });
+    // Attaches the token this client holds; never fetches one. Calls that
+    // need a token get it through `withAccessToken` (HTTP) or `connectExec`
+    // (gRPC), so creating a client or validating a token never fetches one.
+    // The gRPC transport (`connect.ts`) attaches it the same way.
     this.axios.interceptors.request.use((config) => {
       config.headers[headers['user-agent']] = this.userAgent;
       config.headers[headers['x-sdk-version']] = this.sdkVersion;
@@ -212,27 +253,34 @@ export default class CoreClient {
         return Promise.reject(error);
       }
     );
-    // removing token creation at the time of constructor and instead letting the retry functionality handle generating a token whenever required.
-    //this.authenticateClient();
   }
 
   /**
-   * Fetch a client-credentials token if this client doesn't have one yet.
+   * Fetch a client-credentials token if this client has none, or if the one
+   * it holds expires within 10 seconds.
    *
-   * gRPC calls get a token lazily: `connectExec` authenticates when a call
-   * returns 401 and retries it. HTTP calls that must not be retried on 401,
-   * such as the actions proxy (a 401 there can come from the third-party API,
-   * and retrying would replay the request), call this first instead.
-   * Concurrent callers share one token request.
+   * Every call that needs a token runs this before sending: gRPC calls in
+   * `connectExec`, HTTP calls through `withAccessToken`. Concurrent callers
+   * share one token request.
    */
   async ensureAccessToken(): Promise<void> {
-    if (this.accessToken) return;
+    if (
+      this.accessToken &&
+      (this.accessTokenRenewAt === null || Date.now() < this.accessTokenRenewAt)
+    ) {
+      return;
+    }
+    await this.fetchAccessToken();
+  }
+
+  /** One token request at a time; concurrent callers share it. */
+  private fetchAccessToken(): Promise<void> {
     if (!this.pendingAuthentication) {
       this.pendingAuthentication = this.authenticateClient().finally(() => {
         this.pendingAuthentication = null;
       });
     }
-    await this.pendingAuthentication;
+    return this.pendingAuthentication;
   }
 
   private async authenticateClient() {
@@ -244,7 +292,26 @@ export default class CoreClient {
       })
     );
 
-    this.accessToken = res.data.access_token;
+    const { access_token: token, expires_in: expiresIn } = (res.data ??
+      {}) as Partial<TokenResponse>;
+    // Storing an empty token would send every call out unauthenticated, and
+    // each would request another token.
+    if (typeof token !== 'string' || token === '') {
+      throw new ScalekitException(
+        'The token endpoint answered without an access_token.'
+      );
+    }
+    // Without `expires_in` the lifetime is unknown: the token is not renewed
+    // ahead of time, only after Scalekit rejects it.
+    const lifetimeMs =
+      typeof expiresIn === 'number' && expiresIn > 0 ? expiresIn * 1000 : null;
+    this.accessToken = token;
+    this.accessTokenRenewAt =
+      lifetimeMs === null
+        ? null
+        : Date.now() +
+          lifetimeMs -
+          Math.min(TOKEN_RENEW_BEFORE_EXPIRY_MS, lifetimeMs / 2);
   }
   /**
    * Authenticate with the code
@@ -273,12 +340,72 @@ export default class CoreClient {
    */
   async refreshAccessToken(rejectedToken: string | null): Promise<void> {
     if (this.accessToken !== rejectedToken) return;
-    if (!this.pendingAuthentication) {
-      this.pendingAuthentication = this.authenticateClient().finally(() => {
-        this.pendingAuthentication = null;
-      });
+    await this.fetchAccessToken();
+  }
+
+  /**
+   * Run an authenticated HTTP request through `this.axios`, with a token that
+   * isn't about to expire: fetch one first if needed (`ensureAccessToken`).
+   *
+   * On a 401 in the Scalekit proxy's own shape (`isScalekitUnauthorized`),
+   * fetch a new token so later calls use it. A 401 from the provider is
+   * returned as is and never triggers a token request.
+   *
+   * With `resend: false` the request is not sent again and the proxy's 401
+   * is returned, even if fetching the new token fails. `actions.request`
+   * uses this for every request: the proxy answers a rejected Scalekit token
+   * and a connected account's own credential failure with the same 401, and
+   * resending the latter would repeat it at the provider. With `resend: true`
+   * (resumable uploads, as in earlier releases) the request is sent once more
+   * with the new token.
+   *
+   * Pass `signal` to stop waiting for a token request when it aborts.
+   *
+   * @internal
+   */
+  async withAccessToken<T>(
+    send: () => Promise<T>,
+    { resend = true, signal }: { resend?: boolean; signal?: AbortSignal } = {}
+  ): Promise<T> {
+    // An aborted call doesn't start a token request it would not wait for.
+    const tokenRequest = (start: () => Promise<void>) =>
+      signal?.aborted
+        ? Promise.reject(signal.reason)
+        : untilAborted(
+            start().catch((error: unknown) => {
+              throw toScalekitException(error);
+            }),
+            signal
+          );
+
+    try {
+      await tokenRequest(() => this.ensureAccessToken());
+    } catch (error) {
+      // Intentional fallback, as in connectExec: when renewing ahead of expiry
+      // fails (the token endpoint is down) but the client still holds a token,
+      // send with it. A still-valid token succeeds, as in earlier releases; an
+      // expired one gets the proxy's own 401 before anything is forwarded. An
+      // aborted call, or a client with no token, gets the error now.
+      if (signal?.aborted || !this.accessToken) throw error;
     }
-    await this.pendingAuthentication;
+    const tokenUsed = this.accessToken;
+    try {
+      return await send();
+    } catch (error) {
+      if (!isProxyUnauthorized(error)) throw error;
+      if (!resend) {
+        // Intentional: the new token is only for later calls, so failing to
+        // fetch it must not replace this call's 401 with the token error.
+        await tokenRequest(() => this.refreshAccessToken(tokenUsed)).catch(
+          () => undefined
+        );
+        throw error;
+      }
+      await tokenRequest(() => this.refreshAccessToken(tokenUsed));
+      const freshToken = this.accessToken;
+      if (!freshToken || freshToken === tokenUsed) throw error;
+      return send();
+    }
   }
 
   /**
@@ -302,18 +429,51 @@ export default class CoreClient {
   /**
    * Execute a function with error handling and retry logic.
    *
+   * The token is fetched before the first call and renewed shortly before it
+   * expires (`ensureAccessToken`), the same as for HTTP calls. If Scalekit
+   * still rejects it (401 without `TOOL_ERROR`: revoked, a rotated signing
+   * key, clock skew), one new token is fetched, shared with concurrent
+   * callers, and the call is sent once more. A second rejection is returned:
+   * another token would not fix it.
+   *
    * @param fn Function to execute
    * @param data Data to pass to the function
    * @param options Optional per-call gRPC options (e.g. `timeoutMs`), forwarded to `fn` as-is.
    *                Omit to use the transport's default deadline.
    * @returns {Promise<TResponse>} Returns the response
+   * @throws The token endpoint's own error (an `AxiosError`, not mapped) when
+   *         Scalekit rejects the token and fetching a new one fails, as in
+   *         earlier releases.
    */
   async connectExec<TRequest, TResponse>(
     fn: (request: TRequest, options?: CallOptions) => Promise<TResponse>,
     data: TRequest,
     options?: CallOptions
   ): Promise<TResponse> {
-    return this._connectExec(fn, data, 3, 0, options);
+    if (!options?.signal?.aborted) {
+      // Intentional fallback: if this up-front token request fails, send the
+      // call anyway, with the token held (possibly still valid) or none. It
+      // then fails, or succeeds, exactly as it did before tokens were
+      // fetched up front: Scalekit unreachable → Unavailable retries and
+      // `ScalekitServiceUnavailableException`; only the token endpoint
+      // failing → a 401, whose refresh throws the token endpoint's error.
+      await this.ensureAccessToken().catch(() => undefined);
+    }
+    return this._connectExec(fn, data, 3, 0, false, options);
+  }
+
+  /**
+   * After Scalekit rejected `tokenUsed`, fetch a new token (skipped when a
+   * concurrent call already replaced it). True when the client now holds a
+   * different token, so a resend can succeed.
+   */
+  private async replaceRejectedToken(
+    tokenUsed: string | null
+  ): Promise<boolean> {
+    // A failed token request throws its own error (an `AxiosError`), unmapped,
+    // as in earlier releases.
+    await this.refreshAccessToken(tokenUsed);
+    return this.accessToken !== null && this.accessToken !== tokenUsed;
   }
 
   private async _connectExec<TRequest, TResponse>(
@@ -321,8 +481,10 @@ export default class CoreClient {
     data: TRequest,
     retryLeft: number,
     attempt: number,
+    tokenRefreshed: boolean,
     options?: CallOptions
   ): Promise<TResponse> {
+    const tokenUsed = this.accessToken;
     try {
       return await fn(data, options);
     } catch (error) {
@@ -337,13 +499,17 @@ export default class CoreClient {
           .some((d) => d.errorCode === 'TOOL_ERROR');
 
         if (!isToolError && retryLeft > 0) {
-          if (error.code === Code.Unauthenticated) {
-            await this.authenticateClient();
+          if (
+            error.code === Code.Unauthenticated &&
+            !tokenRefreshed &&
+            (await this.replaceRejectedToken(tokenUsed))
+          ) {
             return this._connectExec(
               fn,
               data,
               retryLeft - 1,
               attempt + 1,
+              true,
               options
             );
           }
@@ -359,6 +525,7 @@ export default class CoreClient {
               data,
               retryLeft - 1,
               attempt + 1,
+              tokenRefreshed,
               options
             );
           }
@@ -369,13 +536,17 @@ export default class CoreClient {
       if (error instanceof AxiosError) {
         if (error.response) {
           if (retryLeft > 0) {
-            if (error.response.status === HttpStatusCode.Unauthorized) {
-              await this.authenticateClient();
+            if (
+              error.response.status === HttpStatusCode.Unauthorized &&
+              !tokenRefreshed &&
+              (await this.replaceRejectedToken(tokenUsed))
+            ) {
               return this._connectExec(
                 fn,
                 data,
                 retryLeft - 1,
                 attempt + 1,
+                true,
                 options
               );
             }

@@ -49,12 +49,16 @@ function makeScalekitConnectError(
   return new ConnectError(message, grpcCode);
 }
 
+// Holds a token, as a client does after its first call: `connectExec` only
+// fetches one up front when the client has none.
 function makeClient(): CoreClient {
-  return new CoreClient(
+  const client = new CoreClient(
     'https://test.scalekit.dev',
     'client_id',
     'client_secret'
   );
+  client.accessToken = 'held-token';
+  return client;
 }
 
 // ---------------------------------------------------------------------------
@@ -80,7 +84,9 @@ describe('SK-819 Phase 1 — current (pre-fix) behavior', () => {
 
     const authSpy = jest
       .spyOn(client as any, 'authenticateClient')
-      .mockResolvedValue(undefined);
+      .mockImplementation(async () => {
+        client.accessToken = 'renewed-token';
+      });
 
     const result = await client.connectExec(fn, undefined as any);
     expect(result).toBe('success');
