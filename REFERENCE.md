@@ -6956,7 +6956,9 @@ Lists the end-user consents granted against a resource, with pagination.
 
 Each returned consent carries `id`, `externalUserId`, `clientId`, `clientName`, `scopes` and `grantedAt`. The response also carries `totalSize` plus `nextPageToken` / `prevPageToken` cursors.
 
-Filter by user in one of two ways. Pass `userIds` to match specific external user IDs exactly and case-sensitively. Pass `search` for a case-insensitive substring match. When you give both, `userIds` wins and `search` is ignored.
+Filter in one of three ways. Pass `consentIds` to fetch specific consents by ID, for example to find the `clientId` you need to revoke a consent you already hold the ID of. Pass `userIds` to match specific external user IDs exactly and case-sensitively. Pass `search` for a case-insensitive substring match. When you give more than one, the priority is `consentIds`, then `userIds`, then `search`, and the lower-priority ones are ignored without an error. Blank-only `consentIds` values are ignored, so the next filter applies instead.
+
+When you filter by `consentIds`, check that every returned `id` is one you asked for before you revoke anything. A server that predates this filter ignores it and returns the unfiltered first page. Do not combine `consentIds` with `userIds` as an ownership check, because `consentIds` overrides `userIds`. Compare `externalUserId` on the returned consent instead.
 </dd>
 </dl>
 </dd>
@@ -6974,7 +6976,8 @@ Filter by user in one of two ways. Pass `userIds` to match specific external use
 const res = await scalekitClient.resources.listUserConsents('<RESOURCE_ID>', {
   search: '<OPTIONAL_SEARCH>',
   pageSize: 20,
-  userIds: ['<EXTERNAL_USER_ID>'], // optional; takes precedence over search
+  consentIds: ['<CONSENT_ID>'], // optional; takes precedence over userIds and search
+  userIds: ['<EXTERNAL_USER_ID>'], // optional; ignored when consentIds is set
 });
 
 console.log(res.totalSize, res.nextPageToken);
@@ -7004,10 +7007,11 @@ for (const consent of res.consents) {
 <dd>
 
 **options:** `ListUserConsentsOptions` - Optional filter, search and pagination options
-- `search?: string` - Case-insensitive substring match on external user IDs. Ignored when `userIds` is set.
+- `search?: string` - Case-insensitive substring match on external user IDs. Ignored when `consentIds` or `userIds` is set.
 - `pageSize?: number` - Page size, max 30
 - `pageToken?: string` - Pagination cursor from a previous response (`nextPageToken`/`prevPageToken`)
-- `userIds?: string[]` - Exact match on external user IDs, max 25. Takes precedence over `search`.
+- `userIds?: string[]` - Exact match on external user IDs, max 25. Ignored when `consentIds` is set; takes precedence over `search`.
+- `consentIds?: string[]` - Exact match on consent IDs (format `usrcnst_xxxxx`), max 25 distinct. IDs that do not exist or belong to another resource are omitted from the result. Takes precedence over `userIds` and `search`.
 
 </dd>
 </dl>
