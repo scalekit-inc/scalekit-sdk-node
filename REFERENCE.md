@@ -8265,7 +8265,7 @@ await scalekitClient.actions.createConnectedAccount({
   authorizationDetails: {
     details: {
       case: 'staticAuth',
-      value: { details: { 'X-Key-Id': 'abc', 'X-Secret': 'xyz' } },
+      value: { details: { 'X-Key-Id': '[X-KEY-ID]', 'X-Secret': '[X-SECRET]' } },
     },
   },
 });

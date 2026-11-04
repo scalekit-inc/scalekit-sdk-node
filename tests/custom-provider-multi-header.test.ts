@@ -123,8 +123,8 @@ describe('multi-header connected account credentials', () => {
   it('keeps one credential per header under staticAuth.details', () => {
     const message = create(UpdateConnectedAccountSchema, {
       authorizationDetails: staticAuth({
-        x_api_a: 'Header1',
-        x_api_b: 'header 2',
+        x_api_a: '[X-API-A]',
+        x_api_b: '[X-API-B]',
       }),
     } as any);
 
@@ -133,7 +133,7 @@ describe('multi-header connected account credentials', () => {
       message.authorizationDetails!
     );
     expect(json).toEqual({
-      staticAuth: { details: { x_api_a: 'Header1', x_api_b: 'header 2' } },
+      staticAuth: { details: { x_api_a: '[X-API-A]', x_api_b: '[X-API-B]' } },
     });
   });
 
@@ -141,7 +141,7 @@ describe('multi-header connected account credentials', () => {
     // Pitfall: create() ignores unknown keys, so this sends no credentials and
     // raises no error. Pass { details: { case: 'staticAuth', value: ... } }.
     const message = create(UpdateConnectedAccountSchema, {
-      authorizationDetails: { static_auth: { x_api_a: 'ignored' } },
+      authorizationDetails: { static_auth: { x_api_a: '[X-API-A]' } },
     } as any);
 
     const json = toJson(
@@ -169,8 +169,8 @@ describe('multi-header connected account credentials', () => {
       identifier: 'user_123',
       connectedAccount: create(CreateConnectedAccountSchema, {
         authorizationDetails: staticAuth({
-          x_api_a: 'Header1',
-          x_api_b: 'header 2',
+          x_api_a: '[X-API-A]',
+          x_api_b: '[X-API-B]',
         }),
       } as any),
     });
@@ -183,7 +183,7 @@ describe('multi-header connected account credentials', () => {
       requests[0].connectedAccount.authorizationDetails
     );
     expect(json).toEqual({
-      staticAuth: { details: { x_api_a: 'Header1', x_api_b: 'header 2' } },
+      staticAuth: { details: { x_api_a: '[X-API-A]', x_api_b: '[X-API-B]' } },
     });
   });
 });
