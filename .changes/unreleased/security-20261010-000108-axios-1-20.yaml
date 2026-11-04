@@ -1,0 +1,14 @@
+kind: security
+body: |
+  The SDK now requires `axios` 1.20.0 or later, because axios 1.19.x is affected by 7 high and 5 moderate advisories (older axios versions by some of them). They include header injection, prototype-pollution gadgets, redirect-based SSRF and denial of service. The SDK sends its access-token and JWKS requests, and `scalekit.actions.request(...)` calls with the headers you pass, through axios.
+
+  - **Advisories (high):** [GHSA-c29m-xwm3-cm6r](https://github.com/advisories/GHSA-c29m-xwm3-cm6r) (CVE-2026-101903), [GHSA-mghh-pgcx-3jjj](https://github.com/advisories/GHSA-mghh-pgcx-3jjj) (CVE-2026-101906), [GHSA-x97p-jq2g-jp4f](https://github.com/advisories/GHSA-x97p-jq2g-jp4f) (CVE-2026-101909), [GHSA-3pq3-5fj3-cg6v](https://github.com/advisories/GHSA-3pq3-5fj3-cg6v) (CVE-2026-101898), [GHSA-542g-h47m-68v8](https://github.com/advisories/GHSA-542g-h47m-68v8) (CVE-2026-101901), [GHSA-m8m8-qj5v-23w3](https://github.com/advisories/GHSA-m8m8-qj5v-23w3) (CVE-2026-101905), [GHSA-r4gj-5m52-g5wh](https://github.com/advisories/GHSA-r4gj-5m52-g5wh) (CVE-2026-101907)
+  - **Advisories (moderate):** [GHSA-vh66-26gq-q6x8](https://github.com/advisories/GHSA-vh66-26gq-q6x8) (CVE-2026-101908), [GHSA-9fr6-4gfg-395g](https://github.com/advisories/GHSA-9fr6-4gfg-395g) (CVE-2026-101902), [GHSA-j8rh-479h-cp32](https://github.com/advisories/GHSA-j8rh-479h-cp32) (CVE-2026-101904), [GHSA-4hqw-qxg8-jxx2](https://github.com/advisories/GHSA-4hqw-qxg8-jxx2) (CVE-2026-101900), [GHSA-44g4-m2mj-wpvx](https://github.com/advisories/GHSA-44g4-m2mj-wpvx) (CVE-2026-101899)
+  - **Affected versions:** `axios` `<1.20.0`, as allowed by every `@scalekit-sdk/node` release before this one
+  - **Patched versions:** `axios` `>=1.20.0`; `@scalekit-sdk/node` from this release on
+  - **Action:** upgrade the SDK. Or run `npm ls axios`, and if it shows a version below 1.20.0, run `npm update axios`. Earlier SDK releases also accept 1.20.0, so a fresh install may already have it. No code changes are needed.
+time: '2026-10-10T00:01:08.639686+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: ''
+  Migration: ''
