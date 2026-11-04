@@ -1,0 +1,36 @@
+kind: added
+body: |
+  `AuthField` now accepts `header_name`, so a custom connector's `API_KEY` auth pattern can send several credentials as separate HTTP headers. Set `header_name` on every credential field of the pattern; each field's value is sent as that exact header, and Scalekit derives the stored `field_name` from the header name. When you connect an account, pass one value per header, keyed by the header name, as `{ details: { case: 'staticAuth', value: { details } } }`: a plain `{ staticAuth: ... }` or `{ static_auth: ... }` object is ignored and sends no credentials. Single-key `API_KEY` connectors are unchanged.
+
+  ```ts
+  await scalekit.actions.providers.createCustomProvider({
+    displayName: 'My API',
+    proxyUrl: 'https://api.example.com',
+    authPatterns: [
+      {
+        type: 'API_KEY',
+        display_name: 'API Key',
+        fields: [
+          { field_name: 'x_key_id', header_name: 'X-Key-Id', label: 'Key ID', input_type: 'text', required: true },
+          { field_name: 'x_secret', header_name: 'X-Secret', label: 'Secret', input_type: 'password', required: true },
+        ],
+      },
+    ],
+  });
+
+  await scalekit.actions.createConnectedAccount({
+    connectionName: 'my-connection', // a connection created on this connector
+    identifier: 'user_123',
+    authorizationDetails: {
+      details: {
+        case: 'staticAuth',
+        value: { details: { 'X-Key-Id': '[X-KEY-ID]', 'X-Secret': '[X-SECRET]' } },
+      },
+    },
+  });
+  ```
+time: '2026-11-03T12:00:00.000000+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-3016
+  Migration: ''
