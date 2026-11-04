@@ -8256,11 +8256,28 @@ const res = await scalekitClient.actions.providers.createCustomProvider({
 console.log(res.provider?.identifier);
 ```
 
-**Connecting an account to a multi-header connector.** Supply one credential per header, keyed by the header name, under `staticAuth.details`. Scalekit derives each stored `field_name` from the header name. Pass the generated message shape below; a snake_case `{ static_auth: { ... } }` object is silently ignored.
+**Connecting an account to a multi-header connector.** Create a connector whose `API_KEY` fields each set `header_name`, add a connection on it, then supply one credential per header, keyed by the header name, under `staticAuth.details`. Scalekit derives each stored `field_name` from the header name. Pass the generated message shape below; a snake_case `{ static_auth: { ... } }` object is silently ignored.
 
 ```ts
+// 1. A connector that sends two credentials as separate headers.
+await scalekitClient.actions.providers.createCustomProvider({
+  displayName: 'Acme Gateway',
+  proxyUrl: 'https://api.acme.example.com',
+  authPatterns: [
+    {
+      type: 'API_KEY',
+      display_name: 'API Key',
+      fields: [
+        { field_name: 'x_key_id', header_name: 'X-Key-Id', label: 'Key ID', input_type: 'text', required: true },
+        { field_name: 'x_secret', header_name: 'X-Secret', label: 'Secret', input_type: 'password', required: true },
+      ],
+    },
+  ],
+});
+
+// 2. Add a connection on it, then connect an account with one value per header.
 await scalekitClient.actions.createConnectedAccount({
-  connectionName: 'my-connection', // a connection created on this connector
+  connectionName: 'my-connection', // the connection created on this connector
   identifier: 'user_123',
   authorizationDetails: {
     details: {

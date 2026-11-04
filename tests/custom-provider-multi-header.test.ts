@@ -186,4 +186,40 @@ describe('multi-header connected account credentials', () => {
       staticAuth: { details: { x_api_a: '[X-API-A]', x_api_b: '[X-API-B]' } },
     });
   });
+
+  it('sends every header credential through the update connected accounts client', async () => {
+    const requests: any[] = [];
+    const grpcConnect: any = {
+      createClient: () => ({ updateConnectedAccount: () => undefined }),
+    };
+    const coreClient: any = {
+      connectExec: async (_method: unknown, request: any) => {
+        requests.push(request);
+        return {};
+      },
+    };
+    const client = new ConnectedAccountsClient(grpcConnect, coreClient);
+
+    await client.updateConnectedAccount({
+      connector: 'my-connection',
+      identifier: 'user_123',
+      connectedAccount: create(UpdateConnectedAccountSchema, {
+        authorizationDetails: staticAuth({
+          x_api_a: '[X-API-A]',
+          x_api_b: '[X-API-B]',
+        }),
+      } as any),
+    });
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0].connector).toBe('my-connection');
+    expect(requests[0].identifier).toBe('user_123');
+    const json = toJson(
+      AuthorizationDetailsSchema,
+      requests[0].connectedAccount.authorizationDetails
+    );
+    expect(json).toEqual({
+      staticAuth: { details: { x_api_a: '[X-API-A]', x_api_b: '[X-API-B]' } },
+    });
+  });
 });
