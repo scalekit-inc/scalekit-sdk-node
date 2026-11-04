@@ -66,10 +66,10 @@ export type Tool = Message<"scalekit.v1.tools.Tool"> & {
      */
     updatedAt?: Timestamp | undefined;
     /**
-     * The tool definition as JSON text. Set only when the list request asked for
-     * DEFINITION_FORMAT_JSON_STRING; `definition` is then left unset. Proto3
-     * `optional` keeps it out of REST responses (the gateway emits default
-     * values, but never an unset optional field).
+     * Proto3 `optional` keeps this out of REST responses when unset: the gateway
+     * emits default values, but never an unset optional field. Output only:
+     * CreateTool and UpdateTool ignore it and still require `definition`, so a
+     * Tool listed with DEFINITION_FORMAT_JSON_STRING must not be sent back as is.
      *
      * @generated from field: optional string definition_json = 8;
      */
@@ -119,8 +119,6 @@ export type ListToolsRequest = Message<"scalekit.v1.tools.ListToolsRequest"> & {
      */
     pageToken: string;
     /**
-     * Internal to the Scalekit SDKs. Unset keeps the response unchanged.
-     *
      * @generated from field: scalekit.v1.tools.DefinitionFormat definition_format = 4;
      */
     definitionFormat: DefinitionFormat;
@@ -304,8 +302,6 @@ export type RefreshToolsRequest = Message<"scalekit.v1.tools.RefreshToolsRequest
      */
     userId?: string | undefined;
     /**
-     * Internal to the Scalekit SDKs. Unset keeps the response unchanged.
-     *
      * @generated from field: scalekit.v1.tools.DefinitionFormat definition_format = 6;
      */
     definitionFormat: DefinitionFormat;
@@ -432,8 +428,6 @@ export type ListScopedToolsRequest = Message<"scalekit.v1.tools.ListScopedToolsR
      */
     pageToken: string;
     /**
-     * Internal to the Scalekit SDKs. Unset keeps the response unchanged.
-     *
      * @generated from field: scalekit.v1.tools.DefinitionFormat definition_format = 5;
      */
     definitionFormat: DefinitionFormat;
@@ -508,8 +502,6 @@ export type ListAvailableToolsRequest = Message<"scalekit.v1.tools.ListAvailable
      */
     pageToken: string;
     /**
-     * Internal to the Scalekit SDKs. Unset keeps the response unchanged.
-     *
      * @generated from field: scalekit.v1.tools.DefinitionFormat definition_format = 4;
      */
     definitionFormat: DefinitionFormat;
