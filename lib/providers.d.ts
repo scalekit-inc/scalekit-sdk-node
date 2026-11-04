@@ -10,7 +10,8 @@ import { DeleteProviderResponse, Provider as ProviderMessage, ProviderType } fro
 export interface AuthField {
     /**
      * Key the credential is stored under. Use `token` for bearer patterns and
-     * `api_key` for API-key patterns.
+     * `api_key` for single-key API-key patterns. When `header_name` is set,
+     * Scalekit derives it from the header name, so each header gets its own key.
      */
     field_name: string;
     /** Label shown above the input. */

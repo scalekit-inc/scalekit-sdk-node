@@ -10,8 +10,10 @@ import { describe, it, expect } from '@jest/globals';
 import { create, toJson } from '@bufbuild/protobuf';
 import { ListValueSchema } from '@bufbuild/protobuf/wkt';
 import ProvidersClient, { AuthPattern } from '../src/providers';
+import ConnectedAccountsClient from '../src/connected-accounts';
 import {
   AuthorizationDetailsSchema,
+  CreateConnectedAccountSchema,
   UpdateConnectedAccountSchema,
 } from '../src/pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 
@@ -147,5 +149,41 @@ describe('multi-header connected account credentials', () => {
       message.authorizationDetails!
     );
     expect(json).toEqual({});
+  });
+
+  it('sends every header credential through the connected accounts client', async () => {
+    const requests: any[] = [];
+    const grpcConnect: any = {
+      createClient: () => ({ createConnectedAccount: () => undefined }),
+    };
+    const coreClient: any = {
+      connectExec: async (_method: unknown, request: any) => {
+        requests.push(request);
+        return {};
+      },
+    };
+    const client = new ConnectedAccountsClient(grpcConnect, coreClient);
+
+    await client.createConnectedAccount({
+      connector: 'my-connection',
+      identifier: 'user_123',
+      connectedAccount: create(CreateConnectedAccountSchema, {
+        authorizationDetails: staticAuth({
+          x_api_a: 'Header1',
+          x_api_b: 'header 2',
+        }),
+      } as any),
+    });
+
+    expect(requests).toHaveLength(1);
+    expect(requests[0].connector).toBe('my-connection');
+    expect(requests[0].identifier).toBe('user_123');
+    const json = toJson(
+      AuthorizationDetailsSchema,
+      requests[0].connectedAccount.authorizationDetails
+    );
+    expect(json).toEqual({
+      staticAuth: { details: { x_api_a: 'Header1', x_api_b: 'header 2' } },
+    });
   });
 });

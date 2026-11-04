@@ -8241,8 +8241,8 @@ const authPatterns: AuthPattern[] = [
 // `header_name` on every credential field; `auth_header_key_override` does not apply:
 //   { type: 'API_KEY', display_name: 'API Key', description: '...',
 //     fields: [
-//       { field_name: 'key_id', header_name: 'X-Key-Id', label: 'Key ID', input_type: 'text', required: true },
-//       { field_name: 'secret', header_name: 'X-Secret', label: 'Secret', input_type: 'password', required: true },
+//       { field_name: 'x_key_id', header_name: 'X-Key-Id', label: 'Key ID', input_type: 'text', required: true },
+//       { field_name: 'x_secret', header_name: 'X-Secret', label: 'Secret', input_type: 'password', required: true },
 //     ] }
 // Public server, no credentials:
 //   { type: 'NO_AUTH', display_name: 'No Auth', description: '...', fields: [] }
@@ -8256,7 +8256,7 @@ const res = await scalekitClient.actions.providers.createCustomProvider({
 console.log(res.provider?.identifier);
 ```
 
-**Connecting an account to a multi-header connector.** Supply one credential per header, keyed by the field's `field_name` (or its `header_name`), under `staticAuth.details`. Pass the generated message shape below; a snake_case `{ static_auth: { ... } }` object is silently ignored.
+**Connecting an account to a multi-header connector.** Supply one credential per header, keyed by the header name, under `staticAuth.details`. Scalekit derives each stored `field_name` from the header name. Pass the generated message shape below; a snake_case `{ static_auth: { ... } }` object is silently ignored.
 
 ```ts
 await scalekitClient.actions.createConnectedAccount({
@@ -8265,7 +8265,7 @@ await scalekitClient.actions.createConnectedAccount({
   authorizationDetails: {
     details: {
       case: 'staticAuth',
-      value: { details: { key_id: 'abc', secret: 'xyz' } },
+      value: { details: { 'X-Key-Id': 'abc', 'X-Secret': 'xyz' } },
     },
   },
 });
