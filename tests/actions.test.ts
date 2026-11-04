@@ -8,6 +8,7 @@ import {
 import { TestDataGenerator, TestOrganizationManager } from './utils/test-data';
 import {
   AuthorizationDetailsSchema,
+  ConnectorStatus,
   OauthTokenSchema,
 } from '../src/pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 
@@ -623,6 +624,8 @@ describe('Actions', () => {
         expect(createResponse.connectedAccount).toBeDefined();
         const created = createResponse.connectedAccount!;
         expect(created.identifier).toBe(identifier);
+        // The create status depends on the environment's hosted-widget and credential-import settings.
+        expect([ConnectorStatus.ACTIVE, ConnectorStatus.PENDING_AUTH]).toContain(created.status);
 
         const updatedStaticAuth = {
           static_auth: {
@@ -641,7 +644,10 @@ describe('Actions', () => {
         expect(updateResponse.connectedAccount).toBeDefined();
         const updated = updateResponse.connectedAccount!;
         expect(updated.identifier).toBe(identifier);
-        expect(updated.authorizationDetails).toBeDefined();
+        // Create and update do not echo the stored credential: authorizationDetails is returned
+        // only where connected_account_auth_details is enabled for the environment. An update
+        // with a static credential always activates the account.
+        expect(updated.status).toBe(ConnectorStatus.ACTIVE);
 
         const deleteResponse = await client.actions.deleteConnectedAccount({
           connectionName: FRESHDESK_CONNECTION_NAME,
