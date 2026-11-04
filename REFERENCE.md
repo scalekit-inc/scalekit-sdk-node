@@ -6956,7 +6956,9 @@ Lists the end-user consents granted against a resource, with pagination.
 
 Each returned consent carries `id`, `externalUserId`, `clientId`, `clientName`, `scopes` and `grantedAt`. The response also carries `totalSize` plus `nextPageToken` / `prevPageToken` cursors.
 
-Filter by user in one of two ways. Pass `userIds` to match specific external user IDs exactly and case-sensitively. Pass `search` for a case-insensitive substring match. When you give both, `userIds` wins and `search` is ignored.
+Filter in one of three ways. Pass `consentIds` to fetch specific consents by ID, for example to find the `clientId` you need to revoke a consent you already hold the ID of. Pass `userIds` to match specific external user IDs exactly and case-sensitively. Pass `search` for a case-insensitive substring match. When you give more than one, the priority is `consentIds`, then `userIds`, then `search`, and the lower-priority ones are ignored without an error. Blank-only `consentIds` values are ignored, so the next filter applies instead.
+
+When you filter by `consentIds`, check that every returned `id` is one you asked for before you revoke anything. A server that predates this filter ignores it and returns the unfiltered first page. Do not combine `consentIds` with `userIds` as an ownership check, because `consentIds` overrides `userIds`. Compare `externalUserId` on the returned consent instead.
 </dd>
 </dl>
 </dd>
@@ -6974,7 +6976,8 @@ Filter by user in one of two ways. Pass `userIds` to match specific external use
 const res = await scalekitClient.resources.listUserConsents('<RESOURCE_ID>', {
   search: '<OPTIONAL_SEARCH>',
   pageSize: 20,
-  userIds: ['<EXTERNAL_USER_ID>'], // optional; takes precedence over search
+  consentIds: ['<CONSENT_ID>'], // optional; takes precedence over userIds and search
+  userIds: ['<EXTERNAL_USER_ID>'], // optional; ignored when consentIds is set
 });
 
 console.log(res.totalSize, res.nextPageToken);
@@ -7004,10 +7007,11 @@ for (const consent of res.consents) {
 <dd>
 
 **options:** `ListUserConsentsOptions` - Optional filter, search and pagination options
-- `search?: string` - Case-insensitive substring match on external user IDs. Ignored when `userIds` is set.
+- `search?: string` - Case-insensitive substring match on external user IDs. Ignored when `consentIds` or `userIds` is set.
 - `pageSize?: number` - Page size, max 30
 - `pageToken?: string` - Pagination cursor from a previous response (`nextPageToken`/`prevPageToken`)
-- `userIds?: string[]` - Exact match on external user IDs, max 25. Takes precedence over `search`.
+- `userIds?: string[]` - Exact match on external user IDs, max 25. Ignored when `consentIds` is set; takes precedence over `search`.
+- `consentIds?: string[]` - Exact match on consent IDs (format `usrcnst_xxxxx`), max 25 distinct. IDs that do not exist or belong to another resource are omitted from the result. Takes precedence over `userIds` and `search`.
 
 </dd>
 </dl>
@@ -8237,6 +8241,13 @@ const authPatterns: AuthPattern[] = [
 //   { type: 'API_KEY', display_name: 'API Key', description: '...',
 //     fields: [{ field_name: 'api_key', label: 'API Key', input_type: 'password' }],
 //     auth_header_key_override: 'X-API-Key' }
+// Several API keys, each sent as its own header (multiple-headers mode). Set
+// `header_name` on every credential field; `auth_header_key_override` does not apply:
+//   { type: 'API_KEY', display_name: 'API Key', description: '...',
+//     fields: [
+//       { field_name: 'x_key_id', header_name: 'X-Key-Id', label: 'Key ID', input_type: 'text', required: true },
+//       { field_name: 'x_secret', header_name: 'X-Secret', label: 'Secret', input_type: 'password', required: true },
+//     ] }
 // Public server, no credentials:
 //   { type: 'NO_AUTH', display_name: 'No Auth', description: '...', fields: [] }
 
@@ -8248,6 +8259,40 @@ const res = await scalekitClient.actions.providers.createCustomProvider({
 });
 console.log(res.provider?.identifier);
 ```
+
+**Connecting an account to a multi-header connector.** Create a connector whose `API_KEY` fields each set `header_name`, add a connection on it, then supply one credential per header, keyed by the header name, under `staticAuth.details`. Scalekit derives each stored `field_name` from the header name. Pass the generated message shape below; a snake_case `{ static_auth: { ... } }` object is silently ignored.
+
+```ts
+// 1. A connector that sends two credentials as separate headers.
+await scalekitClient.actions.providers.createCustomProvider({
+  displayName: 'Acme Gateway',
+  proxyUrl: 'https://api.acme.example.com',
+  authPatterns: [
+    {
+      type: 'API_KEY',
+      display_name: 'API Key',
+      fields: [
+        { field_name: 'x_key_id', header_name: 'X-Key-Id', label: 'Key ID', input_type: 'text', required: true },
+        { field_name: 'x_secret', header_name: 'X-Secret', label: 'Secret', input_type: 'password', required: true },
+      ],
+    },
+  ],
+});
+
+// 2. Add a connection on it, then connect an account with one value per header.
+await scalekitClient.actions.createConnectedAccount({
+  connectionName: 'my-connection', // the connection created on this connector
+  identifier: 'user_123',
+  authorizationDetails: {
+    details: {
+      case: 'staticAuth',
+      value: { details: { 'X-Key-Id': '[X-KEY-ID]', 'X-Secret': '[X-SECRET]' } },
+    },
+  },
+});
+```
+
+Unknown keys are rejected with `UNKNOWN_HEADER_FIELD`, and a missing required header with `MISSING_REQUIRED_HEADER`. Creating a multi-header provider needs the `api_key_multi_header` feature enabled for the environment, otherwise the call fails with `FEATURE_NOT_ENABLED`.
 </dd>
 </dl>
 </dd>
@@ -8289,7 +8334,7 @@ console.log(res.provider?.identifier);
 <dl>
 <dd>
 
-**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; is_mcp?: boolean; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select'; hint?: string; required?: boolean }`. Set `is_mcp: true` when the connector fronts an MCP server.
+**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; is_mcp?: boolean; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select'; hint?: string; required?: boolean; header_name?: string }`. On an `API_KEY` pattern, `header_name` sends that field's value as its own HTTP header (case preserved); setting it on any field puts the pattern in multiple-headers mode. Leave it unset for single-key mode, which uses `auth_header_key_override`. Set `is_mcp: true` when the connector fronts an MCP server.
 
 </dd>
 </dl>

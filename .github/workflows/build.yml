@@ -83,4 +83,6 @@ jobs:
           SCALEKIT_ENVIRONMENT_URL: ${{ secrets.SCALEKIT_ENVIRONMENT_URL }}
           SCALEKIT_CLIENT_ID: ${{ secrets.SCALEKIT_CLIENT_ID }}
           SCALEKIT_CLIENT_SECRET: ${{ secrets.SCALEKIT_CLIENT_SECRET }}
+          # Remove once the CI backend validates filter.consent_id.
+          SCALEKIT_SKIP_CONSENT_ID_VALIDATION_TESTS: "true"
         run: make test

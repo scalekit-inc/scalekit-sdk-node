@@ -26,7 +26,8 @@ import {
 export interface AuthField {
   /**
    * Key the credential is stored under. Use `token` for bearer patterns and
-   * `api_key` for API-key patterns.
+   * `api_key` for single-key API-key patterns. When `header_name` is set,
+   * Scalekit derives it from the header name, so each header gets its own key.
    */
   field_name: string;
   /** Label shown above the input. */
@@ -37,6 +38,13 @@ export interface AuthField {
   hint?: string;
   /** Whether the user must fill this in before the connection can be saved. */
   required?: boolean;
+  /**
+   * On an `API_KEY` pattern, sends this field's value as this exact HTTP header
+   * (case preserved). Setting it on any field puts the pattern in multiple-headers
+   * mode, so each field is sent as its own header. Leave it unset for single-key
+   * mode, which uses the pattern's `auth_header_key_override`.
+   */
+  header_name?: string;
 }
 
 /**
