@@ -6,6 +6,7 @@ import {
 import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
+import { ScalekitException } from './errors/base-exception';
 import {
   ExecuteToolResponse,
   FilterSchema,
@@ -46,12 +47,23 @@ function restoreDefinitions(tools: Iterable<Tool | undefined>): void {
     try {
       definition = JSON.parse(tool.definitionJson);
     } catch (error) {
-      throw new Error(
+      throw new ScalekitException(
         `Tool ${tool.id} has an invalid definition: ${(error as Error).message}`
       );
     }
+    if (
+      definition === null ||
+      typeof definition !== 'object' ||
+      Array.isArray(definition)
+    ) {
+      throw new ScalekitException(
+        `Tool ${tool.id} has an invalid definition: expected a JSON object`
+      );
+    }
     tool.definition = definition as JsonObject;
-    tool.definitionJson = undefined;
+    // delete, not `= undefined`: a never-set field has no own property, and the
+    // restored tool must match one decoded from a Struct, also for toStrictEqual.
+    delete tool.definitionJson;
   }
 }
 

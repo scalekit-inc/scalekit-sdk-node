@@ -1,6 +1,6 @@
 kind: fixed
 body: |
-  `tools.listTools`, `tools.listScopedTools`, `tools.listAvailableTools` and `actions.listTools` no longer fail with `cannot decode message google.protobuf.Struct from binary: maximum recursion depth of 100 reached` when a page contains a tool whose definition is nested 50 or more levels deep. This happened with `@bufbuild/protobuf` 2.13.0 and later, which a fresh install of the SDK resolves to. The SDK now asks the server for each definition as JSON text and turns it back into `definition`, so the returned tools look exactly as before. Servers that do not support this keep returning `definition` as before, and the SDK passes it through unchanged.
+  `tools.listTools`, `tools.listScopedTools`, `tools.listAvailableTools` and `actions.listTools` no longer fail with `cannot decode message google.protobuf.Struct from binary: maximum recursion depth of 100 reached` when a page contains a tool with a deeply nested definition (about 50 levels of objects, or about 25 when arrays are nested too). This happened with `@bufbuild/protobuf` 2.12.1 and later, which a fresh install of the SDK resolves to. The SDK now asks the server for each definition as JSON text and turns it back into `definition`, so the returned tools look exactly as before. Servers that do not support this keep returning `definition` as before, and the SDK passes it through unchanged.
 time: '2026-11-04T19:00:00.000000+00:00'
 custom:
   Breaking: 'No'

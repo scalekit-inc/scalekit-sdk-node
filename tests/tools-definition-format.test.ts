@@ -116,7 +116,8 @@ describe('ToolsClient list methods and definition_format (SK-3047)', () => {
       }),
     }).tools.listTools();
 
-    expect(fromJson).toEqual(fromStruct);
+    expect(fromJson).toStrictEqual(fromStruct);
+    expect('definitionJson' in fromJson.tools[0]).toBe(false);
   });
 
   it('listScopedTools requests JSON_STRING and restores each scoped tool', async () => {
@@ -160,7 +161,7 @@ describe('ToolsClient list methods and definition_format (SK-3047)', () => {
 
   it('decodes a page whose definition is too deep to decode as a Struct', async () => {
     // As a Struct, a depth-60 definition fails with "maximum recursion depth of
-    // 100 reached" on @bufbuild/protobuf 2.13.0 and later, which is what
+    // 100 reached" on @bufbuild/protobuf 2.12.1 and later, which is what
     // `^2.12.0` resolves to in customer installs. This repo's lockfile pins
     // 2.12.0, which has no limit, so that failure is not asserted here; the
     // JSON-text page must decode and restore on any version.
@@ -188,6 +189,15 @@ describe('ToolsClient list methods and definition_format (SK-3047)', () => {
     });
 
     await expect(tools.listTools()).rejects.toThrow(/tol_bad/);
+  });
+
+  it('rejects a definition that is not a JSON object', async () => {
+    const bad = create(ToolSchema, { id: 'tol_arr', definitionJson: '[1,2]' });
+    const { tools } = makeClient({
+      listTools: create(ListToolsResponseSchema, { tools: [bad] }),
+    });
+
+    await expect(tools.listTools()).rejects.toThrow(/tol_arr.*JSON object/);
   });
 
   it('actions.listTools still returns the same tool shape', async () => {
