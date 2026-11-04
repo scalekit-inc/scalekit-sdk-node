@@ -1,0 +1,8 @@
+kind: fixed
+body: |
+  Loading the SDK with `require()` no longer throws `ERR_REQUIRE_ESM` where `require()` cannot load ES modules: Node.js 20 before 20.19, Node.js 22 before 22.12, Jest 30.5 and later without a transform for `node_modules`, and Next.js apps that load the SDK as an external CommonJS package. Affected versions: 2.6.3 to 2.21.0. In those environments the SDK uses a bundled copy of `jose`. Invalid, expired or tampered tokens still fail with `ScalekitEdgeError` (status 401); only the key-fetch and setup errors that `ScalekitEdgeClient.validateToken` passes through unchanged, such as `ERR_JWKS_TIMEOUT`, come from the bundled copy, so match those by `code` rather than with `instanceof`. Everywhere else the SDK uses your installed `jose`, as before.
+time: '2026-11-02T15:27:19.934101+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-3011
+  Migration: ''
