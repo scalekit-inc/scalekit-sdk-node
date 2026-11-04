@@ -625,7 +625,10 @@ describe('Actions', () => {
         const created = createResponse.connectedAccount!;
         expect(created.identifier).toBe(identifier);
         // The create status depends on the environment's hosted-widget and credential-import settings.
-        expect([ConnectorStatus.ACTIVE, ConnectorStatus.PENDING_AUTH]).toContain(created.status);
+        expect([
+          ConnectorStatus.ACTIVE,
+          ConnectorStatus.PENDING_AUTH,
+        ]).toContain(created.status);
 
         const updatedStaticAuth = {
           static_auth: {
