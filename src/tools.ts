@@ -15,11 +15,45 @@ import {
   ListScopedToolsResponse,
   ListToolsRequestSchema,
   ListToolsResponse,
+  DefinitionFormat,
   ScopedToolFilterSchema,
   SearchToolsRequestSchema,
   SearchToolsResponse,
   ToolService,
+  type Tool,
 } from './pkg/grpc/scalekit/v1/tools/tools_pb';
+
+/**
+ * List requests ask the server for each tool definition as JSON text
+ * (`definitionJson`) instead of a `google.protobuf.Struct`. A Struct costs 2-3
+ * protobuf nesting levels per JSON level, and protobuf decoders stop at 100
+ * levels, so one deeply nested `input_schema` made a whole page undecodable
+ * (SK-3047). A string adds no nesting.
+ */
+const LIST_DEFINITION_FORMAT = DefinitionFormat.JSON_STRING;
+
+/**
+ * Restores `definition` from `definitionJson` so callers get the same `Tool`
+ * shape as before. A server that does not know `definitionFormat` keeps
+ * sending `definition`, and the tool is left as it is.
+ */
+function restoreDefinitions(tools: Iterable<Tool | undefined>): void {
+  for (const tool of tools) {
+    if (tool?.definitionJson === undefined) {
+      continue;
+    }
+    let definition: unknown;
+    try {
+      definition = JSON.parse(tool.definitionJson);
+    } catch (error) {
+      throw new Error(
+        `Tool ${tool.id} has an invalid definition: ${(error as Error).message}`
+      );
+    }
+    tool.definition = definition as JsonObject;
+    tool.definitionJson = undefined;
+  }
+}
 
 /**
  * Client for listing and executing tools.
@@ -60,7 +94,7 @@ export default class ToolsClient {
     pageSize?: number;
     pageToken?: string;
   }): Promise<ListToolsResponse> {
-    return this.coreClient.connectExec(
+    const response = await this.coreClient.connectExec(
       this.client.listTools,
       create(ListToolsRequestSchema, {
         ...(options?.filter && {
@@ -68,9 +102,12 @@ export default class ToolsClient {
         }),
         ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
         ...(options?.pageToken && { pageToken: options.pageToken }),
+        definitionFormat: LIST_DEFINITION_FORMAT,
       }),
       { timeoutMs: this.coreClient.toolTimeoutMs }
     );
+    restoreDefinitions(response.tools);
+    return response;
   }
 
   /**
@@ -92,16 +129,19 @@ export default class ToolsClient {
       pageToken?: string;
     }
   ): Promise<ListScopedToolsResponse> {
-    return this.coreClient.connectExec(
+    const response = await this.coreClient.connectExec(
       this.client.listScopedTools,
       create(ListScopedToolsRequestSchema, {
         identifier,
         filter: create(ScopedToolFilterSchema, options.filter),
         ...(options.pageSize !== undefined && { pageSize: options.pageSize }),
         ...(options.pageToken && { pageToken: options.pageToken }),
+        definitionFormat: LIST_DEFINITION_FORMAT,
       }),
       { timeoutMs: this.coreClient.toolTimeoutMs }
     );
+    restoreDefinitions(response.tools.map((scoped) => scoped.tool));
+    return response;
   }
 
   /**
@@ -125,15 +165,18 @@ export default class ToolsClient {
       pageToken?: string;
     }
   ): Promise<ListAvailableToolsResponse> {
-    return this.coreClient.connectExec(
+    const response = await this.coreClient.connectExec(
       this.client.listAvailableTools,
       create(ListAvailableToolsRequestSchema, {
         identifier,
         ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
         ...(options?.pageToken && { pageToken: options.pageToken }),
+        definitionFormat: LIST_DEFINITION_FORMAT,
       }),
       { timeoutMs: this.coreClient.toolTimeoutMs }
     );
+    restoreDefinitions(response.tools);
+    return response;
   }
 
   /**
