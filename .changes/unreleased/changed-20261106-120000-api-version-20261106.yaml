@@ -1,6 +1,6 @@
 kind: changed
 body: |
-  The SDK now sends API version `20261106` in the `x-api-version` header on every request. No code changes are needed.
+  `ScalekitClient` now sends API version `20261106` in the `x-api-version` header on every request, REST and gRPC alike, so calls are served at that API version. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/v2.22.0/REFERENCE.md#scalekitclient)
 time: '2026-11-06T12:00:00.000000+00:00'
 custom:
   Breaking: 'No'
