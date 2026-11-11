@@ -2,7 +2,24 @@ import type ConnectionClient from './connection';
 import { AppConnection, ListAppConnectionSummariesResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 /** How end users authorize a connection. Chosen at creation; it cannot be changed afterwards. */
 export type AgentKitAuthMode = 'USER' | 'ORG_WIDE';
-/** Token endpoint client authentication. `'DEFAULT'` clears the stored value so the platform picks. */
+/**
+ * How Scalekit sends the client credentials to the provider's token endpoint.
+ * Choose the value that the provider's token endpoint documentation requires.
+ *
+ * - `'BASIC_AUTH'`: `client_id` and `client_secret` in an HTTP Basic
+ *   `Authorization` header (`client_secret_basic`).
+ * - `'REQUEST_BODY'`: as POST body parameters (`client_secret_post`).
+ * - `'NONE'`: only `client_id`, no secret (`none`), for public or PKCE clients.
+ * - `'DEFAULT'`: clears the stored value, so the platform makes a best-effort
+ *   match for each request. Use it only when the documentation names no method.
+ *
+ * A wrong value makes token exchange and refresh fail, and every connected
+ * account on the connection then has to authenticate again. It applies to the
+ * authorization code exchange, to MCP token refresh and to `OAUTH_M2M` client
+ * credentials; a token refresh on a non-MCP OAuth connection always detects the
+ * method itself. A connection that never set one reads as `'DEFAULT'`, and an
+ * update that leaves it out keeps the stored value.
+ */
 export type AgentKitTokenEndpointAuthMethod = 'NONE' | 'BASIC_AUTH' | 'REQUEST_BODY' | 'DEFAULT';
 /**
  * Settings only some connectors use. At creation only `providerDomain` is accepted;
@@ -49,6 +66,7 @@ export interface AgentKitOAuthSettings {
     };
     /** Added as given to the provider's authorize URL. A non-empty map replaces the stored one; `{}` clears it. */
     extraAuthorizeParams?: Record<string, string>;
+    /** See {@link AgentKitTokenEndpointAuthMethod}. On the environment connection methods the same choices are `TokenAuthType` values. */
     tokenEndpointAuthMethod?: AgentKitTokenEndpointAuthMethod;
     scopeSelectionAllowed?: boolean;
     requiredScopes?: string[];

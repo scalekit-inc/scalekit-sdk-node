@@ -289,6 +289,12 @@ export default class ActionsClient {
    * Thin wrapper around ToolsClient.listTools. Use `connectedAccountId` as a
    * direct alternative to the `connectionName` + `identifier` combination.
    *
+   * @param params.provider A connector's identifier. For a connector created from an
+   *   OpenAPI spec, this lists its tools without a connected account.
+   * @param params.query Searches tool names (3 to 100 characters, every word must appear in the
+   *   name, ignoring case). It covers built-in tools only, never a custom connector's tools.
+   * @param params.pageSize Defaults to 300 when omitted or 0. The maximum is 1000: a larger
+   *   value is reduced to 1000, not rejected. With `query`, a page holds at most 100 tools.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async listTools(params?: {

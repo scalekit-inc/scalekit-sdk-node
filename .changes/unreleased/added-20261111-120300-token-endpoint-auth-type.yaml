@@ -1,0 +1,25 @@
+kind: added
+body: |
+  `TokenAuthType` is now exported, so you can set `tokenEndpointAuthType` on an OAuth connection with `scalekit.connection.updateEnvironmentConnection`: `TokenAuthType.BASIC_AUTH` sends the client credentials in an HTTP Basic header, `TokenAuthType.URL_PARAMS` sends them as POST body parameters, and `TokenAuthType.NONE` sends only the `client_id`, for public or PKCE clients (OAuth connections only). Set one only when the provider's token endpoint documentation names it: a wrong value makes token exchange and refresh fail, and every connected account on the connection then has to authenticate again. Omit the field to keep the stored value; send `TokenAuthType.TOKEN_AUTH_TYPE_UNSPECIFIED` to go back to the default. `tokenEndpointAuthMethod`, the text form of the same setting, is deprecated. `createEnvironmentConnection` documents its `context`, which resolves a templated `proxyUrl` once, when the connection is created, and returns the result as `connection.resolvedProxyUrl`. The AgentKit `oauth.tokenEndpointAuthMethod` option keeps its own names (`'BASIC_AUTH'`, `'REQUEST_BODY'`, `'NONE'`, `'DEFAULT'`). [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#connections)
+
+  ```ts
+  import { ConnectionType, TokenAuthType } from '@scalekit-sdk/node';
+
+  const { connection: current } = await scalekit.connection.getEnvironmentConnection('conn_abc123');
+  if (current?.settings.case === 'oauthConfig') {
+    await scalekit.connection.updateEnvironmentConnection('conn_abc123', {
+      type: ConnectionType.OAUTH,
+      providerKey: current.providerKey,
+      keyId: current.keyId,
+      settings: {
+        case: 'oauthConfig',
+        value: { ...current.settings.value, tokenEndpointAuthType: TokenAuthType.NONE },
+      },
+    });
+  }
+  ```
+time: '2026-11-11T12:03:00.000000+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-3097
+  Migration: ''
