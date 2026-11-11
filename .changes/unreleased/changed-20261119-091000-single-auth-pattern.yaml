@@ -1,0 +1,8 @@
+kind: changed
+body: |
+  `scalekit.actions.providers.createCustomProvider` and `updateCustomProvider` now throw `ScalekitValidationError` (`authPatterns must contain at most one AuthPattern`) before anything is sent when `authPatterns` holds more than one pattern. Only one pattern is supported, and the server used to store a longer list without complaint. The Python SDK already refuses it.
+time: '2026-11-19T09:10:00.000000+00:00'
+custom:
+  Breaking: 'Yes'
+  Ticket: SK-3097
+  Migration: 'Pass exactly one pattern in authPatterns. A call that passed two used to be accepted and stored both; it now throws.'
