@@ -58,10 +58,13 @@ export {
 // (`connection.createEnvironmentConnection` and friends). `type`, `provider` and
 // `authMode` on a connection are numeric enums, so callers need the named
 // constants, and the message types let them name what the methods return.
+// `TokenAuthType` names the values of `tokenEndpointAuthType`, which sets how an
+// OAuth connection sends its client credentials to the provider's token endpoint.
 export {
   ConnectionType,
   ConnectionProvider,
   ConnectionAuthMode,
+  TokenAuthType,
 } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 export type {
   Connection,
@@ -90,6 +93,7 @@ export type {
 // shape below instead (no `$typeName`), consistent with `actions.listConnections`.
 export type {
   ListToolsResponse,
+  RefreshToolsResponse,
   Tool,
 } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 
@@ -151,14 +155,22 @@ export type {
 // JSON shape the API expects. Provider and the create/update/list responses are
 // the SDK's own shapes, with authPatterns decoded to AuthPattern[] so a fetched
 // provider's patterns can be passed straight back to updateCustomProvider.
+// ToolCollectionRun is the same idea for a tool collection run: its status is
+// typed and its skipped operations are parsed into SkippedTool[].
 export type {
   AuthPattern,
   AuthField,
+  CredentialPlacement,
   Provider,
+  CreateCustomProviderParams,
+  UpdateCustomProviderParams,
   CreateProviderResponse,
   UpdateProviderResponse,
   ListProvidersResponse,
+  SkippedTool,
+  ToolCollectionRun,
 } from './providers';
+export { ToolCollectionRunStatus } from './providers';
 export { ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 export type { DeleteProviderResponse } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 

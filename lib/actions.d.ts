@@ -11,7 +11,7 @@ import type ProvidersClient from './providers';
 import { TriggersClient } from './triggers';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
 import { type ResumableUploadOptions, type ResumableUploadParams } from './resumable-upload';
-import type { ListAvailableToolsResponse, ListScopedToolsResponse, ScopedToolFilterSchema, SearchToolsResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
+import type { ListAvailableToolsResponse, ListScopedToolsResponse, RefreshToolsResponse, ScopedToolFilterSchema, SearchToolsResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * Creation timestamp for an app connection, re-exported as the protobuf
  * well-known `Timestamp` type. Passed through from the API unchanged
@@ -145,6 +145,25 @@ export default class ActionsClient {
         pageToken?: string;
     }): Promise<ListAvailableToolsResponse>;
     /**
+     * Re-reads the tool list of a custom MCP connector's connected account from
+     * its upstream MCP server, and returns the full refreshed list.
+     *
+     * Delegates to `tools.refreshTools`, which describes what it does and the
+     * errors it raises. Use `connectedAccountId`, or `connectionName` together
+     * with `identifier`. PREVIEW: the underlying RPC is marked preview in the API.
+     *
+     * @throws {ScalekitValidationError} If neither `connectedAccountId` nor
+     *   `connectionName` together with `identifier` is given. No request is sent.
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    refreshTools(params: {
+        connectionName?: string;
+        identifier?: string;
+        connectedAccountId?: string;
+        organizationId?: string;
+        userId?: string;
+    }): Promise<RefreshToolsResponse>;
+    /**
      * Execute a tool on behalf of a connected account.
      *
      * Thin wrapper around ToolsClient.executeTool, reserved for future
@@ -168,6 +187,12 @@ export default class ActionsClient {
      * Thin wrapper around ToolsClient.listTools. Use `connectedAccountId` as a
      * direct alternative to the `connectionName` + `identifier` combination.
      *
+     * @param params.provider A connector's identifier. For a connector created from an
+     *   OpenAPI spec, this lists its tools without a connected account.
+     * @param params.query Searches tool names (3 to 100 characters, every word must appear in the
+     *   name, ignoring case). It covers built-in tools only, never a custom connector's tools.
+     * @param params.pageSize Defaults to 300 when omitted or 0. The maximum is 1000: a larger
+     *   value is reduced to 1000, not rejected. With `query`, a page holds at most 100 tools.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     listTools(params?: {

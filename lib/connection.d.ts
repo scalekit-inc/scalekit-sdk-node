@@ -302,10 +302,18 @@ export default class ConnectionClient {
      *   - providerKey: Identifier of the connector the connection is for
      *   - type: Authentication type, e.g. `ConnectionType.OAUTH`
      *   - keyId: Optional connection name; generated when omitted
+     *   - context: Optional. For a connector whose `proxyUrl` is a template, such as an MCP
+     *     connector with an endpoint per data region. `domain` and `version` fill the
+     *     `{{domain}}` and `{{version}}` placeholders of the connector's `proxyUrl` once, when
+     *     the connection is created. `domain` is the actual hostname, not a region code. Scalekit
+     *     does not store `context`: it stores the resolved URL, which is `resolvedProxyUrl` on
+     *     the connection and is used for every later request. A placeholder left without a value
+     *     fails the call with `connection context is missing a value required by provider ...`.
      * @param {Flags} [flags] - Optional flags. Set `isApp: true` for an AgentKit app connection.
      *
      * @returns {Promise<CreateConnectionResponse>} Response containing the created connection,
-     *   including its `id` and `keyId`
+     *   including its `id` and `keyId`, and `resolvedProxyUrl` when the connector's `proxyUrl`
+     *   was a template (empty otherwise)
      *
      * @throws {ScalekitServerException} If the connection configuration is invalid or the
      *   client lacks permission
@@ -373,6 +381,34 @@ export default class ConnectionClient {
      * `configurationType` and `attributeMapping` are all accepted and then
      * discarded: the call succeeds and the stored values do not move. Change
      * those from the Scalekit dashboard instead.
+     *
+     * To choose how Scalekit sends the client credentials to the provider's token
+     * endpoint, set `tokenEndpointAuthType` in `oauthConfig`, with a
+     * `TokenAuthType` (exported by this package):
+     * - `TokenAuthType.BASIC_AUTH`: `client_id` and `client_secret` in an HTTP
+     *   Basic `Authorization` header (`client_secret_basic`).
+     * - `TokenAuthType.URL_PARAMS`: as POST body parameters (`client_secret_post`).
+     * - `TokenAuthType.NONE`: only `client_id`, no secret (`none`), for public or
+     *   PKCE clients. It is for OAuth connections only: an OIDC connection rejects it.
+     *
+     * It applies to the authorization code exchange, to MCP token refresh and to
+     * `OAUTH_M2M` client credentials. A token refresh on a non-MCP OAuth connection
+     * always detects the method itself and does not read it. Leave it unset unless
+     * the provider's token endpoint documentation names a method: a wrong one makes
+     * token exchange and refresh fail, and every connected account on the connection
+     * then has to authenticate again. Omit it to keep the stored value, and send
+     * `TokenAuthType.TOKEN_AUTH_TYPE_UNSPECIFIED` to go back to the default, where
+     * Scalekit picks the method for each request. A read returns no value while no
+     * method is set.
+     *
+     * `tokenEndpointAuthMethod` is the deprecated text form of the same setting,
+     * `'client_secret_basic'`, `'client_secret_post'` or `'none'`; any other text is
+     * rejected. If you send both and they differ, the one that differs from the
+     * stored value is applied, on the assumption that the other only repeats what you
+     * read; if neither matches the stored value the update is rejected. Reads return
+     * both in agreement. The AgentKit methods on `actions` name the same choices
+     * differently (`tokenEndpointAuthMethod` with `'BASIC_AUTH'`, `'REQUEST_BODY'`,
+     * `'NONE'` and `'DEFAULT'`): do not mix the two sets of names.
      *
      * PREVIEW: the underlying `UpdateEnvironmentConnection` RPC is marked preview
      * in the API and may change. It maps to `PATCH /api/v1/connections/{connection_id}`,
