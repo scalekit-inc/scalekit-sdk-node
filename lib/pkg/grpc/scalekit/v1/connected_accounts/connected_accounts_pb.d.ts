@@ -894,6 +894,10 @@ export type OauthToken = Message<"scalekit.v1.connected_accounts.OauthToken"> & 
      * @generated from field: string domain = 4;
      */
     domain: string;
+    /**
+     * @generated from field: google.protobuf.Timestamp expires_at = 5;
+     */
+    expiresAt?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.OauthToken.

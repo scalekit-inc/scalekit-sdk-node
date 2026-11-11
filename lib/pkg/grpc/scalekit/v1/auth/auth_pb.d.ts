@@ -814,7 +814,16 @@ export declare enum AuthState {
     /**
      * @generated from enum value: VERIFICATION_COMPLETED = 19;
      */
-    VERIFICATION_COMPLETED = 19
+    VERIFICATION_COMPLETED = 19,
+    /**
+     * The login cannot be continued on the login box (its auth request is gone, the browser's _auth
+     * cookie is missing, unreadable or from another environment or browser session, or the request
+     * carries the dashboard's Try login hints). The client goes to /sso/v1/login/initiate, which sends
+     * the browser back to the application. Only sent when the environment's login_requires_org feature is on.
+     *
+     * @generated from enum value: AUTHENTICATION_NOT_RESUMABLE = 20;
+     */
+    AUTHENTICATION_NOT_RESUMABLE = 20
 }
 /**
  * Describes the enum scalekit.v1.auth.AuthState.
