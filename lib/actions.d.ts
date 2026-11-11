@@ -48,7 +48,7 @@ export interface ListAppConnectionsResult {
     prevPageToken: string;
     totalSize: number;
 }
-import { CreateConnectedAccountResponse, CreateConnectedAccountSchema, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+import { CreateConnectedAccountResponse, CreateConnectedAccountSchema, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, UpdateConnectedAccountSchema, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * Normalized, consumer-friendly view of a tool returned by
@@ -366,7 +366,37 @@ export default class ActionsClient {
          *
          * To connect a user's account, prefer {@link getAuthorizationLink}: it
          * creates the account if needed and the user completes authorization
-         * through the link. OAuth credentials cannot be supplied directly.
+         * through the link.
+         *
+         * To import an OAuth token you obtained outside Scalekit, pass it as
+         * `oauthToken`. `expiresAt` is optional and only used for such an import:
+         *
+         * ```ts
+         * import { timestampFromDate } from '@bufbuild/protobuf/wkt';
+         *
+         * await scalekit.actions.createConnectedAccount({
+         *   connectionName: 'gmail',
+         *   identifier: 'user_123',
+         *   authorizationDetails: {
+         *     details: {
+         *       case: 'oauthToken',
+         *       value: {
+         *         accessToken: 'ya29.a0...',
+         *         refreshToken: '1//0g...', // optional
+         *         scopes: ['https://www.googleapis.com/auth/gmail.readonly'], // optional
+         *         expiresAt: timestampFromDate(new Date('2026-12-01T10:00:00Z')), // optional
+         *       },
+         *     },
+         *   },
+         * });
+         * ```
+         *
+         * The token is imported (and the account becomes ACTIVE) only for a
+         * connection that uses your own OAuth app; Scalekit then records
+         * `expiresAt` as the token's expiry. Without it, a token imported with a
+         * `refreshToken` is refreshed on first use, and one without is used until
+         * the provider rejects it. `expiresAt` is not returned when reading the
+         * account.
          */
         authorizationDetails: MessageInitShape<typeof CreateConnectedAccountSchema>['authorizationDetails'];
         organizationId?: string;
@@ -382,7 +412,12 @@ export default class ActionsClient {
     getOrCreateConnectedAccount(params: {
         connectionName: string;
         identifier: string;
-        /** Same plain-object shape as {@link createConnectedAccount}. */
+        /**
+         * Same plain-object shape as {@link createConnectedAccount}, including the
+         * optional `oauthToken.expiresAt` (for example
+         * `timestampFromDate(new Date(...))` from `@bufbuild/protobuf/wkt`) when
+         * importing a token obtained outside Scalekit.
+         */
         authorizationDetails?: MessageInitShape<typeof CreateConnectedAccountSchema>['authorizationDetails'];
         organizationId?: string;
         userId?: string;
@@ -392,7 +427,12 @@ export default class ActionsClient {
     upsertConnectedAccount: (params: {
         connectionName: string;
         identifier: string;
-        /** Same plain-object shape as {@link createConnectedAccount}. */
+        /**
+         * Same plain-object shape as {@link createConnectedAccount}, including the
+         * optional `oauthToken.expiresAt` (for example
+         * `timestampFromDate(new Date(...))` from `@bufbuild/protobuf/wkt`) when
+         * importing a token obtained outside Scalekit.
+         */
         authorizationDetails?: MessageInitShape<typeof CreateConnectedAccountSchema>["authorizationDetails"];
         organizationId?: string;
         userId?: string;
@@ -408,7 +448,14 @@ export default class ActionsClient {
     updateConnectedAccount(params: {
         connectionName?: string;
         identifier?: string;
-        authorizationDetails?: UpdateConnectedAccount['authorizationDetails'];
+        /**
+         * Same plain-object shape as {@link createConnectedAccount}, including the
+         * optional `oauthToken.expiresAt` (for example
+         * `timestampFromDate(new Date(...))` from `@bufbuild/protobuf/wkt`) when
+         * importing a token obtained outside Scalekit. A message built with
+         * `create(AuthorizationDetailsSchema, ...)` is also accepted.
+         */
+        authorizationDetails?: MessageInitShape<typeof UpdateConnectedAccountSchema>['authorizationDetails'];
         organizationId?: string;
         userId?: string;
         connectedAccountId?: string;

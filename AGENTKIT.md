@@ -157,7 +157,30 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 - `getAuthorizationLink` — magic link for connect / re-auth.
 - `verifyConnectedAccountUser` — completes OAuth user verification.
 - `listConnectedAccounts`, `deleteConnectedAccount`, `getConnectedAccount`
-- `createConnectedAccount`, `getOrCreateConnectedAccount`, `updateConnectedAccount`
+- `createConnectedAccount`, `getOrCreateConnectedAccount`, `updateConnectedAccount` — `authorizationDetails` is a plain object (`details: { case: 'oauthToken' | 'staticAuth' | ..., value }`). To import an OAuth token obtained outside Scalekit:
+
+  ```ts
+  import { timestampFromDate } from '@bufbuild/protobuf/wkt';
+
+  await scalekit.actions.createConnectedAccount({
+    connectionName: 'gmail',
+    identifier: 'user_123',
+    authorizationDetails: {
+      details: {
+        case: 'oauthToken',
+        value: {
+          accessToken: 'ya29.a0...',
+          refreshToken: '1//0g...', // optional
+          scopes: ['https://www.googleapis.com/auth/gmail.readonly'], // optional
+          expiresAt: timestampFromDate(new Date('2026-12-01T10:00:00Z')), // optional
+        },
+      },
+    },
+  });
+  ```
+
+  `oauthToken.expiresAt` (optional) is a `Timestamp`. It is only used when importing a token obtained outside Scalekit for a connection that uses your own OAuth app: the account becomes `ACTIVE` and Scalekit records `expiresAt` as the token's expiry. Without it, a token imported with a `refreshToken` is refreshed on first use, and one without is used until the provider rejects it. `expiresAt` is not returned when reading the account.
+
 - `request` — proxied HTTP to `{envUrl}/proxy/...` with `connection_name` / `identifier` headers (returns `AxiosResponse`). A `path` that would resolve outside `{envUrl}/proxy/` (for example through `..` segments, encoded dots or control characters) is rejected with an `Error` before any request is sent; every other path is sent unchanged. Redirects are followed as before, but a redirect hop outside `{envUrl}/proxy/` (another origin, or a same-origin path outside the prefix) is sent without `Authorization`, `connection_name` and `identifier`.
 - `uploadResumable` — uploads a file of any size to Google Drive, Cloud Storage or YouTube with Google's resumable protocol: chunks of 4 MiB by default, a failed chunk resumes instead of restarting, and it returns the created resource. Errors: `ScalekitUploadHttpException`, `ScalekitUploadSessionExpiredException`, `ScalekitUploadProtocolException`, `ScalekitUploadTimeoutException`, `ScalekitUploadConnectionException`.
 
