@@ -133,6 +133,78 @@ export default class ToolsClient {
         userId?: string;
     }): Promise<RefreshToolsResponse>;
     /**
+     * Deletes one tool of a connector created from an OpenAPI spec, by its name.
+     *
+     * The tool is gone when the call returns. `toolName` is the name the tool is listed under:
+     * `a-<connector name>_<operation>` in lower case, for example `a-acme_get_user`. The connector
+     * name is the connector's identifier prefix in lower case without spaces (`ACMETICKETS:1234`
+     * gives `acmetickets`), and the operation is the sanitised `operationId` (or the method and
+     * path) and can carry a numeric suffix: list the connector's tools with
+     * `listTools({ filter: { provider } })` for the exact names. Capitals in `toolName` are folded
+     * to lower case (ASCII letters only), as names are stored. A name carries its connector's
+     * name, so it picks the tool without `providerIdentifier`.
+     *
+     * Only a tool of a connector created from an OpenAPI spec, in your own environment, can be
+     * deleted this way. A tool of a connector that fronts an MCP server, a built-in tool, another
+     * environment's tool, a tool whose connector no longer exists and a name that matches nothing
+     * all fail the same way, with `ScalekitNotFoundException`; the message does not say which.
+     *
+     * The deletion is not permanent. A full sync of the connector creates the tool again (same
+     * name, new ID) while its operation is still in the spec, for example after the spec's content
+     * or the connector's base URL has changed; a sync that is skipped because nothing changed does
+     * not. If you control the spec, take the operation out of it to remove the tool for good: the
+     * next sync then removes it. While a sync of the connector is queued or running, the call fails
+     * with `ScalekitConflictException`, because that sync could create the tool again: wait for
+     * the run with `actions.providers.getToolCollectionRun`, then call again. Without a `runId`
+     * that call usually shows the run that blocks this one, but not always: the server blocks on
+     * any run that has not finished, and an older unfinished run can sit behind a newer finished
+     * one. The `ScalekitConflictException` is what counts, so call again until it stops. A run
+     * that makes no progress for about 30 minutes is failed automatically.
+     *
+     * A Virtual MCP configuration that lists the tool is not edited, and it serves nothing for that
+     * name. If the connection lists other tools too, reading the configuration returns only those,
+     * and saving it back works. If the deleted tool was the only tool listed for the connection,
+     * reading the configuration still returns its name, and saving it fails with
+     * `ScalekitBadRequestException` until you set the connection's tools to tools that still exist
+     * (`actions.mcp.updateConfig`) or remove the connection from the configuration.
+     *
+     * Like most of the SDK's calls, this one is retried when the service is unavailable
+     * (`triggerToolCollection` is the exception: a repeat of it queues a second run). Each attempt
+     * has its own tool-call deadline (`toolTimeoutMs`). If the first attempt had already deleted
+     * the tool and only its response was lost, the retry answers `ScalekitNotFoundException`, or
+     * `ScalekitConflictException` if a sync was queued in between, although the tool was deleted.
+     * To tell, list the connector's tools.
+     *
+     * @param params.toolName Name of the tool. Surrounding whitespace is ignored. At most 2048
+     *   characters.
+     * @param params.providerIdentifier `provider.identifier` of the connector that owns the tool,
+     *   matched exactly (case included). Leave it out unless a call answered `TOOL_NAME_AMBIGUOUS`.
+     *   Surrounding whitespace is ignored; a blank value is an error. At most 512 characters.
+     * @returns Resolves once the tool is deleted.
+     * @throws {ScalekitValidationError} If `toolName` is empty or blank, or if `providerIdentifier`
+     *   is given and is not a string or is blank. No request is sent.
+     * @throws {ScalekitBadRequestException} If `toolName` is longer than 2048 characters or
+     *   `providerIdentifier` longer than 512, if either has a control character other than
+     *   surrounding whitespace (the SDK trims that), or if OpenAPI-sourced connectors are not
+     *   enabled for your environment (error code `FEATURE_NOT_ENABLED`).
+     * @throws {ScalekitNotFoundException} If no deletable tool has this name, or none of that name
+     *   belongs to `providerIdentifier` (`custom tool not found`).
+     * @throws {ScalekitConflictException} If a sync of the connector is queued or running (error
+     *   code `RESOURCE_ALREADY_EXISTS`): nothing is deleted, so call again once it has finished.
+     *   Also, with the error code `TOOL_NAME_AMBIGUOUS`, if tools of more than one connector of
+     *   your environment have this name (leftovers of an earlier connector): nothing is deleted,
+     *   and the message names two of the connectors. Repeat the call with `providerIdentifier`
+     *   set to the OpenAPI-sourced connector whose tool you mean. A leftover tool of a connector
+     *   that no longer exists, or that is not OpenAPI-sourced, answers
+     *   `ScalekitNotFoundException` once `providerIdentifier` names that connector, and cannot be
+     *   deleted through this API.
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    deleteCustomTool(params: {
+        toolName: string;
+        providerIdentifier?: string;
+    }): Promise<void>;
+    /**
      * Searches tools ranked by relevance to a natural-language query — the job to be
      * done, not an exact tool name.
      *

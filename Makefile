@@ -8,7 +8,11 @@
 SHELL := /bin/bash
 
 PROTO_REPO_URL := https://github.com/scalekit-inc/scalekit.git
-PROTO_REF := v0.1.160.0
+# TEMPORARY: the branch of scalekit-inc/scalekit#2882 (DeleteCustomTool), which is not released yet and
+# is force-pushed (last seen at a6b5574c). tools_pb.ts holds v0.1.160.0 plus only that PR's
+# tools.proto change, so `make verify-generate` fails until PROTO_REF is the release tag that
+# contains the PR and `make generate` has been run.
+PROTO_REF := claude/v1-item-e-delete-custom-tool-v2
 PROTO_SUBDIR := proto
 PROTO_REMOTE_INPUT := $(PROTO_REPO_URL)\#ref=$(PROTO_REF),subdir=$(PROTO_SUBDIR)
 LOCAL_PROTO_DIR ?= ../scalekit/proto

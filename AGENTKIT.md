@@ -98,6 +98,22 @@ console.log(res.totalSize);
 </dd></dl>
 </details>
 
+<details><summary><code>client.tools.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts">deleteCustomTool</a>(params) -> Promise&lt;void&gt;</code></summary>
+<dl><dd>
+
+### 📝 Description
+
+Deletes one tool of a connector created from an OpenAPI spec, by its name (`a-<connector name>_<operation>`, matched in lower case). `actions.deleteCustomTool` does the same. Any other tool, such as a built-in one or one of an MCP connector, fails with `ScalekitNotFoundException`. An empty or blank `toolName` raises `ScalekitValidationError` before anything is sent. The deletion is not permanent: a full sync of the connector creates the tool again while its operation is still in the spec, and while a sync is queued or running the call deletes nothing and fails with `ScalekitConflictException`: wait for the run with `actions.providers.getToolCollectionRun`, then call again. The call is retried when the service is unavailable, so after a retry a `ScalekitNotFoundException` can follow a deletion that succeeded: list the connector's tools to tell. See [`REFERENCE.md`](REFERENCE.md#tools) for the errors.
+
+### 🔌 Usage
+
+```typescript
+await scalekitClient.tools.deleteCustomTool({ toolName: 'a-acme_get_user' });
+```
+
+</dd></dl>
+</details>
+
 <details><summary><code>client.tools.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts">searchTools</a>(query, options?) -> Promise&lt;SearchToolsResponse&gt;</code></summary>
 <dl><dd>
 
@@ -182,6 +198,7 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 
 - `executeTool` — wraps `tools.executeTool` (`toolInput` maps to tool `params`).
 - `refreshTools` — wraps `tools.refreshTools` for a custom MCP connector's connected account (`connectionName` maps to `connector`).
+- `deleteCustomTool` — wraps `tools.deleteCustomTool`: deletes one tool of a connector created from an OpenAPI spec, by its name.
 - `getAuthorizationLink` — magic link for connect / re-auth.
 - `verifyConnectedAccountUser` — completes OAuth user verification.
 - `listConnectedAccounts`, `deleteConnectedAccount`, `getConnectedAccount`
@@ -243,7 +260,7 @@ A mapping can name a connection on a custom connector in either mode: one create
 - `updateCustomProvider({ identifier, displayName, authPatterns, proxyUrl?, openapiSpecUrl?, metadata?, ... })` — on a connector created from a spec only the name, description, icon, metadata and base URL (`proxyUrl`) can change, and the spec URL (`openapiSpecUrl`) where your environment has that enabled. `metadata` replaces the stored map, so leaving it out clears it: read the connector first and send back the metadata to keep.
 - `triggerToolCollection(providerIdentifier)` — queues a new run and returns it as `QUEUED`. It is not retried automatically when the service is unavailable (`ScalekitServiceUnavailableException`): the first attempt may already have queued a run, and a run you then find may be another caller's, so call `getToolCollectionRun`, wait for an active run to finish, and trigger again if you need a run that started after your call.
 - `getToolCollectionRun(providerIdentifier, runId?)` — status, counters and skipped operations of a run; omit `runId` for the latest.
-- `listProviders`, `deleteCustomProvider`.
+- `listProviders`, `deleteCustomProvider` — a connector created from an OpenAPI spec cannot be deleted while a run of it is queued or processing (`ScalekitConflictException`): wait for the run with `getToolCollectionRun`, then call again (without a `runId` it usually shows the run that blocks the call, but not always: the conflict is what counts). To delete one tool of such a connector, use `tools.deleteCustomTool({ toolName })` (see [Tools](#tools)).
 
 A `BEARER`, `API_KEY` or `BASIC` credential can be sent in the URL path, the query string or the JSON body with `placement` on the credential field. Details, limits, errors and examples are under [Custom Connectors](REFERENCE.md#custom-connectors) in `REFERENCE.md`.
 

@@ -1,0 +1,21 @@
+kind: added
+body: |
+  `scalekit.tools.deleteCustomTool({ toolName, providerIdentifier? })` and `scalekit.actions.deleteCustomTool(...)` delete one tool of a connector created from an OpenAPI spec, by its name: `a-<connector name>_<operation>`, matched in lower case. Only such a tool can be deleted: a built-in tool, a tool of an MCP connector and a name that matches nothing all fail with `ScalekitNotFoundException`, and an empty or blank `toolName`, or a `providerIdentifier` that is given and blank, raises `ScalekitValidationError` before anything is sent. The deletion is not permanent: a full sync of the connector creates the tool again while its operation is still in the spec. While a sync of the connector is queued or running, the call deletes nothing and fails with `ScalekitConflictException` (error code `RESOURCE_ALREADY_EXISTS`): call again once the run has finished. If tools of more than one connector of your environment have the same name (leftovers of an earlier connector), it fails with `ScalekitConflictException` (error code `TOOL_NAME_AMBIGUOUS`): repeat the call with `providerIdentifier`. `scalekit.actions.providers.deleteCustomProvider` now also fails with `ScalekitConflictException` (error code `RESOURCE_ALREADY_EXISTS`) while a tool collection run of the connector is queued or processing. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#tools)
+
+  ```ts
+  import { ScalekitConflictException } from '@scalekit-sdk/node';
+
+  try {
+    await scalekit.actions.deleteCustomTool({ toolName: 'a-acme_get_user' });
+  } catch (error) {
+    if (!(error instanceof ScalekitConflictException)) throw error;
+    // Nothing was deleted. 'RESOURCE_ALREADY_EXISTS': a sync is running, call again after it.
+    // 'TOOL_NAME_AMBIGUOUS': pass providerIdentifier, the connector that owns the tool.
+    console.log(error.errorCode);
+  }
+  ```
+time: '2026-11-12T12:00:00.000000+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-3097
+  Migration: ''

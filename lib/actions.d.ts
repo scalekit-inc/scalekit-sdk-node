@@ -164,6 +164,22 @@ export default class ActionsClient {
         userId?: string;
     }): Promise<RefreshToolsResponse>;
     /**
+     * Deletes one tool of a connector created from an OpenAPI spec, by its name.
+     *
+     * Delegates to `tools.deleteCustomTool`, which describes what it does, when the
+     * tool comes back and the errors it raises. `toolName` is the name the tool is
+     * listed under (`a-<connector name>_<operation>`). Pass `providerIdentifier`
+     * only when a call answered `TOOL_NAME_AMBIGUOUS`.
+     *
+     * @throws {ScalekitValidationError} If `toolName` is empty or blank, or if
+     *   `providerIdentifier` is given and is not a string or is blank. No request is sent.
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     */
+    deleteCustomTool(params: {
+        toolName: string;
+        providerIdentifier?: string;
+    }): Promise<void>;
+    /**
      * Execute a tool on behalf of a connected account.
      *
      * Thin wrapper around ToolsClient.executeTool, reserved for future
