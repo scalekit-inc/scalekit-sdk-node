@@ -7297,6 +7297,86 @@ console.log(res.totalSize, res.tools.map((tool) => tool.id));
 </dl>
 </details>
 
+<details><summary><code>client.tools.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/tools.ts">deleteCustomTool</a>(params) -> Promise&lt;void&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes one tool of a connector created from an OpenAPI spec, by its name. Also available as `scalekitClient.actions.deleteCustomTool`, with the same parameters. The tool is gone when the call returns.
+
+**Which tool.** `toolName` is the name the tool is listed under: `a-<connector name>_<operation>` in lower case, for example `a-acme_get_user`. The connector name is the connector's identifier prefix in lower case without spaces (`ACMETICKETS:1234` gives `acmetickets`), and the operation is the sanitised `operationId` (or the method and path) and can carry a numeric suffix: list the connector's tools with `listTools({ filter: { provider } })` for the exact names. Capitals are folded to lower case (ASCII letters only), as names are stored. A name carries its connector's name, so it picks the tool without `providerIdentifier`: pass that only after a call answered `TOOL_NAME_AMBIGUOUS`.
+
+**What can be deleted.** Only a tool of a connector created from an OpenAPI spec, in your own environment. A tool of a connector that fronts an MCP server, a built-in tool, another environment's tool, a tool whose connector no longer exists and a name that matches nothing all fail the same way, with `ScalekitNotFoundException`; the message does not say which. OpenAPI-sourced connectors must be enabled for your environment (the `custom_api_tools` feature), otherwise the call fails with the error code `FEATURE_NOT_ENABLED`.
+
+**It is not permanent.** A full sync of the connector creates the tool again (same name, new ID) while its operation is still in the spec, for example after the spec's content or the connector's base URL has changed. A sync that is skipped because nothing changed does not. If you control the spec, take the operation out of it to remove the tool for good: the next sync then removes it. While a sync of the connector is queued or running, the call fails with `ScalekitConflictException` and deletes nothing, because that sync could create the tool again: wait for the run with `actions.providers.getToolCollectionRun`, then call again. Without a `runId` that call usually shows the run that blocks this one, but not always: the server blocks on any run that has not finished, and an older unfinished run can sit behind a newer finished one. The `ScalekitConflictException` is what counts, so call again until it stops. A run that makes no progress for about 30 minutes is failed automatically.
+
+**Virtual MCP servers.** A configuration that lists the tool is not edited, and it serves nothing for that name. If the connection lists other tools too, reading the configuration returns only those, and saving it back works. If the deleted tool was the only tool listed for the connection, reading the configuration still returns its name, and saving it fails with `ScalekitBadRequestException` until you set the connection's tools to tools that still exist (`actions.mcp.updateConfig`) or remove the connection from the configuration.
+
+**Retries.** Like most of the SDK's calls, this one is retried when the service is unavailable (`triggerToolCollection` is the exception: a repeat of it queues a second run). Each attempt has its own tool-call deadline (`toolTimeoutMs`). If the first attempt had already deleted the tool and only its response was lost, the retry answers `ScalekitNotFoundException`, or `ScalekitConflictException` if a sync was queued in between, although the tool was deleted. To tell, list the connector's tools.
+
+Errors:
+- `ScalekitValidationError` if `toolName` is empty or blank, or if `providerIdentifier` is given and is not a string or is blank; nothing is sent.
+- `ScalekitBadRequestException` if `toolName` is longer than 2048 characters or `providerIdentifier` longer than 512, if either has a control character other than surrounding whitespace, which the SDK trims (`invalid tool name`, `invalid provider identifier`), or if OpenAPI-sourced connectors are not enabled for your environment (error code `FEATURE_NOT_ENABLED`).
+- `ScalekitNotFoundException` (`custom tool not found`) if no deletable tool has this name, or none of that name belongs to `providerIdentifier`.
+- `ScalekitConflictException` with the error code `RESOURCE_ALREADY_EXISTS` if a sync of the connector is queued or running: nothing is deleted, so call again once it has finished.
+- `ScalekitConflictException` with the error code `TOOL_NAME_AMBIGUOUS` if tools of more than one connector of your environment have this name (leftovers of an earlier connector): nothing is deleted, and the message names two of the connectors. Repeat the call with `providerIdentifier` set to the OpenAPI-sourced connector whose tool you mean. A leftover tool of a connector that no longer exists, or that is not OpenAPI-sourced, answers `ScalekitNotFoundException` once `providerIdentifier` names that connector, and cannot be deleted through this API.
+- `ScalekitServerException` if a network or server error occurs.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.tools.deleteCustomTool({ toolName: 'a-acme_get_user' });
+
+// Only after a call answered TOOL_NAME_AMBIGUOUS: name the connector that owns the tool
+await scalekitClient.tools.deleteCustomTool({
+  toolName: 'a-acme_get_user',
+  providerIdentifier: 'ACME:1234',
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `toolName: string` - Name of the tool, as listed for its connector (`a-<connector name>_<operation>`). Matched in lower case. Surrounding whitespace is ignored. At most 2048 characters
+- `providerIdentifier?: string` - `provider.identifier` of the connector that owns the tool, matched exactly (case included). Leave it out unless a call answered `TOOL_NAME_AMBIGUOUS`. Surrounding whitespace is ignored; a blank value is an error. At most 512 characters
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Actions
 
 Connect end users' accounts to third-party services and run tools against them. This section covers tool discovery on `actions` (also available on `scalekitClient.tools`) and authorizing a connected account. To create or update a connected account, send the user an authorization link with `getAuthorizationLink`.
@@ -7574,6 +7654,62 @@ console.log(res.totalSize);
 - `identifier?: string` - Your identifier for the connected account, used with `connectionName`
 - `organizationId?: string` - Narrows the lookup when the same identifier exists in several organizations
 - `userId?: string` - Narrows the lookup when the same identifier exists for several users
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">deleteCustomTool</a>(params) -> Promise&lt;void&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes one tool of a connector created from an OpenAPI spec, by its name. Same parameters, behavior and errors as [`tools.deleteCustomTool`](#tools), which also says when the tool comes back. An empty or blank `toolName`, or a `providerIdentifier` that is given and is not a string or is blank, throws `ScalekitValidationError` before a request is sent.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.actions.deleteCustomTool({ toolName: 'a-acme_get_user' });
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `toolName: string` - Name of the tool, as listed for its connector (`a-<connector name>_<operation>`)
+- `providerIdentifier?: string` - `provider.identifier` of the connector that owns the tool. Leave it out unless a call answered `TOOL_NAME_AMBIGUOUS`
 
 </dd>
 </dl>
@@ -8751,6 +8887,8 @@ console.log(res.provider?.description);
 Deletes a custom connector. Remove its connections and connected accounts first; the server won't delete a connector that is still in use, and answers `[invalid_argument] cannot delete custom provider with existing connections`.
 
 Connected accounts come off with `actions.deleteConnectedAccount`, and then the connector's connections with `actions.deleteConnection`. `connection.deleteConnection` takes an `organizationId`, which an app connection does not have, so it is not the one to use here. `actions.deleteConnection` throws `CONNECTION_IN_USE` while a Virtual MCP configuration still maps the connection: remove it from those configurations first.
+
+A connector created from an OpenAPI spec cannot be deleted while a tool collection run of it is queued or processing. The call throws `ScalekitConflictException` (error code `RESOURCE_ALREADY_EXISTS`; the message names the run) and deletes nothing, because a run in flight writes tools without checking that the connector still exists. Wait for the run with `getToolCollectionRun`, then call again. Without a `runId`, `getToolCollectionRun` usually shows the run that blocks the call, but not always: the server blocks on any run that has not finished, and an older unfinished run can sit behind a newer finished one. The conflict is what counts, so call again until it stops. A run that makes no progress for about 30 minutes is failed automatically.
 </dd>
 </dl>
 </dd>
@@ -9123,6 +9261,8 @@ What Scalekit does:
 **Tool names.** Each tool is named `a-<connector name>_<operationId>`, in lower case, with the connector name taken from the connector's identifier (`ACMETICKETS:1234` gives `acmetickets`). An operation without an `operationId` uses its method and path instead, and a name that is already taken gets a numeric suffix. Tools of a connector that fronts an MCP server are different: they belong to a connected account and their names start with `c-`.
 
 **Calling the tools.** A tool belongs to the connector, so list it with `listTools({ filter: { provider: provider.identifier } })` and run it with any connected account of a connection on that connector. The account has to belong to the tool's connector: Scalekit rejects a mismatch before it sends anything. `listTools({ filter: { query } })` searches built-in tools only, so it never finds these tools.
+
+**Deleting a tool.** `tools.deleteCustomTool({ toolName })` deletes one tool by its name. It is not permanent: a full sync creates the tool again while its operation is still in the spec, and a sync that is queued or running blocks the call (`ScalekitConflictException`). See [`tools.deleteCustomTool`](#tools).
 
 **Virtual MCP servers.** A connection on such a connector can be mapped in a [Virtual MCP server](#virtual-mcp-servers) configuration, with `DIRECT` or `META` tool exposure. Map the tool names above, or leave `tools` out for all of them. The server serves them only while `custom_api_tools` is on for your environment.
 

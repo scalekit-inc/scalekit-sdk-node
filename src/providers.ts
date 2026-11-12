@@ -526,6 +526,19 @@ export default class ProvidersClient {
    * configuration still maps the connection: remove it from those configurations
    * first.
    *
+   * A connector created from an OpenAPI spec cannot be deleted while a tool
+   * collection run of it is queued or processing, because a run in flight writes
+   * tools without checking that the connector still exists. Wait for the run with
+   * {@link getToolCollectionRun}, then call again; a run that makes no progress
+   * for about 30 minutes is failed automatically. Without a `runId`,
+   * `getToolCollectionRun` usually shows the run that blocks the call, but not
+   * always: the server blocks on any run that has not finished, and an older
+   * unfinished run can sit behind a newer finished one. The conflict is what
+   * counts, so call again until it stops.
+   *
+   * @throws {ScalekitConflictException} If a tool collection run of the connector
+   *   is queued or processing, with the error code `RESOURCE_ALREADY_EXISTS`. The
+   *   message names the run. Nothing is deleted.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async deleteCustomProvider(

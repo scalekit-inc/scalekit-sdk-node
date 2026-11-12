@@ -391,6 +391,24 @@ export type DeleteToolRequest = Message<"scalekit.v1.tools.DeleteToolRequest"> &
  */
 export declare const DeleteToolRequestSchema: GenMessage<DeleteToolRequest>;
 /**
+ * @generated from message scalekit.v1.tools.DeleteCustomToolRequest
+ */
+export type DeleteCustomToolRequest = Message<"scalekit.v1.tools.DeleteCustomToolRequest"> & {
+    /**
+     * @generated from field: string tool_name = 1;
+     */
+    toolName: string;
+    /**
+     * @generated from field: string provider_identifier = 2;
+     */
+    providerIdentifier: string;
+};
+/**
+ * Describes the message scalekit.v1.tools.DeleteCustomToolRequest.
+ * Use `create(DeleteCustomToolRequestSchema)` to create a new message.
+ */
+export declare const DeleteCustomToolRequestSchema: GenMessage<DeleteCustomToolRequest>;
+/**
  * @generated from message scalekit.v1.tools.ListScopedToolsRequest
  */
 export type ListScopedToolsRequest = Message<"scalekit.v1.tools.ListScopedToolsRequest"> & {
@@ -714,6 +732,14 @@ export declare const ToolService: GenService<{
     deleteTool: {
         methodKind: "unary";
         input: typeof DeleteToolRequestSchema;
+        output: typeof EmptySchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.tools.ToolService.DeleteCustomTool
+     */
+    deleteCustomTool: {
+        methodKind: "unary";
+        input: typeof DeleteCustomToolRequestSchema;
         output: typeof EmptySchema;
     };
     /**
