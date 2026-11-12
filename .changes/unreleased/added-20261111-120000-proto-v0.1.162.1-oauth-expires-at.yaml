@@ -1,0 +1,8 @@
+kind: added
+body: |
+  Generated code is synced to proto `v0.1.162.1`. `actions.createConnectedAccount`, `actions.updateConnectedAccount` and `actions.getOrCreateConnectedAccount` / `upsertConnectedAccount` pass an optional `authorizationDetails` `oauthToken.expiresAt` (a `Timestamp`, for example `timestampFromDate(new Date('2026-12-01T10:00:00Z'))` from `@bufbuild/protobuf/wkt`) through to the request; leaving it out sends the same request as before. It is read only when you import a token obtained outside Scalekit for a connection that uses your own OAuth app: the account becomes `ACTIVE` and its `tokenExpiresAt` is set to `expiresAt`. Without it, the account has no token expiry and the token is used until the provider rejects it; if a `refreshToken` was imported, tool calls then refresh and retry automatically, and proxy callers refresh with the refresh connected account tokens API. Without a `refreshToken`, nothing can be refreshed, and the account must be updated with new tokens or authorized again. To correct the expiry of the current token, update the account with the same `accessToken` and the new `expiresAt`; the account status does not change. `expiresAt` is never returned; read the expiry back from the account's `tokenExpiresAt`. `actions.updateConnectedAccount` now accepts `authorizationDetails` as the same plain object as `createConnectedAccount` (a message built with `create()` still works). `AuthState` gains `AUTHENTICATION_NOT_RESUMABLE`.
+time: '2026-11-11T12:00:00.000000+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-3047
+  Migration: ''

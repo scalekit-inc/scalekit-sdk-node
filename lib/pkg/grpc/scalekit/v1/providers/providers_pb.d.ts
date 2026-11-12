@@ -73,6 +73,10 @@ export type Provider = Message<"scalekit.v1.providers.Provider"> & {
      * @generated from field: string openapi_spec_url = 15;
      */
     openapiSpecUrl: string;
+    /**
+     * @generated from field: repeated string allowed_hosts = 16;
+     */
+    allowedHosts: string[];
 };
 /**
  * Describes the message scalekit.v1.providers.Provider.
@@ -123,6 +127,10 @@ export type CreateProvider = Message<"scalekit.v1.providers.CreateProvider"> & {
      * @generated from field: bool proxy_enabled = 11;
      */
     proxyEnabled: boolean;
+    /**
+     * @generated from field: repeated string allowed_hosts = 12;
+     */
+    allowedHosts: string[];
 };
 /**
  * Describes the message scalekit.v1.providers.CreateProvider.
@@ -257,6 +265,10 @@ export type UpdateProvider = Message<"scalekit.v1.providers.UpdateProvider"> & {
      * @generated from field: google.protobuf.BoolValue proxy_enabled = 11;
      */
     proxyEnabled?: boolean | undefined;
+    /**
+     * @generated from field: repeated string allowed_hosts = 12;
+     */
+    allowedHosts: string[];
 };
 /**
  * Describes the message scalekit.v1.providers.UpdateProvider.

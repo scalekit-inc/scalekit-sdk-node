@@ -665,7 +665,50 @@ export default class ActionsClient {
      *
      * To connect a user's account, prefer {@link getAuthorizationLink}: it
      * creates the account if needed and the user completes authorization
-     * through the link. OAuth credentials cannot be supplied directly.
+     * through the link.
+     *
+     * To import an OAuth token you obtained outside Scalekit, pass it as
+     * `oauthToken`. `expiresAt` is optional and only used for such an import:
+     *
+     * ```ts
+     * import { timestampFromDate } from '@bufbuild/protobuf/wkt';
+     *
+     * await scalekit.actions.createConnectedAccount({
+     *   connectionName: 'gmail',
+     *   identifier: 'user_123',
+     *   authorizationDetails: {
+     *     details: {
+     *       case: 'oauthToken',
+     *       value: {
+     *         accessToken: 'ya29.a0...',
+     *         refreshToken: '1//0g...', // optional
+     *         scopes: ['https://www.googleapis.com/auth/gmail.readonly'], // optional
+     *         expiresAt: timestampFromDate(new Date('2026-12-01T10:00:00Z')), // optional
+     *       },
+     *     },
+     *   },
+     * });
+     * ```
+     *
+     * `expiresAt` is when the supplied access token expires, a protobuf
+     * `Timestamp` sent as UTC. The token is imported (and the account becomes
+     * ACTIVE) only for a connection that uses your own OAuth app; the
+     * account's `tokenExpiresAt` is then set to `expiresAt`.
+     *
+     * Without `expiresAt`, the account has no token expiry and the token is
+     * used until the provider rejects it. If a `refreshToken` was imported,
+     * tool calls then refresh and retry automatically, and proxy callers
+     * refresh with the refresh connected account tokens API
+     * (`POST /api/v1/connected_accounts:refresh_tokens`). Without a
+     * `refreshToken`, nothing can be refreshed, and the account must be
+     * updated with new tokens or authorized again.
+     *
+     * To correct the expiry of the current token, update the account with the
+     * same `accessToken` and the new `expiresAt`; the account status does not
+     * change. Resending the same `accessToken` keeps the stored `refreshToken`
+     * and `scopes` unless the request supplies new non-empty values.
+     * `expiresAt` is never returned; read the expiry back from the account's
+     * `tokenExpiresAt`.
      */
     authorizationDetails: MessageInitShape<
       typeof CreateConnectedAccountSchema
@@ -715,7 +758,12 @@ export default class ActionsClient {
   async getOrCreateConnectedAccount(params: {
     connectionName: string;
     identifier: string;
-    /** Same plain-object shape as {@link createConnectedAccount}. */
+    /**
+     * Same plain-object shape as {@link createConnectedAccount}, including the
+     * optional `oauthToken.expiresAt` (for example
+     * `timestampFromDate(new Date(...))` from `@bufbuild/protobuf/wkt`) when
+     * importing a token obtained outside Scalekit.
+     */
     authorizationDetails?: MessageInitShape<
       typeof CreateConnectedAccountSchema
     >['authorizationDetails'];
@@ -762,7 +810,18 @@ export default class ActionsClient {
   async updateConnectedAccount(params: {
     connectionName?: string;
     identifier?: string;
-    authorizationDetails?: UpdateConnectedAccount['authorizationDetails'];
+    /**
+     * Same plain-object shape as {@link createConnectedAccount}, including the
+     * optional `oauthToken.expiresAt` (for example
+     * `timestampFromDate(new Date(...))` from `@bufbuild/protobuf/wkt`) when
+     * importing a token obtained outside Scalekit. To correct the expiry of
+     * the current token, send the same `accessToken` with the new
+     * `expiresAt`; the account status does not change. A message built with
+     * `create(AuthorizationDetailsSchema, ...)` is also accepted.
+     */
+    authorizationDetails?: MessageInitShape<
+      typeof UpdateConnectedAccountSchema
+    >['authorizationDetails'];
     organizationId?: string;
     userId?: string;
     connectedAccountId?: string;

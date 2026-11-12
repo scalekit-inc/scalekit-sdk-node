@@ -65,6 +65,15 @@ export type Tool = Message<"scalekit.v1.tools.Tool"> & {
      * @generated from field: google.protobuf.Timestamp updated_at = 7;
      */
     updatedAt?: Timestamp | undefined;
+    /**
+     * Proto3 `optional` keeps this out of REST responses when unset: the gateway
+     * emits default values, but never an unset optional field. Output only:
+     * CreateTool and UpdateTool ignore it and still require `definition`, so a
+     * Tool listed with DEFINITION_FORMAT_JSON_STRING must not be sent back as is.
+     *
+     * @generated from field: optional string definition_json = 8;
+     */
+    definitionJson?: string | undefined;
 };
 /**
  * Describes the message scalekit.v1.tools.Tool.
@@ -109,6 +118,10 @@ export type ListToolsRequest = Message<"scalekit.v1.tools.ListToolsRequest"> & {
      * @generated from field: string page_token = 3;
      */
     pageToken: string;
+    /**
+     * @generated from field: scalekit.v1.tools.DefinitionFormat definition_format = 4;
+     */
+    definitionFormat: DefinitionFormat;
 };
 /**
  * Describes the message scalekit.v1.tools.ListToolsRequest.
@@ -288,6 +301,10 @@ export type RefreshToolsRequest = Message<"scalekit.v1.tools.RefreshToolsRequest
      * @generated from field: optional string user_id = 5;
      */
     userId?: string | undefined;
+    /**
+     * @generated from field: scalekit.v1.tools.DefinitionFormat definition_format = 6;
+     */
+    definitionFormat: DefinitionFormat;
 };
 /**
  * Describes the message scalekit.v1.tools.RefreshToolsRequest.
@@ -410,6 +427,10 @@ export type ListScopedToolsRequest = Message<"scalekit.v1.tools.ListScopedToolsR
      * @generated from field: string page_token = 4;
      */
     pageToken: string;
+    /**
+     * @generated from field: scalekit.v1.tools.DefinitionFormat definition_format = 5;
+     */
+    definitionFormat: DefinitionFormat;
 };
 /**
  * Describes the message scalekit.v1.tools.ListScopedToolsRequest.
@@ -480,6 +501,10 @@ export type ListAvailableToolsRequest = Message<"scalekit.v1.tools.ListAvailable
      * @generated from field: string page_token = 3;
      */
     pageToken: string;
+    /**
+     * @generated from field: scalekit.v1.tools.DefinitionFormat definition_format = 4;
+     */
+    definitionFormat: DefinitionFormat;
 };
 /**
  * Describes the message scalekit.v1.tools.ListAvailableToolsRequest.
@@ -600,6 +625,32 @@ export type ConnectionReadiness = Message<"scalekit.v1.tools.ConnectionReadiness
  * Use `create(ConnectionReadinessSchema)` to create a new message.
  */
 export declare const ConnectionReadinessSchema: GenMessage<ConnectionReadiness>;
+/**
+ * How list responses encode Tool.definition.
+ *
+ * @generated from enum scalekit.v1.tools.DefinitionFormat
+ */
+export declare enum DefinitionFormat {
+    /**
+     * Default: Tool.definition as a Struct, exactly as before this field existed.
+     *
+     * @generated from enum value: DEFINITION_FORMAT_UNSPECIFIED = 0;
+     */
+    UNSPECIFIED = 0,
+    /**
+     * Tool.definition_json carries the definition as JSON text and
+     * Tool.definition is unset. SDK protobuf decoders stop at 100 nesting
+     * levels, which a deeply nested input_schema exceeds as a Struct; a string
+     * adds no nesting. Used internally by the Scalekit SDKs.
+     *
+     * @generated from enum value: DEFINITION_FORMAT_JSON_STRING = 1;
+     */
+    JSON_STRING = 1
+}
+/**
+ * Describes the enum scalekit.v1.tools.DefinitionFormat.
+ */
+export declare const DefinitionFormatSchema: GenEnum<DefinitionFormat>;
 /**
  * ToolReadinessState describes whether a tool in a search result can be
  * invoked right now for a given connected-account identifier and one specific

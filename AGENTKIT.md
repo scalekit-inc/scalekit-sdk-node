@@ -157,7 +157,35 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 - `getAuthorizationLink` — magic link for connect / re-auth.
 - `verifyConnectedAccountUser` — completes OAuth user verification.
 - `listConnectedAccounts`, `deleteConnectedAccount`, `getConnectedAccount`
-- `createConnectedAccount`, `getOrCreateConnectedAccount`, `updateConnectedAccount`
+- `createConnectedAccount`, `getOrCreateConnectedAccount`, `updateConnectedAccount` — `authorizationDetails` is a plain object (`details: { case: 'oauthToken' | 'staticAuth' | ..., value }`). To import an OAuth token obtained outside Scalekit:
+
+  ```ts
+  import { timestampFromDate } from '@bufbuild/protobuf/wkt';
+
+  await scalekit.actions.createConnectedAccount({
+    connectionName: 'gmail',
+    identifier: 'user_123',
+    authorizationDetails: {
+      details: {
+        case: 'oauthToken',
+        value: {
+          accessToken: 'ya29.a0...',
+          refreshToken: '1//0g...', // optional
+          scopes: ['https://www.googleapis.com/auth/gmail.readonly'], // optional
+          expiresAt: timestampFromDate(new Date('2026-12-01T10:00:00Z')), // optional
+        },
+      },
+    },
+  });
+  ```
+
+  `oauthToken.expiresAt` (optional) is when the supplied access token expires: a `Timestamp`, sent as UTC. It is read only when importing a token obtained outside Scalekit for a connection that uses your own OAuth app: the account becomes `ACTIVE` and its `tokenExpiresAt` is set to `expiresAt`.
+
+  - **Without `expiresAt`**, the account has no token expiry and the token is used until the provider rejects it. If a `refreshToken` was imported, tool calls then refresh and retry automatically, and proxy callers refresh with the refresh connected account tokens API (`POST /api/v1/connected_accounts:refresh_tokens`). Without a `refreshToken`, nothing can be refreshed, and the account must be updated with new tokens or authorized again.
+  - **To correct the expiry** of the current token, update the account with the same `accessToken` and the new `expiresAt`. Only `tokenExpiresAt` changes; the account status does not, so an `EXPIRED` account stays `EXPIRED` until you send new tokens. The same `accessToken` without `expiresAt` changes nothing.
+  - **Resending the same `accessToken`** keeps the stored `refreshToken` and `scopes` unless the request supplies new non-empty values. A different `accessToken` is stored exactly as sent.
+  - **`expiresAt` is never returned.** Read the expiry back from the account's `tokenExpiresAt`.
+
 - `request` — proxied HTTP to `{envUrl}/proxy/...` with `connection_name` / `identifier` headers (returns `AxiosResponse`). A `path` that would resolve outside `{envUrl}/proxy/` (for example through `..` segments, encoded dots or control characters) is rejected with an `Error` before any request is sent; every other path is sent unchanged. Redirects are followed as before, but a redirect hop outside `{envUrl}/proxy/` (another origin, or a same-origin path outside the prefix) is sent without `Authorization`, `connection_name` and `identifier`.
 - `uploadResumable` — uploads a file of any size to Google Drive, Cloud Storage or YouTube with Google's resumable protocol: chunks of 4 MiB by default, a failed chunk resumes instead of restarting, and it returns the created resource. Errors: `ScalekitUploadHttpException`, `ScalekitUploadSessionExpiredException`, `ScalekitUploadProtocolException`, `ScalekitUploadTimeoutException`, `ScalekitUploadConnectionException`.
 
