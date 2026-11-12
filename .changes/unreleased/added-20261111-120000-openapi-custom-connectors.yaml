@@ -1,0 +1,84 @@
+kind: added
+body: |
+  `scalekit.actions.providers.createCustomProvider` takes `openapiSpecUrl` as an alternative to `proxyUrl`, so Scalekit generates a custom connector's tools from an OpenAPI spec (JSON or YAML; Swagger 2.0 and 1.x documents are converted). Set exactly one of the two. Scalekit fetches and checks the spec during the call, queues the first tool collection run in the background just after it returns (so `getToolCollectionRun` can answer `ScalekitNotFoundException` for a moment; if it keeps doing so, call `triggerToolCollection`), and fills `provider.proxyUrl` from the spec's server URL. Follow a run with the new `getToolCollectionRun(providerIdentifier, runId?)`, which returns the newest run when you omit `runId`, and queue another with `triggerToolCollection(providerIdentifier)`, which, like `createCustomProvider` with `openapiSpecUrl`, is not retried automatically when the service is unavailable, because the first attempt may already have queued a run or stored the connector: it raises `ScalekitServiceUnavailableException` at once. Both return a `ToolCollectionRun` with its counters and a parsed `skippedTools` list, and `ToolCollectionRunStatus` names its statuses. `updateCustomProvider` now takes an optional `proxyUrl` and `openapiSpecUrl`: on a connector created from a spec only the name, description, icon, metadata and base URL (`proxyUrl`) can change (and the spec URL where your environment has that enabled), and the stored `authPatterns` and `proxyEnabled` must be sent back unchanged. OpenAPI-sourced connectors must be enabled for your environment (the `custom_api_tools` feature), otherwise the calls fail with `FEATURE_NOT_ENABLED`. `AuthPattern` also types `is_open_api`, the read-only flag Scalekit sets on a connector created from an OpenAPI spec. Existing calls are unchanged. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#connectors-created-from-an-openapi-spec)
+
+  ```ts
+  import {
+    ScalekitConflictException,
+    ScalekitNotFoundException,
+    ScalekitServiceUnavailableException,
+    ToolCollectionRun,
+    ToolCollectionRunStatus,
+  } from '@scalekit-sdk/node';
+
+  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  // The first run is queued in the background after createCustomProvider returns, so the first
+  // calls can answer NotFound. If that lasts 45 seconds, queueing failed (Scalekit only logs it):
+  // queue a run yourself, once. A run is processed for up to 3 minutes.
+  async function waitForToolCollectionRun(
+    providerIdentifier: string,
+    timeoutMs = 600_000
+  ): Promise<ToolCollectionRun> {
+    const providers = scalekit.actions.providers;
+    const start = Date.now();
+    let triggered = false;
+    while (Date.now() - start < timeoutMs) {
+      try {
+        const run = await providers.getToolCollectionRun(providerIdentifier);
+        if (
+          run.status === ToolCollectionRunStatus.COMPLETED ||
+          run.status === ToolCollectionRunStatus.FAILED
+        ) {
+          return run;
+        }
+      } catch (error) {
+        if (!(error instanceof ScalekitNotFoundException)) throw error;
+        if (!triggered && Date.now() - start > 45_000) {
+          triggered = true;
+          try {
+            await providers.triggerToolCollection(providerIdentifier);
+          } catch (triggerError) {
+            // A run was queued in the meantime, or the answer was lost: keep polling to find out.
+            if (
+              !(triggerError instanceof ScalekitConflictException) &&
+              !(triggerError instanceof ScalekitServiceUnavailableException)
+            )
+              throw triggerError;
+          }
+        }
+      }
+      await wait(2000);
+    }
+    throw new Error(
+      `The tool collection run did not finish within ${timeoutMs / 1000} seconds`
+    );
+  }
+
+  const { provider } = await scalekit.actions.providers.createCustomProvider({
+    displayName: 'Acme Tickets',
+    openapiSpecUrl: 'https://api.acme.example.com/openapi.json',
+    authPatterns: [
+      {
+        type: 'BEARER',
+        display_name: 'Bearer Token',
+        fields: [{ field_name: 'token', label: 'API Token', input_type: 'password' }],
+      },
+    ],
+  });
+
+  const run = await waitForToolCollectionRun(provider!.identifier);
+  if (run.status === ToolCollectionRunStatus.FAILED) {
+    throw new Error(`The run failed: ${run.errorMessage}`);
+  }
+  const { toolNames } = await scalekit.actions.listTools({
+    provider: provider!.identifier,
+    summary: true,
+  });
+  console.log(run.toolsCreated, run.skippedTools.length, toolNames);
+  ```
+time: '2026-11-11T12:00:00.000000+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-3097
+  Migration: ''

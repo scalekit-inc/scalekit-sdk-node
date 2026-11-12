@@ -1,0 +1,16 @@
+kind: added
+body: |
+  `scalekit.tools.refreshTools(params)` and `scalekit.actions.refreshTools(params)` re-read the tool list of a custom MCP connector's connected account from its upstream MCP server, and return the full refreshed list. Use it when the upstream server has added, renamed or removed tools. Identify the account with `connectedAccountId`, or with the connection name (`connector` on `tools`, `connectionName` on `actions`) and `identifier`. `actions.refreshTools` raises `ScalekitValidationError` before it sends anything when neither is given. Calling it for an account that does not belong to a custom MCP connector fails with a bad request, and a refresh that is already running for the account fails with `ScalekitTooManyRequestsException` (`DISCOVERY_IN_PROGRESS`). The underlying `RefreshTools` RPC is marked preview in the API and may change. The tools of a connector created from an OpenAPI spec are refreshed with `actions.providers.triggerToolCollection` instead. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#tools)
+
+  ```ts
+  const res = await scalekit.actions.refreshTools({
+    connectionName: 'acme-mcp',
+    identifier: 'user_123',
+  });
+  console.log(res.totalSize, res.tools.map((tool) => tool.id));
+  ```
+time: '2026-11-11T12:02:00.000000+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-3097
+  Migration: ''

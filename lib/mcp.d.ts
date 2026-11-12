@@ -68,6 +68,8 @@ export default class McpClient {
      * @param params.connectionToolMappings Which connections, and which tools from each, to expose.
      *                                      Omit `tools` on a mapping to expose every tool for that connection.
      *                                      Maximum 25 connections when `toolExposure` is `'DIRECT'`.
+     *                                      A connection on a custom connector can be mapped too; see
+     *                                      {@link McpClient.updateConfig} for the rules.
      * @param params.toolExposure `'DIRECT'` or `'META'`. Omit it to get `'DIRECT'`; META must be
      *                            requested explicitly. See {@link McpToolExposure}.
      * @throws {ScalekitServerException} If a network or server error occurs.
@@ -114,7 +116,21 @@ export default class McpClient {
      *
      * @param params.configId ID of the configuration to update.
      * @param params.description New description.
-     * @param params.connectionToolMappings Replacement connection-to-tool mappings.
+     * @param params.connectionToolMappings Replacement connection-to-tool mappings. A
+     *   connection on a custom connector can be mapped in either exposure mode:
+     *   - A connector created from an OpenAPI spec needs the `custom_api_tools`
+     *     feature, and its tools are named `a-<connector name>_<operation>` in lower case, after the
+     *     operation's `operationId` or its method and path; list the connector's tools for
+     *     the exact names.
+     *   - A connector that fronts an MCP server needs the hosted connected-accounts
+     *     widget feature and a connected account that has authorized, so that
+     *     Scalekit has the connector's tool list; its tool names start with `c-`.
+     *   - Any other custom connector is refused with `[invalid_argument] custom
+     *     connectors are not supported yet. please contact support@scalekit.com`.
+     *   A tool name the connection does not have fails with `invalid tool '<name>' for
+     *   connection '<connection name>'`. The server serves the tools of a custom
+     *   connection only while `custom_api_tools` (OpenAPI) or `custom_mcp_tools`
+     *   (MCP) is on for your environment.
      * @param params.toolExposure `'DIRECT'` or `'META'`. Omit it to keep the stored mode.
      *                            Switching to `'DIRECT'` is refused when the configuration has more than
      *                            25 connections or overlapping tool names.

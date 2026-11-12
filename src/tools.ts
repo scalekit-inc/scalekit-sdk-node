@@ -15,6 +15,8 @@ import {
   ListScopedToolsResponse,
   ListToolsRequestSchema,
   ListToolsResponse,
+  RefreshToolsRequestSchema,
+  RefreshToolsResponse,
   ScopedToolFilterSchema,
   SearchToolsRequestSchema,
   SearchToolsResponse,
@@ -48,10 +50,20 @@ export default class ToolsClient {
    * @param options Optional filter and pagination parameters
    * @param options.filter Filter configuration. Supports `provider`, `identifier`, `toolName`, `summary`, `query`,
    *                       `connector`, `organizationId`, `userId`, and `connectedAccountId` fields.
-   *                       Use `query` to do a text search across tool metadata (names, descriptions, identifiers).
+   *                       Use `provider` with a connector's identifier to list the tools of a connector
+   *                       created from an OpenAPI spec; no connected account is needed, because those tools belong to
+   *                       the connector.
+   *                       Use `query` to search tools by name: it is split on spaces and underscores, every part must
+   *                       appear in the tool name (ignoring case), and it must be 3 to 100 characters. It searches
+   *                       built-in tools only, so it never returns the tools of a custom connector.
    *                       Use `connector` together with `identifier` to resolve a specific connected account and include its custom MCP tools.
+   *                       A connection name on its own does not identify a connected account.
    *                       Use `connectedAccountId` as a direct alternative to the `identifier` + `connector` combination.
-   * @param options.pageSize Maximum number of tools to return per page.
+   *                       When the connector, identifier or connected account matches none, the call fails
+   *                       with `ScalekitNotFoundException`.
+   * @param options.pageSize Maximum number of tools to return per page. Defaults to 300 when omitted or 0. The
+   *                         maximum is 1000: a larger value is reduced to 1000, not rejected. With `filter.query`,
+   *                         a page holds at most 100 tools.
    * @param options.pageToken Token from a previous `listTools` response for pagination.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
@@ -75,6 +87,11 @@ export default class ToolsClient {
 
   /**
    * Lists tools that are scoped to a specific connected account identifier.
+   *
+   * It includes the tools of a custom connector the identifier has a connected
+   * account on: those of a connector created from an OpenAPI spec while the
+   * `custom_api_tools` feature is on for your environment, and those of a
+   * connector that fronts an MCP server while `custom_mcp_tools` is on.
    *
    * @param identifier Connected account identifier to scope the tools list (for example,
    *                   a workspace identifier or email).
@@ -109,7 +126,8 @@ export default class ToolsClient {
    *
    * This is similar to `listScopedTools` but returns the tools that can be
    * made available for a given identifier, rather than the tools that are
-   * already scoped to it.
+   * already scoped to it. Like `listScopedTools`, it includes the tools of the
+   * custom connectors the identifier has a connected account on.
    *
    * @param identifier Connected account identifier to scope the available tools list (for example,
    *                   a workspace identifier or email).
@@ -131,6 +149,73 @@ export default class ToolsClient {
         identifier,
         ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
         ...(options?.pageToken && { pageToken: options.pageToken }),
+      }),
+      { timeoutMs: this.coreClient.toolTimeoutMs }
+    );
+  }
+
+  /**
+   * Re-reads the tool list of a custom MCP connector's connected account from
+   * its upstream MCP server, and returns the full refreshed list.
+   *
+   * Call it when the upstream server has added, renamed or removed tools and the
+   * list Scalekit holds for the account is out of date. Scalekit also refreshes it
+   * when the account is created or re-authenticated and when its metadata is
+   * updated. New and changed tools are saved, and tools the server no longer
+   * lists are removed.
+   *
+   * It works only for a connected account of a connector that fronts an MCP server
+   * (`is_mcp: true` on its auth pattern). The tools of a connector created from an
+   * OpenAPI spec are refreshed with `providers.triggerToolCollection` instead.
+   *
+   * PREVIEW — the underlying `RefreshTools` RPC is marked preview in the API and
+   * may change.
+   *
+   * Like `listTools`, this can fail to decode a tool whose definition nests more
+   * than about 50 levels deep when `@bufbuild/protobuf` 2.12.1 or later is
+   * installed: this SDK version cannot yet ask the API for definitions as JSON
+   * text (`definition_format`), which needs a later proto update.
+   *
+   * @param params Identify the connected account with `connectedAccountId`, or
+   *               with `connector` (the connection name) together with `identifier`.
+   * @param params.connectedAccountId ID of the connected account (`ca_...`).
+   * @param params.connector Connection name, used with `identifier`.
+   * @param params.identifier Your identifier for the connected account, used with `connector`.
+   * @param params.organizationId Narrows the lookup when the same identifier exists in several organizations.
+   * @param params.userId Narrows the lookup when the same identifier exists for several users.
+   * @returns `tools`, the account's full tool list after the refresh, and `totalSize`.
+   * @throws {ScalekitNotFoundException} If no connected account matches.
+   * @throws {ScalekitBadRequestException} If none of `connectedAccountId`, `connector`
+   *   and `identifier` is set, if the account does not belong to a custom MCP
+   *   connector (`connected account is not a custom MCP connector`), or if custom
+   *   MCP tools are not enabled for your environment.
+   * @throws {ScalekitTooManyRequestsException} If a refresh of the same account is
+   *   already running, with the error code `DISCOVERY_IN_PROGRESS`. Retry in a few seconds.
+   * @throws {ScalekitServerException} If the upstream server fails, or a network or server error occurs.
+   */
+  async refreshTools(params: {
+    connectedAccountId?: string;
+    connector?: string;
+    identifier?: string;
+    organizationId?: string;
+    userId?: string;
+  }): Promise<RefreshToolsResponse> {
+    const {
+      connectedAccountId,
+      connector,
+      identifier,
+      organizationId,
+      userId,
+    } = params;
+
+    return this.coreClient.connectExec(
+      this.client.refreshTools,
+      create(RefreshToolsRequestSchema, {
+        ...(connectedAccountId && { connectedAccountId }),
+        ...(connector && { connector }),
+        ...(identifier && { identifier }),
+        ...(organizationId && { organizationId }),
+        ...(userId && { userId }),
       }),
       { timeoutMs: this.coreClient.toolTimeoutMs }
     );
