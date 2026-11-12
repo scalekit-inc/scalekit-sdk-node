@@ -79,7 +79,11 @@ function restoreDefinitions(tools: Iterable<Tool | undefined>): void {
  * the idioms and patterns used across the Node SDK.
  */
 export default class ToolsClient {
-  private client: Client<typeof ToolService>;
+  /**
+   * @internal ActionsClient calls the RPCs that have no ToolsClient method
+   * through it. Not part of the public API.
+   */
+  readonly client: Client<typeof ToolService>;
 
   constructor(
     private readonly grpcConnect: GrpcConnect,

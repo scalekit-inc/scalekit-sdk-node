@@ -161,6 +161,14 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 <dl><dd>
 
 - `executeTool` — wraps `tools.executeTool` (`toolInput` maps to tool `params`).
+- `deleteCustomTool` — deletes one tool of a connector created from an OpenAPI spec, by its name or its ID (`tol_...`); errors in [`REFERENCE.md`](REFERENCE.md#actions).
+
+  ```ts
+  await scalekit.actions.deleteCustomTool({
+    toolIdentifier: 'a-acme_get_user',
+  });
+  ```
+
 - `getAuthorizationLink` — magic link for connect / re-auth.
 - `verifyConnectedAccountUser` — completes OAuth user verification.
 - `listConnectedAccounts`, `deleteConnectedAccount`, `getConnectedAccount`
@@ -250,7 +258,7 @@ A mapping can name a connection on a custom connector in either mode: one create
 - `updateCustomProvider({ identifier, displayName, authPatterns, proxyUrl?, openapiSpecUrl?, metadata?, ... })` — on a connector created from a spec only the name, description, icon, metadata and base URL (`proxyUrl`) can change, and the spec URL (`openapiSpecUrl`) where your environment has that enabled. `metadata` replaces the stored map, so leaving it out clears it: read the connector first and send back the metadata to keep.
 - `triggerToolCollection(providerIdentifier)` — queues a new run and returns it as `QUEUED`. It is not retried automatically when the service is unavailable (`ScalekitServiceUnavailableException`): the first attempt may already have queued a run, and a run you then find may be another caller's, so call `getToolCollectionRun`, wait for an active run to finish, and trigger again if you need a run that started after your call.
 - `getToolCollectionRun(providerIdentifier, runId?)` — status, counters and skipped operations of a run; omit `runId` for the latest.
-- `listProviders`, `deleteCustomProvider`.
+- `listProviders`, `deleteCustomProvider` — a connector created from an OpenAPI spec cannot be deleted while a tool collection run of it is queued or processing: the call throws `ScalekitConflictException` (`RESOURCE_ALREADY_EXISTS`) and deletes nothing.
 
 ```typescript
 import {

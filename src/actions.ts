@@ -10,6 +10,7 @@ import {
   ScalekitException,
   ScalekitGatewayTimeoutException,
   ScalekitServerException,
+  ScalekitValidationError,
 } from './errors';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
@@ -113,6 +114,7 @@ import {
   VerifyConnectedAccountUserResponse,
 } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import {
+  DeleteCustomToolRequestSchema,
   ExecuteToolResponse,
   Tool,
 } from './pkg/grpc/scalekit/v1/tools/tools_pb';
@@ -238,6 +240,69 @@ export default class ActionsClient {
     options?: { pageSize?: number; pageToken?: string }
   ): Promise<ListAvailableToolsResponse> {
     return this.tools.listAvailableTools(identifier, options);
+  }
+
+  /**
+   * Deletes one tool of a connector created from an OpenAPI spec, by its name or its ID.
+   *
+   * Use it to stop agents from calling one operation of a connector without changing the
+   * connector's spec. The tool is gone when the call returns.
+   *
+   * `toolIdentifier` is the tool's name or its ID. The name is the one the tool is listed under,
+   * `a-<connector name>_<operation>`, for example `a-acme_get_user`; capitals are folded to lower
+   * case (ASCII letters only). The ID is `tol_` followed by a number, for example `tol_1234`: the
+   * `id` of each tool that `listTools({ filter: { provider } })` returns for the connector (not in
+   * summary mode). A value that starts with `tol_` is always read as an ID.
+   *
+   * Only a tool of a connector created from an OpenAPI spec, in your own environment, can be
+   * deleted. A tool of an MCP connector, a built-in tool, another environment's tool, a tool whose
+   * connector no longer exists and a name or ID that matches nothing all fail the same way, with
+   * `ScalekitNotFoundException`; the message does not say which.
+   *
+   * A full sync of the connector creates the tool again while its operation is still in the spec:
+   * to keep it deleted, remove its endpoint from the spec. While a sync of the connector is queued
+   * or running, the call deletes nothing and fails with `ScalekitConflictException`: wait for the
+   * run with `actions.providers.getToolCollectionRun`, then call again.
+   *
+   * This call is retried when the service is unavailable. Each attempt has its own tool-call
+   * deadline (`toolTimeoutMs`). If the first attempt had already deleted the tool and only its
+   * response was lost, the retry answers `ScalekitNotFoundException` although the tool was
+   * deleted. To tell, list the connector's tools.
+   *
+   * @param params.toolIdentifier Name or ID of the tool. Surrounding whitespace is ignored. At
+   *   most 2048 characters.
+   * @returns Resolves once the tool is deleted.
+   * @throws {ScalekitValidationError} If `toolIdentifier` is not a string, or is empty or blank.
+   *   No request is sent.
+   * @throws {ScalekitBadRequestException} If `toolIdentifier` is longer than 2048 characters or
+   *   has a control character other than surrounding whitespace (the SDK trims that).
+   * @throws {ScalekitNotFoundException} If no deletable tool has this name or ID
+   *   (`custom tool not found`).
+   * @throws {ScalekitConflictException} If a sync of the connector is queued or running (error
+   *   code `RESOURCE_ALREADY_EXISTS`; the message names the connector, the run and its status):
+   *   nothing is deleted, so call again once it has finished. Also, with the error code
+   *   `TOOL_NAME_AMBIGUOUS`, when deleting by name and tools of more than one connector of your
+   *   environment have this name (leftovers of an earlier connector): nothing is deleted, and the
+   *   message names two of the connectors and the ID of each tool. Delete the tool by its ID.
+   * @throws {ScalekitServerException} If a network or server error occurs.
+   */
+  async deleteCustomTool(params: { toolIdentifier: string }): Promise<void> {
+    const toolIdentifier =
+      typeof params?.toolIdentifier === 'string'
+        ? params.toolIdentifier.trim()
+        : '';
+    if (!toolIdentifier) {
+      throw new ScalekitValidationError('toolIdentifier is required');
+    }
+
+    // Replayed after `Unavailable` like most calls. Deleting the same tool again changes nothing
+    // (the replay answers NotFound if the first attempt had already deleted it), so unlike
+    // `providers.triggerToolCollection` it does not need to be kept from `connectExec`'s retry.
+    await this.coreClient.connectExec(
+      this.tools.client.deleteCustomTool,
+      create(DeleteCustomToolRequestSchema, { toolIdentifier }),
+      { timeoutMs: this.coreClient.toolTimeoutMs }
+    );
   }
 
   /**
