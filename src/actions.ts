@@ -690,12 +690,25 @@ export default class ActionsClient {
      * });
      * ```
      *
-     * The token is imported (and the account becomes ACTIVE) only for a
-     * connection that uses your own OAuth app; Scalekit then records
-     * `expiresAt` as the token's expiry. Without it, a token imported with a
-     * `refreshToken` is refreshed on first use, and one without is used until
-     * the provider rejects it. `expiresAt` is not returned when reading the
-     * account.
+     * `expiresAt` is when the supplied access token expires, a protobuf
+     * `Timestamp` sent as UTC. The token is imported (and the account becomes
+     * ACTIVE) only for a connection that uses your own OAuth app; the
+     * account's `tokenExpiresAt` is then set to `expiresAt`.
+     *
+     * Without `expiresAt`, the account has no token expiry and the token is
+     * used until the provider rejects it. If a `refreshToken` was imported,
+     * tool calls then refresh and retry automatically, and proxy callers
+     * refresh with the refresh connected account tokens API
+     * (`POST /api/v1/connected_accounts:refresh_tokens`). Without a
+     * `refreshToken`, nothing can be refreshed, and the account must be
+     * updated with new tokens or authorized again.
+     *
+     * To correct the expiry of the current token, update the account with the
+     * same `accessToken` and the new `expiresAt`; the account status does not
+     * change. Resending the same `accessToken` keeps the stored `refreshToken`
+     * and `scopes` unless the request supplies new non-empty values.
+     * `expiresAt` is never returned; read the expiry back from the account's
+     * `tokenExpiresAt`.
      */
     authorizationDetails: MessageInitShape<
       typeof CreateConnectedAccountSchema
@@ -801,7 +814,9 @@ export default class ActionsClient {
      * Same plain-object shape as {@link createConnectedAccount}, including the
      * optional `oauthToken.expiresAt` (for example
      * `timestampFromDate(new Date(...))` from `@bufbuild/protobuf/wkt`) when
-     * importing a token obtained outside Scalekit. A message built with
+     * importing a token obtained outside Scalekit. To correct the expiry of
+     * the current token, send the same `accessToken` with the new
+     * `expiresAt`; the account status does not change. A message built with
      * `create(AuthorizationDetailsSchema, ...)` is also accepted.
      */
     authorizationDetails?: MessageInitShape<
