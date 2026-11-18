@@ -1,0 +1,7 @@
+kind: fixed
+body: |
+  The README's Express and Next.js Full Stack Auth examples now use the named ScalekitClient import so client construction works in Node.js ES modules.
+time: '2026-11-16T19:30:00+00:00'
+custom:
+  Breaking: 'No'
+  Migration: ''
