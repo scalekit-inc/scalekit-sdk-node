@@ -1,0 +1,8 @@
+kind: fixed
+body: |
+  `scalekit.actions.request(...)` and `scalekit.actions.uploadResumable(...)` failed with `400 missing Connection_name header` behind reverse proxies and load balancers that drop request headers containing an underscore, such as ingress-nginx with default settings. Both now also send `X-Scalekit-Connection-Name` and `X-Scalekit-Identifier`, with the same values as the `connection_name` and `identifier` headers, which are still sent. This needs a Scalekit server that accepts the new header names; if you self-host Scalekit, upgrade the server first.
+time: '2026-11-19T07:04:41.581412+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-3343
+  Migration: ''

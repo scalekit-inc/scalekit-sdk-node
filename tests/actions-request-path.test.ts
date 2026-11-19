@@ -19,7 +19,7 @@ import http from 'http';
 import { AddressInfo } from 'net';
 import ScalekitClient from '../src/scalekit';
 import CoreClient from '../src/core';
-import { proxyRedirectGuard } from '../src/proxy-path';
+import { connectedAccountHeaders, proxyRedirectGuard } from '../src/proxy-path';
 
 type Seen = { method?: string; url?: string; authorization?: string };
 
@@ -261,6 +261,8 @@ describe('actions.request redirects', () => {
     authorization?: string;
     connectionName?: string;
     identifier?: string;
+    scalekitConnectionName?: string;
+    scalekitIdentifier?: string;
   };
 
   let envServer: http.Server;
@@ -283,6 +285,12 @@ describe('actions.request redirects', () => {
         authorization: req.headers.authorization,
         connectionName: req.headers['connection_name'] as string | undefined,
         identifier: req.headers['identifier'] as string | undefined,
+        scalekitConnectionName: req.headers['x-scalekit-connection-name'] as
+          | string
+          | undefined,
+        scalekitIdentifier: req.headers['x-scalekit-identifier'] as
+          | string
+          | undefined,
       });
       const to = new URL(req.url ?? '/', 'http://placeholder').searchParams.get(
         'to'
@@ -349,11 +357,15 @@ describe('actions.request redirects', () => {
     authorization: 'Bearer test-access-token',
     connectionName: 'googledrive',
     identifier: 'user_123',
+    scalekitConnectionName: 'googledrive',
+    scalekitIdentifier: 'user_123',
   };
   const withoutCredentials = {
     authorization: undefined,
     connectionName: undefined,
     identifier: undefined,
+    scalekitConnectionName: undefined,
+    scalekitIdentifier: undefined,
   };
 
   it('follows a same-host redirect outside the prefix without credentials', async () => {
@@ -513,6 +525,8 @@ describe('actions.request redirects', () => {
       authorization: h.authorization,
       connectionName: h.connectionName,
       identifier: h.identifier,
+      scalekitConnectionName: h.scalekitConnectionName,
+      scalekitIdentifier: h.scalekitIdentifier,
     };
   }
 });
@@ -527,8 +541,16 @@ describe('proxyRedirectGuard', () => {
     Authorization: 'Bearer t',
     connection_name: 'googledrive',
     identifier: 'user_123',
+    'X-Scalekit-Connection-Name': 'googledrive',
+    'X-Scalekit-Identifier': 'user_123',
     'X-Custom': 'kept',
+    // A provider header, not one of the connected-account headers.
+    'X-Identifier': 'provider-value',
   });
+  const nonCredentialHeaders = {
+    'X-Custom': 'kept',
+    'X-Identifier': 'provider-value',
+  };
   const run = (href: unknown, envUrl = env) => {
     const options: Record<string, unknown> = {
       href,
@@ -552,7 +574,7 @@ describe('proxyRedirectGuard', () => {
     ['a missing href', undefined],
     ['an unparseable href', 'http://[bad'],
   ])('removes credential headers for %s', (_name, href) => {
-    expect(run(href)).toEqual({ 'X-Custom': 'kept' });
+    expect(run(href)).toEqual(nonCredentialHeaders);
   });
 
   it('removes credential headers when the hop request-target carries a fragment', () => {
@@ -564,7 +586,7 @@ describe('proxyRedirectGuard', () => {
       headers: credentialHeaders(),
     };
     proxyRedirectGuard(env)(options);
-    expect(options.headers).toEqual({ 'X-Custom': 'kept' });
+    expect(options.headers).toEqual(nonCredentialHeaders);
   });
 
   it('keeps credential headers when a fragment is not part of the request-target', () => {
@@ -581,7 +603,13 @@ describe('proxyRedirectGuard', () => {
   it('matches header names case-insensitively', () => {
     const options: Record<string, unknown> = {
       href: 'https://env.example.com/outside',
-      headers: { authorization: 'a', CONNECTION_NAME: 'c', Identifier: 'i' },
+      headers: {
+        authorization: 'a',
+        CONNECTION_NAME: 'c',
+        Identifier: 'i',
+        'x-scalekit-connection-name': 'c',
+        'X-SCALEKIT-IDENTIFIER': 'i',
+      },
     };
     proxyRedirectGuard(env)(options);
     expect(options.headers).toEqual({});
@@ -756,5 +784,166 @@ describe('actions.request through an HTTP forward proxy', () => {
       expect(lines[0]).toMatchObject(credentialed);
       expect(lines[1]).toEqual({ requestTarget, ...headers });
     });
+  });
+});
+
+/**
+ * Every proxied request names the connected account twice: under the original
+ * `connection_name` / `identifier` headers and under `X-Scalekit-Connection-Name`
+ * / `X-Scalekit-Identifier`, which survive proxies that drop header names
+ * containing an underscore. The two names must always carry the same value,
+ * and a caller header in any casing of the four names must never reach the
+ * wire beside the SDK's.
+ */
+describe('actions.request connected-account headers', () => {
+  const ACCOUNT_HEADERS = [
+    'connection_name',
+    'identifier',
+    'x-scalekit-connection-name',
+    'x-scalekit-identifier',
+  ];
+  let headerServer: http.Server;
+  let headerOrigin: string;
+  /** Raw header lines of each request, names lower-cased, in wire order. */
+  const received: Array<Array<[string, string]>> = [];
+
+  beforeAll(async () => {
+    headerServer = http.createServer((req, res) => {
+      const lines: Array<[string, string]> = [];
+      for (let i = 0; i < req.rawHeaders.length; i += 2) {
+        lines.push([req.rawHeaders[i].toLowerCase(), req.rawHeaders[i + 1]]);
+      }
+      received.push(lines);
+      res.writeHead(200, { 'content-type': 'application/json' });
+      res.end('{}');
+    });
+    await new Promise<void>((resolve) =>
+      headerServer.listen(0, '127.0.0.1', () => resolve())
+    );
+    headerOrigin = `http://127.0.0.1:${(headerServer.address() as AddressInfo).port}`;
+  });
+
+  afterAll(async () => {
+    await new Promise<void>((resolve) => headerServer.close(() => resolve()));
+  });
+
+  beforeEach(() => {
+    received.length = 0;
+  });
+
+  const send = (headers?: Record<string, string>) =>
+    makeClient(headerOrigin).actions.request({
+      connectionName: 'googledrive',
+      identifier: 'user_123',
+      path: '/drive/v3/files',
+      method: 'POST',
+      body: { a: 1 },
+      ...(headers ? { headers } : {}),
+    });
+
+  /** Every value sent under `name` (lower-case), in wire order. */
+  const valuesOf = (lines: Array<[string, string]>, name: string) =>
+    lines.filter(([n]) => n === name).map(([, v]) => v);
+
+  const expectAccountHeaders = (lines: Array<[string, string]>) => {
+    expect(
+      Object.fromEntries(ACCOUNT_HEADERS.map((n) => [n, valuesOf(lines, n)]))
+    ).toEqual({
+      connection_name: ['googledrive'],
+      identifier: ['user_123'],
+      'x-scalekit-connection-name': ['googledrive'],
+      'x-scalekit-identifier': ['user_123'],
+    });
+  };
+
+  it('sends the connection name and identifier under both header names', async () => {
+    await send();
+    expect(received).toHaveLength(1);
+    expectAccountHeaders(received[0]);
+  });
+
+  it.each([
+    ['connection_name', 'other-connection'],
+    ['CONNECTION_NAME', 'other-connection'],
+    ['Connection_Name', 'other-connection'],
+    ['identifier', 'other-user'],
+    ['Identifier', 'other-user'],
+    ['IDENTIFIER', 'other-user'],
+    ['X-Scalekit-Connection-Name', 'other-connection'],
+    ['x-scalekit-connection-name', 'other-connection'],
+    ['X-Scalekit-Identifier', 'other-user'],
+    ['x-SCALEKIT-identifier', 'other-user'],
+  ])(
+    'replaces a caller %s header with the SDK value, sent once',
+    async (name, value) => {
+      await send({ [name]: value });
+      expectAccountHeaders(received[0]);
+    }
+  );
+
+  it('replaces every caller casing at once and keeps other caller headers', async () => {
+    await send({
+      Connection_name: 'a',
+      CONNECTION_NAME: 'b',
+      Identifier: 'c',
+      identifier: 'd',
+      'X-Scalekit-Identifier': 'e',
+      'x-scalekit-identifier': 'f',
+      'X-Custom': 'kept',
+    });
+    expectAccountHeaders(received[0]);
+    expect(valuesOf(received[0], 'x-custom')).toEqual(['kept']);
+  });
+
+  it('passes a caller X-Identifier header through unchanged', async () => {
+    await send({ 'X-Identifier': 'provider-value' });
+    expectAccountHeaders(received[0]);
+    expect(valuesOf(received[0], 'x-identifier')).toEqual(['provider-value']);
+  });
+
+  it('does not change the caller headers object', async () => {
+    const headers = { Identifier: 'other-user', 'X-Custom': 'kept' };
+    await send(headers);
+    expect(headers).toEqual({ Identifier: 'other-user', 'X-Custom': 'kept' });
+  });
+});
+
+describe('connectedAccountHeaders', () => {
+  it('returns the four account headers with equal values when there are no caller headers', () => {
+    expect(connectedAccountHeaders('googledrive', 'user_123')).toEqual({
+      connection_name: 'googledrive',
+      identifier: 'user_123',
+      'X-Scalekit-Connection-Name': 'googledrive',
+      'X-Scalekit-Identifier': 'user_123',
+    });
+  });
+
+  it('drops caller headers matching any of the four names in any casing', () => {
+    const out = connectedAccountHeaders('googledrive', 'user_123', {
+      CONNECTION_NAME: 'a',
+      Identifier: 'b',
+      'x-scalekit-connection-name': 'c',
+      'X-SCALEKIT-IDENTIFIER': 'd',
+      Accept: 'application/json',
+      'X-Identifier': 'provider-value',
+      // Not one of the four: a hyphen is a different header name.
+      'Connection-Name': 'kept',
+    });
+    expect(out).toEqual({
+      Accept: 'application/json',
+      'X-Identifier': 'provider-value',
+      'Connection-Name': 'kept',
+      connection_name: 'googledrive',
+      identifier: 'user_123',
+      'X-Scalekit-Connection-Name': 'googledrive',
+      'X-Scalekit-Identifier': 'user_123',
+    });
+  });
+
+  it('sends values exactly as given under both names', () => {
+    const out = connectedAccountHeaders(' googledrive ', ' user_123 ');
+    expect(out.connection_name).toBe(out['X-Scalekit-Connection-Name']);
+    expect(out.identifier).toBe(out['X-Scalekit-Identifier']);
+    expect(out.connection_name).toBe(' googledrive ');
   });
 });

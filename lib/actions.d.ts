@@ -479,6 +479,13 @@ export default class ActionsClient {
     /**
      * Make a proxied REST API call on behalf of a connected account.
      *
+     * The connected account is sent in the `connection_name` and `identifier`
+     * headers and, with the same values, in `X-Scalekit-Connection-Name` and
+     * `X-Scalekit-Identifier`, which pass through proxies and load balancers
+     * that drop header names containing an underscore. A header in `headers`
+     * with any of these four names (in any casing) is replaced by the values
+     * from `connectionName` and `identifier`.
+     *
      * @param params.timeoutMs Per-call request timeout in ms. Defaults to `toolTimeoutMs`
      *                         from the `ScalekitClient` constructor options (60000 by
      *                         default), since this proxies to a third-party API and can
@@ -492,8 +499,8 @@ export default class ActionsClient {
      *
      * @remarks Redirects returned by the proxied API are followed as before. A redirect
      * hop that leaves the proxy prefix (another origin, or a same-origin path outside
-     * `<environment URL>/proxy/`) is sent without the client's `Authorization`,
-     * `connection_name` and `identifier` headers. So is a hop sent through an HTTP
+     * `<environment URL>/proxy/`) is sent without the client's `Authorization`
+     * header and the four connected-account headers. So is a hop sent through an HTTP
      * forward proxy whose redirect location carries a fragment.
      */
     request(params: {
