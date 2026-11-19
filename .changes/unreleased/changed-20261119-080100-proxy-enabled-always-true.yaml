@@ -1,0 +1,8 @@
+kind: changed
+body: |
+  `scalekit.actions.providers.createCustomProvider` now always creates a custom connector with `proxyEnabled` true, whatever is passed. The `proxyEnabled` parameter is kept so that existing calls keep working, but its value is ignored. `updateCustomProvider` still sends `proxyEnabled` on every update (the server applies it), `true` unless you pass another value.
+time: '2026-11-19T08:01:00.000000+00:00'
+custom:
+  Breaking: 'Yes'
+  Ticket: SK-3097
+  Migration: 'No code change is needed and passing proxyEnabled does not throw. A call that passes proxyEnabled: false now creates the connector with proxying on: the SDK cannot create one with proxying off any more (use the dashboard or the REST API). Existing connectors are not changed by the upgrade; updateCustomProvider still sends proxyEnabled (true unless you pass another value), so pass provider.proxyEnabled to keep a connector that has proxying off.'

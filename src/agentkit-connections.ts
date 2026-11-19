@@ -21,7 +21,30 @@ import {
 /** How end users authorize a connection. Chosen at creation; it cannot be changed afterwards. */
 export type AgentKitAuthMode = 'USER' | 'ORG_WIDE';
 
-/** Token endpoint client authentication. `'DEFAULT'` clears the stored value so the platform picks. */
+/**
+ * How Scalekit sends the client credentials to the provider's token endpoint.
+ * Choose the value that the provider's token endpoint documentation requires.
+ *
+ * - `'BASIC_AUTH'`: `client_id` and `client_secret` in an HTTP Basic
+ *   `Authorization` header (`client_secret_basic`).
+ * - `'REQUEST_BODY'`: as POST body parameters (`client_secret_post`).
+ * - `'NONE'`: for public or PKCE clients (`none`). It sends no client secret on an MCP
+ *   token refresh, and on the authorization code exchange only when the connection has
+ *   no client secret stored (a stored secret is still sent).
+ * - `'DEFAULT'`: clears the stored value: the authorization code exchange then
+ *   sends POST body parameters, and MCP refresh and `OAUTH_M2M` send an HTTP
+ *   Basic header. Use it only when the documentation names no method.
+ *
+ * A wrong value makes new authorizations fail. On an MCP connection it also
+ * makes token refresh fail, and each connected account then has to authenticate
+ * again when its token is next refreshed; on `OAUTH_M2M` it makes the client
+ * credentials grant fail. It applies to the authorization code exchange, to MCP
+ * token refresh and to `OAUTH_M2M` client credentials; a token refresh on a
+ * non-MCP OAuth connection always detects the method itself. On `OAUTH_M2M`
+ * only `'REQUEST_BODY'` changes the request: `'NONE'`, like `'BASIC_AUTH'` and
+ * `'DEFAULT'`, sends an HTTP Basic header there. A connection that never set one
+ * reads as `'DEFAULT'`, and an update that leaves it out keeps the stored value.
+ */
 export type AgentKitTokenEndpointAuthMethod =
   | 'NONE'
   | 'BASIC_AUTH'
@@ -71,6 +94,7 @@ export interface AgentKitOAuthSettings {
   optionalScopes?: { scopes?: string[]; fieldName?: string };
   /** Added as given to the provider's authorize URL. A non-empty map replaces the stored one; `{}` clears it. */
   extraAuthorizeParams?: Record<string, string>;
+  /** See {@link AgentKitTokenEndpointAuthMethod}. On the environment connection methods the same choices are `TokenAuthType` values. */
   tokenEndpointAuthMethod?: AgentKitTokenEndpointAuthMethod;
   scopeSelectionAllowed?: boolean;
   requiredScopes?: string[];

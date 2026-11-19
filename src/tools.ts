@@ -79,7 +79,11 @@ function restoreDefinitions(tools: Iterable<Tool | undefined>): void {
  * the idioms and patterns used across the Node SDK.
  */
 export default class ToolsClient {
-  private client: Client<typeof ToolService>;
+  /**
+   * @internal ActionsClient calls the RPCs that have no ToolsClient method
+   * through it. Not part of the public API.
+   */
+  readonly client: Client<typeof ToolService>;
 
   constructor(
     private readonly grpcConnect: GrpcConnect,
@@ -94,10 +98,21 @@ export default class ToolsClient {
    * @param options Optional filter and pagination parameters
    * @param options.filter Filter configuration. Supports `provider`, `identifier`, `toolName`, `summary`, `query`,
    *                       `connector`, `organizationId`, `userId`, and `connectedAccountId` fields.
-   *                       Use `query` to do a text search across tool metadata (names, descriptions, identifiers).
+   *                       Use `provider` with a connector's identifier to list the tools of a connector
+   *                       created from an OpenAPI spec; no connected account is needed, because those tools belong to
+   *                       the connector. A `provider` set to an unknown identifier, to a deleted connector or to a
+   *                       custom connector not created from an OpenAPI spec returns an empty result, not an error.
+   *                       Use `query` to search tools by name: it is split on spaces and underscores, every part must
+   *                       appear in the tool name (ignoring case), and it must be 3 to 100 characters. It searches
+   *                       built-in tools only, so it never returns the tools of a custom connector.
    *                       Use `connector` together with `identifier` to resolve a specific connected account and include its custom MCP tools.
+   *                       A connection name on its own does not identify a connected account.
    *                       Use `connectedAccountId` as a direct alternative to the `identifier` + `connector` combination.
-   * @param options.pageSize Maximum number of tools to return per page.
+   *                       A `connectedAccountId`, or a `connector` with an `identifier`, that matches no connected
+   *                       account fails with `ScalekitNotFoundException`.
+   * @param options.pageSize Maximum number of tools to return per page. Defaults to 300 when omitted or 0. The
+   *                         maximum is 1000: a larger value is reduced to 1000, not rejected. With `filter.query`,
+   *                         a page holds at most 100 tools.
    * @param options.pageToken Token from a previous `listTools` response for pagination.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
@@ -124,6 +139,11 @@ export default class ToolsClient {
 
   /**
    * Lists tools that are scoped to a specific connected account identifier.
+   *
+   * It includes the tools of a custom connector the identifier has a connected
+   * account on: those of a connector created from an OpenAPI spec while
+   * OpenAPI-sourced connectors are enabled for your environment, and those of a
+   * connector that fronts an MCP server while custom MCP connectors are enabled.
    *
    * @param identifier Connected account identifier to scope the tools list (for example,
    *                   a workspace identifier or email).

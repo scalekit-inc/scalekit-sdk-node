@@ -8,7 +8,10 @@
 SHELL := /bin/bash
 
 PROTO_REPO_URL := https://github.com/scalekit-inc/scalekit.git
-PROTO_REF := v0.1.162.1
+# DeleteCustomTool is in the backend release v0.1.165.0, which also adds three unrelated read-only
+# scalekit_creds_* fields to connections.proto. So the pin is the commit that merged DeleteCustomTool
+# (scalekit-inc/scalekit#2882, SK-3096). Move it to a release tag at the next proto sync.
+PROTO_REF := 25718aba9c0fbc8833f6f80c7b27ccb655377642
 PROTO_SUBDIR := proto
 PROTO_REMOTE_INPUT := $(PROTO_REPO_URL)\#ref=$(PROTO_REF),subdir=$(PROTO_SUBDIR)
 LOCAL_PROTO_DIR ?= ../scalekit/proto
