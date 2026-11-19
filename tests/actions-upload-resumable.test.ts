@@ -362,6 +362,8 @@ describe('actions.uploadResumable', () => {
       for (const r of h.proxied()) {
         expect(r.headers.connection_name).toBe('googledrive');
         expect(r.headers.identifier).toBe('user_123');
+        expect(r.headers['x-scalekit-connection-name']).toBe('googledrive');
+        expect(r.headers['x-scalekit-identifier']).toBe('user_123');
         expect(r.headers.authorization).toBe('Bearer token-1');
         expect(r.headers['x-sdk-version']).toMatch(/^Scalekit-Node\//);
         expect(r.config.maxRedirects).toBe(0);
@@ -699,6 +701,38 @@ describe('actions.uploadResumable', () => {
         'bytes 524288-786431/786432',
         'bytes */786432',
       ]);
+    });
+
+    it('sends the connected-account headers under both names on the session start, chunks and status queries', async () => {
+      const h = makeHarness();
+      failNth(h, 1, { fail: 'timeout' });
+      await h.client.actions.uploadResumable(params());
+
+      const kinds = h
+        .proxied()
+        .map((r) =>
+          !r.params.upload_id
+            ? 'start'
+            : r.headers['content-range'].startsWith('bytes */')
+              ? 'status query'
+              : 'chunk'
+        );
+      expect(kinds).toEqual(['start', 'chunk', 'status query', 'chunk']);
+      for (const r of h.proxied()) {
+        const account = Object.fromEntries(
+          Object.entries(r.headers).filter(([name]) =>
+            /^(connection_name|identifier|x-scalekit-connection-name|x-scalekit-identifier)$/.test(
+              name
+            )
+          )
+        );
+        expect(account).toEqual({
+          connection_name: 'googledrive',
+          identifier: 'user_123',
+          'x-scalekit-connection-name': 'googledrive',
+          'x-scalekit-identifier': 'user_123',
+        });
+      }
     });
 
     it('raises ScalekitUploadTimeoutException after timeouts run out', async () => {
