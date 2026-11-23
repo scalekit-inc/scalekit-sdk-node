@@ -2,7 +2,7 @@ import { MessageInitShape, MessageShape } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { CreateConnection, CreateConnectionResponse, CreateConnectionSchema, FlagsSchema, GetConnectionResponse, ToggleConnectionResponse, ListConnectionsResponse, ListAppConnectionsResponse, UpdateConnectionResponse, UpdateConnectionSchema } from './pkg/grpc/scalekit/v1/connections/connections_pb';
+import { CreateAppConnectionRequest, CreateAppConnectionResponse, GetAppConnectionResponse, ListAppConnectionSummariesResponse, UpdateAppConnectionRequest, UpdateAppConnectionResponse, CreateConnection, CreateConnectionResponse, CreateConnectionSchema, FlagsSchema, GetConnectionResponse, ToggleConnectionResponse, ListConnectionsResponse, ListAppConnectionsResponse, UpdateConnectionResponse, UpdateConnectionSchema } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 /**
  * Client for managing enterprise SSO connections for organizations.
  *
@@ -415,4 +415,34 @@ export default class ConnectionClient {
      * @see {@link getEnvironmentConnection} - Fetch an environment connection by id
      */
     updateEnvironmentConnection(connectionId: string, connection: MessageInitShape<typeof UpdateConnectionSchema>): Promise<UpdateConnectionResponse>;
+    /**
+     * Creates an AgentKit connection (AgentKit-only API). Prefer `scalekit.actions.createConnection`.
+     * @internal
+     */
+    createAppConnection(request: CreateAppConnectionRequest): Promise<CreateAppConnectionResponse>;
+    /**
+     * Gets an AgentKit connection by name or ID. Prefer `scalekit.actions.getConnection`.
+     * @internal
+     */
+    getAppConnection(connectionIdentifier: string): Promise<GetAppConnectionResponse>;
+    /**
+     * Lists AgentKit connection summaries. Prefer `scalekit.actions.listConnections`.
+     * @internal
+     */
+    listAppConnectionSummaries(params?: {
+        pageSize?: number;
+        pageToken?: string;
+        provider?: string;
+        query?: string;
+    }): Promise<ListAppConnectionSummariesResponse>;
+    /**
+     * Updates an AgentKit connection by ID. Prefer `scalekit.actions.updateConnection`.
+     * @internal
+     */
+    updateAppConnection(request: UpdateAppConnectionRequest): Promise<UpdateAppConnectionResponse>;
+    /**
+     * Deletes an AgentKit connection by ID. Prefer `scalekit.actions.deleteConnection`.
+     * @internal
+     */
+    deleteEnvironmentConnection(connectionId: string): Promise<void>;
 }

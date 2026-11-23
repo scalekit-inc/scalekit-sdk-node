@@ -1,10 +1,14 @@
 import ScalekitClient from '../src/scalekit';
 import { create } from '@bufbuild/protobuf';
 import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
-import { ScalekitServerException } from '../src/errors';
+import {
+  ScalekitNotFoundException,
+  ScalekitServerException,
+} from '../src/errors';
 import { TestDataGenerator, TestOrganizationManager } from './utils/test-data';
 import {
   AuthorizationDetailsSchema,
+  ConnectorStatus,
   OauthTokenSchema,
 } from '../src/pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 
@@ -182,6 +186,72 @@ describe('Actions', () => {
 
       expect(response).toBeDefined();
       expect(response.tools.length).toBeLessThanOrEqual(1);
+    });
+  });
+
+  describe('mcp.createSessionToken with connectionName', () => {
+    it('should mint a read-only token for the connection MCP server', async () => {
+      // The call uses the shared ACTIVE fixture account, which must survive.
+      // Where the fixture is missing, the server may create a pending
+      // connected account instead; delete only an account this test created.
+      const accountExisted = await client.actions
+        .getConnectedAccount({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier: GMAIL_IDENTIFIER,
+        })
+        .then(
+          () => true,
+          (error: unknown) => {
+            if (error instanceof ScalekitNotFoundException) return false;
+            throw error;
+          }
+        );
+
+      try {
+        const response = await client.actions.mcp.createSessionToken({
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier: GMAIL_IDENTIFIER,
+          expirySeconds: 300,
+          accessLevel: 'READ_ONLY',
+        });
+
+        expect(typeof response.token).toBe('string');
+        expect(response.token.length).toBeGreaterThan(0);
+        expect(response.expiresAt).toBeDefined();
+      } finally {
+        if (!accountExisted) {
+          await client.actions
+            .deleteConnectedAccount({
+              connectionName: GMAIL_CONNECTION_NAME,
+              identifier: GMAIL_IDENTIFIER,
+            })
+            .catch((error: unknown) => {
+              // Nothing was created (the call was rejected): nothing to clean.
+              if (!(error instanceof ScalekitNotFoundException)) throw error;
+            });
+        }
+      }
+    });
+
+    it('should reject an unknown connection with ScalekitNotFoundException', async () => {
+      await expect(
+        client.actions.mcp.createSessionToken({
+          connectionName: `missing-connection-${Date.now()}`,
+          identifier: GMAIL_IDENTIFIER,
+        })
+      ).rejects.toBeInstanceOf(ScalekitNotFoundException);
+    });
+
+    it('should use mcpConfigId when both targets are set', async () => {
+      // mcpConfigId wins, as in v2.19.0: an unknown configuration is rejected
+      // by the server even though the connection itself is valid.
+      await expect(
+        client.actions.mcp.createSessionToken({
+          mcpConfigId: `missing-config-${Date.now()}`,
+          connectionName: GMAIL_CONNECTION_NAME,
+          identifier: GMAIL_IDENTIFIER,
+        })
+      ).rejects.toBeInstanceOf(ScalekitServerException);
     });
   });
 
@@ -554,6 +624,11 @@ describe('Actions', () => {
         expect(createResponse.connectedAccount).toBeDefined();
         const created = createResponse.connectedAccount!;
         expect(created.identifier).toBe(identifier);
+        // The create status depends on the environment's hosted-widget and credential-import settings.
+        expect([
+          ConnectorStatus.ACTIVE,
+          ConnectorStatus.PENDING_AUTH,
+        ]).toContain(created.status);
 
         const updatedStaticAuth = {
           static_auth: {
@@ -572,7 +647,10 @@ describe('Actions', () => {
         expect(updateResponse.connectedAccount).toBeDefined();
         const updated = updateResponse.connectedAccount!;
         expect(updated.identifier).toBe(identifier);
-        expect(updated.authorizationDetails).toBeDefined();
+        // Create and update do not echo the stored credential: authorizationDetails is returned
+        // only where connected_account_auth_details is enabled for the environment. An update
+        // with a static credential always activates the account.
+        expect(updated.status).toBe(ConnectorStatus.ACTIVE);
 
         const deleteResponse = await client.actions.deleteConnectedAccount({
           connectionName: FRESHDESK_CONNECTION_NAME,

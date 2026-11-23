@@ -101,11 +101,67 @@ export class ScalekitException extends Error {
   }
 }
 
+/**
+ * A method argument is invalid. Thrown before any network call, so nothing
+ * was sent. Fix the argument named in the message; retrying unchanged fails
+ * the same way.
+ */
+export class ScalekitValidationError extends ScalekitException {
+  /** Always `false`: the same input fails the same way. */
+  readonly retryable: boolean;
+
+  /** @internal */
+  constructor(message: string) {
+    super(message);
+    this.name = 'ScalekitValidationError';
+    this.retryable = false;
+  }
+}
+
+/**
+ * The caller's `AbortSignal` cancelled the call, including during a wait
+ * between retries. `cause` is the signal's `reason`.
+ */
+export class ScalekitAbortError extends ScalekitException {
+  /** Always `false`: the caller asked to stop. */
+  readonly retryable: boolean;
+  /** The aborting signal's `reason`. */
+  declare readonly cause: unknown;
+
+  /** @internal */
+  constructor(message: string, cause?: unknown) {
+    super(message);
+    this.name = 'ScalekitAbortError';
+    this.retryable = false;
+    Object.defineProperty(this, 'cause', {
+      value: cause,
+      writable: true,
+      configurable: true,
+      enumerable: false,
+    });
+  }
+}
+
 // Webhook verification error
 export class WebhookVerificationError extends ScalekitException {
-  constructor(error: any) {
+  /**
+   * The underlying error that caused this one, when there is one (for example
+   * the decoding error behind an invalid request body).
+   */
+  declare cause?: unknown;
+
+  constructor(error: any, options?: { cause?: unknown }) {
     super(error);
     this.name = 'WebhookVerificationError';
+    if (options !== undefined && 'cause' in options) {
+      // Same shape as the ES2022 `Error` `cause` option: an own, non-enumerable property.
+      Object.defineProperty(this, 'cause', {
+        value: options.cause,
+        writable: true,
+        enumerable: false,
+        configurable: true,
+      });
+    }
   }
 }
 

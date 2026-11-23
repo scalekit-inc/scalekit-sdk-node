@@ -15,7 +15,6 @@ declare module 'axios' {
     skipAuth?: boolean;
   }
 }
-import { JWK } from 'jose';
 import os from 'os';
 import QueryString from 'qs';
 import { GrantType } from './types/scalekit';
@@ -94,14 +93,47 @@ export function assertValidPingInterval(value: number): void {
   }
 }
 
+/**
+ * A JSON Web Key from the environment's JWKS endpoint (RFC 7517). Declared
+ * here rather than imported from `jose` so the published declarations never
+ * import `jose`, an ES module that CommonJS declaration files cannot load.
+ */
+export interface JWK {
+  kty?: string;
+  alg?: string;
+  key_ops?: string[];
+  ext?: boolean;
+  use?: string;
+  x5c?: string[];
+  x5t?: string;
+  'x5t#S256'?: string;
+  x5u?: string;
+  kid?: string;
+  crv?: string;
+  d?: string;
+  dp?: string;
+  dq?: string;
+  e?: string;
+  k?: string;
+  n?: string;
+  p?: string;
+  q?: string;
+  qi?: string;
+  x?: string;
+  y?: string;
+  pub?: string;
+  priv?: string;
+}
+
 export default class CoreClient {
   public keys: JWK[] = [];
   public accessToken: string | null = null;
+  private pendingAuthentication: Promise<void> | null = null;
   public axios: Axios;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   public sdkVersion = `Scalekit-Node/${(require('../package.json') as { version: string }).version}`;
   // YYYYMMDD
-  public apiVersion = '20260922';
+  public apiVersion = '20261104';
   public userAgent = `${this.sdkVersion} Node/${process.version} (${
     process.platform
   }; ${os.arch()})`;
@@ -184,6 +216,25 @@ export default class CoreClient {
     //this.authenticateClient();
   }
 
+  /**
+   * Fetch a client-credentials token if this client doesn't have one yet.
+   *
+   * gRPC calls get a token lazily: `connectExec` authenticates when a call
+   * returns 401 and retries it. HTTP calls that must not be retried on 401,
+   * such as the actions proxy (a 401 there can come from the third-party API,
+   * and retrying would replay the request), call this first instead.
+   * Concurrent callers share one token request.
+   */
+  async ensureAccessToken(): Promise<void> {
+    if (this.accessToken) return;
+    if (!this.pendingAuthentication) {
+      this.pendingAuthentication = this.authenticateClient().finally(() => {
+        this.pendingAuthentication = null;
+      });
+    }
+    await this.pendingAuthentication;
+  }
+
   private async authenticateClient() {
     const res = await this.authenticate(
       QueryString.stringify({
@@ -207,6 +258,27 @@ export default class CoreClient {
       },
       skipAuth: true,
     });
+  }
+
+  /**
+   * Replace an access token the server rejected.
+   *
+   * Pass the token the rejected request was sent with. If another caller has
+   * already replaced it, this returns without a token request; otherwise
+   * concurrent callers share one token request (the same one
+   * `ensureAccessToken` uses). Callers resend only when `accessToken` has
+   * changed afterwards.
+   *
+   * @internal
+   */
+  async refreshAccessToken(rejectedToken: string | null): Promise<void> {
+    if (this.accessToken !== rejectedToken) return;
+    if (!this.pendingAuthentication) {
+      this.pendingAuthentication = this.authenticateClient().finally(() => {
+        this.pendingAuthentication = null;
+      });
+    }
+    await this.pendingAuthentication;
   }
 
   /**

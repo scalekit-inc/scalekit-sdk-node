@@ -5,6 +5,14 @@ import GrpcConnect from './connect';
 import CoreClient from './core';
 import { ConnectionService } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 import {
+  CreateAppConnectionRequest,
+  CreateAppConnectionResponse,
+  DeleteEnvironmentConnectionRequestSchema,
+  GetAppConnectionRequestSchema,
+  GetAppConnectionResponse,
+  ListAppConnectionSummariesResponse,
+  UpdateAppConnectionRequest,
+  UpdateAppConnectionResponse,
   CreateConnection,
   CreateConnectionRequestSchema,
   CreateConnectionResponse,
@@ -541,6 +549,73 @@ export default class ConnectionClient {
     return this.coreClient.connectExec(
       this.client.updateEnvironmentConnection,
       request
+    );
+  }
+  /**
+   * Creates an AgentKit connection (AgentKit-only API). Prefer `scalekit.actions.createConnection`.
+   * @internal
+   */
+  async createAppConnection(
+    request: CreateAppConnectionRequest
+  ): Promise<CreateAppConnectionResponse> {
+    return this.coreClient.connectExec(
+      this.client.createAppConnection,
+      request
+    );
+  }
+
+  /**
+   * Gets an AgentKit connection by name or ID. Prefer `scalekit.actions.getConnection`.
+   * @internal
+   */
+  async getAppConnection(
+    connectionIdentifier: string
+  ): Promise<GetAppConnectionResponse> {
+    return this.coreClient.connectExec(
+      this.client.getAppConnection,
+      create(GetAppConnectionRequestSchema, { connectionIdentifier })
+    );
+  }
+
+  /**
+   * Lists AgentKit connection summaries. Prefer `scalekit.actions.listConnections`.
+   * @internal
+   */
+  async listAppConnectionSummaries(params?: {
+    pageSize?: number;
+    pageToken?: string;
+    provider?: string;
+    query?: string;
+  }): Promise<ListAppConnectionSummariesResponse> {
+    return this.coreClient.connectExec(this.client.listAppConnectionSummaries, {
+      pageSize: params?.pageSize,
+      pageToken: params?.pageToken,
+      provider: params?.provider,
+      query: params?.query,
+    });
+  }
+
+  /**
+   * Updates an AgentKit connection by ID. Prefer `scalekit.actions.updateConnection`.
+   * @internal
+   */
+  async updateAppConnection(
+    request: UpdateAppConnectionRequest
+  ): Promise<UpdateAppConnectionResponse> {
+    return this.coreClient.connectExec(
+      this.client.updateAppConnection,
+      request
+    );
+  }
+
+  /**
+   * Deletes an AgentKit connection by ID. Prefer `scalekit.actions.deleteConnection`.
+   * @internal
+   */
+  async deleteEnvironmentConnection(connectionId: string): Promise<void> {
+    await this.coreClient.connectExec(
+      this.client.deleteEnvironmentConnection,
+      create(DeleteEnvironmentConnectionRequestSchema, { connectionId })
     );
   }
 }

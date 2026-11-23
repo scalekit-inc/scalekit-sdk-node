@@ -9,6 +9,23 @@ export * from './types/auth';
 
 export * from './errors';
 
+export type { JsonValue, JsonObject } from './types/json';
+
+// Trigger events delivered to your endpoint: `verifyTriggerEvent` (no client
+// needed) and `scalekit.actions.triggers.verifyEvent`.
+export {
+  verifyTriggerEvent,
+  DeliveryScope,
+  DetectionMode,
+  PayloadState,
+} from './triggers';
+export type {
+  TriggerEvent,
+  TriggerEventHeaders,
+  TriggerEventVerifyParams,
+  TriggersClient,
+} from './triggers';
+
 // Generated enum surfaced in the public `resources.listResources` API:
 // `resourceType` is a required parameter, so callers need to name it (e.g.
 // `ResourceType.MCP_SERVER`) without reaching into the internal pb path.
@@ -78,6 +95,39 @@ export type {
 
 // Normalized types surfaced in the public `actions.listTools` API.
 export type { ActionTool, ListToolsResult } from './actions';
+export type {
+  McpSessionTokenAccessLevel,
+  McpToolExposure,
+  CreateMcpSessionTokenParams,
+} from './mcp';
+
+// Types surfaced by the AgentKit connection methods on `actions`
+// (createConnection, getConnection, listAppConnections, updateConnection, ...).
+export type {
+  AgentKitAuthMode,
+  AgentKitTokenEndpointAuthMethod,
+  AgentKitProviderConfigurations,
+  AgentKitOAuthSettings,
+  AgentKitGoogleDwdSettings,
+  CreateConnectionParams,
+  ListAppConnectionsParams,
+  ListAppConnectionsResponse,
+  ConnectionRef,
+  UpdateConnectionParams,
+} from './agentkit-connections';
+export type {
+  AppConnection,
+  AppConnectionSummary,
+} from './pkg/grpc/scalekit/v1/connections/connections_pb';
+
+// Types surfaced in the public `actions.uploadResumable` API. Its error
+// classes are exported from './errors' above.
+export type {
+  ResumableUploadMethod,
+  ResumableUploadParams,
+  ResumableUploadOptions,
+  UploadProgress,
+} from './resumable-upload';
 
 // Types surfaced by the public `mcp` client (Virtual MCP servers). Only the
 // generally available McpConfig surface is re-exported; the PREVIEW `Mcp` and

@@ -88,6 +88,10 @@ export type CreateResource = Message<"scalekit.v1.clients.CreateResource"> & {
      */
     cimdClientAllowlistEnabled: boolean;
     /**
+     * @generated from field: bool resource_scope_selection_allowed = 17;
+     */
+    resourceScopeSelectionAllowed: boolean;
+    /**
      *
      * string tos_uri = 10 [
      * (buf.validate.field).string = {max_len: 512},
@@ -105,9 +109,9 @@ export type CreateResource = Message<"scalekit.v1.clients.CreateResource"> & {
      * }
      * ];
      *
-     * @generated from field: bool resource_scope_selection_allowed = 17;
+     * @generated from field: bool resource_scoped_issuer_enabled = 18;
      */
-    resourceScopeSelectionAllowed: boolean;
+    resourceScopedIssuerEnabled: boolean;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateResource.
@@ -408,6 +412,10 @@ export type Resource = Message<"scalekit.v1.clients.Resource"> & {
      * @generated from field: bool resource_scope_selection_allowed = 24;
      */
     resourceScopeSelectionAllowed: boolean;
+    /**
+     * @generated from field: bool resource_scoped_issuer_enabled = 25;
+     */
+    resourceScopedIssuerEnabled: boolean;
 };
 /**
  * Describes the message scalekit.v1.clients.Resource.
@@ -693,6 +701,10 @@ export type UpdateResource = Message<"scalekit.v1.clients.UpdateResource"> & {
      * @generated from field: google.protobuf.BoolValue resource_scope_selection_allowed = 19;
      */
     resourceScopeSelectionAllowed?: boolean | undefined;
+    /**
+     * @generated from field: google.protobuf.BoolValue resource_scoped_issuer_enabled = 20;
+     */
+    resourceScopedIssuerEnabled?: boolean | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateResource.
@@ -885,6 +897,10 @@ export type ResourceUserConsentFilter = Message<"scalekit.v1.clients.ResourceUse
      * @generated from field: repeated string external_user_id = 1;
      */
     externalUserId: string[];
+    /**
+     * @generated from field: repeated string consent_id = 2;
+     */
+    consentId: string[];
 };
 /**
  * Describes the message scalekit.v1.clients.ResourceUserConsentFilter.
@@ -1562,6 +1578,42 @@ export type ListClientsResponse = Message<"scalekit.v1.clients.ListClientsRespon
  */
 export declare const ListClientsResponseSchema: GenMessage<ListClientsResponse>;
 /**
+ * @generated from message scalekit.v1.clients.CidrEntry
+ */
+export type CidrEntry = Message<"scalekit.v1.clients.CidrEntry"> & {
+    /**
+     * @generated from field: string value = 1;
+     */
+    value: string;
+    /**
+     * @generated from field: scalekit.v1.clients.CidrType type = 2;
+     */
+    type: CidrType;
+};
+/**
+ * Describes the message scalekit.v1.clients.CidrEntry.
+ * Use `create(CidrEntrySchema)` to create a new message.
+ */
+export declare const CidrEntrySchema: GenMessage<CidrEntry>;
+/**
+ * @generated from message scalekit.v1.clients.IpAllowlist
+ */
+export type IpAllowlist = Message<"scalekit.v1.clients.IpAllowlist"> & {
+    /**
+     * @generated from field: bool opted_in = 1;
+     */
+    optedIn: boolean;
+    /**
+     * @generated from field: repeated scalekit.v1.clients.CidrEntry cidrs = 2;
+     */
+    cidrs: CidrEntry[];
+};
+/**
+ * Describes the message scalekit.v1.clients.IpAllowlist.
+ * Use `create(IpAllowlistSchema)` to create a new message.
+ */
+export declare const IpAllowlistSchema: GenMessage<IpAllowlist>;
+/**
  * @generated from message scalekit.v1.clients.CreateClientRequest
  */
 export type CreateClientRequest = Message<"scalekit.v1.clients.CreateClientRequest"> & {
@@ -1627,6 +1679,10 @@ export type CreateClient = Message<"scalekit.v1.clients.CreateClient"> & {
      * @generated from field: google.protobuf.BoolValue enforce_pkce = 12;
      */
     enforcePkce?: boolean | undefined;
+    /**
+     * @generated from field: scalekit.v1.clients.IpAllowlist ip_allowlist = 13;
+     */
+    ipAllowlist?: IpAllowlist | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.CreateClient.
@@ -1717,6 +1773,10 @@ export type UpdateClient = Message<"scalekit.v1.clients.UpdateClient"> & {
      * @generated from field: google.protobuf.BoolValue enforce_pkce = 15;
      */
     enforcePkce?: boolean | undefined;
+    /**
+     * @generated from field: scalekit.v1.clients.IpAllowlist ip_allowlist = 16;
+     */
+    ipAllowlist?: IpAllowlist | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.UpdateClient.
@@ -2048,6 +2108,10 @@ export type Client = Message<"scalekit.v1.clients.Client"> & {
      * @generated from field: bool enforce_pkce = 19;
      */
     enforcePkce: boolean;
+    /**
+     * @generated from field: scalekit.v1.clients.IpAllowlist ip_allowlist = 20;
+     */
+    ipAllowlist?: IpAllowlist | undefined;
 };
 /**
  * Describes the message scalekit.v1.clients.Client.
@@ -2532,6 +2596,27 @@ export declare enum ResourceType {
  * Describes the enum scalekit.v1.clients.ResourceType.
  */
 export declare const ResourceTypeSchema: GenEnum<ResourceType>;
+/**
+ * @generated from enum scalekit.v1.clients.CidrType
+ */
+export declare enum CidrType {
+    /**
+     * @generated from enum value: CIDR_TYPE_UNSPECIFIED = 0;
+     */
+    CIDR_TYPE_UNSPECIFIED = 0,
+    /**
+     * @generated from enum value: IPV4 = 1;
+     */
+    IPV4 = 1,
+    /**
+     * @generated from enum value: IPV6 = 2;
+     */
+    IPV6 = 2
+}
+/**
+ * Describes the enum scalekit.v1.clients.CidrType.
+ */
+export declare const CidrTypeSchema: GenEnum<CidrType>;
 /**
  * ClientSecretStatus indicates whether a client secret can be used for authentication.
  * ACTIVE secrets can be used for authentication while INACTIVE secrets cannot.

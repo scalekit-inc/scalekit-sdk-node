@@ -4,9 +4,13 @@ import CoreClient from './core';
 import ToolsClient from './tools';
 import ConnectedAccountsClient from './connected-accounts';
 import ConnectionClient from './connection';
+import { type ConnectionRef, type CreateConnectionParams, type ListAppConnectionsParams, type ListAppConnectionsResponse, type UpdateConnectionParams } from './agentkit-connections';
+import type { AppConnection as AgentKitConnection } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 import type McpClient from './mcp';
 import type ProvidersClient from './providers';
+import { TriggersClient } from './triggers';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
+import { type ResumableUploadOptions, type ResumableUploadParams } from './resumable-upload';
 import type { ListAvailableToolsResponse, ListScopedToolsResponse, ScopedToolFilterSchema, SearchToolsResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * Creation timestamp for an app connection, re-exported as the protobuf
@@ -16,7 +20,7 @@ import type { ListAvailableToolsResponse, ListScopedToolsResponse, ScopedToolFil
 export type AppConnectionTimestamp = Timestamp;
 /**
  * Normalized, consumer-friendly view of an app connection returned by
- * {@link ActionsClient.listAppConnections}. Internal proto fields
+ * {@link ActionsClient.listConnections}. Internal proto fields
  * (`provider` enum, `organizationId`, `uiButtonTitle`, `organizationName`,
  * `domains`, `$typeName`) are omitted, and enum fields are decoded to their
  * string names.
@@ -37,14 +41,14 @@ export interface AppConnection {
     /** Creation timestamp, passed through as a protobuf Timestamp. */
     createdAt?: AppConnectionTimestamp;
 }
-/** Normalized response returned by {@link ActionsClient.listAppConnections}. */
+/** Normalized response returned by {@link ActionsClient.listConnections}. */
 export interface ListAppConnectionsResult {
     connections: AppConnection[];
     nextPageToken: string;
     prevPageToken: string;
     totalSize: number;
 }
-import { CreateConnectedAccountResponse, CreateConnectedAccountSchema, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
+import { CreateConnectedAccountResponse, CreateConnectedAccountSchema, DeleteConnectedAccountResponse, GetConnectedAccountByIdentifierResponse, GetMagicLinkForConnectedAccountResponse, ListConnectedAccountsResponse, UpdateConnectedAccount, UpdateConnectedAccountResponse, UpdateConnectedAccountSchema, VerifyConnectedAccountUserResponse } from './pkg/grpc/scalekit/v1/connected_accounts/connected_accounts_pb';
 import { ExecuteToolResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * Normalized, consumer-friendly view of a tool returned by
@@ -83,6 +87,11 @@ export default class ActionsClient {
     readonly mcp: McpClient;
     /** Bring-your-own connectors: create, update, list and delete custom connectors. */
     readonly providers: ProvidersClient;
+    /**
+     * Trigger events delivered to your endpoint: verify and parse them with
+     * `triggers.verifyEvent`. Needs no network access.
+     */
+    readonly triggers: TriggersClient;
     /**
      * @param {ToolsClient} tools - Client used to execute tools on behalf of connected accounts.
      * @param {ConnectedAccountsClient} connectedAccounts - Client for connected-account lifecycle operations.
@@ -204,6 +213,14 @@ export default class ActionsClient {
     /**
      * List connected accounts with optional filters.
      *
+     * @param params.query Text to search for (up to 100 characters), ignoring case. With
+     *                     `query`, only `connectionName` and the paging options narrow the
+     *                     search; `identifier`, `provider`, `connectionNames` and
+     *                     `isOrgWideCredential` are not applied, so use those without it.
+     * @param params.isOrgWideCredential For connections that share one credential across the
+     *                     organization: `true` returns only the account that holds that
+     *                     shared credential, `false` returns only the per-user accounts.
+     *                     Leave it out to get both.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     listConnectedAccounts(params?: {
@@ -216,6 +233,7 @@ export default class ActionsClient {
         pageToken?: string;
         query?: string;
         connectionNames?: string[];
+        isOrgWideCredential?: boolean;
     }): Promise<ListConnectedAccountsResponse>;
     /**
      * List app-level connections with optional pagination and provider filtering.
@@ -238,6 +256,70 @@ export default class ActionsClient {
         pageToken?: string;
         provider?: string;
     }): Promise<ListAppConnectionsResult>;
+    private agentKitConnectionsImpl?;
+    private get agentKitConnections();
+    /**
+     * Creates an AgentKit connection.
+     *
+     * The connection type comes from the connector, so there is no `type`. The server fills in the
+     * connector's URLs, PKCE setting and default scopes. Add credentials and options afterwards with
+     * {@link ActionsClient.updateConnection}.
+     *
+     * @param params.provider Connector identifier, for example `'GMAIL'` (case-insensitive), or a custom connector's identifier.
+     * @param params.connectionName Letters, digits and hyphens, unique per environment. Generated when omitted.
+     * @param params.authMode `'USER'` (default) or `'ORG_WIDE'`. Cannot be changed later.
+     * @param params.providerDomain Only for regional connectors such as MIXPANELMCP. Create only; never returned.
+     * @returns The created connection. Secrets are masked.
+     * @throws {ScalekitValidationError} If an argument is invalid; nothing is sent.
+     * @throws {ScalekitAgentKitConnectionError} If the server refuses or fails the request. On
+     *   `OUTCOME_UNKNOWN`, check {@link ActionsClient.listAppConnections} before creating again.
+     *
+     * @remarks A temporary `UNAVAILABLE` response is retried by the SDK like any other call, so a create
+     * whose first attempt succeeded can come back as `CONNECTION_NAME_CONFLICT` when you pass a
+     * `connectionName`. Read the connection to confirm.
+     */
+    createConnection(params: CreateConnectionParams): Promise<AgentKitConnection>;
+    /**
+     * Gets one AgentKit connection by name (case-insensitive) or by ID (`conn_...`).
+     *
+     * @param connection The name or ID as a string, or `{ connectionName }` / `{ connectionId }`.
+     * @throws {ScalekitAgentKitConnectionError} `CONNECTION_NOT_FOUND` if no AgentKit connection matches.
+     */
+    getConnection(connection: string | ConnectionRef): Promise<AgentKitConnection>;
+    /**
+     * Lists AgentKit connections, newest first, as summaries (`id`, `connectionName`, `provider`,
+     * `type`, `authMode`, `createTime`). Use {@link ActionsClient.getConnection} for the settings.
+     *
+     * This uses the AgentKit-only connection API and returns summaries only (no settings, no enabled
+     * flag). It is not the same as {@link ActionsClient.listConnections} or
+     * {@link ConnectionClient.listAppConnections} (`scalekit.connection.listAppConnections`), which use
+     * the older API and are unchanged: this one matches `provider` case-insensitively, supports `query`,
+     * and allows page sizes up to 100.
+     *
+     * @throws {ScalekitValidationError} If `query` is shorter than 3 characters.
+     */
+    listAppConnections(params?: ListAppConnectionsParams): Promise<ListAppConnectionsResponse>;
+    /**
+     * Changes the settings of an AgentKit connection.
+     *
+     * Identify it with `connectionName` or `connectionId`; a name costs one extra read to find the ID.
+     * Pass at most one of `oauth` or `googleDwd`. `providerConfigurations` goes with `oauth` or on its own,
+     * never with `googleDwd`; you can also rename on its own. It is a true partial merge: a field you leave out keeps its stored value,
+     * a masked secret sent back is ignored, and a list or map you pass empty (`scopes: []`,
+     * `extraAuthorizeParams: {}`) is cleared. Sending your own `clientId` or `clientSecret` turns
+     * `useScalekitCreds` off unless you set it. `providerDomain` cannot be changed.
+     *
+     * @throws {ScalekitValidationError} If the arguments are invalid; nothing is sent.
+     * @throws {ScalekitAgentKitConnectionError} If the server refuses or fails the update.
+     */
+    updateConnection(params: UpdateConnectionParams): Promise<AgentKitConnection>;
+    /**
+     * Deletes a connection.
+     *
+     * @throws {ScalekitAgentKitConnectionError} `CONNECTION_IN_USE` while connected accounts or MCP
+     *   configurations still use it.
+     */
+    deleteConnection(connection: string | ConnectionRef): Promise<void>;
     /**
      * Delete a connected account.
      * Requires either `connectedAccountId` or both `connectionName` + `identifier`.
@@ -284,7 +366,50 @@ export default class ActionsClient {
          *
          * To connect a user's account, prefer {@link getAuthorizationLink}: it
          * creates the account if needed and the user completes authorization
-         * through the link. OAuth credentials cannot be supplied directly.
+         * through the link.
+         *
+         * To import an OAuth token you obtained outside Scalekit, pass it as
+         * `oauthToken`. `expiresAt` is optional and only used for such an import:
+         *
+         * ```ts
+         * import { timestampFromDate } from '@bufbuild/protobuf/wkt';
+         *
+         * await scalekit.actions.createConnectedAccount({
+         *   connectionName: 'gmail',
+         *   identifier: 'user_123',
+         *   authorizationDetails: {
+         *     details: {
+         *       case: 'oauthToken',
+         *       value: {
+         *         accessToken: 'ya29.a0...',
+         *         refreshToken: '1//0g...', // optional
+         *         scopes: ['https://www.googleapis.com/auth/gmail.readonly'], // optional
+         *         expiresAt: timestampFromDate(new Date('2026-12-01T10:00:00Z')), // optional
+         *       },
+         *     },
+         *   },
+         * });
+         * ```
+         *
+         * `expiresAt` is when the supplied access token expires, a protobuf
+         * `Timestamp` sent as UTC. The token is imported (and the account becomes
+         * ACTIVE) only for a connection that uses your own OAuth app; the
+         * account's `tokenExpiresAt` is then set to `expiresAt`.
+         *
+         * Without `expiresAt`, the account has no token expiry and the token is
+         * used until the provider rejects it. If a `refreshToken` was imported,
+         * tool calls then refresh and retry automatically, and proxy callers
+         * refresh with the refresh connected account tokens API
+         * (`POST /api/v1/connected_accounts:refresh_tokens`). Without a
+         * `refreshToken`, nothing can be refreshed, and the account must be
+         * updated with new tokens or authorized again.
+         *
+         * To correct the expiry of the current token, update the account with the
+         * same `accessToken` and the new `expiresAt`; the account status does not
+         * change. Resending the same `accessToken` keeps the stored `refreshToken`
+         * and `scopes` unless the request supplies new non-empty values.
+         * `expiresAt` is never returned; read the expiry back from the account's
+         * `tokenExpiresAt`.
          */
         authorizationDetails: MessageInitShape<typeof CreateConnectedAccountSchema>['authorizationDetails'];
         organizationId?: string;
@@ -300,7 +425,12 @@ export default class ActionsClient {
     getOrCreateConnectedAccount(params: {
         connectionName: string;
         identifier: string;
-        /** Same plain-object shape as {@link createConnectedAccount}. */
+        /**
+         * Same plain-object shape as {@link createConnectedAccount}, including the
+         * optional `oauthToken.expiresAt` (for example
+         * `timestampFromDate(new Date(...))` from `@bufbuild/protobuf/wkt`) when
+         * importing a token obtained outside Scalekit.
+         */
         authorizationDetails?: MessageInitShape<typeof CreateConnectedAccountSchema>['authorizationDetails'];
         organizationId?: string;
         userId?: string;
@@ -310,7 +440,12 @@ export default class ActionsClient {
     upsertConnectedAccount: (params: {
         connectionName: string;
         identifier: string;
-        /** Same plain-object shape as {@link createConnectedAccount}. */
+        /**
+         * Same plain-object shape as {@link createConnectedAccount}, including the
+         * optional `oauthToken.expiresAt` (for example
+         * `timestampFromDate(new Date(...))` from `@bufbuild/protobuf/wkt`) when
+         * importing a token obtained outside Scalekit.
+         */
         authorizationDetails?: MessageInitShape<typeof CreateConnectedAccountSchema>["authorizationDetails"];
         organizationId?: string;
         userId?: string;
@@ -326,7 +461,16 @@ export default class ActionsClient {
     updateConnectedAccount(params: {
         connectionName?: string;
         identifier?: string;
-        authorizationDetails?: UpdateConnectedAccount['authorizationDetails'];
+        /**
+         * Same plain-object shape as {@link createConnectedAccount}, including the
+         * optional `oauthToken.expiresAt` (for example
+         * `timestampFromDate(new Date(...))` from `@bufbuild/protobuf/wkt`) when
+         * importing a token obtained outside Scalekit. To correct the expiry of
+         * the current token, send the same `accessToken` with the new
+         * `expiresAt`; the account status does not change. A message built with
+         * `create(AuthorizationDetailsSchema, ...)` is also accepted.
+         */
+        authorizationDetails?: MessageInitShape<typeof UpdateConnectedAccountSchema>['authorizationDetails'];
         organizationId?: string;
         userId?: string;
         connectedAccountId?: string;
@@ -342,6 +486,15 @@ export default class ActionsClient {
      * @throws {ScalekitGatewayTimeoutException} If the request exceeds the timeout.
      * @throws {ScalekitServerException} If a network or server error occurs.
      * @throws {ScalekitException} If required parameters are missing or an unexpected error occurs.
+     * @throws {Error} If `path` resolves outside the proxy prefix (`<environment URL>/proxy/`),
+     *                 for example through `..` segments, encoded dots or control characters.
+     *                 Checked before any network call; every other path is sent unchanged.
+     *
+     * @remarks Redirects returned by the proxied API are followed as before. A redirect
+     * hop that leaves the proxy prefix (another origin, or a same-origin path outside
+     * `<environment URL>/proxy/`) is sent without the client's `Authorization`,
+     * `connection_name` and `identifier` headers. So is a hop sent through an HTTP
+     * forward proxy whose redirect location carries a fragment.
      */
     request(params: {
         connectionName: string;
@@ -354,4 +507,68 @@ export default class ActionsClient {
         headers?: Record<string, string>;
         timeoutMs?: number;
     }): Promise<AxiosResponse<any>>;
+    /**
+     * Upload a file of any size to a Google API that supports resumable
+     * uploads (Drive v3, the Cloud Storage JSON API, YouTube Data API) through
+     * a connected account.
+     *
+     * The content is sent in chunks (4 MiB by default), one request each, so
+     * no single request runs long. After a timeout, a connection error or HTTP
+     * 408, 429, 500, 502, 503 or 504, the SDK waits, asks the server how many
+     * bytes it has and resumes from there instead of restarting. After a 308
+     * that commits no new bytes, it waits and resends from the offset that 308
+     * reported, without asking first. The session-start request is never
+     * retried, because a retry would open a second session.
+     *
+     * Content can be bytes or a stream. A stream is read one chunk at a time
+     * and never buffered whole. Its size is known for an unread
+     * `fs.createReadStream(path)` without `start`/`end`; otherwise pass
+     * `totalBytes`, or let the SDK send the size with the last chunk. Errors
+     * from reading the stream propagate unchanged.
+     *
+     * @param params - What to upload and where. `connectionName`, `identifier`,
+     *   `path` and `data` are required; see {@link ResumableUploadParams}.
+     * @param options - Cancellation, timeout, retries and progress; see
+     *   {@link ResumableUploadOptions}.
+     * @returns The created or updated resource from the final response, such
+     *   as the Drive file object (`{}` when that response has no body).
+     * @throws {ScalekitValidationError} If an argument is invalid (before any
+     *   request is sent), or if a stream is shorter or longer than `totalBytes`.
+     * @throws {ScalekitUploadSessionExpiredException} If the upload session
+     *   expired or no longer exists (HTTP 404/410 on a chunk). Upload again.
+     * @throws {ScalekitUploadHttpException} If the session-start request fails,
+     *   a chunk gets any other 4xx or 5xx (such as 403, 501 or 505) or a 2xx
+     *   other than 200/201, or a retryable (408, 429, 500, 502, 503, 504)
+     *   status persists after
+     *   `maxRetries` retries. `status`, `headers` and `body` describe the response.
+     * @throws {ScalekitUploadTimeoutException} If a request times out (a chunk:
+     *   after `maxRetries` retries).
+     * @throws {ScalekitUploadConnectionException} If a request gets no response
+     *   (a chunk: after `maxRetries` retries).
+     * @throws {ScalekitUploadProtocolException} If a response breaks the
+     *   resumable protocol: the upload completes before the last chunk is sent,
+     *   a chunk still commits no new bytes after `maxRetries` retries, or the
+     *   final body is not a JSON object.
+     * @throws {ScalekitAbortError} If `options.signal` is aborted.
+     * @throws {ScalekitServerException} If a network or server error occurs.
+     *
+     * @example
+     * ```ts
+     * import fs from 'node:fs';
+     *
+     * const file = await scalekit.actions.uploadResumable(
+     *   {
+     *     connectionName: 'googledrive',
+     *     identifier: 'user_123',
+     *     path: '/upload/drive/v3/files',
+     *     data: fs.createReadStream('video.mp4'),
+     *     contentType: 'video/mp4',
+     *     metadata: { name: 'video.mp4' },
+     *   },
+     *   { onProgress: (p) => console.log(p.bytesCommitted, p.totalBytes) }
+     * );
+     * console.log(file.id);
+     * ```
+     */
+    uploadResumable(params: ResumableUploadParams, options?: ResumableUploadOptions): Promise<Record<string, unknown>>;
 }

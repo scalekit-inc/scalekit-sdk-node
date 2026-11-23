@@ -1,0 +1,17 @@
+kind: added
+body: |
+  `scalekit.actions` manages AgentKit connections with the new AgentKit-only connection APIs: `createConnection`, `getConnection`, `listAppConnections`, `updateConnection` and `deleteConnection`. They use AgentKit names (`provider`, `connectionName`, `useScalekitCreds`) and group connector-specific settings under `providerConfigurations`. `getConnection` and `deleteConnection` take a name or an ID; `updateConnection` is a true partial merge, and a list or map you pass empty (`scopes: []`, `extraAuthorizeParams: {}`) is cleared. Failures raise `ScalekitAgentKitConnectionError` with a stable `code`. Existing methods, including `actions.listConnections`, are unchanged. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/AGENTKIT.md#connections)
+
+  ```ts
+  await scalekit.actions.createConnection({ provider: 'GMAIL', connectionName: 'gmail-work' });
+  await scalekit.actions.updateConnection({
+    connectionName: 'gmail-work',
+    oauth: { clientId: '...', clientSecret: '...', scopes: ['https://www.googleapis.com/auth/gmail.readonly'] },
+  });
+  const { connections } = await scalekit.actions.listAppConnections({ provider: 'GMAIL' });
+  ```
+time: '2026-10-27T12:00:00+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-2101
+  Migration: ''

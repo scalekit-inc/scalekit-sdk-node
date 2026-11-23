@@ -1,7 +1,7 @@
 import type { GenEnum, GenFile, GenMessage, GenService } from "@bufbuild/protobuf/codegenv2";
 import type { EmptySchema, FieldMask, Timestamp } from "@bufbuild/protobuf/wkt";
 import type { RegionCode, TimeUnit } from "../commons/commons_pb";
-import type { Message } from "@bufbuild/protobuf";
+import type { JsonObject, Message } from "@bufbuild/protobuf";
 /**
  * Describes the file scalekit/v1/organizations/organizations.proto.
  */
@@ -662,6 +662,92 @@ export type UpdateOrganizationSessionPolicyResponse = Message<"scalekit.v1.organ
  */
 export declare const UpdateOrganizationSessionPolicyResponseSchema: GenMessage<UpdateOrganizationSessionPolicyResponse>;
 /**
+ * @generated from message scalekit.v1.organizations.OrganizationBranding
+ */
+export type OrganizationBranding = Message<"scalekit.v1.organizations.OrganizationBranding"> & {
+    /**
+     * @generated from field: scalekit.v1.organizations.BrandingSource source = 1;
+     */
+    source: BrandingSource;
+    /**
+     * @generated from field: google.protobuf.Struct customization_settings = 2;
+     */
+    customizationSettings?: JsonObject | undefined;
+    /**
+     * @generated from field: google.protobuf.Timestamp update_time = 3;
+     */
+    updateTime?: Timestamp | undefined;
+};
+/**
+ * Describes the message scalekit.v1.organizations.OrganizationBranding.
+ * Use `create(OrganizationBrandingSchema)` to create a new message.
+ */
+export declare const OrganizationBrandingSchema: GenMessage<OrganizationBranding>;
+/**
+ * @generated from message scalekit.v1.organizations.GetOrganizationBrandingRequest
+ */
+export type GetOrganizationBrandingRequest = Message<"scalekit.v1.organizations.GetOrganizationBrandingRequest"> & {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+};
+/**
+ * Describes the message scalekit.v1.organizations.GetOrganizationBrandingRequest.
+ * Use `create(GetOrganizationBrandingRequestSchema)` to create a new message.
+ */
+export declare const GetOrganizationBrandingRequestSchema: GenMessage<GetOrganizationBrandingRequest>;
+/**
+ * @generated from message scalekit.v1.organizations.GetOrganizationBrandingResponse
+ */
+export type GetOrganizationBrandingResponse = Message<"scalekit.v1.organizations.GetOrganizationBrandingResponse"> & {
+    /**
+     * @generated from field: scalekit.v1.organizations.OrganizationBranding branding = 1;
+     */
+    branding?: OrganizationBranding | undefined;
+};
+/**
+ * Describes the message scalekit.v1.organizations.GetOrganizationBrandingResponse.
+ * Use `create(GetOrganizationBrandingResponseSchema)` to create a new message.
+ */
+export declare const GetOrganizationBrandingResponseSchema: GenMessage<GetOrganizationBrandingResponse>;
+/**
+ * @generated from message scalekit.v1.organizations.UpdateOrganizationBrandingRequest
+ */
+export type UpdateOrganizationBrandingRequest = Message<"scalekit.v1.organizations.UpdateOrganizationBrandingRequest"> & {
+    /**
+     * @generated from field: string organization_id = 1;
+     */
+    organizationId: string;
+    /**
+     * @generated from field: scalekit.v1.organizations.BrandingSource source = 2;
+     */
+    source: BrandingSource;
+    /**
+     * @generated from field: google.protobuf.Struct customization_settings = 3;
+     */
+    customizationSettings?: JsonObject | undefined;
+};
+/**
+ * Describes the message scalekit.v1.organizations.UpdateOrganizationBrandingRequest.
+ * Use `create(UpdateOrganizationBrandingRequestSchema)` to create a new message.
+ */
+export declare const UpdateOrganizationBrandingRequestSchema: GenMessage<UpdateOrganizationBrandingRequest>;
+/**
+ * @generated from message scalekit.v1.organizations.UpdateOrganizationBrandingResponse
+ */
+export type UpdateOrganizationBrandingResponse = Message<"scalekit.v1.organizations.UpdateOrganizationBrandingResponse"> & {
+    /**
+     * @generated from field: scalekit.v1.organizations.OrganizationBranding branding = 1;
+     */
+    branding?: OrganizationBranding | undefined;
+};
+/**
+ * Describes the message scalekit.v1.organizations.UpdateOrganizationBrandingResponse.
+ * Use `create(UpdateOrganizationBrandingResponseSchema)` to create a new message.
+ */
+export declare const UpdateOrganizationBrandingResponseSchema: GenMessage<UpdateOrganizationBrandingResponse>;
+/**
  * @generated from message scalekit.v1.organizations.GetApplicationSessionPolicyRequest
  */
 export type GetApplicationSessionPolicyRequest = Message<"scalekit.v1.organizations.GetApplicationSessionPolicyRequest"> & {
@@ -916,6 +1002,34 @@ export declare enum SessionPolicyType {
  */
 export declare const SessionPolicyTypeSchema: GenEnum<SessionPolicyType>;
 /**
+ * Values carry a BRANDING_SOURCE_ prefix because APPLICATION and CUSTOM are already
+ * declared in this package by SessionPolicyType (proto3 enum values share the package scope).
+ *
+ * @generated from enum scalekit.v1.organizations.BrandingSource
+ */
+export declare enum BrandingSource {
+    /**
+     * @generated from enum value: BRANDING_SOURCE_UNSPECIFIED = 0;
+     */
+    UNSPECIFIED = 0,
+    /**
+     * The organization inherits the environment branding.
+     *
+     * @generated from enum value: BRANDING_SOURCE_ENVIRONMENT = 1;
+     */
+    ENVIRONMENT = 1,
+    /**
+     * The organization branding is applied over the environment branding.
+     *
+     * @generated from enum value: BRANDING_SOURCE_CUSTOM = 2;
+     */
+    CUSTOM = 2
+}
+/**
+ * Describes the enum scalekit.v1.organizations.BrandingSource.
+ */
+export declare const BrandingSourceSchema: GenEnum<BrandingSource>;
+/**
  * @generated from service scalekit.v1.organizations.OrganizationService
  */
 export declare const OrganizationService: GenService<{
@@ -1036,6 +1150,22 @@ export declare const OrganizationService: GenService<{
         methodKind: "unary";
         input: typeof GetOrganizationSessionPolicyRequestSchema;
         output: typeof GetOrganizationSessionPolicyResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.GetOrganizationBranding
+     */
+    getOrganizationBranding: {
+        methodKind: "unary";
+        input: typeof GetOrganizationBrandingRequestSchema;
+        output: typeof GetOrganizationBrandingResponseSchema;
+    };
+    /**
+     * @generated from rpc scalekit.v1.organizations.OrganizationService.UpdateOrganizationBranding
+     */
+    updateOrganizationBranding: {
+        methodKind: "unary";
+        input: typeof UpdateOrganizationBrandingRequestSchema;
+        output: typeof UpdateOrganizationBrandingResponseSchema;
     };
     /**
      * Update user management setting for an organization

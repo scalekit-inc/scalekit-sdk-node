@@ -18,6 +18,7 @@
 - [Actions](#actions)
 - [Virtual MCP Servers](#virtual-mcp-servers)
 - [Custom Connectors](#custom-connectors)
+- [Trigger Events](#trigger-events)
 - [WebAuthn](#webauthn)
 - [Error Handling](#error-handling)
 - [Type Definitions](#type-definitions)
@@ -1060,9 +1061,18 @@ Scalekit SDK uses a typed exception hierarchy rooted at `ScalekitException`:
 
 - `ScalekitException` (base)
   - `ScalekitValidateTokenFailureException` - Token validation failures
+  - `ScalekitValidationError` - An invalid method argument, raised before any request is sent
+  - `ScalekitAbortError` - The caller's `AbortSignal` cancelled the call
   - `ScalekitServerException` - HTTP errors (400-599)
     - Specific subclasses for each status code (400, 401, 403, 404, 409, 422, 429, 500, 502, 503, 504)
+    - `ScalekitGatewayTimeoutException`
+      - `ScalekitUploadTimeoutException` - An `actions.uploadResumable` request timed out
+    - `ScalekitUploadHttpException` - An `actions.uploadResumable` request got an HTTP error
+      - `ScalekitUploadSessionExpiredException` - The upload session expired or no longer exists
+  - `ScalekitUploadConnectionException` - An `actions.uploadResumable` request got no response
+  - `ScalekitUploadProtocolException` - A response broke the resumable-upload protocol
   - `WebhookVerificationError` - Webhook signature verification failures
+    - `ScalekitTriggerEventParseError` - A trigger event whose signature is valid but whose body is not a readable trigger event
 
 ### Usage Example
 
@@ -1127,6 +1137,10 @@ try {
 - `AuthPattern`, `AuthField`: Hand-written types for custom connector `authPatterns`
 - `ConnectionType`, `ConnectionProvider`, `ConnectionAuthMode`: Numeric enums on a connection's `type`, `provider` and `authMode`
 - `Connection`, `CreateConnection`, `UpdateConnection`, `Flags`: Environment connection shapes used by `createEnvironmentConnection` and `updateEnvironmentConnection`
+- `TriggerEvent`: A verified trigger event returned by `verifyTriggerEvent` and `actions.triggers.verifyEvent`
+- `DeliveryScope` (`ACCOUNT`, `CONNECTION`), `DetectionMode` (`WEBHOOK`, `POLL`), `PayloadState` (`FULL`, `REFERENCE`): String constants for the matching `TriggerEvent` fields. Values the SDK does not know yet arrive as plain strings
+- `TriggerEventVerifyParams`, `TriggerEventHeaders`: The parameters of `verifyTriggerEvent`
+- `JsonValue`, `JsonObject`: Any JSON value, and a JSON object
 
 ## Organizations
 
@@ -6942,7 +6956,9 @@ Lists the end-user consents granted against a resource, with pagination.
 
 Each returned consent carries `id`, `externalUserId`, `clientId`, `clientName`, `scopes` and `grantedAt`. The response also carries `totalSize` plus `nextPageToken` / `prevPageToken` cursors.
 
-Filter by user in one of two ways. Pass `userIds` to match specific external user IDs exactly and case-sensitively. Pass `search` for a case-insensitive substring match. When you give both, `userIds` wins and `search` is ignored.
+Filter in one of three ways. Pass `consentIds` to fetch specific consents by ID, for example to find the `clientId` you need to revoke a consent you already hold the ID of. Pass `userIds` to match specific external user IDs exactly and case-sensitively. Pass `search` for a case-insensitive substring match. When you give more than one, the priority is `consentIds`, then `userIds`, then `search`, and the lower-priority ones are ignored without an error. Blank-only `consentIds` values are ignored, so the next filter applies instead.
+
+When you filter by `consentIds`, check that every returned `id` is one you asked for before you revoke anything. A server that predates this filter ignores it and returns the unfiltered first page. Do not combine `consentIds` with `userIds` as an ownership check, because `consentIds` overrides `userIds`. Compare `externalUserId` on the returned consent instead.
 </dd>
 </dl>
 </dd>
@@ -6960,7 +6976,8 @@ Filter by user in one of two ways. Pass `userIds` to match specific external use
 const res = await scalekitClient.resources.listUserConsents('<RESOURCE_ID>', {
   search: '<OPTIONAL_SEARCH>',
   pageSize: 20,
-  userIds: ['<EXTERNAL_USER_ID>'], // optional; takes precedence over search
+  consentIds: ['<CONSENT_ID>'], // optional; takes precedence over userIds and search
+  userIds: ['<EXTERNAL_USER_ID>'], // optional; ignored when consentIds is set
 });
 
 console.log(res.totalSize, res.nextPageToken);
@@ -6990,10 +7007,11 @@ for (const consent of res.consents) {
 <dd>
 
 **options:** `ListUserConsentsOptions` - Optional filter, search and pagination options
-- `search?: string` - Case-insensitive substring match on external user IDs. Ignored when `userIds` is set.
+- `search?: string` - Case-insensitive substring match on external user IDs. Ignored when `consentIds` or `userIds` is set.
 - `pageSize?: number` - Page size, max 30
 - `pageToken?: string` - Pagination cursor from a previous response (`nextPageToken`/`prevPageToken`)
-- `userIds?: string[]` - Exact match on external user IDs, max 25. Takes precedence over `search`.
+- `userIds?: string[]` - Exact match on external user IDs, max 25. Ignored when `consentIds` is set; takes precedence over `search`.
+- `consentIds?: string[]` - Exact match on consent IDs (format `usrcnst_xxxxx`), max 25 distinct. IDs that do not exist or belong to another resource are omitted from the result. Takes precedence over `userIds` and `search`.
 
 </dd>
 </dl>
@@ -7491,9 +7509,138 @@ console.log(connectedAccount?.status === ConnectorStatus.ACTIVE);
 </dl>
 </details>
 
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">uploadResumable</a>(params, options?) -> Promise&lt;Record&lt;string, unknown&gt;&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Uploads a file of any size to a Google API that supports resumable uploads (Drive v3, the Cloud Storage JSON API, YouTube Data API) through a connected account, and returns the created or updated resource from the final response, such as the Drive file object (`{}` when that response has no body).
+
+The content is sent in chunks (4 MiB by default), one request each. After a timeout, a connection error or HTTP 408/429/500/502/503/504, the SDK waits (exponential backoff with full jitter, or `Retry-After` on 429/503, at most 30 s), asks the server how many bytes it has and resumes from there instead of restarting. After a `308` that commits no new bytes, it waits the same way and resends from the offset that `308` reported, without asking first. Each chunk gets `maxRetries` retries (default 3); the count resets only when the server confirms bytes beyond the most it had confirmed before. The session-start request is never retried, because a retry would open a second upload session.
+
+`data` is bytes (`Buffer`, `Uint8Array`) or any async iterable of bytes, such as `fs.createReadStream(path)`. There is no file-path parameter: pass `fs.createReadStream(path)`. A stream is read one chunk at a time and never buffered whole. The total size is known for bytes and for an unread `fs.createReadStream(path)` without `start`/`end`; otherwise pass `totalBytes`, or let the SDK send the size with the last chunk. A stream that turns out shorter or longer than `totalBytes` fails before its last chunk is sent. Errors thrown while reading the stream propagate unchanged.
+
+| Error | When |
+|---|---|
+| `ScalekitValidationError` | An argument is invalid (nothing is sent), or a stream is shorter or longer than `totalBytes` |
+| `ScalekitUploadSessionExpiredException` | A chunk or status request got 404 or 410: the session expired or no longer exists. The SDK does not start a new session; upload again |
+| `ScalekitUploadHttpException` | The session-start request failed (`uploadId` is `undefined`), a chunk got any other 4xx or 5xx (such as 403, 501 or 505) or a 2xx other than 200/201, or a retryable status (408, 429, 500, 502, 503, 504) persisted after `maxRetries` retries. `status`, `headers` and `body` describe the response |
+| `ScalekitUploadTimeoutException` | A request timed out (a chunk: after `maxRetries` retries). Extends `ScalekitGatewayTimeoutException` |
+| `ScalekitUploadConnectionException` | A request got no response (a chunk: after `maxRetries` retries) |
+| `ScalekitUploadProtocolException` | A response broke the protocol: no `upload_id`, a bad `Range`, the upload completed before the last chunk was sent, a chunk still committed no new bytes after `maxRetries` retries, or the final body is not a JSON object |
+| `ScalekitAbortError` | `options.signal` was aborted, including during a wait between retries |
+
+Every upload error carries `uploadId` and `bytesCommitted`, and none carries the access token. A Scalekit `401` (expired access token) is answered by one token refresh and one resend; a `401` from Google is raised as `ScalekitUploadHttpException`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import fs from 'node:fs';
+import { ScalekitUploadSessionExpiredException } from '@scalekit-sdk/node';
+
+try {
+  const file = await scalekitClient.actions.uploadResumable(
+    {
+      connectionName: 'googledrive',
+      identifier: 'user_123',
+      path: '/upload/drive/v3/files',
+      data: fs.createReadStream('video.mp4'),
+      contentType: 'video/mp4',
+      metadata: { name: 'video.mp4', parents: ['folder_123'] },
+      queryParams: { supportsAllDrives: true },
+    },
+    {
+      signal: AbortSignal.timeout(10 * 60_000),
+      onProgress: ({ bytesCommitted, totalBytes }) =>
+        console.log(`${bytesCommitted} / ${totalBytes ?? '?'} bytes`),
+    }
+  );
+  console.log(file.id);
+} catch (err) {
+  if (err instanceof ScalekitUploadSessionExpiredException) {
+    // The session is gone; upload the file again.
+  }
+  throw err;
+}
+
+// Replace an existing Drive file's content
+await scalekitClient.actions.uploadResumable({
+  connectionName: 'googledrive',
+  identifier: 'user_123',
+  path: '/upload/drive/v3/files/file_123',
+  method: 'PATCH',
+  data: Buffer.from('new content'),
+  contentType: 'text/plain',
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `ResumableUploadParams` - What to upload and where:
+- `connectionName: string` - Connection name as shown in the dashboard, e.g. `'googledrive'`. Must not contain CR/LF
+- `identifier: string` - Your application's identifier for the end user whose account is used. Must not contain CR/LF
+- `path: string` - Provider upload path, e.g. `/upload/drive/v3/files`, `/upload/storage/v1/b/{bucket}/o` or `/upload/youtube/v3/videos`. A leading `/` is added if missing. Must not contain `?`, `#`, spaces, control characters or `.`/`..` segments (also percent-encoded); pass query parameters in `queryParams`
+- `data: Uint8Array | AsyncIterable<Uint8Array>` - The content: bytes, or a stream such as `fs.createReadStream(path)`
+- `totalBytes?: number` - Total size in bytes, when the SDK can't know it (see Description)
+- `contentType?: string` - MIME type of the content, sent as `X-Upload-Content-Type` and on each chunk. Defaults to `application/octet-stream`. Must not be empty or contain CR/LF
+- `metadata?: Record<string, unknown>` - Resource metadata, sent as JSON with the session-start request, e.g. `{ name, parents }` for Drive or `{ snippet, status }` for YouTube
+- `queryParams?: Record<string, string | number | boolean>` - Extra query parameters for the session-start request only, e.g. `{ supportsAllDrives: true }` or YouTube's `{ part: 'snippet,status' }`. The SDK always sends `uploadType=resumable`; an `uploadType` key (exact, case-sensitive) is rejected
+- `method?: 'POST' | 'PUT' | 'PATCH'` - Method of the session-start request (case-insensitive). Defaults to `'POST'`; Drive uses `'PATCH'` to replace a file's content
+- `chunkSize?: number` - Bytes per chunk request: a positive multiple of 262144 (256 KiB). Defaults to 4 MiB
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**options:** `ResumableUploadOptions` - Optional per-call options:
+- `signal?: AbortSignal` - Cancels the upload, including a wait between retries
+- `timeoutMs?: number` - Timeout for each HTTP request. Defaults to the client's `toolTimeoutMs` (60000)
+- `maxRetries?: number` - Retries per chunk (see Description). Defaults to 3; `0` disables retries
+- `onProgress?: (progress: UploadProgress) => void | Promise<void>` - Called with `{ bytesCommitted, totalBytes }` each time the server confirms more bytes, and once on completion (a zero-byte upload gets one call with 0/0). `totalBytes` is `undefined` while unknown. The upload waits for a returned promise; an error thrown here stops the upload and is rethrown unchanged
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Virtual MCP Servers
 
-A Virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol, so any MCP-capable agent can call them. Create one configuration per agent role (not per user), and mint a short-lived session token per user per run. The server URL stays the same; the token carries the user's identity.
+A Virtual MCP server exposes a chosen set of connections and tools over the Model Context Protocol, so any MCP-capable agent can call them. Create one configuration per agent role (not per user), and mint a short-lived session token per user per run. The server URL stays the same; the token carries the user's identity. Each AgentKit connection also has its own MCP server with all of its tools; mint tokens for it with `createSessionToken({ connectionName, ... })`.
+
+`createConfig` and `updateConfig` take an optional `toolExposure`: `'DIRECT'` (the default) lists every mapped tool and allows at most 25 connections; `'META'` gives agents five search and execute tools with no connection limit and must be enabled for your environment. An update without `toolExposure` keeps the stored mode.
 
 Only the generally available `McpConfig` API is covered. The older `Mcp` and `McpInstance` families are marked PREVIEW and are not exposed.
 
@@ -7569,7 +7716,14 @@ console.log(res.config.id, res.config.mcpServerUrl);
 <dl>
 <dd>
 
-**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Connections to expose and, optionally, which of their tools. Omit `tools` to expose every tool for that connection. Maximum 25 mappings.
+**params.connectionToolMappings?:** `Array<{ connectionName?: string; connectionId?: string; tools?: string[] }>` - Connections to expose and, optionally, which of their tools. Omit `tools` to expose every tool for that connection. Maximum 25 connections in `DIRECT` mode.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.toolExposure?:** `'DIRECT' | 'META'` - `'DIRECT'` is the default and exposes every mapped tool. `'META'` exposes five search and execute tools, has no connection limit, and must be enabled for the environment.
 
 </dd>
 </dl>
@@ -7766,6 +7920,13 @@ console.log(res.config?.connectionToolMappings);
 
 </dd>
 </dl>
+<dl>
+<dd>
+
+**params.toolExposure?:** `'DIRECT' | 'META'` - New exposure mode. Omit it to keep the stored mode. Switching to `'DIRECT'` is refused above 25 connections or when tools overlap, and `'META'` must be enabled for the environment.
+
+</dd>
+</dl>
 </dd>
 </dl>
 
@@ -7921,9 +8082,16 @@ for (const account of pending) {
 <dl>
 <dd>
 
-Mints a session token for one user against one configuration.
+Mints a session token for one user, for either a Virtual MCP server or a connection's own MCP server. Set a target; if both are set, `mcpConfigId` is used:
 
-The token carries the user's identity. Mint a fresh one before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
+- `mcpConfigId`: the token works on that configuration's `config.mcpServerUrl`.
+- `connectionName`: the token works on the connection's own MCP server at `<environment URL>/mcp/v3/connections/<connection name>`, which exposes all of that connection's tools without an MCP configuration. The name is matched without regard to case, but the URL path is case-sensitive: build it from the connection's name exactly as stored.
+
+A token works only on the server it was minted for. The token carries the user's identity. Mint a fresh one before every agent run, never reuse one across runs, and set the expiry longer than the run is expected to take.
+
+TypeScript rejects a call with neither target at compile time. At run time, only the connection form is checked before the request is sent: a non-string `connectionName` throws, and so does an `identifier` that is not a non-empty string (`identifier is required`). Calls with `mcpConfigId` are unchanged: they are not checked beyond `expirySeconds`, so a missing or empty ID is sent and rejected by the server, and `connectionName` is ignored when a non-empty `mcpConfigId` is set.
+
+For a connection, the user should have an active connected account on it. When they do not, depending on the environment, the call either fails with `ScalekitBadRequestException`, or succeeds after creating a pending connected account, in which case tool calls report the account as not connected. The call fails with `ScalekitNotFoundException` when no active connection has that name, and with `ScalekitBadRequestException` when the connection is not an AgentKit connection or the identifier or expiry is rejected.
 </dd>
 </dl>
 </dd>
@@ -7938,6 +8106,7 @@ The token carries the user's identity. Mint a fresh one before every agent run, 
 <dd>
 
 ```typescript
+// Virtual MCP server built from a configuration
 const { config } = await scalekitClient.actions.mcp.getConfig('<CONFIG_ID>');
 const session = await scalekitClient.actions.mcp.createSessionToken({
   mcpConfigId: '<CONFIG_ID>',
@@ -7948,6 +8117,20 @@ const session = await scalekitClient.actions.mcp.createSessionToken({
 // Hand both to your MCP client
 console.log(config?.mcpServerUrl, session.token, session.expiresAt);
 ```
+
+```typescript
+// A connection's own MCP server
+const session = await scalekitClient.actions.mcp.createSessionToken({
+  connectionName: 'gmail',
+  identifier: 'user_123',
+  expirySeconds: 900,
+  accessLevel: 'READ_ONLY',
+});
+
+// Hand both to your MCP client. The URL path is case-sensitive: use the connection's stored name.
+const serverUrl = `${process.env.SCALEKIT_ENVIRONMENT_URL}/mcp/v3/connections/gmail`;
+console.log(serverUrl, session.token, session.expiresAt);
+```
 </dd>
 </dl>
 </dd>
@@ -7955,27 +8138,43 @@ console.log(config?.mcpServerUrl, session.token, session.expiresAt);
 
 #### ⚙️ Parameters
 
-<dl>
-<dd>
+Type: `CreateMcpSessionTokenParams`. Set `mcpConfigId` or `connectionName`; if both are set, `mcpConfigId` is used.
 
 <dl>
 <dd>
 
-**params.mcpConfigId:** `string` - The configuration
+<dl>
+<dd>
+
+**params.mcpConfigId?:** `string` - The configuration. If both targets are set, this one is used and `connectionName` is ignored.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.identifier:** `string` - Your application's identifier for the end user
+**params.connectionName?:** `string` - The connection name: the same value used as `connectionName` elsewhere in the SDK. Used when `mcpConfigId` is omitted or empty. It is matched without regard to case, and the token is always issued for the server URL built from the connection's stored name. That URL is case-sensitive, so connect using the stored name exactly as it appears.
 
 </dd>
 </dl>
 <dl>
 <dd>
 
-**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server enforces the allowed range.
+**params.identifier:** `string` - Your application's identifier for the end user, 1 to 255 characters. For a connection, the user whose connected account the token acts as; required (non-empty) for a connection before the request is sent.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.expirySeconds?:** `number` - Token lifetime in whole seconds. Must be a positive integer; any other value, such as `900.5`, `0` or `NaN`, throws before the request is sent. The server accepts 60 seconds to 24 hours (86400), 1 hour (3600) by default.
+
+</dd>
+</dl>
+<dl>
+<dd>
+
+**params.accessLevel?:** `'FULL' | 'READ_ONLY'` - Tools the token can use. `'READ_ONLY'` limits the token to tools annotated read-only (`read_only_hint`): other tools are left out of the tool list and refused when called. `'FULL'`, or omitting it, exposes every tool the configuration or connection exposes.
 
 </dd>
 </dl>
@@ -8042,6 +8241,13 @@ const authPatterns: AuthPattern[] = [
 //   { type: 'API_KEY', display_name: 'API Key', description: '...',
 //     fields: [{ field_name: 'api_key', label: 'API Key', input_type: 'password' }],
 //     auth_header_key_override: 'X-API-Key' }
+// Several API keys, each sent as its own header (multiple-headers mode). Set
+// `header_name` on every credential field; `auth_header_key_override` does not apply:
+//   { type: 'API_KEY', display_name: 'API Key', description: '...',
+//     fields: [
+//       { field_name: 'x_key_id', header_name: 'X-Key-Id', label: 'Key ID', input_type: 'text', required: true },
+//       { field_name: 'x_secret', header_name: 'X-Secret', label: 'Secret', input_type: 'password', required: true },
+//     ] }
 // Public server, no credentials:
 //   { type: 'NO_AUTH', display_name: 'No Auth', description: '...', fields: [] }
 
@@ -8053,6 +8259,40 @@ const res = await scalekitClient.actions.providers.createCustomProvider({
 });
 console.log(res.provider?.identifier);
 ```
+
+**Connecting an account to a multi-header connector.** Create a connector whose `API_KEY` fields each set `header_name`, add a connection on it, then supply one credential per header, keyed by the header name, under `staticAuth.details`. Scalekit derives each stored `field_name` from the header name. Pass the generated message shape below; a snake_case `{ static_auth: { ... } }` object is silently ignored.
+
+```ts
+// 1. A connector that sends two credentials as separate headers.
+await scalekitClient.actions.providers.createCustomProvider({
+  displayName: 'Acme Gateway',
+  proxyUrl: 'https://api.acme.example.com',
+  authPatterns: [
+    {
+      type: 'API_KEY',
+      display_name: 'API Key',
+      fields: [
+        { field_name: 'x_key_id', header_name: 'X-Key-Id', label: 'Key ID', input_type: 'text', required: true },
+        { field_name: 'x_secret', header_name: 'X-Secret', label: 'Secret', input_type: 'password', required: true },
+      ],
+    },
+  ],
+});
+
+// 2. Add a connection on it, then connect an account with one value per header.
+await scalekitClient.actions.createConnectedAccount({
+  connectionName: 'my-connection', // the connection created on this connector
+  identifier: 'user_123',
+  authorizationDetails: {
+    details: {
+      case: 'staticAuth',
+      value: { details: { 'X-Key-Id': '[X-KEY-ID]', 'X-Secret': '[X-SECRET]' } },
+    },
+  },
+});
+```
+
+Unknown keys are rejected with `UNKNOWN_HEADER_FIELD`, and a missing required header with `MISSING_REQUIRED_HEADER`. Creating a multi-header provider needs the `api_key_multi_header` feature enabled for the environment, otherwise the call fails with `FEATURE_NOT_ENABLED`.
 </dd>
 </dl>
 </dd>
@@ -8094,7 +8334,7 @@ console.log(res.provider?.identifier);
 <dl>
 <dd>
 
-**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; is_mcp?: boolean; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select'; hint?: string; required?: boolean }`. Set `is_mcp: true` when the connector fronts an MCP server.
+**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; is_mcp?: boolean; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select'; hint?: string; required?: boolean; header_name?: string }`. On an `API_KEY` pattern, `header_name` sends that field's value as its own HTTP header (case preserved); setting it on any field puts the pattern in multiple-headers mode. Leave it unset for single-key mode, which uses `auth_header_key_override`. Set `is_mcp: true` when the connector fronts an MCP server.
 
 </dd>
 </dl>
@@ -8365,6 +8605,159 @@ for (const provider of res.providers) {
 - `identifier?: string` - Filter to one connector. For a custom connector, also pass `providerType: ProviderType.CUSTOM` (or `ALL`), or nothing is found.
 - `pageSize?: number` - Page size
 - `pageToken?: string` - Pagination cursor
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Trigger Events
+
+Scalekit delivers trigger events to your endpoint as signed HTTP requests. Verify and parse each one with `verifyTriggerEvent`, which needs no client, or with the same method on `scalekitClient.actions.triggers`.
+
+<details><summary><code><a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/triggers.ts">verifyTriggerEvent</a>({ body, headers, secret }) -> TriggerEvent</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Checks the signature first (HMAC-SHA256 over `webhook-id.webhook-timestamp.body`, a 5-minute timestamp tolerance, constant-time comparison), then parses the body into a `TriggerEvent`. Also available as `scalekitClient.actions.triggers.verifyEvent(params)`, with identical behaviour.
+
+- Delivery is at least once, and a redelivery can arrive while the first delivery is still being handled. Make processing idempotent, keyed on `dedupeKey` together with the connected account you act as:
+  - Claim that key atomically before you handle the event, so two concurrent deliveries cannot both handle it. For example, use a row with a unique key on both, inserted with a lease (an expiry time). The claim succeeds only when no row exists, or when the row is unfinished and its lease has expired.
+  - Make the lease longer than handling can take. A claim left by a worker that stopped mid-handling then expires, and a later redelivery can take it, but an active claim is never taken.
+  - Mark the claim finished after handling, so a finished event is never handled again. Release it if handling fails, so a redelivery can retry at once.
+  - Answer `2xx` only once the event is finished, handled, or durably queued. When another delivery still holds an unexpired claim, answer a non-`2xx` status such as `409`, so Scalekit delivers the event again later instead of treating it as done.
+- Branch on `deliveryScope`: `'account'` events are for `connectedAccountId`; `'connection'` events are for the whole connection, and `connectedAccountId` is `''`.
+- When `payloadState` is `'reference'`, `payload` is `null`: fetch the resource identified by `resourceType` and `resourceId`.
+- `payload` is decoded with `JSON.parse`, so integers above `Number.MAX_SAFE_INTEGER` lose precision. Parse the raw body yourself if you need them exactly.
+- Header names are matched case-insensitively. Malformed `webhook-signature` candidates (including any that are not padded standard base64) are skipped.
+- Throws `WebhookVerificationError` when the request is not authentic (missing or conflicting headers, a malformed secret, a `webhook-timestamp` that is not decimal digits, stale timestamp, no matching signature, body not UTF-8), and its subclass `ScalekitTriggerEventParseError` when the signature is valid but the body is not a readable trigger event (including a body that starts with a byte order mark). Throws `TypeError` when called with arguments of the wrong type.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+import express from 'express';
+import {
+  DeliveryScope,
+  PayloadState,
+  verifyTriggerEvent,
+  WebhookVerificationError,
+} from '@scalekit-sdk/node';
+
+const app = express();
+
+// express.raw keeps the body as the exact bytes that were signed.
+app.post('/scalekit/triggers', express.raw({ type: 'application/json' }), async (req, res) => {
+  let event;
+  try {
+    event = verifyTriggerEvent({
+      body: req.body,
+      headers: req.headers,
+      secret: process.env.SCALEKIT_TRIGGER_SECRET!,
+    });
+  } catch (err) {
+    if (err instanceof WebhookVerificationError) {
+      return res.status(400).send('invalid trigger event');
+    } else {
+      throw err; // a bug or a wrong argument, not a bad request
+    }
+  }
+
+  // Account events are for one connected account; for connection-wide events
+  // your app decides which connected accounts act on them.
+  let accountIds: string[];
+  if (event.deliveryScope === DeliveryScope.ACCOUNT) {
+    accountIds = [event.connectedAccountId];
+  } else if (event.deliveryScope === DeliveryScope.CONNECTION) {
+    accountIds = await accountsToActFor(event.connectionId);
+  } else {
+    // A scope this SDK version does not know yet: acknowledge and skip it.
+    return res.sendStatus(204);
+  }
+
+  let inProgress = false;
+  for (const accountId of accountIds) {
+    // Delivery is at least once, and a redelivery can arrive while the first is
+    // still being handled: claim dedupeKey + the account you act as atomically,
+    // with a lease longer than handling takes. Returns 'claimed', 'finished'
+    // (already handled) or 'in_progress' (another delivery holds an unexpired lease).
+    const claim = await claimDelivery(event.dedupeKey, accountId, { leaseSeconds: 900 });
+    if (claim === 'finished') continue;
+    if (claim === 'in_progress') {
+      inProgress = true;
+      continue;
+    }
+
+    try {
+      const resource =
+        event.payloadState === PayloadState.REFERENCE
+          ? await fetchResource(accountId, event.resourceType, event.resourceId)
+          : event.payload;
+
+      await handle(event.triggerType, resource, accountId);
+    } catch (err) {
+      await releaseDelivery(event.dedupeKey, accountId); // let a redelivery retry
+      throw err;
+    }
+    await finishDelivery(event.dedupeKey, accountId); // never handled again
+  }
+  // Not done yet: a non-2xx answer makes Scalekit deliver the event again later.
+  res.sendStatus(inProgress ? 409 : 204);
+});
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `TriggerEventVerifyParams`
+- `body: string | Uint8Array` - The raw request body exactly as received. A `Buffer` (for example from `express.raw()`) is preferred; never pass a parsed object
+- `headers: Headers | Record<string, string | string[] | undefined>` - The request headers: a Fetch `Headers` object or Node's `req.headers`. Names are matched case-insensitively
+- `secret: string` - The signing secret for your trigger endpoint (`whsec_...`)
+
+**Returns:** `TriggerEvent`
+- `version: string`, `triggerType: string` (for example `'example.item.created'`), `subscriptionId: string`, `connectionId: string`, `resourceType: string`
+- `dedupeKey: string` - Stable key for de-duplicating redeliveries
+- `correlationId: string` - Links follow-up work back to the event that caused it
+- `deliveryScope: DeliveryScope` - `'account'` or `'connection'`
+- `connectedAccountId: string` - `''` when `deliveryScope` is `'connection'`
+- `resourceId: string | undefined`
+- `occurredAt: Date | undefined`
+- `detectionMode: DetectionMode` - `'webhook'` or `'poll'`
+- `payloadState: PayloadState` - `'full'` or `'reference'`
+- `deliveryScope`, `detectionMode` and `payloadState` can also hold a value added after this SDK version, as a plain string; handle the values you know and skip the rest
+- `payload: JsonValue` - `null` when absent, and always for `'reference'`
+- `extra: Record<string, JsonValue>` - Top-level fields this SDK version does not recognise, under their wire (snake_case) names
 
 </dd>
 </dl>

@@ -320,6 +320,10 @@ export type UpdateConnectedAccountRequest = Message<"scalekit.v1.connected_accou
      * @generated from field: scalekit.v1.connected_accounts.UpdateConnectedAccount connected_account = 5;
      */
     connectedAccount?: UpdateConnectedAccount | undefined;
+    /**
+     * @generated from field: scalekit.v1.connected_accounts.ScopeSelection scope_selection = 7;
+     */
+    scopeSelection?: ScopeSelection | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.UpdateConnectedAccountRequest.
@@ -379,6 +383,42 @@ export type DeleteConnectedAccountResponse = Message<"scalekit.v1.connected_acco
  * Use `create(DeleteConnectedAccountResponseSchema)` to create a new message.
  */
 export declare const DeleteConnectedAccountResponseSchema: GenMessage<DeleteConnectedAccountResponse>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.RefreshConnectedAccountTokensRequest
+ */
+export type RefreshConnectedAccountTokensRequest = Message<"scalekit.v1.connected_accounts.RefreshConnectedAccountTokensRequest"> & {
+    /**
+     * @generated from field: string connected_account_id = 1;
+     */
+    connectedAccountId: string;
+    /**
+     * @generated from field: string connection_name = 2;
+     */
+    connectionName: string;
+    /**
+     * @generated from field: string identifier = 3;
+     */
+    identifier: string;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.RefreshConnectedAccountTokensRequest.
+ * Use `create(RefreshConnectedAccountTokensRequestSchema)` to create a new message.
+ */
+export declare const RefreshConnectedAccountTokensRequestSchema: GenMessage<RefreshConnectedAccountTokensRequest>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.RefreshConnectedAccountTokensResponse
+ */
+export type RefreshConnectedAccountTokensResponse = Message<"scalekit.v1.connected_accounts.RefreshConnectedAccountTokensResponse"> & {
+    /**
+     * @generated from field: scalekit.v1.connected_accounts.ConnectedAccount connected_account = 1;
+     */
+    connectedAccount?: ConnectedAccount | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.RefreshConnectedAccountTokensResponse.
+ * Use `create(RefreshConnectedAccountTokensResponseSchema)` to create a new message.
+ */
+export declare const RefreshConnectedAccountTokensResponseSchema: GenMessage<RefreshConnectedAccountTokensResponse>;
 /**
  * @generated from message scalekit.v1.connected_accounts.GetMagicLinkForConnectedAccountRequest
  */
@@ -854,6 +894,10 @@ export type OauthToken = Message<"scalekit.v1.connected_accounts.OauthToken"> & 
      * @generated from field: string domain = 4;
      */
     domain: string;
+    /**
+     * @generated from field: google.protobuf.Timestamp expires_at = 5;
+     */
+    expiresAt?: Timestamp | undefined;
 };
 /**
  * Describes the message scalekit.v1.connected_accounts.OauthToken.
@@ -941,6 +985,43 @@ export type GetRedirectUrlRequest = Message<"scalekit.v1.connected_accounts.GetR
  * Use `create(GetRedirectUrlRequestSchema)` to create a new message.
  */
 export declare const GetRedirectUrlRequestSchema: GenMessage<GetRedirectUrlRequest>;
+/**
+ * ScopeSelection is the set of scopes an end user chose in the hosted connect widget.
+ * Both lists together are the complete selection: a list that is left out is the same as
+ * an empty one and means the user chose no scopes in that bucket. Required scopes are
+ * added back by the server, so they never need to be sent.
+ *
+ * @generated from message scalekit.v1.connected_accounts.ScopeSelection
+ */
+export type ScopeSelection = Message<"scalekit.v1.connected_accounts.ScopeSelection"> & {
+    /**
+     * @generated from field: repeated string scopes = 1;
+     */
+    scopes: string[];
+    /**
+     * @generated from field: repeated string optional_scopes = 2;
+     */
+    optionalScopes: string[];
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.ScopeSelection.
+ * Use `create(ScopeSelectionSchema)` to create a new message.
+ */
+export declare const ScopeSelectionSchema: GenMessage<ScopeSelection>;
+/**
+ * @generated from message scalekit.v1.connected_accounts.CreateRedirectUrlRequest
+ */
+export type CreateRedirectUrlRequest = Message<"scalekit.v1.connected_accounts.CreateRedirectUrlRequest"> & {
+    /**
+     * @generated from field: scalekit.v1.connected_accounts.ScopeSelection scope_selection = 1;
+     */
+    scopeSelection?: ScopeSelection | undefined;
+};
+/**
+ * Describes the message scalekit.v1.connected_accounts.CreateRedirectUrlRequest.
+ * Use `create(CreateRedirectUrlRequestSchema)` to create a new message.
+ */
+export declare const CreateRedirectUrlRequestSchema: GenMessage<CreateRedirectUrlRequest>;
 /**
  * @generated from message scalekit.v1.connected_accounts.GetRedirectUrlResponse
  */
@@ -1146,6 +1227,16 @@ export declare const ConnectedAccountService: GenService<{
         output: typeof DeleteConnectedAccountResponseSchema;
     };
     /**
+     * Refresh Connected Account Tokens
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.RefreshConnectedAccountTokens
+     */
+    refreshConnectedAccountTokens: {
+        methodKind: "unary";
+        input: typeof RefreshConnectedAccountTokensRequestSchema;
+        output: typeof RefreshConnectedAccountTokensResponseSchema;
+    };
+    /**
      * Generate Magic Link for Account Connection
      *
      * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.GetMagicLinkForConnectedAccount
@@ -1193,6 +1284,16 @@ export declare const ConnectedAccountService: GenService<{
     getRedirectUrl: {
         methodKind: "unary";
         input: typeof GetRedirectUrlRequestSchema;
+        output: typeof GetRedirectUrlResponseSchema;
+    };
+    /**
+     * Create Redirect URL for Connected Account Portal, with the end user's scope selection
+     *
+     * @generated from rpc scalekit.v1.connected_accounts.ConnectedAccountService.CreateRedirectUrl
+     */
+    createRedirectUrl: {
+        methodKind: "unary";
+        input: typeof CreateRedirectUrlRequestSchema;
         output: typeof GetRedirectUrlResponseSchema;
     };
     /**

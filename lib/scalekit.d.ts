@@ -388,13 +388,6 @@ export default class ScalekitClient {
      */
     private extractScopesFromPayload;
     /**
-     * Verify the timestamp
-     *
-     * @param {string} timestampStr The timestamp string
-     * @return {Date} Returns the timestamp
-     */
-    private verifyTimestamp;
-    /**
      * Generates an M2M access token using the client credentials grant for the given clientId and clientSecret.
      *
      * @param {string} clientId - The client ID to authenticate with
@@ -411,14 +404,6 @@ export default class ScalekitClient {
      * @returns {Promise<string>} The access token string
      */
     getClientAccessToken(): Promise<string>;
-    /**
-     * Compute the signature
-     *
-     * @param {Buffer} secretBytes The secret bytes
-     * @param {string} data The data to be signed
-     * @return {string} Returns the signature
-     */
-    private computeSignature;
     /**
      * Obtains a new access token using a refresh token.
      *

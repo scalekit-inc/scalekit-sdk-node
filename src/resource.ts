@@ -41,14 +41,20 @@ export interface ListResourcesOptions {
 }
 
 export interface ListUserConsentsOptions {
-  /** Case-insensitive substring match on external user IDs. Ignored when userIds is set. */
+  /** Case-insensitive substring match on external user IDs. Ignored when consentIds or userIds is set. */
   search?: string;
   /** Page size, max 30. */
   pageSize?: number;
   /** Pagination cursor. */
   pageToken?: string;
-  /** Exact match on external user IDs, max 25. Takes precedence over search. */
+  /** Exact match on external user IDs, max 25. Ignored when consentIds is set; takes precedence over search. */
   userIds?: string[];
+  /**
+   * Exact match on consent IDs (format: usrcnst_xxxxx), max 25 distinct. Takes precedence over
+   * userIds and search; blank-only values are ignored. IDs that do not exist or belong to another resource
+   * are omitted. An older server ignores this filter, so confirm each returned id is one you asked for before revoking.
+   */
+  consentIds?: string[];
 }
 
 export interface CreateResourceClientOptions {
@@ -418,9 +424,12 @@ export default class ResourceClient {
    * `clientName`, `scopes` and `grantedAt`. The response also carries
    * `totalSize` plus `nextPageToken` / `prevPageToken` cursors.
    *
-   * Pass `userIds` to match specific users exactly, or `search` for a
-   * case-insensitive substring match. When both are given, `userIds` wins and
-   * `search` is ignored.
+   * Pass `consentIds` to fetch specific consents by ID, `userIds` to match
+   * specific users exactly, or `search` for a case-insensitive substring match.
+   * Priority is `consentIds`, then `userIds`, then `search`; lower-priority
+   * filters are ignored without an error. Blank-only `consentIds` are ignored.
+   * An older server ignores `consentIds`, so confirm each returned `id` is one
+   * you asked for before revoking.
    *
    * @param resourceId - The resource whose consents to list (format: res_xxxxx)
    * @param options - Optional filter, search and pagination options
@@ -436,8 +445,11 @@ export default class ResourceClient {
       ...(options?.search && { search: options.search }),
       ...(options?.pageSize !== undefined && { pageSize: options.pageSize }),
       ...(options?.pageToken && { pageToken: options.pageToken }),
-      ...(options?.userIds?.length && {
-        filter: { externalUserId: options.userIds },
+      ...((options?.userIds?.length || options?.consentIds?.length) && {
+        filter: {
+          externalUserId: options.userIds ?? [],
+          consentId: options.consentIds ?? [],
+        },
       }),
     });
   }
