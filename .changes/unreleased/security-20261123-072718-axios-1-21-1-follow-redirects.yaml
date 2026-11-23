@@ -1,11 +1,15 @@
 kind: security
 body: |
-  The SDK now requires `axios` 1.21.1 or later, which in turn requires `follow-redirects` 1.16.2 or later. `follow-redirects` 1.16.0 and 1.16.1 are affected by 3 high advisories that can forward credential headers, such as `Authorization`, to a different origin when a request is redirected. The SDK sends its access-token and JWKS requests, and `scalekit.actions.request(...)` calls with the headers you pass, through axios, which follows redirects with `follow-redirects`.
+  The SDK now requires `axios` 1.21.1 or later, which in turn requires `follow-redirects` 1.16.2 or later. Every `follow-redirects` version below 1.16.2 is affected by at least one advisory under which credential headers can reach a different origin when a request is redirected. The SDK sends its access-token and JWKS requests, and `scalekit.actions.request(...)` calls with the headers you pass, through axios, which follows redirects with `follow-redirects`.
 
-  - **Advisories (high):** [GHSA-q3jh-wrc6-jgq8](https://github.com/advisories/GHSA-q3jh-wrc6-jgq8), [GHSA-8r9p-f939-6h3c](https://github.com/advisories/GHSA-8r9p-f939-6h3c), [GHSA-mrwp-f3q8-3g9p](https://github.com/advisories/GHSA-mrwp-f3q8-3g9p)
-  - **Affected versions:** `follow-redirects` `>=1.16.0 <=1.16.1`, as allowed by every `@scalekit-sdk/node` release before this one
+  - **Advisories (high):**
+    - [GHSA-q3jh-wrc6-jgq8](https://github.com/advisories/GHSA-q3jh-wrc6-jgq8) (`1.16.0`): headers passed in array form bypass the cross-origin stripping of credential headers.
+    - [GHSA-8r9p-f939-6h3c](https://github.com/advisories/GHSA-8r9p-f939-6h3c) (`1.16.0`): faulty regex escaping of `sensitiveHeaders` names can leave credential headers unstripped.
+    - [GHSA-mrwp-f3q8-3g9p](https://github.com/advisories/GHSA-mrwp-f3q8-3g9p) (`1.16.0` to `1.16.1`): a `sensitiveHeaders` array created in another realm is discarded, so custom credential headers you listed in it follow the redirect. It does not affect the built-in stripping of `Authorization`.
+  - **Advisory (moderate):** [GHSA-r4q5-vmmm-2653](https://github.com/advisories/GHSA-r4q5-vmmm-2653) (`<=1.15.11`): custom authentication headers leak to a redirect target on another domain.
+  - **Affected versions:** `follow-redirects` `<1.16.2`, as allowed by every `@scalekit-sdk/node` release before this one
   - **Patched versions:** `follow-redirects` `>=1.16.2` and `axios` `>=1.21.1`; `@scalekit-sdk/node` from this release on
-  - **Action:** upgrade the SDK. Or run `npm ls follow-redirects`, and if it shows 1.16.0 or 1.16.1, run `npm update follow-redirects`. Earlier SDK releases also accept 1.16.2 and later, so a fresh install may already have it. No code changes are needed.
+  - **Action:** upgrade the SDK. Then run `npm ls follow-redirects`, and if any copy is below 1.16.2, including one your application depends on directly, run `npm update follow-redirects` (or `npm install follow-redirects@^1.16.2` for a direct dependency pinned lower). No code changes are needed.
 time: '2026-11-23T07:27:18.000000+00:00'
 custom:
   Breaking: 'No'
