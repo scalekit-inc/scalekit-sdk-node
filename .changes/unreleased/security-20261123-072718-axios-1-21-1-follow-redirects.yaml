@@ -1,0 +1,13 @@
+kind: security
+body: |
+  The SDK now requires `axios` 1.21.1 or later, which in turn requires `follow-redirects` 1.16.2 or later. `follow-redirects` 1.16.0 and 1.16.1 are affected by 3 high advisories that can forward credential headers, such as `Authorization`, to a different origin when a request is redirected. The SDK sends its access-token and JWKS requests, and `scalekit.actions.request(...)` calls with the headers you pass, through axios, which follows redirects with `follow-redirects`.
+
+  - **Advisories (high):** [GHSA-q3jh-wrc6-jgq8](https://github.com/advisories/GHSA-q3jh-wrc6-jgq8), [GHSA-8r9p-f939-6h3c](https://github.com/advisories/GHSA-8r9p-f939-6h3c), [GHSA-mrwp-f3q8-3g9p](https://github.com/advisories/GHSA-mrwp-f3q8-3g9p)
+  - **Affected versions:** `follow-redirects` `>=1.16.0 <=1.16.1`, as allowed by every `@scalekit-sdk/node` release before this one
+  - **Patched versions:** `follow-redirects` `>=1.16.2` and `axios` `>=1.21.1`; `@scalekit-sdk/node` from this release on
+  - **Action:** upgrade the SDK. Or run `npm ls follow-redirects`, and if it shows 1.16.0 or 1.16.1, run `npm update follow-redirects`. Earlier SDK releases also accept 1.16.2 and later, so a fresh install may already have it. No code changes are needed.
+time: '2026-11-23T07:27:18.000000+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: ''
+  Migration: ''
