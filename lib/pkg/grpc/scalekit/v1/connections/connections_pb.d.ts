@@ -322,6 +322,18 @@ export type AppOAuthConfig = Message<"scalekit.v1.connections.AppOAuthConfig"> &
      * @generated from field: repeated string required_optional_scopes = 29;
      */
     requiredOptionalScopes: string[];
+    /**
+     * @generated from field: repeated string scalekit_creds_allowed_scopes = 41;
+     */
+    scalekitCredsAllowedScopes: string[];
+    /**
+     * @generated from field: repeated string scalekit_creds_allowed_optional_scopes = 42;
+     */
+    scalekitCredsAllowedOptionalScopes: string[];
+    /**
+     * @generated from field: bool scalekit_creds_scope_limited = 43;
+     */
+    scalekitCredsScopeLimited: boolean;
 };
 /**
  * Describes the message scalekit.v1.connections.AppOAuthConfig.
@@ -1466,6 +1478,18 @@ export type OAuthConnectionConfig = Message<"scalekit.v1.connections.OAuthConnec
      * @generated from field: optional scalekit.v1.connections.TokenAuthType token_endpoint_auth_type = 30;
      */
     tokenEndpointAuthType?: TokenAuthType | undefined;
+    /**
+     * @generated from field: repeated string scalekit_creds_allowed_scopes = 41;
+     */
+    scalekitCredsAllowedScopes: string[];
+    /**
+     * @generated from field: repeated string scalekit_creds_allowed_optional_scopes = 42;
+     */
+    scalekitCredsAllowedOptionalScopes: string[];
+    /**
+     * @generated from field: bool scalekit_creds_scope_limited = 43;
+     */
+    scalekitCredsScopeLimited: boolean;
 };
 /**
  * Describes the message scalekit.v1.connections.OAuthConnectionConfig.

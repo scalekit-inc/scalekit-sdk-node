@@ -161,6 +161,14 @@ Each method wraps the gRPC `ConnectedAccountService`; see JSDoc in the source fi
 <dl><dd>
 
 - `executeTool` — wraps `tools.executeTool` (`toolInput` maps to tool `params`).
+- `deleteCustomTool` — deletes one tool of a connector created from an OpenAPI spec, by its name or its ID (`tol_...`); errors in [`REFERENCE.md`](REFERENCE.md#actions).
+
+  ```ts
+  await scalekit.actions.deleteCustomTool({
+    toolIdentifier: 'a-acme_get_user',
+  });
+  ```
+
 - `getAuthorizationLink` — magic link for connect / re-auth.
 - `verifyConnectedAccountUser` — completes OAuth user verification.
 - `listConnectedAccounts`, `deleteConnectedAccount`, `getConnectedAccount`

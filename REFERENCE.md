@@ -7445,6 +7445,86 @@ console.log(res);
 </dl>
 </details>
 
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">deleteCustomTool</a>(params) -> Promise&lt;void&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes one tool of a connector created from an OpenAPI spec, by its name or its ID. Use it to stop agents from calling one operation of a connector without changing the connector's spec. The tool is gone when the call returns. It needs a workspace client with the `agent_connectors:write` permission.
+
+**Which tool.** `toolIdentifier` is the tool's name or its ID. The name is the one the tool is listed under: `a-<connector name>_<operation>`, for example `a-acme_get_user`; capitals are folded to lower case (ASCII letters only). The ID is `tol_` followed by a number, for example `tol_1234`: the `id` of each tool that `actions.listTools({ provider })` returns for the connector (not in summary mode). A value that starts with `tol_`, in any case, is always read as an ID.
+
+**What can be deleted.** Only a tool of a connector created from an OpenAPI spec, in your own environment. A tool of an MCP connector, a built-in tool, another environment's tool, a tool whose connector no longer exists and a name or ID that matches nothing all fail the same way, with `ScalekitNotFoundException`; the message does not say which.
+
+**Syncs.** A sync that regenerates the tools (the spec, the base URL or the auth patterns changed since the last completed run, or the spec references external files) creates the tool again while its operation is still in the spec: to keep it deleted, remove its endpoint from the spec. A sync of an unchanged connector changes no tools, so `actions.providers.invokeToolCollection` alone does not bring a deleted tool back. While a sync of the connector is queued or running, the call deletes nothing and fails with `ScalekitConflictException`: wait for the run with `actions.providers.getToolCollectionRun`, then call again.
+
+**Retries.** This call is retried when the service is unavailable. Each attempt has its own tool-call deadline (`toolTimeoutMs`). If the first attempt had already deleted the tool and only its response was lost, the retry answers `ScalekitNotFoundException` although the tool was deleted. A connection reset is not retried: it raises `ScalekitServiceUnavailableException` at once, as does running out of retries, and the tool may or may not be deleted. To check, list the connector's tools (follow `nextPageToken`): a listing shows the current state, not what the first attempt did, so look for the tool's ID if you know it: a sync can create the name again. A retry by name looks the name up again: if a sync finished in between and created a tool with that name again, the retry deletes that one. A tool a sync creates again has a new ID, so a retry by ID cannot delete it.
+
+Errors:
+- `ScalekitValidationError` if `toolIdentifier` is not a string, or is empty or blank; nothing is sent.
+- `ScalekitBadRequestException` (the request validation error on `tool_identifier`) if `toolIdentifier` is longer than 2048 characters.
+- `ScalekitBadRequestException` (`invalid tool identifier`) if `toolIdentifier` has a control character other than surrounding whitespace, which the SDK trims.
+- `ScalekitBadRequestException` with the error code `FEATURE_NOT_ENABLED` if OpenAPI-sourced connectors are not enabled for your environment; nothing is deleted.
+- `ScalekitForbiddenException` if the client lacks the `agent_connectors:write` permission.
+- `ScalekitNotFoundException` (`custom tool not found`) if no deletable tool has this name or ID.
+- `ScalekitConflictException` with the error code `RESOURCE_ALREADY_EXISTS` if a sync of the connector is queued or running (the message names the connector, the run and its status): nothing is deleted, so call again once it has finished.
+- `ScalekitConflictException` with the error code `TOOL_NAME_AMBIGUOUS` when deleting by name and tools of more than one connector of your environment have this name (leftovers of an earlier connector): nothing is deleted, and the message names two of the connectors and the ID of each tool. Delete the tool by its ID.
+- `ScalekitNotImplementedException` (HTTP 501) if the backend is older than release v0.1.165.0, which does not have this call.
+- `ScalekitServerException` if a network or server error occurs.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+await scalekitClient.actions.deleteCustomTool({
+  toolIdentifier: 'a-acme_get_user',
+});
+
+// By ID: the `id` of the tool in actions.listTools({ provider })
+await scalekitClient.actions.deleteCustomTool({ toolIdentifier: 'tol_1234' });
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**params:** `object`
+- `toolIdentifier: string` - Name of the tool, as listed for its connector (`a-<connector name>_<operation>`, matched in lower case), or its ID (`tol_1234`). Surrounding whitespace is ignored. At most 2048 characters
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">getAuthorizationLink</a>(params) -> Promise&lt;GetMagicLinkForConnectedAccountResponse&gt;</code></summary>
 <dl>
 <dd>
@@ -8990,11 +9070,13 @@ What Scalekit does:
 - **Fills in OAuth settings.** For an `OAUTH` pattern, a run fills a blank `authorize_uri`, `token_uri` and the available scopes of `oauth_config` from the spec's OAuth2 security scheme. The stored pattern can then differ from the one you sent, so read it back with `listProviders` before you update the connector.
 - **Allows one connector per name.** An environment holds one OpenAPI-sourced connector per name, ignoring case and spaces: a second one fails with `[already_exists] an OpenAPI connector named "<NAME>" already exists in this environment`.
 - **Locks tools and auth.** The tools and the auth pattern are managed by Scalekit, so `updateCustomProvider` can change only the name, description, icon, metadata and base URL, and the spec URL where your workspace allows changing it. See [`updateCustomProvider`](#custom-connectors) for the exact rules.
-- **Must be enabled.** OpenAPI-sourced connectors must be enabled for your environment; otherwise creating one, changing its base URL or spec URL, and `invokeToolCollection` fail with the error code `FEATURE_NOT_ENABLED` and `OpenAPI-sourced connectors are not enabled for this environment`. While they are not enabled, the connector's tools are not listed and cannot be called. Changing `openapiSpecUrl` on an existing connector must also be enabled for your workspace.
+- **Must be enabled.** OpenAPI-sourced connectors must be enabled for your environment; otherwise creating one, changing its base URL or spec URL, `invokeToolCollection` and `actions.deleteCustomTool` fail with the error code `FEATURE_NOT_ENABLED` and `OpenAPI-sourced connectors are not enabled for this environment`. While they are not enabled, the connector's tools are not listed and cannot be called. Changing `openapiSpecUrl` on an existing connector must also be enabled for your workspace.
 
 **Tool names.** Each tool is named `a-<connector name>_<operationId>`, in lower case, with the connector name taken from the connector's identifier (`ACMETICKETS:1234` gives `acmetickets`). An operation without an `operationId` uses its method and path instead, and a name that is already taken gets a numeric suffix. Tools of a connector that fronts an MCP server are different: they belong to a connected account and their names start with `c-`.
 
 **Calling the tools.** A tool belongs to the connector, so list it with `actions.listTools({ provider: provider.identifier })` and run it with any connected account of a connection on that connector. The account has to belong to the tool's connector: Scalekit rejects a mismatch before it sends anything. `actions.listTools({ query })` searches built-in tools only, so it never finds these tools.
+
+**Deleting a tool.** `actions.deleteCustomTool({ toolIdentifier })` deletes one tool by its name or its ID. A sync that regenerates the tools (the spec, the base URL or the auth patterns changed since the last completed run, or the spec references external files) creates the tool again while its operation is still in the spec, so remove its endpoint from the spec to keep it deleted. A sync of an unchanged connector changes no tools, so `invokeToolCollection` alone does not bring a deleted tool back. A sync that is queued or running blocks the call (`ScalekitConflictException`). See [`actions.deleteCustomTool`](#actions).
 
 **Virtual MCP servers.** A connection on such a connector can be mapped in a [Virtual MCP server](#virtual-mcp-servers) configuration, with `DIRECT` or `META` tool exposure. Map the tool names above, or leave `tools` out for all of them. The server serves them only while OpenAPI-sourced connectors are enabled for your environment.
 
