@@ -13,8 +13,8 @@ body: |
   const result = await scalekit.actions.updateConnection({
     connectionId: connection.id, // or connectionName: 'acme-mcp'
     oauth: {
-      clientId: '<CLIENT_ID>',
-      clientSecret: '<CLIENT_SECRET>',
+      clientId: process.env.ACME_CLIENT_ID!,
+      clientSecret: process.env.ACME_CLIENT_SECRET!,
       scopes: ['read', 'write'],
       tokenEndpointAuthMethod: 'BASIC_AUTH',
     },

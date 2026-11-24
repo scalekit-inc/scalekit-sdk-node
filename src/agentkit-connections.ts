@@ -42,8 +42,8 @@ export type AgentKitAuthMode = 'USER' | 'ORG_WIDE';
  * token refresh and to `OAUTH_M2M` client credentials; a token refresh on a
  * non-MCP OAuth connection always detects the method itself. On `OAUTH_M2M`
  * only `'REQUEST_BODY'` changes the request: `'NONE'`, like `'BASIC_AUTH'` and
- * `'DEFAULT'`, sends an HTTP Basic header there. A connection that never set one
- * reads as `'DEFAULT'`, and an update that leaves it out keeps the stored value.
+ * `'DEFAULT'`, sends an HTTP Basic header there. An update that leaves it out keeps
+ * the stored value.
  *
  * `createConnection` takes no OAuth settings: set the method with `updateConnection`,
  * for example on the connection of a custom MCP connector or of a connector created

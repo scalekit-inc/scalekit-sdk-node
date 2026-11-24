@@ -53,10 +53,15 @@ const res = await scalekitClient.tools.listTools({
 });
 
 // The tools of a connector created from an OpenAPI spec, page by page
-const custom = await scalekitClient.tools.listTools({
+const filter = { provider: 'ACMEAPI:70219645518265104' };
+const firstPage = await scalekitClient.tools.listTools({
   pageSize: 100,
-  pageToken: '<NEXT_PAGE_TOKEN>', // the nextPageToken of the previous page; leave it out for the first
-  filter: { provider: 'ACMEAPI:70219645518265104' },
+  filter,
+});
+const secondPage = await scalekitClient.tools.listTools({
+  pageSize: 100,
+  pageToken: firstPage.nextPageToken,
+  filter,
 });
 ```
 
@@ -319,8 +324,8 @@ const connection = await scalekitClient.actions.createConnection({
 const result = await scalekitClient.actions.updateConnection({
   connectionId: connection.id, // or connectionName: 'acme-mcp'
   oauth: {
-    clientId: '<CLIENT_ID>',
-    clientSecret: '<CLIENT_SECRET>',
+    clientId: process.env.ACME_CLIENT_ID!,
+    clientSecret: process.env.ACME_CLIENT_SECRET!,
     scopes: ['read', 'write'],
     tokenEndpointAuthMethod: 'BASIC_AUTH',
   },

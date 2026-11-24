@@ -8934,8 +8934,8 @@ const connection = await scalekitClient.actions.createConnection({
 const result = await scalekitClient.actions.updateConnection({
   connectionId: connection.id, // or connectionName: 'acme-mcp'
   oauth: {
-    clientId: '<CLIENT_ID>',
-    clientSecret: '<CLIENT_SECRET>',
+    clientId: process.env.ACME_CLIENT_ID!,
+    clientSecret: process.env.ACME_CLIENT_SECRET!,
     scopes: ['read', 'write'],
     tokenEndpointAuthMethod: 'BASIC_AUTH',
   },
@@ -8996,7 +8996,7 @@ const { connectedAccount } = await scalekitClient.actions.createConnectedAccount
   connectionName: 'acme-tickets',
   identifier: 'user_123',
   authorizationDetails: {
-    details: { case: 'staticAuth', value: { details: { token: '<API_TOKEN>' } } },
+    details: { case: 'staticAuth', value: { details: { token: process.env.ACME_API_TOKEN! } } },
   },
 });
 const result = await scalekitClient.actions.executeTool({
