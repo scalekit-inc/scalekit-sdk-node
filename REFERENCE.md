@@ -8551,7 +8551,7 @@ Treat this as a PUT: read the current connector with `listProviders` first, then
 What the server does with each field:
 - `displayName` and `authPatterns` are required on every update, and so is `proxyUrl` for an MCP-sourced connector (`[invalid_argument] proxy_url is required for an MCP-sourced connector`). Leaving out `authPatterns` fails with `[invalid_argument] Validation error`, and it replaces the whole list rather than merging into it. A pattern's `type` and `is_mcp` cannot be changed.
 - `metadata` replaces the stored map, so leaving it out clears it.
-- `proxyEnabled` is always applied. It defaults to `true`, the value `createCustomProvider` always sets, so pass the current value to keep a connector that has proxying switched off (created that way by another client such as the dashboard or the REST API, or by a release of this SDK up to 2.22.0) as it is.
+- `proxyEnabled` is always applied. It defaults to `true`, the value `createCustomProvider` always sets, so pass the current value to keep a connector that has proxying switched off (created that way by another client such as the dashboard or the REST API, or by an earlier release of this SDK) as it is.
 - `description` and `iconSrc` keep their stored values when left out.
 
 A connector created from an OpenAPI spec (`provider.openapiSpecUrl` is set) follows stricter rules, because Scalekit manages its tools and its auth:
