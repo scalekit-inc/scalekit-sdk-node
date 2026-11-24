@@ -302,22 +302,10 @@ export default class ConnectionClient {
      *   - providerKey: Identifier of the connector the connection is for
      *   - type: Authentication type, e.g. `ConnectionType.OAUTH`
      *   - keyId: Optional connection name; generated when omitted
-     *   - context: Optional. For an MCP connector whose `proxyUrl` is a template, such as one
-     *     with an endpoint per data region. `domain` and `version` fill the
-     *     `{{domain}}` and `{{version}}` placeholders of the connector's `proxyUrl` once, when
-     *     the connection is created. `domain` is the actual hostname, not a region code. If the
-     *     connector declares the hostnames it offers (the `options` of the `domain` field in its
-     *     `authPatterns`), use one of them. Scalekit does not store `context`: it stores the
-     *     resolved URL, which is `resolvedProxyUrl` on
-     *     the connection and is used for every later request. A placeholder left without a value
-     *     fails the call with `connection context is missing a value required by provider ...`.
-     *     Send only `domain` and `version`: `path_variables` and any key the API does not know
-     *     fail the call with `invalid connection context`.
      * @param {Flags} [flags] - Optional flags. Set `isApp: true` for an AgentKit app connection.
      *
      * @returns {Promise<CreateConnectionResponse>} Response containing the created connection,
-     *   including its `id` and `keyId`, and `resolvedProxyUrl` when the connector's `proxyUrl`
-     *   was a template (absent otherwise)
+     *   including its `id` and `keyId`
      *
      * @throws {ScalekitServerException} If the connection configuration is invalid or the
      *   client lacks permission
@@ -385,51 +373,6 @@ export default class ConnectionClient {
      * `configurationType` and `attributeMapping` are all accepted and then
      * discarded: the call succeeds and the stored values do not move. Change
      * those from the Scalekit dashboard instead.
-     *
-     * To choose how Scalekit sends the client credentials to the provider's token
-     * endpoint, set `tokenEndpointAuthType` in `oauthConfig`, with a
-     * `TokenAuthType` (exported by this package). The dashboard shows it as "Token
-     * Endpoint Auth Method":
-     * - `TokenAuthType.BASIC_AUTH`: `client_id` and `client_secret` in an HTTP
-     *   Basic `Authorization` header (`client_secret_basic`; "Authorization Header
-     *   (Basic Auth)" in the dashboard).
-     * - `TokenAuthType.URL_PARAMS`: as POST body parameters (`client_secret_post`;
-     *   "Request Body (POST params)").
-     * - `TokenAuthType.NONE`: for public or PKCE clients (`none`; "None (Public
-     *   Client)"). It sends no client secret on an MCP token refresh, and on the
-     *   authorization code exchange only when the connection has no client secret
-     *   stored (a stored secret is still sent). It is for OAuth connections only: an
-     *   OIDC connection rejects it.
-     *
-     * Only an update sets it: `createEnvironmentConnection` takes no token endpoint
-     * setting, and a new connection starts with the method its connector or MCP
-     * server registration gives, if any. Set it on the OAuth connection of a custom
-     * MCP connector or of a connector created from an OpenAPI spec.
-     *
-     * It applies to the authorization code exchange, to MCP token refresh and to
-     * `OAUTH_M2M` client credentials. A token refresh on a non-MCP OAuth connection
-     * always detects the method itself and does not read it. On `OAUTH_M2M` only
-     * `URL_PARAMS` (`client_secret_post`) changes the request: `NONE`, like
-     * `BASIC_AUTH` and the default, sends an HTTP Basic header there. Leave it unset
-     * unless the provider's token endpoint documentation names a method. A wrong
-     * value makes new authorizations fail. On an MCP connection it also makes token
-     * refresh fail, and each connected account then has to authenticate again when
-     * its token is next refreshed; on `OAUTH_M2M` it makes the client credentials
-     * grant fail. Omit it to keep the stored value, and send
-     * `TokenAuthType.TOKEN_AUTH_TYPE_UNSPECIFIED` to clear it: the authorization
-     * code exchange then sends the credentials as POST body parameters, and MCP
-     * token refresh and `OAUTH_M2M` send an HTTP Basic header. A read returns no
-     * value while no method is set.
-     *
-     * `tokenEndpointAuthMethod` is the deprecated text form of the same setting,
-     * `'client_secret_basic'`, `'client_secret_post'` or `'none'`; an empty string
-     * resets it like `TOKEN_AUTH_TYPE_UNSPECIFIED`, and any other text is
-     * rejected. If you send both and they differ, the one that differs from the
-     * stored value is applied, on the assumption that the other only repeats what you
-     * read; if neither matches the stored value the update is rejected. Reads return
-     * both in agreement. The AgentKit methods on `actions` name the same choices
-     * differently (`tokenEndpointAuthMethod` with `'BASIC_AUTH'`, `'REQUEST_BODY'`,
-     * `'NONE'` and `'DEFAULT'`): do not mix the two sets of names.
      *
      * PREVIEW: the underlying `UpdateEnvironmentConnection` RPC is marked preview
      * in the API and may change. It maps to `PATCH /api/v1/connections/{connection_id}`,

@@ -1,22 +1,25 @@
 kind: added
 body: |
-  `TokenAuthType` is now exported, so you can set `tokenEndpointAuthType` on an OAuth connection with `scalekit.connection.updateEnvironmentConnection`: `TokenAuthType.BASIC_AUTH` sends the client credentials in an HTTP Basic header, `TokenAuthType.URL_PARAMS` sends them as POST body parameters, and `TokenAuthType.NONE` is for public or PKCE clients: it sends no client secret on an MCP token refresh, and on the authorization code exchange only when the connection has no client secret stored (a stored secret is still sent), while on `OAUTH_M2M`, where only `URL_PARAMS` changes the request, it still sends an HTTP Basic header (OAuth connections only). Set one only when the provider's token endpoint documentation names it: a wrong value makes new authorizations fail, and on an MCP connection it also makes token refresh fail, so each connected account has to authenticate again when its token is next refreshed. Omit the field to keep the stored value; send `TokenAuthType.TOKEN_AUTH_TYPE_UNSPECIFIED` to go back to the default. Only an update sets it, on the OAuth connection of a custom MCP connector or of a connector created from an OpenAPI spec. `tokenEndpointAuthMethod`, the text form of the same setting, is deprecated. `createEnvironmentConnection` documents its `context`, which resolves an MCP connector's templated `proxyUrl` once, when the connection is created, and returns the result as `connection.resolvedProxyUrl`. The AgentKit `oauth.tokenEndpointAuthMethod` option keeps its own names (`'BASIC_AUTH'`, `'REQUEST_BODY'`, `'NONE'`, `'DEFAULT'`). [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#connections)
+  The AgentKit docs now cover the connection of a custom connector. The connections of a custom connector are AgentKit connections: create one with `scalekit.actions.createConnection({ provider, connectionName, authMode, providerDomain })`, where `provider` is the custom connector's `provider.identifier` (`NAME:environment-id`, not `provider.id`), and set its OAuth credentials and token endpoint options with `scalekit.actions.updateConnection({ connectionId, oauth })`. `providerDomain` is the host name that replaces `{{domain}}` in the `proxyUrl` of a custom MCP connector whose URL is a template; you set it when you create the connection, and it cannot be changed later and is not returned. `oauth.tokenEndpointAuthMethod` sets how Scalekit sends the client credentials to the provider's token endpoint: `'BASIC_AUTH'` sends them in an HTTP Basic header, `'REQUEST_BODY'` as POST body parameters, `'NONE'` is for public or PKCE clients (it sends no client secret on an MCP token refresh, and on the authorization code exchange only when the connection has no client secret stored, since a stored secret is still sent), and `'DEFAULT'` lets Scalekit choose. Set one only when the provider's token endpoint documentation names it: a wrong value makes new authorizations fail, and on an MCP connection it also makes token refresh fail, so each connected account has to authenticate again when its token is next refreshed. Leave it out to keep the stored value. The methods and options themselves are unchanged. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/AGENTKIT.md#connect-a-custom-connector)
 
   ```ts
-  import { ConnectionType, TokenAuthType } from '@scalekit-sdk/node';
+  const connection = await scalekit.actions.createConnection({
+    provider: 'ACMEAPI:70219645518265104', // the custom connector
+    connectionName: 'acme-mcp',
+    authMode: 'USER',
+    providerDomain: 'mcp.eu.acme.example.com', // replaces {{domain}} in the connector's proxyUrl
+  });
 
-  const { connection: current } = await scalekit.connection.getEnvironmentConnection('conn_abc123');
-  if (current?.settings.case === 'oauthConfig') {
-    await scalekit.connection.updateEnvironmentConnection('conn_abc123', {
-      type: ConnectionType.OAUTH,
-      providerKey: current.providerKey,
-      keyId: current.keyId,
-      settings: {
-        case: 'oauthConfig',
-        value: { ...current.settings.value, tokenEndpointAuthType: TokenAuthType.NONE },
-      },
-    });
-  }
+  const result = await scalekit.actions.updateConnection({
+    connectionId: connection.id, // or connectionName: 'acme-mcp'
+    oauth: {
+      clientId: '<CLIENT_ID>',
+      clientSecret: '<CLIENT_SECRET>',
+      scopes: ['read', 'write'],
+      tokenEndpointAuthMethod: 'BASIC_AUTH',
+    },
+  });
+  console.log(result.id);
   ```
 time: '2026-11-11T12:03:00.000000+00:00'
 custom:

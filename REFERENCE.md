@@ -870,8 +870,6 @@ await scalekitClient.connection.disableConnection('conn_123');
 #### 📝 Description
 **Preview.** Creates an environment-scoped connection, such as an AgentKit app connection for a connector. It has no organization. `POST /api/v1/connections`; requires a workspace client and `sso:write`.
 
-For a connector whose `proxyUrl` is a template, pass `context: { domain, version }`: Scalekit fills the `{{domain}}` and `{{version}}` placeholders once, when the connection is created, and returns the resolved URL as `connection.resolvedProxyUrl`. The full entry, under `client.connection.createEnvironmentConnection` below, has the rules.
-
 #### 🔌 Usage
 ```typescript
 import { ConnectionType } from '@scalekit-sdk/node';
@@ -886,7 +884,7 @@ const connectionName = connection!.keyId; // pass to the actions methods
 #### ⚙️ Parameters
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| connection | `CreateConnection` | Yes | `providerKey` (the connector identifier) and `type`; `context` for a templated `proxyUrl` |
+| connection | `CreateConnection` | Yes | `providerKey` (the connector identifier) and `type` |
 | flags | `Flags` | No | Pass `{ isApp: true }` for an AgentKit app connection |
 
 **Returns**: `Promise<CreateConnectionResponse>` - The created connection. Its `keyId` is the connection name.
@@ -924,8 +922,6 @@ const { connection } = await scalekitClient.connection.getEnvironmentConnection(
 **Preview.** Updates the OAuth settings of an environment-scoped connection. `PATCH /api/v1/connections/{connection_id}`; requires a workspace client and `sso:write`.
 
 Despite the `PATCH` verb, the server requires `type`, `providerKey` and `keyId` on every call, so read the connection first and send them back alongside what you are changing. Fields you leave out keep their stored values. On an app connection `settings` is the only field an update actually changes — every other field is accepted and then discarded.
-
-To choose how Scalekit sends the client credentials to the provider's token endpoint, set `tokenEndpointAuthType` in `oauthConfig` to `TokenAuthType.BASIC_AUTH`, `TokenAuthType.URL_PARAMS` or `TokenAuthType.NONE`. Omit it to keep the stored value. `tokenEndpointAuthMethod` is the deprecated text form. The full entry, under `client.connection.updateEnvironmentConnection` below, says what each value sends and when to set one.
 
 #### 🔌 Usage
 ```typescript
@@ -1143,7 +1139,6 @@ try {
 - `ToolCollectionRun`, `SkippedTool`: A tool collection run, and one operation it skipped. `ToolCollectionRun.skippedTools` is `skippedToolsJson` parsed
 - `ToolCollectionRunStatus`: String constants for `ToolCollectionRun.status` (`QUEUED`, `PROCESSING`, `COMPLETED`, `FAILED`). A status the SDK does not know yet arrives as a plain string
 - `ConnectionType`, `ConnectionProvider`, `ConnectionAuthMode`: Numeric enums on a connection's `type`, `provider` and `authMode`
-- `TokenAuthType`: Numeric enum for `tokenEndpointAuthType` on an OAuth connection (`TOKEN_AUTH_TYPE_UNSPECIFIED`, `URL_PARAMS`, `BASIC_AUTH`, `NONE`)
 - `Connection`, `CreateConnection`, `UpdateConnection`, `Flags`: Environment connection shapes used by `createEnvironmentConnection` and `updateEnvironmentConnection`
 - `TriggerEvent`: A verified trigger event returned by `verifyTriggerEvent` and `actions.triggers.verifyEvent`
 - `DeliveryScope` (`ACCOUNT`, `CONNECTION`), `DetectionMode` (`WEBHOOK`, `POLL`), `PayloadState` (`FULL`, `REFERENCE`): String constants for the matching `TriggerEvent` fields. Values the SDK does not know yet arrive as plain strings
@@ -2223,8 +2218,6 @@ Creates an environment-scoped connection. Unlike `createConnection`, which creat
 
 Use it for AgentKit app connections: pass `flags: { isApp: true }` and set `providerKey` to the connector's identifier, such as a custom connector's `provider.identifier`. The returned connection's `keyId` is the connection name that the AgentKit methods on `actions` take.
 
-Some MCP connectors have a templated `proxyUrl`, such as a server with an endpoint per data region. Pass `context: { domain, version }` and Scalekit fills the `{{domain}}` and `{{version}}` placeholders of the connector's `proxyUrl` once, when the connection is created. `domain` is the actual hostname, not a region code. If the connector declares the hostnames it offers (the `options` of the `domain` field in its `authPatterns`), use one of them. Scalekit does not store `context`: it stores the resolved URL, returns it as `connection.resolvedProxyUrl` (empty when the `proxyUrl` has no template) and uses it for every later request. A placeholder left without a value fails with `[invalid_argument] connection context is missing a value required by provider ...`. Send only `domain` and `version`: `path_variables` and any key the API does not know fail with `[invalid_argument] invalid connection context`. The AgentKit method `actions.createConnection` takes the same choice as `providerDomain`.
-
 **Preview:** the underlying `CreateEnvironmentConnection` RPC is marked preview in the API and may change. It maps to `POST /api/v1/connections`, requires a workspace client, and needs the `sso:write` permission.
 </dd>
 </dl>
@@ -2295,7 +2288,6 @@ console.log(connectionName, link);
 - `type: ConnectionType` - Authentication type, e.g. `ConnectionType.OAUTH`
 - `keyId?: string` - Connection name; generated when omitted
 - `authMode?: ConnectionAuthMode` - Whether each user connects their own account (`USER`) or shares one (`ORG_WIDE`)
-- `context?: { domain?: string; version?: string }` - Fills the `{{domain}}` and `{{version}}` placeholders of an MCP connector's templated `proxyUrl`. Used once, at creation, and not stored; see above
 
 </dd>
 </dl>
@@ -2397,22 +2389,6 @@ Despite the `PATCH` verb, the server validates the whole connection rather than 
 
 On an AgentKit app connection `settings` is the only field an update actually changes. `provider`, `uiButtonTitle`, `debugEnabled`, `configurationType` and `attributeMapping` are all accepted and then discarded: the call succeeds and the stored values do not move. Change those from the Scalekit dashboard instead.
 
-To choose how Scalekit sends the client credentials to the provider's token endpoint, set `tokenEndpointAuthType` in `oauthConfig`, with a `TokenAuthType`. The dashboard shows it as "Token Endpoint Auth Method":
-
-| `TokenAuthType` | Sends | Legacy text form | Dashboard option |
-| --- | --- | --- | --- |
-| `BASIC_AUTH` | `client_id` and `client_secret` in an HTTP Basic `Authorization` header | `client_secret_basic` | Authorization Header (Basic Auth) |
-| `URL_PARAMS` | `client_id` and `client_secret` as POST body parameters | `client_secret_post` | Request Body (POST params) |
-| `NONE` | For public or PKCE clients. No client secret on an MCP token refresh, and on the authorization code exchange only when the connection has no client secret stored (a stored secret is still sent). OAuth connections only; an OIDC connection rejects it | `none` | None (Public Client) |
-
-Only an update sets it: `createEnvironmentConnection` takes no token endpoint setting, and a new connection starts with the method its connector or MCP server registration gives, if any. Set it on the OAuth connection of a custom MCP connector or of a connector created from an OpenAPI spec.
-
-It applies to the authorization code exchange, to MCP token refresh and to `OAUTH_M2M` client credentials. A token refresh on a non-MCP OAuth connection always detects the method itself and does not read it. On `OAUTH_M2M` only `URL_PARAMS` (`client_secret_post`) changes the request: `NONE`, like `BASIC_AUTH` and the default, sends an HTTP Basic header there. Leave it unset unless the provider's token endpoint documentation names a method. A wrong value makes new authorizations fail. On an MCP connection it also makes token refresh fail, and each connected account then has to authenticate again when its token is next refreshed; on `OAUTH_M2M` it makes the client credentials grant fail. Omit it to keep the stored value, and send `TokenAuthType.TOKEN_AUTH_TYPE_UNSPECIFIED` to clear it: the authorization code exchange then sends the credentials as POST body parameters, and MCP token refresh and `OAUTH_M2M` send an HTTP Basic header. A read returns no value while no method is set.
-
-`tokenEndpointAuthMethod` is the deprecated text form of the same setting; an empty string resets it like `TOKEN_AUTH_TYPE_UNSPECIFIED`, and any other text than the three above is rejected (`[invalid_argument] error converting connection`). If you send both and they differ, the one that differs from the stored value is applied, on the assumption that the other only repeats what you read; if neither matches the stored value, the update is rejected with the same message. Reads return both in agreement. An enum number the API does not define is rejected.
-
-The AgentKit methods on `actions` (`updateConnection({ oauth: { tokenEndpointAuthMethod } })`) name the same choices `'BASIC_AUTH'`, `'REQUEST_BODY'`, `'NONE'` and `'DEFAULT'`. Do not mix the two sets of names.
-
 **Preview:** the underlying `UpdateEnvironmentConnection` RPC is marked preview in the API and may change. It maps to `PATCH /api/v1/connections/{connection_id}`, requires a workspace client, and needs the `sso:write` permission.
 </dd>
 </dl>
@@ -2451,27 +2427,6 @@ const { connection } = await scalekitClient.connection.updateEnvironmentConnecti
 );
 
 console.log(connection?.settings.value);
-```
-
-```typescript
-// Send the client credentials in an HTTP Basic header, as the provider's documentation requires
-import { ConnectionType, TokenAuthType } from '@scalekit-sdk/node';
-
-const { connection: stored } =
-  await scalekitClient.connection.getEnvironmentConnection('conn_abc123');
-if (stored?.settings.case !== 'oauthConfig') {
-  throw new Error('not an OAuth connection');
-}
-
-await scalekitClient.connection.updateEnvironmentConnection('conn_abc123', {
-  type: ConnectionType.OAUTH,
-  providerKey: stored.providerKey,
-  keyId: stored.keyId,
-  settings: {
-    case: 'oauthConfig',
-    value: { ...stored.settings.value, tokenEndpointAuthType: TokenAuthType.BASIC_AUTH },
-  },
-});
 ```
 </dd>
 </dl>
@@ -7228,6 +7183,8 @@ Connect end users' accounts to third-party services and run tools against them. 
 
 Virtual MCP servers and custom connectors are also under `actions`, as [`actions.mcp`](#virtual-mcp-servers) and [`actions.providers`](#custom-connectors).
 
+`actions.invokeToolCollection` and `actions.getToolCollectionRun`, which queue and follow the tool collection runs of a connector created from an OpenAPI spec, and `actions.deleteCustomTool` are on `actions` itself. The two run methods are also available as `actions.providers.invokeToolCollection(providerIdentifier)` and `actions.providers.getToolCollectionRun(providerIdentifier, runId?)`.
+
 Access via `scalekitClient.actions`.
 
 <details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">searchTools</a>(query, options?) -> Promise&lt;SearchToolsResponse&gt;</code></summary>
@@ -7459,24 +7416,24 @@ console.log(res);
 
 Deletes one tool of a connector created from an OpenAPI spec, by its name or its ID. Use it to stop agents from calling one operation of a connector without changing the connector's spec. The tool is gone when the call returns. It needs a workspace client with the `agent_connectors:write` permission.
 
-**Which tool.** `toolIdentifier` is the tool's name or its ID. The name is the one the tool is listed under: `a-<connector name>_<operation>`, for example `a-acme_get_user`; capitals are folded to lower case (ASCII letters only). The ID is `tol_` followed by a number, for example `tol_1234`: the `id` of each tool that `actions.listTools({ provider })` returns for the connector (not in summary mode). A value that starts with `tol_`, in any case, is always read as an ID.
+**Which tool.** `toolIdentifier` is the tool's name or its ID. The name is the one the tool is listed under: `a-<connector name>_<operation>`, for example `a-acmeapi_deletepet`; capitals are folded to lower case (ASCII letters only). The ID is `tol_` followed by a number, for example `tol_153432495478538376`: the `id` of each tool that `actions.listTools({ provider })` returns for the connector (not in summary mode). A value that starts with `tol_`, in any case, is always read as an ID.
 
 **What can be deleted.** Only a tool of a connector created from an OpenAPI spec, in your own environment. A tool of an MCP connector, a built-in tool, another environment's tool, a tool whose connector no longer exists and a name or ID that matches nothing all fail the same way, with `ScalekitNotFoundException`; the message does not say which.
 
-**Syncs.** A sync that regenerates the tools (the spec, the base URL or the auth patterns changed since the last completed run, or the spec references external files) creates the tool again while its operation is still in the spec: to keep it deleted, remove its endpoint from the spec. A sync of an unchanged connector changes no tools, so `actions.providers.invokeToolCollection` alone does not bring a deleted tool back. While a sync of the connector is queued or running, the call deletes nothing and fails with `ScalekitConflictException`: wait for the run with `actions.providers.getToolCollectionRun`, then call again.
+**Tool collection runs.** A tool collection run that regenerates the tools (the spec, the base URL or the auth patterns changed since the last completed run, or the spec references external files) creates the tool again while its operation is still in the spec: to keep it deleted, remove its endpoint from the spec. A run of an unchanged connector changes no tools, so `actions.invokeToolCollection` alone does not bring a deleted tool back. While a run of the connector is queued or processing, the call deletes nothing and fails with `ScalekitConflictException`: wait for the run with `actions.getToolCollectionRun`, then call again.
 
-**Retries.** This call is retried when the service is unavailable. Each attempt has its own tool-call deadline (`toolTimeoutMs`). If the first attempt had already deleted the tool and only its response was lost, the retry answers `ScalekitNotFoundException` although the tool was deleted. A connection reset is not retried: it raises `ScalekitServiceUnavailableException` at once, as does running out of retries, and the tool may or may not be deleted. To check, list the connector's tools (follow `nextPageToken`): a listing shows the current state, not what the first attempt did, so look for the tool's ID if you know it: a sync can create the name again. A retry by name looks the name up again: if a sync finished in between and created a tool with that name again, the retry deletes that one. A tool a sync creates again has a new ID, so a retry by ID cannot delete it.
+**Retries.** This call is retried when the service is unavailable. If the first attempt had already deleted the tool and only its response was lost, the retry answers `ScalekitNotFoundException` although the tool was deleted. A connection reset is not retried: it raises `ScalekitServiceUnavailableException` at once, as does running out of retries, and the tool may or may not be deleted. To check, list the connector's tools (follow `nextPageToken`): a listing shows the current state, not what the first attempt did, so look for the tool's ID if you know it: a run can create the name again. A retry by name looks the name up again: if a run finished in between and created a tool with that name again, the retry deletes that one. A tool a run creates again has a new ID, so a retry by ID cannot delete it.
 
 Errors:
 - `ScalekitValidationError` if `toolIdentifier` is not a string, or is empty or blank; nothing is sent.
-- `ScalekitBadRequestException` (the request validation error on `tool_identifier`) if `toolIdentifier` is longer than 2048 characters.
-- `ScalekitBadRequestException` (`invalid tool identifier`) if `toolIdentifier` has a control character other than surrounding whitespace, which the SDK trims.
-- `ScalekitBadRequestException` with the error code `FEATURE_NOT_ENABLED` if OpenAPI-sourced connectors are not enabled for your environment; nothing is deleted.
-- `ScalekitForbiddenException` if the client lacks the `agent_connectors:write` permission.
-- `ScalekitNotFoundException` (`custom tool not found`) if no deletable tool has this name or ID.
-- `ScalekitConflictException` with the error code `RESOURCE_ALREADY_EXISTS` if a sync of the connector is queued or running (the message names the connector, the run and its status): nothing is deleted, so call again once it has finished.
-- `ScalekitConflictException` with the error code `TOOL_NAME_AMBIGUOUS` when deleting by name and tools of more than one connector of your environment have this name (leftovers of an earlier connector): nothing is deleted, and the message names two of the connectors and the ID of each tool. Delete the tool by its ID.
-- `ScalekitNotImplementedException` (HTTP 501) if the backend is older than release v0.1.165.0, which does not have this call.
+- `ScalekitBadRequestException` (`400`, the request validation error on `tool_identifier`) if `toolIdentifier` is longer than 2048 characters.
+- `ScalekitBadRequestException` (`400`, `invalid tool identifier`) if `toolIdentifier` has a control character other than surrounding whitespace, which the SDK trims.
+- `ScalekitBadRequestException` (`400`) with the error code `FEATURE_NOT_ENABLED` if OpenAPI-sourced connectors are not enabled for your environment; nothing is deleted.
+- `ScalekitForbiddenException` (`403`) if the client lacks the `agent_connectors:write` permission.
+- `ScalekitNotFoundException` (`404`, `custom tool not found`) if no deletable tool has this name or ID.
+- `ScalekitConflictException` (`409`) with the error code `RESOURCE_ALREADY_EXISTS` if a tool collection run of the connector is queued or processing (the message names the connector, the run and its status): nothing is deleted, so call again once it has finished.
+- `ScalekitConflictException` (`409`) with the error code `TOOL_NAME_AMBIGUOUS` when deleting by name and tools of more than one connector of your environment have this name (leftovers of an earlier connector): nothing is deleted, and the message names two of the connectors and the ID of each tool. Delete the tool by its ID.
+- `ScalekitNotImplementedException` (`501`) if the backend is older than release v0.1.165.0, which does not have this call.
 - `ScalekitServerException` if a network or server error occurs.
 </dd>
 </dl>
@@ -7493,11 +7450,11 @@ Errors:
 
 ```typescript
 await scalekitClient.actions.deleteCustomTool({
-  toolIdentifier: 'a-acme_get_user',
+  toolIdentifier: 'a-acmeapi_deletepet',
 });
 
 // By ID: the `id` of the tool in actions.listTools({ provider })
-await scalekitClient.actions.deleteCustomTool({ toolIdentifier: 'tol_1234' });
+await scalekitClient.actions.deleteCustomTool({ toolIdentifier: 'tol_153432495478538376' });
 ```
 </dd>
 </dl>
@@ -7512,8 +7469,155 @@ await scalekitClient.actions.deleteCustomTool({ toolIdentifier: 'tol_1234' });
 <dl>
 <dd>
 
-**params:** `object`
-- `toolIdentifier: string` - Name of the tool, as listed for its connector (`a-<connector name>_<operation>`, matched in lower case), or its ID (`tol_1234`). Surrounding whitespace is ignored. At most 2048 characters
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `params.toolIdentifier` | `string` | Yes | Name of the tool, as listed for its connector (`a-<connector name>_<operation>`, matched in lower case), or its ID (`tol_153432495478538376`). Surrounding whitespace is ignored. At most 2048 characters |
+
+**Returns**: `Promise<void>` - Resolves once the tool is deleted.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">invokeToolCollection</a>(params) -> Promise&lt;ToolCollectionRun&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Queues a new tool collection run for a connector created from an OpenAPI spec, and returns it with the status `QUEUED`. The run reads the connector's stored spec again and brings its tools in line with it.
+
+Creating the connector, and changing its base URL or spec URL, already queue a run for you. Call this to pick up a spec that changed upstream, or to retry a run that failed. It returns at once: poll `actions.getToolCollectionRun` for the outcome.
+
+Scalekit checks the stored spec URL during this call, with the same checks and errors as `createCustomProvider`. A run of a spec that has not changed since the last completed run changes no tools: see [Unchanged specs](#the-tool-collection-run).
+
+Errors:
+- `ScalekitValidationError` if `params` or `providerIdentifier` is missing, or `providerIdentifier` is empty or blank; nothing is sent.
+- `ScalekitNotFoundException` (`404`) if no connector in your environment has that identifier.
+- `ScalekitBadRequestException` (`400`) if the connector was not created from an OpenAPI spec (`this connector is not sourced from an OpenAPI spec`), if OpenAPI-sourced connectors are not enabled for your environment (error code `FEATURE_NOT_ENABLED`), or if the stored spec URL fails the check.
+- `ScalekitConflictException` (`409`), with the error code `RESOURCE_ALREADY_EXISTS`, if a run is already in progress: a connector has at most one active run.
+- `ScalekitServiceUnavailableException` (`503`) if the service is unavailable. This call is not retried automatically, because the first attempt may already have queued a run. You cannot tell whether it did, and a run you then find may be another caller's: call `actions.getToolCollectionRun`, wait for an active run to finish, and invoke again if you need a run that started after your call. The one exception is an HTTP 429 from the edge: that request never reached Scalekit, so it is retried.
+- `ScalekitServerException` if a network or server error occurs.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const run = await scalekitClient.actions.invokeToolCollection({
+  providerIdentifier: 'ACMEAPI:70219645518265104',
+});
+console.log(run.runId, run.status); // 'QUEUED'
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `params.providerIdentifier` | `string` | Yes | The connector's identifier (`NAME:environment-id`, from `provider.identifier`), not `provider.id`. Whitespace around it is removed |
+
+**Returns**: `Promise<ToolCollectionRun>` - The queued run, with the status `QUEUED`.
+
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.actions.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/actions.ts">getToolCollectionRun</a>(params) -> Promise&lt;ToolCollectionRun&gt;</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Gets one tool collection run of a connector created from an OpenAPI spec: its status, its counters and, once it has finished, the operations that were skipped and why. Omit `runId`, or pass `'latest'` (an empty or blank string means the same), for the connector's newest run.
+
+After `actions.providers.createCustomProvider`, after `actions.invokeToolCollection` and after an `actions.providers.updateCustomProvider` that queued a run (a base URL or spec URL change: see its rules), poll it until `status` is `COMPLETED` or `FAILED`. Any other update queues no run, so this call then returns an older run, or `ScalekitNotFoundException` if there is none. After your own `actions.invokeToolCollection`, pass the `runId` it returned: without one you get the newest run, which can be one that another caller queued. Right after `actions.providers.createCustomProvider` the first run is still being queued in the background, so this call can answer `ScalekitNotFoundException` for a moment. If it keeps doing so for about 45 seconds, queueing failed (Scalekit only logs it): call `actions.invokeToolCollection` once. See [The tool collection run](#the-tool-collection-run) for the fields of the result.
+
+Errors:
+- `ScalekitValidationError` if `params` or `providerIdentifier` is missing, or `providerIdentifier` is empty or blank, or `runId` is given and is not a string; nothing is sent.
+- `ScalekitNotFoundException` (`404`) if no connector has that identifier, if the connector has no run yet, or if `runId` is not one of its runs (`tool collection run not found`).
+- `ScalekitBadRequestException` (`400`) if `runId` is malformed (`invalid run_id`).
+- `ScalekitServerException` if a network or server error occurs.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```typescript
+const run = await scalekitClient.actions.getToolCollectionRun({
+  providerIdentifier: 'ACMEAPI:70219645518265104',
+  runId: 'latest', // or the runId that invokeToolCollection returned
+});
+console.log(run.status, run.toolsCreated, run.skippedTools.length);
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `params.providerIdentifier` | `string` | Yes | The connector's identifier (`NAME:environment-id`, from `provider.identifier`), not `provider.id`. Whitespace around it is removed |
+| `params.runId` | `string` | No | A run's `runId`. Omit it, or pass `'latest'` (an empty or blank string means the same), for the connector's newest run. Whitespace around it is removed |
+
+**Returns**: `Promise<ToolCollectionRun>` - The run: its status, its counters and, once it has finished, the skipped operations. See [The tool collection run](#the-tool-collection-run) for the fields.
 
 </dd>
 </dl>
@@ -8326,11 +8430,17 @@ Type: `CreateMcpSessionTokenParams`. Set `mcpConfigId` or `connectionName`; if b
 
 A custom connector (custom provider) puts a service Scalekit doesn't ship behind the same flow as a built-in one: users connect an account, you call the service through `actions.request`, and Scalekit injects the credentials.
 
-A connector is sourced from an MCP server (`proxyUrl`) or from an OpenAPI spec (`openapiSpecUrl`); set exactly one. A connector created from an OpenAPI spec gets a tool for each operation it supports, generated by a background tool collection run that you can follow with `getToolCollectionRun`. The operations it cannot convert are listed in `skippedTools`. See [Connectors created from an OpenAPI spec](#connectors-created-from-an-openapi-spec).
+A connector is sourced from an MCP server (`proxyUrl`) or from an OpenAPI spec (`openapiSpecUrl`); set exactly one. A connector created from an OpenAPI spec gets a tool for each operation it supports, generated by a background tool collection run that you can follow with `actions.getToolCollectionRun`. The operations it cannot convert are listed in `skippedTools`. See [Connectors created from an OpenAPI spec](#connectors-created-from-an-openapi-spec).
+
+Users connect their accounts to a connection on the connector. The connections of a custom connector are AgentKit connections: create one with `actions.createConnection` and change its settings with `actions.updateConnection`. See [Connections on a custom connector](#connections-on-a-custom-connector).
 
 `authPatterns` are passed to the API as-is, so their keys are snake_case (`type`, `display_name`, `field_name`, `input_type`) rather than the camelCase used elsewhere in this SDK. Exactly one pattern is supported today: `createCustomProvider` and `updateCustomProvider` throw `ScalekitValidationError` for more than one, and send nothing. `type` is one of `OAUTH`, `BEARER`, `API_KEY`, `BASIC` or `NO_AUTH`. `BEARER`, `API_KEY` and `BASIC` patterns take `fields`; an `OAUTH` pattern collects its own credentials through `oauth_config`, and `NO_AUTH` takes none. A `BASIC` pattern has the two fields `username` and `password` (`input_type: 'password'` for the second), which Scalekit sends as an HTTP Basic `Authorization` header. Use `BASIC` on a connector created from an OpenAPI spec or another REST connector, not on one that fronts an MCP server.
 
-**Credentials in tool calls.** On a connector created from an OpenAPI spec, `actions.executeTool` sends the connected account's static credential (`BEARER`, `API_KEY` or `BASIC`) only for an operation that requires authentication: its own `security` list, or the spec's top-level one when the operation has none, is not empty and has no empty `{}` alternative. Any other operation has no authentication: the call goes out without credentials, and an upstream that needs them answers 401. That includes an operation with `security: []`, which overrides a top-level requirement, and one whose list has an empty `{}` alternative, because authentication is then optional. The scheme type in the spec is not read: the connector's auth pattern decides which header is sent. A request through `actions.request` attaches the credential whatever the spec says. An upstream 401 on a tool call sets a static-credential connected account to `ConnectorStatus.EXPIRED`, even when the call carried no credential. That call raises `ScalekitToolUnauthorizedException` (`toolErrorCode` `REAUTHENTICATION_NEEDED`), and every later call of the account raises it too, with `toolErrorCode` `UNAUTHENTICATED` and the message `token expired`. Update the account with its credentials again to make it `ConnectorStatus.ACTIVE`; for a `BASIC` account: `actions.updateConnectedAccount({ connectedAccountId, authorizationDetails: { details: { case: 'staticAuth', value: { details: { username, password } } } } })`.
+**Credentials in tool calls.** On a connector created from an OpenAPI spec, `actions.executeTool` sends the connected account's static credential (`BEARER`, `API_KEY` or `BASIC`) only for an operation that requires authentication: its own `security` list, or the spec's top-level one when the operation has none, is not empty and has no empty `{}` alternative.
+
+- Any other operation has no authentication: the call goes out without credentials, and an upstream that needs them answers 401. That includes an operation with `security: []`, which overrides a top-level requirement, and one whose list has an empty `{}` alternative, because authentication is then optional.
+- The scheme type in the spec is not read: the connector's auth pattern decides which header is sent. A request through `actions.request` attaches the credential whatever the spec says.
+- An upstream 401 on a tool call sets a static-credential connected account to `ConnectorStatus.EXPIRED`, even when the call carried no credential. That call raises `ScalekitToolUnauthorizedException` (`toolErrorCode` `REAUTHENTICATION_NEEDED`), and every later call of the account raises it too, with `toolErrorCode` `UNAUTHENTICATED` and the message `token expired`. Update the account with its credentials again to make it `ConnectorStatus.ACTIVE`; for a `BASIC` account: `actions.updateConnectedAccount({ connectedAccountId, authorizationDetails: { details: { case: 'staticAuth', value: { details: { username, password } } } } })`.
 
 Access via `scalekitClient.actions.providers`.
 
@@ -8346,11 +8456,21 @@ Access via `scalekitClient.actions.providers`.
 <dl>
 <dd>
 
-Creates a custom connector. The response's `provider.identifier` is the id you pass to `updateCustomProvider`, `deleteCustomProvider`, `invokeToolCollection` and `getToolCollectionRun`.
+Creates a custom connector, sourced from an MCP server or from an OpenAPI spec. The connector is identified by `provider.identifier` in the response (not by `provider.id`): pass it as `identifier` to `updateCustomProvider` and `deleteCustomProvider`, as `provider` to `actions.createConnection`, and as `providerIdentifier` to `actions.invokeToolCollection` and `actions.getToolCollectionRun`.
 
-Set exactly one of `proxyUrl` (an MCP server, or a REST service you call through `actions.request`) and `openapiSpecUrl` (an OpenAPI spec to generate tools from). Both fail with a message that starts `[invalid_argument] proxy_url cannot be set together with openapi_spec_url`, and neither with one that starts `[invalid_argument] either proxy_url or openapi_spec_url must be set`; each goes on with a dash and a sentence that says what to do instead. Both URLs must start with `https://` and are at most 2048 characters. For what happens with `openapiSpecUrl`, see [Connectors created from an OpenAPI spec](#connectors-created-from-an-openapi-spec).
+Set exactly one of `proxyUrl` (an MCP server, or a REST service you call through `actions.request`) and `openapiSpecUrl` (an OpenAPI spec to generate tools from). Both URLs must start with `https://` and are at most 2048 characters. For what happens with `openapiSpecUrl`, see [Connectors created from an OpenAPI spec](#connectors-created-from-an-openapi-spec).
 
-A create with `openapiSpecUrl` is not retried automatically when the service is unavailable, because the first attempt may already have stored the connector and a retry would fail with `already_exists`. The call raises `ScalekitServiceUnavailableException` at once: look the connector up with `listProviders` before you create it again. A timeout (`ScalekitGatewayTimeoutException`) is not retried either, and the server may still finish the create, so look the connector up the same way. The one exception is an HTTP 429 from the edge: that request never reached Scalekit, so it is retried.
+A create with `openapiSpecUrl` is not retried automatically when the service is unavailable, because the first attempt may already have stored the connector and a retry would fail with `already_exists`. The call raises `ScalekitServiceUnavailableException` at once: look the connector up with `listProviders` before you create it again. The one exception is an HTTP 429 from the edge: that request never reached Scalekit, so it is retried.
+
+Errors:
+- `ScalekitValidationError` if `authPatterns` holds more than one pattern; nothing is sent.
+- `ScalekitBadRequestException` (`400`) if you set both `proxyUrl` and `openapiSpecUrl` (a message that starts `[invalid_argument] proxy_url cannot be set together with openapi_spec_url`) or neither (`[invalid_argument] either proxy_url or openapi_spec_url must be set`). Each message goes on with a dash and a sentence that says what to do instead.
+- `ScalekitBadRequestException` (`400`, `[invalid_argument] Validation error`) if a URL does not start with `https://` or is longer than 2048 characters. A spec URL is checked this way before the spec is fetched.
+- `ScalekitBadRequestException` (`400`, `[invalid_argument] openapi_spec_url failed validation: <reason>`) if the spec fails the check. The reasons are under [Connectors created from an OpenAPI spec](#connectors-created-from-an-openapi-spec).
+- `ScalekitBadRequestException` (`400`) with the error code `FEATURE_NOT_ENABLED` (`OpenAPI-sourced connectors are not enabled for this environment`) if you set `openapiSpecUrl` and your environment has not enabled OpenAPI-sourced connectors.
+- `ScalekitConflictException` (`409`) with the error code `RESOURCE_ALREADY_EXISTS` (`[already_exists] an OpenAPI connector named "<NAME>" already exists in this environment`) if you set `openapiSpecUrl` and the environment already holds an OpenAPI-sourced connector with this name, ignoring case and spaces.
+- `ScalekitServiceUnavailableException` (`503`) if the service is unavailable: with `openapiSpecUrl` it is not retried, see above.
+- `ScalekitServerException` if a network or server error occurs.
 </dd>
 </dl>
 </dd>
@@ -8373,7 +8493,13 @@ const authPatterns: AuthPattern[] = [
     display_name: 'Bearer Token',
     description: 'Authenticate with an Acme API token.',
     fields: [
-      { field_name: 'token', label: 'API Token', input_type: 'password' },
+      {
+        field_name: 'token',
+        label: 'API Token',
+        input_type: 'password',
+        hint: 'Create a token under Settings > API in Acme.',
+        required: true,
+      },
     ],
   },
 ];
@@ -8395,39 +8521,41 @@ const authPatterns: AuthPattern[] = [
 // Public server, no credentials:
 //   { type: 'NO_AUTH', display_name: 'No Auth', description: '...', fields: [] }
 
+// A connector for a REST service or an MCP server (`proxyUrl`), with every parameter that applies
 const res = await scalekitClient.actions.providers.createCustomProvider({
   displayName: 'Acme Tickets',
   description: 'Internal ticketing API',
   proxyUrl: 'https://api.acme.example.com',
+  proxyEnabled: true, // ignored: a custom connector is always created with proxyEnabled true
+  iconSrc: 'https://acme.example.com/icon.png',
+  metadata: { team: 'support', environment: 'production' },
   authPatterns,
 });
 console.log(res.provider?.identifier);
 ```
 
-**Creating a connector from an OpenAPI spec.** Pass `openapiSpecUrl` instead of `proxyUrl`:
+**Creating a connector from an OpenAPI spec.** Pass `openapiSpecUrl` instead of `proxyUrl`; every other parameter stays the same:
 
 ```ts
 const { provider } = await scalekitClient.actions.providers.createCustomProvider({
   displayName: 'Acme Tickets',
+  description: 'Internal ticketing API',
   openapiSpecUrl: 'https://api.acme.example.com/openapi.json',
-  authPatterns: [
-    {
-      type: 'BEARER',
-      display_name: 'Bearer Token',
-      fields: [{ field_name: 'token', label: 'API Token', input_type: 'password' }],
-    },
-  ],
+  proxyEnabled: true, // ignored, as above
+  iconSrc: 'https://acme.example.com/icon.png',
+  metadata: { team: 'support', environment: 'production' },
+  authPatterns, // the Bearer pattern from the example above
 });
 // provider.proxyUrl is empty here: Scalekit fills the base URL from the spec.
-// Tools are generated in the background; see getToolCollectionRun.
+// Tools are generated in the background; follow them with actions.getToolCollectionRun.
 console.log(provider?.identifier, provider?.openapiSpecUrl);
 ```
 
-**Connecting an account to a multi-header connector.** Create a connector whose `API_KEY` fields each set `header_name`, add a connection on it, then supply one credential per header, keyed by the header name, under `staticAuth.details`. Scalekit derives each stored `field_name` from the header name. Pass the generated message shape below; a snake_case `{ static_auth: { ... } }` object is silently ignored.
+**Connecting an account to a multi-header connector.** Create a connector whose `API_KEY` fields each set `header_name`, create a connection on it with `actions.createConnection`, then supply one credential per header, keyed by the header name, under `staticAuth.details`. Scalekit derives each stored `field_name` from the header name. Pass the generated message shape below; a snake_case `{ static_auth: { ... } }` object is silently ignored.
 
 ```ts
 // 1. A connector that sends two credentials as separate headers.
-await scalekitClient.actions.providers.createCustomProvider({
+const { provider: gateway } = await scalekitClient.actions.providers.createCustomProvider({
   displayName: 'Acme Gateway',
   proxyUrl: 'https://api.acme.example.com',
   authPatterns: [
@@ -8442,9 +8570,13 @@ await scalekitClient.actions.providers.createCustomProvider({
   ],
 });
 
-// 2. Add a connection on it, then connect an account with one value per header.
+// 2. A connection on it, then a connected account with one value per header.
+await scalekitClient.actions.createConnection({
+  provider: gateway!.identifier,
+  connectionName: 'my-connection',
+});
 await scalekitClient.actions.createConnectedAccount({
-  connectionName: 'my-connection', // the connection created on this connector
+  connectionName: 'my-connection',
   identifier: 'user_123',
   authorizationDetails: {
     details: {
@@ -8471,56 +8603,42 @@ Scalekit rejects a violation of these rules with the error code `INVALID_HEADER_
 <dl>
 <dd>
 
-**params.displayName:** `string` - Letters, digits and spaces only. End it with "MCP" when the connector fronts an MCP server.
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `params.displayName` | `string` | Yes | Letters, digits and spaces only. End it with "MCP" when the connector fronts an MCP server |
+| `params.proxyUrl` | `string` | Yes, or `openapiSpecUrl` | HTTPS URL of the upstream service: the MCP server URL for an MCP connector, at most 2048 characters. Leave it out when you set `openapiSpecUrl` |
+| `params.openapiSpecUrl` | `string` | Yes, or `proxyUrl` | HTTPS URL of an OpenAPI spec, in JSON or YAML, to generate the connector's tools from. Swagger 2.0 and 1.x documents are converted. At most 2048 characters. Leave it out when you set `proxyUrl` |
+| `params.proxyEnabled` | `boolean` | No | Ignored: a custom connector is always created with `proxyEnabled` true, whatever you pass. Kept so that existing calls keep working |
+| `params.description` | `string` | No | Description |
+| `params.authPatterns` | `AuthPattern[]` | No | How users authenticate. Exactly one pattern is supported: more than one throws `ScalekitValidationError`, and nothing is sent. The properties of an `AuthPattern` and of its `AuthField` are listed below |
+| `params.iconSrc` | `string` | No | Icon URL |
+| `params.metadata` | `Record<string, string>` | No | Arbitrary key-value metadata |
 
-</dd>
-</dl>
-<dl>
-<dd>
+An `AuthPattern` is passed to the API as-is, so its keys are snake_case:
 
-**params.proxyUrl?:** `string` - HTTPS URL of the upstream service: the MCP server URL for an MCP connector, at most 2048 characters. Leave it out when you set `openapiSpecUrl`.
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `type` | `string` | Yes | One of `OAUTH`, `BEARER`, `API_KEY`, `BASIC` or `NO_AUTH`. A `BASIC` pattern takes the two fields `username` and `password`: use it on a connector created from an OpenAPI spec or another REST connector, not on one that fronts an MCP server |
+| `display_name` | `string` | Yes | Name of this method, shown to the user while they connect |
+| `description` | `string` | No | Short explanation of this method, shown to the user |
+| `is_mcp` | `boolean` | No | Set `true` when the connector fronts an MCP server. Scalekit sets it to `false` on a connector created from an OpenAPI spec, whatever you send |
+| `is_open_api` | `boolean` | No | Set by Scalekit, never by you: `true` on every pattern of a connector created from an OpenAPI spec, whatever you send. When you update such a connector, send the stored patterns back unchanged, `is_open_api` included, or the update is rejected |
+| `fields` | `AuthField[]` | No | Credential inputs for `BEARER`, `API_KEY` and `BASIC`. Leave it empty for `OAUTH` and `NO_AUTH` |
+| `oauth_config` | `object` | No | OAuth settings for an `OAUTH` pattern. Pass `{}` to use the upstream server's discovered defaults |
+| `auth_header_key_override` | `string` | No | The header an `API_KEY` credential is sent in, when the upstream expects something other than the default. It belongs to single-key mode: leave it out when a field sets `header_name` |
 
-</dd>
-</dl>
-<dl>
-<dd>
+An `AuthField` is one credential input:
 
-**params.openapiSpecUrl?:** `string` - HTTPS URL of an OpenAPI spec, in JSON or YAML, to generate the connector's tools from. Swagger 2.0 and 1.x documents are converted. At most 2048 characters. Leave it out when you set `proxyUrl`.
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `field_name` | `string` | Yes | Key the credential is stored under. Use `token` for a `BEARER` pattern, `api_key` for a single-key `API_KEY` pattern, and `username` and `password` for a `BASIC` pattern. When `header_name` is set, Scalekit derives it from the header name |
+| `label` | `string` | No | Label shown above the input |
+| `input_type` | `string` | No | `text`, `password` or `select`. Use `password` for anything secret so the UI masks it |
+| `hint` | `string` | No | Helper text shown with the input |
+| `required` | `boolean` | No | Whether the user must fill this in before the connection can be saved |
+| `header_name` | `string` | No | On an `API_KEY` pattern, sends this field's value as this exact HTTP header (case preserved). Setting it on any field puts the pattern in multiple-headers mode, where each field is sent as its own header |
 
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.proxyEnabled?:** `boolean` - Ignored: a custom connector is always created with `proxyEnabled` true, whatever you pass. Kept so that existing calls keep working.
-
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.description?:** `string` - Description
-
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.authPatterns?:** `AuthPattern[]` - How users authenticate: `{ type: 'OAUTH' | 'BEARER' | 'API_KEY' | 'BASIC' | 'NO_AUTH'; display_name: string; description?: string; is_mcp?: boolean; is_open_api?: boolean; fields?: AuthField[]; oauth_config?: object; auth_header_key_override?: string }`, where each `AuthField` is `{ field_name: string; label?: string; input_type?: 'text' | 'password' | 'select'; hint?: string; required?: boolean; header_name?: string }`. On an `API_KEY` pattern, `header_name` sends that field's value as its own HTTP header (case preserved); setting it on any field puts the pattern in multiple-headers mode. Leave it unset for single-key mode, which uses `auth_header_key_override`. Set `is_mcp: true` when the connector fronts an MCP server. `is_open_api` is set by Scalekit on a connector created from an OpenAPI spec, whatever you send; when you update such a connector, send the stored patterns back unchanged, `is_open_api` included, or the update is rejected. `is_mcp` is forced to `false` there. Only one pattern is supported: more than one throws `ScalekitValidationError`, and nothing is sent.
-
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.iconSrc?:** `string` - Icon URL
-
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.metadata?:** `Record<string, string>` - Arbitrary key-value metadata
+**Returns**: `Promise<CreateProviderResponse>` - `{ provider }`, the created connector.
 
 </dd>
 </dl>
@@ -8549,18 +8667,33 @@ Updates a custom connector.
 Treat this as a PUT: read the current connector with `listProviders` first, then send back every field you want to keep alongside the ones you are changing. `authPatterns` on a response is already decoded into plain `AuthPattern` objects, so `provider.authPatterns` and `provider.proxyEnabled` can be passed back as-is.
 
 What the server does with each field:
-- `displayName` and `authPatterns` are required on every update, and so is `proxyUrl` for an MCP-sourced connector (`[invalid_argument] proxy_url is required for an MCP-sourced connector`). Leaving out `authPatterns` fails with `[invalid_argument] Validation error`, and it replaces the whole list rather than merging into it. A pattern's `type` and `is_mcp` cannot be changed.
+- `displayName` and `authPatterns` are required on every update, and so is `proxyUrl` for an MCP-sourced connector. `authPatterns` replaces the whole list rather than merging into it. A pattern's `type` and `is_mcp` cannot be changed.
 - `metadata` replaces the stored map, so leaving it out clears it.
 - `proxyEnabled` is always applied. It defaults to `true`, the value `createCustomProvider` always sets, so pass the current value to keep a connector that has proxying switched off (created that way by another client such as the dashboard or the REST API, or by an earlier release of this SDK) as it is.
 - `description` and `iconSrc` keep their stored values when left out.
 
 A connector created from an OpenAPI spec (`provider.openapiSpecUrl` is set) follows stricter rules, because Scalekit manages its tools and its auth:
-- Only `displayName`, `description`, `iconSrc`, `metadata` and `proxyUrl` can change, apart from `openapiSpecUrl` (below). A different `proxyEnabled`, or `authPatterns` that differ in content from the stored ones, fail with `[invalid_argument] an OpenAPI-sourced connector can only update metadata, display_name, description, icon_src and proxy_url`. Send back `provider.proxyEnabled` and `provider.authPatterns` from `listProviders` exactly as they came, `is_open_api` included: sending the stored values is not a change.
+- Only `displayName`, `description`, `iconSrc`, `metadata` and `proxyUrl` can change, apart from `openapiSpecUrl` (below). Send back `provider.proxyEnabled` and `provider.authPatterns` from `listProviders` exactly as they came, `is_open_api` included: sending the stored values is not a change.
 - `proxyUrl` is the connector's base URL. Leave it out to keep the stored value. A different value is saved and re-reads the spec, so every tool is generated against the new base URL. A value that differs only by a trailing slash is saved as sent but queues no run.
-- `openapiSpecUrl` is fixed once the connector exists. Sending the stored URL changes nothing. A different URL fails with the error code `FEATURE_NOT_ENABLED` and `updating the OpenAPI spec URL of an existing connector is not enabled for this workspace`, unless your workspace has that capability enabled. When it does, Scalekit checks the new spec as `createCustomProvider` does, saves the URL and re-reads the spec. A connector that was not created from a spec can never get one: `[invalid_argument] openapi_spec_url can only be set on a connector that was created as an OpenAPI-sourced connector`.
-- Changing `proxyUrl` or `openapiSpecUrl` queues a tool collection run; follow it with `getToolCollectionRun`. If a run is already in progress, the new value is still saved but no run is queued, and the call fails with `ScalekitConflictException`. After a `proxyUrl` change the message is `[already_exists] base_url was saved, but an ingestion run is already in progress for this connector — call TriggerToolCollection once it completes to re-ingest against the new base_url`. Call `invokeToolCollection` once that run has finished.
+- `openapiSpecUrl` is fixed once the connector exists. Sending the stored URL changes nothing. Where your workspace has changing it enabled, Scalekit checks a different URL as `createCustomProvider` does, saves it and re-reads the spec. A connector that was not created from a spec can never get one.
+- Changing `proxyUrl` or `openapiSpecUrl` queues a tool collection run; follow it with `actions.getToolCollectionRun`. If a run is already in progress, the new value is still saved but no run is queued, and the call fails with `ScalekitConflictException`. Call `actions.invokeToolCollection` once that run has finished.
 - Both changes need OpenAPI-sourced connectors to be enabled for your environment, as on create.
-- With `openapiSpecUrl` the call is not retried automatically when the service is unavailable (`ScalekitServiceUnavailableException`), because the first attempt may already have saved the new URL, and a repeat finds nothing to change: it queues no run and still succeeds. Read the connector back with `listProviders`. If its `openapiSpecUrl` is the new value, wait for any active run to finish with `getToolCollectionRun` and call `invokeToolCollection`; otherwise send the update again. A timeout (`ScalekitGatewayTimeoutException`) is not retried either, and the server may have finished, so check the same way before you repeat the call. An HTTP 429 from the edge never reached Scalekit and is retried. An update without `openapiSpecUrl` is retried as before, also one that changes the base URL (`proxyUrl`) of an OpenAPI-sourced connector: that change queues a run too, and a repeat after a lost answer finds nothing to change and queues none, so after such an update call `getToolCollectionRun`, and `invokeToolCollection` if no new run appeared.
+
+With `openapiSpecUrl` the call is not retried automatically when the service is unavailable (`ScalekitServiceUnavailableException`), because the first attempt may already have saved the new URL, and a repeat finds nothing to change: it queues no run and still succeeds. Read the connector back with `listProviders`. If its `openapiSpecUrl` is the new value, wait for any active run to finish with `actions.getToolCollectionRun` and call `actions.invokeToolCollection`; otherwise send the update again. An HTTP 429 from the edge never reached Scalekit and is retried. An update without `openapiSpecUrl` is retried as before, also one that changes the base URL (`proxyUrl`) of a connector created from an OpenAPI spec: that change queues a run too, and a repeat after a lost answer finds nothing to change and queues none, so after such an update call `actions.getToolCollectionRun`, and `actions.invokeToolCollection` if no new run appeared.
+
+Errors:
+- `ScalekitValidationError` if `authPatterns` holds more than one pattern; nothing is sent.
+- `ScalekitNotFoundException` (`404`) if no connector has this `identifier`.
+- `ScalekitBadRequestException` (`400`) with one of these messages or error codes:
+  - `[invalid_argument] Validation error` if `authPatterns` is left out.
+  - `[invalid_argument] proxy_url is required for an MCP-sourced connector` if `proxyUrl` is left out for such a connector.
+  - `[invalid_argument] an OpenAPI-sourced connector can only update metadata, display_name, description, icon_src and proxy_url` if you send a different `proxyEnabled`, or `authPatterns` that differ in content from the stored ones, for a connector created from an OpenAPI spec.
+  - `[invalid_argument] openapi_spec_url can only be set on a connector that was created as an OpenAPI-sourced connector` if you send an `openapiSpecUrl` for any other connector.
+  - The error code `FEATURE_NOT_ENABLED` with `OpenAPI-sourced connectors are not enabled for this environment`, if you change `proxyUrl` or `openapiSpecUrl` and your environment has not enabled OpenAPI-sourced connectors.
+  - The error code `FEATURE_NOT_ENABLED` with `updating the OpenAPI spec URL of an existing connector is not enabled for this workspace`, if you send a different `openapiSpecUrl` and your workspace has not enabled changing it.
+- `ScalekitConflictException` (`409`) if a run is already in progress when you change `proxyUrl` or `openapiSpecUrl`: the new value is saved, but no run is queued. After a `proxyUrl` change the message is `[already_exists] base_url was saved, but an ingestion run is already in progress for this connector — call TriggerToolCollection once it completes to re-ingest against the new base_url`.
+- `ScalekitServiceUnavailableException` (`503`) if the service is unavailable: see the retry rules above.
+- `ScalekitServerException` if a network or server error occurs.
 </dd>
 </dl>
 </dd>
@@ -8580,11 +8713,12 @@ import { ProviderType } from '@scalekit-sdk/node';
 // Read the current state first, then send back everything you want to keep.
 // Pass ProviderType.CUSTOM: without it, only built-in connectors are searched.
 const { providers } = await scalekitClient.actions.providers.listProviders({
-  identifier: '<PROVIDER_IDENTIFIER>',
+  identifier: 'ACMEAPI:70219645518265104',
   providerType: ProviderType.CUSTOM,
 });
 const current = providers[0];
 
+// A connector for a REST service or an MCP server, with every parameter that applies
 const res = await scalekitClient.actions.providers.updateCustomProvider({
   identifier: current.identifier,
   displayName: current.displayName,
@@ -8596,6 +8730,24 @@ const res = await scalekitClient.actions.providers.updateCustomProvider({
   metadata: { ...current.metadata, updated_by: 'sync-job' },
 });
 console.log(res.provider?.description);
+```
+
+**Updating a connector created from an OpenAPI spec.** Send back the stored `openapiSpecUrl`, `authPatterns` and `proxyEnabled` unchanged, and change only what the rules above allow:
+
+```ts
+const { provider } = await scalekitClient.actions.providers.updateCustomProvider({
+  identifier: current.identifier,
+  displayName: current.displayName,
+  proxyUrl: 'https://api-v2.acme.example.com', // a new base URL: every tool is generated again against it
+  openapiSpecUrl: current.openapiSpecUrl, // the stored URL: sending it changes nothing
+  authPatterns: current.authPatterns, // unchanged, is_open_api included
+  proxyEnabled: current.proxyEnabled, // unchanged
+  description: 'Internal ticketing API, v2',
+  iconSrc: current.iconSrc,
+  metadata: { ...current.metadata, updated_by: 'sync-job' },
+});
+// The new base URL queues a tool collection run: follow it with actions.getToolCollectionRun.
+console.log(provider?.proxyUrl);
 ```
 </dd>
 </dl>
@@ -8610,64 +8762,19 @@ console.log(res.provider?.description);
 <dl>
 <dd>
 
-**params.identifier:** `string` - From `provider.identifier` on a create or list response
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `params.identifier` | `string` | Yes | The connector's identifier (`NAME:environment-id`, from `provider.identifier`), not `provider.id` |
+| `params.displayName` | `string` | Yes | Required on every update |
+| `params.proxyUrl` | `string` | For an MCP-sourced connector | Required for an MCP-sourced connector. For a connector created from an OpenAPI spec this is its base URL, and leaving it out keeps the stored value |
+| `params.openapiSpecUrl` | `string` | No | Only for a connector created from an OpenAPI spec. Sending the stored URL changes nothing; a different one is rejected unless your workspace has that capability enabled |
+| `params.authPatterns` | `AuthPattern[]` | Yes | Required on every update. Replaces the existing list. It has the same properties as in [`createCustomProvider`](#custom-connectors). For a connector created from an OpenAPI spec, send back `provider.authPatterns` unchanged. Only one pattern is supported: more than one throws `ScalekitValidationError`, and nothing is sent |
+| `params.proxyEnabled` | `boolean` | No | Whether Scalekit proxies requests. Always sent; defaults to `true`, so pass `current.proxyEnabled` to keep the stored value |
+| `params.description` | `string` | No | Description. Keeps the stored value when left out |
+| `params.iconSrc` | `string` | No | Icon URL. Keeps the stored value when left out |
+| `params.metadata` | `Record<string, string>` | No | Arbitrary key-value metadata. Replaces the stored map, so leaving it out clears it |
 
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.displayName:** `string` - Required on every update
-
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.proxyUrl?:** `string` - Required for an MCP-sourced connector. For a connector created from an OpenAPI spec this is its base URL, and leaving it out keeps the stored value.
-
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.openapiSpecUrl?:** `string` - Only for a connector created from an OpenAPI spec. Sending the stored URL changes nothing; a different one is rejected unless your workspace has that capability enabled.
-
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.authPatterns:** `AuthPattern[]` - Required on every update. Replaces the existing list. For a connector created from an OpenAPI spec, send back `provider.authPatterns` unchanged. Only one pattern is supported: more than one throws `ScalekitValidationError`, and nothing is sent.
-
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**params.proxyEnabled?:** `boolean` - Whether Scalekit proxies requests. Always sent; defaults to `true`, so pass `current.proxyEnabled` to keep the stored value.
-
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.description?:** `string` - Description. Keeps the stored value when left out.
-
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.iconSrc?:** `string` - Icon URL. Keeps the stored value when left out.
-
-</dd>
-</dl>
-<dl>
-<dd>
-
-**params.metadata?:** `Record<string, string>` - Arbitrary key-value metadata. Replaces the stored map, so leaving it out clears it.
+**Returns**: `Promise<UpdateProviderResponse>` - `{ provider }`, the updated connector.
 
 </dd>
 </dl>
@@ -8691,78 +8798,17 @@ console.log(res.provider?.description);
 <dl>
 <dd>
 
-Deletes a custom connector. Remove its connections and connected accounts first; the server won't delete a connector that still has connections, and fails with `ScalekitBadRequestException` (error code `PROVIDER_HAS_EXISTING_CONNECTIONS`, message `[invalid_argument] cannot delete custom provider with existing connections`). A connector that does not exist fails with `ScalekitNotFoundException`.
+Deletes a custom connector. Deleting a connector cannot be undone.
 
-Connected accounts come off with `actions.deleteConnectedAccount`, and then the connector's connections with `actions.deleteConnection`. `connection.deleteConnection` takes an `organizationId`, which an app connection does not have, so it is not the one to use here. `actions.deleteConnection` throws `CONNECTION_IN_USE` while a Virtual MCP configuration still maps the connection: remove it from those configurations first.
+Remove its connections and connected accounts first: the server won't delete a connector that still has connections. Connected accounts come off with `actions.deleteConnectedAccount`, and then the connector's connections with `actions.deleteConnection`, which fails with the code `CONNECTION_IN_USE` while connected accounts or Virtual MCP servers still use the connection: remove those first.
 
-A connector created from an OpenAPI spec cannot be deleted while a tool collection run of it is queued or processing: the call throws `ScalekitConflictException` (error code `RESOURCE_ALREADY_EXISTS`) and deletes nothing. Wait for the run with `getToolCollectionRun`, then call again until the conflict stops.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```typescript
-await scalekitClient.actions.providers.deleteCustomProvider('<PROVIDER_IDENTIFIER>');
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**identifier:** `string` - From `provider.identifier` on a create or list response
-
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">invokeToolCollection</a>(providerIdentifier) -> Promise&lt;ToolCollectionRun&gt;</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Queues a new tool collection run for a connector created from an OpenAPI spec, and returns it with the status `QUEUED`. The run reads the connector's stored spec again and brings its tools in line with it.
-
-Creating the connector, and changing its base URL or spec URL, already queue a run for you. Call this to pick up a spec that changed upstream, or to retry a run that failed. It returns at once: poll `getToolCollectionRun` for the outcome.
-
-Scalekit checks the stored spec URL during this call, with the same checks and errors as `createCustomProvider`. When the spec, the connector's base URL and its auth patterns are all unchanged since the last completed run, and the spec does not reference external files, the run changes no tools and reports `toolsCreated`, `toolsUpdated` and `toolsDeleted` as 0. If the first run fills in the base URL, that counts as a change: the next run updates every tool, and only the run after that reports 0.
-
-The server allows the spec check up to 2 minutes, while the SDK's default `timeoutMs` is 20 seconds, so raise `timeoutMs` when you create the client if your spec is slow to download.
+A connector created from an OpenAPI spec cannot be deleted while a tool collection run of it is queued or processing, and nothing is deleted. Wait for the run with `actions.getToolCollectionRun`, then call again until the conflict stops.
 
 Errors:
-- `ScalekitValidationError` if `providerIdentifier` is empty or blank; nothing is sent.
-- `ScalekitNotFoundException` if no connector in your environment has that identifier.
-- `ScalekitBadRequestException` if the connector was not created from an OpenAPI spec (`this connector is not sourced from an OpenAPI spec`), if OpenAPI-sourced connectors are not enabled for your environment (error code `FEATURE_NOT_ENABLED`), or if the stored spec URL fails the check.
-- `ScalekitConflictException`, with the error code `RESOURCE_ALREADY_EXISTS`, if a run is already in progress: a connector has at most one active run.
-- `ScalekitServiceUnavailableException` if the service is unavailable. This call is not retried automatically, because the first attempt may already have queued a run. You cannot tell whether it did, and a run you then find may be another caller's: call `getToolCollectionRun`, wait for an active run to finish, and invoke again if you need a run that started after your call. After a timeout (`ScalekitGatewayTimeoutException`), which is not retried either, check the same way. The one exception is an HTTP 429 from the edge: that request never reached Scalekit, so it is retried.
+- `ScalekitBadRequestException` (`400`) with the error code `PROVIDER_HAS_EXISTING_CONNECTIONS` (`[invalid_argument] cannot delete custom provider with existing connections`) if the connector still has connections; nothing is deleted.
+- `ScalekitNotFoundException` (`404`) if no custom connector has this identifier.
+- `ScalekitConflictException` (`409`) with the error code `RESOURCE_ALREADY_EXISTS` if the connector was created from an OpenAPI spec and a tool collection run of it is queued or processing. The message names the run; nothing is deleted.
+- `ScalekitServerException` if a network or server error occurs.
 </dd>
 </dl>
 </dd>
@@ -8777,17 +8823,13 @@ Errors:
 <dd>
 
 ```typescript
-import { ScalekitConflictException } from '@scalekit-sdk/node';
-
-try {
-  const run = await scalekitClient.actions.providers.invokeToolCollection(
-    '<PROVIDER_IDENTIFIER>'
-  );
-  console.log(run.runId, run.status); // 'QUEUED'
-} catch (err) {
-  // A run is already going: wait for it with getToolCollectionRun, then retry.
-  if (!(err instanceof ScalekitConflictException)) throw err;
-}
+// Remove the connected accounts, then the connections, then the connector
+await scalekitClient.actions.deleteConnectedAccount({
+  connectionName: 'acme-tickets',
+  identifier: 'user_123',
+});
+await scalekitClient.actions.deleteConnection('acme-tickets');
+await scalekitClient.actions.providers.deleteCustomProvider('ACMEAPI:70219645518265104');
 ```
 </dd>
 </dl>
@@ -8802,144 +8844,11 @@ try {
 <dl>
 <dd>
 
-**providerIdentifier:** `string` - `provider.identifier` of the connector, from a create or list response; whitespace around it is removed
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `identifier` | `string` | Yes | The connector's identifier (`NAME:environment-id`, from `provider.identifier`), not `provider.id` |
 
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">getToolCollectionRun</a>(providerIdentifier, runId?) -> Promise&lt;ToolCollectionRun&gt;</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Fetches one tool collection run of a connector created from an OpenAPI spec: its status, its counters and, once it has finished, the operations that were skipped and why. Omit `runId`, or pass `'latest'` (an empty or blank string means the same), for the connector's newest run.
-
-After `createCustomProvider`, after `invokeToolCollection` and after an `updateCustomProvider` that queued a run (a base URL or spec URL change: see its rules), poll it until `status` is `COMPLETED` or `FAILED`. Any other update queues no run, so this call then returns an older run, or `ScalekitNotFoundException` if there is none. After your own `invokeToolCollection`, pass the `runId` it returned: without one you get the newest run, which can be one that another caller queued. See [The tool collection run](#the-tool-collection-run) for the fields of the result.
-
-Errors:
-- `ScalekitValidationError` if `providerIdentifier` is empty or blank; nothing is sent.
-- `ScalekitNotFoundException` if no connector has that identifier, if the connector has no run yet, or if `runId` is not one of its runs (`tool collection run not found`).
-- `ScalekitBadRequestException` if `runId` is malformed (`invalid run_id`).
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```typescript
-import {
-  ScalekitConflictException,
-  ScalekitNotFoundException,
-  ScalekitServiceUnavailableException,
-  ToolCollectionRun,
-  ToolCollectionRunStatus,
-} from '@scalekit-sdk/node';
-
-const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// The first run is queued in the background after createCustomProvider returns, so the first
-// calls can answer NotFound. If that lasts 45 seconds, queueing failed (Scalekit only logs it):
-// queue a run yourself, once. A run is processed for up to 3 minutes.
-async function waitForToolCollectionRun(
-  providerIdentifier: string,
-  timeoutMs = 600_000
-): Promise<ToolCollectionRun> {
-  const providers = scalekitClient.actions.providers;
-  const start = Date.now();
-  let invoked = false;
-  let runId: string | undefined; // the run our own invocation queued: "latest" can be another caller's
-  // timeoutMs only stops a new poll from starting; a call already under way can finish after it.
-  while (Date.now() - start < timeoutMs) {
-    try {
-      const run = await providers.getToolCollectionRun(
-        providerIdentifier,
-        runId
-      );
-      if (
-        run.status === ToolCollectionRunStatus.COMPLETED ||
-        run.status === ToolCollectionRunStatus.FAILED
-      ) {
-        return run;
-      }
-    } catch (error) {
-      if (!(error instanceof ScalekitNotFoundException)) throw error;
-      if (!invoked && Date.now() - start > 45_000) {
-        invoked = true;
-        try {
-          const queued =
-            await providers.invokeToolCollection(providerIdentifier);
-          runId = queued.runId;
-        } catch (invokeError) {
-          // A run was queued in the meantime, or the answer was lost: keep polling to find out.
-          if (
-            !(invokeError instanceof ScalekitConflictException) &&
-            !(invokeError instanceof ScalekitServiceUnavailableException)
-          )
-            throw invokeError;
-        }
-      }
-    }
-    await wait(2000);
-  }
-  throw new Error(
-    `The tool collection run did not finish within ${timeoutMs / 1000} seconds`
-  );
-}
-
-const run = await waitForToolCollectionRun('<PROVIDER_IDENTIFIER>');
-
-if (run.status === ToolCollectionRunStatus.FAILED) {
-  throw new Error(`Tool collection failed: ${run.errorMessage}`);
-}
-console.log(
-  `${run.toolsCreated} created, ${run.toolsUpdated} updated, ${run.toolsDeleted} deleted`
-);
-for (const skipped of run.skippedTools) {
-  console.log(skipped.method, skipped.path, skipped.reason);
-}
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**providerIdentifier:** `string` - `provider.identifier` of the connector, from a create or list response; whitespace around it is removed
-
-</dd>
-</dl>
-<dl>
-<dd>
-
-**runId?:** `string` - A run's `runId`. Omit it, or pass `'latest'` (an empty or blank string means the same), for the connector's newest run; whitespace around it is removed.
+**Returns**: `Promise<DeleteProviderResponse>` - An empty response: the connector is deleted.
 
 </dd>
 </dl>
@@ -9005,7 +8914,7 @@ for (const provider of res.providers) {
 
 **params:** `object` - Optional
 - `providerType?: ProviderType` - `ProviderType.CUSTOM` for your own connectors, `ProviderType.ALL` for built-ins and custom together. Omitting it behaves like `ProviderType.DEFAULT` and returns built-ins only, so pass `CUSTOM` or `ALL` to find a custom connector's `identifier`.
-- `identifier?: string` - Filter to one connector. For a custom connector, also pass `providerType: ProviderType.CUSTOM` (or `ALL`), or nothing is found.
+- `identifier?: string` - Filter to one connector: its identifier (`NAME:environment-id`, from `provider.identifier`), not `provider.id`. For a custom connector, also pass `providerType: ProviderType.CUSTOM` (or `ALL`), or nothing is found.
 - `pageSize?: number` - Page size
 - `pageToken?: string` - Pagination cursor
 
@@ -9019,14 +8928,46 @@ for (const provider of res.providers) {
 </dl>
 </details>
 
+### Connections on a custom connector
+
+Users connect their accounts to a connection, and a connection belongs to a connector. The connections of a custom connector are AgentKit connections: create one with `actions.createConnection`, passing the custom connector's `provider.identifier` as `provider`, and change its settings with `actions.updateConnection`.
+
+```typescript
+const connection = await scalekitClient.actions.createConnection({
+  provider: 'ACMEAPI:70219645518265104', // the custom connector
+  connectionName: 'acme-mcp',
+  authMode: 'USER',
+  providerDomain: 'mcp.eu.acme.example.com', // replaces {{domain}} in the connector's proxyUrl
+});
+
+const result = await scalekitClient.actions.updateConnection({
+  connectionId: connection.id, // or connectionName: 'acme-mcp'
+  oauth: {
+    clientId: '<CLIENT_ID>',
+    clientSecret: '<CLIENT_SECRET>',
+    scopes: ['read', 'write'],
+    tokenEndpointAuthMethod: 'BASIC_AUTH',
+  },
+});
+console.log(result.id);
+```
+
+- `provider`: the connector's identifier. For a custom connector it is `provider.identifier` (`NAME:environment-id`, not `provider.id`) from `createCustomProvider` or `listProviders`. There is no `type`: the connection type comes from the connector.
+- `connectionName`: letters, digits and hyphens, unique per environment. Scalekit generates one when you leave it out.
+- `authMode`: `'USER'` (the default: each user connects their own account) or `'ORG_WIDE'`. It cannot be changed after the connection is created.
+- `providerDomain`: the host name that replaces `{{domain}}` in the connector's `proxyUrl`. Pass it only for a connector whose `proxyUrl` has that placeholder. You set it when you create the connection: it cannot be changed later and is not returned.
+- When the connection has OAuth settings (`settings.case` is `'oauthConfig'`), `settings.value.redirectUri` is the redirect URI to register with the provider's OAuth app.
+- `updateConnection` takes `connectionName` or `connectionId`. Send only the settings you want to change: everything else keeps its stored value, including the stored client secret.
+- `oauth.tokenEndpointAuthMethod`: how Scalekit sends the client credentials to the provider's token endpoint. `'BASIC_AUTH'` sends `client_id` and `client_secret` in an HTTP Basic `Authorization` header, `'REQUEST_BODY'` sends them as POST body parameters, `'NONE'` is for public or PKCE clients, and `'DEFAULT'` lets Scalekit choose. Choose the value the provider's token endpoint documentation requires: a wrong value makes new authorizations fail. Leave it out to keep the stored value.
+
+What each value sends in each flow, the other AgentKit connection methods (`getConnection`, `listAppConnections`, `deleteConnection`) and the error codes of `ScalekitAgentKitConnectionError` are in the [AgentKit guide](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/AGENTKIT.md#connections).
+
 ### Connectors created from an OpenAPI spec
 
 Pass `openapiSpecUrl` to `createCustomProvider` and Scalekit generates the connector's tools from the spec: a tool for each operation it supports, and the rest are listed in `skippedTools`.
 
 ```typescript
-import { ToolCollectionRunStatus } from '@scalekit-sdk/node';
-
-// 1. Create the connector. The first tool collection run is queued for you.
+// Create the connector. The first tool collection run is queued for you.
 const { provider } = await scalekitClient.actions.providers.createCustomProvider({
   displayName: 'Acme Tickets',
   openapiSpecUrl: 'https://api.acme.example.com/openapi.json',
@@ -9040,49 +8981,63 @@ const { provider } = await scalekitClient.actions.providers.createCustomProvider
 });
 const providerIdentifier = provider!.identifier;
 
-// 2. Wait for the first run. It is queued in the background after the create call returns,
-//    so the first getToolCollectionRun calls can answer NotFound: use the waitForToolCollectionRun
-//    helper from the getToolCollectionRun section above.
-const run = await waitForToolCollectionRun(providerIdentifier);
-if (run.status === ToolCollectionRunStatus.COMPLETED) {
-  // 3. List the connector's tools. No connected account is needed: they belong to the connector.
-  const { toolNames } = await scalekitClient.actions.listTools({
-    provider: providerIdentifier,
-    summary: true,
-  });
-  console.log(toolNames); // for example ['a-acmetickets_listtickets', ...]
+// Follow the first run: poll until its status is COMPLETED or FAILED. It is queued in the
+// background after the create call returns, so the first calls can answer NotFound.
+const run = await scalekitClient.actions.getToolCollectionRun({ providerIdentifier });
 
-  // 4. Run one with a connected account on a connection to this connector.
-  const result = await scalekitClient.actions.executeTool({
-    toolName: 'a-acmetickets_listtickets',
-    toolInput: { status: 'open' },
-    connectedAccountId: 'ca_123',
-  });
-}
+// The connector's tools. No connected account is needed: they belong to the connector.
+const { toolNames } = await scalekitClient.actions.listTools({
+  provider: providerIdentifier,
+  summary: true,
+});
+console.log(run.status, toolNames); // for example 'COMPLETED', ['a-acmeapi_listpets', ...]
+```
+
+To run one of the tools, create a connection on the connector (an AgentKit connection), connect an account to it, and call `executeTool` with that account:
+
+```typescript
+await scalekitClient.actions.createConnection({
+  provider: 'ACMEAPI:70219645518265104',
+  connectionName: 'acme-tickets',
+  authMode: 'USER',
+});
+const { connectedAccount } = await scalekitClient.actions.createConnectedAccount({
+  connectionName: 'acme-tickets',
+  identifier: 'user_123',
+  authorizationDetails: {
+    details: { case: 'staticAuth', value: { details: { token: '<API_TOKEN>' } } },
+  },
+});
+const result = await scalekitClient.actions.executeTool({
+  toolName: 'a-acmeapi_listpets',
+  toolInput: { status: 'open' },
+  connectedAccountId: connectedAccount!.id,
+});
+console.log(result);
 ```
 
 What Scalekit does:
 
-- **Checks the spec first.** `createCustomProvider` fetches and checks the spec before it stores anything, and rejects a spec that fails with `[invalid_argument] openapi_spec_url failed validation: <reason>`: not a valid URL, a host that cannot be reached for security reasons, a URL that could not be reached or read, not a valid OpenAPI or Swagger document, or larger than the environment's size limit. A URL that does not start with `https://` or is longer than 2048 characters fails request validation (`[invalid_argument] Validation error`) before the spec is fetched. A check that a server restart interrupts fails with `[internal] validating the spec url was interrupted — please retry`. The server allows the check up to 2 minutes, while the SDK's default `timeoutMs` is 20 seconds, so raise `timeoutMs` when you create the client if your spec is slow to download.
+- **Checks the spec first.** `createCustomProvider` fetches and checks the spec before it stores anything, and rejects a spec that fails with `[invalid_argument] openapi_spec_url failed validation: <reason>`: not a valid URL, a host that cannot be reached for security reasons, a URL that could not be reached or read, not a valid OpenAPI or Swagger document, or larger than the environment's size limit. A URL that does not start with `https://` or is longer than 2048 characters fails request validation (`[invalid_argument] Validation error`) before the spec is fetched. A check that a server restart interrupts fails with `[internal] validating the spec url was interrupted — please retry`.
 - **Accepts JSON or YAML.** OpenAPI 3.x, and Swagger 2.0 and 1.x documents, which Scalekit converts. A spec that a Swagger UI or Redoc page embeds is read from that page.
 - **Limits.** The spec must download within 20 seconds, follow at most 5 redirects, and be at most 5 MB for each file by default (Scalekit can raise this for an environment). The spec and the external files it references together can be at most 50 MB, and it can reference at most 500 external files.
 - **Fills in the base URL.** `provider.proxyUrl` is empty after create. When a tool collection run reads the spec, Scalekit sets `proxyUrl` to the spec's own server URL, but only while `proxyUrl` is still empty and that server URL is `https://`. A value you set with `updateCustomProvider` is kept, and every tool then calls it.
 - **Fills in OAuth settings.** For an `OAUTH` pattern, a run fills a blank `authorize_uri`, `token_uri` and the available scopes of `oauth_config` from the spec's OAuth2 security scheme. The stored pattern can then differ from the one you sent, so read it back with `listProviders` before you update the connector.
 - **Allows one connector per name.** An environment holds one OpenAPI-sourced connector per name, ignoring case and spaces: a second one fails with `[already_exists] an OpenAPI connector named "<NAME>" already exists in this environment`.
 - **Locks tools and auth.** The tools and the auth pattern are managed by Scalekit, so `updateCustomProvider` can change only the name, description, icon, metadata and base URL, and the spec URL where your workspace allows changing it. See [`updateCustomProvider`](#custom-connectors) for the exact rules.
-- **Must be enabled.** OpenAPI-sourced connectors must be enabled for your environment; otherwise creating one, changing its base URL or spec URL, `invokeToolCollection` and `actions.deleteCustomTool` fail with the error code `FEATURE_NOT_ENABLED` and `OpenAPI-sourced connectors are not enabled for this environment`. While they are not enabled, the connector's tools are not listed and cannot be called. Changing `openapiSpecUrl` on an existing connector must also be enabled for your workspace.
+- **Must be enabled.** OpenAPI-sourced connectors must be enabled for your environment; otherwise creating one, changing its base URL or spec URL, `actions.invokeToolCollection` and `actions.deleteCustomTool` fail with the error code `FEATURE_NOT_ENABLED` and `OpenAPI-sourced connectors are not enabled for this environment`. While they are not enabled, the connector's tools are not listed and cannot be called. Changing `openapiSpecUrl` on an existing connector must also be enabled for your workspace.
 
-**Tool names.** Each tool is named `a-<connector name>_<operationId>`, in lower case, with the connector name taken from the connector's identifier (`ACMETICKETS:1234` gives `acmetickets`). An operation without an `operationId` uses its method and path instead, and a name that is already taken gets a numeric suffix. Tools of a connector that fronts an MCP server are different: they belong to a connected account and their names start with `c-`.
+**Tool names.** Each tool is named `a-<connector name>_<operationId>`, in lower case, with the connector name taken from the connector's identifier (`ACMEAPI:70219645518265104` gives `acmeapi`). An operation without an `operationId` uses its method and path instead, and a name that is already taken gets a numeric suffix. Tools of a connector that fronts an MCP server are different: they belong to a connected account and their names start with `c-`.
 
 **Calling the tools.** A tool belongs to the connector, so list it with `actions.listTools({ provider: provider.identifier })` and run it with any connected account of a connection on that connector. The account has to belong to the tool's connector: Scalekit rejects a mismatch before it sends anything. `actions.listTools({ query })` searches built-in tools only, so it never finds these tools.
 
-**Deleting a tool.** `actions.deleteCustomTool({ toolIdentifier })` deletes one tool by its name or its ID. A sync that regenerates the tools (the spec, the base URL or the auth patterns changed since the last completed run, or the spec references external files) creates the tool again while its operation is still in the spec, so remove its endpoint from the spec to keep it deleted. A sync of an unchanged connector changes no tools, so `invokeToolCollection` alone does not bring a deleted tool back. A sync that is queued or running blocks the call (`ScalekitConflictException`). See [`actions.deleteCustomTool`](#actions).
+**Deleting a tool.** `actions.deleteCustomTool({ toolIdentifier })` deletes one tool by its name or its ID. A tool collection run that regenerates the tools creates it again while its operation is still in the spec, so remove its endpoint from the spec to keep it deleted. A run that is queued or processing blocks the call (`ScalekitConflictException`). See [`actions.deleteCustomTool`](#actions) for when a run regenerates the tools.
 
 **Virtual MCP servers.** A connection on such a connector can be mapped in a [Virtual MCP server](#virtual-mcp-servers) configuration, with `DIRECT` or `META` tool exposure. Map the tool names above, or leave `tools` out for all of them. The server serves them only while OpenAPI-sourced connectors are enabled for your environment.
 
 ### The tool collection run
 
-A tool collection run reads a connector's spec and turns its operations into tools. `invokeToolCollection` and `getToolCollectionRun` return a `ToolCollectionRun`:
+A tool collection run reads a connector's spec and turns its operations into tools. `actions.invokeToolCollection` and `actions.getToolCollectionRun` return a `ToolCollectionRun`:
 
 | Field | Meaning |
 | --- | --- |
@@ -9099,18 +9054,18 @@ A tool collection run reads a connector's spec and turns its operations into too
 **Skipped operations.** An operation that cannot become a tool is skipped and reported; it does not fail the run. Scalekit skips an operation that:
 
 - uses a method other than GET, POST, PUT, PATCH or DELETE;
-- has a request body that is not JSON, form-encoded or a plain string (for example multipart, binary or XML), or a form-encoded body that is not an object. Operations that upload files with `multipart/form-data` are therefore not available as tools;
+- has a request body that is not JSON, form-encoded or a plain string (for example multipart, binary or XML), or a form-encoded body that is not an object, so operations that upload files with `multipart/form-data` are not available as tools;
 - needs authentication while the connector's auth type is not one that Scalekit can sign requests for;
 - has no base URL, or needs authentication but has a plain `http://` base URL (other than on localhost);
 - uses a path parameter it does not declare, or an object query parameter with `style: form`.
 
 `reason` is text for people: Scalekit can reword it, so do not match on it.
 
-**Failed runs.** A run fails when Scalekit cannot fetch or parse the spec, when the spec yields no tool at all, when processing takes longer than 3 minutes, or when the run makes no progress for 30 minutes. Fix the cause, then call `invokeToolCollection`.
+**Failed runs.** A run fails when Scalekit cannot fetch or parse the spec, when the spec yields no tool at all, when processing takes longer than 3 minutes, or when the run makes no progress for 30 minutes. Fix the cause, then call `actions.invokeToolCollection`.
 
 **Unchanged specs.** When the spec, the connector's base URL and its auth patterns are all unchanged since the last completed run, and the spec does not reference external files, a run changes no tools: it reports `toolsCreated`, `toolsUpdated` and `toolsDeleted` as 0 and keeps the earlier `totalEndpoints` and `skippedTools`. If the first run fills in the base URL, that counts as a change: the next run updates every tool, and only the run after that reports 0.
 
-**One run at a time.** A connector has at most one active run (`QUEUED` or `PROCESSING`). `invokeToolCollection` answers `ScalekitConflictException` while one is active.
+**One run at a time.** A connector has at most one active run (`QUEUED` or `PROCESSING`). `actions.invokeToolCollection` answers `ScalekitConflictException` while one is active.
 
 ## Trigger Events
 

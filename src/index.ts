@@ -58,13 +58,10 @@ export {
 // (`connection.createEnvironmentConnection` and friends). `type`, `provider` and
 // `authMode` on a connection are numeric enums, so callers need the named
 // constants, and the message types let them name what the methods return.
-// `TokenAuthType` names the values of `tokenEndpointAuthType`, which sets how an
-// OAuth connection sends its client credentials to the provider's token endpoint.
 export {
   ConnectionType,
   ConnectionProvider,
   ConnectionAuthMode,
-  TokenAuthType,
 } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 export type {
   Connection,

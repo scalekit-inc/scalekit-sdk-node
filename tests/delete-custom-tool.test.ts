@@ -39,14 +39,15 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-function setup() {
+function setup(toolTimeoutMs?: number) {
   const rpc = {
     deleteCustomTool: jest.fn(async (_r: any, _o?: any) => create(EmptySchema)),
   };
   const coreClient = new CoreClient(
     'https://test.scalekit.dev',
     'client_id',
-    'client_secret'
+    'client_secret',
+    toolTimeoutMs
   );
   const tools = new ToolsClient({ createClient: () => rpc } as any, coreClient);
   const actions = new ActionsClient(
@@ -57,7 +58,7 @@ function setup() {
     {} as any,
     {} as any
   );
-  return { rpc, actions, coreClient };
+  return { rpc, actions };
 }
 
 const connectError = (code: Code, message: string, errorCode: string) =>
@@ -66,8 +67,8 @@ const connectError = (code: Code, message: string, errorCode: string) =>
   ]);
 
 describe('actions.deleteCustomTool', () => {
-  it('sends the name or the ID trimmed, with the tool timeout, and returns nothing', async () => {
-    const { rpc, actions, coreClient } = setup();
+  it('sends the name or the ID trimmed and returns nothing', async () => {
+    const { rpc, actions } = setup();
 
     // The name has capitals on purpose: the server folds the case of a name, so the SDK
     // trims it and sends it as given.
@@ -76,16 +77,22 @@ describe('actions.deleteCustomTool', () => {
     ).resolves.toBeUndefined();
     await actions.deleteCustomTool({ toolIdentifier: ' tol_1234 ' });
 
-    expect(rpc.deleteCustomTool.mock.calls).toEqual([
+    expect(rpc.deleteCustomTool.mock.calls.map(([request]) => request)).toEqual(
       [
         expect.objectContaining({ toolIdentifier: 'A-Acme_Get_User' }),
-        { timeoutMs: coreClient.toolTimeoutMs },
-      ],
-      [
         expect.objectContaining({ toolIdentifier: 'tol_1234' }),
-        { timeoutMs: coreClient.toolTimeoutMs },
-      ],
-    ]);
+      ]
+    );
+  });
+
+  it('passes no per-call options, so the call has the same deadline as every other call', async () => {
+    // A tool timeout that differs from the default shows that it is not used for this call.
+    const { rpc, actions } = setup(90_000);
+
+    await actions.deleteCustomTool({ toolIdentifier: 'a-acme_get_user' });
+
+    expect(rpc.deleteCustomTool).toHaveBeenCalledTimes(1);
+    expect(rpc.deleteCustomTool.mock.calls[0][1]).toBeUndefined();
   });
 
   it.each([[''], ['   '], ['\n\t'], [null], [1234], [undefined]])(

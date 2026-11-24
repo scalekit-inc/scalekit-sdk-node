@@ -31,9 +31,9 @@ export type AgentKitAuthMode = 'USER' | 'ORG_WIDE';
  * - `'NONE'`: for public or PKCE clients (`none`). It sends no client secret on an MCP
  *   token refresh, and on the authorization code exchange only when the connection has
  *   no client secret stored (a stored secret is still sent).
- * - `'DEFAULT'`: clears the stored value: the authorization code exchange then
- *   sends POST body parameters, and MCP refresh and `OAUTH_M2M` send an HTTP
- *   Basic header. Use it only when the documentation names no method.
+ * - `'DEFAULT'`: lets Scalekit choose, and clears the stored value: the authorization
+ *   code exchange then sends POST body parameters, and MCP refresh and `OAUTH_M2M` send
+ *   an HTTP Basic header. Use it only when the documentation names no method.
  *
  * A wrong value makes new authorizations fail. On an MCP connection it also
  * makes token refresh fail, and each connected account then has to authenticate
@@ -44,6 +44,10 @@ export type AgentKitAuthMode = 'USER' | 'ORG_WIDE';
  * only `'REQUEST_BODY'` changes the request: `'NONE'`, like `'BASIC_AUTH'` and
  * `'DEFAULT'`, sends an HTTP Basic header there. A connection that never set one
  * reads as `'DEFAULT'`, and an update that leaves it out keeps the stored value.
+ *
+ * `createConnection` takes no OAuth settings: set the method with `updateConnection`,
+ * for example on the connection of a custom MCP connector or of a connector created
+ * from an OpenAPI spec.
  */
 export type AgentKitTokenEndpointAuthMethod =
   | 'NONE'
@@ -56,7 +60,11 @@ export type AgentKitTokenEndpointAuthMethod =
  * set the others with `updateConnection`. `providerDomain` cannot be changed after creation.
  */
 export interface AgentKitProviderConfigurations {
-  /** Regional connectors only, for example `'mcp-eu.mixpanel.com'`. Create only; never returned. */
+  /**
+   * MCP connectors whose server URL has a `{{domain}}` placeholder: regional connectors such as
+   * MIXPANELMCP (for example `'mcp-eu.mixpanel.com'`) and custom MCP connectors with a templated
+   * `proxyUrl`. Create only; never returned.
+   */
   providerDomain?: string;
   /** Slack only: `'BOT'` or `'USER'`. */
   slackConnectionType?: 'BOT' | 'USER';
@@ -80,7 +88,7 @@ export interface AgentKitOAuthSettings {
   authorizeUri?: string;
   tokenUri?: string;
   userInfoUri?: string;
-  /** Sending your own `clientId` or `clientSecret` turns `useScalekitCreds` off unless you set it. */
+  /** Sending your own `clientId` or `clientSecret` switches the connection to your credentials unless you also send `useScalekitCreds`. */
   clientId?: string;
   clientSecret?: string;
   /** A non-empty list replaces the stored scopes; `[]` clears them. */
@@ -94,7 +102,7 @@ export interface AgentKitOAuthSettings {
   optionalScopes?: { scopes?: string[]; fieldName?: string };
   /** Added as given to the provider's authorize URL. A non-empty map replaces the stored one; `{}` clears it. */
   extraAuthorizeParams?: Record<string, string>;
-  /** See {@link AgentKitTokenEndpointAuthMethod}. On the environment connection methods the same choices are `TokenAuthType` values. */
+  /** How Scalekit sends the client credentials to the token endpoint; see {@link AgentKitTokenEndpointAuthMethod}. Leave it out to keep the stored value. */
   tokenEndpointAuthMethod?: AgentKitTokenEndpointAuthMethod;
   scopeSelectionAllowed?: boolean;
   requiredScopes?: string[];
@@ -118,7 +126,13 @@ export interface CreateConnectionParams {
   connectionName?: string;
   /** `'USER'` (default) or `'ORG_WIDE'`. */
   authMode?: AgentKitAuthMode;
-  /** Required for regional connectors such as MIXPANELMCP and HONEYCOMBMCP; not allowed for others. */
+  /**
+   * The host name that replaces `{{domain}}` in the `proxyUrl` of a templated MCP connector,
+   * for example `'mcp-eu.mixpanel.com'`. Required for a connector whose MCP server URL has a
+   * `{{domain}}` placeholder: regional connectors such as MIXPANELMCP and HONEYCOMBMCP, and a
+   * custom MCP connector whose `proxyUrl` is a template. Not allowed for others. It cannot be
+   * changed later and is not returned.
+   */
   providerDomain?: string;
 }
 

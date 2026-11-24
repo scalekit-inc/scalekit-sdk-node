@@ -163,7 +163,10 @@ export type CreateCustomProviderParams = {
 });
 /** Parameters of {@link ProvidersClient.updateCustomProvider}. */
 export interface UpdateCustomProviderParams {
-    /** From `provider.identifier` on a create or list response. */
+    /**
+     * The connector's `identifier` (`NAME:environment-id`, such as `ACMEAPI:70219645518265104`):
+     * `provider.identifier` on a create or list response, not `provider.id` (`prvd_...`).
+     */
     identifier: string;
     displayName: string;
     /**
@@ -275,9 +278,7 @@ export default class ProvidersClient {
      *   and 50 MB for the spec and the external files it references together). A
      *   URL that does not start with `https://` or is longer than 2048 characters
      *   fails request validation (`[invalid_argument] Validation error`) before
-     *   the spec is fetched. The server allows this check up to 2 minutes, while
-     *   the SDK's default `timeoutMs` is 20 seconds, so raise `timeoutMs` when you
-     *   create the client if your spec is slow to download.
+     *   the spec is fetched.
      * - The call returns as soon as the connector is stored. The first tool
      *   collection run is queued in the background right after the connector is
      *   stored, so {@link getToolCollectionRun} can answer
@@ -323,7 +324,7 @@ export default class ProvidersClient {
      *   first attempt may already have stored the connector (a retry would fail
      *   with `already_exists`): look it up with {@link listProviders} before you
      *   create it again. An HTTP 429 from the edge never reached Scalekit and is retried.
-     * @throws {ScalekitGatewayTimeoutException} If the call takes longer than `timeoutMs`
+     * @throws {ScalekitGatewayTimeoutException} If the call exceeds the client's deadline
      *   (it is not retried). With `openapiSpecUrl` the server may still finish the
      *   create: look the connector up with {@link listProviders} before you create it
      *   again.
@@ -385,12 +386,15 @@ export default class ProvidersClient {
      * - Both changes need OpenAPI-sourced connectors to be enabled for your
      *   environment, as on create.
      *
-     * @param params.identifier From `provider.identifier` on a create or list response.
+     * @param params.identifier The connector's `identifier` (`NAME:environment-id`, such as
+     *   `ACMEAPI:70219645518265104`): `provider.identifier` on a create or list response, not
+     *   `provider.id` (`prvd_...`).
      * @param params.proxyUrl Required for an MCP-sourced connector. For one created
      *                        from an OpenAPI spec this is its base URL, and leaving it
      *                        out keeps the stored value.
      * @param params.openapiSpecUrl Only for a connector created from an OpenAPI spec.
      * @param params.proxyEnabled Whether Scalekit proxies requests. Defaults to true.
+     * @returns The updated connector, as `provider` on the response.
      * @throws {ScalekitValidationError} If `authPatterns` holds more than one
      *   pattern: only one is supported. No request is sent.
      * @throws {ScalekitServiceUnavailableException} If the service is unavailable.
@@ -405,7 +409,7 @@ export default class ProvidersClient {
      *   and a repeat after a lost answer finds nothing to change and queues none. After
      *   such an update call {@link getToolCollectionRun}, and {@link invokeToolCollection}
      *   if no new run appeared. With `openapiSpecUrl`, an HTTP 429 from the edge never reached Scalekit and is retried.
-     * @throws {ScalekitGatewayTimeoutException} If the call takes longer than `timeoutMs`
+     * @throws {ScalekitGatewayTimeoutException} If the call exceeds the client's deadline
      *   (it is not retried). The server may still have finished the update: check as
      *   described above before you repeat it.
      * @throws {ScalekitServerException} If a network or server error occurs.
@@ -418,14 +422,12 @@ export default class ProvidersClient {
      * refuses to delete one that still has connections, with the error code
      * `PROVIDER_HAS_EXISTING_CONNECTIONS` and the message
      * `[invalid_argument] cannot delete custom provider with existing connections`.
+     * Deleting a connector cannot be undone.
      *
      * Connected accounts come off with `actions.deleteConnectedAccount`, and then
-     * the connector's connections with `actions.deleteConnection`.
-     * `connection.deleteConnection` takes an `organizationId`, which an app
-     * connection does not have, so it is not the one to use here.
-     * `actions.deleteConnection` throws `CONNECTION_IN_USE` while a Virtual MCP
-     * configuration still maps the connection: remove it from those configurations
-     * first.
+     * the connector's connections with `actions.deleteConnection`, which fails with
+     * the code `CONNECTION_IN_USE` while connected accounts or Virtual MCP servers
+     * still use the connection: remove those first.
      *
      * A connector created from an OpenAPI spec cannot be deleted while a tool
      * collection run of it is queued or processing: the call throws
@@ -433,6 +435,11 @@ export default class ProvidersClient {
      * Wait for the run with {@link getToolCollectionRun}, then call again until the
      * conflict stops.
      *
+     * @param identifier The connector's `identifier` (`NAME:environment-id`, such as
+     *   `ACMEAPI:70219645518265104`): `provider.identifier` from a create or list response, not
+     *   `provider.id` (`prvd_...`).
+     * @returns The API's `DeleteProviderResponse`, which has no fields, once the
+     *   connector is deleted.
      * @throws {ScalekitBadRequestException} If the connector still has connections,
      *   with the error code `PROVIDER_HAS_EXISTING_CONNECTIONS`. Nothing is deleted.
      * @throws {ScalekitNotFoundException} If no custom connector has this identifier.
@@ -461,11 +468,11 @@ export default class ProvidersClient {
      * run fills in the base URL, that counts as a change: the next run updates
      * every tool, and only the run after that reports 0.
      *
-     * The server allows the spec check up to 2 minutes, while the SDK's default
-     * `timeoutMs` is 20 seconds, so raise `timeoutMs` when you create the client if
-     * your spec is slow to download.
+     * The same operation is available as `actions.invokeToolCollection({ providerIdentifier })`.
      *
-     * @param providerIdentifier `provider.identifier` of the connector. Whitespace around it is removed.
+     * @param providerIdentifier The connector's `identifier` (`NAME:environment-id`, such as
+     *   `ACMEAPI:70219645518265104`, from `provider.identifier`), not `provider.id` (`prvd_...`).
+     *   Whitespace around it is removed.
      * @returns The queued {@link ToolCollectionRun}.
      * @throws {ScalekitValidationError} If `providerIdentifier` is empty or blank. No request is sent.
      * @throws {ScalekitNotFoundException} If no connector in your environment has this identifier.
@@ -481,14 +488,14 @@ export default class ProvidersClient {
      *   may be another caller's: call {@link getToolCollectionRun}, wait for an active
      *   run to finish, and invoke again if you need a run that started after your call.
      *   An HTTP 429 from the edge never reached Scalekit and is retried.
-     * @throws {ScalekitGatewayTimeoutException} If the call takes longer than `timeoutMs`
+     * @throws {ScalekitGatewayTimeoutException} If the call exceeds the client's deadline
      *   (it is not retried). The server may still have queued the run: check with
      *   {@link getToolCollectionRun} as above before you invoke again.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     invokeToolCollection(providerIdentifier: string): Promise<ToolCollectionRun>;
     /**
-     * Fetches one tool collection run of a connector created from an OpenAPI spec:
+     * Gets one tool collection run of a connector created from an OpenAPI spec:
      * its status, its counters and, once it has finished, the operations that were
      * skipped and why.
      *
@@ -522,7 +529,12 @@ export default class ProvidersClient {
      * and path stand in for it, and a name that is already taken gets a numeric suffix.
      * Operations that left the spec are deleted from the connector.
      *
-     * @param providerIdentifier `provider.identifier` of the connector. Whitespace around it is removed.
+     * The same operation is available as
+     * `actions.getToolCollectionRun({ providerIdentifier, runId })`.
+     *
+     * @param providerIdentifier The connector's `identifier` (`NAME:environment-id`, such as
+     *   `ACMEAPI:70219645518265104`, from `provider.identifier`), not `provider.id` (`prvd_...`).
+     *   Whitespace around it is removed.
      * @param runId A run's `runId`. Omit it, or pass `'latest'` (an empty or blank string means the same),
      *   for the connector's newest run. Whitespace around it is removed.
      * @returns The {@link ToolCollectionRun}.
@@ -538,7 +550,8 @@ export default class ProvidersClient {
     /**
      * Lists connectors, built-in and custom.
      *
-     * Use it to find a connector's `identifier` before updating or deleting it.
+     * Use it to find a connector's `identifier` (`NAME:environment-id`, not `provider.id`) before
+     * updating or deleting it.
      *
      * PREVIEW — the underlying `ListProviders` RPC is marked preview in the API and
      * may change. It is exposed because create, update and delete are generally
