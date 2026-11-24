@@ -7422,8 +7422,6 @@ Deletes one tool of a connector created from an OpenAPI spec, by its name or its
 
 **Tool collection runs.** A tool collection run that regenerates the tools (the spec, the base URL or the auth patterns changed since the last completed run, or the spec references external files) creates the tool again while its operation is still in the spec: to keep it deleted, remove its endpoint from the spec. A run of an unchanged connector changes no tools, so `actions.invokeToolCollection` alone does not bring a deleted tool back. While a run of the connector is queued or processing, the call deletes nothing and fails with `ScalekitConflictException`: wait for the run with `actions.getToolCollectionRun`, then call again.
 
-**Retries.** This call is retried when the service is unavailable. If the first attempt had already deleted the tool and only its response was lost, the retry answers `ScalekitNotFoundException` although the tool was deleted. A connection reset is not retried: it raises `ScalekitServiceUnavailableException` at once, as does running out of retries, and the tool may or may not be deleted. To check, list the connector's tools (follow `nextPageToken`): a listing shows the current state, not what the first attempt did, so look for the tool's ID if you know it: a run can create the name again. A retry by name looks the name up again: if a run finished in between and created a tool with that name again, the retry deletes that one. A tool a run creates again has a new ID, so a retry by ID cannot delete it.
-
 Errors:
 - `ScalekitValidationError` if `toolIdentifier` is not a string, or is empty or blank; nothing is sent.
 - `ScalekitBadRequestException` (`400`, the request validation error on `tool_identifier`) if `toolIdentifier` is longer than 2048 characters.
@@ -7508,7 +7506,6 @@ Errors:
 - `ScalekitNotFoundException` (`404`) if no connector in your environment has that identifier.
 - `ScalekitBadRequestException` (`400`) if the connector was not created from an OpenAPI spec (`this connector is not sourced from an OpenAPI spec`), if OpenAPI-sourced connectors are not enabled for your environment (error code `FEATURE_NOT_ENABLED`), or if the stored spec URL fails the check.
 - `ScalekitConflictException` (`409`), with the error code `RESOURCE_ALREADY_EXISTS`, if a run is already in progress: a connector has at most one active run.
-- `ScalekitServiceUnavailableException` (`503`) if the service is unavailable. This call is not retried automatically, because the first attempt may already have queued a run. You cannot tell whether it did, and a run you then find may be another caller's: call `actions.getToolCollectionRun`, wait for an active run to finish, and invoke again if you need a run that started after your call. The one exception is an HTTP 429 from the edge: that request never reached Scalekit, so it is retried.
 - `ScalekitServerException` if a network or server error occurs.
 </dd>
 </dl>
@@ -8460,8 +8457,6 @@ Creates a custom connector, sourced from an MCP server or from an OpenAPI spec. 
 
 Set exactly one of `proxyUrl` (an MCP server, or a REST service you call through `actions.request`) and `openapiSpecUrl` (an OpenAPI spec to generate tools from). Both URLs must start with `https://` and are at most 2048 characters. For what happens with `openapiSpecUrl`, see [Connectors created from an OpenAPI spec](#connectors-created-from-an-openapi-spec).
 
-A create with `openapiSpecUrl` is not retried automatically when the service is unavailable, because the first attempt may already have stored the connector and a retry would fail with `already_exists`. The call raises `ScalekitServiceUnavailableException` at once: look the connector up with `listProviders` before you create it again. The one exception is an HTTP 429 from the edge: that request never reached Scalekit, so it is retried.
-
 Errors:
 - `ScalekitValidationError` if `authPatterns` holds more than one pattern; nothing is sent.
 - `ScalekitBadRequestException` (`400`) if you set both `proxyUrl` and `openapiSpecUrl` (a message that starts `[invalid_argument] proxy_url cannot be set together with openapi_spec_url`) or neither (`[invalid_argument] either proxy_url or openapi_spec_url must be set`). Each message goes on with a dash and a sentence that says what to do instead.
@@ -8469,7 +8464,6 @@ Errors:
 - `ScalekitBadRequestException` (`400`, `[invalid_argument] openapi_spec_url failed validation: <reason>`) if the spec fails the check. The reasons are under [Connectors created from an OpenAPI spec](#connectors-created-from-an-openapi-spec).
 - `ScalekitBadRequestException` (`400`) with the error code `FEATURE_NOT_ENABLED` (`OpenAPI-sourced connectors are not enabled for this environment`) if you set `openapiSpecUrl` and your environment has not enabled OpenAPI-sourced connectors.
 - `ScalekitConflictException` (`409`) with the error code `RESOURCE_ALREADY_EXISTS` (`[already_exists] an OpenAPI connector named "<NAME>" already exists in this environment`) if you set `openapiSpecUrl` and the environment already holds an OpenAPI-sourced connector with this name, ignoring case and spaces.
-- `ScalekitServiceUnavailableException` (`503`) if the service is unavailable: with `openapiSpecUrl` it is not retried, see above.
 - `ScalekitServerException` if a network or server error occurs.
 </dd>
 </dl>
@@ -8679,8 +8673,6 @@ A connector created from an OpenAPI spec (`provider.openapiSpecUrl` is set) foll
 - Changing `proxyUrl` or `openapiSpecUrl` queues a tool collection run; follow it with `actions.getToolCollectionRun`. If a run is already in progress, the new value is still saved but no run is queued, and the call fails with `ScalekitConflictException`. Call `actions.invokeToolCollection` once that run has finished.
 - Both changes need OpenAPI-sourced connectors to be enabled for your environment, as on create.
 
-With `openapiSpecUrl` the call is not retried automatically when the service is unavailable (`ScalekitServiceUnavailableException`), because the first attempt may already have saved the new URL, and a repeat finds nothing to change: it queues no run and still succeeds. Read the connector back with `listProviders`. If its `openapiSpecUrl` is the new value, wait for any active run to finish with `actions.getToolCollectionRun` and call `actions.invokeToolCollection`; otherwise send the update again. An HTTP 429 from the edge never reached Scalekit and is retried. An update without `openapiSpecUrl` is retried as before, also one that changes the base URL (`proxyUrl`) of a connector created from an OpenAPI spec: that change queues a run too, and a repeat after a lost answer finds nothing to change and queues none, so after such an update call `actions.getToolCollectionRun`, and `actions.invokeToolCollection` if no new run appeared.
-
 Errors:
 - `ScalekitValidationError` if `authPatterns` holds more than one pattern; nothing is sent.
 - `ScalekitNotFoundException` (`404`) if no connector has this `identifier`.
@@ -8692,7 +8684,6 @@ Errors:
   - The error code `FEATURE_NOT_ENABLED` with `OpenAPI-sourced connectors are not enabled for this environment`, if you change `proxyUrl` or `openapiSpecUrl` and your environment has not enabled OpenAPI-sourced connectors.
   - The error code `FEATURE_NOT_ENABLED` with `updating the OpenAPI spec URL of an existing connector is not enabled for this workspace`, if you send a different `openapiSpecUrl` and your workspace has not enabled changing it.
 - `ScalekitConflictException` (`409`) if a run is already in progress when you change `proxyUrl` or `openapiSpecUrl`: the new value is saved, but no run is queued. After a `proxyUrl` change the message is `[already_exists] base_url was saved, but an ingestion run is already in progress for this connector — call TriggerToolCollection once it completes to re-ingest against the new base_url`.
-- `ScalekitServiceUnavailableException` (`503`) if the service is unavailable: see the retry rules above.
 - `ScalekitServerException` if a network or server error occurs.
 </dd>
 </dl>

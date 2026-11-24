@@ -319,15 +319,6 @@ export default class ProvidersClient {
      *          {@link invokeToolCollection} and {@link getToolCollectionRun}.
      * @throws {ScalekitValidationError} If `authPatterns` holds more than one
      *   pattern. No request is sent.
-     * @throws {ScalekitServiceUnavailableException} If the service is unavailable.
-     *   With `openapiSpecUrl` the call is not retried automatically, because the
-     *   first attempt may already have stored the connector (a retry would fail
-     *   with `already_exists`): look it up with {@link listProviders} before you
-     *   create it again. An HTTP 429 from the edge never reached Scalekit and is retried.
-     * @throws {ScalekitGatewayTimeoutException} If the call exceeds the client's deadline
-     *   (it is not retried). With `openapiSpecUrl` the server may still finish the
-     *   create: look the connector up with {@link listProviders} before you create it
-     *   again.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     createCustomProvider(params: CreateCustomProviderParams): Promise<CreateProviderResponse>;
@@ -397,21 +388,6 @@ export default class ProvidersClient {
      * @returns The updated connector, as `provider` on the response.
      * @throws {ScalekitValidationError} If `authPatterns` holds more than one
      *   pattern: only one is supported. No request is sent.
-     * @throws {ScalekitServiceUnavailableException} If the service is unavailable.
-     *   With `openapiSpecUrl` the call is not retried automatically, because the
-     *   first attempt may already have saved the new URL, and a repeat finds nothing
-     *   to change: it queues no run and still succeeds. Read the connector back with
-     *   {@link listProviders}. If its `openapiSpecUrl` is the new value, wait for any
-     *   active run to finish ({@link getToolCollectionRun}) and call
-     *   {@link invokeToolCollection}; otherwise send the update again. An update
-     *   without `openapiSpecUrl` is retried as before, also one that changes the base
-     *   URL (`proxyUrl`) of an OpenAPI-sourced connector: that change queues a run too,
-     *   and a repeat after a lost answer finds nothing to change and queues none. After
-     *   such an update call {@link getToolCollectionRun}, and {@link invokeToolCollection}
-     *   if no new run appeared. With `openapiSpecUrl`, an HTTP 429 from the edge never reached Scalekit and is retried.
-     * @throws {ScalekitGatewayTimeoutException} If the call exceeds the client's deadline
-     *   (it is not retried). The server may still have finished the update: check as
-     *   described above before you repeat it.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     updateCustomProvider(params: UpdateCustomProviderParams): Promise<UpdateProviderResponse>;
@@ -482,15 +458,6 @@ export default class ProvidersClient {
      *   `FEATURE_NOT_ENABLED`), or if the stored spec URL fails the check.
      * @throws {ScalekitConflictException} If a run is already in progress, with the
      *   error code `RESOURCE_ALREADY_EXISTS`. A connector has at most one active run.
-     * @throws {ScalekitServiceUnavailableException} If the service is unavailable.
-     *   This call is not retried automatically, because the first attempt may already
-     *   have queued a run. You cannot tell whether it did, and a run you then find
-     *   may be another caller's: call {@link getToolCollectionRun}, wait for an active
-     *   run to finish, and invoke again if you need a run that started after your call.
-     *   An HTTP 429 from the edge never reached Scalekit and is retried.
-     * @throws {ScalekitGatewayTimeoutException} If the call exceeds the client's deadline
-     *   (it is not retried). The server may still have queued the run: check with
-     *   {@link getToolCollectionRun} as above before you invoke again.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     invokeToolCollection(providerIdentifier: string): Promise<ToolCollectionRun>;

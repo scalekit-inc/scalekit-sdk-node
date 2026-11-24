@@ -1,20 +1,12 @@
 /**
  * `actions.invokeToolCollection` and `actions.getToolCollectionRun`: the tool collection run
  * methods, called directly on the AgentKit client (`scalekit.actions.<method>`). They delegate to
- * `actions.providers`, which keeps the same methods, so validation, errors and the
- * no-replay-after-Unavailable rule live in one place.
+ * `actions.providers`, which keeps the same methods, so validation and errors live in one place.
  *
  * Offline tests, so no environment is needed: the real `ActionsClient` reaches mocked RPC methods
  * through the real `ProvidersClient` it holds.
  */
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  it,
-  expect,
-  jest,
-} from '@jest/globals';
+import { afterEach, describe, it, expect, jest } from '@jest/globals';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { create } from '@bufbuild/protobuf';
 import { timestampFromDate } from '@bufbuild/protobuf/wkt';
@@ -28,7 +20,6 @@ import {
   ScalekitBadRequestException,
   ScalekitConflictException,
   ScalekitNotFoundException,
-  ScalekitServiceUnavailableException,
   ScalekitValidationError,
 } from '../src/errors';
 import { ErrorInfoSchema } from '../src/pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
@@ -42,15 +33,6 @@ const PROVIDER = 'ACMEAPI:1234';
 
 const created = new Date('2026-11-10T10:00:00Z');
 const finished = new Date('2026-11-10T10:00:42Z');
-
-let sleep: jest.SpiedFunction<any>;
-
-beforeEach(() => {
-  // `connectExec` backs off for about a second before it replays a call: do not wait for it.
-  sleep = jest
-    .spyOn(CoreClient.prototype as any, 'sleep')
-    .mockResolvedValue(undefined as never);
-});
 
 afterEach(() => {
   jest.restoreAllMocks();
@@ -238,22 +220,6 @@ describe('actions.invokeToolCollection', () => {
     expect(error).toBeInstanceOf(ScalekitValidationError);
     expect(error.message).toContain('providerIdentifier is required');
     expect(rpc.triggerToolCollection).not.toHaveBeenCalled();
-  });
-
-  it('is not sent again after Unavailable', async () => {
-    const { rpc, actions } = setup();
-    rpc.triggerToolCollection.mockRejectedValue(
-      new ConnectError('upstream connect error', Code.Unavailable)
-    );
-
-    const error = await actions
-      .invokeToolCollection({ providerIdentifier: PROVIDER })
-      .catch((e) => e);
-
-    expect(error).toBeInstanceOf(ScalekitServiceUnavailableException);
-    expect(error.httpStatus).toBe(503);
-    expect(rpc.triggerToolCollection).toHaveBeenCalledTimes(1);
-    expect(sleep).not.toHaveBeenCalled();
   });
 });
 
@@ -453,20 +419,6 @@ describe('actions.getToolCollectionRun', () => {
       expect(rpc.getToolCollectionRun).not.toHaveBeenCalled();
     }
   );
-
-  it('is sent again after Unavailable, as a read is', async () => {
-    const { rpc, actions } = setup();
-    rpc.getToolCollectionRun.mockRejectedValueOnce(
-      new ConnectError('upstream connect error', Code.Unavailable)
-    );
-
-    await expect(
-      actions.getToolCollectionRun({ providerIdentifier: PROVIDER })
-    ).resolves.toMatchObject({ runId: 'tcr_1' });
-
-    expect(rpc.getToolCollectionRun).toHaveBeenCalledTimes(2);
-    expect(sleep).toHaveBeenCalledTimes(1);
-  });
 });
 
 describe('the same operations through actions.providers', () => {

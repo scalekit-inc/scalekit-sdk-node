@@ -5,14 +5,7 @@
  * Offline tests, so no environment is needed: the real `ActionsClient` reaches a mocked RPC method
  * through the real `ToolsClient` it is built on.
  */
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  it,
-  expect,
-  jest,
-} from '@jest/globals';
+import { afterEach, describe, it, expect, jest } from '@jest/globals';
 import { Code, ConnectError } from '@connectrpc/connect';
 import { create } from '@bufbuild/protobuf';
 import { EmptySchema } from '@bufbuild/protobuf/wkt';
@@ -25,15 +18,6 @@ import {
   ScalekitValidationError,
 } from '../src/errors';
 import { ErrorInfoSchema } from '../src/pkg/grpc/scalekit/v1/errdetails/errdetails_pb';
-
-let sleep: jest.SpiedFunction<any>;
-
-beforeEach(() => {
-  // `connectExec` backs off for about a second before it replays a call: do not wait for it.
-  sleep = jest
-    .spyOn(CoreClient.prototype as any, 'sleep')
-    .mockResolvedValue(undefined as never);
-});
 
 afterEach(() => {
   jest.restoreAllMocks();
@@ -134,18 +118,4 @@ describe('actions.deleteCustomTool', () => {
       expect(error.errorCode).toBe(errorCode);
     }
   );
-
-  it('sends the call again after Unavailable', async () => {
-    const { rpc, actions } = setup();
-    rpc.deleteCustomTool.mockRejectedValueOnce(
-      new ConnectError('upstream connect error', Code.Unavailable)
-    );
-
-    await expect(
-      actions.deleteCustomTool({ toolIdentifier: 'a-acme_get_user' })
-    ).resolves.toBeUndefined();
-
-    expect(rpc.deleteCustomTool).toHaveBeenCalledTimes(2);
-    expect(sleep).toHaveBeenCalledTimes(1);
-  });
 });

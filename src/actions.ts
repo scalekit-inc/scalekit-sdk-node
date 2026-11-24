@@ -269,16 +269,6 @@ export default class ActionsClient {
    * processing, the call deletes nothing and fails with `ScalekitConflictException`: wait for the
    * run with `actions.getToolCollectionRun`, then call again.
    *
-   * This call is retried when the service is unavailable. If the first attempt had already
-   * deleted the tool and only its response was lost, the retry answers `ScalekitNotFoundException`
-   * although the tool was deleted. A connection reset is not retried: it raises
-   * `ScalekitServiceUnavailableException` at once, as does running out of retries, and the tool
-   * may or may not be deleted. To check, list the connector's tools (follow `nextPageToken`): a
-   * listing shows the current state, not what the first attempt did, so look for the tool's ID if
-   * you know it: a run can create the name again. A retry by name looks the name up again: if a
-   * run finished in between and created a tool with that name again, the retry deletes that one.
-   * A tool a run creates again has a new ID, so a retry by ID cannot delete it.
-   *
    * @param params.toolIdentifier Name or ID of the tool. Required. Surrounding whitespace is
    *   ignored. At most 2048 characters.
    * @returns Resolves once the tool is deleted.
@@ -317,10 +307,6 @@ export default class ActionsClient {
       throw new ScalekitValidationError('toolIdentifier is required');
     }
 
-    // Replayed after `Unavailable` like most calls. Deleting the same tool again changes nothing
-    // (the replay answers NotFound if the first attempt had already deleted it), so unlike
-    // `invokeToolCollection` it does not need to be kept from `connectExec`'s retry.
-    // A replay by name looks the name up again, though: see the doc comment above.
     await this.coreClient.connectExec(
       this.tools.client.deleteCustomTool,
       create(DeleteCustomToolRequestSchema, { toolIdentifier })
@@ -360,15 +346,6 @@ export default class ActionsClient {
    *   URL fails the check.
    * @throws {ScalekitConflictException} If a run is already in progress, with the error code
    *   `RESOURCE_ALREADY_EXISTS`. A connector has at most one active run.
-   * @throws {ScalekitServiceUnavailableException} If the service is unavailable. This call is not
-   *   retried automatically, because the first attempt may already have queued a run. You cannot
-   *   tell whether it did, and a run you then find may be another caller's: call
-   *   {@link ActionsClient.getToolCollectionRun}, wait for an active run to finish, and invoke
-   *   again if you need a run that started after your call. An HTTP 429 from the edge never
-   *   reached Scalekit and is retried.
-   * @throws {ScalekitGatewayTimeoutException} If the call exceeds the client's deadline (it is
-   *   not retried). The server may still have queued the run: check with
-   *   {@link ActionsClient.getToolCollectionRun} as above before you invoke again.
    * @throws {ScalekitServerException} If a network or server error occurs.
    *
    * @example

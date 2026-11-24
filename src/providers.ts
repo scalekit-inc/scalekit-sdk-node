@@ -1,14 +1,9 @@
 import { create, fromJson, toJson, type JsonValue } from '@bufbuild/protobuf';
 import { ListValueSchema, type ListValue } from '@bufbuild/protobuf/wkt';
-import {
-  Code,
-  ConnectError,
-  type CallOptions,
-  type Client,
-} from '@connectrpc/connect';
+import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { ScalekitServerException, ScalekitValidationError } from './errors';
+import { ScalekitValidationError } from './errors';
 import {
   CreateCustomProviderRequestSchema,
   CreateCustomProviderSchema,
@@ -368,15 +363,6 @@ export default class ProvidersClient {
    *          {@link invokeToolCollection} and {@link getToolCollectionRun}.
    * @throws {ScalekitValidationError} If `authPatterns` holds more than one
    *   pattern. No request is sent.
-   * @throws {ScalekitServiceUnavailableException} If the service is unavailable.
-   *   With `openapiSpecUrl` the call is not retried automatically, because the
-   *   first attempt may already have stored the connector (a retry would fail
-   *   with `already_exists`): look it up with {@link listProviders} before you
-   *   create it again. An HTTP 429 from the edge never reached Scalekit and is retried.
-   * @throws {ScalekitGatewayTimeoutException} If the call exceeds the client's deadline
-   *   (it is not retried). With `openapiSpecUrl` the server may still finish the
-   *   create: look the connector up with {@link listProviders} before you create it
-   *   again.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async createCustomProvider(
@@ -400,13 +386,8 @@ export default class ProvidersClient {
       }),
     });
 
-    // A create from a spec is not replayed after `Unavailable`: the first attempt
-    // may have stored the connector, and a replay would answer `already_exists`.
-    const createCall = params.openapiSpecUrl
-      ? withoutUnavailableRetry(this.client.createCustomProvider)
-      : this.client.createCustomProvider;
     const response = await this.coreClient.connectExec(
-      createCall,
+      this.client.createCustomProvider,
       create(CreateCustomProviderRequestSchema, { provider })
     );
     return { provider: toProvider(response.provider) };
@@ -478,21 +459,6 @@ export default class ProvidersClient {
    * @returns The updated connector, as `provider` on the response.
    * @throws {ScalekitValidationError} If `authPatterns` holds more than one
    *   pattern: only one is supported. No request is sent.
-   * @throws {ScalekitServiceUnavailableException} If the service is unavailable.
-   *   With `openapiSpecUrl` the call is not retried automatically, because the
-   *   first attempt may already have saved the new URL, and a repeat finds nothing
-   *   to change: it queues no run and still succeeds. Read the connector back with
-   *   {@link listProviders}. If its `openapiSpecUrl` is the new value, wait for any
-   *   active run to finish ({@link getToolCollectionRun}) and call
-   *   {@link invokeToolCollection}; otherwise send the update again. An update
-   *   without `openapiSpecUrl` is retried as before, also one that changes the base
-   *   URL (`proxyUrl`) of an OpenAPI-sourced connector: that change queues a run too,
-   *   and a repeat after a lost answer finds nothing to change and queues none. After
-   *   such an update call {@link getToolCollectionRun}, and {@link invokeToolCollection}
-   *   if no new run appeared. With `openapiSpecUrl`, an HTTP 429 from the edge never reached Scalekit and is retried.
-   * @throws {ScalekitGatewayTimeoutException} If the call exceeds the client's deadline
-   *   (it is not retried). The server may still have finished the update: check as
-   *   described above before you repeat it.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async updateCustomProvider(
@@ -516,13 +482,8 @@ export default class ProvidersClient {
       authPatterns: toListValue(params.authPatterns),
     });
 
-    // An update that sends a spec URL is not replayed after `Unavailable`: the first attempt may
-    // already have saved the URL without queueing its run, and a replay finds nothing to change.
-    const updateCall = params.openapiSpecUrl
-      ? withoutUnavailableRetry(this.client.updateCustomProvider)
-      : this.client.updateCustomProvider;
     const response = await this.coreClient.connectExec(
-      updateCall,
+      this.client.updateCustomProvider,
       create(UpdateCustomProviderRequestSchema, {
         identifier: params.identifier,
         provider,
@@ -606,24 +567,14 @@ export default class ProvidersClient {
    *   `FEATURE_NOT_ENABLED`), or if the stored spec URL fails the check.
    * @throws {ScalekitConflictException} If a run is already in progress, with the
    *   error code `RESOURCE_ALREADY_EXISTS`. A connector has at most one active run.
-   * @throws {ScalekitServiceUnavailableException} If the service is unavailable.
-   *   This call is not retried automatically, because the first attempt may already
-   *   have queued a run. You cannot tell whether it did, and a run you then find
-   *   may be another caller's: call {@link getToolCollectionRun}, wait for an active
-   *   run to finish, and invoke again if you need a run that started after your call.
-   *   An HTTP 429 from the edge never reached Scalekit and is retried.
-   * @throws {ScalekitGatewayTimeoutException} If the call exceeds the client's deadline
-   *   (it is not retried). The server may still have queued the run: check with
-   *   {@link getToolCollectionRun} as above before you invoke again.
    * @throws {ScalekitServerException} If a network or server error occurs.
    */
   async invokeToolCollection(
     providerIdentifier: string
   ): Promise<ToolCollectionRun> {
     // The RPC and its request message are still named TriggerToolCollection in the proto.
-    // Not replayed after `Unavailable`: the first attempt may already have queued a run.
     const response = await this.coreClient.connectExec(
-      withoutUnavailableRetry(this.client.triggerToolCollection),
+      this.client.triggerToolCollection,
       create(TriggerToolCollectionRequestSchema, {
         providerIdentifier: requireProviderIdentifier(providerIdentifier),
       })
@@ -812,51 +763,6 @@ function requireProviderIdentifier(providerIdentifier: string): string {
     throw new ScalekitValidationError('providerIdentifier is required');
   }
   return trimmed;
-}
-
-/**
- * Wraps a gRPC method so that `CoreClient.connectExec` does not replay it when
- * the service answers `Unavailable`. `connectExec` retries that code, which is
- * safe for a read but not for a call whose first attempt may have worked even
- * though its response was lost: a replayed {@link ProvidersClient.invokeToolCollection}
- * can queue a second run or answer `ScalekitConflictException` for the first,
- * a replayed create from a spec answers `already_exists` for the connector
- * it has just made, and a replayed update that sends a spec URL succeeds without
- * queueing the run its first attempt may have failed to queue. The wrapper
- * raises the same `ScalekitServiceUnavailableException` that `connectExec`
- * raises once it runs out of retries, so the caller sees one error type either
- * way. An `Unavailable` that the transport makes of an HTTP 429 from the edge is let
- * through to `connectExec`: that request never reached Scalekit, so replaying it is safe.
- * Every other code, including the `Unauthenticated` that makes
- * `connectExec` fetch a new token, passes through untouched.
- */
-function withoutUnavailableRetry<TRequest, TResponse>(
-  call: (request: TRequest, options?: CallOptions) => Promise<TResponse>
-): (request: TRequest, options?: CallOptions) => Promise<TResponse> {
-  return async (request, options) => {
-    try {
-      return await call(request, options);
-    } catch (error) {
-      if (
-        error instanceof ConnectError &&
-        error.code === Code.Unavailable &&
-        !isEdgeRateLimit(error)
-      ) {
-        throw ScalekitServerException.promote(error);
-      }
-      throw error;
-    }
-  };
-}
-
-/**
- * True for the `Unavailable` that the gRPC transport makes of an HTTP 429 answer: the edge turned the
- * request away because of a rate limit, so it never reached Scalekit and `connectExec` may replay it.
- * The transport words that error `HTTP 429`. Any other `Unavailable` (a status the service sent, or a
- * 502, 503 or 504 from a proxy) may have been processed.
- */
-function isEdgeRateLimit(error: ConnectError): boolean {
-  return error.rawMessage === 'HTTP 429';
 }
 
 /**
