@@ -1,6 +1,7 @@
+import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { DeleteProviderResponse, Provider as ProviderMessage, ProviderType, ToolCollectionRun as ToolCollectionRunMessage } from './pkg/grpc/scalekit/v1/providers/providers_pb';
+import { DeleteProviderResponse, Provider as ProviderMessage, ProviderService, ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 /**
  * One credential input shown to the user while they connect.
  *
@@ -188,63 +189,6 @@ export interface UpdateCustomProviderParams {
     metadata?: Record<string, string>;
 }
 /**
- * Status of a {@link ToolCollectionRun}. A run goes from `QUEUED` to
- * `PROCESSING` and ends as `COMPLETED` or `FAILED`.
- *
- * The API sends the status as a plain string, so a value the SDK does not know
- * yet passes through unchanged.
- */
-export declare const ToolCollectionRunStatus: {
-    readonly QUEUED: "QUEUED";
-    readonly PROCESSING: "PROCESSING";
-    readonly COMPLETED: "COMPLETED";
-    readonly FAILED: "FAILED";
-};
-/** See {@link (ToolCollectionRunStatus:variable)}. Open: unknown values are plain strings. */
-export type ToolCollectionRunStatus = (typeof ToolCollectionRunStatus)[keyof typeof ToolCollectionRunStatus] | (string & {});
-/**
- * One operation of an OpenAPI spec that a tool collection run did not turn into
- * a tool. A skipped operation does not fail the run.
- *
- * `reason` is text for people: Scalekit can reword it, so do not match on it.
- */
-export interface SkippedTool {
-    /** The operation's `operationId` in the spec. Empty when the spec has none, or when the entry is not about one operation. */
-    operationId: string;
-    /** HTTP method of the operation in upper case, for example `GET`. */
-    method: string;
-    /** Path of the operation, as written in the spec. */
-    path: string;
-    reason: string;
-}
-/**
- * A tool collection run: one attempt to read an OpenAPI-sourced connector's spec
- * and turn its operations into tools. Returned by
- * {@link ProvidersClient.invokeToolCollection} and
- * {@link ProvidersClient.getToolCollectionRun}.
- *
- * Same fields as the API's `ToolCollectionRun`, except that `status` is typed
- * as {@link ToolCollectionRunStatus} and `skippedTools` is `skippedToolsJson`
- * parsed. `createdAt`, `startedAt` and `finishedAt` are protobuf timestamps,
- * whose `seconds` is a `bigint`.
- *
- * - `totalEndpoints`: operations found in the spec, before leaving out those
- *   that cannot become tools.
- * - `toolsCreated`, `toolsUpdated`, `toolsDeleted`: tools added, refreshed, and
- *   removed because their operation is no longer in the spec. Putting the
- *   operation back in the spec creates a new tool.
- * - `skippedToolsJson`: the skipped operations as JSON text, empty until the run
- *   is `COMPLETED` or `FAILED`. Its shape is not settled yet, so prefer
- *   `skippedTools`.
- * - `errorMessage`: why the run failed. Empty unless `status` is `FAILED`.
- * - `createdAt`: when the run was queued. `startedAt` is unset while `QUEUED`,
- *   and `finishedAt` until the run is `COMPLETED` or `FAILED`.
- */
-export type ToolCollectionRun = Omit<ToolCollectionRunMessage, '$typeName' | 'status'> & {
-    status: ToolCollectionRunStatus;
-    skippedTools: SkippedTool[];
-};
-/**
  * Client for bring-your-own connectors (custom providers).
  *
  * A custom connector puts a service Scalekit does not ship in front of the same
@@ -257,7 +201,11 @@ export type ToolCollectionRun = Omit<ToolCollectionRunMessage, '$typeName' | 'st
 export default class ProvidersClient {
     private readonly grpcConnect;
     private readonly coreClient;
-    private client;
+    /**
+     * @internal ActionsClient calls the RPCs that have no ProvidersClient method
+     * through it. Not part of the public API.
+     */
+    readonly client: Client<typeof ProviderService>;
     constructor(grpcConnect: GrpcConnect, coreClient: CoreClient);
     /**
      * Creates a custom connector.
@@ -281,10 +229,10 @@ export default class ProvidersClient {
      *   the spec is fetched.
      * - The call returns as soon as the connector is stored. The first tool
      *   collection run is queued in the background right after the connector is
-     *   stored, so {@link getToolCollectionRun} can answer
+     *   stored, so `actions.getToolCollectionRun` can answer
      *   `ScalekitNotFoundException` (no run yet) for a moment, and keeps doing so
      *   if queueing failed (Scalekit only logs that). Treat it as "not queued yet"
-     *   for a few seconds, then call {@link invokeToolCollection}. Poll until the
+     *   for a few seconds, then call `actions.invokeToolCollection`. Poll until the
      *   run's `status` is `COMPLETED` or `FAILED` before you list the tools.
      * - `provider.proxyUrl` is empty in the response. Scalekit fills it from the
      *   spec's own server URL (see {@link Provider}); change it later with
@@ -314,9 +262,10 @@ export default class ProvidersClient {
      * @param params.authPatterns How users authenticate. Exactly one pattern is
      *                            supported today; the array is for future use.
      *                            More than one is refused before anything is sent.
-     * @returns `provider.identifier` on the response is the id you pass to
-     *          {@link updateCustomProvider}, {@link deleteCustomProvider},
-     *          {@link invokeToolCollection} and {@link getToolCollectionRun}.
+     * @returns `provider.identifier` on the response is the connector
+     *          `identifier` (`NAME:environment-id`, not `provider.id`) you pass
+     *          to {@link updateCustomProvider}, {@link deleteCustomProvider},
+     *          `actions.invokeToolCollection` and `actions.getToolCollectionRun`.
      * @throws {ScalekitValidationError} If `authPatterns` holds more than one
      *   pattern. No request is sent.
      * @throws {ScalekitServerException} If a network or server error occurs.
@@ -367,12 +316,12 @@ export default class ProvidersClient {
      *   `[invalid_argument] openapi_spec_url can only be set
      *   on a connector that was created as an OpenAPI-sourced connector`.
      * - Changing `proxyUrl` or `openapiSpecUrl` queues a tool collection run; follow
-     *   it with {@link getToolCollectionRun}. If a run is already in progress, the
+     *   it with `actions.getToolCollectionRun`. If a run is already in progress, the
      *   new value is still saved but no run is queued, and the call fails with
      *   `ScalekitConflictException`. After a `proxyUrl` change the message is
      *   `[already_exists] base_url was saved, but an ingestion run is already in
      *   progress for this connector — call TriggerToolCollection once it completes
-     *   to re-ingest against the new base_url`. Call {@link invokeToolCollection}
+     *   to re-ingest against the new base_url`. Call `actions.invokeToolCollection`
      *   once that run has finished.
      * - Both changes need OpenAPI-sourced connectors to be enabled for your
      *   environment, as on create.
@@ -408,7 +357,7 @@ export default class ProvidersClient {
      * A connector created from an OpenAPI spec cannot be deleted while a tool
      * collection run of it is queued or processing: the call throws
      * `ScalekitConflictException` (`RESOURCE_ALREADY_EXISTS`) and deletes nothing.
-     * Wait for the run with {@link getToolCollectionRun}, then call again until the
+     * Wait for the run with `actions.getToolCollectionRun`, then call again until the
      * conflict stops.
      *
      * @param identifier The connector's `identifier` (`NAME:environment-id`, such as
@@ -426,94 +375,6 @@ export default class ProvidersClient {
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
     deleteCustomProvider(identifier: string): Promise<DeleteProviderResponse>;
-    /**
-     * Queues a new tool collection run for a connector created from an OpenAPI
-     * spec, and returns it with the status `QUEUED`.
-     *
-     * The run reads the connector's stored spec again and brings its tools in line
-     * with it. Creating the connector, and changing its base URL or spec URL,
-     * already queue a run for you. Call this to pick up a spec that changed
-     * upstream, or to retry a run that failed. It returns at once: poll
-     * {@link getToolCollectionRun} for the outcome.
-     *
-     * Scalekit checks the stored spec URL during this call, with the same checks
-     * and errors as {@link createCustomProvider}. When the spec, the connector's
-     * base URL and its auth patterns are all unchanged since the last completed run,
-     * and the spec does not reference external files, the run changes no tools and
-     * reports `toolsCreated`, `toolsUpdated` and `toolsDeleted` as 0. If the first
-     * run fills in the base URL, that counts as a change: the next run updates
-     * every tool, and only the run after that reports 0.
-     *
-     * The same operation is available as `actions.invokeToolCollection({ providerIdentifier })`.
-     *
-     * @param providerIdentifier The connector's `identifier` (`NAME:environment-id`, such as
-     *   `ACMEAPI:70219645518265104`, from `provider.identifier`), not `provider.id` (`prvd_...`).
-     *   Whitespace around it is removed.
-     * @returns The queued {@link ToolCollectionRun}.
-     * @throws {ScalekitValidationError} If `providerIdentifier` is empty or blank. No request is sent.
-     * @throws {ScalekitNotFoundException} If no connector in your environment has this identifier.
-     * @throws {ScalekitBadRequestException} If the connector was not created from an
-     *   OpenAPI spec (`this connector is not sourced from an OpenAPI spec`), if
-     *   OpenAPI-sourced connectors are not enabled for your environment (error code
-     *   `FEATURE_NOT_ENABLED`), or if the stored spec URL fails the check.
-     * @throws {ScalekitConflictException} If a run is already in progress, with the
-     *   error code `RESOURCE_ALREADY_EXISTS`. A connector has at most one active run.
-     * @throws {ScalekitServerException} If a network or server error occurs.
-     */
-    invokeToolCollection(providerIdentifier: string): Promise<ToolCollectionRun>;
-    /**
-     * Gets one tool collection run of a connector created from an OpenAPI spec:
-     * its status, its counters and, once it has finished, the operations that were
-     * skipped and why.
-     *
-     * After {@link createCustomProvider}, after {@link invokeToolCollection} and after an
-     * {@link updateCustomProvider} that queued a run (a base URL or spec URL change: see its
-     * rules), poll this until `status` is `COMPLETED` or `FAILED`. Any other update queues no
-     * run, so this call then returns an older run, or `ScalekitNotFoundException` if there is
-     * none.
-     * Right after {@link createCustomProvider} the first run may not exist yet, and
-     * this call can answer `ScalekitNotFoundException`: see
-     * {@link createCustomProvider} for how to wait for it. After your own
-     * {@link invokeToolCollection}, pass the `runId` it returned: without one you
-     * get the newest run, which can be one that another caller queued.
-     * A run is `QUEUED`, then `PROCESSING`. It fails if Scalekit cannot fetch or
-     * parse the spec, if the spec yields no tool at all, if processing takes longer
-     * than 3 minutes, or if the run makes no progress for 30 minutes. A spec
-     * operation that cannot become a tool is skipped and listed in `skippedTools`,
-     * and does not fail the run. The operations skipped are those that:
-     * - use a method other than GET, POST, PUT, PATCH or DELETE;
-     * - have a request body that is not JSON, form-encoded or a plain string (for
-     *   example multipart, binary or XML), or a form-encoded body that is not an object;
-     * - need authentication while the connector's auth type is not one that
-     *   Scalekit can sign requests for;
-     * - have no base URL, or need authentication but have a plain `http://` base
-     *   URL (other than on localhost);
-     * - use a path parameter the operation does not declare, or an object query
-     *   parameter with `style: form`.
-     *
-     * Each tool is named `a-<connector name>_<operationId>`, in lower case, with the
-     * connector name taken from its identifier. Without an `operationId`, the method
-     * and path stand in for it, and a name that is already taken gets a numeric suffix.
-     * Operations that left the spec are deleted from the connector.
-     *
-     * The same operation is available as
-     * `actions.getToolCollectionRun({ providerIdentifier, runId })`.
-     *
-     * @param providerIdentifier The connector's `identifier` (`NAME:environment-id`, such as
-     *   `ACMEAPI:70219645518265104`, from `provider.identifier`), not `provider.id` (`prvd_...`).
-     *   Whitespace around it is removed.
-     * @param runId A run's `runId`. Omit it, or pass `'latest'` (an empty or blank string means the same),
-     *   for the connector's newest run. Whitespace around it is removed.
-     * @returns The {@link ToolCollectionRun}.
-     * @throws {ScalekitValidationError} If `providerIdentifier` is empty or blank, or `runId` is
-     *   given and is not a string. No request is sent.
-     * @throws {ScalekitNotFoundException} If no connector has this identifier, or
-     *   the connector has no run yet, or `runId` is not one of its runs
-     *   (`tool collection run not found`).
-     * @throws {ScalekitBadRequestException} If `runId` is malformed (`invalid run_id`).
-     * @throws {ScalekitServerException} If a network or server error occurs.
-     */
-    getToolCollectionRun(providerIdentifier: string, runId?: string): Promise<ToolCollectionRun>;
     /**
      * Lists connectors, built-in and custom.
      *
@@ -540,12 +401,3 @@ export default class ProvidersClient {
         identifier?: string;
     }): Promise<ListProvidersResponse>;
 }
-/**
- * Parses a run's `skippedToolsJson`. The API leaves it empty until the run has
- * finished, and the JSON text `null` can stand for "nothing skipped": an empty
- * string, `null` and `[]` all give an empty list. Text that is not a JSON array
- * also gives an empty list, rather than failing a poll over a field whose shape
- * is not settled; read `skippedToolsJson` on the run to see it. Entries that are
- * not objects are left out, and a missing field becomes an empty string.
- */
-export declare function parseSkippedTools(skippedToolsJson: string): SkippedTool[];

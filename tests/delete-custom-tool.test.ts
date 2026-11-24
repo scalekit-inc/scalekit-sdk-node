@@ -23,15 +23,14 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-function setup(toolTimeoutMs?: number) {
+function setup() {
   const rpc = {
     deleteCustomTool: jest.fn(async (_r: any, _o?: any) => create(EmptySchema)),
   };
   const coreClient = new CoreClient(
     'https://test.scalekit.dev',
     'client_id',
-    'client_secret',
-    toolTimeoutMs
+    'client_secret'
   );
   const tools = new ToolsClient({ createClient: () => rpc } as any, coreClient);
   const actions = new ActionsClient(
@@ -69,9 +68,8 @@ describe('actions.deleteCustomTool', () => {
     );
   });
 
-  it('passes no per-call options, so the call has the same deadline as every other call', async () => {
-    // A tool timeout that differs from the default shows that it is not used for this call.
-    const { rpc, actions } = setup(90_000);
+  it('calls the service method with the request and no per-call options', async () => {
+    const { rpc, actions } = setup();
 
     await actions.deleteCustomTool({ toolIdentifier: 'a-acme_get_user' });
 

@@ -151,8 +151,6 @@ export type {
 // JSON shape the API expects. Provider and the create/update/list responses are
 // the SDK's own shapes, with authPatterns decoded to AuthPattern[] so a fetched
 // provider's patterns can be passed straight back to updateCustomProvider.
-// ToolCollectionRun is the same idea for a tool collection run: its status is
-// typed and its skipped operations are parsed into SkippedTool[].
 export type {
   AuthPattern,
   AuthField,
@@ -162,10 +160,12 @@ export type {
   CreateProviderResponse,
   UpdateProviderResponse,
   ListProvidersResponse,
-  SkippedTool,
-  ToolCollectionRun,
 } from './providers';
-export { ToolCollectionRunStatus } from './providers';
+// ToolCollectionRun is the same idea for a tool collection run, returned by
+// `actions.invokeToolCollection` and `actions.getToolCollectionRun`: its status
+// is typed and its skipped operations are parsed into SkippedTool[].
+export type { SkippedTool, ToolCollectionRun } from './tool-collection-runs';
+export { ToolCollectionRunStatus } from './tool-collection-runs';
 export { ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 export type { DeleteProviderResponse } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 

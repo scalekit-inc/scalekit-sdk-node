@@ -278,8 +278,6 @@ A mapping can name a connection on a custom connector in either mode: one create
 - `actions.getToolCollectionRun({ providerIdentifier, runId? })` — status, counters and skipped operations of a run; omit `runId` for the latest. Poll it until `status` is `COMPLETED` or `FAILED`. Right after `createCustomProvider` it can answer NotFound for a moment; if it keeps doing so for about 45 seconds, queueing failed (Scalekit only logs it): call `actions.invokeToolCollection` once, and pass the `runId` it returns to follow your own run.
 - `listProviders`, `deleteCustomProvider` — a connector that still has connections cannot be deleted (`ScalekitBadRequestException`, `PROVIDER_HAS_EXISTING_CONNECTIONS`). Nor can a connector created from an OpenAPI spec while a tool collection run of it is queued or processing: the call throws `ScalekitConflictException` (`RESOURCE_ALREADY_EXISTS`). Either way nothing is deleted.
 
-The two run methods are also available as `actions.providers.invokeToolCollection(providerIdentifier)` and `actions.providers.getToolCollectionRun(providerIdentifier, runId?)`.
-
 ```typescript
 const { provider } =
   await scalekitClient.actions.providers.createCustomProvider({

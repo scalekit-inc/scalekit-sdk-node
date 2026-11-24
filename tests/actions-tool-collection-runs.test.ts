@@ -1,10 +1,10 @@
 /**
- * `actions.invokeToolCollection` and `actions.getToolCollectionRun`: the tool collection run
- * methods, called directly on the AgentKit client (`scalekit.actions.<method>`). They delegate to
- * `actions.providers`, which keeps the same methods, so validation and errors live in one place.
+ * `actions.invokeToolCollection` and `actions.getToolCollectionRun`: queue and follow the tool
+ * collection runs of a connector created from an OpenAPI spec. Like `actions.deleteCustomTool`,
+ * they exist only on the AgentKit client (`scalekit.actions.<method>`): each validates its params
+ * inline and calls the generated service client through `coreClient.connectExec` itself.
  *
- * Offline tests, so no environment is needed: the real `ActionsClient` reaches mocked RPC methods
- * through the real `ProvidersClient` it holds.
+ * Offline tests, so no environment is needed: the real `ActionsClient` reaches mocked RPC methods.
  */
 import { afterEach, describe, it, expect, jest } from '@jest/globals';
 import { Code, ConnectError } from '@connectrpc/connect';
@@ -29,10 +29,10 @@ import {
   TriggerToolCollectionRequestSchema,
 } from '../src/pkg/grpc/scalekit/v1/providers/providers_pb';
 
-const PROVIDER = 'ACMEAPI:1234';
+const PROVIDER = 'ACMEAPI:70219645518265104';
+const RUN_ID = 'tcr_153432495495315592';
 
 const created = new Date('2026-11-10T10:00:00Z');
-const finished = new Date('2026-11-10T10:00:42Z');
 
 afterEach(() => {
   jest.restoreAllMocks();
@@ -40,7 +40,7 @@ afterEach(() => {
 
 function run(overrides: Record<string, unknown> = {}) {
   return create(ToolCollectionRunSchema, {
-    runId: 'tcr_1',
+    runId: RUN_ID,
     providerIdentifier: PROVIDER,
     status: 'QUEUED',
     createdAt: timestampFromDate(created),
@@ -58,6 +58,7 @@ function setup() {
     'client_id',
     'client_secret'
   );
+  const connectExec = jest.spyOn(coreClient, 'connectExec');
   const providers = new ProvidersClient(
     { createClient: () => rpc } as any,
     coreClient
@@ -70,7 +71,7 @@ function setup() {
     {} as any,
     providers
   );
-  return { rpc, actions, providers };
+  return { rpc, actions, connectExec };
 }
 
 const connectError = (code: Code, message: string, errorCode: string) =>
@@ -82,18 +83,20 @@ const connectError = (code: Code, message: string, errorCode: string) =>
 const badParams: unknown[][] = [
   [undefined],
   [null],
-  ['ACMEAPI:1234'],
+  [PROVIDER],
   [{}],
   [{ providerIdentifier: undefined }],
   [{ providerIdentifier: null }],
   [{ providerIdentifier: '' }],
   [{ providerIdentifier: '   ' }],
   [{ providerIdentifier: '\n\t' }],
-  [{ providerIdentifier: 1234 }],
+  [{ providerIdentifier: 70219645518265104 }],
+  [{ providerIdentifier: [PROVIDER] }],
+  [{ providerIdentifier: { identifier: PROVIDER } }],
 ];
 
 describe('actions.invokeToolCollection', () => {
-  it('sends the connector identifier, with no per-call options, and returns the queued run', async () => {
+  it('sends the connector identifier and returns the queued run', async () => {
     const { rpc, actions } = setup();
 
     const queued = await actions.invokeToolCollection({
@@ -101,18 +104,18 @@ describe('actions.invokeToolCollection', () => {
     });
 
     expect(rpc.triggerToolCollection).toHaveBeenCalledTimes(1);
-    const [request, options] = rpc.triggerToolCollection.mock.calls[0];
-    expect(request).toEqual(
+    expect(rpc.getToolCollectionRun).not.toHaveBeenCalled();
+    expect(rpc.triggerToolCollection.mock.calls[0][0]).toEqual(
       create(TriggerToolCollectionRequestSchema, {
         providerIdentifier: PROVIDER,
       })
     );
-    // No special deadline: the call uses the client's default like every other call.
-    expect(options).toBeUndefined();
-    expect(queued.runId).toBe('tcr_1');
+    expect(queued.runId).toBe(RUN_ID);
     expect(queued.providerIdentifier).toBe(PROVIDER);
     expect(queued.status).toBe(sdk.ToolCollectionRunStatus.QUEUED);
     expect(queued.skippedTools).toEqual([]);
+    expect(queued.startedAt).toBeUndefined();
+    expect(queued.finishedAt).toBeUndefined();
     expect(queued).not.toHaveProperty('$typeName');
   });
 
@@ -130,31 +133,22 @@ describe('actions.invokeToolCollection', () => {
     );
   });
 
-  it('delegates to actions.providers.invokeToolCollection and returns its result as it is', async () => {
-    const { actions, providers } = setup();
-    const result = { runId: 'tcr_9', skippedTools: [] } as any;
-    const delegate = jest
-      .spyOn(providers, 'invokeToolCollection')
-      .mockResolvedValueOnce(result);
+  it('calls connectExec with the service method and the request, and nothing else', async () => {
+    const { rpc, actions, connectExec } = setup();
 
-    await expect(
-      actions.invokeToolCollection({ providerIdentifier: PROVIDER })
-    ).resolves.toBe(result);
+    await actions.invokeToolCollection({ providerIdentifier: PROVIDER });
 
-    expect(delegate).toHaveBeenCalledTimes(1);
-    expect(delegate).toHaveBeenCalledWith(PROVIDER);
-  });
-
-  it('lets an error from actions.providers.invokeToolCollection through unchanged', async () => {
-    const { actions, providers } = setup();
-    const failure = new Error('boom');
-    jest
-      .spyOn(providers, 'invokeToolCollection')
-      .mockRejectedValueOnce(failure);
-
-    await expect(
-      actions.invokeToolCollection({ providerIdentifier: PROVIDER })
-    ).rejects.toBe(failure);
+    expect(connectExec).toHaveBeenCalledTimes(1);
+    const args = connectExec.mock.calls[0];
+    expect(args).toHaveLength(2);
+    expect(args[0]).toBe(rpc.triggerToolCollection);
+    expect(args[1]).toEqual(
+      create(TriggerToolCollectionRequestSchema, {
+        providerIdentifier: PROVIDER,
+      })
+    );
+    // The service method gets the request and no per-call options.
+    expect(rpc.triggerToolCollection.mock.calls[0][1]).toBeUndefined();
   });
 
   const failures: Array<[string, ConnectError, any, number, string]> = [
@@ -187,31 +181,38 @@ describe('actions.invokeToolCollection', () => {
       400,
       'INVALID_ARGUMENT',
     ],
+    [
+      'OpenAPI-sourced connectors that are not enabled',
+      connectError(
+        Code.InvalidArgument,
+        'OpenAPI-sourced connectors are not enabled for this environment',
+        'FEATURE_NOT_ENABLED'
+      ),
+      ScalekitBadRequestException,
+      400,
+      'FEATURE_NOT_ENABLED',
+    ],
   ];
 
   it.each(failures)(
-    'raises the same exception as actions.providers for %s',
+    'raises the SDK exception for %s',
     async (_name, failure, ErrorClass, httpStatus, errorCode) => {
-      const { rpc, actions, providers } = setup();
-      rpc.triggerToolCollection.mockRejectedValue(failure);
+      const { rpc, actions } = setup();
+      rpc.triggerToolCollection.mockRejectedValueOnce(failure);
 
-      const viaActions = await actions
+      const error = await actions
         .invokeToolCollection({ providerIdentifier: PROVIDER })
         .catch((e) => e);
-      const viaProviders = await providers
-        .invokeToolCollection(PROVIDER)
-        .catch((e) => e);
 
-      expect(viaActions).toBeInstanceOf(ErrorClass);
-      expect(viaActions.httpStatus).toBe(httpStatus);
-      expect(viaActions.message).toBe(viaProviders.message);
-      expect(viaActions.errorCode).toBe(errorCode);
-      expect(viaActions.errorCode).toBe(viaProviders.errorCode);
+      expect(error).toBeInstanceOf(ErrorClass);
+      expect(error.httpStatus).toBe(httpStatus);
+      expect(error.errorCode).toBe(errorCode);
+      expect(error.message).toContain(failure.rawMessage);
     }
   );
 
   it.each(badParams)('refuses %p and sends nothing', async (params) => {
-    const { rpc, actions } = setup();
+    const { rpc, actions, connectExec } = setup();
 
     const error = await actions
       .invokeToolCollection(params as any)
@@ -219,25 +220,30 @@ describe('actions.invokeToolCollection', () => {
 
     expect(error).toBeInstanceOf(ScalekitValidationError);
     expect(error.message).toContain('providerIdentifier is required');
+    expect(connectExec).not.toHaveBeenCalled();
     expect(rpc.triggerToolCollection).not.toHaveBeenCalled();
   });
 });
 
 describe('actions.getToolCollectionRun', () => {
-  it('asks for the latest run when no run id is given, with no per-call options', async () => {
+  it('asks for the latest run when no run id is given', async () => {
     const { rpc, actions } = setup();
 
-    await actions.getToolCollectionRun({ providerIdentifier: PROVIDER });
+    const latest = await actions.getToolCollectionRun({
+      providerIdentifier: PROVIDER,
+    });
 
     expect(rpc.getToolCollectionRun).toHaveBeenCalledTimes(1);
-    const [request, options] = rpc.getToolCollectionRun.mock.calls[0];
-    expect(request).toEqual(
+    expect(rpc.triggerToolCollection).not.toHaveBeenCalled();
+    expect(rpc.getToolCollectionRun.mock.calls[0][0]).toEqual(
       create(GetToolCollectionRunRequestSchema, {
         providerIdentifier: PROVIDER,
         runId: 'latest',
       })
     );
-    expect(options).toBeUndefined();
+    expect(latest.runId).toBe(RUN_ID);
+    expect(latest.providerIdentifier).toBe(PROVIDER);
+    expect(latest).not.toHaveProperty('$typeName');
   });
 
   it.each([
@@ -269,96 +275,50 @@ describe('actions.getToolCollectionRun', () => {
 
     await actions.getToolCollectionRun({
       providerIdentifier: ` ${PROVIDER}\n`,
-      runId: ' tcr_77\n',
+      runId: ` ${RUN_ID}\n`,
     });
 
     expect(rpc.getToolCollectionRun.mock.calls[0][0]).toEqual(
       create(GetToolCollectionRunRequestSchema, {
         providerIdentifier: PROVIDER,
-        runId: 'tcr_77',
+        runId: RUN_ID,
       })
     );
   });
 
-  it('delegates to actions.providers.getToolCollectionRun and returns its result as it is', async () => {
-    const { actions, providers } = setup();
-    const result = { runId: 'tcr_9', skippedTools: [] } as any;
-    const delegate = jest
-      .spyOn(providers, 'getToolCollectionRun')
-      .mockResolvedValue(result);
+  it('calls connectExec with the service method and the request, and nothing else', async () => {
+    const { rpc, actions, connectExec } = setup();
 
-    await expect(
-      actions.getToolCollectionRun({
-        providerIdentifier: PROVIDER,
-        runId: 'tcr_77',
-      })
-    ).resolves.toBe(result);
-    await actions.getToolCollectionRun({ providerIdentifier: PROVIDER });
-
-    expect(delegate.mock.calls).toEqual([
-      [PROVIDER, 'tcr_77'],
-      [PROVIDER, undefined],
-    ]);
-  });
-
-  it('returns the counters, timestamps and parsed skipped operations of a finished run', async () => {
-    const { rpc, actions, providers } = setup();
-    rpc.getToolCollectionRun.mockResolvedValue(
-      run({
-        status: 'COMPLETED',
-        totalEndpoints: 14,
-        toolsCreated: 10,
-        toolsUpdated: 2,
-        toolsDeleted: 1,
-        skippedToolsJson: JSON.stringify([
-          {
-            operation_id: 'uploadAvatar',
-            method: 'POST',
-            path: '/users/{id}/avatar',
-            reason: 'request body has no application/json representation',
-          },
-        ]),
-        startedAt: timestampFromDate(created),
-        finishedAt: timestampFromDate(finished),
-      })
-    );
-
-    const viaActions = await actions.getToolCollectionRun({
+    await actions.getToolCollectionRun({
       providerIdentifier: PROVIDER,
+      runId: RUN_ID,
     });
 
-    expect(viaActions.status).toBe(sdk.ToolCollectionRunStatus.COMPLETED);
-    expect(viaActions.toolsCreated).toBe(10);
-    expect(viaActions.finishedAt?.seconds).toBe(
-      BigInt(finished.getTime() / 1000)
+    expect(connectExec).toHaveBeenCalledTimes(1);
+    const args = connectExec.mock.calls[0];
+    expect(args).toHaveLength(2);
+    expect(args[0]).toBe(rpc.getToolCollectionRun);
+    expect(args[1]).toEqual(
+      create(GetToolCollectionRunRequestSchema, {
+        providerIdentifier: PROVIDER,
+        runId: RUN_ID,
+      })
     );
-    expect(viaActions.skippedTools).toEqual([
-      {
-        operationId: 'uploadAvatar',
-        method: 'POST',
-        path: '/users/{id}/avatar',
-        reason: 'request body has no application/json representation',
-      },
-    ]);
-    expect(viaActions).toEqual(await providers.getToolCollectionRun(PROVIDER));
-  });
-
-  it('lets an error from actions.providers.getToolCollectionRun through unchanged', async () => {
-    const { actions, providers } = setup();
-    const failure = new Error('boom');
-    jest
-      .spyOn(providers, 'getToolCollectionRun')
-      .mockRejectedValueOnce(failure);
-
-    await expect(
-      actions.getToolCollectionRun({ providerIdentifier: PROVIDER })
-    ).rejects.toBe(failure);
+    // The service method gets the request and no per-call options.
+    expect(rpc.getToolCollectionRun.mock.calls[0][1]).toBeUndefined();
   });
 
   const failures: Array<[string, ConnectError, any, number, string]> = [
     [
       'a connector without a run',
       connectError(Code.NotFound, 'tool collection run not found', 'NOT_FOUND'),
+      ScalekitNotFoundException,
+      404,
+      'NOT_FOUND',
+    ],
+    [
+      'an unknown connector',
+      connectError(Code.NotFound, 'provider not found', 'NOT_FOUND'),
       ScalekitNotFoundException,
       404,
       'NOT_FOUND',
@@ -373,28 +333,24 @@ describe('actions.getToolCollectionRun', () => {
   ];
 
   it.each(failures)(
-    'raises the same exception as actions.providers for %s',
+    'raises the SDK exception for %s',
     async (_name, failure, ErrorClass, httpStatus, errorCode) => {
-      const { rpc, actions, providers } = setup();
-      rpc.getToolCollectionRun.mockRejectedValue(failure);
+      const { rpc, actions } = setup();
+      rpc.getToolCollectionRun.mockRejectedValueOnce(failure);
 
-      const viaActions = await actions
+      const error = await actions
         .getToolCollectionRun({ providerIdentifier: PROVIDER, runId: 'nope' })
         .catch((e) => e);
-      const viaProviders = await providers
-        .getToolCollectionRun(PROVIDER, 'nope')
-        .catch((e) => e);
 
-      expect(viaActions).toBeInstanceOf(ErrorClass);
-      expect(viaActions.httpStatus).toBe(httpStatus);
-      expect(viaActions.message).toBe(viaProviders.message);
-      expect(viaActions.errorCode).toBe(errorCode);
-      expect(viaActions.errorCode).toBe(viaProviders.errorCode);
+      expect(error).toBeInstanceOf(ErrorClass);
+      expect(error.httpStatus).toBe(httpStatus);
+      expect(error.errorCode).toBe(errorCode);
+      expect(error.message).toContain(failure.rawMessage);
     }
   );
 
   it.each(badParams)('refuses %p and sends nothing', async (params) => {
-    const { rpc, actions } = setup();
+    const { rpc, actions, connectExec } = setup();
 
     const error = await actions
       .getToolCollectionRun(params as any)
@@ -402,68 +358,48 @@ describe('actions.getToolCollectionRun', () => {
 
     expect(error).toBeInstanceOf(ScalekitValidationError);
     expect(error.message).toContain('providerIdentifier is required');
+    expect(connectExec).not.toHaveBeenCalled();
     expect(rpc.getToolCollectionRun).not.toHaveBeenCalled();
   });
 
-  it.each([[77], [{}], [['tcr_1']], [true]])(
+  it.each([[77], [{}], [[RUN_ID]], [true]])(
     'refuses the run id %p, which is not a string, and sends nothing',
     async (runId) => {
-      const { rpc, actions } = setup();
+      const { rpc, actions, connectExec } = setup();
 
-      await expect(
-        actions.getToolCollectionRun({
+      const error = await actions
+        .getToolCollectionRun({
           providerIdentifier: PROVIDER,
           runId: runId as any,
         })
-      ).rejects.toBeInstanceOf(ScalekitValidationError);
+        .catch((e) => e);
+
+      expect(error).toBeInstanceOf(ScalekitValidationError);
+      expect(error.message).toContain('runId must be a string');
+      expect(connectExec).not.toHaveBeenCalled();
       expect(rpc.getToolCollectionRun).not.toHaveBeenCalled();
     }
   );
 });
 
-describe('the same operations through actions.providers', () => {
-  it('still work and send the same requests', async () => {
-    const { rpc, actions } = setup();
-
-    expect(actions.providers).toBeInstanceOf(ProvidersClient);
-    await actions.providers.invokeToolCollection(PROVIDER);
-    await actions.invokeToolCollection({ providerIdentifier: PROVIDER });
-    await actions.providers.getToolCollectionRun(PROVIDER);
-    await actions.getToolCollectionRun({ providerIdentifier: PROVIDER });
-    await actions.providers.getToolCollectionRun(PROVIDER, 'tcr_77');
-    await actions.getToolCollectionRun({
-      providerIdentifier: PROVIDER,
-      runId: 'tcr_77',
-    });
-
-    const triggered = rpc.triggerToolCollection.mock.calls;
-    expect(triggered).toHaveLength(2);
-    expect(triggered[0][0]).toEqual(triggered[1][0]);
-    const read = rpc.getToolCollectionRun.mock.calls;
-    expect(read).toHaveLength(4);
-    expect(read[0][0]).toEqual(read[1][0]);
-    expect(read[2][0]).toEqual(read[3][0]);
-    expect(read[0][0].runId).toBe('latest');
-    expect(read[2][0].runId).toBe('tcr_77');
-  });
-});
-
 describe('scalekit.actions', () => {
-  it('has the tool collection methods and deleteCustomTool directly on the AgentKit client', () => {
-    const scalekit = new ScalekitClient(
+  const scalekit = () =>
+    new ScalekitClient(
       'https://test.scalekit.dev',
       'client_id',
       'client_secret'
     );
 
-    expect(typeof scalekit.actions.invokeToolCollection).toBe('function');
-    expect(typeof scalekit.actions.getToolCollectionRun).toBe('function');
-    expect(typeof scalekit.actions.deleteCustomTool).toBe('function');
-    // The providers form stays.
-    expect(typeof scalekit.actions.providers.invokeToolCollection).toBe(
+  it('has the tool collection methods and deleteCustomTool directly on the AgentKit client', () => {
+    const { actions } = scalekit();
+
+    expect(typeof actions.invokeToolCollection).toBe('function');
+    expect(typeof actions.getToolCollectionRun).toBe('function');
+    expect(typeof actions.deleteCustomTool).toBe('function');
+    expect(typeof ActionsClient.prototype.invokeToolCollection).toBe(
       'function'
     );
-    expect(typeof scalekit.actions.providers.getToolCollectionRun).toBe(
+    expect(typeof ActionsClient.prototype.getToolCollectionRun).toBe(
       'function'
     );
   });
@@ -479,7 +415,7 @@ describe('scalekit.actions', () => {
       runId: 'latest',
     });
     expect(queued.status).toBe(sdk.ToolCollectionRunStatus.QUEUED);
-    expect(latest.runId).toBe('tcr_1');
+    expect(latest.runId).toBe(RUN_ID);
 
     // These are never called. The file fails to compile if one of the errors expected below goes
     // away: the params object and `providerIdentifier` are required, `runId` is optional.

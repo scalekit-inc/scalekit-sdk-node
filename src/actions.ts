@@ -27,7 +27,10 @@ import {
 import type { AppConnection as AgentKitConnection } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 import type McpClient from './mcp';
 import type ProvidersClient from './providers';
-import type { ToolCollectionRun } from './providers';
+import {
+  toToolCollectionRun,
+  type ToolCollectionRun,
+} from './tool-collection-runs';
 import { TriggersClient } from './triggers';
 import type { Timestamp } from '@bufbuild/protobuf/wkt';
 import {
@@ -119,6 +122,10 @@ import {
   ExecuteToolResponse,
   Tool,
 } from './pkg/grpc/scalekit/v1/tools/tools_pb';
+import {
+  GetToolCollectionRunRequestSchema,
+  TriggerToolCollectionRequestSchema,
+} from './pkg/grpc/scalekit/v1/providers/providers_pb';
 
 /**
  * Normalized, consumer-friendly view of a tool returned by
@@ -317,9 +324,6 @@ export default class ActionsClient {
    * Queues a tool collection run for a connector created from an OpenAPI spec, and returns the
    * run with the status `QUEUED`.
    *
-   * Call it as `scalekit.actions.invokeToolCollection({ providerIdentifier })`. The same operation
-   * is also available as `scalekit.actions.providers.invokeToolCollection(providerIdentifier)`.
-   *
    * A tool collection run reads the connector's stored spec again and brings its tools in line
    * with it. Creating the connector, and changing its base URL or spec URL, already queue a run
    * for you. Call this to pick up a spec that changed upstream, or to retry a run that failed.
@@ -329,7 +333,9 @@ export default class ActionsClient {
    * `actions.providers.createCustomProvider` with `openapiSpecUrl`. When the spec, the
    * connector's base URL and its auth patterns are all unchanged since the last completed run,
    * and the spec does not reference external files, the run changes no tools and reports
-   * `toolsCreated`, `toolsUpdated` and `toolsDeleted` as 0.
+   * `toolsCreated`, `toolsUpdated` and `toolsDeleted` as 0. If the first run fills in the base
+   * URL, that counts as a change: the next run updates every tool, and only the run after that
+   * reports 0.
    *
    * @param params.providerIdentifier The connector's `identifier`: the `NAME:environment-id` string
    *   that `actions.providers.createCustomProvider` and `actions.providers.listProviders` return as
@@ -360,16 +366,25 @@ export default class ActionsClient {
   async invokeToolCollection(params: {
     providerIdentifier: string;
   }): Promise<ToolCollectionRun> {
-    return this.providers.invokeToolCollection(params?.providerIdentifier);
+    const providerIdentifier =
+      typeof params?.providerIdentifier === 'string'
+        ? params.providerIdentifier.trim()
+        : '';
+    if (!providerIdentifier) {
+      throw new ScalekitValidationError('providerIdentifier is required');
+    }
+
+    // The RPC and its request message are still named TriggerToolCollection in the proto.
+    const response = await this.coreClient.connectExec(
+      this.providers.client.triggerToolCollection,
+      create(TriggerToolCollectionRequestSchema, { providerIdentifier })
+    );
+    return toToolCollectionRun(response);
   }
 
   /**
    * Gets one tool collection run of a connector created from an OpenAPI spec: its status, its
    * counters and, once it has finished, the operations that were skipped and why.
-   *
-   * Call it as `scalekit.actions.getToolCollectionRun({ providerIdentifier, runId })`. The same
-   * operation is also available as
-   * `scalekit.actions.providers.getToolCollectionRun(providerIdentifier, runId)`.
    *
    * After `actions.providers.createCustomProvider`, after
    * {@link ActionsClient.invokeToolCollection} and after an `actions.providers.updateCustomProvider`
@@ -381,8 +396,24 @@ export default class ActionsClient {
    * without one you get the newest run, which can be one that another caller queued.
    *
    * A run is `QUEUED`, then `PROCESSING`, and ends as `COMPLETED` or `FAILED`; `errorMessage` says
-   * why a run failed. An operation of the spec that cannot become a tool is skipped, listed in
-   * `skippedTools`, and does not fail the run. See {@link ToolCollectionRun} for the fields.
+   * why a run failed. A run fails if Scalekit cannot fetch or parse the spec, if the spec yields no
+   * tool at all, if processing takes longer than 3 minutes, or if the run makes no progress for 30
+   * minutes. An operation of the spec that cannot become a tool is skipped, listed in
+   * `skippedTools`, and does not fail the run. The operations skipped are those that:
+   * - use a method other than GET, POST, PUT, PATCH or DELETE;
+   * - have a request body that is not JSON, form-encoded or a plain string (for example
+   *   multipart, binary or XML), or a form-encoded body that is not an object;
+   * - need authentication while the connector's auth type is not one that Scalekit can sign
+   *   requests for;
+   * - have no base URL, or need authentication but have a plain `http://` base URL (other than on
+   *   localhost);
+   * - use a path parameter the operation does not declare, or an object query parameter with
+   *   `style: form`.
+   *
+   * Each tool is named `a-<connector name>_<operationId>`, in lower case, with the connector name
+   * taken from its identifier. Without an `operationId`, the method and path stand in for it, and a
+   * name that is already taken gets a numeric suffix. Operations that left the spec are deleted
+   * from the connector. See {@link ToolCollectionRun} for the fields.
    *
    * @param params.providerIdentifier The connector's `identifier`: the `NAME:environment-id` string
    *   that `actions.providers.createCustomProvider` and `actions.providers.listProviders` return as
@@ -413,10 +444,27 @@ export default class ActionsClient {
     providerIdentifier: string;
     runId?: string;
   }): Promise<ToolCollectionRun> {
-    return this.providers.getToolCollectionRun(
-      params?.providerIdentifier,
-      params?.runId
+    const runId = params?.runId;
+    if (runId !== undefined && runId !== null && typeof runId !== 'string') {
+      throw new ScalekitValidationError('runId must be a string');
+    }
+    const providerIdentifier =
+      typeof params?.providerIdentifier === 'string'
+        ? params.providerIdentifier.trim()
+        : '';
+    if (!providerIdentifier) {
+      throw new ScalekitValidationError('providerIdentifier is required');
+    }
+
+    const response = await this.coreClient.connectExec(
+      this.providers.client.getToolCollectionRun,
+      create(GetToolCollectionRunRequestSchema, {
+        providerIdentifier,
+        // A missing or blank run id means the connector's newest run.
+        runId: (runId ?? '').trim() || 'latest',
+      })
     );
+    return toToolCollectionRun(response);
   }
 
   /**

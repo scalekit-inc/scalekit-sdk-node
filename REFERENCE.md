@@ -7183,7 +7183,7 @@ Connect end users' accounts to third-party services and run tools against them. 
 
 Virtual MCP servers and custom connectors are also under `actions`, as [`actions.mcp`](#virtual-mcp-servers) and [`actions.providers`](#custom-connectors).
 
-`actions.invokeToolCollection` and `actions.getToolCollectionRun`, which queue and follow the tool collection runs of a connector created from an OpenAPI spec, and `actions.deleteCustomTool` are on `actions` itself. The two run methods are also available as `actions.providers.invokeToolCollection(providerIdentifier)` and `actions.providers.getToolCollectionRun(providerIdentifier, runId?)`.
+`actions.invokeToolCollection` and `actions.getToolCollectionRun`, which queue and follow the tool collection runs of a connector created from an OpenAPI spec, and `actions.deleteCustomTool` are on `actions` itself.
 
 Access via `scalekitClient.actions`.
 
@@ -7502,7 +7502,7 @@ Creating the connector, and changing its base URL or spec URL, already queue a r
 Scalekit checks the stored spec URL during this call, with the same checks and errors as `createCustomProvider`. A run of a spec that has not changed since the last completed run changes no tools: see [Unchanged specs](#the-tool-collection-run).
 
 Errors:
-- `ScalekitValidationError` if `params` or `providerIdentifier` is missing, or `providerIdentifier` is empty or blank; nothing is sent.
+- `ScalekitValidationError` if `params` or `providerIdentifier` is missing, not a string, empty or blank; nothing is sent.
 - `ScalekitNotFoundException` (`404`) if no connector in your environment has that identifier.
 - `ScalekitBadRequestException` (`400`) if the connector was not created from an OpenAPI spec (`this connector is not sourced from an OpenAPI spec`), if OpenAPI-sourced connectors are not enabled for your environment (error code `FEATURE_NOT_ENABLED`), or if the stored spec URL fails the check.
 - `ScalekitConflictException` (`409`), with the error code `RESOURCE_ALREADY_EXISTS`, if a run is already in progress: a connector has at most one active run.
@@ -7541,7 +7541,7 @@ console.log(run.runId, run.status); // 'QUEUED'
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `params.providerIdentifier` | `string` | Yes | The connector's identifier (`NAME:environment-id`, from `provider.identifier`), not `provider.id`. Whitespace around it is removed |
+| `params.providerIdentifier` | `string` | Yes | The connector's `identifier` (`NAME:environment-id`, from `provider.identifier`), not `provider.id`. Whitespace around it is removed |
 
 **Returns**: `Promise<ToolCollectionRun>` - The queued run, with the status `QUEUED`.
 
@@ -7572,7 +7572,7 @@ Gets one tool collection run of a connector created from an OpenAPI spec: its st
 After `actions.providers.createCustomProvider`, after `actions.invokeToolCollection` and after an `actions.providers.updateCustomProvider` that queued a run (a base URL or spec URL change: see its rules), poll it until `status` is `COMPLETED` or `FAILED`. Any other update queues no run, so this call then returns an older run, or `ScalekitNotFoundException` if there is none. After your own `actions.invokeToolCollection`, pass the `runId` it returned: without one you get the newest run, which can be one that another caller queued. Right after `actions.providers.createCustomProvider` the first run is still being queued in the background, so this call can answer `ScalekitNotFoundException` for a moment. If it keeps doing so for about 45 seconds, queueing failed (Scalekit only logs it): call `actions.invokeToolCollection` once. See [The tool collection run](#the-tool-collection-run) for the fields of the result.
 
 Errors:
-- `ScalekitValidationError` if `params` or `providerIdentifier` is missing, or `providerIdentifier` is empty or blank, or `runId` is given and is not a string; nothing is sent.
+- `ScalekitValidationError` if `params` or `providerIdentifier` is missing, not a string, empty or blank, or `runId` is given and is not a string; nothing is sent.
 - `ScalekitNotFoundException` (`404`) if no connector has that identifier, if the connector has no run yet, or if `runId` is not one of its runs (`tool collection run not found`).
 - `ScalekitBadRequestException` (`400`) if `runId` is malformed (`invalid run_id`).
 - `ScalekitServerException` if a network or server error occurs.
@@ -7611,7 +7611,7 @@ console.log(run.status, run.toolsCreated, run.skippedTools.length);
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `params.providerIdentifier` | `string` | Yes | The connector's identifier (`NAME:environment-id`, from `provider.identifier`), not `provider.id`. Whitespace around it is removed |
+| `params.providerIdentifier` | `string` | Yes | The connector's `identifier` (`NAME:environment-id`, from `provider.identifier`), not `provider.id`. Whitespace around it is removed |
 | `params.runId` | `string` | No | A run's `runId`. Omit it, or pass `'latest'` (an empty or blank string means the same), for the connector's newest run. Whitespace around it is removed |
 
 **Returns**: `Promise<ToolCollectionRun>` - The run: its status, its counters and, once it has finished, the skipped operations. See [The tool collection run](#the-tool-collection-run) for the fields.
@@ -8755,7 +8755,7 @@ console.log(provider?.proxyUrl);
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `params.identifier` | `string` | Yes | The connector's identifier (`NAME:environment-id`, from `provider.identifier`), not `provider.id` |
+| `params.identifier` | `string` | Yes | The connector's `identifier` (`NAME:environment-id`, from `provider.identifier`), not `provider.id` |
 | `params.displayName` | `string` | Yes | Required on every update |
 | `params.proxyUrl` | `string` | For an MCP-sourced connector | Required for an MCP-sourced connector. For a connector created from an OpenAPI spec this is its base URL, and leaving it out keeps the stored value |
 | `params.openapiSpecUrl` | `string` | No | Only for a connector created from an OpenAPI spec. Sending the stored URL changes nothing; a different one is rejected unless your workspace has that capability enabled |
@@ -8837,7 +8837,7 @@ await scalekitClient.actions.providers.deleteCustomProvider('ACMEAPI:70219645518
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `identifier` | `string` | Yes | The connector's identifier (`NAME:environment-id`, from `provider.identifier`), not `provider.id` |
+| `identifier` | `string` | Yes | The connector's `identifier` (`NAME:environment-id`, from `provider.identifier`), not `provider.id` |
 
 **Returns**: `Promise<DeleteProviderResponse>` - An empty response: the connector is deleted.
 
