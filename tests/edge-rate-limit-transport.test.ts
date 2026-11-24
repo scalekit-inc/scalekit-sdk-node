@@ -101,11 +101,11 @@ afterEach(async () => {
 });
 
 describe('the real gRPC transport and the no-replay wrapper', () => {
-  it('replays triggerToolCollection after an HTTP 429 and returns the run', async () => {
+  it('replays invokeToolCollection after an HTTP 429 and returns the run', async () => {
     answers = ['429', 'ok'];
     const client = await providers();
 
-    const run = await client.triggerToolCollection('ACMEAPI:1234');
+    const run = await client.invokeToolCollection('ACMEAPI:1234');
 
     expect(run.runId).toBe('tcr_1');
     expect(requests).toBe(2);
@@ -117,7 +117,7 @@ describe('the real gRPC transport and the no-replay wrapper', () => {
     const client = await providers();
 
     await expect(
-      client.triggerToolCollection('ACMEAPI:1234')
+      client.invokeToolCollection('ACMEAPI:1234')
     ).rejects.toBeInstanceOf(ScalekitServiceUnavailableException);
     expect(requests).toBe(4); // the first attempt and three replays
   });
@@ -127,7 +127,7 @@ describe('the real gRPC transport and the no-replay wrapper', () => {
     const client = await providers();
 
     await expect(
-      client.triggerToolCollection('ACMEAPI:1234')
+      client.invokeToolCollection('ACMEAPI:1234')
     ).rejects.toBeInstanceOf(ScalekitServiceUnavailableException);
     expect(requests).toBe(1);
     expect(sleep).not.toHaveBeenCalled();

@@ -1,6 +1,6 @@
 /**
  * Tool collection runs of a connector created from an OpenAPI spec:
- * `providers.triggerToolCollection` and `providers.getToolCollectionRun`.
+ * `providers.invokeToolCollection` and `providers.getToolCollectionRun`.
  *
  * Offline tests: the gRPC client is mocked, so no environment is needed.
  */
@@ -73,11 +73,11 @@ const notFound = (message: string) =>
     { desc: ErrorInfoSchema, value: { errorCode: 'NOT_FOUND' } },
   ]);
 
-describe('triggerToolCollection', () => {
+describe('invokeToolCollection', () => {
   it('sends the connector identifier and returns the queued run', async () => {
     const { rpc, client } = setup();
 
-    const queued = await client.triggerToolCollection('ACMEAPI:1234');
+    const queued = await client.invokeToolCollection('ACMEAPI:1234');
 
     expect(lastRequest(rpc.triggerToolCollection).providerIdentifier).toBe(
       'ACMEAPI:1234'
@@ -94,7 +94,7 @@ describe('triggerToolCollection', () => {
   it('returns a plain object without the protobuf type name', async () => {
     const { client } = setup();
 
-    const queued = await client.triggerToolCollection('ACMEAPI:1234');
+    const queued = await client.invokeToolCollection('ACMEAPI:1234');
 
     expect(queued).not.toHaveProperty('$typeName');
   });
@@ -102,10 +102,10 @@ describe('triggerToolCollection', () => {
   it('rejects an empty identifier before sending anything', async () => {
     const { rpc, client } = setup();
 
-    await expect(client.triggerToolCollection('')).rejects.toBeInstanceOf(
+    await expect(client.invokeToolCollection('')).rejects.toBeInstanceOf(
       ScalekitValidationError
     );
-    await expect(client.triggerToolCollection('   ')).rejects.toBeInstanceOf(
+    await expect(client.invokeToolCollection('   ')).rejects.toBeInstanceOf(
       ScalekitValidationError
     );
     expect(rpc.triggerToolCollection).not.toHaveBeenCalled();
@@ -114,7 +114,7 @@ describe('triggerToolCollection', () => {
   it('sends the identifier without the whitespace around it', async () => {
     const { rpc, client } = setup();
 
-    await client.triggerToolCollection('  ACMEAPI:1234\n');
+    await client.invokeToolCollection('  ACMEAPI:1234\n');
 
     expect(lastRequest(rpc.triggerToolCollection).providerIdentifier).toBe(
       'ACMEAPI:1234'
@@ -126,7 +126,7 @@ describe('triggerToolCollection', () => {
     rpc.triggerToolCollection.mockRejectedValueOnce(conflict());
 
     const error = await client
-      .triggerToolCollection('ACMEAPI:1234')
+      .invokeToolCollection('ACMEAPI:1234')
       .catch((e) => e);
 
     expect(error).toBeInstanceOf(ScalekitConflictException);
@@ -140,7 +140,7 @@ describe('triggerToolCollection', () => {
       notFound('provider not found')
     );
 
-    const error = await client.triggerToolCollection('NOPE:1').catch((e) => e);
+    const error = await client.invokeToolCollection('NOPE:1').catch((e) => e);
 
     expect(error).toBeInstanceOf(ScalekitNotFoundException);
     expect(error.httpStatus).toBe(404);
@@ -158,7 +158,7 @@ describe('triggerToolCollection', () => {
     );
 
     const error = await client
-      .triggerToolCollection('ACMEMCP:1234')
+      .invokeToolCollection('ACMEMCP:1234')
       .catch((e) => e);
 
     expect(error).toBeInstanceOf(ScalekitBadRequestException);

@@ -8266,7 +8266,7 @@ Access via `scalekitClient.actions.providers`.
 <dl>
 <dd>
 
-Creates a custom connector. The response's `provider.identifier` is the id you pass to `updateCustomProvider`, `deleteCustomProvider`, `triggerToolCollection` and `getToolCollectionRun`.
+Creates a custom connector. The response's `provider.identifier` is the id you pass to `updateCustomProvider`, `deleteCustomProvider`, `invokeToolCollection` and `getToolCollectionRun`.
 
 Set exactly one of `proxyUrl` (an MCP server, or a REST service you call through `actions.request`) and `openapiSpecUrl` (an OpenAPI spec to generate tools from). Both fail with a message that starts `[invalid_argument] proxy_url cannot be set together with openapi_spec_url`, and neither with one that starts `[invalid_argument] either proxy_url or openapi_spec_url must be set`; each goes on with a dash and a sentence that says what to do instead. Both URLs must start with `https://` and are at most 2048 characters. For what happens with `openapiSpecUrl`, see [Connectors created from an OpenAPI spec](#connectors-created-from-an-openapi-spec).
 
@@ -8476,11 +8476,11 @@ What the server does with each field:
 
 A connector created from an OpenAPI spec (`provider.openapiSpecUrl` is set) follows stricter rules, because Scalekit manages its tools and its auth:
 - Only `displayName`, `description`, `iconSrc`, `metadata` and `proxyUrl` can change, apart from `openapiSpecUrl` (below). A different `proxyEnabled`, or `authPatterns` that differ in content from the stored ones, fail with `[invalid_argument] an OpenAPI-sourced connector can only update metadata, display_name, description, icon_src and proxy_url`. Send back `provider.proxyEnabled` and `provider.authPatterns` from `listProviders` exactly as they came, `is_open_api` included: sending the stored values is not a change.
-- `proxyUrl` is the connector's base URL. Leave it out to keep the stored value. A different value is saved and re-reads the spec, so every tool is generated against the new base URL. A value that differs only by a trailing slash is saved as sent but triggers no re-read.
+- `proxyUrl` is the connector's base URL. Leave it out to keep the stored value. A different value is saved and re-reads the spec, so every tool is generated against the new base URL. A value that differs only by a trailing slash is saved as sent but queues no run.
 - `openapiSpecUrl` is fixed once the connector exists. Sending the stored URL changes nothing. A different URL fails with the error code `FEATURE_NOT_ENABLED` and `updating the OpenAPI spec URL of an existing connector is not enabled for this workspace`, unless your workspace has that capability enabled. When it does, Scalekit checks the new spec as `createCustomProvider` does, saves the URL and re-reads the spec. A connector that was not created from a spec can never get one: `[invalid_argument] openapi_spec_url can only be set on a connector that was created as an OpenAPI-sourced connector`.
-- Changing `proxyUrl` or `openapiSpecUrl` queues a tool collection run; follow it with `getToolCollectionRun`. If a run is already in progress, the new value is still saved but no run is queued, and the call fails with `ScalekitConflictException`. After a `proxyUrl` change the message is `[already_exists] base_url was saved, but an ingestion run is already in progress for this connector — call TriggerToolCollection once it completes to re-ingest against the new base_url`. Call `triggerToolCollection` once that run has finished.
+- Changing `proxyUrl` or `openapiSpecUrl` queues a tool collection run; follow it with `getToolCollectionRun`. If a run is already in progress, the new value is still saved but no run is queued, and the call fails with `ScalekitConflictException`. After a `proxyUrl` change the message is `[already_exists] base_url was saved, but an ingestion run is already in progress for this connector — call TriggerToolCollection once it completes to re-ingest against the new base_url`. Call `invokeToolCollection` once that run has finished.
 - Both changes need OpenAPI-sourced connectors to be enabled for your environment, as on create.
-- With `openapiSpecUrl` the call is not retried automatically when the service is unavailable (`ScalekitServiceUnavailableException`), because the first attempt may already have saved the new URL, and a repeat finds nothing to change: it queues no run and still succeeds. Read the connector back with `listProviders`. If its `openapiSpecUrl` is the new value, wait for any active run to finish with `getToolCollectionRun` and call `triggerToolCollection`; otherwise send the update again. A timeout (`ScalekitGatewayTimeoutException`) is not retried either, and the server may have finished, so check the same way before you repeat the call. An HTTP 429 from the edge never reached Scalekit and is retried. An update without `openapiSpecUrl` is retried as before, also one that changes the base URL (`proxyUrl`) of an OpenAPI-sourced connector: that change queues a run too, and a repeat after a lost answer finds nothing to change and queues none, so after such an update call `getToolCollectionRun`, and `triggerToolCollection` if no new run appeared.
+- With `openapiSpecUrl` the call is not retried automatically when the service is unavailable (`ScalekitServiceUnavailableException`), because the first attempt may already have saved the new URL, and a repeat finds nothing to change: it queues no run and still succeeds. Read the connector back with `listProviders`. If its `openapiSpecUrl` is the new value, wait for any active run to finish with `getToolCollectionRun` and call `invokeToolCollection`; otherwise send the update again. A timeout (`ScalekitGatewayTimeoutException`) is not retried either, and the server may have finished, so check the same way before you repeat the call. An HTTP 429 from the edge never reached Scalekit and is retried. An update without `openapiSpecUrl` is retried as before, also one that changes the base URL (`proxyUrl`) of an OpenAPI-sourced connector: that change queues a run too, and a repeat after a lost answer finds nothing to change and queues none, so after such an update call `getToolCollectionRun`, and `invokeToolCollection` if no new run appeared.
 </dd>
 </dl>
 </dd>
@@ -8657,7 +8657,7 @@ await scalekitClient.actions.providers.deleteCustomProvider('<PROVIDER_IDENTIFIE
 </dl>
 </details>
 
-<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">triggerToolCollection</a>(providerIdentifier) -> Promise&lt;ToolCollectionRun&gt;</code></summary>
+<details><summary><code>client.actions.providers.<a href="https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/src/providers.ts">invokeToolCollection</a>(providerIdentifier) -> Promise&lt;ToolCollectionRun&gt;</code></summary>
 <dl>
 <dd>
 
@@ -8682,7 +8682,7 @@ Errors:
 - `ScalekitNotFoundException` if no connector in your environment has that identifier.
 - `ScalekitBadRequestException` if the connector was not created from an OpenAPI spec (`this connector is not sourced from an OpenAPI spec`), if OpenAPI-sourced connectors are not enabled for your environment (error code `FEATURE_NOT_ENABLED`), or if the stored spec URL fails the check.
 - `ScalekitConflictException`, with the error code `RESOURCE_ALREADY_EXISTS`, if a run is already in progress: a connector has at most one active run.
-- `ScalekitServiceUnavailableException` if the service is unavailable. This call is not retried automatically, because the first attempt may already have queued a run. You cannot tell whether it did, and a run you then find may be another caller's: call `getToolCollectionRun`, wait for an active run to finish, and trigger again if you need a run that started after your call. After a timeout (`ScalekitGatewayTimeoutException`), which is not retried either, check the same way. The one exception is an HTTP 429 from the edge: that request never reached Scalekit, so it is retried.
+- `ScalekitServiceUnavailableException` if the service is unavailable. This call is not retried automatically, because the first attempt may already have queued a run. You cannot tell whether it did, and a run you then find may be another caller's: call `getToolCollectionRun`, wait for an active run to finish, and invoke again if you need a run that started after your call. After a timeout (`ScalekitGatewayTimeoutException`), which is not retried either, check the same way. The one exception is an HTTP 429 from the edge: that request never reached Scalekit, so it is retried.
 </dd>
 </dl>
 </dd>
@@ -8700,7 +8700,7 @@ Errors:
 import { ScalekitConflictException } from '@scalekit-sdk/node';
 
 try {
-  const run = await scalekitClient.actions.providers.triggerToolCollection(
+  const run = await scalekitClient.actions.providers.invokeToolCollection(
     '<PROVIDER_IDENTIFIER>'
   );
   console.log(run.runId, run.status); // 'QUEUED'
@@ -8748,7 +8748,7 @@ try {
 
 Fetches one tool collection run of a connector created from an OpenAPI spec: its status, its counters and, once it has finished, the operations that were skipped and why. Omit `runId`, or pass `'latest'` (an empty or blank string means the same), for the connector's newest run.
 
-After `createCustomProvider`, after `triggerToolCollection` and after an `updateCustomProvider` that queued a run (a base URL or spec URL change: see its rules), poll it until `status` is `COMPLETED` or `FAILED`. Any other update queues no run, so this call then returns an older run, or `ScalekitNotFoundException` if there is none. After your own `triggerToolCollection`, pass the `runId` it returned: without one you get the newest run, which can be one that another caller queued. See [The tool collection run](#the-tool-collection-run) for the fields of the result.
+After `createCustomProvider`, after `invokeToolCollection` and after an `updateCustomProvider` that queued a run (a base URL or spec URL change: see its rules), poll it until `status` is `COMPLETED` or `FAILED`. Any other update queues no run, so this call then returns an older run, or `ScalekitNotFoundException` if there is none. After your own `invokeToolCollection`, pass the `runId` it returned: without one you get the newest run, which can be one that another caller queued. See [The tool collection run](#the-tool-collection-run) for the fields of the result.
 
 Errors:
 - `ScalekitValidationError` if `providerIdentifier` is empty or blank; nothing is sent.
@@ -8787,8 +8787,8 @@ async function waitForToolCollectionRun(
 ): Promise<ToolCollectionRun> {
   const providers = scalekitClient.actions.providers;
   const start = Date.now();
-  let triggered = false;
-  let runId: string | undefined; // the run our own trigger queued: "latest" can be another caller's
+  let invoked = false;
+  let runId: string | undefined; // the run our own invocation queued: "latest" can be another caller's
   // timeoutMs only stops a new poll from starting; a call already under way can finish after it.
   while (Date.now() - start < timeoutMs) {
     try {
@@ -8804,19 +8804,19 @@ async function waitForToolCollectionRun(
       }
     } catch (error) {
       if (!(error instanceof ScalekitNotFoundException)) throw error;
-      if (!triggered && Date.now() - start > 45_000) {
-        triggered = true;
+      if (!invoked && Date.now() - start > 45_000) {
+        invoked = true;
         try {
           const queued =
-            await providers.triggerToolCollection(providerIdentifier);
+            await providers.invokeToolCollection(providerIdentifier);
           runId = queued.runId;
-        } catch (triggerError) {
+        } catch (invokeError) {
           // A run was queued in the meantime, or the answer was lost: keep polling to find out.
           if (
-            !(triggerError instanceof ScalekitConflictException) &&
-            !(triggerError instanceof ScalekitServiceUnavailableException)
+            !(invokeError instanceof ScalekitConflictException) &&
+            !(invokeError instanceof ScalekitServiceUnavailableException)
           )
-            throw triggerError;
+            throw invokeError;
         }
       }
     }
@@ -8990,7 +8990,7 @@ What Scalekit does:
 - **Fills in OAuth settings.** For an `OAUTH` pattern, a run fills a blank `authorize_uri`, `token_uri` and the available scopes of `oauth_config` from the spec's OAuth2 security scheme. The stored pattern can then differ from the one you sent, so read it back with `listProviders` before you update the connector.
 - **Allows one connector per name.** An environment holds one OpenAPI-sourced connector per name, ignoring case and spaces: a second one fails with `[already_exists] an OpenAPI connector named "<NAME>" already exists in this environment`.
 - **Locks tools and auth.** The tools and the auth pattern are managed by Scalekit, so `updateCustomProvider` can change only the name, description, icon, metadata and base URL, and the spec URL where your workspace allows changing it. See [`updateCustomProvider`](#custom-connectors) for the exact rules.
-- **Must be enabled.** OpenAPI-sourced connectors must be enabled for your environment; otherwise creating one, changing its base URL or spec URL, and `triggerToolCollection` fail with the error code `FEATURE_NOT_ENABLED` and `OpenAPI-sourced connectors are not enabled for this environment`. While they are not enabled, the connector's tools are not listed and cannot be called. Changing `openapiSpecUrl` on an existing connector must also be enabled for your workspace.
+- **Must be enabled.** OpenAPI-sourced connectors must be enabled for your environment; otherwise creating one, changing its base URL or spec URL, and `invokeToolCollection` fail with the error code `FEATURE_NOT_ENABLED` and `OpenAPI-sourced connectors are not enabled for this environment`. While they are not enabled, the connector's tools are not listed and cannot be called. Changing `openapiSpecUrl` on an existing connector must also be enabled for your workspace.
 
 **Tool names.** Each tool is named `a-<connector name>_<operationId>`, in lower case, with the connector name taken from the connector's identifier (`ACMETICKETS:1234` gives `acmetickets`). An operation without an `operationId` uses its method and path instead, and a name that is already taken gets a numeric suffix. Tools of a connector that fronts an MCP server are different: they belong to a connected account and their names start with `c-`.
 
@@ -9000,7 +9000,7 @@ What Scalekit does:
 
 ### The tool collection run
 
-A tool collection run reads a connector's spec and turns its operations into tools. `triggerToolCollection` and `getToolCollectionRun` return a `ToolCollectionRun`:
+A tool collection run reads a connector's spec and turns its operations into tools. `invokeToolCollection` and `getToolCollectionRun` return a `ToolCollectionRun`:
 
 | Field | Meaning |
 | --- | --- |
@@ -9024,11 +9024,11 @@ A tool collection run reads a connector's spec and turns its operations into too
 
 `reason` is text for people: Scalekit can reword it, so do not match on it.
 
-**Failed runs.** A run fails when Scalekit cannot fetch or parse the spec, when the spec yields no tool at all, when processing takes longer than 3 minutes, or when the run makes no progress for 30 minutes. Fix the cause, then call `triggerToolCollection`.
+**Failed runs.** A run fails when Scalekit cannot fetch or parse the spec, when the spec yields no tool at all, when processing takes longer than 3 minutes, or when the run makes no progress for 30 minutes. Fix the cause, then call `invokeToolCollection`.
 
 **Unchanged specs.** When the spec, the connector's base URL and its auth patterns are all unchanged since the last completed run, and the spec does not reference external files, a run changes no tools: it reports `toolsCreated`, `toolsUpdated` and `toolsDeleted` as 0 and keeps the earlier `totalEndpoints` and `skippedTools`. If the first run fills in the base URL, that counts as a change: the next run updates every tool, and only the run after that reports 0.
 
-**One run at a time.** A connector has at most one active run (`QUEUED` or `PROCESSING`). `triggerToolCollection` answers `ScalekitConflictException` while one is active.
+**One run at a time.** A connector has at most one active run (`QUEUED` or `PROCESSING`). `invokeToolCollection` answers `ScalekitConflictException` while one is active.
 
 ## Trigger Events
 

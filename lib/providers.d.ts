@@ -217,7 +217,7 @@ export interface SkippedTool {
 /**
  * A tool collection run: one attempt to read an OpenAPI-sourced connector's spec
  * and turn its operations into tools. Returned by
- * {@link ProvidersClient.triggerToolCollection} and
+ * {@link ProvidersClient.invokeToolCollection} and
  * {@link ProvidersClient.getToolCollectionRun}.
  *
  * Same fields as the API's `ToolCollectionRun`, except that `status` is typed
@@ -283,7 +283,7 @@ export default class ProvidersClient {
      *   stored, so {@link getToolCollectionRun} can answer
      *   `ScalekitNotFoundException` (no run yet) for a moment, and keeps doing so
      *   if queueing failed (Scalekit only logs that). Treat it as "not queued yet"
-     *   for a few seconds, then call {@link triggerToolCollection}. Poll until the
+     *   for a few seconds, then call {@link invokeToolCollection}. Poll until the
      *   run's `status` is `COMPLETED` or `FAILED` before you list the tools.
      * - `provider.proxyUrl` is empty in the response. Scalekit fills it from the
      *   spec's own server URL (see {@link Provider}); change it later with
@@ -315,7 +315,7 @@ export default class ProvidersClient {
      *                            More than one is refused before anything is sent.
      * @returns `provider.identifier` on the response is the id you pass to
      *          {@link updateCustomProvider}, {@link deleteCustomProvider},
-     *          {@link triggerToolCollection} and {@link getToolCollectionRun}.
+     *          {@link invokeToolCollection} and {@link getToolCollectionRun}.
      * @throws {ScalekitValidationError} If `authPatterns` holds more than one
      *   pattern. No request is sent.
      * @throws {ScalekitServiceUnavailableException} If the service is unavailable.
@@ -364,7 +364,7 @@ export default class ProvidersClient {
      * - `proxyUrl` is the connector's base URL. Leave it out to keep the stored
      *   value. A different value is saved and re-reads the spec, so every tool is
      *   generated against the new base URL. A value that differs only by a
-     *   trailing slash is saved as sent but triggers no re-read.
+     *   trailing slash is saved as sent but queues no run.
      * - `openapiSpecUrl` is fixed once the connector exists. Re-sending the stored
      *   URL changes nothing. A different URL fails with the error code
      *   `FEATURE_NOT_ENABLED` and `updating the OpenAPI spec URL of an existing
@@ -380,7 +380,7 @@ export default class ProvidersClient {
      *   `ScalekitConflictException`. After a `proxyUrl` change the message is
      *   `[already_exists] base_url was saved, but an ingestion run is already in
      *   progress for this connector — call TriggerToolCollection once it completes
-     *   to re-ingest against the new base_url`. Call {@link triggerToolCollection}
+     *   to re-ingest against the new base_url`. Call {@link invokeToolCollection}
      *   once that run has finished.
      * - Both changes need OpenAPI-sourced connectors to be enabled for your
      *   environment, as on create.
@@ -399,11 +399,11 @@ export default class ProvidersClient {
      *   to change: it queues no run and still succeeds. Read the connector back with
      *   {@link listProviders}. If its `openapiSpecUrl` is the new value, wait for any
      *   active run to finish ({@link getToolCollectionRun}) and call
-     *   {@link triggerToolCollection}; otherwise send the update again. An update
+     *   {@link invokeToolCollection}; otherwise send the update again. An update
      *   without `openapiSpecUrl` is retried as before, also one that changes the base
      *   URL (`proxyUrl`) of an OpenAPI-sourced connector: that change queues a run too,
      *   and a repeat after a lost answer finds nothing to change and queues none. After
-     *   such an update call {@link getToolCollectionRun}, and {@link triggerToolCollection}
+     *   such an update call {@link getToolCollectionRun}, and {@link invokeToolCollection}
      *   if no new run appeared. With `openapiSpecUrl`, an HTTP 429 from the edge never reached Scalekit and is retried.
      * @throws {ScalekitGatewayTimeoutException} If the call takes longer than `timeoutMs`
      *   (it is not retried). The server may still have finished the update: check as
@@ -479,20 +479,20 @@ export default class ProvidersClient {
      *   This call is not retried automatically, because the first attempt may already
      *   have queued a run. You cannot tell whether it did, and a run you then find
      *   may be another caller's: call {@link getToolCollectionRun}, wait for an active
-     *   run to finish, and trigger again if you need a run that started after your call.
+     *   run to finish, and invoke again if you need a run that started after your call.
      *   An HTTP 429 from the edge never reached Scalekit and is retried.
      * @throws {ScalekitGatewayTimeoutException} If the call takes longer than `timeoutMs`
      *   (it is not retried). The server may still have queued the run: check with
-     *   {@link getToolCollectionRun} as above before you trigger again.
+     *   {@link getToolCollectionRun} as above before you invoke again.
      * @throws {ScalekitServerException} If a network or server error occurs.
      */
-    triggerToolCollection(providerIdentifier: string): Promise<ToolCollectionRun>;
+    invokeToolCollection(providerIdentifier: string): Promise<ToolCollectionRun>;
     /**
      * Fetches one tool collection run of a connector created from an OpenAPI spec:
      * its status, its counters and, once it has finished, the operations that were
      * skipped and why.
      *
-     * After {@link createCustomProvider}, after {@link triggerToolCollection} and after an
+     * After {@link createCustomProvider}, after {@link invokeToolCollection} and after an
      * {@link updateCustomProvider} that queued a run (a base URL or spec URL change: see its
      * rules), poll this until `status` is `COMPLETED` or `FAILED`. Any other update queues no
      * run, so this call then returns an older run, or `ScalekitNotFoundException` if there is
@@ -500,7 +500,7 @@ export default class ProvidersClient {
      * Right after {@link createCustomProvider} the first run may not exist yet, and
      * this call can answer `ScalekitNotFoundException`: see
      * {@link createCustomProvider} for how to wait for it. After your own
-     * {@link triggerToolCollection}, pass the `runId` it returned: without one you
+     * {@link invokeToolCollection}, pass the `runId` it returned: without one you
      * get the newest run, which can be one that another caller queued.
      * A run is `QUEUED`, then `PROCESSING`. It fails if Scalekit cannot fetch or
      * parse the spec, if the spec yields no tool at all, if processing takes longer

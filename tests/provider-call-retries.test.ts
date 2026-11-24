@@ -2,7 +2,7 @@
  * Which provider calls `CoreClient.connectExec` may replay after `Unavailable`.
  *
  * `connectExec` replays a call that answers `Unavailable`, which is safe for a read.
- * It is not safe for `triggerToolCollection`, for a create from an OpenAPI spec or for
+ * It is not safe for `invokeToolCollection`, for a create from an OpenAPI spec or for
  * an update that sends a spec URL: their first attempt may have worked even though the
  * response was lost, and a replayed update finds the URL already saved, queues no run
  * and succeeds. Those calls surface `ScalekitServiceUnavailableException` at once. The
@@ -97,13 +97,13 @@ const outcomes = (...list: unknown[]) => {
   return fn;
 };
 
-describe('triggerToolCollection is not replayed after Unavailable', () => {
+describe('invokeToolCollection is not replayed after Unavailable', () => {
   it('raises ScalekitServiceUnavailableException after one attempt, without a backoff', async () => {
     const trigger = outcomes(unavailable());
     const client = setup({ triggerToolCollection: trigger });
 
     const error = await client
-      .triggerToolCollection('ACMEAPI:1234')
+      .invokeToolCollection('ACMEAPI:1234')
       .catch((e) => e);
 
     expect(error).toBeInstanceOf(ScalekitServiceUnavailableException);
@@ -122,7 +122,7 @@ describe('triggerToolCollection is not replayed after Unavailable', () => {
     const triggerError = await setup({
       triggerToolCollection: outcomes(unavailable()),
     })
-      .triggerToolCollection('ACMEAPI:1234')
+      .invokeToolCollection('ACMEAPI:1234')
       .catch((e) => e);
 
     expect(readError).toBeInstanceOf(ScalekitServiceUnavailableException);
@@ -135,7 +135,7 @@ describe('triggerToolCollection is not replayed after Unavailable', () => {
     const trigger = outcomes(unauthenticated(), queuedRun());
     const client = setup({ triggerToolCollection: trigger });
 
-    const run = await client.triggerToolCollection('ACMEAPI:1234');
+    const run = await client.invokeToolCollection('ACMEAPI:1234');
 
     expect(run.runId).toBe('tcr_1');
     expect(authenticate).toHaveBeenCalledTimes(1);
@@ -147,7 +147,7 @@ describe('triggerToolCollection is not replayed after Unavailable', () => {
     const client = setup({ triggerToolCollection: trigger });
 
     await expect(
-      client.triggerToolCollection('ACMEAPI:1234')
+      client.invokeToolCollection('ACMEAPI:1234')
     ).rejects.toBeInstanceOf(ScalekitServiceUnavailableException);
 
     expect(authenticate).toHaveBeenCalledTimes(1);
@@ -165,10 +165,10 @@ describe('triggerToolCollection is not replayed after Unavailable', () => {
     await expect(
       setup({
         triggerToolCollection: outcomes(conflict),
-      }).triggerToolCollection('X:1')
+      }).invokeToolCollection('X:1')
     ).rejects.toBeInstanceOf(ScalekitConflictException);
     await expect(
-      setup({ triggerToolCollection: outcomes(missing) }).triggerToolCollection(
+      setup({ triggerToolCollection: outcomes(missing) }).invokeToolCollection(
         'X:1'
       )
     ).rejects.toBeInstanceOf(ScalekitNotFoundException);
@@ -258,11 +258,11 @@ describe('an HTTP 429 from the edge is replayed even where Unavailable is not', 
   const edgeRateLimit = () => new ConnectError('HTTP 429', Code.Unavailable);
   const proxy503 = () => new ConnectError('HTTP 503', Code.Unavailable);
 
-  it('replays triggerToolCollection, with a backoff', async () => {
+  it('replays invokeToolCollection, with a backoff', async () => {
     const trigger = outcomes(edgeRateLimit(), queuedRun());
     const client = setup({ triggerToolCollection: trigger });
 
-    const run = await client.triggerToolCollection('ACMEAPI:1234');
+    const run = await client.invokeToolCollection('ACMEAPI:1234');
 
     expect(run.runId).toBe('tcr_1');
     expect(trigger).toHaveBeenCalledTimes(2);
@@ -298,7 +298,7 @@ describe('an HTTP 429 from the edge is replayed even where Unavailable is not', 
     const client = setup({ triggerToolCollection: trigger });
 
     await expect(
-      client.triggerToolCollection('ACMEAPI:1234')
+      client.invokeToolCollection('ACMEAPI:1234')
     ).rejects.toBeInstanceOf(ScalekitServiceUnavailableException);
     expect(trigger).toHaveBeenCalledTimes(4); // the first attempt and three replays
   });
@@ -308,7 +308,7 @@ describe('an HTTP 429 from the edge is replayed even where Unavailable is not', 
     const client = setup({ triggerToolCollection: trigger });
 
     await expect(
-      client.triggerToolCollection('ACMEAPI:1234')
+      client.invokeToolCollection('ACMEAPI:1234')
     ).rejects.toBeInstanceOf(ScalekitServiceUnavailableException);
     expect(trigger).toHaveBeenCalledTimes(1);
     expect(sleep).not.toHaveBeenCalled();
