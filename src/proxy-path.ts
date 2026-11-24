@@ -1,5 +1,6 @@
 /**
- * Containment check for `actions.request()` proxy URLs.
+ * Containment check and connected-account headers for proxied requests
+ * (`actions.request()` and `actions.uploadResumable()`).
  *
  * `actions.request()` sends to `<envUrl>/proxy<path>` with the client's
  * credentials. The WHATWG URL parser (used by axios and fetch) removes tab,
@@ -14,12 +15,65 @@
 
 const PROXY_PATH_ERROR = 'path must resolve under the proxy prefix';
 
-/** Headers that carry the client's credentials or select the connected account. */
-const PROXY_CREDENTIAL_HEADERS = new Set([
-  'authorization',
+/**
+ * Header names that carry the connection name. The `X-Scalekit-` form carries
+ * the same value for reverse proxies and load balancers that drop header names
+ * containing an underscore.
+ */
+const CONNECTION_NAME_HEADERS = [
   'connection_name',
-  'identifier',
+  'X-Scalekit-Connection-Name',
+] as const;
+
+/** Header names that carry the identifier; same value under both. */
+const IDENTIFIER_HEADERS = ['identifier', 'X-Scalekit-Identifier'] as const;
+
+/** The four connected-account header names, lower-cased. */
+const CONNECTED_ACCOUNT_HEADERS: ReadonlySet<string> = new Set(
+  [...CONNECTION_NAME_HEADERS, ...IDENTIFIER_HEADERS].map((name) =>
+    name.toLowerCase()
+  )
+);
+
+/** Headers that carry the client's credentials or select the connected account. */
+const PROXY_CREDENTIAL_HEADERS: ReadonlySet<string> = new Set([
+  'authorization',
+  ...CONNECTED_ACCOUNT_HEADERS,
 ]);
+
+/**
+ * Builds the headers of a proxied request: the caller's headers plus the
+ * connected account, named under both `connection_name` / `identifier` and
+ * `X-Scalekit-Connection-Name` / `X-Scalekit-Identifier`, with the same value
+ * under each pair.
+ *
+ * A caller header whose name matches any of those four, in any casing, is
+ * dropped, so the SDK's values always win and no second casing with a
+ * different value is sent beside them. Every other caller header (including
+ * `X-Identifier`) is kept unchanged. Values are used exactly as given.
+ * `headers` is not modified.
+ *
+ * @param connectionName - The connection name to send.
+ * @param identifier - The connected account's identifier to send.
+ * @param headers - The caller's headers, if any.
+ * @returns A new header object for the request.
+ * @internal
+ */
+export function connectedAccountHeaders(
+  connectionName: string,
+  identifier: string,
+  headers?: Readonly<Record<string, string>>
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [name, value] of Object.entries(headers ?? {})) {
+    if (!CONNECTED_ACCOUNT_HEADERS.has(name.toLowerCase())) {
+      out[name] = value;
+    }
+  }
+  for (const name of CONNECTION_NAME_HEADERS) out[name] = connectionName;
+  for (const name of IDENTIFIER_HEADERS) out[name] = identifier;
+  return out;
+}
 
 type Containment = 'inside' | 'outside' | 'unparseable';
 
@@ -90,8 +144,9 @@ export function assertProxyPathContained(envUrl: string, url: string): void {
  * Builds an axios `beforeRedirect` hook (Node http adapter, follow-redirects)
  * for proxied requests. Each redirect is still followed as before; when a hop
  * targets anything other than `<envUrl base path>/proxy/` on the environment's
- * origin, the `Authorization`, `connection_name` and `identifier` headers are
- * removed before that hop is sent, as they are when the hop's request-target
+ * origin, the `Authorization`, `connection_name`, `identifier`,
+ * `X-Scalekit-Connection-Name` and `X-Scalekit-Identifier` headers (any
+ * casing) are removed before that hop is sent, as they are when the hop's request-target
  * would carry a fragment. follow-redirects reuses the same headers object for
  * later hops, so once removed they stay removed. axios runs its own proxy
  * hook before this one, so `path` is already the final request-target.

@@ -21,6 +21,7 @@ import {
   ScalekitUploadSessionExpiredException,
   ScalekitUploadTimeoutException,
 } from './errors/upload-exceptions';
+import { connectedAccountHeaders } from './proxy-path';
 
 // Google's resumable upload protocol (Drive v3, the Cloud Storage JSON API,
 // YouTube Data API), sent through the Scalekit proxy:
@@ -765,10 +766,10 @@ class ResumableUpload {
   }
 
   private proxyHeaders(): Record<string, string> {
-    return {
-      connection_name: this.plan.connectionName,
-      identifier: this.plan.identifier,
-    };
+    return connectedAccountHeaders(
+      this.plan.connectionName,
+      this.plan.identifier
+    );
   }
 
   private async startSession(total: number | undefined): Promise<string> {
