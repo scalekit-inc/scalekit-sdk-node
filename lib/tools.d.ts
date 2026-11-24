@@ -1,8 +1,7 @@
 import { type MessageInitShape } from '@bufbuild/protobuf';
-import type { Client } from '@connectrpc/connect';
 import GrpcConnect from './connect';
 import CoreClient from './core';
-import { ExecuteToolResponse, FilterSchema, ListAvailableToolsResponse, ListScopedToolsResponse, ListToolsResponse, ScopedToolFilterSchema, SearchToolsResponse, ToolService } from './pkg/grpc/scalekit/v1/tools/tools_pb';
+import { ExecuteToolResponse, FilterSchema, ListAvailableToolsResponse, ListScopedToolsResponse, ListToolsResponse, ScopedToolFilterSchema, SearchToolsResponse } from './pkg/grpc/scalekit/v1/tools/tools_pb';
 /**
  * Client for listing and executing tools.
  *
@@ -17,11 +16,7 @@ import { ExecuteToolResponse, FilterSchema, ListAvailableToolsResponse, ListScop
 export default class ToolsClient {
     private readonly grpcConnect;
     private readonly coreClient;
-    /**
-     * @internal ActionsClient calls the RPCs that have no ToolsClient method
-     * through it. Not part of the public API.
-     */
-    readonly client: Client<typeof ToolService>;
+    private client;
     constructor(grpcConnect: GrpcConnect, coreClient: CoreClient);
     /**
      * Lists tools available in your workspace with optional filtering and pagination.
