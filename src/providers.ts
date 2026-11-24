@@ -160,8 +160,7 @@ export type CreateCustomProviderParams = {
   /** Human-readable name. Letters, digits and spaces only. */
   displayName: string;
   /**
-   * Ignored: a custom connector is always created with `proxyEnabled` true,
-   * whatever you pass. Kept so that existing calls keep working.
+   * Ignored: the SDK always creates the connector with proxying on.
    */
   proxyEnabled?: boolean;
   description?: string;
@@ -288,9 +287,8 @@ export default class ProvidersClient {
    * @param params.openapiSpecUrl HTTPS URL of an OpenAPI spec, in JSON or YAML, to
    *                              generate the connector's tools from. Swagger 2.0 and 1.x
    *                              documents are converted. At most 2048 characters.
-   * @param params.proxyEnabled Ignored: a custom connector is always created with
-   *                            `proxyEnabled` true, whatever you pass. Kept so that
-   *                            existing calls keep working.
+   * @param params.proxyEnabled Ignored: the SDK always creates the connector with
+   *                            proxying on.
    * @param params.authPatterns How users authenticate. Exactly one pattern is
    *                            supported today; the array is for future use.
    *                            More than one is refused before anything is sent.
@@ -335,8 +333,8 @@ export default class ProvidersClient {
    *
    * Treat this as a PUT: read the current connector with {@link listProviders}
    * first, then send back every field you want to keep alongside the ones you
-   * are changing. `provider.authPatterns` and `provider.proxyEnabled` from that
-   * response can be passed here as-is.
+   * are changing. `provider.authPatterns` from that response can be passed here
+   * as-is.
    *
    * What the server does with each field:
    * - `displayName` and `authPatterns` are required on every update, and so is
@@ -345,22 +343,16 @@ export default class ProvidersClient {
    *   `[invalid_argument] Validation error`, and it replaces the whole list rather
    *   than merging into it. The pattern's `type` and `is_mcp` cannot be changed.
    * - `metadata` replaces the stored map, so leaving it out clears it.
-   * - `proxyEnabled` is always applied. It defaults to `true` here, the value
-   *   {@link createCustomProvider} always sets, so pass the current value to keep
-   *   a connector that has proxying switched off (created that way by another
-   *   client such as the dashboard or the REST API, or by an earlier release of
-   *   this SDK) as it is.
    * - `description` and `iconSrc` keep their stored values when left out.
    *
    * A connector created from an OpenAPI spec (`provider.openapiSpecUrl` is set)
    * follows stricter rules, because Scalekit manages its tools and its auth:
    * - Only `displayName`, `description`, `iconSrc`, `metadata` and `proxyUrl` can
-   *   change. A different `proxyEnabled`, or `authPatterns` that differ in
-   *   content from the stored ones, fail with `[invalid_argument] an
-   *   OpenAPI-sourced connector can only update metadata, display_name,
-   *   description, icon_src and proxy_url`. Send back `provider.proxyEnabled`
-   *   and `provider.authPatterns` from {@link listProviders} unchanged, even
-   *   `is_open_api`: re-sending the stored values is not a change.
+   *   change. `authPatterns` that differ in content from the stored ones fail
+   *   with `[invalid_argument] an OpenAPI-sourced connector can only update
+   *   metadata, display_name, description, icon_src and proxy_url`. Send back
+   *   `provider.authPatterns` from {@link listProviders} unchanged, even
+   *   `is_open_api`: re-sending the stored value is not a change.
    * - `proxyUrl` is the connector's base URL. Leave it out to keep the stored
    *   value. A different value is saved and re-reads the spec, so every tool is
    *   generated against the new base URL. A value that differs only by a

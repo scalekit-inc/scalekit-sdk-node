@@ -7426,7 +7426,6 @@ Errors:
 - `ScalekitValidationError` if `toolIdentifier` is not a string, or is empty or blank; nothing is sent.
 - `ScalekitBadRequestException` (`400`, the request validation error on `tool_identifier`) if `toolIdentifier` is longer than 2048 characters.
 - `ScalekitBadRequestException` (`400`, `invalid tool identifier`) if `toolIdentifier` has a control character other than surrounding whitespace, which the SDK trims.
-- `ScalekitBadRequestException` (`400`) with the error code `FEATURE_NOT_ENABLED` if OpenAPI-sourced connectors are not enabled for your environment; nothing is deleted.
 - `ScalekitForbiddenException` (`403`) if the client lacks the `agent_connectors:write` permission.
 - `ScalekitNotFoundException` (`404`, `custom tool not found`) if no deletable tool has this name or ID.
 - `ScalekitConflictException` (`409`) with the error code `RESOURCE_ALREADY_EXISTS` if a tool collection run of the connector is queued or processing (the message names the connector, the run and its status): nothing is deleted, so call again once it has finished.
@@ -8520,7 +8519,6 @@ const res = await scalekitClient.actions.providers.createCustomProvider({
   displayName: 'Acme Tickets',
   description: 'Internal ticketing API',
   proxyUrl: 'https://api.acme.example.com',
-  proxyEnabled: true, // ignored: a custom connector is always created with proxyEnabled true
   iconSrc: 'https://acme.example.com/icon.png',
   metadata: { team: 'support', environment: 'production' },
   authPatterns,
@@ -8535,7 +8533,6 @@ const { provider } = await scalekitClient.actions.providers.createCustomProvider
   displayName: 'Acme Tickets',
   description: 'Internal ticketing API',
   openapiSpecUrl: 'https://api.acme.example.com/openapi.json',
-  proxyEnabled: true, // ignored, as above
   iconSrc: 'https://acme.example.com/icon.png',
   metadata: { team: 'support', environment: 'production' },
   authPatterns, // the Bearer pattern from the example above
@@ -8602,7 +8599,6 @@ Scalekit rejects a violation of these rules with the error code `INVALID_HEADER_
 | `params.displayName` | `string` | Yes | Letters, digits and spaces only. End it with "MCP" when the connector fronts an MCP server |
 | `params.proxyUrl` | `string` | Yes, or `openapiSpecUrl` | HTTPS URL of the upstream service: the MCP server URL for an MCP connector, at most 2048 characters. Leave it out when you set `openapiSpecUrl` |
 | `params.openapiSpecUrl` | `string` | Yes, or `proxyUrl` | HTTPS URL of an OpenAPI spec, in JSON or YAML, to generate the connector's tools from. Swagger 2.0 and 1.x documents are converted. At most 2048 characters. Leave it out when you set `proxyUrl` |
-| `params.proxyEnabled` | `boolean` | No | Ignored: a custom connector is always created with `proxyEnabled` true, whatever you pass. Kept so that existing calls keep working |
 | `params.description` | `string` | No | Description |
 | `params.authPatterns` | `AuthPattern[]` | No | How users authenticate. Exactly one pattern is supported: more than one throws `ScalekitValidationError`, and nothing is sent. The properties of an `AuthPattern` and of its `AuthField` are listed below |
 | `params.iconSrc` | `string` | No | Icon URL |
@@ -8658,16 +8654,15 @@ An `AuthField` is one credential input:
 
 Updates a custom connector.
 
-Treat this as a PUT: read the current connector with `listProviders` first, then send back every field you want to keep alongside the ones you are changing. `authPatterns` on a response is already decoded into plain `AuthPattern` objects, so `provider.authPatterns` and `provider.proxyEnabled` can be passed back as-is.
+Treat this as a PUT: read the current connector with `listProviders` first, then send back every field you want to keep alongside the ones you are changing. `authPatterns` on a response is already decoded into plain `AuthPattern` objects, so `provider.authPatterns` can be passed back as-is.
 
 What the server does with each field:
 - `displayName` and `authPatterns` are required on every update, and so is `proxyUrl` for an MCP-sourced connector. `authPatterns` replaces the whole list rather than merging into it. A pattern's `type` and `is_mcp` cannot be changed.
 - `metadata` replaces the stored map, so leaving it out clears it.
-- `proxyEnabled` is always applied. It defaults to `true`, the value `createCustomProvider` always sets, so pass the current value to keep a connector that has proxying switched off (created that way by another client such as the dashboard or the REST API, or by an earlier release of this SDK) as it is.
 - `description` and `iconSrc` keep their stored values when left out.
 
 A connector created from an OpenAPI spec (`provider.openapiSpecUrl` is set) follows stricter rules, because Scalekit manages its tools and its auth:
-- Only `displayName`, `description`, `iconSrc`, `metadata` and `proxyUrl` can change, apart from `openapiSpecUrl` (below). Send back `provider.proxyEnabled` and `provider.authPatterns` from `listProviders` exactly as they came, `is_open_api` included: sending the stored values is not a change.
+- Only `displayName`, `description`, `iconSrc`, `metadata` and `proxyUrl` can change, apart from `openapiSpecUrl` (below). Send back `provider.authPatterns` from `listProviders` exactly as they came, `is_open_api` included: sending the stored value is not a change.
 - `proxyUrl` is the connector's base URL. Leave it out to keep the stored value. A different value is saved and re-reads the spec, so every tool is generated against the new base URL. A value that differs only by a trailing slash is saved as sent but queues no run.
 - `openapiSpecUrl` is fixed once the connector exists. Sending the stored URL changes nothing. Where your workspace has changing it enabled, Scalekit checks a different URL as `createCustomProvider` does, saves it and re-reads the spec. A connector that was not created from a spec can never get one.
 - Changing `proxyUrl` or `openapiSpecUrl` queues a tool collection run; follow it with `actions.getToolCollectionRun`. If a run is already in progress, the new value is still saved but no run is queued, and the call fails with `ScalekitConflictException`. Call `actions.invokeToolCollection` once that run has finished.
@@ -8679,7 +8674,7 @@ Errors:
 - `ScalekitBadRequestException` (`400`) with one of these messages or error codes:
   - `[invalid_argument] Validation error` if `authPatterns` is left out.
   - `[invalid_argument] proxy_url is required for an MCP-sourced connector` if `proxyUrl` is left out for such a connector.
-  - `[invalid_argument] an OpenAPI-sourced connector can only update metadata, display_name, description, icon_src and proxy_url` if you send a different `proxyEnabled`, or `authPatterns` that differ in content from the stored ones, for a connector created from an OpenAPI spec.
+  - `[invalid_argument] an OpenAPI-sourced connector can only update metadata, display_name, description, icon_src and proxy_url` if you send `authPatterns` that differ in content from the stored ones, for a connector created from an OpenAPI spec.
   - `[invalid_argument] openapi_spec_url can only be set on a connector that was created as an OpenAPI-sourced connector` if you send an `openapiSpecUrl` for any other connector.
   - The error code `FEATURE_NOT_ENABLED` with `OpenAPI-sourced connectors are not enabled for this environment`, if you change `proxyUrl` or `openapiSpecUrl` and your environment has not enabled OpenAPI-sourced connectors.
   - The error code `FEATURE_NOT_ENABLED` with `updating the OpenAPI spec URL of an existing connector is not enabled for this workspace`, if you send a different `openapiSpecUrl` and your workspace has not enabled changing it.
@@ -8715,7 +8710,6 @@ const res = await scalekitClient.actions.providers.updateCustomProvider({
   displayName: current.displayName,
   proxyUrl: current.proxyUrl,
   authPatterns: current.authPatterns, // already plain AuthPattern objects
-  proxyEnabled: current.proxyEnabled,
   description: 'Internal ticketing API, v2',
   iconSrc: current.iconSrc,
   metadata: { ...current.metadata, updated_by: 'sync-job' },
@@ -8723,7 +8717,7 @@ const res = await scalekitClient.actions.providers.updateCustomProvider({
 console.log(res.provider?.description);
 ```
 
-**Updating a connector created from an OpenAPI spec.** Send back the stored `openapiSpecUrl`, `authPatterns` and `proxyEnabled` unchanged, and change only what the rules above allow:
+**Updating a connector created from an OpenAPI spec.** Send back the stored `openapiSpecUrl` and `authPatterns` unchanged, and change only what the rules above allow:
 
 ```ts
 const { provider } = await scalekitClient.actions.providers.updateCustomProvider({
@@ -8732,7 +8726,6 @@ const { provider } = await scalekitClient.actions.providers.updateCustomProvider
   proxyUrl: 'https://api-v2.acme.example.com', // a new base URL: every tool is generated again against it
   openapiSpecUrl: current.openapiSpecUrl, // the stored URL: sending it changes nothing
   authPatterns: current.authPatterns, // unchanged, is_open_api included
-  proxyEnabled: current.proxyEnabled, // unchanged
   description: 'Internal ticketing API, v2',
   iconSrc: current.iconSrc,
   metadata: { ...current.metadata, updated_by: 'sync-job' },
@@ -8760,7 +8753,7 @@ console.log(provider?.proxyUrl);
 | `params.proxyUrl` | `string` | For an MCP-sourced connector | Required for an MCP-sourced connector. For a connector created from an OpenAPI spec this is its base URL, and leaving it out keeps the stored value |
 | `params.openapiSpecUrl` | `string` | No | Only for a connector created from an OpenAPI spec. Sending the stored URL changes nothing; a different one is rejected unless your workspace has that capability enabled |
 | `params.authPatterns` | `AuthPattern[]` | Yes | Required on every update. Replaces the existing list. It has the same properties as in [`createCustomProvider`](#custom-connectors). For a connector created from an OpenAPI spec, send back `provider.authPatterns` unchanged. Only one pattern is supported: more than one throws `ScalekitValidationError`, and nothing is sent |
-| `params.proxyEnabled` | `boolean` | No | Whether Scalekit proxies requests. Always sent; defaults to `true`, so pass `current.proxyEnabled` to keep the stored value |
+| `params.proxyEnabled` | `boolean` | No | Whether Scalekit proxies requests. Defaults to `true` |
 | `params.description` | `string` | No | Description. Keeps the stored value when left out |
 | `params.iconSrc` | `string` | No | Icon URL. Keeps the stored value when left out |
 | `params.metadata` | `Record<string, string>` | No | Arbitrary key-value metadata. Replaces the stored map, so leaving it out clears it |
@@ -9016,7 +9009,7 @@ What Scalekit does:
 - **Fills in OAuth settings.** For an `OAUTH` pattern, a run fills a blank `authorize_uri`, `token_uri` and the available scopes of `oauth_config` from the spec's OAuth2 security scheme. The stored pattern can then differ from the one you sent, so read it back with `listProviders` before you update the connector.
 - **Allows one connector per name.** An environment holds one OpenAPI-sourced connector per name, ignoring case and spaces: a second one fails with `[already_exists] an OpenAPI connector named "<NAME>" already exists in this environment`.
 - **Locks tools and auth.** The tools and the auth pattern are managed by Scalekit, so `updateCustomProvider` can change only the name, description, icon, metadata and base URL, and the spec URL where your workspace allows changing it. See [`updateCustomProvider`](#custom-connectors) for the exact rules.
-- **Must be enabled.** OpenAPI-sourced connectors must be enabled for your environment; otherwise creating one, changing its base URL or spec URL, `actions.invokeToolCollection` and `actions.deleteCustomTool` fail with the error code `FEATURE_NOT_ENABLED` and `OpenAPI-sourced connectors are not enabled for this environment`. While they are not enabled, the connector's tools are not listed and cannot be called. Changing `openapiSpecUrl` on an existing connector must also be enabled for your workspace.
+- **Must be enabled.** OpenAPI-sourced connectors must be enabled for your environment; otherwise creating one, changing its base URL or spec URL, and `actions.invokeToolCollection` fail with the error code `FEATURE_NOT_ENABLED` and `OpenAPI-sourced connectors are not enabled for this environment`. While they are not enabled, the connector's tools are not listed and cannot be called. Changing `openapiSpecUrl` on an existing connector must also be enabled for your workspace.
 
 **Tool names.** Each tool is named `a-<connector name>_<operationId>`, in lower case, with the connector name taken from the connector's identifier (`ACMEAPI:70219645518265104` gives `acmeapi`). An operation without an `operationId` uses its method and path instead, and a name that is already taken gets a numeric suffix. Tools of a connector that fronts an MCP server are different: they belong to a connected account and their names start with `c-`.
 
