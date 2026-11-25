@@ -8654,15 +8654,16 @@ An `AuthField` is one credential input:
 
 Updates a custom connector.
 
-Treat this as a PUT: read the current connector with `listProviders` first, then send back every field you want to keep alongside the ones you are changing. `authPatterns` on a response is already decoded into plain `AuthPattern` objects, so `provider.authPatterns` can be passed back as-is.
+Treat this as a PUT: read the current connector with `listProviders` first, then send back every field you want to keep alongside the ones you are changing. `authPatterns` on a response is already decoded into plain `AuthPattern` objects, so `provider.authPatterns` and `provider.proxyEnabled` can be passed back as-is.
 
 What the server does with each field:
 - `displayName` and `authPatterns` are required on every update, and so is `proxyUrl` for an MCP-sourced connector. `authPatterns` replaces the whole list rather than merging into it. A pattern's `type` and `is_mcp` cannot be changed.
 - `metadata` replaces the stored map, so leaving it out clears it.
+- `proxyEnabled` is always applied. It defaults to `true`, the value `createCustomProvider` always sets, so pass the current value to keep a connector that has proxying switched off (created that way by another client such as the dashboard or the REST API, or by an earlier release of this SDK) as it is.
 - `description` and `iconSrc` keep their stored values when left out.
 
 A connector created from an OpenAPI spec (`provider.openapiSpecUrl` is set) follows stricter rules, because Scalekit manages its tools and its auth:
-- Only `displayName`, `description`, `iconSrc`, `metadata` and `proxyUrl` can change, apart from `openapiSpecUrl` (below). Send back `provider.authPatterns` from `listProviders` exactly as they came, `is_open_api` included: sending the stored value is not a change.
+- Only `displayName`, `description`, `iconSrc`, `metadata` and `proxyUrl` can change, apart from `openapiSpecUrl` (below). Send back `provider.proxyEnabled` and `provider.authPatterns` from `listProviders` exactly as they came, `is_open_api` included: sending the stored values is not a change.
 - `proxyUrl` is the connector's base URL. Leave it out to keep the stored value. A different value is saved and re-reads the spec, so every tool is generated against the new base URL. A value that differs only by a trailing slash is saved as sent but queues no run.
 - `openapiSpecUrl` is fixed once the connector exists. Sending the stored URL changes nothing. Where your workspace has changing it enabled, Scalekit checks a different URL as `createCustomProvider` does, saves it and re-reads the spec. A connector that was not created from a spec can never get one.
 - Changing `proxyUrl` or `openapiSpecUrl` queues a tool collection run; follow it with `actions.getToolCollectionRun`. If a run is already in progress, the new value is still saved but no run is queued, and the call fails with `ScalekitConflictException`. Call `actions.invokeToolCollection` once that run has finished.
@@ -8674,7 +8675,7 @@ Errors:
 - `ScalekitBadRequestException` (`400`) with one of these messages or error codes:
   - `[invalid_argument] Validation error` if `authPatterns` is left out.
   - `[invalid_argument] proxy_url is required for an MCP-sourced connector` if `proxyUrl` is left out for such a connector.
-  - `[invalid_argument] an OpenAPI-sourced connector can only update metadata, display_name, description, icon_src and proxy_url` if you send `authPatterns` that differ in content from the stored ones, for a connector created from an OpenAPI spec.
+  - `[invalid_argument] an OpenAPI-sourced connector can only update metadata, display_name, description, icon_src and proxy_url` if you send a different `proxyEnabled`, or `authPatterns` that differ in content from the stored ones, for a connector created from an OpenAPI spec.
   - `[invalid_argument] openapi_spec_url can only be set on a connector that was created as an OpenAPI-sourced connector` if you send an `openapiSpecUrl` for any other connector.
   - The error code `FEATURE_NOT_ENABLED` with `OpenAPI-sourced connectors are not enabled for this environment`, if you change `proxyUrl` or `openapiSpecUrl` and your environment has not enabled OpenAPI-sourced connectors.
   - The error code `FEATURE_NOT_ENABLED` with `updating the OpenAPI spec URL of an existing connector is not enabled for this workspace`, if you send a different `openapiSpecUrl` and your workspace has not enabled changing it.
@@ -8710,6 +8711,7 @@ const res = await scalekitClient.actions.providers.updateCustomProvider({
   displayName: current.displayName,
   proxyUrl: current.proxyUrl,
   authPatterns: current.authPatterns, // already plain AuthPattern objects
+  proxyEnabled: current.proxyEnabled,
   description: 'Internal ticketing API, v2',
   iconSrc: current.iconSrc,
   metadata: { ...current.metadata, updated_by: 'sync-job' },
@@ -8717,7 +8719,7 @@ const res = await scalekitClient.actions.providers.updateCustomProvider({
 console.log(res.provider?.description);
 ```
 
-**Updating a connector created from an OpenAPI spec.** Send back the stored `openapiSpecUrl` and `authPatterns` unchanged, and change only what the rules above allow:
+**Updating a connector created from an OpenAPI spec.** Send back the stored `openapiSpecUrl`, `authPatterns` and `proxyEnabled` unchanged, and change only what the rules above allow:
 
 ```ts
 const { provider } = await scalekitClient.actions.providers.updateCustomProvider({
@@ -8726,6 +8728,7 @@ const { provider } = await scalekitClient.actions.providers.updateCustomProvider
   proxyUrl: 'https://api-v2.acme.example.com', // a new base URL: every tool is generated again against it
   openapiSpecUrl: current.openapiSpecUrl, // the stored URL: sending it changes nothing
   authPatterns: current.authPatterns, // unchanged, is_open_api included
+  proxyEnabled: current.proxyEnabled, // unchanged
   description: 'Internal ticketing API, v2',
   iconSrc: current.iconSrc,
   metadata: { ...current.metadata, updated_by: 'sync-job' },
@@ -8753,7 +8756,7 @@ console.log(provider?.proxyUrl);
 | `params.proxyUrl` | `string` | For an MCP-sourced connector | Required for an MCP-sourced connector. For a connector created from an OpenAPI spec this is its base URL, and leaving it out keeps the stored value |
 | `params.openapiSpecUrl` | `string` | No | Only for a connector created from an OpenAPI spec. Sending the stored URL changes nothing; a different one is rejected unless your workspace has that capability enabled |
 | `params.authPatterns` | `AuthPattern[]` | Yes | Required on every update. Replaces the existing list. It has the same properties as in [`createCustomProvider`](#custom-connectors). For a connector created from an OpenAPI spec, send back `provider.authPatterns` unchanged. Only one pattern is supported: more than one throws `ScalekitValidationError`, and nothing is sent |
-| `params.proxyEnabled` | `boolean` | No | Whether Scalekit proxies requests. Defaults to `true` |
+| `params.proxyEnabled` | `boolean` | No | Whether Scalekit proxies requests. Always sent; defaults to `true`, so pass `current.proxyEnabled` to keep the stored value |
 | `params.description` | `string` | No | Description. Keeps the stored value when left out |
 | `params.iconSrc` | `string` | No | Icon URL. Keeps the stored value when left out |
 | `params.metadata` | `Record<string, string>` | No | Arbitrary key-value metadata. Replaces the stored map, so leaving it out clears it |
@@ -8951,6 +8954,8 @@ What each value sends in each flow, the other AgentKit connection methods (`getC
 Pass `openapiSpecUrl` to `createCustomProvider` and Scalekit generates the connector's tools from the spec: a tool for each operation it supports, and the rest are listed in `skippedTools`.
 
 ```typescript
+import { ScalekitNotFoundException, ToolCollectionRun } from '@scalekit-sdk/node';
+
 // Create the connector. The first tool collection run is queued for you.
 const { provider } = await scalekitClient.actions.providers.createCustomProvider({
   displayName: 'Acme Tickets',
@@ -8965,9 +8970,16 @@ const { provider } = await scalekitClient.actions.providers.createCustomProvider
 });
 const providerIdentifier = provider!.identifier;
 
-// Follow the first run: poll until its status is COMPLETED or FAILED. It is queued in the
-// background after the create call returns, so the first calls can answer NotFound.
-const run = await scalekitClient.actions.getToolCollectionRun({ providerIdentifier });
+// Follow the first run until it is COMPLETED or FAILED. It is queued in the background after
+// the create call returns, so the first calls can answer NotFound.
+let run: ToolCollectionRun | undefined;
+for (let i = 0; i < 30 && run?.status !== 'COMPLETED' && run?.status !== 'FAILED'; i++) {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  run = await scalekitClient.actions
+    .getToolCollectionRun({ providerIdentifier })
+    .catch((e) => (e instanceof ScalekitNotFoundException ? undefined : Promise.reject(e)));
+}
+if (run?.status !== 'COMPLETED') throw new Error(run?.errorMessage || 'the first run did not finish');
 
 // The connector's tools. No connected account is needed: they belong to the connector.
 const { toolNames } = await scalekitClient.actions.listTools({
