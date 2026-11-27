@@ -147,7 +147,7 @@ npm install @scalekit-sdk/node express   # or: npm install @scalekit-sdk/node ne
 ```javascript
 // Express
 import express from "express";
-import ScalekitClient from "@scalekit-sdk/node";
+import { ScalekitClient } from "@scalekit-sdk/node";
 import { ScalekitAuth } from "@scalekit-sdk/node/express";
 
 const client = new ScalekitClient(
@@ -172,7 +172,7 @@ app.get("/account", auth.requiresAuth, (req, res) => {
 ```javascript
 // Next.js (App Router) -- one auth instance, constructed once and re-exported
 // lib/auth.js
-import ScalekitClient from "@scalekit-sdk/node";
+import { ScalekitClient } from "@scalekit-sdk/node";
 import { ScalekitAuthNext } from "@scalekit-sdk/node/next";
 
 const client = new ScalekitClient(
