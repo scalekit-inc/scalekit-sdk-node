@@ -155,10 +155,17 @@ export type {
   AuthPattern,
   AuthField,
   Provider,
+  CreateCustomProviderParams,
+  UpdateCustomProviderParams,
   CreateProviderResponse,
   UpdateProviderResponse,
   ListProvidersResponse,
 } from './providers';
+// ToolCollectionRun is the same idea for a tool collection run, returned by
+// `actions.invokeToolCollection` and `actions.getToolCollectionRun`: its status
+// is typed and its skipped operations are parsed into SkippedTool[].
+export type { SkippedTool, ToolCollectionRun } from './tool-collection-runs';
+export { ToolCollectionRunStatus } from './tool-collection-runs';
 export { ProviderType } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 export type { DeleteProviderResponse } from './pkg/grpc/scalekit/v1/providers/providers_pb';
 

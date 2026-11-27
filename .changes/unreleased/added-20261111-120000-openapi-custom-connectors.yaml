@@ -1,0 +1,36 @@
+kind: added
+body: |
+  `scalekit.actions.providers.createCustomProvider` takes `openapiSpecUrl` as an alternative to `proxyUrl`, so Scalekit generates a custom connector's tools from an OpenAPI spec (JSON or YAML; Swagger 2.0 and 1.x documents are converted). Set exactly one of the two. Scalekit fetches and checks the spec during the call, queues the first tool collection run in the background just after it returns (so `actions.getToolCollectionRun` can answer `ScalekitNotFoundException` for a moment; if it keeps doing so, call `actions.invokeToolCollection`), and fills `provider.proxyUrl` from the spec's server URL. Follow a run with the new `scalekit.actions.getToolCollectionRun({ providerIdentifier, runId })`, which returns the newest run when you omit `runId`, and queue another with `scalekit.actions.invokeToolCollection({ providerIdentifier })`. `providerIdentifier` is the connector's identifier (`NAME:environment-id`, from `provider.identifier`), not `provider.id`; it and `runId` are sent without the whitespace around them, and a blank `runId` means the newest run. Both methods return a `ToolCollectionRun` with its counters and a parsed `skippedTools` list, and `ToolCollectionRunStatus` names its statuses. `updateCustomProvider` now takes an optional `proxyUrl` and `openapiSpecUrl`: on a connector created from a spec only the name, description, icon, metadata and base URL (`proxyUrl`) can change (and the spec URL where your environment has that enabled), and the stored `authPatterns` and `proxyEnabled` must be sent back unchanged. OpenAPI-sourced connectors must be enabled for your environment, otherwise the calls fail with `FEATURE_NOT_ENABLED`. `AuthPattern` also types `is_open_api`, the read-only flag Scalekit sets on a connector created from an OpenAPI spec. A `BASIC` pattern takes the two fields `username` and `password`. This addition leaves existing calls compiling and behaving as before. Code that derives `Parameters<typeof createCustomProvider>[0]` or `Parameters<typeof updateCustomProvider>[0]` and reads or overrides `proxyUrl` through it is affected: `proxyUrl` may now be `undefined` (see Migration). [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#connectors-created-from-an-openapi-spec)
+
+  ```ts
+  import { ScalekitNotFoundException, ToolCollectionRun } from '@scalekit-sdk/node';
+
+  const { provider } = await scalekit.actions.providers.createCustomProvider({
+    displayName: 'Acme Tickets',
+    openapiSpecUrl: 'https://api.acme.example.com/openapi.json',
+    authPatterns: [
+      {
+        type: 'BEARER',
+        display_name: 'Bearer Token',
+        fields: [{ field_name: 'token', label: 'API Token', input_type: 'password' }],
+      },
+    ],
+  });
+
+  // The first run is queued in the background, so the first calls can answer NotFound
+  const providerIdentifier = provider!.identifier;
+  let run: ToolCollectionRun | undefined;
+  for (let i = 0; i < 30 && run?.status !== 'COMPLETED' && run?.status !== 'FAILED'; i++) {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    run = await scalekit.actions
+      .getToolCollectionRun({ providerIdentifier })
+      .catch((e) => (e instanceof ScalekitNotFoundException ? undefined : Promise.reject(e)));
+  }
+  if (run?.status !== 'COMPLETED') throw new Error(run?.errorMessage || 'the first run did not finish');
+  console.log(run.status, run.toolsCreated, run.skippedTools.length);
+  ```
+time: '2026-11-11T12:00:00.000000+00:00'
+custom:
+  Breaking: 'Yes'
+  Ticket: SK-3097
+  Migration: 'Calls to createCustomProvider and updateCustomProvider need no change. Code that derives Parameters<typeof createCustomProvider>[0] (a union now) or Parameters<typeof updateCustomProvider>[0] and reads or overrides proxyUrl through it must allow for proxyUrl being undefined, or it fails to compile under strict type checking: { ...params, proxyUrl: url } passed to createCustomProvider fails with TS2345 (also set openapiSpecUrl: undefined next to the proxyUrl you override), and assigning params.proxyUrl to a string fails with TS2322 (check it for undefined first). The types are exported as CreateCustomProviderParams and UpdateCustomProviderParams. Behavior at runtime does not change.'

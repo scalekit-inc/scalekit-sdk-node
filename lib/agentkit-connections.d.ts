@@ -2,14 +2,45 @@ import type ConnectionClient from './connection';
 import { AppConnection, ListAppConnectionSummariesResponse } from './pkg/grpc/scalekit/v1/connections/connections_pb';
 /** How end users authorize a connection. Chosen at creation; it cannot be changed afterwards. */
 export type AgentKitAuthMode = 'USER' | 'ORG_WIDE';
-/** Token endpoint client authentication. `'DEFAULT'` clears the stored value so the platform picks. */
+/**
+ * How Scalekit sends the client credentials to the provider's token endpoint.
+ * Choose the value that the provider's token endpoint documentation requires.
+ *
+ * - `'BASIC_AUTH'`: `client_id` and `client_secret` in an HTTP Basic
+ *   `Authorization` header (`client_secret_basic`).
+ * - `'REQUEST_BODY'`: as POST body parameters (`client_secret_post`).
+ * - `'NONE'`: for public or PKCE clients (`none`). It sends no client secret on an MCP
+ *   token refresh, and on the authorization code exchange only when the connection has
+ *   no client secret stored (a stored secret is still sent).
+ * - `'DEFAULT'`: lets Scalekit choose, and clears the stored value: the authorization
+ *   code exchange then sends POST body parameters, and MCP refresh and `OAUTH_M2M` send
+ *   an HTTP Basic header. Use it only when the documentation names no method.
+ *
+ * A wrong value makes new authorizations fail. On an MCP connection it also
+ * makes token refresh fail, and each connected account then has to authenticate
+ * again when its token is next refreshed; on `OAUTH_M2M` it makes the client
+ * credentials grant fail. It applies to the authorization code exchange, to MCP
+ * token refresh and to `OAUTH_M2M` client credentials; a token refresh on a
+ * non-MCP OAuth connection always detects the method itself. On `OAUTH_M2M`
+ * only `'REQUEST_BODY'` changes the request: `'NONE'`, like `'BASIC_AUTH'` and
+ * `'DEFAULT'`, sends an HTTP Basic header there. An update that leaves it out keeps
+ * the stored value.
+ *
+ * `createConnection` takes no OAuth settings: set the method with `updateConnection`,
+ * for example on the connection of a custom MCP connector or of a connector created
+ * from an OpenAPI spec.
+ */
 export type AgentKitTokenEndpointAuthMethod = 'NONE' | 'BASIC_AUTH' | 'REQUEST_BODY' | 'DEFAULT';
 /**
  * Settings only some connectors use. At creation only `providerDomain` is accepted;
  * set the others with `updateConnection`. `providerDomain` cannot be changed after creation.
  */
 export interface AgentKitProviderConfigurations {
-    /** Regional connectors only, for example `'mcp-eu.mixpanel.com'`. Create only; never returned. */
+    /**
+     * MCP connectors whose server URL has a `{{domain}}` placeholder: regional connectors such as
+     * MIXPANELMCP (for example `'mcp-eu.mixpanel.com'`) and custom MCP connectors with a templated
+     * `proxyUrl`. Create only; never returned.
+     */
     providerDomain?: string;
     /** Slack only: `'BOT'` or `'USER'`. */
     slackConnectionType?: 'BOT' | 'USER';
@@ -32,7 +63,7 @@ export interface AgentKitOAuthSettings {
     authorizeUri?: string;
     tokenUri?: string;
     userInfoUri?: string;
-    /** Sending your own `clientId` or `clientSecret` turns `useScalekitCreds` off unless you set it. */
+    /** Sending your own `clientId` or `clientSecret` switches the connection to your credentials unless you also send `useScalekitCreds`. */
     clientId?: string;
     clientSecret?: string;
     /** A non-empty list replaces the stored scopes; `[]` clears them. */
@@ -49,6 +80,7 @@ export interface AgentKitOAuthSettings {
     };
     /** Added as given to the provider's authorize URL. A non-empty map replaces the stored one; `{}` clears it. */
     extraAuthorizeParams?: Record<string, string>;
+    /** How Scalekit sends the client credentials to the token endpoint; see {@link AgentKitTokenEndpointAuthMethod}. Leave it out to keep the stored value. */
     tokenEndpointAuthMethod?: AgentKitTokenEndpointAuthMethod;
     scopeSelectionAllowed?: boolean;
     requiredScopes?: string[];
@@ -70,7 +102,13 @@ export interface CreateConnectionParams {
     connectionName?: string;
     /** `'USER'` (default) or `'ORG_WIDE'`. */
     authMode?: AgentKitAuthMode;
-    /** Required for regional connectors such as MIXPANELMCP and HONEYCOMBMCP; not allowed for others. */
+    /**
+     * The host name that replaces `{{domain}}` in the `proxyUrl` of a templated MCP connector,
+     * for example `'mcp-eu.mixpanel.com'`. Required for a connector whose MCP server URL has a
+     * `{{domain}}` placeholder: regional connectors such as MIXPANELMCP and HONEYCOMBMCP, and a
+     * custom MCP connector whose `proxyUrl` is a template. Not allowed for others. It cannot be
+     * changed later and is not returned.
+     */
     providerDomain?: string;
 }
 /**

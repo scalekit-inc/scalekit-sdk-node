@@ -1,0 +1,8 @@
+kind: added
+body: |
+  `scalekit.actions.deleteCustomTool({ toolIdentifier })` deletes one tool of a connector created from an OpenAPI spec, to stop agents from calling one operation without changing the connector's spec. It deletes nothing and fails with `ScalekitConflictException` with the error code `RESOURCE_ALREADY_EXISTS` while a tool collection run of the connector is queued or processing, or `TOOL_NAME_AMBIGUOUS` when deleting by a name that tools of more than one connector have (delete by ID instead). A backend older than release v0.1.165.0 does not have the call and answers 501 (`ScalekitNotImplementedException`). `scalekit.actions.providers.deleteCustomProvider` now also fails with `ScalekitConflictException` (error code `RESOURCE_ALREADY_EXISTS`) for a connector created from an OpenAPI spec while a tool collection run of it is queued or processing. [Reference](https://github.com/scalekit-inc/scalekit-sdk-node/blob/main/REFERENCE.md#actions)
+time: '2026-11-12T12:00:00.000000+00:00'
+custom:
+  Breaking: 'No'
+  Ticket: SK-3097
+  Migration: ''
